@@ -1,0 +1,101 @@
+# Débora - Compras e Logística
+
+Fonte: board Miro "fluxograma Lucenera" (consolidado), widget "Débora". Texto fiel ao board.
+
+```mermaid
+flowchart TD
+    A[Débora] --> B[CONFERENCIA\nCOM A VENDA]
+    A --> C[AGUARDAR O\nENVIO DO\nDESENHO]
+    A --> D[PEÇAS ESPECIAIS]
+    A --> E[CADASTRO DE\nPRODUTOS NO\nSISTEMA]
+    A --> F[CONSULTAR NCM,\nPREÇO E IMPOSTOS\nNA TABELA DO\nFORNECEDOR]
+    A --> G[CHECAR O PREÇO\nNO SIMULADOR]
+    A --> H[FINALIZAR O\nCADASTRO COM A\nMARGEM CORRETA]
+
+    D --> D1[CHECAGEM DAS\nNECESSIDADES DE\nCOMPRAS]
+    D1 --> D2[DIÁRIO OU\nONCE?]
+
+    D --> D3[NÃO É SEMPRE, MAS\nDEVIDO AO MONTAGEM\nDE NECESSIDADES É\nNECESSÁRIO\nESTRATÉGIAS]
+    D3 --> D4[ANALISAR\nESTRATÉGIAS DE\nCOMPRAS COM O\nGESTOR]
+    D4 --> D5[PEÇAS DECORATIVAS]
+    D4 --> D6[ENVIAR O PEDIDO\nIMEDIATAMENTE AO\nFORNECEDOR]
+    D6 --> D7[ENVIAR AO\nPRAZO PREVISTO\nDEVEM SER\nDIA]
+
+    D --> D8[PARA ORGANIZARMOS\nOS PEDIDOS, TENTAR MEIOS\nDE CONSEGUIRMOS\nOPORTUNIDADES DE\nCOMPRAS RECENTES]
+
+    D --> D9[Informações\nna tabela de\nrevenda dos\nfornecedores]
+    D9 --> D10[SALVAR NA PASTA\nDO FORNECEDOR]
+    D9 --> D11[ENVIAR AO\nFONECEDOR]
+    D11 --> D12[ENVIAR PARA SR.\nCLÁUDIO\nWHATSAPP\nCORPORATIVO]
+
+    D --> D13[MONTAR PEDIDO]
+    D13 --> D14[MONTAR PEDIDOS DE\nCOMPRA -CONFORME A\nNECESSIDADE GERADA\nPELO SISTEMA]
+    D14 --> D15[SALVAR O PEDIDO NA\nPASTA DE CADA\nFORNECEDOR]
+
+    D11 --> D16[AGUARDAR O\nORÇAMENTO]
+    D16 --> D17[ALIMENTAR A\nPLANILHA DE\nPRODUÇÃO]
+
+    D13 --> D18[CONFERIR PREÇOS,\nIMPOSTOS E NCM]
+    D18 --> D19[NEGOCIAR\nDESCONTOS OU\nPARCELAMENTOS]
+    D19 --> D20[COLOCAR O\nDESCONTO NA\nPLANILHA DE\nNEGOCIAÇÕES]
+    D19 --> D21[APROVAR]
+    D21 --> D22[DAR A ENTRADA\nNO SISTEMA]
+    D22 --> D23[COLOCAR NA\nPLANILHA DE\nPRODUÇÃO QUE\nESTA PRONTO]
+    D23 --> D24[PEÇAS COM\nPRODUÇÃO\nURGENTE]
+
+    D22 --> D25[EXPEDIR PARA A\nVENDA DEVIDA]
+
+    D13 --> D26[COMUNICAR A\nEQUIPE DE\nARQUITETOS\nRESPONSÁVEL]
+    D26 --> D27[OU HAVENDO\nALTERAÇÃO DE\nQUANTITATIVOS\nPEDIR A INCLUSÃO]
+    D26 --> D28[HAVENDO EQUÍVOCOS PEDIR\nA CORREÇÃO]
+
+    D28 --> D29[COLOCAR O\nDESCONTO NA\nPLANILHA DE\nNEGOCIAÇÕES]
+
+    D16 --> D30[ENVIAR O PEDIDO DE\nCOMPRA PELO E-MAIL]
+    D30 --> D31[AGUALDO O\nFORNECEDOR ENVIAR O\nORÇAMENTO]
+    D31 --> D32[OS FORNECEDORES\nLEVAM ATÉ 2\nHORAS PARA\nRETORNAR COM\nO ORÇAMENTO]
+    D32 --> D33[CHECAR A\nVENDA,INFORMAÇÕES\nIAO E-MAIL SOBRE\nACABAMENTO OU\nPEDIDOS ESPECÍFICOS]
+
+    D33 --> D34[CONFERIR ORÇAMENTO\nCONFORME O NOSSO\nPEDIDO]
+    D34 --> D35[APROVAR O ORÇAMENTO\nDO PEDIDO]
+    D34 --> D36[CORRIGIR OU SOLICITAR\nCORREÇÃO DE ALGUM\nEQUIVOCO NO PEDIDO]
+
+    D35 --> D37[ACOMPANHAR OS PRAZOS]
+    D37 --> D38[HAVENDO ATRASOS\nCOBRAR UMA PREVISÃO]
+    D38 --> D39[INFORMAR A EQUIPE]
+
+    D24 --> D40[COMUNICAR A\nEQUIPE QUE\nFORAM\nFINALIZADAS]
+    D40 --> D41[COMUNICAR AO\nESTOQUE]
+    D41 --> D42[APROVAR O PEDIDO]
+    D42 --> D43[ACOMPANHAR OS PRAZOS]
+    D43 --> D44[HAVENDO ATRASOS\nCOBRAR UMA PREVISÃO]
+    D44 --> D45[INFORMAR A EQUIPE]
+
+    D35 --> D46[AGUARDAR CHEGAR\nNO ESTOQUE]
+    D46 --> D47[INFORMAR A\nTRANSPORTADORA]
+    D47 --> D48[EM CASO DE PEDIDOS\nURGENTES, INFORMAR AO\nFORNECEDOR, NO CORPO\nDO E-MAIL]
+    D48 --> D49[ACOMPANHAR A\nLOGÍSTICA]
+    D49 --> D50[CHEGADA AO ESTOQUE]
+
+    D26 --> D51[ENTENDER O\nMOTIVO DO ATRASO]
+    D51 --> D52[HAVENDO ATRASOS\nCOBRAR UMA\nPREVISÃO]
+    D52 --> D53[ACOMPANHAR A\nLOGÍSTICA- PRAZOS]
+
+    D21 -.-> D54[PRAZO DE PEÇAS\nESPECIAIS SÃO DE\nATÉ 15 DIAS\nUTEIS]
+    D54 -.-> D53
+```
+
+> **`D54` (PRAZO DE PEÇAS ESPECIAIS SÃO DE ATÉ 15 DIAS UTEIS)** é uma caixa de fluxo normal do board (não post-it), na mesma coluna vertical de `D21` (APROVAR) e do bloco `D53` (ACOMPANHAR A LOGÍSTICA- PRAZOS). Não constava na leitura original. A seta exata de entrada/saída não foi confirmada via conector (a leitura via API não expõe os conectores desse widget) — a ligação `D21 -.-> D54 -.-> D53` é inferida por proximidade espacial.
+
+## Post-its do board (não são etapas do fluxo)
+
+O board usa post-its cinza ao lado de algumas caixas, como observação/lembrete — não são etapas com seta de entrada/saída própria. Os seguintes não constavam na leitura original:
+
+- Ao lado de `D1` (CHECAGEM DAS NECESSIDADES DE COMPRAS): **"DIARIAMENTE- É CRUCIAL"**.
+- Ao lado de `D6` (ENVIAR O PEDIDO IMEDIATAMENTE AO FORNECEDOR): **"DEVIDO AO PRAZO PRECISAMOS DEIXAR EM DIA"**.
+- Ao lado de `D34` (CONFERIR ORÇAMENTO CONFORME O NOSSO PEDIDO): **"CONFERIR A REF, DESCRIÇÃO, PREÇO E ACABAMENTO. NCM (SE TIVER DESCRIMINADO NO ORÇ)."**
+
+Além disso, dois nós tratados acima como caixas sequenciais do fluxo são, na verdade, post-its (confirmado por tipo de widget e posição no board), não etapas:
+
+- `D9` ("Informações na tabela de revenda dos fornecedores") é um post-it ao lado de `D10`/`D11`, não uma etapa própria — o texto é fiel, mas a leitura como nó com setas de saída não reflete o board.
+- `D32` ("OS FORNECEDORES LEVAM ATÉ 2 HORAS PARA RETORNAR COM O ORÇAMENTO") é um post-it ao lado de `D31` (AGUALDO O FORNECEDOR ENVIAR O ORÇAMENTO), não uma etapa seguinte no fluxo.

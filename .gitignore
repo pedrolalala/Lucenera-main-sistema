@@ -1,0 +1,31 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+.turbo/
+.next/
+
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+supabase/.temp/
+
+# Este repositório é a referência central (docs/specs/banco). O código de cada
+# sistema já vive em seu próprio repositório GitHub — não duplicar aqui.
+04-Sistemas/
+
+# Vídeos de referência (Descritivo Connect) — acima do limite de 100MB do
+# GitHub; ficam locais ou migram para SharePoint/OneDrive.
+*.mp4
+*.mov
+*.avi
+

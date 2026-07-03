@@ -1,0 +1,18 @@
+[submodule "04-Sistemas/central-lucenera-dashboard-1c9ba"]
+	path = 04-Sistemas/central-lucenera-dashboard-1c9ba
+	url = https://github.com/pedrolalala/central-lucenera.git
+[submodule "04-Sistemas/retorno-bancario-bradesco-5392a"]
+	path = 04-Sistemas/retorno-bancario-bradesco-5392a
+	url = https://github.com/pedrolalala/administra--o-bancaria.git
+[submodule "04-Sistemas/gestao-financeira-clone-544cb (1)"]
+	path = 04-Sistemas/gestao-financeira-clone-544cb (1)
+	url = https://github.com/pedrolalala/Lucenera---Gest-o-Financeira.git
+[submodule "04-Sistemas/lucenera-crm-3bd29 (1)"]
+	path = 04-Sistemas/lucenera-crm-3bd29 (1)
+	url = https://github.com/pedrolalala/lucenera-crm.git
+[submodule "04-Sistemas/dashboard-rh-lucenera-5fe9c"]
+	path = 04-Sistemas/dashboard-rh-lucenera-5fe9c
+	url = https://github.com/pedrolalala/dashboard-rh-lucenera-6g2endmv7.git
+[submodule "04-Sistemas/lucenera-logistics-b7cd1"]
+	path = 04-Sistemas/lucenera-logistics-b7cd1
+	url = https://github.com/pedrolalala/lucenera-logistics-bz5s7xehm.git

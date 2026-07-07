@@ -16,3 +16,6 @@
 [submodule "04-Sistemas/lucenera-logistics-b7cd1"]
 	path = 04-Sistemas/lucenera-logistics-b7cd1
 	url = https://github.com/pedrolalala/lucenera-logistics-bz5s7xehm.git
+[submodule "04-Sistemas/cadastro-lucenera-b86fe"]
+	path = 04-Sistemas/cadastro-lucenera-b86fe
+	url = https://github.com/pedrolalala/cadastro-lucenera.git

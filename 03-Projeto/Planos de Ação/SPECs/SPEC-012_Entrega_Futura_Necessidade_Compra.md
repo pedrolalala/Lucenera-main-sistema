@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-012 — Entrega Futura e Necessidade de Compra"
-status: não iniciado
+status: implementada no banco (views); sem frontend nesta rodada
 data_ultima_modificacao: 2026-07-06
 sistemas_envolvidos:
   - Supabase (banco central)

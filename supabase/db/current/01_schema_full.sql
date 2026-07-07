@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict bEOEq0x0RgSEJMK4u2zA0jM9A12IpctkQStRH3JoNXs9TmjSS0absABRm0c70Uc
+\restrict VN4g9iMstwNUxyEBiYv6gSI7NeOmDQUStMETcPYPZKdYwwtQGIAEbGZfSAxbCxS
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.4
@@ -200,7 +200,9 @@ CREATE TYPE public.projeto_status AS ENUM (
     'Obra Finalizada',
     'Contrato de Projeto',
     'Ajustes Finais',
-    'Emissão Projeto Executivo'
+    'Emissão Projeto Executivo',
+    'Aprovação Financeira',
+    'Orçamento Aprovado'
 );
 
 
@@ -372,6 +374,69 @@ $$;
 
 
 --
+-- Name: adm_aprovar_pelo_cliente(uuid, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.adm_aprovar_pelo_cliente(p_orcamento_id uuid, p_observacao text DEFAULT 'Aprovação registrada manualmente pela administração'::text) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  v_orcamento public.orcamentos%ROWTYPE;
+  v_numero text;
+BEGIN
+  SELECT * INTO v_orcamento
+  FROM public.orcamentos
+  WHERE id = p_orcamento_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orçamento não encontrado.' USING ERRCODE = 'P0001';
+  END IF;
+
+  v_numero := COALESCE(v_orcamento.numero, left(p_orcamento_id::text, 8));
+
+  IF v_orcamento.status NOT IN ('aguardando_aprovacao', 'enviado_cliente', 'recusado_cliente') THEN
+    RAISE EXCEPTION
+      'Não é possível registrar aprovação do cliente para orçamento % com status %.',
+      v_numero, v_orcamento.status
+      USING ERRCODE = 'P0002';
+  END IF;
+
+  UPDATE public.orcamentos
+  SET status = 'Aprovação Financeira',
+      aprovado_cliente_em = now(),
+      requer_revisao_financeira = true,
+      token_aprovacao_cliente = NULL
+  WHERE id = p_orcamento_id;
+
+  INSERT INTO public.historico_status_orcamentos (
+    orcamento_id, status_anterior, status_novo, usuario, observacao
+  ) VALUES (
+    p_orcamento_id, v_orcamento.status, 'Aprovação Financeira',
+    auth.uid()::text, p_observacao
+  );
+
+  RETURN jsonb_build_object(
+    'orcamento_id', p_orcamento_id,
+    'numero', v_numero,
+    'status', 'Aprovação Financeira',
+    'aprovado_em', now(),
+    'manual', true
+  );
+END;
+$$;
+
+
+--
+-- Name: FUNCTION adm_aprovar_pelo_cliente(p_orcamento_id uuid, p_observacao text); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.adm_aprovar_pelo_cliente(p_orcamento_id uuid, p_observacao text) IS 'Registra aprovação do cliente manualmente (casos presenciais/verbais, sem token).
+Permitido apenas pela ADM (SECURITY DEFINER). Registra em historico_status_orcamentos.';
+
+
+--
 -- Name: admin_update_user_password(uuid, text); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -447,29 +512,209 @@ $$;
 
 
 --
--- Name: aprovar_orcamento_financeiro(uuid); Type: FUNCTION; Schema: public; Owner: -
+-- Name: aprovar_orcamento_cliente(uuid); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.aprovar_orcamento_financeiro(p_orcamento_id uuid) RETURNS jsonb
+CREATE FUNCTION public.aprovar_orcamento_cliente(p_orcamento_id uuid) RETURNS jsonb
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public'
     AS $$
 DECLARE
-  v_result jsonb;
+  v_orcamento public.orcamentos%ROWTYPE;
+  v_status_anterior text;
+  v_numero_orcamento text;
+  v_user_role text;
 BEGIN
-  v_result := public.aprovar_orcamento_financeiro_base_spec001(p_orcamento_id);
+  SELECT u.role::text INTO v_user_role
+  FROM public.usuarios u
+  WHERE u.id = auth.uid();
 
-  RETURN coalesce(v_result, '{}'::jsonb)
-    || jsonb_build_object('financeiro_usa_orcamento_id', true);
+  IF v_user_role IS NULL THEN
+    RAISE EXCEPTION 'Usuário não encontrado ou não autenticado.'
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_user_role NOT IN ('admin', 'gerente', 'operador') THEN
+    RAISE EXCEPTION 'Permissão negada. Apenas admin, gerente ou operador podem aprovar orçamentos do cliente. Role atual: %', v_user_role
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  SELECT * INTO v_orcamento
+  FROM public.orcamentos
+  WHERE id = p_orcamento_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orçamento % não encontrado.', p_orcamento_id
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  v_status_anterior := v_orcamento.status;
+  v_numero_orcamento := COALESCE(v_orcamento.numero, left(p_orcamento_id::text, 8));
+
+  IF v_orcamento.status NOT IN ('enviado_cliente', 'recusado_cliente', 'aguardando_cliente', 'aguardando_aprovacao', 'rascunho') THEN
+    RAISE EXCEPTION 'Orçamento % não pode ser aprovado no status atual: %', v_numero_orcamento, v_status_anterior
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  UPDATE public.orcamentos
+  SET status = 'Aprovação Financeira',
+      aprovado_cliente_em = now(),
+      requer_revisao_financeira = true,
+      token_aprovacao_cliente = NULL
+  WHERE id = p_orcamento_id;
+
+  INSERT INTO public.historico_status_orcamentos (orcamento_id, status_anterior, status_novo, usuario, observacao)
+  VALUES (
+    p_orcamento_id,
+    v_status_anterior,
+    'Aprovação Financeira',
+    auth.uid()::text,
+    'Aprovação do cliente finalizada; orçamento enviado para aprovação financeira'
+  );
+
+  RETURN jsonb_build_object(
+    'orcamento_id', p_orcamento_id,
+    'status_anterior', v_status_anterior,
+    'status_novo', 'Aprovação Financeira',
+    'sucesso', true
+  );
 END;
 $$;
 
 
 --
--- Name: aprovar_orcamento_financeiro_base_spec001(uuid); Type: FUNCTION; Schema: public; Owner: -
+-- Name: aprovar_orcamento_cliente_manual(uuid); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.aprovar_orcamento_financeiro_base_spec001(p_orcamento_id uuid) RETURNS jsonb
+CREATE FUNCTION public.aprovar_orcamento_cliente_manual(p_orcamento_id uuid) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  v_orcamento public.orcamentos%ROWTYPE;
+  v_status_anterior text;
+  v_numero_orcamento text;
+  v_user_role text;
+BEGIN
+  SELECT u.role::text INTO v_user_role
+  FROM public.usuarios u
+  WHERE u.id = auth.uid();
+
+  IF v_user_role IS NULL THEN
+    RAISE EXCEPTION 'Usuário não encontrado ou não autenticado.' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_user_role NOT IN ('admin', 'gerente', 'operador') THEN
+    RAISE EXCEPTION 'Permissão negada.' USING ERRCODE = 'P0001';
+  END IF;
+
+  SELECT * INTO v_orcamento
+  FROM public.orcamentos
+  WHERE id = p_orcamento_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orçamento não encontrado.' USING ERRCODE = 'P0001';
+  END IF;
+
+  v_status_anterior := v_orcamento.status;
+  v_numero_orcamento := COALESCE(v_orcamento.numero, left(p_orcamento_id::text, 8));
+
+  IF v_orcamento.status NOT IN ('enviado_cliente', 'recusado_cliente', 'aguardando_cliente', 'aguardando_aprovacao', 'rascunho') THEN
+    RAISE EXCEPTION 'Orçamento % não pode ser aprovado manualmente no status atual: %', v_numero_orcamento, v_status_anterior
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  UPDATE public.orcamentos
+  SET status = 'Aprovação Financeira',
+      aprovado_cliente_em = now(),
+      requer_revisao_financeira = true,
+      token_aprovacao_cliente = NULL
+  WHERE id = p_orcamento_id;
+
+  INSERT INTO public.historico_status_orcamentos (orcamento_id, status_anterior, status_novo, usuario, observacao)
+  VALUES (
+    p_orcamento_id,
+    v_status_anterior,
+    'Aprovação Financeira',
+    auth.uid()::text,
+    'Aprovação manual do cliente pelo administrador'
+  );
+
+  RETURN jsonb_build_object(
+    'orcamento_id', p_orcamento_id,
+    'status', 'Aprovação Financeira',
+    'sucesso', true
+  );
+END;
+$$;
+
+
+--
+-- Name: aprovar_orcamento_cliente_publico(uuid, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.aprovar_orcamento_cliente_publico(p_orcamento_id uuid, p_token text) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  v_orcamento public.orcamentos%ROWTYPE;
+  v_status_anterior text;
+  v_numero_orcamento text;
+BEGIN
+  SELECT * INTO v_orcamento
+  FROM public.orcamentos
+  WHERE id = p_orcamento_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orçamento não encontrado.' USING ERRCODE = 'P0001';
+  END IF;
+
+  v_status_anterior := v_orcamento.status;
+  v_numero_orcamento := COALESCE(v_orcamento.numero, left(p_orcamento_id::text, 8));
+
+  IF v_orcamento.token_aprovacao_cliente IS NULL OR v_orcamento.token_aprovacao_cliente <> p_token THEN
+    RAISE EXCEPTION 'Token inválido ou expirado.' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_orcamento.status <> 'enviado_cliente' THEN
+    RAISE EXCEPTION 'Orçamento % não está aguardando aprovação do cliente. Status atual: %', v_numero_orcamento, v_status_anterior
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  UPDATE public.orcamentos
+  SET status = 'Aprovação Financeira',
+      aprovado_cliente_em = now(),
+      requer_revisao_financeira = true,
+      token_aprovacao_cliente = NULL
+  WHERE id = p_orcamento_id;
+
+  INSERT INTO public.historico_status_orcamentos (orcamento_id, status_anterior, status_novo, usuario, observacao)
+  VALUES (
+    p_orcamento_id,
+    v_status_anterior,
+    'Aprovação Financeira',
+    NULL,
+    'Orçamento aprovado pelo cliente via link público'
+  );
+
+  RETURN jsonb_build_object(
+    'orcamento_id', p_orcamento_id,
+    'status', 'Aprovação Financeira',
+    'sucesso', true
+  );
+END;
+$$;
+
+
+--
+-- Name: aprovar_orcamento_financeiro(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.aprovar_orcamento_financeiro(p_orcamento_id uuid) RETURNS jsonb
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public'
     AS $$
@@ -492,7 +737,363 @@ DECLARE
   v_parcelas_criadas integer := 0;
   v_boletos_criados integer := 0;
   v_numero_orcamento text;
+  v_user_role text;
+  v_reservas_aplicadas integer := 0;
 BEGIN
+  IF COALESCE(auth.role(), '') <> 'service_role' THEN
+    SELECT u.role::text INTO v_user_role
+    FROM public.usuarios u
+    WHERE u.id = auth.uid()
+      AND COALESCE(u.ativo, true) = true;
+
+    IF v_user_role IS NULL THEN
+      RAISE EXCEPTION 'Usuário não autenticado ou sem cadastro operacional.'
+        USING ERRCODE = 'P0001';
+    END IF;
+
+    IF v_user_role NOT IN ('admin', 'gerente') THEN
+      RAISE EXCEPTION 'Permissão negada. Apenas admin ou gerente podem aprovar financeiramente. Role atual: %', v_user_role
+        USING ERRCODE = 'P0001';
+    END IF;
+  END IF;
+
+  SELECT * INTO v_orcamento
+  FROM public.orcamentos
+  WHERE id = p_orcamento_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orçamento % não encontrado.', p_orcamento_id
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  v_status_anterior := v_orcamento.status;
+  v_numero_orcamento := COALESCE(v_orcamento.numero, left(p_orcamento_id::text, 8));
+
+  IF v_orcamento.status <> 'Aprovação Financeira' THEN
+    RAISE EXCEPTION 'Orçamento % não pode ter aprovação financeira no status atual: %. Status exigido: Aprovação Financeira.',
+      v_numero_orcamento, v_status_anterior
+      USING ERRCODE = 'P0002';
+  END IF;
+
+  IF v_orcamento.projeto_id IS NULL THEN
+    RAISE EXCEPTION 'Orçamento % não possui projeto vinculado.', v_numero_orcamento
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_orcamento.empresa_id IS NULL THEN
+    RAISE EXCEPTION 'Orçamento % não possui empresa vinculada.', v_numero_orcamento
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_orcamento.cliente_id IS NULL THEN
+    RAISE EXCEPTION 'Orçamento % não possui cliente vinculado.', v_numero_orcamento
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  IF COALESCE(v_orcamento.valor_total, 0) <= 0 THEN
+    RAISE EXCEPTION 'Orçamento % possui valor total inválido.', v_numero_orcamento
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_orcamento.forma_pagamento IS NULL THEN
+    RAISE EXCEPTION 'Orçamento % não possui forma de pagamento estruturada.', v_numero_orcamento
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_orcamento.frete_tipo IS NULL THEN
+    RAISE EXCEPTION 'Orçamento % não possui frete estruturado. Edite o orçamento e informe "Com Frete" ou "Sem Frete".',
+      v_numero_orcamento
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.orcamento_itens oi
+    WHERE oi.orcamento_id = p_orcamento_id
+  ) THEN
+    RAISE EXCEPTION 'Orçamento % não possui itens.', v_numero_orcamento
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.orcamento_itens oi
+    WHERE oi.orcamento_id = p_orcamento_id
+      AND (COALESCE(oi.quantidade, 0) <= 0 OR COALESCE(oi.preco_unitario, 0) <= 0)
+  ) THEN
+    RAISE EXCEPTION 'Orçamento % possui item sem quantidade ou preço válido.', v_numero_orcamento
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  v_prazos := public._lucenera_parse_prazo_pagamento(
+    v_orcamento.condicoes_pagamento,
+    v_orcamento.prazo_pagamento_dias
+  );
+  v_qtd_parcelas := COALESCE(array_length(v_prazos, 1), 0);
+
+  IF v_qtd_parcelas = 0 THEN
+    RAISE EXCEPTION 'Orçamento % não possui prazo de pagamento interpretável. Edite o orçamento e informe o "Prazo para Início da Cobrança (dias)".',
+      v_numero_orcamento
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  SELECT COALESCE(nome, nome_empresa, razao_social, 'Cliente')
+  INTO v_cliente_nome
+  FROM public.contatos
+  WHERE id = v_orcamento.cliente_id;
+
+  SELECT COUNT(*) INTO v_itens_existentes
+  FROM public.projeto_itens
+  WHERE orcamento_id = p_orcamento_id;
+
+  SELECT COUNT(*) INTO v_parcelas_existentes
+  FROM public.projeto_parcelas
+  WHERE orcamento_id = p_orcamento_id;
+
+  SELECT COUNT(*) INTO v_boletos_existentes
+  FROM public.boletos
+  WHERE orcamento_id = p_orcamento_id;
+
+  IF v_itens_existentes > 0 OR v_parcelas_existentes > 0 OR v_boletos_existentes > 0 THEN
+    IF v_itens_existentes > 0
+       AND v_parcelas_existentes = v_qtd_parcelas
+       AND v_boletos_existentes = v_qtd_parcelas THEN
+      UPDATE public.orcamentos
+      SET status = 'Orçamento Aprovado',
+          requer_revisao_financeira = false,
+          token_aprovacao_cliente = NULL
+      WHERE id = p_orcamento_id;
+
+      INSERT INTO public.historico_status_orcamentos (
+        orcamento_id, status_anterior, status_novo, usuario, observacao
+      ) VALUES (
+        p_orcamento_id,
+        v_status_anterior,
+        'Orçamento Aprovado',
+        auth.uid()::text,
+        'Aprovação financeira confirmada; artefatos já existiam por orcamento_id'
+      );
+
+      RETURN jsonb_build_object(
+        'orcamento_id', p_orcamento_id,
+        'status', 'Orçamento Aprovado',
+        'projeto_id', v_orcamento.projeto_id,
+        'projeto_itens_criados', 0,
+        'parcelas_criadas', 0,
+        'boletos_criados', 0,
+        'reservas_estoque_aplicadas', 0,
+        'nota_fiscal_status', 'pendente_api',
+        'ja_processado', true
+      );
+    END IF;
+
+    RAISE EXCEPTION
+      'Orçamento % possui processamento parcial inconsistente: itens %, parcelas %, boletos %.',
+      v_numero_orcamento,
+      v_itens_existentes,
+      v_parcelas_existentes,
+      v_boletos_existentes
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  INSERT INTO public.projeto_itens (
+    projeto_id,
+    produto_id,
+    descricao,
+    quantidade,
+    preco_unitario,
+    desconto,
+    validado,
+    orcamento_id
+  )
+  SELECT
+    v_orcamento.projeto_id,
+    oi.produto_id,
+    COALESCE(oi.descricao, p.nome, 'Item sem descrição'),
+    COALESCE(oi.quantidade, 1),
+    COALESCE(oi.preco_unitario, 0),
+    COALESCE(oi.desconto, 0),
+    true,
+    p_orcamento_id
+  FROM public.orcamento_itens oi
+  LEFT JOIN public.produtos p ON p.id = oi.produto_id
+  WHERE oi.orcamento_id = p_orcamento_id;
+  GET DIAGNOSTICS v_itens_criados = ROW_COUNT;
+
+  v_valor_total := v_orcamento.valor_total;
+  v_valor_base := round(v_valor_total / v_qtd_parcelas, 2);
+  v_valor_acumulado := 0;
+
+  IF v_orcamento.data_base_vencimento = 'emissao' THEN
+    v_data_base := COALESCE(v_orcamento.data_emissao, current_date)::date;
+  ELSE
+    v_data_base := current_date;
+  END IF;
+
+  FOR v_i IN 1..v_qtd_parcelas LOOP
+    v_valor_parcela := CASE
+      WHEN v_i < v_qtd_parcelas THEN v_valor_base
+      ELSE v_valor_total - v_valor_acumulado
+    END;
+
+    INSERT INTO public.projeto_parcelas (
+      projeto_id,
+      orcamento_id,
+      numero_parcela,
+      valor,
+      data_vencimento,
+      status,
+      forma_pagamento,
+      descricao
+    ) VALUES (
+      v_orcamento.projeto_id,
+      p_orcamento_id,
+      v_i,
+      v_valor_parcela,
+      v_data_base + v_prazos[v_i],
+      'pendente'::public.parcela_status,
+      v_orcamento.forma_pagamento,
+      'Parcela ' || v_i || '/' || v_qtd_parcelas || ' - ' || COALESCE(v_numero_orcamento, 'Orçamento')
+    );
+
+    v_valor_acumulado := v_valor_acumulado + v_valor_parcela;
+    v_parcelas_criadas := v_parcelas_criadas + 1;
+  END LOOP;
+
+  INSERT INTO public.boletos (
+    orcamento_id,
+    empresa_id,
+    parcela_id,
+    valor,
+    vencimento,
+    nome_pagador,
+    numero_documento,
+    status,
+    tipo,
+    nosso_numero,
+    num_parcela,
+    total_parcelas
+  )
+  SELECT
+    p_orcamento_id,
+    v_orcamento.empresa_id,
+    pp.id,
+    pp.valor,
+    pp.data_vencimento,
+    v_cliente_nome,
+    v_numero_orcamento || '-P' || pp.numero_parcela,
+    'pendente_registro',
+    'Nota Fiscal',
+    v_numero_orcamento || '-P' || pp.numero_parcela,
+    pp.numero_parcela,
+    v_qtd_parcelas
+  FROM public.projeto_parcelas pp
+  WHERE pp.orcamento_id = p_orcamento_id;
+  GET DIAGNOSTICS v_boletos_criados = ROW_COUNT;
+
+  INSERT INTO public.estoque_itens (
+    produto_id,
+    local,
+    quantidade,
+    quantidade_reservada,
+    atualizado_em
+  )
+  SELECT
+    oi.produto_id,
+    'Estoque'::public.estoque_local,
+    0,
+    SUM(COALESCE(oi.quantidade, 0)),
+    now()
+  FROM public.orcamento_itens oi
+  WHERE oi.orcamento_id = p_orcamento_id
+    AND oi.produto_id IS NOT NULL
+    AND COALESCE(oi.quantidade, 0) > 0
+  GROUP BY oi.produto_id
+  ON CONFLICT (produto_id, local) DO UPDATE
+    SET quantidade_reservada = public.estoque_itens.quantidade_reservada + EXCLUDED.quantidade_reservada,
+        atualizado_em = now();
+  GET DIAGNOSTICS v_reservas_aplicadas = ROW_COUNT;
+
+  UPDATE public.orcamentos
+  SET status = 'Orçamento Aprovado',
+      requer_revisao_financeira = false,
+      token_aprovacao_cliente = NULL
+  WHERE id = p_orcamento_id;
+
+  INSERT INTO public.historico_status_orcamentos (
+    orcamento_id,
+    status_anterior,
+    status_novo,
+    usuario,
+    observacao
+  ) VALUES (
+    p_orcamento_id,
+    v_status_anterior,
+    'Orçamento Aprovado',
+    auth.uid()::text,
+    'Aprovação financeira por orcamento_id'
+  );
+
+  RETURN jsonb_build_object(
+    'orcamento_id', p_orcamento_id,
+    'status', 'Orçamento Aprovado',
+    'projeto_id', v_orcamento.projeto_id,
+    'projeto_itens_criados', v_itens_criados,
+    'parcelas_criadas', v_parcelas_criadas,
+    'boletos_criados', v_boletos_criados,
+    'reservas_estoque_aplicadas', v_reservas_aplicadas,
+    'nota_fiscal_status', 'pendente_api',
+    'ja_processado', false
+  );
+END;
+$$;
+
+
+--
+-- Name: FUNCTION aprovar_orcamento_financeiro(p_orcamento_id uuid); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.aprovar_orcamento_financeiro(p_orcamento_id uuid) IS 'SPEC-016: aprovacao financeira transacional por orcamento_id. Aceita apenas status Aprovação Financeira e finaliza em Orçamento Aprovado.';
+
+
+--
+-- Name: aprovar_orcamento_financeiro_base_spec001(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.aprovar_orcamento_financeiro_base_spec001(p_orcamento_id uuid) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  v_orcamento        public.orcamentos%ROWTYPE;
+  v_cliente_nome     text;
+  v_status_anterior  text;
+  v_prazos           integer[];
+  v_qtd_parcelas     integer;
+  v_i                integer;
+  v_valor_total      numeric;
+  v_valor_base       numeric;
+  v_valor_parcela    numeric;
+  v_valor_acumulado  numeric  := 0;
+  v_data_base        date     := current_date;
+  v_itens_existentes    integer := 0;
+  v_parcelas_existentes integer := 0;
+  v_boletos_existentes  integer := 0;
+  v_itens_criados    integer := 0;
+  v_parcelas_criadas integer := 0;
+  v_boletos_criados  integer := 0;
+  v_reservas_criadas integer := 0;
+  v_saldos_criados   integer := 0;
+  v_numero_orcamento text;
+  v_item                     record;
+  v_estoque_fisico           numeric(10,2);
+  v_estoque_reservado_atual  numeric(10,2);
+  v_disponivel_fisico        numeric(10,3);
+  v_q_reserva                numeric(10,3);
+  v_q_entrega_futura         numeric(10,3);
+BEGIN
+  -- 1. Carregar e travar o orçamento
   SELECT *
     INTO v_orcamento
   FROM public.orcamentos
@@ -504,9 +1105,10 @@ BEGIN
       USING ERRCODE = 'P0001';
   END IF;
 
-  v_status_anterior := v_orcamento.status;
+  v_status_anterior  := v_orcamento.status;
   v_numero_orcamento := coalesce(v_orcamento.numero, left(p_orcamento_id::text, 8));
 
+  -- 2. Validações obrigatórias
   IF v_orcamento.projeto_id IS NULL THEN
     RAISE EXCEPTION 'Orçamento % não possui projeto vinculado.', v_numero_orcamento
       USING ERRCODE = 'P0001';
@@ -551,7 +1153,7 @@ BEGIN
     FROM public.orcamento_itens oi
     WHERE oi.orcamento_id = p_orcamento_id
       AND (
-        coalesce(oi.quantidade, 0) <= 0
+        coalesce(oi.quantidade, 0)     <= 0
         OR coalesce(oi.preco_unitario, 0) <= 0
       )
   ) THEN
@@ -559,7 +1161,8 @@ BEGIN
       USING ERRCODE = 'P0001';
   END IF;
 
-  v_prazos := public._lucenera_parse_prazo_pagamento(
+  -- 3. Interpretar prazos de pagamento
+  v_prazos       := public._lucenera_parse_prazo_pagamento(
     v_orcamento.condicoes_pagamento,
     v_orcamento.prazo_pagamento_dias
   );
@@ -570,11 +1173,13 @@ BEGIN
       USING ERRCODE = 'P0001';
   END IF;
 
+  -- 4. Resolver nome do cliente
   SELECT nome
     INTO v_cliente_nome
   FROM public.contatos
   WHERE id = v_orcamento.cliente_id;
 
+  -- 5. Idempotência: verificar se já foi processado
   SELECT count(*) INTO v_itens_existentes
   FROM public.projeto_itens
   WHERE orcamento_id = p_orcamento_id;
@@ -589,23 +1194,27 @@ BEGIN
 
   IF v_itens_existentes > 0
      OR v_parcelas_existentes > 0
-     OR v_boletos_existentes > 0 THEN
+     OR v_boletos_existentes  > 0 THEN
+
     IF v_itens_existentes > 0
        AND v_parcelas_existentes = v_qtd_parcelas
-       AND v_boletos_existentes = v_qtd_parcelas THEN
+       AND v_boletos_existentes  = v_qtd_parcelas THEN
+
       UPDATE public.orcamentos
       SET status = 'aprovado'
       WHERE id = p_orcamento_id;
 
       RETURN jsonb_build_object(
-        'orcamento_id', p_orcamento_id,
-        'status', 'aprovado',
-        'projeto_id', v_orcamento.projeto_id,
-        'projeto_itens_criados', 0,
-        'parcelas_criadas', 0,
-        'boletos_criados', 0,
-        'nota_fiscal_status', 'pendente_api',
-        'ja_processado', true
+        'orcamento_id',              p_orcamento_id,
+        'status',                    'aprovado',
+        'projeto_id',                v_orcamento.projeto_id,
+        'projeto_itens_criados',     0,
+        'parcelas_criadas',          0,
+        'boletos_criados',           0,
+        'reservas_estoque_aplicadas', 0,
+        'saldos_operacionais_criados', 0,
+        'nota_fiscal_status',        'pendente_api',
+        'ja_processado',             true
       );
     END IF;
 
@@ -618,6 +1227,7 @@ BEGIN
       USING ERRCODE = 'P0001';
   END IF;
 
+  -- 6. Marcar como aprovado e registrar histórico
   UPDATE public.orcamentos
   SET status = 'aprovado'
   WHERE id = p_orcamento_id;
@@ -637,42 +1247,100 @@ BEGIN
     'Aprovação integrada por aprovar_orcamento_financeiro'
   );
 
-  -- subtotal é coluna GENERATED ALWAYS (round(quantidade*preco_unitario*
-  -- (1-desconto/100),2)) — não inserir valor explícito, deixar o Postgres
-  -- calcular.
-  INSERT INTO public.projeto_itens (
-    projeto_id,
-    produto_id,
-    descricao,
-    quantidade,
-    preco_unitario,
-    desconto,
-    validado,
-    orcamento_id
-  )
-  SELECT
-    v_orcamento.projeto_id,
-    oi.produto_id,
-    coalesce(oi.descricao, oi.custom_id, p.nome, 'Item do Orçamento'),
-    coalesce(oi.quantidade, 0),
-    coalesce(oi.preco_unitario, 0),
-    coalesce(oi.desconto, 0),
-    true,
-    p_orcamento_id
-  FROM public.orcamento_itens oi
-  LEFT JOIN public.produtos p ON p.id = oi.produto_id
-  WHERE oi.orcamento_id = p_orcamento_id;
+  -- 7. Criar projeto_itens (snapshot dos itens aprovados) e, para cada item
+  --    com produto, reservar estoque físico e criar o saldo operacional
+  --    (SPEC-010), item por item, com lock por produto/local.
+  --    subtotal é coluna GENERATED ALWAYS — não inserir valor explícito.
+  FOR v_item IN
+    INSERT INTO public.projeto_itens (
+      projeto_id,
+      produto_id,
+      descricao,
+      quantidade,
+      preco_unitario,
+      desconto,
+      validado,
+      orcamento_id
+    )
+    SELECT
+      v_orcamento.projeto_id,
+      oi.produto_id,
+      coalesce(oi.descricao, oi.custom_id, p.nome, 'Item do Orçamento'),
+      coalesce(oi.quantidade, 0),
+      coalesce(oi.preco_unitario, 0),
+      coalesce(oi.desconto, 0),
+      true,
+      p_orcamento_id
+    FROM public.orcamento_itens oi
+    LEFT JOIN public.produtos p ON p.id = oi.produto_id
+    WHERE oi.orcamento_id = p_orcamento_id
+    RETURNING id, produto_id, quantidade
+  LOOP
+    v_itens_criados := v_itens_criados + 1;
 
-  GET DIAGNOSTICS v_itens_criados = ROW_COUNT;
+    CONTINUE WHEN v_item.produto_id IS NULL OR coalesce(v_item.quantidade, 0) <= 0;
 
-  v_valor_total := coalesce(v_orcamento.valor_total, 0);
-  v_valor_base := round(v_valor_total / v_qtd_parcelas, 2);
+    -- 8. Garantir a linha de estoque_itens do produto e travá-la (FOR UPDATE)
+    --    antes de calcular cobertura física disponível. O lock por linha
+    --    evita corrida quando o mesmo produto aparece em mais de um item do
+    --    mesmo orçamento ou em aprovações concorrentes.
+    INSERT INTO public.estoque_itens (produto_id, local, quantidade, quantidade_reservada, atualizado_em)
+    VALUES (v_item.produto_id, 'Estoque'::public.estoque_local, 0, 0, NOW())
+    ON CONFLICT (produto_id, local) DO NOTHING;
+
+    SELECT quantidade, quantidade_reservada
+      INTO v_estoque_fisico, v_estoque_reservado_atual
+    FROM public.estoque_itens
+    WHERE produto_id = v_item.produto_id
+      AND local = 'Estoque'::public.estoque_local
+    FOR UPDATE;
+
+    v_disponivel_fisico := GREATEST(0, coalesce(v_estoque_fisico, 0) - coalesce(v_estoque_reservado_atual, 0));
+    v_q_reserva          := LEAST(v_item.quantidade, v_disponivel_fisico);
+    v_q_entrega_futura   := GREATEST(0, v_item.quantidade - v_q_reserva);
+
+    UPDATE public.estoque_itens
+    SET quantidade_reservada = quantidade_reservada + v_item.quantidade,
+        atualizado_em        = NOW()
+    WHERE produto_id = v_item.produto_id
+      AND local = 'Estoque'::public.estoque_local;
+
+    v_reservas_criadas := v_reservas_criadas + 1;
+
+    -- 8b. Criar o saldo operacional do item (SPEC-010).
+    INSERT INTO public.estoque_saldos_projeto_item (
+      projeto_item_id, q_reserva, q_entrega_futura
+    )
+    VALUES (v_item.id, v_q_reserva, v_q_entrega_futura)
+    ON CONFLICT (projeto_item_id) DO NOTHING;
+
+    v_saldos_criados := v_saldos_criados + 1;
+
+    INSERT INTO public.estoque_movimentos_projeto_item (
+      projeto_item_id, tipo, quantidade, origem, referencia_id, observacao, criado_por
+    )
+    VALUES (
+      v_item.id,
+      'aprovacao_orcamento',
+      v_item.quantidade,
+      'aprovar_orcamento_financeiro',
+      p_orcamento_id,
+      format('Reserva %s / entrega futura %s na aprovação do orçamento %s',
+             v_q_reserva, v_q_entrega_futura, v_numero_orcamento),
+      auth.uid()
+    );
+  END LOOP;
+
+  -- 9. Criar parcelas financeiras (uma por prazo)
+  v_valor_total     := coalesce(v_orcamento.valor_total, 0);
+  v_valor_base      := round(v_valor_total / v_qtd_parcelas, 2);
+  v_valor_acumulado := 0;
 
   FOR v_i IN 1..v_qtd_parcelas LOOP
     IF v_i = v_qtd_parcelas THEN
       v_valor_parcela := v_valor_total - v_valor_acumulado;
     ELSE
-      v_valor_parcela := v_valor_base;
+      v_valor_parcela   := v_valor_base;
       v_valor_acumulado := v_valor_acumulado + v_valor_parcela;
     END IF;
 
@@ -702,6 +1370,7 @@ BEGIN
     v_parcelas_criadas := v_parcelas_criadas + 1;
   END LOOP;
 
+  -- 10. Criar boletos (um por parcela, nosso_numero único por orçamento+parcela)
   INSERT INTO public.boletos (
     nosso_numero,
     numero_documento,
@@ -719,7 +1388,8 @@ BEGIN
     emissao
   )
   SELECT
-    'ORC-' || regexp_replace(v_numero_orcamento, '[^a-zA-Z0-9]', '', 'g') || '-P' || pp.numero_parcela,
+    'ORC-' || regexp_replace(v_numero_orcamento, '[^a-zA-Z0-9]', '', 'g')
+            || '-P' || pp.numero_parcela,
     v_numero_orcamento || '-P' || pp.numero_parcela,
     pp.id,
     p_orcamento_id,
@@ -739,18 +1409,676 @@ BEGIN
 
   GET DIAGNOSTICS v_boletos_criados = ROW_COUNT;
 
+  -- 11. Retornar resultado
   RETURN jsonb_build_object(
-    'orcamento_id', p_orcamento_id,
-    'status', 'aprovado',
-    'projeto_id', v_orcamento.projeto_id,
-    'projeto_itens_criados', v_itens_criados,
-    'parcelas_criadas', v_parcelas_criadas,
-    'boletos_criados', v_boletos_criados,
-    'nota_fiscal_status', 'pendente_api',
-    'ja_processado', false
+    'orcamento_id',              p_orcamento_id,
+    'status',                    'aprovado',
+    'projeto_id',                v_orcamento.projeto_id,
+    'projeto_itens_criados',     v_itens_criados,
+    'parcelas_criadas',          v_parcelas_criadas,
+    'boletos_criados',           v_boletos_criados,
+    'reservas_estoque_aplicadas', v_reservas_criadas,
+    'saldos_operacionais_criados', v_saldos_criados,
+    'nota_fiscal_status',        'pendente_api',
+    'ja_processado',             false
   );
 END;
 $$;
+
+
+--
+-- Name: FUNCTION aprovar_orcamento_financeiro_base_spec001(p_orcamento_id uuid); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.aprovar_orcamento_financeiro_base_spec001(p_orcamento_id uuid) IS 'Wrapper legado da SPEC-001. O contrato oficial esta em aprovar_orcamento_financeiro(uuid).';
+
+
+--
+-- Name: aprovar_projeto_financeiro(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.aprovar_projeto_financeiro(p_project_id uuid) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  RAISE EXCEPTION 'aprovar_projeto_financeiro foi descontinuada. Use aprovar_orcamento_financeiro(p_orcamento_id) para aprovar apenas um orçamento.'
+    USING ERRCODE = 'P0002';
+END;
+$$;
+
+
+--
+-- Name: FUNCTION aprovar_projeto_financeiro(p_project_id uuid); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.aprovar_projeto_financeiro(p_project_id uuid) IS 'Descontinuada pela SPEC-016 para evitar aprovacao financeira por project_id.';
+
+
+--
+-- Name: aprovar_transferencia_estoque(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.aprovar_transferencia_estoque(p_transferencia_id uuid) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+    v_transf     public.transferencias_estoque%ROWTYPE;
+    v_origem     public.estoque_saldos_projeto_item%ROWTYPE;
+    v_destino    public.estoque_saldos_projeto_item%ROWTYPE;
+    v_role       public.usuario_role;
+    v_reduzir_ef numeric(10,3);
+BEGIN
+    SELECT role INTO v_role FROM public.usuarios WHERE id = auth.uid();
+    IF v_role IS NULL OR v_role NOT IN ('admin', 'gerente') THEN
+        RAISE EXCEPTION 'Apenas admin ou gerente pode aprovar transferencia de estoque.' USING ERRCODE = '42501';
+    END IF;
+
+    SELECT * INTO v_transf FROM public.transferencias_estoque WHERE id = p_transferencia_id FOR UPDATE;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Transferencia % nao encontrada.', p_transferencia_id USING ERRCODE = 'P0001';
+    END IF;
+
+    IF v_transf.status <> 'solicitada' THEN
+        RAISE EXCEPTION 'Transferencia % nao esta mais solicitada (status atual: %).', p_transferencia_id, v_transf.status USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT * INTO v_origem
+    FROM public.estoque_saldos_projeto_item
+    WHERE projeto_item_id = v_transf.origem_projeto_item_id
+    FOR UPDATE;
+
+    SELECT * INTO v_destino
+    FROM public.estoque_saldos_projeto_item
+    WHERE projeto_item_id = v_transf.destino_projeto_item_id
+    FOR UPDATE;
+
+    IF v_origem.q_reserva < v_transf.quantidade THEN
+        RAISE EXCEPTION 'Origem nao tem mais q_reserva suficiente (era % no momento da solicitacao).', v_transf.quantidade USING ERRCODE = 'P0001';
+    END IF;
+
+    v_reduzir_ef := LEAST(v_transf.quantidade, v_destino.q_entrega_futura);
+
+    UPDATE public.estoque_saldos_projeto_item
+    SET q_reserva = q_reserva - v_transf.quantidade,
+        q_entrega_futura = q_entrega_futura + v_transf.quantidade,
+        q_transferida_saida = q_transferida_saida + v_transf.quantidade,
+        atualizado_em = now()
+    WHERE projeto_item_id = v_transf.origem_projeto_item_id;
+
+    UPDATE public.estoque_saldos_projeto_item
+    SET q_entrega_futura = q_entrega_futura - v_reduzir_ef,
+        q_reserva = q_reserva + v_transf.quantidade,
+        atualizado_em = now()
+    WHERE projeto_item_id = v_transf.destino_projeto_item_id;
+
+    INSERT INTO public.estoque_movimentos_projeto_item
+        (projeto_item_id, projeto_item_destino_id, tipo, quantidade, origem, referencia_id, criado_por)
+    VALUES
+        (v_transf.origem_projeto_item_id, v_transf.destino_projeto_item_id, 'transferencia_saida', v_transf.quantidade, 'transferencia_estoque', v_transf.id, auth.uid());
+
+    INSERT INTO public.estoque_movimentos_projeto_item
+        (projeto_item_id, projeto_item_destino_id, tipo, quantidade, origem, referencia_id, criado_por)
+    VALUES
+        (v_transf.destino_projeto_item_id, v_transf.origem_projeto_item_id, 'transferencia_entrada', v_transf.quantidade, 'transferencia_estoque', v_transf.id, auth.uid());
+
+    UPDATE public.transferencias_estoque
+    SET status = 'aprovada', aprovado_por = auth.uid(), aprovado_em = now()
+    WHERE id = p_transferencia_id;
+
+    RETURN jsonb_build_object('transferencia_id', p_transferencia_id, 'status', 'aprovada');
+END;
+$$;
+
+
+--
+-- Name: FUNCTION aprovar_transferencia_estoque(p_transferencia_id uuid); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.aprovar_transferencia_estoque(p_transferencia_id uuid) IS 'SPEC-011. Aprova transferencia: origem perde q_reserva e ganha q_entrega_futura; destino ganha q_reserva e perde q_entrega_futura ate o limite disponivel. Restrito a admin/gerente.';
+
+
+--
+-- Name: can_user_approve_quotes(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.can_user_approve_quotes() RETURNS boolean
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.usuarios
+    WHERE id = auth.uid() AND coalesce(can_approve_quotes, false) = true
+  );
+END;
+$$;
+
+
+--
+-- Name: cancelar_orcamento(uuid, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.cancelar_orcamento(p_orcamento_id uuid, p_motivo text DEFAULT NULL::text) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+    v_orcamento           public.orcamentos%ROWTYPE;
+    v_status_anterior     text;
+    v_numero_orcamento    text;
+    v_reservas_revertidas integer := 0;
+    v_parcelas_canceladas integer := 0;
+    v_boletos_cancelados  integer := 0;
+    v_itens_invalidados   integer := 0;
+    v_saldos_cancelados   integer := 0;
+BEGIN
+    -- 1. Carregar e travar o orçamento
+    SELECT * INTO v_orcamento
+    FROM public.orcamentos
+    WHERE id = p_orcamento_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Orçamento % não encontrado.', p_orcamento_id
+            USING ERRCODE = 'P0001';
+    END IF;
+
+    v_status_anterior  := v_orcamento.status;
+    v_numero_orcamento := coalesce(v_orcamento.numero, left(p_orcamento_id::text, 8));
+
+    -- 2. Idempotência: já cancelado
+    IF v_status_anterior = 'cancelado' THEN
+        RETURN jsonb_build_object(
+            'orcamento_id',          p_orcamento_id,
+            'numero',                v_numero_orcamento,
+            'status',                'cancelado',
+            'reservas_revertidas',   0,
+            'parcelas_canceladas',   0,
+            'boletos_cancelados',    0,
+            'itens_invalidados',     0,
+            'saldos_cancelados',     0,
+            'ja_cancelado',          true
+        );
+    END IF;
+
+    -- 3. Se estava aprovado → desfazer todos os efeitos da aprovação
+    IF v_status_anterior = 'aprovado' THEN
+
+        -- 3a. Reverter reservas de estoque físico (estoque_itens), pelo saldo
+        --     aberto real do item (SPEC-010: q_reserva + q_entrega_futura +
+        --     q_ag_separar + q_separado) — não mais pela quantidade original
+        --     do orçamento, para não reverter em dobro um item que já tenha
+        --     sido parcialmente entregue/transferido antes do cancelamento.
+        UPDATE public.estoque_itens ei
+        SET quantidade_reservada = GREATEST(0, ei.quantidade_reservada - aberto.qtd_aberta),
+            atualizado_em        = NOW()
+        FROM (
+            SELECT pi.produto_id,
+                   SUM(esp.q_reserva + esp.q_entrega_futura + esp.q_ag_separar + esp.q_separado) AS qtd_aberta
+            FROM public.projeto_itens pi
+            JOIN public.estoque_saldos_projeto_item esp ON esp.projeto_item_id = pi.id
+            WHERE pi.orcamento_id = p_orcamento_id
+              AND esp.status_operacional = 'ativo'
+            GROUP BY pi.produto_id
+        ) aberto
+        WHERE ei.produto_id = aberto.produto_id
+          AND ei.local      = 'Estoque'::public.estoque_local
+          AND aberto.qtd_aberta > 0;
+
+        GET DIAGNOSTICS v_reservas_revertidas = ROW_COUNT;
+
+        -- 3b. Cancelar parcelas financeiras
+        UPDATE public.projeto_parcelas
+        SET status = 'cancelada'::public.parcela_status
+        WHERE orcamento_id = p_orcamento_id
+          AND status = 'pendente'::public.parcela_status;
+
+        GET DIAGNOSTICS v_parcelas_canceladas = ROW_COUNT;
+
+        -- 3c. Cancelar boletos
+        UPDATE public.boletos
+        SET status = 'cancelado'
+        WHERE orcamento_id = p_orcamento_id
+          AND status IN ('pendente_registro', 'Pendente', 'pendente');
+
+        GET DIAGNOSTICS v_boletos_cancelados = ROW_COUNT;
+
+        -- 3d. Invalidar projeto_itens (preservar histórico, apenas desmarca validado)
+        UPDATE public.projeto_itens
+        SET validado = false
+        WHERE orcamento_id = p_orcamento_id
+          AND validado = true;
+
+        GET DIAGNOSTICS v_itens_invalidados = ROW_COUNT;
+
+        -- 3e. Encerrar o saldo operacional do item (SPEC-010): zera as
+        --     posições abertas, preserva q_entregue/q_devolvida para
+        --     auditoria, e registra o movimento de cancelamento com a
+        --     quantidade que estava aberta antes de zerar.
+        WITH antes AS (
+            SELECT esp.projeto_item_id,
+                   (esp.q_reserva + esp.q_entrega_futura + esp.q_ag_separar + esp.q_separado) AS qtd_aberta
+            FROM public.estoque_saldos_projeto_item esp
+            JOIN public.projeto_itens pi ON pi.id = esp.projeto_item_id
+            WHERE pi.orcamento_id = p_orcamento_id
+              AND esp.status_operacional = 'ativo'
+        ),
+        cancelados AS (
+            UPDATE public.estoque_saldos_projeto_item esp
+            SET status_operacional = 'cancelado',
+                q_reserva           = 0,
+                q_entrega_futura    = 0,
+                q_ag_separar        = 0,
+                q_separado          = 0
+            FROM public.projeto_itens pi
+            WHERE pi.id = esp.projeto_item_id
+              AND pi.orcamento_id = p_orcamento_id
+              AND esp.status_operacional = 'ativo'
+            RETURNING esp.projeto_item_id
+        )
+        INSERT INTO public.estoque_movimentos_projeto_item (
+            projeto_item_id, tipo, quantidade, origem, referencia_id, observacao, criado_por
+        )
+        SELECT
+            c.projeto_item_id,
+            'cancelamento',
+            antes.qtd_aberta,
+            'cancelar_orcamento',
+            p_orcamento_id,
+            coalesce(p_motivo, 'Cancelamento do orçamento ' || v_numero_orcamento),
+            auth.uid()
+        FROM cancelados c
+        JOIN antes ON antes.projeto_item_id = c.projeto_item_id
+        WHERE antes.qtd_aberta > 0;
+
+        GET DIAGNOSTICS v_saldos_cancelados = ROW_COUNT;
+
+    END IF;
+
+    -- 4. Atualizar status do orçamento
+    UPDATE public.orcamentos
+    SET status = 'cancelado'
+    WHERE id = p_orcamento_id;
+
+    -- 5. Registrar histórico
+    INSERT INTO public.historico_status_orcamentos (
+        orcamento_id,
+        status_anterior,
+        status_novo,
+        usuario,
+        observacao
+    ) VALUES (
+        p_orcamento_id,
+        v_status_anterior,
+        'cancelado',
+        auth.uid()::text,
+        coalesce(p_motivo, 'Cancelamento via RPC cancelar_orcamento')
+    );
+
+    RETURN jsonb_build_object(
+        'orcamento_id',        p_orcamento_id,
+        'numero',              v_numero_orcamento,
+        'status',              'cancelado',
+        'status_anterior',     v_status_anterior,
+        'reservas_revertidas', v_reservas_revertidas,
+        'parcelas_canceladas', v_parcelas_canceladas,
+        'boletos_cancelados',  v_boletos_cancelados,
+        'itens_invalidados',   v_itens_invalidados,
+        'saldos_cancelados',   v_saldos_cancelados,
+        'ja_cancelado',        false
+    );
+END;
+$$;
+
+
+--
+-- Name: FUNCTION cancelar_orcamento(p_orcamento_id uuid, p_motivo text); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.cancelar_orcamento(p_orcamento_id uuid, p_motivo text) IS 'Cancela um orçamento. Se aprovado: reverte quantidade_reservada em estoque_itens
+com base no saldo aberto real do item (SPEC-010), cancela projeto_parcelas,
+cancela boletos, invalida projeto_itens e encerra o saldo operacional do item.
+Todos os artefatos são mantidos para auditoria (soft-cancel). Registra em
+historico_status_orcamentos e estoque_movimentos_projeto_item.';
+
+
+--
+-- Name: cancelar_transferencia_estoque(uuid, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.cancelar_transferencia_estoque(p_transferencia_id uuid, p_motivo text DEFAULT NULL::text) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+    v_transf public.transferencias_estoque%ROWTYPE;
+BEGIN
+    SELECT * INTO v_transf FROM public.transferencias_estoque WHERE id = p_transferencia_id FOR UPDATE;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Transferencia % nao encontrada.', p_transferencia_id USING ERRCODE = 'P0001';
+    END IF;
+
+    IF v_transf.status <> 'solicitada' THEN
+        RAISE EXCEPTION 'Só é possível cancelar transferencia com status solicitada (atual: %). Transferencia aprovada exige nova transferencia no sentido contrario.', v_transf.status USING ERRCODE = 'P0001';
+    END IF;
+
+    UPDATE public.transferencias_estoque
+    SET status = 'cancelada', cancelado_em = now(), motivo_cancelamento = p_motivo
+    WHERE id = p_transferencia_id;
+
+    RETURN jsonb_build_object('transferencia_id', p_transferencia_id, 'status', 'cancelada');
+END;
+$$;
+
+
+--
+-- Name: FUNCTION cancelar_transferencia_estoque(p_transferencia_id uuid, p_motivo text); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.cancelar_transferencia_estoque(p_transferencia_id uuid, p_motivo text) IS 'SPEC-011. Cancela transferencia ainda nao aprovada. Nao reverte saldo, pois transferencia solicitada nao altera saldo.';
+
+
+--
+-- Name: cliente_aprovar_orcamento(uuid, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.cliente_aprovar_orcamento(p_orcamento_id uuid, p_token text) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  v_orcamento public.orcamentos%ROWTYPE;
+  v_numero text;
+BEGIN
+  SELECT * INTO v_orcamento
+  FROM public.orcamentos
+  WHERE id = p_orcamento_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orçamento não encontrado.' USING ERRCODE = 'P0001';
+  END IF;
+
+  v_numero := COALESCE(v_orcamento.numero, left(p_orcamento_id::text, 8));
+
+  IF v_orcamento.token_aprovacao_cliente IS NULL
+     OR v_orcamento.token_aprovacao_cliente <> p_token THEN
+    RAISE EXCEPTION 'Token inválido ou expirado para o orçamento %.',
+      v_numero USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_orcamento.status <> 'enviado_cliente' THEN
+    RAISE EXCEPTION
+      'Orçamento % não está aguardando aprovação do cliente. Status: %.',
+      v_numero, v_orcamento.status USING ERRCODE = 'P0002';
+  END IF;
+
+  UPDATE public.orcamentos
+  SET status = 'Aprovação Financeira',
+      aprovado_cliente_em = now(),
+      requer_revisao_financeira = true,
+      token_aprovacao_cliente = NULL
+  WHERE id = p_orcamento_id;
+
+  INSERT INTO public.historico_status_orcamentos (
+    orcamento_id, status_anterior, status_novo, usuario, observacao
+  ) VALUES (
+    p_orcamento_id, 'enviado_cliente', 'Aprovação Financeira',
+    'cliente', 'Orçamento aprovado pelo cliente via link'
+  );
+
+  RETURN jsonb_build_object(
+    'orcamento_id', p_orcamento_id,
+    'numero', v_numero,
+    'status', 'Aprovação Financeira',
+    'aprovado_em', now()
+  );
+END;
+$$;
+
+
+--
+-- Name: FUNCTION cliente_aprovar_orcamento(p_orcamento_id uuid, p_token text); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.cliente_aprovar_orcamento(p_orcamento_id uuid, p_token text) IS 'Aprovação do cliente via token (link enviado por e-mail/WhatsApp).
+Token é de uso único — invalidado após aprovação. Registra em historico_status_orcamentos.';
+
+
+--
+-- Name: cliente_recusar_orcamento(uuid, text, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.cliente_recusar_orcamento(p_orcamento_id uuid, p_token text, p_motivo text DEFAULT NULL::text) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+    v_orcamento public.orcamentos%ROWTYPE;
+    v_numero    text;
+BEGIN
+    SELECT * INTO v_orcamento
+    FROM public.orcamentos
+    WHERE id = p_orcamento_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Orçamento não encontrado.' USING ERRCODE = 'P0001';
+    END IF;
+
+    v_numero := coalesce(v_orcamento.numero, left(p_orcamento_id::text, 8));
+
+    IF v_orcamento.token_aprovacao_cliente IS NULL
+       OR v_orcamento.token_aprovacao_cliente <> p_token THEN
+        RAISE EXCEPTION 'Token inválido ou expirado para o orçamento %.',
+            v_numero USING ERRCODE = 'P0001';
+    END IF;
+
+    IF v_orcamento.status <> 'enviado_cliente' THEN
+        RAISE EXCEPTION
+            'Orçamento % não está aguardando aprovação do cliente. Status: %.',
+            v_numero, v_orcamento.status USING ERRCODE = 'P0002';
+    END IF;
+
+    UPDATE public.orcamentos
+    SET status                  = 'recusado_cliente',
+        recusado_cliente_em     = now(),
+        motivo_recusa_cliente   = p_motivo,
+        token_aprovacao_cliente = NULL
+    WHERE id = p_orcamento_id;
+
+    INSERT INTO public.historico_status_orcamentos (
+        orcamento_id, status_anterior, status_novo, usuario, observacao
+    ) VALUES (
+        p_orcamento_id, 'enviado_cliente', 'recusado_cliente',
+        'cliente', coalesce(p_motivo, 'Orçamento recusado pelo cliente via link')
+    );
+
+    RETURN jsonb_build_object(
+        'orcamento_id', p_orcamento_id,
+        'numero',        v_numero,
+        'status',        'recusado_cliente',
+        'motivo',        p_motivo,
+        'recusado_em',   now()
+    );
+END;
+$$;
+
+
+--
+-- Name: FUNCTION cliente_recusar_orcamento(p_orcamento_id uuid, p_token text, p_motivo text); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.cliente_recusar_orcamento(p_orcamento_id uuid, p_token text, p_motivo text) IS 'Recusa do cliente via token (link enviado por e-mail/WhatsApp).
+Registra motivo e invalida o token. Permite reenvio posterior via enviar_orcamento_para_cliente.';
+
+
+--
+-- Name: criar_produto_orcamento(jsonb); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.criar_produto_orcamento(p_payload jsonb) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $_$
+DECLARE
+  v_user_role text;
+  v_codigo integer;
+  v_nome text;
+  v_sku text;
+  v_marca_id uuid;
+  v_categoria_id uuid;
+  v_fornecedor_id uuid;
+  v_produto public.produtos%ROWTYPE;
+BEGIN
+  IF p_payload IS NULL THEN
+    RAISE EXCEPTION 'Payload do produto é obrigatório.' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF COALESCE(auth.role(), '') <> 'service_role' THEN
+    SELECT u.role::text INTO v_user_role
+    FROM public.usuarios u
+    WHERE u.id = auth.uid()
+      AND COALESCE(u.ativo, true) = true;
+
+    IF v_user_role IS NULL THEN
+      RAISE EXCEPTION 'Usuário não autenticado ou sem cadastro operacional.'
+        USING ERRCODE = 'P0001';
+    END IF;
+
+    IF v_user_role NOT IN ('admin', 'gerente', 'operador') THEN
+      RAISE EXCEPTION 'Permissão negada para criar produto. Role atual: %', v_user_role
+        USING ERRCODE = 'P0001';
+    END IF;
+  END IF;
+
+  IF COALESCE(p_payload->>'codigo_produto', '') !~ '^[0-9]+$' THEN
+    RAISE EXCEPTION 'Código do produto é obrigatório e deve ser numérico.'
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  v_codigo := (p_payload->>'codigo_produto')::integer;
+  v_nome := NULLIF(btrim(COALESCE(p_payload->>'nome', '')), '');
+  v_sku := NULLIF(btrim(COALESCE(p_payload->>'sku', '')), '');
+  v_marca_id := NULLIF(p_payload->>'marca_id', '')::uuid;
+  v_categoria_id := NULLIF(p_payload->>'categoria_id', '')::uuid;
+  v_fornecedor_id := NULLIF(NULLIF(p_payload->>'fornecedor_principal_id', ''), 'none')::uuid;
+
+  IF v_nome IS NULL THEN
+    RAISE EXCEPTION 'Nome do produto é obrigatório.' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_marca_id IS NULL THEN
+    RAISE EXCEPTION 'Marca do produto é obrigatória.' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_categoria_id IS NULL THEN
+    RAISE EXCEPTION 'Categoria do produto é obrigatória.' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM public.produtos WHERE codigo_produto = v_codigo) THEN
+    RAISE EXCEPTION 'Código do produto % já está em uso.', v_codigo
+      USING ERRCODE = '23505';
+  END IF;
+
+  IF v_sku IS NOT NULL AND EXISTS (SELECT 1 FROM public.produtos WHERE sku = v_sku) THEN
+    RAISE EXCEPTION 'SKU % já está em uso.', v_sku
+      USING ERRCODE = '23505';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM public.marcas WHERE id = v_marca_id) THEN
+    RAISE EXCEPTION 'Marca informada não existe.' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM public.categorias_produto WHERE id = v_categoria_id) THEN
+    RAISE EXCEPTION 'Categoria informada não existe.' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_fornecedor_id IS NOT NULL
+     AND NOT EXISTS (SELECT 1 FROM public.contatos WHERE id = v_fornecedor_id) THEN
+    RAISE EXCEPTION 'Fornecedor informado não existe.' USING ERRCODE = 'P0001';
+  END IF;
+
+  INSERT INTO public.produtos (
+    codigo_produto,
+    nome,
+    sku,
+    referencia,
+    marca_id,
+    categoria_id,
+    fornecedor_principal_id,
+    unidade,
+    preco_custo,
+    preco_venda,
+    valor_venda,
+    descricao_tecnica,
+    ncm,
+    tipo_fiscal,
+    cst,
+    cest,
+    porc_frete,
+    porc_despesas,
+    porc_bdi,
+    porc_st,
+    porc_desconto,
+    icms_entrada,
+    ipi_entrada,
+    margem_lucro,
+    custo_total,
+    mascara_produto,
+    status_comercial,
+    ativo
+  ) VALUES (
+    v_codigo,
+    v_nome,
+    v_sku,
+    NULLIF(btrim(COALESCE(p_payload->>'referencia', '')), ''),
+    v_marca_id,
+    v_categoria_id,
+    v_fornecedor_id,
+    COALESCE(NULLIF(btrim(COALESCE(p_payload->>'unidade', '')), ''), 'UN'),
+    COALESCE(NULLIF(p_payload->>'preco_custo', '')::numeric, 0),
+    COALESCE(NULLIF(p_payload->>'preco_venda', '')::numeric, 0),
+    COALESCE(NULLIF(p_payload->>'valor_venda', '')::numeric, NULLIF(p_payload->>'preco_venda', '')::numeric, 0),
+    NULLIF(btrim(COALESCE(p_payload->>'descricao_tecnica', '')), ''),
+    NULLIF(btrim(COALESCE(p_payload->>'ncm', '')), ''),
+    NULLIF(btrim(COALESCE(p_payload->>'tipo_fiscal', '')), ''),
+    NULLIF(btrim(COALESCE(p_payload->>'cst', '')), ''),
+    NULLIF(btrim(COALESCE(p_payload->>'cest', '')), ''),
+    COALESCE(NULLIF(p_payload->>'porc_frete', '')::numeric, 0),
+    COALESCE(NULLIF(p_payload->>'porc_despesas', '')::numeric, 0),
+    COALESCE(NULLIF(p_payload->>'porc_bdi', '')::numeric, 0),
+    COALESCE(NULLIF(p_payload->>'porc_st', '')::numeric, 0),
+    COALESCE(NULLIF(p_payload->>'porc_desconto', '')::numeric, 0),
+    COALESCE(NULLIF(p_payload->>'icms_entrada', '')::numeric, 0),
+    COALESCE(NULLIF(p_payload->>'ipi_entrada', '')::numeric, 0),
+    COALESCE(NULLIF(p_payload->>'margem_lucro', '')::numeric, NULLIF(p_payload->>'percentual_lucro', '')::numeric, 150),
+    COALESCE(NULLIF(p_payload->>'custo_total', '')::numeric, 0),
+    NULLIF(btrim(COALESCE(p_payload->>'mascara_produto', '')), ''),
+    COALESCE(NULLIF(btrim(COALESCE(p_payload->>'status_comercial', '')), ''), 'Normal'),
+    true
+  )
+  RETURNING * INTO v_produto;
+
+  IF COALESCE(v_produto.valor_venda, 0) = 0 AND COALESCE(v_produto.preco_venda, 0) > 0 THEN
+    UPDATE public.produtos
+    SET valor_venda = v_produto.preco_venda
+    WHERE id = v_produto.id
+    RETURNING * INTO v_produto;
+  END IF;
+
+  RETURN to_jsonb(v_produto) || jsonb_build_object('source', 'produtos');
+END;
+$_$;
+
+
+--
+-- Name: FUNCTION criar_produto_orcamento(p_payload jsonb); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.criar_produto_orcamento(p_payload jsonb) IS 'SPEC-018: cria produto canonico em public.produtos a partir do modal de Orcamentos, com validacao de codigo_produto, sku, marca e categoria.';
 
 
 --
@@ -796,6 +2124,129 @@ BEGIN
   RETURN v_new_id;
 END;
 $$;
+
+
+--
+-- Name: current_user_funcionario_id(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.current_user_funcionario_id() RETURNS uuid
+    LANGUAGE sql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+  SELECT id FROM public.funcionarios
+  WHERE usuario_id = auth.uid()
+  LIMIT 1;
+$$;
+
+
+--
+-- Name: current_user_is_funcionario(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.current_user_is_funcionario() RETURNS boolean
+    LANGUAGE sql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.funcionarios
+    WHERE usuario_id = auth.uid()
+  );
+$$;
+
+
+--
+-- Name: enviar_orcamento_para_cliente(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.enviar_orcamento_para_cliente(p_orcamento_id uuid) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+    v_orcamento  public.orcamentos%ROWTYPE;
+    v_numero     text;
+    v_status_ant text;
+    v_token      text;
+BEGIN
+    SELECT * INTO v_orcamento
+    FROM public.orcamentos
+    WHERE id = p_orcamento_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Orçamento % não encontrado.', p_orcamento_id
+            USING ERRCODE = 'P0001';
+    END IF;
+
+    v_numero     := coalesce(v_orcamento.numero, left(p_orcamento_id::text, 8));
+    v_status_ant := v_orcamento.status;
+
+    IF v_status_ant NOT IN ('aguardando_aprovacao', 'recusado_cliente', 'rascunho') THEN
+        RAISE EXCEPTION
+            'Orçamento % não pode ser enviado ao cliente: status atual é %. '
+            'Permitido apenas em: aguardando_aprovacao, recusado_cliente.',
+            v_numero, v_status_ant
+            USING ERRCODE = 'P0002';
+    END IF;
+
+    v_token := gen_random_uuid()::text;
+
+    UPDATE public.orcamentos
+    SET status                  = 'enviado_cliente',
+        enviado_cliente_em      = now(),
+        enviado_cliente_por     = auth.uid(),
+        token_aprovacao_cliente = v_token,
+        recusado_cliente_em     = NULL,
+        motivo_recusa_cliente   = NULL
+    WHERE id = p_orcamento_id;
+
+    INSERT INTO public.historico_status_orcamentos (
+        orcamento_id, status_anterior, status_novo, usuario, observacao
+    ) VALUES (
+        p_orcamento_id, v_status_ant, 'enviado_cliente',
+        auth.uid()::text, 'Orçamento enviado ao cliente para aprovação'
+    );
+
+    RETURN jsonb_build_object(
+        'orcamento_id', p_orcamento_id,
+        'numero',        v_numero,
+        'status',        'enviado_cliente',
+        'token',         v_token,
+        'enviado_em',    now()
+    );
+END;
+$$;
+
+
+--
+-- Name: FUNCTION enviar_orcamento_para_cliente(p_orcamento_id uuid); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.enviar_orcamento_para_cliente(p_orcamento_id uuid) IS 'Envia orçamento para aprovação do cliente. Gera token único para o link de aprovação.
+Permitido em: aguardando_aprovacao, recusado_cliente. Registra em historico_status_orcamentos.';
+
+
+--
+-- Name: finalizar_validacao_financeira(uuid, jsonb, jsonb); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.finalizar_validacao_financeira(p_project_id uuid, p_project_data jsonb, p_orcamentos jsonb) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  RAISE EXCEPTION 'finalizar_validacao_financeira foi descontinuada. Edite o orçamento e depois chame aprovar_orcamento_financeiro(p_orcamento_id).'
+    USING ERRCODE = 'P0002';
+END;
+$$;
+
+
+--
+-- Name: FUNCTION finalizar_validacao_financeira(p_project_id uuid, p_project_data jsonb, p_orcamentos jsonb); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.finalizar_validacao_financeira(p_project_id uuid, p_project_data jsonb, p_orcamentos jsonb) IS 'Descontinuada pela SPEC-016: edicao financeira nao aprova projeto/orcamentos em lote.';
 
 
 --
@@ -923,6 +2374,37 @@ $$;
 
 
 --
+-- Name: fn_sync_equipe_por_responsavel(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_sync_equipe_por_responsavel() RETURNS trigger
+    LANGUAGE plpgsql
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  v_equipe_id uuid;
+BEGIN
+  IF NEW.responsavel_nome IS NULL THEN
+    NEW.equipe_id                  := NULL;
+    NEW.equipe_responsavel_obra_id := NULL;
+    RETURN NEW;
+  END IF;
+
+  SELECT id
+    INTO v_equipe_id
+  FROM public.equipes_projetos
+  WHERE lower(trim(equipes)) = lower(trim(NEW.responsavel_nome))
+  LIMIT 1;
+
+  NEW.equipe_id                  := v_equipe_id;
+  NEW.equipe_responsavel_obra_id := v_equipe_id;
+
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: fn_update_orcamento_timestamp(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -933,6 +2415,48 @@ BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
+$$;
+
+
+--
+-- Name: fn_validar_saldo_projeto_item(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_validar_saldo_projeto_item() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  v_quantidade_venda numeric(10,2);
+  v_soma             numeric(10,3);
+BEGIN
+  SELECT quantidade INTO v_quantidade_venda
+  FROM public.projeto_itens
+  WHERE id = NEW.projeto_item_id;
+
+  v_soma := NEW.q_reserva + NEW.q_entrega_futura + NEW.q_ag_separar
+          + NEW.q_separado + NEW.q_entregue + NEW.q_devolvida;
+
+  IF v_soma > coalesce(v_quantidade_venda, 0) THEN
+    RAISE EXCEPTION
+      'Saldo do item de projeto % excede a quantidade vendida (% > %).',
+      NEW.projeto_item_id, v_soma, v_quantidade_venda
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: gen_token_hex(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.gen_token_hex() RETURNS text
+    LANGUAGE sql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+  SELECT md5(gen_random_uuid()::text) || md5(gen_random_uuid()::text);
 $$;
 
 
@@ -964,100 +2488,6 @@ END;
 $$;
 
 
---
--- Name: gerenciar_fluxo_projeto(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.gerenciar_fluxo_projeto() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    v_item RECORD;
-    v_estoque_disponivel NUMERIC;
-    v_faltante NUMERIC;
-    v_acao VARCHAR(20);
-    v_usuario VARCHAR(100);
-BEGIN
-    -- Apenas processa quando o status efetivamente muda
-    IF TG_OP = 'UPDATE' AND NEW.status IS DISTINCT FROM OLD.status THEN
-        IF NEW.status = 'Aprovado' THEN
-            v_acao := 'APROVACAO';
-            v_usuario := NEW.aprovado_por;
-
-            -- Percorre os itens do orçamento original
-            FOR v_item IN
-                SELECT oi.id, oi.item_id, oi.quantidade, oi.orcamento_id
-                FROM orcamento_itens oi
-                JOIN orcamentos o ON o.id = oi.orcamento_id
-                WHERE o.projeto_id = NEW.id
-            LOOP
-                -- Insere o item em projeto_itens
-                INSERT INTO projeto_itens (projeto_id, item_id, quantidade, orcamento_item_id)
-                VALUES (NEW.id, v_item.item_id, v_item.quantidade, v_item.id);
-
-                -- Calcula o estoque disponível (exemplo: quantidade atual - reservada)
-                SELECT COALESCE(quantidade, 0) - COALESCE(quantidade_reservada, 0)
-                INTO v_estoque_disponivel
-                FROM estoque_itens
-                WHERE id = v_item.item_id;
-
-                IF v_estoque_disponivel >= v_item.quantidade THEN
-                    -- Incrementa a quantidade reservada
-                    UPDATE estoque_itens
-                    SET quantidade_reservada = COALESCE(quantidade_reservada, 0) + v_item.quantidade
-                    WHERE id = v_item.item_id;
-                ELSE
-                    -- Reserva o que é possível
-                    IF v_estoque_disponivel > 0 THEN
-                        UPDATE estoque_itens
-                        SET quantidade_reservada = COALESCE(quantidade_reservada, 0) + v_estoque_disponivel
-                        WHERE id = v_item.item_id;
-
-                        v_faltante := v_item.quantidade - v_estoque_disponivel;
-                    ELSE
-                        v_faltante := v_item.quantidade;
-                    END IF;
-
-                    -- Insere solicitação de compra para o faltante
-                    INSERT INTO solicitacoes_compra (projeto_id, item_id, quantidade, status, data_solicitacao)
-                    VALUES (NEW.id, v_item.item_id, v_faltante, 'Pendente', NOW());
-                END IF;
-            END LOOP;
-
-        ELSIF NEW.status = 'Estornado' THEN
-            v_acao := 'ESTORNO';
-            v_usuario := NEW.estornado_por;
-
-            -- Percorre os itens do projeto
-            FOR v_item IN
-                SELECT id, item_id, quantidade
-                FROM projeto_itens
-                WHERE projeto_id = NEW.id
-            LOOP
-                -- Decrementa a quantidade reservada em estoque_itens
-                UPDATE estoque_itens
-                SET quantidade_reservada = GREATEST(COALESCE(quantidade_reservada, 0) - v_item.quantidade, 0)
-                WHERE id = v_item.item_id;
-            END LOOP;
-
-            -- Cancela solicitações de compra pendentes do projeto
-            UPDATE solicitacoes_compra
-            SET status = 'Cancelado', data_cancelamento = NOW()
-            WHERE projeto_id = NEW.id AND status = 'Pendente';
-        END IF;
-
-        -- Registra log da operação, se houver uma ação identificada
-        IF v_acao IS NOT NULL THEN
-            INSERT INTO logs_operacoes (projeto_id, acao, usuario, data_hora)
-            VALUES (NEW.id, v_acao, v_usuario, NOW());
-        END IF;
-    END IF;
-
-    RETURN NEW;
-END;
-$$;
-
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -1083,7 +2513,7 @@ CREATE TABLE public.projetos (
     historico jsonb DEFAULT '[]'::jsonb NOT NULL,
     responsavel_nome text,
     created_by uuid,
-    responsavel_obra_id uuid,
+    equipe_responsavel_obra_id uuid,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     client_id uuid,
     area_do_projeto jsonb,
@@ -1091,6 +2521,8 @@ CREATE TABLE public.projetos (
     codigo_legado integer,
     empresa_id uuid,
     valor_total numeric(15,2) DEFAULT 0 NOT NULL,
+    equipe_id uuid,
+    responsavel_obra_id uuid,
     CONSTRAINT check_area_projeto_estrutura CHECK (((area_do_projeto IS NULL) OR (jsonb_typeof(area_do_projeto) = 'object'::text))),
     CONSTRAINT check_tipo_projeto_valido CHECK (((area_do_projeto IS NULL) OR ((area_do_projeto ->> 'tipo'::text) IS NULL) OR ((area_do_projeto ->> 'tipo'::text) = ANY (ARRAY['Residential'::text, 'Corporativo'::text, 'Exposição Comercial'::text, 'Paisagismo'::text])))),
     CONSTRAINT chk_historico_is_array CHECK ((jsonb_typeof(historico) = 'array'::text))
@@ -1333,6 +2765,18 @@ $$;
 
 
 --
+-- Name: get_my_funcionario_id(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.get_my_funcionario_id() RETURNS uuid
+    LANGUAGE sql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+  SELECT id FROM public.funcionarios WHERE usuario_id = auth.uid();
+$$;
+
+
+--
 -- Name: get_next_sku(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1374,12 +2818,10 @@ $$;
 --
 
 CREATE FUNCTION public.get_user_role() RETURNS text
-    LANGUAGE plpgsql SECURITY DEFINER
+    LANGUAGE sql SECURITY DEFINER
     SET search_path TO 'public'
     AS $$
-BEGIN
-  RETURN (SELECT role FROM public.profiles WHERE id = auth.uid());
-END;
+  SELECT role::text FROM public.usuarios WHERE id = auth.uid();
 $$;
 
 
@@ -1442,16 +2884,131 @@ $$;
 
 CREATE FUNCTION public.handle_new_user() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
     AS $$
+DECLARE
+    v_nome text;
 BEGIN
-  INSERT INTO public.profiles (id, full_name, role)
-  VALUES (
-    new.id,
-    new.raw_user_meta_data->>'full_name',
-    'visitante'
-  )
-  ON CONFLICT (id) DO NOTHING;
-  RETURN new;
+    v_nome := COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1));
+
+    -- Insert into usuarios (permissions table)
+    INSERT INTO public.usuarios (id, email, nome, role)
+    VALUES (NEW.id, NEW.email, v_nome, 'viewer')
+    ON CONFLICT (id) DO NOTHING;
+
+    -- Try to link an existing funcionario by email
+    UPDATE public.funcionarios
+    SET usuario_id = NEW.id
+    WHERE email = NEW.email AND usuario_id IS NULL;
+
+    -- If not linked, create a new funcionario record
+    IF NOT EXISTS (SELECT 1 FROM public.funcionarios WHERE usuario_id = NEW.id) THEN
+        INSERT INTO public.funcionarios (usuario_id, nome, email, status)
+        VALUES (NEW.id, v_nome, NEW.email, 'Ativo');
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: handle_orcamento_item_workflow(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.handle_orcamento_item_workflow() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  v_status text;
+  v_empresa_id uuid;
+  v_projeto_id uuid;
+  v_cliente_id uuid;
+  v_forma_pagamento public.pagamento_forma;
+BEGIN
+  SELECT status, empresa_id, projeto_id, cliente_id, forma_pagamento
+    INTO v_status, v_empresa_id, v_projeto_id, v_cliente_id, v_forma_pagamento
+  FROM public.orcamentos
+  WHERE id = NEW.orcamento_id;
+
+  IF NOT FOUND THEN
+    RETURN NEW;
+  END IF;
+
+  IF (v_status IN ('rascunho', 'aguardando_cliente') OR v_status IS NULL) THEN
+    IF v_empresa_id IS NOT NULL
+       AND v_projeto_id IS NOT NULL
+       AND v_cliente_id IS NOT NULL
+       AND v_forma_pagamento IS NOT NULL THEN
+      UPDATE public.orcamentos
+      SET status = 'enviado_cliente',
+          token_aprovacao_cliente = COALESCE(token_aprovacao_cliente, public.gen_token_hex()),
+          enviado_cliente_em = COALESCE(enviado_cliente_em, now()),
+          enviado_cliente_por = COALESCE(enviado_cliente_por, auth.uid())
+      WHERE id = NEW.orcamento_id;
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: handle_orcamento_workflow(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.handle_orcamento_workflow() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  v_old_status text;
+  v_has_items boolean := false;
+BEGIN
+  v_old_status := COALESCE(OLD.status, '');
+
+  -- Auto-generate token when status is enviado_cliente and no token exists
+  IF (NEW.status = 'enviado_cliente' AND NEW.token_aprovacao_cliente IS NULL) THEN
+    NEW.token_aprovacao_cliente := public.gen_token_hex();
+    IF NEW.enviado_cliente_em IS NULL THEN
+      NEW.enviado_cliente_em := now();
+    END IF;
+    IF NEW.enviado_cliente_por IS NULL THEN
+      NEW.enviado_cliente_por := auth.uid();
+    END IF;
+  END IF;
+
+  -- When customer approves (transition to Aprovação Financeira from enviado_cliente),
+  -- set financial review flag and approval timestamp
+  IF (NEW.status = 'Aprovação Financeira' AND v_old_status = 'enviado_cliente') THEN
+    NEW.requer_revisao_financeira := true;
+    IF NEW.aprovado_cliente_em IS NULL THEN
+      NEW.aprovado_cliente_em := now();
+    END IF;
+  END IF;
+
+  -- Auto-transition from rascunho/aguardando_cliente to enviado_cliente
+  -- when all mandatory data AND at least one item exist
+  IF (NEW.status IN ('rascunho', 'aguardando_cliente') OR NEW.status IS NULL) THEN
+    IF NEW.empresa_id IS NOT NULL
+       AND NEW.projeto_id IS NOT NULL
+       AND NEW.cliente_id IS NOT NULL
+       AND NEW.forma_pagamento IS NOT NULL THEN
+      SELECT EXISTS(
+        SELECT 1 FROM public.orcamento_itens WHERE orcamento_id = NEW.id
+      ) INTO v_has_items;
+      IF v_has_items THEN
+        NEW.status := 'enviado_cliente';
+        NEW.token_aprovacao_cliente := public.gen_token_hex();
+        NEW.enviado_cliente_em := COALESCE(NEW.enviado_cliente_em, now());
+        NEW.enviado_cliente_por := COALESCE(NEW.enviado_cliente_por, auth.uid());
+      END IF;
+    END IF;
+  END IF;
+
+  RETURN NEW;
 END;
 $$;
 
@@ -1539,6 +3096,235 @@ COMMENT ON FUNCTION public.limpar_staging_processados() IS 'Remove registros sta
 
 
 --
+-- Name: link_my_funcionario_record(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.link_my_funcionario_record() RETURNS void
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+    v_user_email text;
+    v_func_id uuid;
+BEGIN
+    -- Identify the current authenticated user's email
+    v_user_email := auth.jwt() ->> 'email';
+
+    IF v_user_email IS NULL THEN
+        RETURN;
+    END IF;
+
+    -- Search funcionarios by email and link if usuario_id is null
+    UPDATE public.funcionarios
+    SET usuario_id = auth.uid()
+    WHERE email = v_user_email AND usuario_id IS NULL
+    RETURNING id INTO v_func_id;
+
+    -- If already linked, nothing more to do
+    IF v_func_id IS NOT NULL THEN
+        RETURN;
+    END IF;
+
+    -- Check if the user is already linked (email match but usuario_id already set)
+    SELECT id INTO v_func_id
+    FROM public.funcionarios
+    WHERE usuario_id = auth.uid()
+    LIMIT 1;
+
+    -- If still not found, try funcionarios_detalhes (which has an email column)
+    IF v_func_id IS NULL THEN
+        SELECT funcionario_id INTO v_func_id
+        FROM public.funcionarios_detalhes
+        WHERE email = v_user_email
+        LIMIT 1;
+
+        IF v_func_id IS NOT NULL THEN
+            -- Attempt to link in the funcionarios table by id
+            UPDATE public.funcionarios
+            SET usuario_id = auth.uid()
+            WHERE id = v_func_id AND usuario_id IS NULL;
+        END IF;
+    END IF;
+END;
+$$;
+
+
+--
+-- Name: log_can_approve_quotes_change(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.log_can_approve_quotes_change() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  IF NEW.can_approve_quotes IS DISTINCT FROM OLD.can_approve_quotes THEN
+    INSERT INTO public.logs_auditoria (
+      tabela, operacao, registro_id, usuario_id,
+      dados_anteriores, dados_novos, observacao
+    )
+    VALUES (
+      'usuarios',
+      'UPDATE',
+      NEW.id,
+      auth.uid(),
+      jsonb_build_object(
+        'can_approve_quotes', OLD.can_approve_quotes,
+        'nome', OLD.nome,
+        'email', OLD.email
+      ),
+      jsonb_build_object(
+        'can_approve_quotes', NEW.can_approve_quotes,
+        'nome', NEW.nome,
+        'email', NEW.email
+      ),
+      CASE
+        WHEN NEW.can_approve_quotes THEN 'Permissao de aprovacao de orcamento concedida'
+        ELSE 'Permissao de aprovacao de orcamento revogada'
+      END
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: normalize_orcamento_status(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.normalize_orcamento_status() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF NEW.status = 'aprovado_financeiro' THEN
+    NEW.status := 'Orçamento Aprovado';
+  ELSIF NEW.status = 'aprovado_cliente' THEN
+    NEW.status := 'Aprovação Financeira';
+    NEW.requer_revisao_financeira := true;
+    NEW.aprovado_cliente_em := COALESCE(NEW.aprovado_cliente_em, now());
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: processar_retorno_bancario(text, text, text, jsonb, boolean); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.processar_retorno_bancario(p_nome_arquivo text, p_hash text, p_conta text, p_registros jsonb, p_forcar boolean DEFAULT false) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  v_arquivo_id     uuid;
+  v_reg            jsonb;
+  v_boleto         public.boletos%ROWTYPE;
+  v_transacao_id   uuid;
+  v_aplicados      integer := 0;
+  v_divergentes    integer := 0;
+  v_nao_encontrados integer := 0;
+BEGIN
+  IF p_registros IS NULL OR jsonb_typeof(p_registros) <> 'array' THEN
+    RAISE EXCEPTION 'p_registros deve ser um array JSON.' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF NOT p_forcar AND EXISTS (SELECT 1 FROM public.retorno_bancario_arquivos WHERE hash_conteudo = p_hash) THEN
+    RAISE EXCEPTION 'Arquivo % já foi processado anteriormente (hash %). Use a opção de forçar reprocessamento se isso for intencional.', p_nome_arquivo, p_hash
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  INSERT INTO public.retorno_bancario_arquivos (nome_arquivo, hash_conteudo, conta, processado_por, forcado, total_registros)
+  VALUES (p_nome_arquivo, p_hash, p_conta, auth.uid(), p_forcar, jsonb_array_length(p_registros))
+  RETURNING id INTO v_arquivo_id;
+
+  FOR v_reg IN SELECT * FROM jsonb_array_elements(p_registros)
+  LOOP
+    SELECT * INTO v_boleto FROM public.boletos WHERE nosso_numero = v_reg->>'nosso_numero' LIMIT 1;
+
+    IF NOT FOUND THEN
+      INSERT INTO public.retorno_bancario_registros
+        (arquivo_id, nosso_numero, valor_recebido, data_pagamento, ocorrencia_codigo, status_aplicacao)
+      VALUES
+        (v_arquivo_id, v_reg->>'nosso_numero', (v_reg->>'valor_recebido')::numeric, (v_reg->>'data_pagamento')::date, v_reg->>'ocorrencia_codigo', 'nao_encontrado');
+      v_nao_encontrados := v_nao_encontrados + 1;
+      CONTINUE;
+    END IF;
+
+    IF coalesce((v_reg->>'valor_recebido')::numeric, 0) <> coalesce(v_boleto.valor, 0) THEN
+      INSERT INTO public.retorno_bancario_registros
+        (arquivo_id, nosso_numero, boleto_id, parcela_id, valor_esperado, valor_recebido, data_pagamento, ocorrencia_codigo, status_aplicacao, motivo_divergencia)
+      VALUES
+        (v_arquivo_id, v_reg->>'nosso_numero', v_boleto.id, v_boleto.parcela_id, v_boleto.valor, (v_reg->>'valor_recebido')::numeric, (v_reg->>'data_pagamento')::date, v_reg->>'ocorrencia_codigo', 'divergente', 'Valor recebido difere do valor esperado do boleto.');
+      v_divergentes := v_divergentes + 1;
+      CONTINUE;
+    END IF;
+
+    UPDATE public.boletos
+    SET status = 'pago',
+        valor_pago = (v_reg->>'valor_recebido')::numeric,
+        data_pagamento = (v_reg->>'data_pagamento')::date
+    WHERE id = v_boleto.id;
+
+    IF v_boleto.parcela_id IS NOT NULL THEN
+      UPDATE public.projeto_parcelas
+      SET status = 'paga'::public.parcela_status,
+          valor_pago = (v_reg->>'valor_recebido')::numeric,
+          data_pagamento = (v_reg->>'data_pagamento')::date
+      WHERE id = v_boleto.parcela_id;
+    END IF;
+
+    INSERT INTO public.transacoes (parcela_id, tipo, descricao, valor, data_transacao, vl_pago, dt_pagamento, status_pago, created_by)
+    VALUES (
+      v_boleto.parcela_id,
+      'receita'::public.transacao_tipo,
+      'Recebimento boleto ' || v_boleto.nosso_numero,
+      v_boleto.valor,
+      (v_reg->>'data_pagamento')::date,
+      (v_reg->>'valor_recebido')::numeric,
+      (v_reg->>'data_pagamento')::date,
+      1,
+      auth.uid()
+    )
+    RETURNING id INTO v_transacao_id;
+
+    IF v_boleto.parcela_id IS NOT NULL THEN
+      UPDATE public.projeto_parcelas
+      SET transacao_id = v_transacao_id
+      WHERE id = v_boleto.parcela_id;
+    END IF;
+
+    INSERT INTO public.retorno_bancario_registros
+      (arquivo_id, nosso_numero, boleto_id, parcela_id, transacao_id, valor_esperado, valor_recebido, data_pagamento, ocorrencia_codigo, status_aplicacao)
+    VALUES
+      (v_arquivo_id, v_reg->>'nosso_numero', v_boleto.id, v_boleto.parcela_id, v_transacao_id, v_boleto.valor, (v_reg->>'valor_recebido')::numeric, (v_reg->>'data_pagamento')::date, v_reg->>'ocorrencia_codigo', 'aplicado');
+    v_aplicados := v_aplicados + 1;
+  END LOOP;
+
+  UPDATE public.retorno_bancario_arquivos
+  SET total_aplicados = v_aplicados, total_divergentes = v_divergentes, total_nao_encontrados = v_nao_encontrados
+  WHERE id = v_arquivo_id;
+
+  RETURN jsonb_build_object(
+    'arquivo_id', v_arquivo_id,
+    'aplicados', v_aplicados,
+    'divergentes', v_divergentes,
+    'nao_encontrados', v_nao_encontrados
+  );
+END;
+$$;
+
+
+--
+-- Name: FUNCTION processar_retorno_bancario(p_nome_arquivo text, p_hash text, p_conta text, p_registros jsonb, p_forcar boolean); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.processar_retorno_bancario(p_nome_arquivo text, p_hash text, p_conta text, p_registros jsonb, p_forcar boolean) IS 'SPEC-008. Aplica lote de retorno CNAB: baixa boleto/parcela + lanca transacao quando valor confere; marca divergente sem alterar nada quando nao confere; marca nao_encontrado quando nosso_numero nao existe. Bloqueia reprocessamento do mesmo hash salvo p_forcar=true.';
+
+
+--
 -- Name: propagate_contato_nome(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1608,6 +3394,164 @@ $$;
 
 
 --
+-- Name: registrar_devolucao_projeto_item(uuid, numeric, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.registrar_devolucao_projeto_item(p_projeto_item_id uuid, p_quantidade numeric, p_motivo text DEFAULT NULL::text) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+    v_saldo             public.estoque_saldos_projeto_item%ROWTYPE;
+    v_produto_id        uuid;
+    v_de_entrega_futura numeric(10,3);
+    v_de_reserva        numeric(10,3);
+    v_de_entregue       numeric(10,3);
+    v_restante          numeric(10,3);
+    v_status            text;
+    v_devolucao_id      uuid;
+BEGIN
+    IF p_quantidade IS NULL OR p_quantidade <= 0 THEN
+        RAISE EXCEPTION 'Quantidade deve ser maior que zero.' USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT produto_id INTO v_produto_id FROM public.projeto_itens WHERE id = p_projeto_item_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Item de projeto % nao encontrado.', p_projeto_item_id USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT * INTO v_saldo
+    FROM public.estoque_saldos_projeto_item
+    WHERE projeto_item_id = p_projeto_item_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Item de projeto % nao possui saldo operacional (estoque_saldos_projeto_item).', p_projeto_item_id USING ERRCODE = 'P0001';
+    END IF;
+
+    IF p_quantidade > (v_saldo.q_entrega_futura + v_saldo.q_reserva + v_saldo.q_entregue) THEN
+        RAISE EXCEPTION 'Quantidade de devolucao (%) excede o total disponivel para devolver (entrega futura + reserva + entregue = %).',
+            p_quantidade, (v_saldo.q_entrega_futura + v_saldo.q_reserva + v_saldo.q_entregue) USING ERRCODE = 'P0001';
+    END IF;
+
+    v_de_entrega_futura := LEAST(p_quantidade, v_saldo.q_entrega_futura);
+    v_restante := p_quantidade - v_de_entrega_futura;
+    v_de_reserva := LEAST(v_restante, v_saldo.q_reserva);
+    v_restante := v_restante - v_de_reserva;
+    v_de_entregue := LEAST(v_restante, v_saldo.q_entregue);
+
+    UPDATE public.estoque_saldos_projeto_item
+    SET q_entrega_futura = q_entrega_futura - v_de_entrega_futura,
+        q_reserva = q_reserva - v_de_reserva,
+        q_entregue = q_entregue - v_de_entregue,
+        q_devolvida = q_devolvida + p_quantidade,
+        atualizado_em = now()
+    WHERE projeto_item_id = p_projeto_item_id;
+
+    -- RN-08: estoque_itens.quantidade_reservada so eh reduzido pela parte que
+    -- estava em saldo aberto (entrega futura ou reserva); devolucao de entregue
+    -- depende de coleta/entrada fisica, tratada em fluxo logistico proprio.
+    IF (v_de_entrega_futura + v_de_reserva) > 0 AND v_produto_id IS NOT NULL THEN
+        UPDATE public.estoque_itens
+        SET quantidade_reservada = GREATEST(quantidade_reservada - (v_de_entrega_futura + v_de_reserva), 0)
+        WHERE produto_id = v_produto_id
+          AND local = 'Estoque'::public.estoque_local;
+    END IF;
+
+    v_status := CASE WHEN v_de_entregue > 0 THEN 'aguardando_coleta' ELSE 'registrada' END;
+
+    INSERT INTO public.devolucoes_estoque (
+        projeto_item_id, quantidade, qtd_de_entrega_futura, qtd_de_reserva, qtd_de_entregue,
+        status, motivo, solicitado_por
+    ) VALUES (
+        p_projeto_item_id, p_quantidade, v_de_entrega_futura, v_de_reserva, v_de_entregue,
+        v_status, p_motivo, auth.uid()
+    )
+    RETURNING id INTO v_devolucao_id;
+
+    INSERT INTO public.estoque_movimentos_projeto_item
+        (projeto_item_id, tipo, quantidade, origem, referencia_id, observacao, criado_por)
+    VALUES
+        (p_projeto_item_id, 'devolucao', p_quantidade, 'devolucao_estoque', v_devolucao_id, p_motivo, auth.uid());
+
+    RETURN jsonb_build_object(
+        'devolucao_id', v_devolucao_id,
+        'status', v_status,
+        'de_entrega_futura', v_de_entrega_futura,
+        'de_reserva', v_de_reserva,
+        'de_entregue', v_de_entregue
+    );
+END;
+$$;
+
+
+--
+-- Name: FUNCTION registrar_devolucao_projeto_item(p_projeto_item_id uuid, p_quantidade numeric, p_motivo text); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.registrar_devolucao_projeto_item(p_projeto_item_id uuid, p_quantidade numeric, p_motivo text) IS 'SPEC-015. Devolucao por projeto_item_id, reduzindo saldos na ordem q_entrega_futura -> q_reserva -> q_entregue. Nao altera projeto_itens.quantidade (Q. Venda). Devolucao que toca q_entregue fica aguardando_coleta.';
+
+
+--
+-- Name: replace_orcamento_itens(uuid, jsonb); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.replace_orcamento_itens(p_orcamento_id uuid, p_items jsonb) RETURNS integer
+    LANGUAGE plpgsql SECURITY DEFINER
+    AS $$
+DECLARE
+  inserted_count integer;
+BEGIN
+  DELETE FROM public.orcamento_itens WHERE orcamento_id = p_orcamento_id;
+
+  INSERT INTO public.orcamento_itens (
+    orcamento_id,
+    produto_id,
+    descricao,
+    quantidade,
+    preco_unitario,
+    desconto,
+    custom_id,
+    ordem,
+    sub_ordem,
+    item_pai_id,
+    peca_nova
+  )
+  SELECT
+    p_orcamento_id,
+    CASE
+      WHEN item->>'produto_id' IS NULL OR item->>'produto_id' = '' THEN NULL
+      ELSE (item->>'produto_id')::uuid
+    END,
+    NULLIF(item->>'descricao', ''),
+    (item->>'quantidade')::numeric,
+    (item->>'preco_unitario')::numeric,
+    (item->>'desconto')::numeric,
+    NULLIF(item->>'custom_id', ''),
+    CASE
+      WHEN item->>'ordem' IS NULL OR item->>'ordem' = '' THEN NULL
+      ELSE (item->>'ordem')::integer
+    END,
+    CASE
+      WHEN item->>'sub_ordem' IS NULL OR item->>'sub_ordem' = '' THEN NULL
+      ELSE (item->>'sub_ordem')::integer
+    END,
+    CASE
+      WHEN item->>'item_pai_id' IS NULL OR item->>'item_pai_id' = '' THEN NULL
+      ELSE (item->>'item_pai_id')::uuid
+    END,
+    COALESCE((item->>'peca_nova')::boolean, false)
+  FROM jsonb_array_elements(p_items) AS item
+  WHERE (item->>'produto_id' IS NOT NULL AND item->>'produto_id' != '')
+     OR NULLIF(item->>'descricao', '') IS NOT NULL;
+
+  GET DIAGNOSTICS inserted_count = ROW_COUNT;
+  RETURN inserted_count;
+END;
+$$;
+
+
+--
 -- Name: set_orcamento_numero(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1668,6 +3612,69 @@ $$;
 
 
 --
+-- Name: solicitar_transferencia_estoque(uuid, uuid, numeric, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.solicitar_transferencia_estoque(p_origem_projeto_item_id uuid, p_destino_projeto_item_id uuid, p_quantidade numeric, p_motivo text DEFAULT NULL::text) RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+    v_origem_produto  uuid;
+    v_destino_produto uuid;
+    v_origem_saldo    public.estoque_saldos_projeto_item%ROWTYPE;
+    v_transferencia_id uuid;
+BEGIN
+    IF p_quantidade IS NULL OR p_quantidade <= 0 THEN
+        RAISE EXCEPTION 'Quantidade deve ser maior que zero.' USING ERRCODE = 'P0001';
+    END IF;
+
+    IF p_origem_projeto_item_id = p_destino_projeto_item_id THEN
+        RAISE EXCEPTION 'Origem e destino nao podem ser o mesmo item de projeto.' USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT produto_id INTO v_origem_produto FROM public.projeto_itens WHERE id = p_origem_projeto_item_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Item de projeto de origem % nao encontrado.', p_origem_projeto_item_id USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT produto_id INTO v_destino_produto FROM public.projeto_itens WHERE id = p_destino_projeto_item_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Item de projeto de destino % nao encontrado.', p_destino_projeto_item_id USING ERRCODE = 'P0001';
+    END IF;
+
+    IF v_origem_produto IS DISTINCT FROM v_destino_produto THEN
+        RAISE EXCEPTION 'Origem e destino precisam ser do mesmo produto.' USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT * INTO v_origem_saldo
+    FROM public.estoque_saldos_projeto_item
+    WHERE projeto_item_id = p_origem_projeto_item_id;
+
+    IF NOT FOUND OR v_origem_saldo.q_reserva < p_quantidade THEN
+        RAISE EXCEPTION 'Origem nao tem q_reserva suficiente para a transferencia solicitada.' USING ERRCODE = 'P0001';
+    END IF;
+
+    INSERT INTO public.transferencias_estoque (
+        origem_projeto_item_id, destino_projeto_item_id, quantidade, motivo, solicitado_por
+    ) VALUES (
+        p_origem_projeto_item_id, p_destino_projeto_item_id, p_quantidade, p_motivo, auth.uid()
+    )
+    RETURNING id INTO v_transferencia_id;
+
+    RETURN jsonb_build_object('transferencia_id', v_transferencia_id, 'status', 'solicitada');
+END;
+$$;
+
+
+--
+-- Name: FUNCTION solicitar_transferencia_estoque(p_origem_projeto_item_id uuid, p_destino_projeto_item_id uuid, p_quantidade numeric, p_motivo text); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.solicitar_transferencia_estoque(p_origem_projeto_item_id uuid, p_destino_projeto_item_id uuid, p_quantidade numeric, p_motivo text) IS 'SPEC-011. Registra solicitacao de transferencia de q_reserva entre dois projeto_item_id do mesmo produto. Nao altera saldo ainda.';
+
+
+--
 -- Name: stats_datacenter(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1684,6 +3691,33 @@ BEGIN
     'marcas',      (SELECT COUNT(*) FROM marcas WHERE ativo = true),
     'ultima_sync', (SELECT MAX(created_at) FROM sync_history WHERE status = 'sucesso')
   );
+END;
+$$;
+
+
+--
+-- Name: sync_contact_type_on_budget(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.sync_contact_type_on_budget() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  IF NEW.cliente_id IS NOT NULL THEN
+    -- Update the tipo column on contatos to 'cliente'
+    UPDATE public.contatos
+    SET tipo = 'cliente'
+    WHERE id = NEW.cliente_id
+      AND tipo IS DISTINCT FROM 'cliente'::public.contato_tipo;
+
+    -- Also ensure the contato_tipos junction table has the 'cliente' entry
+    INSERT INTO public.contato_tipos (contato_id, tipo)
+    VALUES (NEW.cliente_id, 'cliente')
+    ON CONFLICT (contato_id, tipo) DO NOTHING;
+  END IF;
+
+  RETURN NEW;
 END;
 $$;
 
@@ -1788,6 +3822,20 @@ $$;
 
 
 --
+-- Name: trg_estoque_saldos_projeto_item_atualizado_em(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.trg_estoque_saldos_projeto_item_atualizado_em() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW.atualizado_em := now();
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: trigger_fechar_projeto(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1797,36 +3845,123 @@ CREATE FUNCTION public.trigger_fechar_projeto() RETURNS trigger
     AS $$
 DECLARE
   v_sinal RECORD;
+  v_item_entrega_futura RECORD;
 BEGIN
-  IF NEW.status = 'Entrega materiais'::public.projeto_status AND OLD.status <> 'Entrega materiais'::public.projeto_status THEN
+  IF NEW.status = 'Entrega materiais'::public.projeto_status
+     AND OLD.status <> 'Entrega materiais'::public.projeto_status THEN
 
-    -- 3a. Baixar estoque físico (local='Estoque') por produto
-    UPDATE estoque_itens ei
-    SET quantidade    = GREATEST(0, ei.quantidade - pi.quantidade),
-        atualizado_em = NOW()
-    FROM projeto_itens pi
+    SELECT pi.id AS projeto_item_id,
+           pi.descricao,
+           esp.q_entrega_futura
+      INTO v_item_entrega_futura
+    FROM estoque_saldos_projeto_item esp
+    JOIN projeto_itens pi ON pi.id = esp.projeto_item_id
     WHERE pi.projeto_id = NEW.id
-      AND pi.produto_id = ei.produto_id
+      AND esp.status_operacional = 'ativo'
+      AND esp.q_entrega_futura > 0
+    LIMIT 1;
+
+    IF FOUND THEN
+      RAISE EXCEPTION
+        'Projeto % possui item % com entrega futura pendente (%). Receba/reserve o material antes de entregar.',
+        NEW.codigo,
+        coalesce(v_item_entrega_futura.descricao, v_item_entrega_futura.projeto_item_id::text),
+        v_item_entrega_futura.q_entrega_futura
+        USING ERRCODE = 'P0001';
+    END IF;
+
+    -- 3a. Baixar estoque fisico (local='Estoque') pelo saldo coberto aberto
+    --     real do item. q_entrega_futura nao entra aqui; ela e bloqueada acima.
+    WITH aberto_por_produto AS (
+      SELECT pi.produto_id,
+             SUM(esp.q_reserva + esp.q_ag_separar + esp.q_separado) AS qtd_coberta
+      FROM estoque_saldos_projeto_item esp
+      JOIN projeto_itens pi ON pi.id = esp.projeto_item_id
+      WHERE pi.projeto_id = NEW.id
+        AND pi.produto_id IS NOT NULL
+        AND esp.status_operacional = 'ativo'
+      GROUP BY pi.produto_id
+    )
+    UPDATE estoque_itens ei
+    SET quantidade    = GREATEST(0, ei.quantidade - aberto.qtd_coberta),
+        atualizado_em = NOW()
+    FROM aberto_por_produto aberto
+    WHERE aberto.produto_id = ei.produto_id
       AND ei.local = 'Estoque'::public.estoque_local;
 
-    -- 3b. Zerar a reserva desse projeto
+    -- 3b. Zerar reserva usando o saldo aberto coberto real, nao a quantidade
+    --     original do item.
+    WITH aberto_por_produto AS (
+      SELECT pi.produto_id,
+             SUM(esp.q_reserva + esp.q_ag_separar + esp.q_separado) AS qtd_coberta
+      FROM estoque_saldos_projeto_item esp
+      JOIN projeto_itens pi ON pi.id = esp.projeto_item_id
+      WHERE pi.projeto_id = NEW.id
+        AND pi.produto_id IS NOT NULL
+        AND esp.status_operacional = 'ativo'
+      GROUP BY pi.produto_id
+    )
     UPDATE estoque_itens ei
-    SET quantidade    = GREATEST(0, ei.quantidade - pi.quantidade),
+    SET quantidade_reservada = GREATEST(0, ei.quantidade_reservada - aberto.qtd_coberta),
+        atualizado_em        = NOW()
+    FROM aberto_por_produto aberto
+    WHERE aberto.produto_id = ei.produto_id
+      AND ei.local = 'Estoque'::public.estoque_local;
+
+    -- 3b-legado. Compatibilidade com reservas antigas em local='Reservado'.
+    WITH aberto_por_produto AS (
+      SELECT pi.produto_id,
+             SUM(esp.q_reserva + esp.q_ag_separar + esp.q_separado) AS qtd_coberta
+      FROM estoque_saldos_projeto_item esp
+      JOIN projeto_itens pi ON pi.id = esp.projeto_item_id
+      WHERE pi.projeto_id = NEW.id
+        AND pi.produto_id IS NOT NULL
+        AND esp.status_operacional = 'ativo'
+      GROUP BY pi.produto_id
+    )
+    UPDATE estoque_itens ei
+    SET quantidade    = GREATEST(0, ei.quantidade - aberto.qtd_coberta),
         atualizado_em = NOW()
-    FROM projeto_itens pi
-    WHERE pi.projeto_id = NEW.id
-      AND pi.produto_id = ei.produto_id
+    FROM aberto_por_produto aberto
+    WHERE aberto.produto_id = ei.produto_id
       AND ei.local = 'Reservado'::public.estoque_local;
 
-    -- 3c. Marcar sinal como 'creditado' (cliente comprou)
+    -- 3b-saldo. Mover para q_entregue somente o saldo coberto aberto.
+    WITH antes AS (
+      SELECT esp.projeto_item_id,
+             (esp.q_reserva + esp.q_ag_separar + esp.q_separado) AS qtd_coberta
+      FROM estoque_saldos_projeto_item esp
+      JOIN projeto_itens pi ON pi.id = esp.projeto_item_id
+      WHERE pi.projeto_id = NEW.id
+        AND esp.status_operacional = 'ativo'
+    ),
+    entregues AS (
+      UPDATE estoque_saldos_projeto_item esp
+      SET q_entregue       = esp.q_entregue + antes.qtd_coberta,
+          q_reserva        = 0,
+          q_ag_separar     = 0,
+          q_separado       = 0
+      FROM antes
+      WHERE antes.projeto_item_id = esp.projeto_item_id
+        AND antes.qtd_coberta > 0
+      RETURNING esp.projeto_item_id
+    )
+    INSERT INTO estoque_movimentos_projeto_item (
+      projeto_item_id, tipo, quantidade, origem, observacao
+    )
+    SELECT e.projeto_item_id, 'entregue', antes.qtd_coberta, 'trigger_fechar_projeto',
+           'Entrega registrada no fechamento do projeto ' || NEW.codigo
+    FROM entregues e
+    JOIN antes ON antes.projeto_item_id = e.projeto_item_id;
+
+    -- 3c. Marcar sinal como 'creditado'.
     UPDATE projeto_sinal
     SET status     = 'creditado'::public.sinal_status,
         updated_at = NOW()
     WHERE projeto_id = NEW.id
       AND status = 'recebido'::public.sinal_status;
 
-    -- 3d. Criar separação automaticamente com os itens validados
-    --     (só cria se ainda não existe separação para esse projeto)
+    -- 3d. Criar separacao automaticamente com os itens validados.
     IF NOT EXISTS (
       SELECT 1 FROM separacoes
       WHERE projeto_id = NEW.id
@@ -1856,7 +3991,6 @@ BEGIN
       FROM projeto_itens pi, nova_sep
       WHERE pi.projeto_id = NEW.id
         AND pi.validado = true;
-
     END IF;
 
   END IF;
@@ -1932,58 +4066,6 @@ BEGIN
     RAISE EXCEPTION
       'Parcelas só podem ser criadas após o projeto estar em "Ajustes finais" ou "Finalizado". Status atual: %',
       v_status;
-  END IF;
-
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: trigger_reserva_estoque(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.trigger_reserva_estoque() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-BEGIN
-  -- Só age quando status MUDA para 'Proposta Sinal'
-  IF NEW.status = 'Proposta Sinal'::public.projeto_status AND OLD.status <> 'Proposta Sinal'::public.projeto_status THEN
-
-    -- Inserir ou somar na reserva de estoque para cada item do projeto
-    INSERT INTO estoque_itens (produto_id, local, quantidade, atualizado_por, atualizado_em)
-    SELECT
-      pi.produto_id,
-      'Reservado'::public.estoque_local,
-      pi.quantidade,
-      NEW.created_by,
-      NOW()
-    FROM projeto_itens pi
-    WHERE pi.projeto_id = NEW.id
-      AND pi.produto_id IS NOT NULL
-    ON CONFLICT (produto_id, local)
-    DO UPDATE SET
-      quantidade    = estoque_itens.quantidade + EXCLUDED.quantidade,
-      atualizado_em = NOW();
-
-  END IF;
-
-  -- Ao SAIR de 'Proposta Sinal' para trás (ex: cancelamento),
-  -- liberar a reserva
-  IF OLD.status = 'Proposta Sinal'::public.projeto_status
-     AND NEW.status NOT IN ('Proposta Sinal'::public.projeto_status,'Elaboração Orçamento'::public.projeto_status,
-                             'Informações necessárias'::public.projeto_status,'Projeto executivo'::public.projeto_status,
-                             'Entrega materiais'::public.projeto_status,'Ajustes finais'::public.projeto_status,'Finalizado'::public.projeto_status) THEN
-
-    UPDATE estoque_itens ei
-    SET quantidade = GREATEST(0, ei.quantidade - pi.quantidade),
-        atualizado_em = NOW()
-    FROM projeto_itens pi
-    WHERE pi.projeto_id = NEW.id
-      AND pi.produto_id = ei.produto_id
-      AND ei.local = 'Reservado'::public.estoque_local;
-
   END IF;
 
   RETURN NEW;
@@ -2291,6 +4373,13 @@ CREATE TABLE public.contatos (
 
 
 --
+-- Name: COLUMN contatos.razao_social; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.contatos.razao_social IS 'Razão social (nome jurídico) do cliente. Equivale ao campo rzCliente da planilha de importação. Diferente de nome (nome fantasia/comercial = nmCliente).';
+
+
+--
 -- Name: contatos_revisao; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2384,6 +4473,40 @@ CREATE TABLE public.departamentos (
     ativo boolean DEFAULT true NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL
 );
+
+
+--
+-- Name: devolucoes_estoque; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.devolucoes_estoque (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    projeto_item_id uuid NOT NULL,
+    quantidade numeric(10,3) NOT NULL,
+    qtd_de_entrega_futura numeric(10,3) DEFAULT 0 NOT NULL,
+    qtd_de_reserva numeric(10,3) DEFAULT 0 NOT NULL,
+    qtd_de_entregue numeric(10,3) DEFAULT 0 NOT NULL,
+    status text DEFAULT 'registrada'::text NOT NULL,
+    motivo text,
+    gera_credito_financeiro boolean,
+    solicitado_por uuid,
+    aprovado_por uuid,
+    criado_em timestamp with time zone DEFAULT now() NOT NULL,
+    aprovado_em timestamp with time zone,
+    cancelado_em timestamp with time zone,
+    CONSTRAINT devolucoes_estoque_qtd_de_entrega_futura_check CHECK ((qtd_de_entrega_futura >= (0)::numeric)),
+    CONSTRAINT devolucoes_estoque_qtd_de_entregue_check CHECK ((qtd_de_entregue >= (0)::numeric)),
+    CONSTRAINT devolucoes_estoque_qtd_de_reserva_check CHECK ((qtd_de_reserva >= (0)::numeric)),
+    CONSTRAINT devolucoes_estoque_quantidade_check CHECK ((quantidade > (0)::numeric)),
+    CONSTRAINT devolucoes_estoque_status_check CHECK ((status = ANY (ARRAY['registrada'::text, 'aguardando_coleta'::text, 'coletada'::text, 'cancelada'::text])))
+);
+
+
+--
+-- Name: TABLE devolucoes_estoque; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.devolucoes_estoque IS 'SPEC-015. Devolucao por projeto_item_id, reduzindo saldos na ordem q_entrega_futura -> q_reserva -> q_entregue, preservando projeto_itens.quantidade (Q. Venda).';
 
 
 --
@@ -2515,7 +4638,7 @@ CREATE TABLE public.entregas (
 
 CREATE TABLE public.entregas_finalizadas (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
-    separacao_id text,
+    separacao_id uuid,
     cliente text,
     codigo_obra text,
     data_entrega_real timestamp with time zone,
@@ -2533,6 +4656,17 @@ CREATE TABLE public.entregas_finalizadas (
     gestora_equipe text,
     numero_entrega text,
     data_solicitacao timestamp with time zone
+);
+
+
+--
+-- Name: equipes_projetos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.equipes_projetos (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    equipes text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -2556,6 +4690,67 @@ CREATE TABLE public.estoque_itens (
 --
 
 COMMENT ON COLUMN public.estoque_itens.quantidade_reservada IS 'Quantidade comprometida com projetos aprovados, mas ainda presente fisicamente no local.';
+
+
+--
+-- Name: estoque_movimentos_projeto_item; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.estoque_movimentos_projeto_item (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    projeto_item_id uuid NOT NULL,
+    projeto_item_destino_id uuid,
+    tipo text NOT NULL,
+    quantidade numeric(10,3) NOT NULL,
+    origem text,
+    referencia_id uuid,
+    observacao text,
+    criado_por uuid,
+    criado_em timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT estoque_movimentos_projeto_item_quantidade_check CHECK ((quantidade > (0)::numeric)),
+    CONSTRAINT estoque_movimentos_projeto_item_tipo_check CHECK ((tipo = ANY (ARRAY['aprovacao_orcamento'::text, 'alocacao_reserva'::text, 'alocacao_entrega_futura'::text, 'transferencia_saida'::text, 'transferencia_entrada'::text, 'recebimento_para_reserva'::text, 'solicitacao_separacao'::text, 'separado'::text, 'entregue'::text, 'devolucao'::text, 'cancelamento'::text])))
+);
+
+
+--
+-- Name: TABLE estoque_movimentos_projeto_item; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.estoque_movimentos_projeto_item IS 'SPEC-010. Auditoria de cada movimento que altera estoque_saldos_projeto_item.';
+
+
+--
+-- Name: estoque_saldos_projeto_item; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.estoque_saldos_projeto_item (
+    projeto_item_id uuid NOT NULL,
+    q_reserva numeric(10,3) DEFAULT 0 NOT NULL,
+    q_entrega_futura numeric(10,3) DEFAULT 0 NOT NULL,
+    q_ag_separar numeric(10,3) DEFAULT 0 NOT NULL,
+    q_separado numeric(10,3) DEFAULT 0 NOT NULL,
+    q_entregue numeric(10,3) DEFAULT 0 NOT NULL,
+    q_devolvida numeric(10,3) DEFAULT 0 NOT NULL,
+    q_transferida_saida numeric(10,3) DEFAULT 0 NOT NULL,
+    status_operacional text DEFAULT 'ativo'::text NOT NULL,
+    criado_em timestamp with time zone DEFAULT now() NOT NULL,
+    atualizado_em timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT estoque_saldos_projeto_item_q_ag_separar_check CHECK ((q_ag_separar >= (0)::numeric)),
+    CONSTRAINT estoque_saldos_projeto_item_q_devolvida_check CHECK ((q_devolvida >= (0)::numeric)),
+    CONSTRAINT estoque_saldos_projeto_item_q_entrega_futura_check CHECK ((q_entrega_futura >= (0)::numeric)),
+    CONSTRAINT estoque_saldos_projeto_item_q_entregue_check CHECK ((q_entregue >= (0)::numeric)),
+    CONSTRAINT estoque_saldos_projeto_item_q_reserva_check CHECK ((q_reserva >= (0)::numeric)),
+    CONSTRAINT estoque_saldos_projeto_item_q_separado_check CHECK ((q_separado >= (0)::numeric)),
+    CONSTRAINT estoque_saldos_projeto_item_q_transferida_saida_check CHECK ((q_transferida_saida >= (0)::numeric)),
+    CONSTRAINT estoque_saldos_projeto_item_status_operacional_check CHECK ((status_operacional = ANY (ARRAY['ativo'::text, 'cancelado'::text, 'encerrado'::text])))
+);
+
+
+--
+-- Name: TABLE estoque_saldos_projeto_item; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.estoque_saldos_projeto_item IS 'SPEC-010. Saldo operacional vivo por projeto_itens.id. Cliente/projeto/orçamento/produto são lidos por relacionamento (ver vw_estoque_saldos_projeto_item), nunca duplicados aqui.';
 
 
 --
@@ -2659,6 +4854,7 @@ CREATE TABLE public.funcionarios (
     empresa_id uuid,
     codigo_legado integer,
     nm_connect text,
+    email text,
     CONSTRAINT funcionarios_status_check CHECK ((status = ANY (ARRAY['Ativo'::text, 'Inativo'::text, 'Afastado'::text, 'Ferias'::text]))),
     CONSTRAINT funcionarios_tipo_contratacao_check CHECK ((tipo_contratacao = ANY (ARRAY['CLT'::text, 'PJ'::text])))
 );
@@ -2702,7 +4898,8 @@ CREATE TABLE public.funcionarios_financeiro (
     salario_base numeric(12,2) DEFAULT 0 NOT NULL,
     salario_por_fora numeric(12,2) DEFAULT 0 NOT NULL,
     comissao_percentual numeric(5,2) DEFAULT 0,
-    salario_liquido numeric(12,2) GENERATED ALWAYS AS ((salario_base + salario_por_fora)) STORED
+    salario_liquido numeric(12,2) GENERATED ALWAYS AS ((salario_base + salario_por_fora)) STORED,
+    equipes_id uuid
 );
 
 
@@ -2716,21 +4913,6 @@ CREATE TABLE public.funcionarios_novo (
     cargo character varying(100),
     data_admissao date,
     ativo boolean DEFAULT true,
-    created_at timestamp with time zone DEFAULT now()
-);
-
-
---
--- Name: historico_status_orcamento; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.historico_status_orcamento (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    orcamento_id uuid NOT NULL,
-    status_anterior text,
-    status_novo text NOT NULL,
-    usuario text,
-    observacao text,
     created_at timestamp with time zone DEFAULT now()
 );
 
@@ -2899,7 +5081,10 @@ CREATE TABLE public.orcamento_itens (
     item_pai_id uuid,
     created_at timestamp with time zone DEFAULT now(),
     custom_id text,
-    descricao text
+    descricao text,
+    ordem integer DEFAULT 0,
+    sub_ordem integer DEFAULT 0,
+    peca_nova boolean DEFAULT false
 );
 
 
@@ -2920,7 +5105,7 @@ CREATE TABLE public.orcamentos (
     cliente_id uuid,
     arquiteto_id uuid,
     vendedor_id uuid,
-    status text DEFAULT 'aguardando_aprovacao'::text,
+    status text DEFAULT 'rascunho'::text,
     data_emissao timestamp with time zone DEFAULT now(),
     validade date,
     valor_total numeric(12,2) DEFAULT 0,
@@ -2937,6 +5122,13 @@ CREATE TABLE public.orcamentos (
     prazo_pagamento_dias integer[],
     data_base_vencimento text DEFAULT 'aprovacao'::text,
     prazo_inicio_cobranca_dias integer,
+    requer_revisao_financeira boolean DEFAULT false,
+    enviado_cliente_em timestamp with time zone,
+    enviado_cliente_por uuid,
+    aprovado_cliente_em timestamp with time zone,
+    recusado_cliente_em timestamp with time zone,
+    motivo_recusa_cliente text,
+    token_aprovacao_cliente text,
     CONSTRAINT orcamentos_frete_coerencia_check CHECK (((frete_tipo IS NULL) OR ((frete_tipo = 'sem_frete'::text) AND (COALESCE(frete_valor, (0)::numeric) = (0)::numeric)) OR ((frete_tipo = 'com_frete'::text) AND (frete_valor > (0)::numeric)))),
     CONSTRAINT orcamentos_frete_tipo_check CHECK (((frete_tipo IS NULL) OR (frete_tipo = ANY (ARRAY['com_frete'::text, 'sem_frete'::text])))),
     CONSTRAINT orcamentos_prazo_inicio_cobranca_dias_check CHECK (((prazo_inicio_cobranca_dias IS NULL) OR (prazo_inicio_cobranca_dias >= 0)))
@@ -2948,6 +5140,48 @@ CREATE TABLE public.orcamentos (
 --
 
 COMMENT ON COLUMN public.orcamentos.empresa_id IS 'ÂNCORA: Define se a venda é Foco, Manoella ou Islight. Todo o fluxo financeiro e de estoque herdará este ID.';
+
+
+--
+-- Name: COLUMN orcamentos.enviado_cliente_em; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.orcamentos.enviado_cliente_em IS 'Quando o orçamento foi enviado ao cliente pela última vez';
+
+
+--
+-- Name: COLUMN orcamentos.enviado_cliente_por; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.orcamentos.enviado_cliente_por IS 'Usuário interno que enviou o orçamento ao cliente';
+
+
+--
+-- Name: COLUMN orcamentos.aprovado_cliente_em; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.orcamentos.aprovado_cliente_em IS 'Quando o cliente aprovou o orçamento';
+
+
+--
+-- Name: COLUMN orcamentos.recusado_cliente_em; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.orcamentos.recusado_cliente_em IS 'Quando o cliente recusou o orçamento (mais recente)';
+
+
+--
+-- Name: COLUMN orcamentos.motivo_recusa_cliente; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.orcamentos.motivo_recusa_cliente IS 'Motivo informado pelo cliente na recusa mais recente';
+
+
+--
+-- Name: COLUMN orcamentos.token_aprovacao_cliente; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.orcamentos.token_aprovacao_cliente IS 'Token de uso único para o link de aprovação do cliente';
 
 
 --
@@ -3301,6 +5535,60 @@ ALTER TABLE ONLY public.remessas FORCE ROW LEVEL SECURITY;
 --
 
 COMMENT ON TABLE public.remessas IS 'Registro de remessas de cobrança/títulos para pagamento';
+
+
+--
+-- Name: retorno_bancario_arquivos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.retorno_bancario_arquivos (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    nome_arquivo text NOT NULL,
+    hash_conteudo text NOT NULL,
+    conta text,
+    processado_por uuid,
+    processado_em timestamp with time zone DEFAULT now() NOT NULL,
+    total_registros integer DEFAULT 0 NOT NULL,
+    total_aplicados integer DEFAULT 0 NOT NULL,
+    total_divergentes integer DEFAULT 0 NOT NULL,
+    total_nao_encontrados integer DEFAULT 0 NOT NULL,
+    forcado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: TABLE retorno_bancario_arquivos; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.retorno_bancario_arquivos IS 'SPEC-008. Um registro por arquivo de retorno CNAB processado, com hash do conteudo para bloquear reprocessamento acidental.';
+
+
+--
+-- Name: retorno_bancario_registros; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.retorno_bancario_registros (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    arquivo_id uuid NOT NULL,
+    nosso_numero text NOT NULL,
+    boleto_id uuid,
+    parcela_id uuid,
+    transacao_id uuid,
+    valor_esperado numeric(12,2),
+    valor_recebido numeric(12,2),
+    data_pagamento date,
+    ocorrencia_codigo text,
+    status_aplicacao text NOT NULL,
+    motivo_divergencia text,
+    CONSTRAINT retorno_bancario_registros_status_aplicacao_check CHECK ((status_aplicacao = ANY (ARRAY['aplicado'::text, 'divergente'::text, 'nao_encontrado'::text, 'ja_processado'::text])))
+);
+
+
+--
+-- Name: TABLE retorno_bancario_registros; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.retorno_bancario_registros IS 'SPEC-008. Um registro por linha do CNAB de retorno, com o resultado da aplicacao contra boletos/projeto_parcelas.';
 
 
 --
@@ -3858,6 +6146,36 @@ COMMENT ON COLUMN public.transacoes.funcionario_id IS 'Funcionário relacionado 
 
 
 --
+-- Name: transferencias_estoque; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.transferencias_estoque (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    origem_projeto_item_id uuid NOT NULL,
+    destino_projeto_item_id uuid NOT NULL,
+    quantidade numeric(10,3) NOT NULL,
+    status text DEFAULT 'solicitada'::text NOT NULL,
+    motivo text,
+    solicitado_por uuid,
+    aprovado_por uuid,
+    solicitado_em timestamp with time zone DEFAULT now() NOT NULL,
+    aprovado_em timestamp with time zone,
+    cancelado_em timestamp with time zone,
+    motivo_cancelamento text,
+    CONSTRAINT transferencias_estoque_origem_destino_diff CHECK ((origem_projeto_item_id <> destino_projeto_item_id)),
+    CONSTRAINT transferencias_estoque_quantidade_check CHECK ((quantidade > (0)::numeric)),
+    CONSTRAINT transferencias_estoque_status_check CHECK ((status = ANY (ARRAY['solicitada'::text, 'aprovada'::text, 'cancelada'::text])))
+);
+
+
+--
+-- Name: TABLE transferencias_estoque; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.transferencias_estoque IS 'SPEC-011. Transferencia de cobertura fisica (q_reserva) entre dois projeto_item_id do mesmo produto.';
+
+
+--
 -- Name: user_roles_separacao; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3900,7 +6218,8 @@ CREATE TABLE public.usuarios (
     updated_at timestamp with time zone,
     onboarding_completado boolean DEFAULT false NOT NULL,
     empresa_id uuid,
-    telefone text
+    telefone text,
+    can_approve_quotes boolean DEFAULT false
 );
 
 
@@ -4017,6 +6336,35 @@ CREATE VIEW public.vw_catalogo_unificado AS
 
 
 --
+-- Name: vw_comissao_mensal; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.vw_comissao_mensal AS
+ SELECT fn.id AS funcionario_id,
+    fn.nome AS funcionario,
+    ep.id AS equipe_id,
+    ep.equipes AS equipe,
+    ff.comissao_percentual,
+    (date_trunc('month'::text, (p.data_entrada)::timestamp with time zone))::date AS mes,
+    count(p.id) AS total_projetos,
+    round(sum(p.valor_total), 2) AS valor_total_projetos,
+    round(sum(((p.valor_total * COALESCE(ff.comissao_percentual, (0)::numeric)) / 100.0)), 2) AS comissao_calculada
+   FROM (((public.projetos p
+     JOIN public.equipes_projetos ep ON ((ep.id = p.equipe_id)))
+     JOIN public.funcionarios_financeiro ff ON ((ff.equipes_id = ep.id)))
+     JOIN public.funcionarios_novo fn ON ((fn.id = ff.funcionario_id)))
+  WHERE ((p.valor_total > (0)::numeric) AND (p.data_entrada IS NOT NULL) AND (fn.ativo IS TRUE))
+  GROUP BY fn.id, fn.nome, ep.id, ep.equipes, ff.comissao_percentual, (date_trunc('month'::text, (p.data_entrada)::timestamp with time zone));
+
+
+--
+-- Name: VIEW vw_comissao_mensal; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.vw_comissao_mensal IS 'Comissão mensal por funcionário agrupada por data_entrada do projeto. Cada funcionário da equipe recebe sua própria % sobre o total da equipe no mês.';
+
+
+--
 -- Name: vw_conferencia_financeira; Type: VIEW; Schema: public; Owner: -
 --
 
@@ -4117,60 +6465,95 @@ COMMENT ON VIEW public.vw_dashboard_crm_fechamento IS 'Dashboard de fechamentos 
 -- Name: vw_detalhe_produto_estoque; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW public.vw_detalhe_produto_estoque AS
- SELECT p.id AS produto_id,
-    p.codigo_produto,
-    p.nome,
-    p.referencia,
-    p.sku,
-    p.unidade,
-    p.preco_custo,
-    p.porc_frete,
-    p.porc_despesas,
-    p.porc_bdi,
-    p.valor_venda,
-    p.ncm,
-    p.cst,
-    p.cest,
-    p.status_comercial,
-    p.ativo,
-    ei.local AS setor,
-    ei.quantidade AS qtd_atual,
-    ei.quantidade_reservada AS qtd_reserva,
-    (ei.quantidade - ei.quantidade_reservada) AS qtd_disponivel
-   FROM (public.produtos p
-     LEFT JOIN public.estoque_itens ei ON ((p.id = ei.produto_id)));
+CREATE VIEW public.vw_detalhe_produto_estoque WITH (security_invoker='true') AS
+ SELECT produto_id,
+    COALESCE(sum(quantidade), (0)::numeric) AS estoque_total,
+    COALESCE(sum((quantidade - COALESCE(quantidade_reservada, (0)::numeric))), (0)::numeric) AS estoque_disponivel,
+    COALESCE(sum(COALESCE(quantidade_reservada, (0)::numeric)), (0)::numeric) AS estoque_reservado
+   FROM public.estoque_itens
+  GROUP BY produto_id;
+
+
+--
+-- Name: vw_entrega_futura_projeto_item; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.vw_entrega_futura_projeto_item WITH (security_invoker='true') AS
+ SELECT esp.projeto_item_id,
+    pi.produto_id,
+    p.nome AS produto,
+    p.codigo_produto AS produto_codigo,
+    pi.projeto_id,
+    pr.codigo AS projeto_codigo,
+    pi.orcamento_id,
+    o.numero AS orcamento_numero,
+    COALESCE(o.cliente_id, pr.cliente_id, pr.client_id) AS cliente_id,
+    c.nome AS cliente,
+    pi.quantidade AS q_venda,
+    esp.q_entrega_futura,
+    esp.q_reserva,
+    esp.q_transferida_saida,
+    esp.atualizado_em
+   FROM (((((public.estoque_saldos_projeto_item esp
+     JOIN public.projeto_itens pi ON ((pi.id = esp.projeto_item_id)))
+     LEFT JOIN public.produtos p ON ((p.id = pi.produto_id)))
+     LEFT JOIN public.projetos pr ON ((pr.id = pi.projeto_id)))
+     LEFT JOIN public.orcamentos o ON ((o.id = pi.orcamento_id)))
+     LEFT JOIN public.contatos c ON ((c.id = COALESCE(o.cliente_id, pr.cliente_id, pr.client_id))))
+  WHERE ((esp.status_operacional = 'ativo'::text) AND (esp.q_entrega_futura > (0)::numeric))
+  ORDER BY p.nome, esp.atualizado_em;
+
+
+--
+-- Name: VIEW vw_entrega_futura_projeto_item; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.vw_entrega_futura_projeto_item IS 'SPEC-012. Saldo operacional detalhado por projeto_item_id sem cobertura fisica (q_entrega_futura > 0). SECURITY INVOKER.';
 
 
 --
 -- Name: vw_estoque_liquido; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW public.vw_estoque_liquido WITH (security_invoker='on') AS
- SELECT p.id AS produto_id,
-    p.nome AS produto,
-    p.sku,
-    m.nome AS marca,
-    p.categoria,
-    p.preco_custo,
-    p.preco_venda,
-    COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Estoque'::public.estoque_local)), (0)::numeric) AS qtd_fisico,
-    COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Reservado'::public.estoque_local)), (0)::numeric) AS qtd_reservado,
-    COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Showroom'::public.estoque_local)), (0)::numeric) AS qtd_showroom,
-    COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Em trânsito'::public.estoque_local)), (0)::numeric) AS qtd_em_transito,
-    GREATEST((0)::numeric, (COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Estoque'::public.estoque_local)), (0)::numeric) - COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Reservado'::public.estoque_local)), (0)::numeric))) AS qtd_disponivel,
+CREATE VIEW public.vw_estoque_liquido AS
+ WITH calc AS (
+         SELECT p.id AS produto_id,
+            p.nome AS produto,
+            p.sku,
+            m.nome AS marca,
+            p.categoria,
+            p.preco_custo,
+            p.preco_venda,
+            COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Estoque'::public.estoque_local)), (0)::numeric) AS qtd_fisico,
+            (COALESCE(sum(ei.quantidade_reservada) FILTER (WHERE (ei.local = 'Estoque'::public.estoque_local)), (0)::numeric) + COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Reservado'::public.estoque_local)), (0)::numeric)) AS qtd_reservado,
+            COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Showroom'::public.estoque_local)), (0)::numeric) AS qtd_showroom,
+            COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Em trânsito'::public.estoque_local)), (0)::numeric) AS qtd_em_transito
+           FROM ((public.produtos p
+             LEFT JOIN public.marcas m ON ((m.id = p.marca_id)))
+             LEFT JOIN public.estoque_itens ei ON ((ei.produto_id = p.id)))
+          WHERE (p.ativo = true)
+          GROUP BY p.id, p.nome, p.sku, m.nome, p.categoria, p.preco_custo, p.preco_venda
+        )
+ SELECT produto_id,
+    produto,
+    sku,
+    marca,
+    categoria,
+    preco_custo,
+    preco_venda,
+    qtd_fisico,
+    qtd_reservado,
+    qtd_showroom,
+    qtd_em_transito,
+    GREATEST((0)::numeric, (qtd_fisico - qtd_reservado)) AS qtd_disponivel,
         CASE
-            WHEN ((COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Estoque'::public.estoque_local)), (0)::numeric) - COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Reservado'::public.estoque_local)), (0)::numeric)) <= (0)::numeric) THEN 'critico'::text
-            WHEN ((COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Estoque'::public.estoque_local)), (0)::numeric) - COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Reservado'::public.estoque_local)), (0)::numeric)) <= (3)::numeric) THEN 'baixo'::text
-            ELSE 'ok'::text
+            WHEN (GREATEST((0)::numeric, (qtd_fisico - qtd_reservado)) = (0)::numeric) THEN 'critico'::text
+            WHEN (GREATEST((0)::numeric, (qtd_fisico - qtd_reservado)) <= (3)::numeric) THEN 'baixo'::text
+            ELSE 'normal'::text
         END AS alerta_estoque,
-    round((COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Estoque'::public.estoque_local)), (0)::numeric) * p.preco_venda), 2) AS valor_estoque_total,
-    round((COALESCE(sum(ei.quantidade) FILTER (WHERE (ei.local = 'Reservado'::public.estoque_local)), (0)::numeric) * p.preco_venda), 2) AS valor_reservado_total
-   FROM ((public.produtos p
-     LEFT JOIN public.marcas m ON ((m.id = p.marca_id)))
-     LEFT JOIN public.estoque_itens ei ON ((ei.produto_id = p.id)))
-  WHERE (p.ativo = true)
-  GROUP BY p.id, p.nome, p.sku, m.nome, p.categoria, p.preco_custo, p.preco_venda;
+    round((qtd_fisico * preco_venda), 2) AS valor_estoque_total,
+    round((qtd_reservado * preco_venda), 2) AS valor_reservado_total
+   FROM calc;
 
 
 --
@@ -4187,6 +6570,79 @@ CREATE VIEW public.vw_estoque_por_marca WITH (security_invoker='on') AS
      LEFT JOIN public.produtos p ON ((p.marca_id = m.id)))
      LEFT JOIN public.estoque_itens e ON ((e.produto_id = p.id)))
   GROUP BY m.id, m.nome;
+
+
+--
+-- Name: vw_estoque_saldos_projeto_item; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.vw_estoque_saldos_projeto_item WITH (security_invoker='true') AS
+ SELECT esp.projeto_item_id,
+    pi.projeto_id,
+    pi.orcamento_id,
+    pi.produto_id,
+    COALESCE(o.cliente_id, pr.cliente_id, pr.client_id) AS cliente_id,
+    p.nome AS produto,
+    p.codigo_produto AS produto_codigo,
+    pr.codigo AS projeto_codigo,
+    o.numero AS orcamento_numero,
+    pi.quantidade AS q_venda,
+    esp.q_reserva,
+    esp.q_entrega_futura,
+    esp.q_ag_separar,
+    esp.q_separado,
+    esp.q_entregue,
+    esp.q_devolvida,
+    esp.q_transferida_saida,
+    esp.status_operacional,
+    esp.atualizado_em
+   FROM ((((public.estoque_saldos_projeto_item esp
+     JOIN public.projeto_itens pi ON ((pi.id = esp.projeto_item_id)))
+     LEFT JOIN public.projetos pr ON ((pr.id = pi.projeto_id)))
+     LEFT JOIN public.orcamentos o ON ((o.id = pi.orcamento_id)))
+     LEFT JOIN public.produtos p ON ((p.id = pi.produto_id)));
+
+
+--
+-- Name: VIEW vw_estoque_saldos_projeto_item; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.vw_estoque_saldos_projeto_item IS 'SPEC-010. Saldo operacional detalhado por item de projeto, com produto/projeto/orcamento/cliente resolvidos por relacionamento. SECURITY INVOKER para respeitar RLS das tabelas base.';
+
+
+--
+-- Name: vw_estoque_por_produto_projeto; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.vw_estoque_por_produto_projeto WITH (security_invoker='true') AS
+ SELECT projeto_item_id,
+    projeto_id,
+    orcamento_id,
+    produto_id,
+    cliente_id,
+    produto,
+    produto_codigo,
+    projeto_codigo,
+    orcamento_numero,
+    q_venda,
+    q_reserva,
+    q_entrega_futura,
+    q_ag_separar,
+    q_separado,
+    q_entregue,
+    q_devolvida,
+    q_transferida_saida,
+    status_operacional,
+    atualizado_em
+   FROM public.vw_estoque_saldos_projeto_item
+  WHERE (status_operacional = 'ativo'::text);
+
+
+--
+-- Name: VIEW vw_estoque_por_produto_projeto; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.vw_estoque_por_produto_projeto IS 'SPEC-010. Mesma leitura de vw_estoque_saldos_projeto_item, filtrada aos saldos ativos. SECURITY INVOKER para respeitar RLS das tabelas base.';
 
 
 --
@@ -4213,6 +6669,37 @@ CREATE VIEW public.vw_estoque_produtos AS
      LEFT JOIN public.categorias_produto cp ON ((cp.id = p.categoria_id)))
   WHERE (p.ativo = true)
   ORDER BY p.nome;
+
+
+--
+-- Name: vw_estoque_resumo; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.vw_estoque_resumo WITH (security_invoker='true') AS
+ SELECT ei.produto_id,
+    p.nome AS produto,
+    p.codigo_produto AS produto_codigo,
+    ei.quantidade AS qtd_total,
+    COALESCE(comprometido.qtd_comprometida, (0)::numeric) AS qtd_comprometida,
+    (ei.quantidade - COALESCE(comprometido.qtd_comprometida, (0)::numeric)) AS qtd_disponivel,
+    COALESCE(comprometido.qtd_entrega_futura, (0)::numeric) AS qtd_entrega_futura
+   FROM ((public.estoque_itens ei
+     JOIN public.produtos p ON ((p.id = ei.produto_id)))
+     LEFT JOIN ( SELECT pi.produto_id,
+            sum((((esp.q_reserva + esp.q_entrega_futura) + esp.q_ag_separar) + esp.q_separado)) AS qtd_comprometida,
+            sum(esp.q_entrega_futura) AS qtd_entrega_futura
+           FROM (public.estoque_saldos_projeto_item esp
+             JOIN public.projeto_itens pi ON ((pi.id = esp.projeto_item_id)))
+          WHERE (esp.status_operacional = 'ativo'::text)
+          GROUP BY pi.produto_id) comprometido ON ((comprometido.produto_id = ei.produto_id)))
+  WHERE (ei.local = 'Estoque'::public.estoque_local);
+
+
+--
+-- Name: VIEW vw_estoque_resumo; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.vw_estoque_resumo IS 'SPEC-010. Resumo por produto: total fisico, comprometido e disponivel. SECURITY INVOKER para respeitar RLS das tabelas base.';
 
 
 --
@@ -4325,28 +6812,28 @@ CREATE VIEW public.vw_fornecedores_resumo AS
 --
 
 CREATE VIEW public.vw_funcionarios_completo AS
- SELECT f.id,
-    f.nome,
-    f.cargo,
-    f.data_admissao,
-    f.ativo,
+ SELECT fn.id,
+    fn.nome,
+    fn.cargo,
+    fn.ativo,
+    fn.data_admissao,
+    fn.created_at,
     fd.cpf,
     fd.rg,
     fd.data_nascimento,
-    fd.email,
-    fd.telefone,
     fd.endereco,
+    fd.telefone,
+    fd.email,
     ff.salario_base,
     ff.salario_por_fora,
-    ff.salario_liquido,
     ff.comissao_percentual,
+    ff.salario_liquido,
     fb.empresa,
     fb.valor_vt_dia
-   FROM (((public.funcionarios_novo f
-     LEFT JOIN public.funcionarios_detalhes fd ON ((f.id = fd.funcionario_id)))
-     LEFT JOIN public.funcionarios_financeiro ff ON ((f.id = ff.funcionario_id)))
-     LEFT JOIN public.funcionarios_beneficios_empresas fb ON ((f.id = fb.funcionario_id)))
-  ORDER BY f.id;
+   FROM (((public.funcionarios_novo fn
+     LEFT JOIN public.funcionarios_detalhes fd ON ((fd.funcionario_id = fn.id)))
+     LEFT JOIN public.funcionarios_financeiro ff ON ((ff.funcionario_id = fn.id)))
+     LEFT JOIN public.funcionarios_beneficios_empresas fb ON ((fb.funcionario_id = fn.id)));
 
 
 --
@@ -4389,6 +6876,72 @@ CREATE VIEW public.vw_logs_auditoria_recentes AS
 
 
 --
+-- Name: vw_necessidade_compra; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.vw_necessidade_compra WITH (security_invoker='true') AS
+ SELECT pi.produto_id,
+    p.nome AS produto,
+    p.codigo_produto AS produto_codigo,
+    COALESCE(ei.quantidade, (0)::numeric) AS qtd_fisica,
+    sum((((esp.q_reserva + esp.q_entrega_futura) + esp.q_ag_separar) + esp.q_separado)) AS qtd_comprometida,
+    sum(esp.q_entrega_futura) AS necessidade_compra,
+    (COALESCE(ei.quantidade, (0)::numeric) - sum((((esp.q_reserva + esp.q_entrega_futura) + esp.q_ag_separar) + esp.q_separado))) AS qtd_disponivel,
+    count(DISTINCT pi.projeto_id) FILTER (WHERE (esp.q_entrega_futura > (0)::numeric)) AS projetos_com_entrega_futura
+   FROM (((public.estoque_saldos_projeto_item esp
+     JOIN public.projeto_itens pi ON ((pi.id = esp.projeto_item_id)))
+     LEFT JOIN public.produtos p ON ((p.id = pi.produto_id)))
+     LEFT JOIN public.estoque_itens ei ON (((ei.produto_id = pi.produto_id) AND (ei.local = 'Estoque'::public.estoque_local))))
+  WHERE ((esp.status_operacional = 'ativo'::text) AND (pi.produto_id IS NOT NULL))
+  GROUP BY pi.produto_id, p.nome, p.codigo_produto, ei.quantidade
+ HAVING (sum(esp.q_entrega_futura) > (0)::numeric)
+  ORDER BY (sum(esp.q_entrega_futura)) DESC, p.nome;
+
+
+--
+-- Name: VIEW vw_necessidade_compra; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.vw_necessidade_compra IS 'SPEC-012. Deficit agregado por produto (soma de q_entrega_futura), sem vinculo fixo a cliente/projeto. SECURITY INVOKER.';
+
+
+--
+-- Name: vw_orcamentos_aprovacao_financeira_auditoria; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.vw_orcamentos_aprovacao_financeira_auditoria AS
+ SELECT o.id AS orcamento_id,
+    o.numero,
+    o.status,
+    o.projeto_id,
+    o.cliente_id,
+    o.valor_total,
+    o.requer_revisao_financeira,
+    o.aprovado_cliente_em,
+    count(DISTINCT pi.id) AS projeto_itens_por_orcamento,
+    count(DISTINCT pp.id) AS parcelas_por_orcamento,
+    count(DISTINCT b.id) AS boletos_por_orcamento,
+        CASE
+            WHEN (o.status = 'Aprovação Financeira'::text) THEN 'fila_financeira'::text
+            WHEN (o.status = 'Orçamento Aprovado'::text) THEN 'aprovado_final'::text
+            WHEN (o.status = ANY (ARRAY['aprovado_cliente'::text, 'aprovado'::text, 'aprovado_financeiro'::text])) THEN 'legado_revisar'::text
+            ELSE 'fora_fluxo_financeiro'::text
+        END AS classificacao_fluxo
+   FROM (((public.orcamentos o
+     LEFT JOIN public.projeto_itens pi ON ((pi.orcamento_id = o.id)))
+     LEFT JOIN public.projeto_parcelas pp ON ((pp.orcamento_id = o.id)))
+     LEFT JOIN public.boletos b ON ((b.orcamento_id = o.id)))
+  GROUP BY o.id, o.numero, o.status, o.projeto_id, o.cliente_id, o.valor_total, o.requer_revisao_financeira, o.aprovado_cliente_em;
+
+
+--
+-- Name: VIEW vw_orcamentos_aprovacao_financeira_auditoria; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.vw_orcamentos_aprovacao_financeira_auditoria IS 'Auditoria da SPEC-016 para classificar orcamentos por status e artefatos financeiros gerados por orcamento_id.';
+
+
+--
 -- Name: vw_produtos_estoque_detalhado; Type: VIEW; Schema: public; Owner: -
 --
 
@@ -4405,11 +6958,15 @@ CREATE VIEW public.vw_produtos_estoque_detalhado AS
                     WHEN ((estoque_itens.local)::text ~~* 'showroom%'::text) THEN estoque_itens.quantidade
                     ELSE (0)::numeric
                 END) AS qtd_showroom,
-            sum(
+            (sum(
+                CASE
+                    WHEN (estoque_itens.local = 'Estoque'::public.estoque_local) THEN COALESCE(estoque_itens.quantidade_reservada, (0)::numeric)
+                    ELSE (0)::numeric
+                END) + sum(
                 CASE
                     WHEN ((estoque_itens.local)::text ~~* 'reserva%'::text) THEN estoque_itens.quantidade
                     ELSE (0)::numeric
-                END) AS qtd_reserva,
+                END)) AS qtd_reserva,
             sum(
                 CASE
                     WHEN (((estoque_itens.local)::text ~~* 'separacao%'::text) OR ((estoque_itens.local)::text ~~* 'separação%'::text)) THEN estoque_itens.quantidade
@@ -4907,6 +7464,52 @@ CREATE VIEW public.vw_transacoes_completas AS
 
 
 --
+-- Name: vw_transferencias_estoque; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.vw_transferencias_estoque WITH (security_invoker='true') AS
+ SELECT t.id AS transferencia_id,
+    t.status,
+    pi_o.produto_id,
+    p.nome AS produto,
+    p.codigo_produto AS produto_codigo,
+    t.quantidade,
+    t.origem_projeto_item_id,
+    pr_o.codigo AS origem_projeto_codigo,
+    o_o.numero AS origem_orcamento_numero,
+    c_o.nome AS origem_cliente,
+    t.destino_projeto_item_id,
+    pr_d.codigo AS destino_projeto_codigo,
+    o_d.numero AS destino_orcamento_numero,
+    c_d.nome AS destino_cliente,
+    t.motivo,
+    t.solicitado_por,
+    t.aprovado_por,
+    t.solicitado_em,
+    t.aprovado_em,
+    t.cancelado_em,
+    t.motivo_cancelamento
+   FROM (((((((((public.transferencias_estoque t
+     JOIN public.projeto_itens pi_o ON ((pi_o.id = t.origem_projeto_item_id)))
+     JOIN public.projeto_itens pi_d ON ((pi_d.id = t.destino_projeto_item_id)))
+     LEFT JOIN public.produtos p ON ((p.id = pi_o.produto_id)))
+     LEFT JOIN public.projetos pr_o ON ((pr_o.id = pi_o.projeto_id)))
+     LEFT JOIN public.orcamentos o_o ON ((o_o.id = pi_o.orcamento_id)))
+     LEFT JOIN public.contatos c_o ON ((c_o.id = COALESCE(o_o.cliente_id, pr_o.cliente_id, pr_o.client_id))))
+     LEFT JOIN public.projetos pr_d ON ((pr_d.id = pi_d.projeto_id)))
+     LEFT JOIN public.orcamentos o_d ON ((o_d.id = pi_d.orcamento_id)))
+     LEFT JOIN public.contatos c_d ON ((c_d.id = COALESCE(o_d.cliente_id, pr_d.cliente_id, pr_d.client_id))))
+  ORDER BY t.solicitado_em DESC;
+
+
+--
+-- Name: VIEW vw_transferencias_estoque; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.vw_transferencias_estoque IS 'SPEC-011. Historico/pendencias de transferencia com produto/projeto/orcamento/cliente resolvidos por JOIN. SECURITY INVOKER.';
+
+
+--
 -- Name: vw_vendas_loja; Type: VIEW; Schema: public; Owner: -
 --
 
@@ -5016,6 +7619,14 @@ UNION ALL
 --
 
 ALTER TABLE ONLY public.revenda_ubiqua ALTER COLUMN id SET DEFAULT nextval('public.revenda_ubiqua_id_seq'::regclass);
+
+
+--
+-- Name: equipes_projetos Equipes_projetos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.equipes_projetos
+    ADD CONSTRAINT "Equipes_projetos_pkey" PRIMARY KEY (id);
 
 
 --
@@ -5187,6 +7798,14 @@ ALTER TABLE ONLY public.departamentos
 
 
 --
+-- Name: devolucoes_estoque devolucoes_estoque_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.devolucoes_estoque
+    ADD CONSTRAINT devolucoes_estoque_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: empresa_ubiqua empresa_ubiqua_cnpj_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5256,6 +7875,22 @@ ALTER TABLE ONLY public.estoque_itens
 
 ALTER TABLE ONLY public.estoque_itens
     ADD CONSTRAINT estoque_itens_produto_id_local_key UNIQUE (produto_id, local);
+
+
+--
+-- Name: estoque_movimentos_projeto_item estoque_movimentos_projeto_item_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.estoque_movimentos_projeto_item
+    ADD CONSTRAINT estoque_movimentos_projeto_item_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: estoque_saldos_projeto_item estoque_saldos_projeto_item_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.estoque_saldos_projeto_item
+    ADD CONSTRAINT estoque_saldos_projeto_item_pkey PRIMARY KEY (projeto_item_id);
 
 
 --
@@ -5368,14 +8003,6 @@ ALTER TABLE ONLY public.funcionarios_novo
 
 ALTER TABLE ONLY public.funcionarios
     ADD CONSTRAINT funcionarios_pkey PRIMARY KEY (id);
-
-
---
--- Name: historico_status_orcamento historico_status_orcamento_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.historico_status_orcamento
-    ADD CONSTRAINT historico_status_orcamento_pkey PRIMARY KEY (id);
 
 
 --
@@ -5659,6 +8286,22 @@ ALTER TABLE ONLY public.remessas
 
 
 --
+-- Name: retorno_bancario_arquivos retorno_bancario_arquivos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retorno_bancario_arquivos
+    ADD CONSTRAINT retorno_bancario_arquivos_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: retorno_bancario_registros retorno_bancario_registros_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retorno_bancario_registros
+    ADD CONSTRAINT retorno_bancario_registros_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: retornos_processados retornos_processados_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5736,6 +8379,14 @@ ALTER TABLE ONLY public.systems
 
 ALTER TABLE ONLY public.transacoes
     ADD CONSTRAINT transacoes_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: transferencias_estoque transferencias_estoque_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transferencias_estoque
+    ADD CONSTRAINT transferencias_estoque_pkey PRIMARY KEY (id);
 
 
 --
@@ -6028,6 +8679,41 @@ CREATE INDEX idx_custos_rec_created_by ON public.custos_recorrentes USING btree 
 
 
 --
+-- Name: idx_dev_projeto_item; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_dev_projeto_item ON public.devolucoes_estoque USING btree (projeto_item_id);
+
+
+--
+-- Name: idx_dev_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_dev_status ON public.devolucoes_estoque USING btree (status);
+
+
+--
+-- Name: idx_empi_projeto_item; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_empi_projeto_item ON public.estoque_movimentos_projeto_item USING btree (projeto_item_id);
+
+
+--
+-- Name: idx_empi_referencia; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_empi_referencia ON public.estoque_movimentos_projeto_item USING btree (referencia_id);
+
+
+--
+-- Name: idx_empi_tipo; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_empi_tipo ON public.estoque_movimentos_projeto_item USING btree (tipo);
+
+
+--
 -- Name: idx_entregas_data; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6060,6 +8746,13 @@ CREATE INDEX idx_entregas_separacao ON public.entregas USING btree (separacao_id
 --
 
 CREATE INDEX idx_entregas_status ON public.entregas USING btree (status);
+
+
+--
+-- Name: idx_esp_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_esp_status ON public.estoque_saldos_projeto_item USING btree (status_operacional);
 
 
 --
@@ -6221,20 +8914,6 @@ CREATE INDEX idx_funcionarios_financeiro_func_id ON public.funcionarios_financei
 --
 
 CREATE INDEX idx_funcionarios_nm_connect ON public.funcionarios USING btree (nm_connect);
-
-
---
--- Name: idx_historico_data; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_historico_data ON public.historico_status_orcamento USING btree (created_at DESC);
-
-
---
--- Name: idx_historico_orcamento; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_historico_orcamento ON public.historico_status_orcamento USING btree (orcamento_id);
 
 
 --
@@ -6406,6 +9085,20 @@ CREATE INDEX idx_notas_fiscais_orcamento_id ON public.notas_fiscais USING btree 
 
 
 --
+-- Name: idx_orcamento_itens_ordem; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_orcamento_itens_ordem ON public.orcamento_itens USING btree (ordem);
+
+
+--
+-- Name: idx_orcamento_itens_ordem_sub; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_orcamento_itens_ordem_sub ON public.orcamento_itens USING btree (ordem, sub_ordem);
+
+
+--
 -- Name: idx_orcamentos_cliente; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6438,6 +9131,13 @@ CREATE INDEX idx_orcamentos_numero ON public.orcamentos_revenda_ubiqua USING btr
 --
 
 CREATE INDEX idx_orcamentos_status ON public.orcamentos_revenda_ubiqua USING btree (status);
+
+
+--
+-- Name: idx_orcamentos_token_aprovacao; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_orcamentos_token_aprovacao ON public.orcamentos USING btree (token_aprovacao_cliente) WHERE (token_aprovacao_cliente IS NOT NULL);
 
 
 --
@@ -6728,6 +9428,13 @@ CREATE INDEX idx_projetos_empresa_status ON public.projetos USING btree (empresa
 
 
 --
+-- Name: idx_projetos_equipe_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_projetos_equipe_id ON public.projetos USING btree (equipe_id);
+
+
+--
 -- Name: idx_projetos_nivel; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6745,7 +9452,7 @@ CREATE INDEX idx_projetos_nome ON public.projetos USING gin (to_tsvector('portug
 -- Name: idx_projetos_resp_obra; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_projetos_resp_obra ON public.projetos USING btree (responsavel_obra_id);
+CREATE INDEX idx_projetos_resp_obra ON public.projetos USING btree (equipe_responsavel_obra_id);
 
 
 --
@@ -6753,6 +9460,13 @@ CREATE INDEX idx_projetos_resp_obra ON public.projetos USING btree (responsavel_
 --
 
 CREATE INDEX idx_projetos_responsavel ON public.projetos USING btree (responsavel_id);
+
+
+--
+-- Name: idx_projetos_responsavel_obra_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_projetos_responsavel_obra_id ON public.projetos USING btree (responsavel_obra_id);
 
 
 --
@@ -6767,6 +9481,20 @@ CREATE INDEX idx_projetos_status ON public.projetos USING btree (status);
 --
 
 CREATE INDEX idx_projetos_tipo_projeto ON public.projetos USING btree (((area_do_projeto ->> 'tipo'::text)));
+
+
+--
+-- Name: idx_rbr_arquivo; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_rbr_arquivo ON public.retorno_bancario_registros USING btree (arquivo_id);
+
+
+--
+-- Name: idx_rbr_nosso_numero; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_rbr_nosso_numero ON public.retorno_bancario_registros USING btree (nosso_numero);
 
 
 --
@@ -6795,6 +9523,13 @@ CREATE INDEX idx_remessas_status ON public.remessas USING btree (status);
 --
 
 CREATE INDEX idx_remessas_vencimento ON public.remessas USING btree (vencimento);
+
+
+--
+-- Name: idx_retorno_bancario_arquivos_hash; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_retorno_bancario_arquivos_hash ON public.retorno_bancario_arquivos USING btree (hash_conteudo);
 
 
 --
@@ -6830,6 +9565,13 @@ CREATE UNIQUE INDEX idx_revenda_ubiqua_referencia_unique ON public.revenda_ubiqu
 --
 
 CREATE INDEX idx_revenda_ubiqua_slug ON public.revenda_ubiqua USING btree (slug);
+
+
+--
+-- Name: idx_sep_arquivos_separacao_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_sep_arquivos_separacao_id ON public.separacao_arquivos USING btree (separacao_id);
 
 
 --
@@ -6970,6 +9712,27 @@ CREATE INDEX idx_sync_executado_por ON public.sync_history USING btree (executad
 --
 
 CREATE INDEX idx_sync_history_data ON public.sync_history USING btree (created_at DESC);
+
+
+--
+-- Name: idx_te_destino; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_te_destino ON public.transferencias_estoque USING btree (destino_projeto_item_id);
+
+
+--
+-- Name: idx_te_origem; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_te_origem ON public.transferencias_estoque USING btree (origem_projeto_item_id);
+
+
+--
+-- Name: idx_te_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_te_status ON public.transferencias_estoque USING btree (status) WHERE (status = 'solicitada'::text);
 
 
 --
@@ -7127,6 +9890,13 @@ CREATE UNIQUE INDEX projeto_parcelas_projeto_numero_legado_uniq ON public.projet
 
 
 --
+-- Name: uq_orcamentos_token_aprovacao_cliente; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uq_orcamentos_token_aprovacao_cliente ON public.orcamentos USING btree (token_aprovacao_cliente) WHERE (token_aprovacao_cliente IS NOT NULL);
+
+
+--
 -- Name: contas_bancarias contas_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -7204,6 +9974,13 @@ CREATE TRIGGER separacoes_updated_at BEFORE UPDATE ON public.separacoes FOR EACH
 
 
 --
+-- Name: estoque_saldos_projeto_item trg_atualizar_estoque_saldos_projeto_item; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_atualizar_estoque_saldos_projeto_item BEFORE UPDATE ON public.estoque_saldos_projeto_item FOR EACH ROW EXECUTE FUNCTION public.trg_estoque_saldos_projeto_item_atualizado_em();
+
+
+--
 -- Name: produtos trg_atualizar_preco_venda; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -7239,10 +10016,31 @@ CREATE TRIGGER trg_fornecedores_updated_at BEFORE UPDATE ON public.fornecedores 
 
 
 --
--- Name: projetos trg_gerenciar_fluxo_projeto; Type: TRIGGER; Schema: public; Owner: -
+-- Name: usuarios trg_log_can_approve_quotes; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER trg_gerenciar_fluxo_projeto AFTER UPDATE ON public.projetos FOR EACH ROW EXECUTE FUNCTION public.gerenciar_fluxo_projeto();
+CREATE TRIGGER trg_log_can_approve_quotes AFTER UPDATE OF can_approve_quotes ON public.usuarios FOR EACH ROW EXECUTE FUNCTION public.log_can_approve_quotes_change();
+
+
+--
+-- Name: orcamentos trg_normalize_orcamento_status; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_normalize_orcamento_status BEFORE INSERT OR UPDATE OF status ON public.orcamentos FOR EACH ROW EXECUTE FUNCTION public.normalize_orcamento_status();
+
+
+--
+-- Name: orcamento_itens trg_orcamento_item_workflow; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_orcamento_item_workflow AFTER INSERT ON public.orcamento_itens FOR EACH ROW EXECUTE FUNCTION public.handle_orcamento_item_workflow();
+
+
+--
+-- Name: orcamentos trg_orcamento_workflow; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_orcamento_workflow BEFORE INSERT OR UPDATE ON public.orcamentos FOR EACH ROW EXECUTE FUNCTION public.handle_orcamento_workflow();
 
 
 --
@@ -7295,13 +10093,6 @@ CREATE TRIGGER trg_remessas_updated_at BEFORE UPDATE ON public.remessas FOR EACH
 
 
 --
--- Name: projetos trg_reserva_estoque; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER trg_reserva_estoque AFTER UPDATE OF status ON public.projetos FOR EACH ROW EXECUTE FUNCTION public.trigger_reserva_estoque();
-
-
---
 -- Name: revenda_ubiqua trg_revenda_ubiqua_slug; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -7320,6 +10111,20 @@ CREATE TRIGGER trg_separacao_pronta AFTER UPDATE OF status, data_entrega ON publ
 --
 
 CREATE TRIGGER trg_set_projeto_itens_descricao BEFORE INSERT OR UPDATE ON public.projeto_itens FOR EACH ROW EXECUTE FUNCTION public.set_projeto_itens_descricao();
+
+
+--
+-- Name: orcamentos trg_sync_contact_type_on_budget; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_sync_contact_type_on_budget AFTER INSERT OR UPDATE OF cliente_id ON public.orcamentos FOR EACH ROW EXECUTE FUNCTION public.sync_contact_type_on_budget();
+
+
+--
+-- Name: projetos trg_sync_equipe_por_responsavel; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_sync_equipe_por_responsavel BEFORE INSERT OR UPDATE OF responsavel_nome ON public.projetos FOR EACH ROW EXECUTE FUNCTION public.fn_sync_equipe_por_responsavel();
 
 
 --
@@ -7358,6 +10163,13 @@ CREATE TRIGGER trg_track_reagendamento BEFORE UPDATE OF data_entrega ON public.s
 
 
 --
+-- Name: estoque_saldos_projeto_item trg_validar_saldo_projeto_item; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_validar_saldo_projeto_item BEFORE INSERT OR UPDATE ON public.estoque_saldos_projeto_item FOR EACH ROW EXECUTE FUNCTION public.fn_validar_saldo_projeto_item();
+
+
+--
 -- Name: orcamentos_revenda_ubiqua trigger_auto_numero_orcamento; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -7383,13 +10195,6 @@ CREATE TRIGGER trigger_revenda_ubiqua_updated_at BEFORE UPDATE ON public.revenda
 --
 
 CREATE TRIGGER trigger_set_orcamento_numero BEFORE INSERT ON public.orcamentos FOR EACH ROW EXECUTE FUNCTION public.set_orcamento_numero();
-
-
---
--- Name: projeto_parcelas update_parcelas_updated_at; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER update_parcelas_updated_at BEFORE UPDATE ON public.projeto_parcelas FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 
 --
@@ -7573,11 +10378,43 @@ ALTER TABLE ONLY public.custos_recorrentes_lancamentos
 
 
 --
+-- Name: devolucoes_estoque devolucoes_estoque_aprovado_por_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.devolucoes_estoque
+    ADD CONSTRAINT devolucoes_estoque_aprovado_por_fkey FOREIGN KEY (aprovado_por) REFERENCES auth.users(id);
+
+
+--
+-- Name: devolucoes_estoque devolucoes_estoque_projeto_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.devolucoes_estoque
+    ADD CONSTRAINT devolucoes_estoque_projeto_item_id_fkey FOREIGN KEY (projeto_item_id) REFERENCES public.projeto_itens(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: devolucoes_estoque devolucoes_estoque_solicitado_por_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.devolucoes_estoque
+    ADD CONSTRAINT devolucoes_estoque_solicitado_por_fkey FOREIGN KEY (solicitado_por) REFERENCES auth.users(id);
+
+
+--
 -- Name: entregas entregas_entregador_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.entregas
     ADD CONSTRAINT entregas_entregador_id_fkey FOREIGN KEY (entregador_id) REFERENCES public.usuarios(id) ON DELETE SET NULL;
+
+
+--
+-- Name: entregas_finalizadas entregas_finalizadas_separacao_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.entregas_finalizadas
+    ADD CONSTRAINT entregas_finalizadas_separacao_id_fkey FOREIGN KEY (separacao_id) REFERENCES public.separacoes(id) ON DELETE SET NULL;
 
 
 --
@@ -7610,6 +10447,38 @@ ALTER TABLE ONLY public.estoque_itens
 
 ALTER TABLE ONLY public.estoque_itens
     ADD CONSTRAINT estoque_itens_produto_id_fkey FOREIGN KEY (produto_id) REFERENCES public.produtos(id) ON DELETE CASCADE;
+
+
+--
+-- Name: estoque_movimentos_projeto_item estoque_movimentos_projeto_item_criado_por_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.estoque_movimentos_projeto_item
+    ADD CONSTRAINT estoque_movimentos_projeto_item_criado_por_fkey FOREIGN KEY (criado_por) REFERENCES auth.users(id);
+
+
+--
+-- Name: estoque_movimentos_projeto_item estoque_movimentos_projeto_item_projeto_item_destino_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.estoque_movimentos_projeto_item
+    ADD CONSTRAINT estoque_movimentos_projeto_item_projeto_item_destino_id_fkey FOREIGN KEY (projeto_item_destino_id) REFERENCES public.projeto_itens(id) ON DELETE SET NULL;
+
+
+--
+-- Name: estoque_movimentos_projeto_item estoque_movimentos_projeto_item_projeto_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.estoque_movimentos_projeto_item
+    ADD CONSTRAINT estoque_movimentos_projeto_item_projeto_item_id_fkey FOREIGN KEY (projeto_item_id) REFERENCES public.projeto_itens(id) ON DELETE CASCADE;
+
+
+--
+-- Name: estoque_saldos_projeto_item estoque_saldos_projeto_item_projeto_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.estoque_saldos_projeto_item
+    ADD CONSTRAINT estoque_saldos_projeto_item_projeto_item_id_fkey FOREIGN KEY (projeto_item_id) REFERENCES public.projeto_itens(id) ON DELETE CASCADE;
 
 
 --
@@ -7701,6 +10570,14 @@ ALTER TABLE ONLY public.funcionarios
 
 
 --
+-- Name: funcionarios_financeiro funcionarios_financeiro_equipes_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.funcionarios_financeiro
+    ADD CONSTRAINT funcionarios_financeiro_equipes_id_fkey FOREIGN KEY (equipes_id) REFERENCES public.equipes_projetos(id) ON DELETE SET NULL;
+
+
+--
 -- Name: funcionarios_financeiro funcionarios_financeiro_funcionario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -7714,14 +10591,6 @@ ALTER TABLE ONLY public.funcionarios_financeiro
 
 ALTER TABLE ONLY public.funcionarios
     ADD CONSTRAINT funcionarios_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id) ON DELETE SET NULL;
-
-
---
--- Name: historico_status_orcamento historico_status_orcamento_orcamento_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.historico_status_orcamento
-    ADD CONSTRAINT historico_status_orcamento_orcamento_id_fkey FOREIGN KEY (orcamento_id) REFERENCES public.orcamentos_revenda_ubiqua(id) ON DELETE CASCADE;
 
 
 --
@@ -7858,6 +10727,14 @@ ALTER TABLE ONLY public.orcamentos
 
 ALTER TABLE ONLY public.orcamentos
     ADD CONSTRAINT orcamentos_empresa_id_fkey FOREIGN KEY (empresa_id) REFERENCES public.empresas(id);
+
+
+--
+-- Name: orcamentos orcamentos_enviado_cliente_por_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.orcamentos
+    ADD CONSTRAINT orcamentos_enviado_cliente_por_fkey FOREIGN KEY (enviado_cliente_por) REFERENCES auth.users(id);
 
 
 --
@@ -8053,6 +10930,22 @@ ALTER TABLE ONLY public.projetos
 
 
 --
+-- Name: projetos projetos_equipe_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projetos
+    ADD CONSTRAINT projetos_equipe_id_fkey FOREIGN KEY (equipe_id) REFERENCES public.equipes_projetos(id) ON DELETE SET NULL;
+
+
+--
+-- Name: projetos projetos_equipe_responsavel_obra_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projetos
+    ADD CONSTRAINT projetos_equipe_responsavel_obra_id_fkey FOREIGN KEY (equipe_responsavel_obra_id) REFERENCES public.equipes_projetos(id);
+
+
+--
 -- Name: projetos projetos_responsavel_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -8065,7 +10958,7 @@ ALTER TABLE ONLY public.projetos
 --
 
 ALTER TABLE ONLY public.projetos
-    ADD CONSTRAINT projetos_responsavel_obra_id_fkey FOREIGN KEY (responsavel_obra_id) REFERENCES public.contatos(id) ON DELETE SET NULL;
+    ADD CONSTRAINT projetos_responsavel_obra_id_fkey FOREIGN KEY (responsavel_obra_id) REFERENCES public.usuarios(id) ON DELETE SET NULL;
 
 
 --
@@ -8101,11 +10994,59 @@ ALTER TABLE ONLY public.remessas
 
 
 --
+-- Name: retorno_bancario_arquivos retorno_bancario_arquivos_processado_por_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retorno_bancario_arquivos
+    ADD CONSTRAINT retorno_bancario_arquivos_processado_por_fkey FOREIGN KEY (processado_por) REFERENCES public.usuarios(id);
+
+
+--
+-- Name: retorno_bancario_registros retorno_bancario_registros_arquivo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retorno_bancario_registros
+    ADD CONSTRAINT retorno_bancario_registros_arquivo_id_fkey FOREIGN KEY (arquivo_id) REFERENCES public.retorno_bancario_arquivos(id) ON DELETE CASCADE;
+
+
+--
+-- Name: retorno_bancario_registros retorno_bancario_registros_boleto_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retorno_bancario_registros
+    ADD CONSTRAINT retorno_bancario_registros_boleto_id_fkey FOREIGN KEY (boleto_id) REFERENCES public.boletos(id);
+
+
+--
+-- Name: retorno_bancario_registros retorno_bancario_registros_parcela_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retorno_bancario_registros
+    ADD CONSTRAINT retorno_bancario_registros_parcela_id_fkey FOREIGN KEY (parcela_id) REFERENCES public.projeto_parcelas(id);
+
+
+--
+-- Name: retorno_bancario_registros retorno_bancario_registros_transacao_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retorno_bancario_registros
+    ADD CONSTRAINT retorno_bancario_registros_transacao_id_fkey FOREIGN KEY (transacao_id) REFERENCES public.transacoes(id);
+
+
+--
 -- Name: retornos_processados retornos_processados_empresa_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.retornos_processados
     ADD CONSTRAINT retornos_processados_empresa_id_fkey FOREIGN KEY (empresa_id) REFERENCES public.empresas(id);
+
+
+--
+-- Name: separacao_arquivos separacao_arquivos_separacao_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.separacao_arquivos
+    ADD CONSTRAINT separacao_arquivos_separacao_id_fkey FOREIGN KEY (separacao_id) REFERENCES public.separacoes(id) ON DELETE CASCADE;
 
 
 --
@@ -8234,6 +11175,38 @@ ALTER TABLE ONLY public.transacoes
 
 ALTER TABLE ONLY public.transacoes
     ADD CONSTRAINT transacoes_projeto_id_fkey FOREIGN KEY (projeto_id) REFERENCES public.projetos(id) ON DELETE SET NULL;
+
+
+--
+-- Name: transferencias_estoque transferencias_estoque_aprovado_por_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transferencias_estoque
+    ADD CONSTRAINT transferencias_estoque_aprovado_por_fkey FOREIGN KEY (aprovado_por) REFERENCES auth.users(id);
+
+
+--
+-- Name: transferencias_estoque transferencias_estoque_destino_projeto_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transferencias_estoque
+    ADD CONSTRAINT transferencias_estoque_destino_projeto_item_id_fkey FOREIGN KEY (destino_projeto_item_id) REFERENCES public.projeto_itens(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: transferencias_estoque transferencias_estoque_origem_projeto_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transferencias_estoque
+    ADD CONSTRAINT transferencias_estoque_origem_projeto_item_id_fkey FOREIGN KEY (origem_projeto_item_id) REFERENCES public.projeto_itens(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: transferencias_estoque transferencias_estoque_solicitado_por_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transferencias_estoque
+    ADD CONSTRAINT transferencias_estoque_solicitado_por_fkey FOREIGN KEY (solicitado_por) REFERENCES auth.users(id);
 
 
 --
@@ -8415,17 +11388,17 @@ CREATE POLICY admin_all_logs ON public.logs_auditoria TO authenticated USING (pu
 
 
 --
+-- Name: systems admin_all_systems; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY admin_all_systems ON public.systems TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+
+--
 -- Name: user_system_access admin_all_usa; Type: POLICY; Schema: public; Owner: -
 --
 
 CREATE POLICY admin_all_usa ON public.user_system_access TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
-
-
---
--- Name: usuarios admin_all_usuarios; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY admin_all_usuarios ON public.usuarios TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 
 --
@@ -8461,6 +11434,13 @@ CREATE POLICY all_select_itens_orcamento_ubiqua ON public.itens_orcamento_ubiqua
 --
 
 CREATE POLICY all_select_orcamentos_revenda_ubiqua ON public.orcamentos_revenda_ubiqua FOR SELECT USING (true);
+
+
+--
+-- Name: orcamentos anon_can_read_orcamento_by_token; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY anon_can_read_orcamento_by_token ON public.orcamentos FOR SELECT TO authenticated, anon USING ((token_aprovacao_cliente IS NOT NULL));
 
 
 --
@@ -8681,6 +11661,13 @@ CREATE POLICY authenticated_delete_projetos ON public.projetos FOR DELETE TO aut
 
 
 --
+-- Name: projetos authenticated_delete_projetos_v2; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_delete_projetos_v2 ON public.projetos FOR DELETE TO authenticated USING (true);
+
+
+--
 -- Name: retornos_processados authenticated_delete_retornos; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -8692,6 +11679,13 @@ CREATE POLICY authenticated_delete_retornos ON public.retornos_processados FOR D
 --
 
 CREATE POLICY authenticated_delete_solicitacoes_compra ON public.solicitacoes_compra FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: transacoes authenticated_delete_transacoes; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_delete_transacoes ON public.transacoes FOR DELETE TO authenticated USING (true);
 
 
 --
@@ -8709,6 +11703,20 @@ CREATE POLICY authenticated_insert_boletos ON public.boletos FOR INSERT TO authe
 
 
 --
+-- Name: categorias_financeiras authenticated_insert_categorias_financeiras; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_insert_categorias_financeiras ON public.categorias_financeiras FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: contas_bancarias authenticated_insert_contas_bancarias; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_insert_contas_bancarias ON public.contas_bancarias FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
 -- Name: contatos authenticated_insert_contatos; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -8723,17 +11731,17 @@ CREATE POLICY authenticated_insert_estoque_itens ON public.estoque_itens FOR INS
 
 
 --
--- Name: historico_status_orcamento authenticated_insert_historico_status_orcamento; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY authenticated_insert_historico_status_orcamento ON public.historico_status_orcamento FOR INSERT TO authenticated WITH CHECK (true);
-
-
---
 -- Name: historico_status_orcamentos authenticated_insert_historico_status_orcamentos; Type: POLICY; Schema: public; Owner: -
 --
 
 CREATE POLICY authenticated_insert_historico_status_orcamentos ON public.historico_status_orcamentos FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: logs_auditoria authenticated_insert_logs_auditoria; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_insert_logs_auditoria ON public.logs_auditoria FOR INSERT TO authenticated WITH CHECK (true);
 
 
 --
@@ -8758,6 +11766,13 @@ CREATE POLICY authenticated_insert_orcamentos ON public.orcamentos FOR INSERT TO
 
 
 --
+-- Name: orcamentos authenticated_insert_orcamentos_approval; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_insert_orcamentos_approval ON public.orcamentos FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
 -- Name: produtos authenticated_insert_produtos; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -8765,10 +11780,24 @@ CREATE POLICY authenticated_insert_produtos ON public.produtos FOR INSERT TO aut
 
 
 --
+-- Name: projeto_parcelas authenticated_insert_projeto_parcelas; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_insert_projeto_parcelas ON public.projeto_parcelas FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
 -- Name: projetos authenticated_insert_projetos; Type: POLICY; Schema: public; Owner: -
 --
 
 CREATE POLICY authenticated_insert_projetos ON public.projetos FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: projetos authenticated_insert_projetos_v2; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_insert_projetos_v2 ON public.projetos FOR INSERT TO authenticated WITH CHECK (true);
 
 
 --
@@ -8786,6 +11815,13 @@ CREATE POLICY authenticated_insert_solicitacoes_compra ON public.solicitacoes_co
 
 
 --
+-- Name: transacoes authenticated_insert_transacoes; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_insert_transacoes ON public.transacoes FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
 -- Name: contatos authenticated_select; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -8800,10 +11836,45 @@ CREATE POLICY authenticated_select_boletos ON public.boletos FOR SELECT TO authe
 
 
 --
+-- Name: categorias_financeiras authenticated_select_categorias_financeiras; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_categorias_financeiras ON public.categorias_financeiras FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: categorias_produto authenticated_select_categorias_produto; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_categorias_produto ON public.categorias_produto FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: contas_bancarias authenticated_select_contas_bancarias; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_contas_bancarias ON public.contas_bancarias FOR SELECT TO authenticated USING (true);
+
+
+--
 -- Name: contatos authenticated_select_contatos; Type: POLICY; Schema: public; Owner: -
 --
 
 CREATE POLICY authenticated_select_contatos ON public.contatos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: contatos authenticated_select_contatos_financial; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_contatos_financial ON public.contatos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: devolucoes_estoque authenticated_select_devolucoes_estoque; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_devolucoes_estoque ON public.devolucoes_estoque FOR SELECT TO authenticated USING (true);
 
 
 --
@@ -8821,6 +11892,20 @@ CREATE POLICY authenticated_select_estoque_itens ON public.estoque_itens FOR SEL
 
 
 --
+-- Name: estoque_movimentos_projeto_item authenticated_select_estoque_movimentos_projeto_item; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_estoque_movimentos_projeto_item ON public.estoque_movimentos_projeto_item FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: estoque_saldos_projeto_item authenticated_select_estoque_saldos_projeto_item; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_estoque_saldos_projeto_item ON public.estoque_saldos_projeto_item FOR SELECT TO authenticated USING (true);
+
+
+--
 -- Name: funcionarios authenticated_select_funcionarios; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -8828,17 +11913,24 @@ CREATE POLICY authenticated_select_funcionarios ON public.funcionarios FOR SELEC
 
 
 --
--- Name: historico_status_orcamento authenticated_select_historico_status_orcamento; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY authenticated_select_historico_status_orcamento ON public.historico_status_orcamento FOR SELECT TO authenticated USING (true);
-
-
---
 -- Name: historico_status_orcamentos authenticated_select_historico_status_orcamentos; Type: POLICY; Schema: public; Owner: -
 --
 
 CREATE POLICY authenticated_select_historico_status_orcamentos ON public.historico_status_orcamentos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: logs_auditoria authenticated_select_logs_auditoria; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_logs_auditoria ON public.logs_auditoria FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: marcas authenticated_select_marcas; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_marcas ON public.marcas FOR SELECT TO authenticated USING (true);
 
 
 --
@@ -8856,10 +11948,31 @@ CREATE POLICY authenticated_select_orcamento_itens ON public.orcamento_itens FOR
 
 
 --
+-- Name: orcamento_itens authenticated_select_orcamento_itens_financial; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_orcamento_itens_financial ON public.orcamento_itens FOR SELECT TO authenticated USING (true);
+
+
+--
 -- Name: orcamentos authenticated_select_orcamentos; Type: POLICY; Schema: public; Owner: -
 --
 
 CREATE POLICY authenticated_select_orcamentos ON public.orcamentos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: orcamentos authenticated_select_orcamentos_approval; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_orcamentos_approval ON public.orcamentos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: orcamentos authenticated_select_orcamentos_financial; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_orcamentos_financial ON public.orcamentos FOR SELECT TO authenticated USING (true);
 
 
 --
@@ -8870,10 +11983,45 @@ CREATE POLICY authenticated_select_produtos ON public.produtos FOR SELECT TO aut
 
 
 --
+-- Name: projeto_parcelas authenticated_select_projeto_parcelas; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_projeto_parcelas ON public.projeto_parcelas FOR SELECT TO authenticated USING (true);
+
+
+--
 -- Name: projetos authenticated_select_projetos; Type: POLICY; Schema: public; Owner: -
 --
 
 CREATE POLICY authenticated_select_projetos ON public.projetos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: projetos authenticated_select_projetos_financial; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_projetos_financial ON public.projetos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: projetos authenticated_select_projetos_v2; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_projetos_v2 ON public.projetos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: retorno_bancario_arquivos authenticated_select_retorno_bancario_arquivos; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_retorno_bancario_arquivos ON public.retorno_bancario_arquivos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: retorno_bancario_registros authenticated_select_retorno_bancario_registros; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_retorno_bancario_registros ON public.retorno_bancario_registros FOR SELECT TO authenticated USING (true);
 
 
 --
@@ -8891,13 +12039,6 @@ CREATE POLICY authenticated_select_revenda ON public.revenda_ubiqua FOR SELECT T
 
 
 --
--- Name: usuarios authenticated_select_self; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY authenticated_select_self ON public.usuarios FOR SELECT TO authenticated USING ((auth.uid() = id));
-
-
---
 -- Name: solicitacoes_compra authenticated_select_solicitacoes_compra; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -8912,10 +12053,17 @@ CREATE POLICY authenticated_select_systems ON public.systems FOR SELECT TO authe
 
 
 --
--- Name: usuarios authenticated_select_usuarios; Type: POLICY; Schema: public; Owner: -
+-- Name: transacoes authenticated_select_transacoes; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY authenticated_select_usuarios ON public.usuarios FOR SELECT TO authenticated USING (true);
+CREATE POLICY authenticated_select_transacoes ON public.transacoes FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: transferencias_estoque authenticated_select_transferencias_estoque; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_select_transferencias_estoque ON public.transferencias_estoque FOR SELECT TO authenticated USING (true);
 
 
 --
@@ -8933,6 +12081,20 @@ CREATE POLICY authenticated_update_boletos ON public.boletos FOR UPDATE TO authe
 
 
 --
+-- Name: categorias_financeiras authenticated_update_categorias_financeiras; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_update_categorias_financeiras ON public.categorias_financeiras FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
+-- Name: contas_bancarias authenticated_update_contas_bancarias; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_update_contas_bancarias ON public.contas_bancarias FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
 -- Name: contatos authenticated_update_contatos; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -8944,6 +12106,13 @@ CREATE POLICY authenticated_update_contatos ON public.contatos FOR UPDATE TO aut
 --
 
 CREATE POLICY authenticated_update_estoque_itens ON public.estoque_itens FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
+-- Name: historico_status_orcamentos authenticated_update_historico_status_orcamentos; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_update_historico_status_orcamentos ON public.historico_status_orcamentos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 
 --
@@ -8968,6 +12137,13 @@ CREATE POLICY authenticated_update_orcamentos ON public.orcamentos FOR UPDATE TO
 
 
 --
+-- Name: orcamentos authenticated_update_orcamentos_approval; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_update_orcamentos_approval ON public.orcamentos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
 -- Name: orcamentos_revenda_ubiqua authenticated_update_orcamentos_revenda_ubiqua; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -8982,10 +12158,24 @@ CREATE POLICY authenticated_update_produtos ON public.produtos FOR UPDATE TO aut
 
 
 --
+-- Name: projeto_parcelas authenticated_update_projeto_parcelas; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_update_projeto_parcelas ON public.projeto_parcelas FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
 -- Name: projetos authenticated_update_projetos; Type: POLICY; Schema: public; Owner: -
 --
 
 CREATE POLICY authenticated_update_projetos ON public.projetos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
+-- Name: projetos authenticated_update_projetos_v2; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_update_projetos_v2 ON public.projetos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 
 --
@@ -9000,6 +12190,13 @@ CREATE POLICY authenticated_update_retornos ON public.retornos_processados FOR U
 --
 
 CREATE POLICY authenticated_update_solicitacoes_compra ON public.solicitacoes_compra FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
+-- Name: transacoes authenticated_update_transacoes; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY authenticated_update_transacoes ON public.transacoes FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 
 --
@@ -9217,6 +12414,34 @@ CREATE POLICY contatos_update ON public.contatos FOR UPDATE TO authenticated USI
 ALTER TABLE public.controle_falta ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: controle_falta controle_falta_delete; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY controle_falta_delete ON public.controle_falta FOR DELETE TO authenticated USING ((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])));
+
+
+--
+-- Name: controle_falta controle_falta_insert; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY controle_falta_insert ON public.controle_falta FOR INSERT TO authenticated WITH CHECK (((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = public.get_my_funcionario_id())));
+
+
+--
+-- Name: controle_falta controle_falta_select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY controle_falta_select ON public.controle_falta FOR SELECT TO authenticated USING (((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = public.get_my_funcionario_id())));
+
+
+--
+-- Name: controle_falta controle_falta_update; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY controle_falta_update ON public.controle_falta FOR UPDATE TO authenticated USING (((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = public.get_my_funcionario_id())));
+
+
+--
 -- Name: custos_recorrentes custos_rec_delete; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -9271,38 +12496,17 @@ ALTER TABLE public.custos_recorrentes_lancamentos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.departamentos ENABLE ROW LEVEL SECURITY;
 
 --
--- Name: departamentos dept_delete_admin; Type: POLICY; Schema: public; Owner: -
+-- Name: departamentos departamentos_select_all; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY dept_delete_admin ON public.departamentos FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role]))))));
+CREATE POLICY departamentos_select_all ON public.departamentos FOR SELECT TO authenticated USING (true);
 
 
 --
--- Name: departamentos dept_insert_admin; Type: POLICY; Schema: public; Owner: -
+-- Name: devolucoes_estoque; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
-CREATE POLICY dept_insert_admin ON public.departamentos FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role]))))));
-
-
---
--- Name: departamentos dept_select; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY dept_select ON public.departamentos FOR SELECT TO authenticated USING (true);
-
-
---
--- Name: departamentos dept_update_admin; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY dept_update_admin ON public.departamentos FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role]))))));
-
+ALTER TABLE public.devolucoes_estoque ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: empresa_ubiqua; Type: ROW SECURITY; Schema: public; Owner: -
@@ -9384,6 +12588,34 @@ CREATE POLICY empresas_update_auth ON public.empresas FOR UPDATE TO authenticate
 
 
 --
+-- Name: entregas_finalizadas ent_fin_delete_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY ent_fin_delete_auth ON public.entregas_finalizadas FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: entregas_finalizadas ent_fin_insert_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY ent_fin_insert_auth ON public.entregas_finalizadas FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: entregas_finalizadas ent_fin_select_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY ent_fin_select_auth ON public.entregas_finalizadas FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: entregas_finalizadas ent_fin_update_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY ent_fin_update_auth ON public.entregas_finalizadas FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
 -- Name: entregas; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -9412,6 +12644,34 @@ CREATE POLICY entregas_finalizadas_authenticated_all ON public.entregas_finaliza
 
 
 --
+-- Name: entregas_finalizadas entregas_finalizadas_delete; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY entregas_finalizadas_delete ON public.entregas_finalizadas FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: entregas_finalizadas entregas_finalizadas_insert; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY entregas_finalizadas_insert ON public.entregas_finalizadas FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: entregas_finalizadas entregas_finalizadas_select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY entregas_finalizadas_select ON public.entregas_finalizadas FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: entregas_finalizadas entregas_finalizadas_update; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY entregas_finalizadas_update ON public.entregas_finalizadas FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
 -- Name: entregas entregas_insert; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -9435,6 +12695,12 @@ CREATE POLICY entregas_update ON public.entregas FOR UPDATE TO authenticated USI
    FROM public.usuarios u
   WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role, 'operador'::public.usuario_role]))))));
 
+
+--
+-- Name: equipes_projetos; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.equipes_projetos ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: estoque_itens estoque_delete; Type: POLICY; Schema: public; Owner: -
@@ -9461,6 +12727,18 @@ CREATE POLICY estoque_insert ON public.estoque_itens FOR INSERT TO authenticated
 ALTER TABLE public.estoque_itens ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: estoque_movimentos_projeto_item; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.estoque_movimentos_projeto_item ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: estoque_saldos_projeto_item; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.estoque_saldos_projeto_item ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: estoque_itens estoque_select; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -9483,43 +12761,143 @@ CREATE POLICY estoque_update ON public.estoque_itens FOR UPDATE TO authenticated
 ALTER TABLE public.ferias ENABLE ROW LEVEL SECURITY;
 
 --
--- Name: ferias ferias_delete_admin; Type: POLICY; Schema: public; Owner: -
+-- Name: ferias ferias_delete; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY ferias_delete_admin ON public.ferias FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role]))))));
+CREATE POLICY ferias_delete ON public.ferias FOR DELETE TO authenticated USING ((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])));
 
 
 --
 -- Name: ferias ferias_insert; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY ferias_insert ON public.ferias FOR INSERT TO authenticated WITH CHECK (((funcionario_id IN ( SELECT funcionarios.id
-   FROM public.funcionarios
-  WHERE (funcionarios.usuario_id = ( SELECT auth.uid() AS uid)))) OR (EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role])))))));
+CREATE POLICY ferias_insert ON public.ferias FOR INSERT TO authenticated WITH CHECK (((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = public.get_my_funcionario_id())));
 
 
 --
 -- Name: ferias ferias_select; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY ferias_select ON public.ferias FOR SELECT TO authenticated USING (((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role]))))) OR (funcionario_id IN ( SELECT funcionarios.id
-   FROM public.funcionarios
-  WHERE (funcionarios.usuario_id = ( SELECT auth.uid() AS uid))))));
+CREATE POLICY ferias_select ON public.ferias FOR SELECT TO authenticated USING (((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = public.get_my_funcionario_id())));
 
 
 --
--- Name: ferias ferias_update_admin; Type: POLICY; Schema: public; Owner: -
+-- Name: ferias ferias_update; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY ferias_update_admin ON public.ferias FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role]))))));
+CREATE POLICY ferias_update ON public.ferias FOR UPDATE TO authenticated USING (((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = public.get_my_funcionario_id())));
+
+
+--
+-- Name: funcionarios_beneficios_empresas fn_ben_delete_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_ben_delete_auth ON public.funcionarios_beneficios_empresas FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: funcionarios_beneficios_empresas fn_ben_insert_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_ben_insert_auth ON public.funcionarios_beneficios_empresas FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: funcionarios_beneficios_empresas fn_ben_select_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_ben_select_auth ON public.funcionarios_beneficios_empresas FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: funcionarios_beneficios_empresas fn_ben_update_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_ben_update_auth ON public.funcionarios_beneficios_empresas FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
+-- Name: funcionarios_detalhes fn_det_delete_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_det_delete_auth ON public.funcionarios_detalhes FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: funcionarios_detalhes fn_det_insert_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_det_insert_auth ON public.funcionarios_detalhes FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: funcionarios_detalhes fn_det_select_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_det_select_auth ON public.funcionarios_detalhes FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: funcionarios_detalhes fn_det_update_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_det_update_auth ON public.funcionarios_detalhes FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
+-- Name: funcionarios_financeiro fn_fin_delete_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_fin_delete_auth ON public.funcionarios_financeiro FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: funcionarios_financeiro fn_fin_insert_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_fin_insert_auth ON public.funcionarios_financeiro FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: funcionarios_financeiro fn_fin_select_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_fin_select_auth ON public.funcionarios_financeiro FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: funcionarios_financeiro fn_fin_update_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_fin_update_auth ON public.funcionarios_financeiro FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
+-- Name: funcionarios_novo fn_novo_delete_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_novo_delete_auth ON public.funcionarios_novo FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: funcionarios_novo fn_novo_insert_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_novo_insert_auth ON public.funcionarios_novo FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: funcionarios_novo fn_novo_select_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_novo_select_auth ON public.funcionarios_novo FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: funcionarios_novo fn_novo_update_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY fn_novo_update_auth ON public.funcionarios_novo FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 
 --
@@ -9686,19 +13064,6 @@ ALTER TABLE public.funcionarios_novo ENABLE ROW LEVEL SECURITY;
 --
 
 CREATE POLICY funcionarios_novo_authenticated_all ON public.funcionarios_novo TO authenticated USING (true) WITH CHECK (true);
-
-
---
--- Name: historico_status_orcamento; Type: ROW SECURITY; Schema: public; Owner: -
---
-
-ALTER TABLE public.historico_status_orcamento ENABLE ROW LEVEL SECURITY;
-
---
--- Name: historico_status_orcamento historico_status_orcamento_authenticated_all; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY historico_status_orcamento_authenticated_all ON public.historico_status_orcamento TO authenticated USING (true) WITH CHECK (true);
 
 
 --
@@ -9892,7 +13257,7 @@ CREATE POLICY orcamento_itens_select ON public.orcamento_itens FOR SELECT TO aut
 -- Name: orcamento_itens orcamento_itens_update; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY orcamento_itens_update ON public.orcamento_itens FOR UPDATE TO authenticated USING (true);
+CREATE POLICY orcamento_itens_update ON public.orcamento_itens FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 
 --
@@ -9976,6 +13341,40 @@ CREATE POLICY parcelas_update ON public.projeto_parcelas FOR UPDATE TO authentic
 ALTER TABLE public.pedido_compra ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: periodos_aquisitivos periodos_aquis_delete; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY periodos_aquis_delete ON public.periodos_aquisitivos FOR DELETE TO authenticated USING ((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])));
+
+
+--
+-- Name: periodos_aquisitivos periodos_aquis_insert; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY periodos_aquis_insert ON public.periodos_aquisitivos FOR INSERT TO authenticated WITH CHECK ((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])));
+
+
+--
+-- Name: periodos_aquisitivos periodos_aquis_select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY periodos_aquis_select ON public.periodos_aquisitivos FOR SELECT TO authenticated USING (((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = public.get_my_funcionario_id())));
+
+
+--
+-- Name: periodos_aquisitivos periodos_aquis_update; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY periodos_aquis_update ON public.periodos_aquisitivos FOR UPDATE TO authenticated USING ((public.get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])));
+
+
+--
+-- Name: periodos_aquisitivos; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.periodos_aquisitivos ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: projeto_itens pi_delete_admin; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -10028,44 +13427,6 @@ CREATE POLICY plano_contas_write ON public.plano_de_contas TO service_role USING
 --
 
 ALTER TABLE public.plano_de_contas ENABLE ROW LEVEL SECURITY;
-
---
--- Name: controle_falta ponto_delete_admin; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY ponto_delete_admin ON public.controle_falta FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role]))))));
-
-
---
--- Name: controle_falta ponto_insert_admin; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY ponto_insert_admin ON public.controle_falta FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role]))))));
-
-
---
--- Name: controle_falta ponto_select; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY ponto_select ON public.controle_falta FOR SELECT TO authenticated USING (((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role]))))) OR (funcionario_id IN ( SELECT funcionarios.id
-   FROM public.funcionarios
-  WHERE (funcionarios.usuario_id = ( SELECT auth.uid() AS uid))))));
-
-
---
--- Name: controle_falta ponto_update_admin; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY ponto_update_admin ON public.controle_falta FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role]))))));
-
 
 --
 -- Name: produtos prod_delete; Type: POLICY; Schema: public; Owner: -
@@ -10258,6 +13619,18 @@ CREATE POLICY remessas_update_policy ON public.remessas FOR UPDATE USING (true) 
 
 
 --
+-- Name: retorno_bancario_arquivos; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.retorno_bancario_arquivos ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: retorno_bancario_registros; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.retorno_bancario_registros ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: retornos_processados; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -10324,6 +13697,48 @@ CREATE POLICY revenda_ubiqua_update ON public.revenda_ubiqua FOR UPDATE TO authe
 
 
 --
+-- Name: separacao_arquivos sep_arq_delete_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY sep_arq_delete_auth ON public.separacao_arquivos FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: separacao_arquivos sep_arq_insert_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY sep_arq_insert_auth ON public.separacao_arquivos FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: separacao_arquivos sep_arq_select_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY sep_arq_select_auth ON public.separacao_arquivos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: separacao_arquivos sep_arq_update_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY sep_arq_update_auth ON public.separacao_arquivos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
+-- Name: separacoes sep_delete_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY sep_delete_auth ON public.separacoes FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: separacoes sep_insert_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY sep_insert_auth ON public.separacoes FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
 -- Name: separacao_itens sep_itens_delete; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -10358,6 +13773,20 @@ CREATE POLICY sep_itens_update ON public.separacao_itens FOR UPDATE TO authentic
 
 
 --
+-- Name: separacoes sep_select_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY sep_select_auth ON public.separacoes FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: separacoes sep_update_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY sep_update_auth ON public.separacoes FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
 -- Name: separacao_arquivos; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -10368,6 +13797,34 @@ ALTER TABLE public.separacao_arquivos ENABLE ROW LEVEL SECURITY;
 --
 
 CREATE POLICY separacao_arquivos_authenticated_all ON public.separacao_arquivos TO authenticated USING (true) WITH CHECK (true);
+
+
+--
+-- Name: separacao_arquivos separacao_arquivos_delete; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY separacao_arquivos_delete ON public.separacao_arquivos FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: separacao_arquivos separacao_arquivos_insert; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY separacao_arquivos_insert ON public.separacao_arquivos FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: separacao_arquivos separacao_arquivos_select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY separacao_arquivos_select ON public.separacao_arquivos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: separacao_arquivos separacao_arquivos_update; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY separacao_arquivos_update ON public.separacao_arquivos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 
 --
@@ -10396,6 +13853,41 @@ CREATE POLICY separacoes_arquivos_authenticated_all ON public.separacoes_arquivo
 
 
 --
+-- Name: separacoes_arquivos separacoes_arquivos_delete; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY separacoes_arquivos_delete ON public.separacoes_arquivos FOR DELETE TO authenticated USING (true);
+
+
+--
+-- Name: separacoes_arquivos separacoes_arquivos_insert; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY separacoes_arquivos_insert ON public.separacoes_arquivos FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: separacoes_arquivos separacoes_arquivos_select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY separacoes_arquivos_select ON public.separacoes_arquivos FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: separacoes_arquivos separacoes_arquivos_update; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY separacoes_arquivos_update ON public.separacoes_arquivos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+
+
+--
+-- Name: separacoes separacoes_delete; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY separacoes_delete ON public.separacoes FOR DELETE TO authenticated USING (true);
+
+
+--
 -- Name: separacoes separacoes_delete_admin; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -10408,9 +13900,7 @@ CREATE POLICY separacoes_delete_admin ON public.separacoes FOR DELETE TO authent
 -- Name: separacoes separacoes_insert; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY separacoes_insert ON public.separacoes FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role, 'operador'::public.usuario_role]))))));
+CREATE POLICY separacoes_insert ON public.separacoes FOR INSERT TO authenticated WITH CHECK (true);
 
 
 --
@@ -10424,9 +13914,7 @@ CREATE POLICY separacoes_select ON public.separacoes FOR SELECT TO authenticated
 -- Name: separacoes separacoes_update; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY separacoes_update ON public.separacoes FOR UPDATE TO authenticated USING ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::public.usuario_role, 'gerente'::public.usuario_role, 'operador'::public.usuario_role]))))));
+CREATE POLICY separacoes_update ON public.separacoes FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 
 --
@@ -10542,6 +14030,12 @@ CREATE POLICY trans_update_admin ON public.transacoes FOR UPDATE TO authenticate
 ALTER TABLE public.transacoes ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: transferencias_estoque; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.transferencias_estoque ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: orcamentos_revenda_ubiqua update_orcamentos_revenda_ubiqua; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -10553,6 +14047,27 @@ CREATE POLICY update_orcamentos_revenda_ubiqua ON public.orcamentos_revenda_ubiq
 --
 
 CREATE POLICY user_insert_logs ON public.logs_auditoria FOR INSERT TO authenticated WITH CHECK ((usuario_id = auth.uid()));
+
+
+--
+-- Name: user_roles_separacao user_role_sep_insert_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY user_role_sep_insert_auth ON public.user_roles_separacao FOR INSERT TO authenticated WITH CHECK (true);
+
+
+--
+-- Name: user_roles_separacao user_role_sep_select_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY user_role_sep_select_auth ON public.user_roles_separacao FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: user_roles_separacao user_role_sep_update_auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY user_role_sep_update_auth ON public.user_roles_separacao FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 
 --
@@ -10584,25 +14099,21 @@ ALTER TABLE public.usuarios ENABLE ROW LEVEL SECURITY;
 -- Name: usuarios usuarios_delete_admin; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY usuarios_delete_admin ON public.usuarios FOR DELETE TO authenticated USING ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::public.usuario_role)))));
+CREATE POLICY usuarios_delete_admin ON public.usuarios FOR DELETE TO authenticated USING ((public.get_user_role() = 'admin'::text));
 
 
 --
--- Name: usuarios usuarios_insert_admin; Type: POLICY; Schema: public; Owner: -
+-- Name: usuarios usuarios_select_all; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY usuarios_insert_admin ON public.usuarios FOR INSERT TO authenticated WITH CHECK ((EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::public.usuario_role)))));
+CREATE POLICY usuarios_select_all ON public.usuarios FOR SELECT TO authenticated USING (true);
 
 
 --
--- Name: usuarios usuarios_select_own; Type: POLICY; Schema: public; Owner: -
+-- Name: usuarios usuarios_select_own_or_funcionario; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY usuarios_select_own ON public.usuarios FOR SELECT TO authenticated USING (true);
+CREATE POLICY usuarios_select_own_or_funcionario ON public.usuarios FOR SELECT TO authenticated USING (((id = auth.uid()) OR public.current_user_is_funcionario()));
 
 
 --
@@ -10643,9 +14154,7 @@ CREATE POLICY usuarios_ubiqua_update ON public.usuarios_ubiqua FOR UPDATE TO aut
 -- Name: usuarios usuarios_update_own; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY usuarios_update_own ON public.usuarios FOR UPDATE TO authenticated USING (((id = auth.uid()) OR (EXISTS ( SELECT 1
-   FROM public.usuarios u
-  WHERE ((u.id = auth.uid()) AND (u.role = 'admin'::public.usuario_role))))));
+CREATE POLICY usuarios_update_own ON public.usuarios FOR UPDATE TO authenticated USING ((id = auth.uid())) WITH CHECK ((id = auth.uid()));
 
 
 --
@@ -10700,5 +14209,5 @@ CREATE POLICY vendas_update ON public.vendas_marca FOR UPDATE TO authenticated U
 -- PostgreSQL database dump complete
 --
 
-\unrestrict bEOEq0x0RgSEJMK4u2zA0jM9A12IpctkQStRH3JoNXs9TmjSS0absABRm0c70Uc
+\unrestrict VN4g9iMstwNUxyEBiYv6gSI7NeOmDQUStMETcPYPZKdYwwtQGIAEbGZfSAxbCxS
 

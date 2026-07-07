@@ -44,6 +44,8 @@ RH não faz parte do núcleo comercial, mas deve permanecer coerente com o ecoss
 
 **Critério de aceite:** cada colaborador ativo possui um único identificador principal.
 
+**Atualização 29/06/2026:** criada a view `vw_funcionarios_completo`, juntando `funcionarios_novo` com detalhes, financeiro e benefícios, e RLS ligada nas 4 tabelas pela primeira vez (`20260629120922_vw_funcionarios_completo.sql`). **Alerta:** a mesma migration semeia 4 funcionários fictícios (nome, CPF, RG, endereço, salário fabricados) condicionado a `funcionarios_novo` estar vazia — risco de entrar como dado real se rodada antes da carga de colaboradores verdadeiros. Ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md) e pendência 12 do checklist geral.
+
 ## SPEC-RH-02 — Separação entre funcionário e usuário
 
 **Achado:** funcionário e acesso ao sistema são conceitos relacionados, mas diferentes.
@@ -99,6 +101,8 @@ RH não faz parte do núcleo comercial, mas deve permanecer coerente com o ecoss
 **Ação a ser realizada:** definir comando de fechamento da folha que gere previsões ou títulos, sem duplicar cálculo.
 
 **Critério de aceite:** o Financeiro recebe os valores aprovados com referência ao período e funcionário.
+
+**Atualização 30/06/2026:** a migration central `20260630_012_equipe_projetos_comissao` criou a view `vw_comissao_mensal` (percentual da equipe × valor total dos projetos do mês), com `equipe_id` novo em `projetos` e trigger de vínculo automático por nome do responsável. **Avanço parcial e por fora do sistema**: nasceu no banco central, não em um commit deste repositório de RH, e nenhum frontend consome a view ainda — não há comando de fechamento de folha nem envio de evento ao Financeiro. Ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md).
 
 ## SPEC-RH-06 — Relatórios
 

@@ -2,11 +2,26 @@
 
 ## Snapshot do DB
 
-Snapshot reextraído em 2026-06-25 para as SPECs 001-004.
+Snapshot reextraído em 2026-07-06 a partir do Supabase real.
 
-Pendente: reextrair novamente após a SPEC-005. A tentativa local em 2026-06-26 falhou porque o ambiente não tinha Docker disponível para `supabase db dump` nem `pg_dump` instalado.
+Resolvido: o snapshot pós-SPEC-005 e pós-migrations `017/018` foi reextraído com `pg_dump`/`psql` via `libpq`.
 
-Até a reextração, considerar `db/current/` como fotografia pré-SPEC-005 para funções/triggers e usar `db/migrations/20260626_009_spec005_remocao_triggers_legados_aprovacao/` como fonte da correção aplicada.
+Pendente: reextrair `db/current/` depois das migrations `20260706_020`, `20260706_021`, `20260706_022` e do hardening `20260707_023`, sem sobrescrever alterações locais já existentes no snapshot.
+
+## Aprovação do cliente
+
+O banco real já contém colunas e RPCs de aprovação do cliente, e a migration de normalização da SPEC-016 já foi aplicada. O contrato oficial é:
+
+- Oficial: `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`.
+- Legados/compatibilidade: `aprovado_cliente`, `aprovado` e `aprovado_financeiro`.
+
+Resolvido tecnicamente em 06/07/2026: SPEC-016 aplicada no Supabase real e SPEC-017 aplicada na UI de Orçamentos via Skip. Pendência remanescente: homologar o fluxo completo com orçamento real e confirmar a experiência final de envio/link para cliente.
+
+## Saldos de estoque por item de projeto
+
+`estoque_saldos_projeto_item` e `estoque_movimentos_projeto_item` já existem no banco real em 07/07/2026, junto com as views da SPEC-010.
+
+Aplicar o hardening `20260707_023_spec010_hardening` antes de SPEC-011/012/015 e antes de mostrar badges ricos de reserva/entrega futura no CRM. A decisão de modelagem já foi tomada: saldo vivo por `projeto_item_id`; cliente/projeto/orçamento/produto por `JOIN`. Decisão ainda pendente: policy de RLS de negócio para leitura operacional.
 
 ## Nota fiscal
 

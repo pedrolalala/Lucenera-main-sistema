@@ -1,1744 +1,1611 @@
--- Tabelas com RLS habilitado (public, auth, storage)
-
--- auth.audit_log_entries
-
--- auth.flow_state
-
--- auth.identities
-
--- auth.instances
-
--- auth.mfa_amr_claims
-
--- auth.mfa_challenges
-
--- auth.mfa_factors
-
--- auth.one_time_tokens
-
--- auth.refresh_tokens
-
--- auth.saml_providers
-
--- auth.saml_relay_states
-
--- auth.schema_migrations
-
--- auth.sessions
-
--- auth.sso_domains
-
--- auth.sso_providers
-
--- auth.users
-
--- public.boletos
-
--- public.categorias_financeiras
-
--- public.categorias_produto
-
--- public.contas_bancarias
-
--- public.contato_origens
-
--- public.contato_tipos
-
--- public.contatos
-
--- public.contatos_revisao
-
--- public.controle_falta
-
--- public.custos_recorrentes
-
--- public.custos_recorrentes_lancamentos
-
--- public.departamentos
-
--- public.empresa_ubiqua
-
--- public.empresas
-
--- public.entregas
-
--- public.entregas_finalizadas
-
--- public.estoque_itens
-
--- public.ferias
-
--- public.folha_pagamento
-
--- public.fornecedores
-
--- public.funcionarios_beneficios_empresas
-
--- public.funcionarios_detalhes
-
--- public.funcionarios_financeiro
-
--- public.funcionarios_novo
-
--- public.historico_status_orcamento
-
--- public.historico_status_orcamentos
-
--- public.informacoes_cliente_ubiqua
-
--- public.itens_orcamento_ubiqua
-
--- public.logs_auditoria
-
--- public.logs_operacoes
-
--- public.marcas
-
--- public.negociacoes
-
--- public.notas_fiscais
-
--- public.orcamento_itens
-
--- public.orcamentos
-
--- public.orcamentos_revenda_ubiqua
-
--- public.pedido_compra
-
--- public.plano_de_contas
-
--- public.produtos
-
--- public.projeto_itens
-
--- public.projeto_parcelas
-
--- public.projeto_parcelas_backup_migration
-
--- public.projeto_produtos
-
--- public.projeto_sinal
-
--- public.projetos
-
--- public.projetos_fechados
-
--- public.quote_history
-
--- public.quotes
-
--- public.remessas
-
--- public.retornos_processados
-
--- public.revenda_ubiqua
-
--- public.separacao_arquivos
-
--- public.separacao_itens
-
--- public.separacoes
-
--- public.separacoes_arquivos
-
--- public.solicitacoes_compra
-
--- public.sync_history
-
--- public.systems
-
--- public.transacoes
-
--- public.user_roles_separacao
-
--- public.user_system_access
-
--- public.usuarios
-
--- public.usuarios_ubiqua
-
--- public.vendas
-
--- public.vendas_marca
-
--- storage.buckets
-
--- storage.buckets_analytics
-
--- storage.buckets_vectors
-
--- storage.migrations
-
--- storage.objects
-
--- storage.s3_multipart_uploads
-
--- storage.s3_multipart_uploads_parts
-
--- storage.vector_indexes
-
-
--- Policies
-
--- Policy: public.boletos.authenticated_all_boletos
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
-
--- Policy: public.boletos.authenticated_delete_boletos
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
-
--- Policy: public.boletos.authenticated_insert_boletos
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
-
--- Policy: public.boletos.authenticated_select_boletos
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
-
--- Policy: public.boletos.authenticated_update_boletos
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
-
--- Policy: public.categorias_financeiras.catfin_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: authenticated_all_boletos ON boletos
+CREATE POLICY authenticated_all_boletos ON public.boletos AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: authenticated_delete_boletos ON boletos
+CREATE POLICY authenticated_delete_boletos ON public.boletos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: authenticated_insert_boletos ON boletos
+CREATE POLICY authenticated_insert_boletos ON public.boletos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: authenticated_select_boletos ON boletos
+CREATE POLICY authenticated_select_boletos ON public.boletos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_update_boletos ON boletos
+CREATE POLICY authenticated_update_boletos ON public.boletos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: authenticated_insert_categorias_financeiras ON categorias_financeiras
+CREATE POLICY authenticated_insert_categorias_financeiras ON public.categorias_financeiras AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: authenticated_select_categorias_financeiras ON categorias_financeiras
+CREATE POLICY authenticated_select_categorias_financeiras ON public.categorias_financeiras AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_update_categorias_financeiras ON categorias_financeiras
+CREATE POLICY authenticated_update_categorias_financeiras ON public.categorias_financeiras AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: catfin_delete ON categorias_financeiras
+CREATE POLICY catfin_delete ON public.categorias_financeiras AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.categorias_financeiras.catfin_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: catfin_insert ON categorias_financeiras
+CREATE POLICY catfin_insert ON public.categorias_financeiras AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.categorias_financeiras.catfin_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: catfin_select ON categorias_financeiras
+CREATE POLICY catfin_select ON public.categorias_financeiras AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.categorias_financeiras.catfin_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: catfin_update ON categorias_financeiras
+CREATE POLICY catfin_update ON public.categorias_financeiras AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.categorias_produto.categorias_produto_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_categorias_produto ON categorias_produto
+CREATE POLICY authenticated_select_categorias_produto ON public.categorias_produto AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.categorias_produto.categorias_produto_write
-permissive=PERMISSIVE roles=service_role cmd=ALL
-qual: true
-with_check: (none)
+-- Policy: categorias_produto_select ON categorias_produto
+CREATE POLICY categorias_produto_select ON public.categorias_produto AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.contas_bancarias.contas_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: categorias_produto_write ON categorias_produto
+CREATE POLICY categorias_produto_write ON public.categorias_produto AS PERMISSIVE FOR ALL TO service_role
+  USING (true);
+
+-- Policy: authenticated_insert_contas_bancarias ON contas_bancarias
+CREATE POLICY authenticated_insert_contas_bancarias ON public.contas_bancarias AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: authenticated_select_contas_bancarias ON contas_bancarias
+CREATE POLICY authenticated_select_contas_bancarias ON public.contas_bancarias AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_update_contas_bancarias ON contas_bancarias
+CREATE POLICY authenticated_update_contas_bancarias ON public.contas_bancarias AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: contas_delete ON contas_bancarias
+CREATE POLICY contas_delete ON public.contas_bancarias AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role)))));
 
--- Policy: public.contas_bancarias.contas_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: contas_insert ON contas_bancarias
+CREATE POLICY contas_insert ON public.contas_bancarias AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role)))));
 
--- Policy: public.contas_bancarias.contas_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: (EXISTS ( SELECT 1
+-- Policy: contas_select ON contas_bancarias
+CREATE POLICY contas_select ON public.contas_bancarias AS PERMISSIVE FOR SELECT TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.contas_bancarias.contas_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: contas_update ON contas_bancarias
+CREATE POLICY contas_update ON public.contas_bancarias AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role)))));
 
--- Policy: public.contato_origens.contato_origens_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: contato_origens_select ON contato_origens
+CREATE POLICY contato_origens_select ON public.contato_origens AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.contato_origens.contato_origens_write
-permissive=PERMISSIVE roles=service_role cmd=ALL
-qual: true
-with_check: (none)
+-- Policy: contato_origens_write ON contato_origens
+CREATE POLICY contato_origens_write ON public.contato_origens AS PERMISSIVE FOR ALL TO service_role
+  USING (true);
 
--- Policy: public.contato_tipos.authenticated_all
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: authenticated_all ON contato_tipos
+CREATE POLICY authenticated_all ON public.contato_tipos AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.contato_tipos.contato_tipos_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: contato_tipos_select ON contato_tipos
+CREATE POLICY contato_tipos_select ON public.contato_tipos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.contato_tipos.contato_tipos_write
-permissive=PERMISSIVE roles=service_role cmd=ALL
-qual: true
-with_check: (none)
+-- Policy: contato_tipos_write ON contato_tipos
+CREATE POLICY contato_tipos_write ON public.contato_tipos AS PERMISSIVE FOR ALL TO service_role
+  USING (true);
 
--- Policy: public.contatos.authenticated_all_contatos
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: authenticated_all_contatos ON contatos
+CREATE POLICY authenticated_all_contatos ON public.contatos AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.contatos.authenticated_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: authenticated_delete ON contatos
+CREATE POLICY authenticated_delete ON public.contatos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.contatos.authenticated_delete_contatos
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: authenticated_delete_contatos ON contatos
+CREATE POLICY authenticated_delete_contatos ON public.contatos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.contatos.authenticated_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: authenticated_insert ON contatos
+CREATE POLICY authenticated_insert ON public.contatos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.contatos.authenticated_insert_contatos
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: authenticated_insert_contatos ON contatos
+CREATE POLICY authenticated_insert_contatos ON public.contatos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.contatos.authenticated_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_select ON contatos
+CREATE POLICY authenticated_select ON public.contatos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.contatos.authenticated_select_contatos
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_contatos ON contatos
+CREATE POLICY authenticated_select_contatos ON public.contatos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.contatos.authenticated_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_contatos_financial ON contatos
+CREATE POLICY authenticated_select_contatos_financial ON public.contatos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.contatos.authenticated_update_contatos
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: authenticated_update ON contatos
+CREATE POLICY authenticated_update ON public.contatos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true);
 
--- Policy: public.contatos.contatos_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: authenticated_update_contatos ON contatos
+CREATE POLICY authenticated_update_contatos ON public.contatos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: contatos_delete_admin ON contatos
+CREATE POLICY contatos_delete_admin ON public.contatos AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.contatos.contatos_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: contatos_insert ON contatos
+CREATE POLICY contatos_insert ON public.contatos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.contatos.contatos_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: contatos_select ON contatos
+CREATE POLICY contatos_select ON public.contatos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.contatos.contatos_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: contatos_update ON contatos
+CREATE POLICY contatos_update ON public.contatos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.contatos_revisao.contatos_revisao_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: contatos_revisao_select ON contatos_revisao
+CREATE POLICY contatos_revisao_select ON public.contatos_revisao AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.contatos_revisao.contatos_revisao_write
-permissive=PERMISSIVE roles=service_role cmd=ALL
-qual: true
-with_check: (none)
+-- Policy: contatos_revisao_write ON contatos_revisao
+CREATE POLICY contatos_revisao_write ON public.contatos_revisao AS PERMISSIVE FOR ALL TO service_role
+  USING (true);
 
--- Policy: public.controle_falta.ponto_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: controle_falta_delete ON controle_falta
+CREATE POLICY controle_falta_delete ON public.controle_falta AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])));
+
+-- Policy: controle_falta_insert ON controle_falta
+CREATE POLICY controle_falta_insert ON public.controle_falta AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = get_my_funcionario_id())));
+
+-- Policy: controle_falta_select ON controle_falta
+CREATE POLICY controle_falta_select ON public.controle_falta AS PERMISSIVE FOR SELECT TO authenticated
+  USING (((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = get_my_funcionario_id())));
+
+-- Policy: controle_falta_update ON controle_falta
+CREATE POLICY controle_falta_update ON public.controle_falta AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = get_my_funcionario_id())));
+
+-- Policy: custos_rec_delete ON custos_recorrentes
+CREATE POLICY custos_rec_delete ON public.custos_recorrentes AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.controle_falta.ponto_insert_admin
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: custos_rec_insert ON custos_recorrentes
+CREATE POLICY custos_rec_insert ON public.custos_recorrentes AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.controle_falta.ponto_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: ((EXISTS ( SELECT 1
+-- Policy: custos_rec_select ON custos_recorrentes
+CREATE POLICY custos_rec_select ON public.custos_recorrentes AS PERMISSIVE FOR SELECT TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))) OR (funcionario_id IN ( SELECT funcionarios.id
-   FROM funcionarios
-  WHERE (funcionarios.usuario_id = ( SELECT auth.uid() AS uid)))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.controle_falta.ponto_update_admin
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: custos_rec_update ON custos_recorrentes
+CREATE POLICY custos_rec_update ON public.custos_recorrentes AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.custos_recorrentes.custos_rec_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: lanc_delete ON custos_recorrentes_lancamentos
+CREATE POLICY lanc_delete ON public.custos_recorrentes_lancamentos AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.custos_recorrentes.custos_rec_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: lanc_insert ON custos_recorrentes_lancamentos
+CREATE POLICY lanc_insert ON public.custos_recorrentes_lancamentos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.custos_recorrentes.custos_rec_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: (EXISTS ( SELECT 1
+-- Policy: lanc_select ON custos_recorrentes_lancamentos
+CREATE POLICY lanc_select ON public.custos_recorrentes_lancamentos AS PERMISSIVE FOR SELECT TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.custos_recorrentes.custos_rec_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: lanc_update ON custos_recorrentes_lancamentos
+CREATE POLICY lanc_update ON public.custos_recorrentes_lancamentos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.custos_recorrentes_lancamentos.lanc_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+-- Policy: departamentos_select_all ON departamentos
+CREATE POLICY departamentos_select_all ON public.departamentos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.custos_recorrentes_lancamentos.lanc_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
+-- Policy: empresa_ubiqua_insert ON empresa_ubiqua
+CREATE POLICY empresa_ubiqua_insert ON public.empresa_ubiqua AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.custos_recorrentes_lancamentos.lanc_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+-- Policy: empresa_ubiqua_select ON empresa_ubiqua
+CREATE POLICY empresa_ubiqua_select ON public.empresa_ubiqua AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.custos_recorrentes_lancamentos.lanc_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
-
--- Policy: public.departamentos.dept_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
-
--- Policy: public.departamentos.dept_insert_admin
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-
--- Policy: public.departamentos.dept_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
-
--- Policy: public.departamentos.dept_update_admin
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
-
--- Policy: public.empresa_ubiqua.empresa_ubiqua_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
-
--- Policy: public.empresa_ubiqua.empresa_ubiqua_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
-
--- Policy: public.empresa_ubiqua.empresa_ubiqua_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (id IN ( SELECT usuarios_ubiqua.empresa_id
+-- Policy: empresa_ubiqua_update ON empresa_ubiqua
+CREATE POLICY empresa_ubiqua_update ON public.empresa_ubiqua AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((id IN ( SELECT usuarios_ubiqua.empresa_id
    FROM usuarios_ubiqua
-  WHERE (usuarios_ubiqua.id = auth.uid())))
-with_check: (id IN ( SELECT usuarios_ubiqua.empresa_id
+  WHERE (usuarios_ubiqua.id = auth.uid()))))
+  WITH CHECK ((id IN ( SELECT usuarios_ubiqua.empresa_id
    FROM usuarios_ubiqua
-  WHERE (usuarios_ubiqua.id = auth.uid())))
+  WHERE (usuarios_ubiqua.id = auth.uid()))));
 
--- Policy: public.empresas.anon_select_empresas
-permissive=PERMISSIVE roles=anon,authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: anon_select_empresas ON empresas
+CREATE POLICY anon_select_empresas ON public.empresas AS PERMISSIVE FOR SELECT TO authenticated, anon
+  USING (true);
 
--- Policy: public.empresas.authenticated_select_empresas
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_empresas ON empresas
+CREATE POLICY authenticated_select_empresas ON public.empresas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.empresas.empresas_delete_auth
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: empresas_delete_auth ON empresas
+CREATE POLICY empresas_delete_auth ON public.empresas AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.empresas.empresas_insert
-permissive=PERMISSIVE roles=service_role cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: empresas_insert ON empresas
+CREATE POLICY empresas_insert ON public.empresas AS PERMISSIVE FOR INSERT TO service_role
+  WITH CHECK (true);
 
--- Policy: public.empresas.empresas_insert_auth
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: empresas_insert_auth ON empresas
+CREATE POLICY empresas_insert_auth ON public.empresas AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.empresas.empresas_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: empresas_select ON empresas
+CREATE POLICY empresas_select ON public.empresas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.empresas.empresas_update
-permissive=PERMISSIVE roles=service_role cmd=UPDATE
-qual: true
-with_check: (none)
+-- Policy: empresas_update ON empresas
+CREATE POLICY empresas_update ON public.empresas AS PERMISSIVE FOR UPDATE TO service_role
+  USING (true);
 
--- Policy: public.empresas.empresas_update_auth
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: (none)
+-- Policy: empresas_update_auth ON empresas
+CREATE POLICY empresas_update_auth ON public.empresas AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true);
 
--- Policy: public.entregas.entregas_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: entregas_delete_admin ON entregas
+CREATE POLICY entregas_delete_admin ON public.entregas AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.entregas.entregas_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: entregas_insert ON entregas
+CREATE POLICY entregas_insert ON public.entregas AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.entregas.entregas_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: entregas_select ON entregas
+CREATE POLICY entregas_select ON public.entregas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.entregas.entregas_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: entregas_update ON entregas
+CREATE POLICY entregas_update ON public.entregas AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.entregas_finalizadas.entregas_finalizadas_authenticated_all
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: ent_fin_delete_auth ON entregas_finalizadas
+CREATE POLICY ent_fin_delete_auth ON public.entregas_finalizadas AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.estoque_itens.authenticated_delete_estoque_itens
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: ent_fin_insert_auth ON entregas_finalizadas
+CREATE POLICY ent_fin_insert_auth ON public.entregas_finalizadas AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.estoque_itens.authenticated_insert_estoque_itens
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: ent_fin_select_auth ON entregas_finalizadas
+CREATE POLICY ent_fin_select_auth ON public.entregas_finalizadas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.estoque_itens.authenticated_select_estoque_itens
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: ent_fin_update_auth ON entregas_finalizadas
+CREATE POLICY ent_fin_update_auth ON public.entregas_finalizadas AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.estoque_itens.authenticated_update_estoque_itens
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: entregas_finalizadas_authenticated_all ON entregas_finalizadas
+CREATE POLICY entregas_finalizadas_authenticated_all ON public.entregas_finalizadas AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.estoque_itens.estoque_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: entregas_finalizadas_delete ON entregas_finalizadas
+CREATE POLICY entregas_finalizadas_delete ON public.entregas_finalizadas AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: entregas_finalizadas_insert ON entregas_finalizadas
+CREATE POLICY entregas_finalizadas_insert ON public.entregas_finalizadas AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: entregas_finalizadas_select ON entregas_finalizadas
+CREATE POLICY entregas_finalizadas_select ON public.entregas_finalizadas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: entregas_finalizadas_update ON entregas_finalizadas
+CREATE POLICY entregas_finalizadas_update ON public.entregas_finalizadas AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: authenticated_delete_estoque_itens ON estoque_itens
+CREATE POLICY authenticated_delete_estoque_itens ON public.estoque_itens AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: authenticated_insert_estoque_itens ON estoque_itens
+CREATE POLICY authenticated_insert_estoque_itens ON public.estoque_itens AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: authenticated_select_estoque_itens ON estoque_itens
+CREATE POLICY authenticated_select_estoque_itens ON public.estoque_itens AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_update_estoque_itens ON estoque_itens
+CREATE POLICY authenticated_update_estoque_itens ON public.estoque_itens AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: estoque_delete ON estoque_itens
+CREATE POLICY estoque_delete ON public.estoque_itens AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.estoque_itens.estoque_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: estoque_insert ON estoque_itens
+CREATE POLICY estoque_insert ON public.estoque_itens AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.estoque_itens.estoque_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: estoque_select ON estoque_itens
+CREATE POLICY estoque_select ON public.estoque_itens AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.estoque_itens.estoque_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: estoque_update ON estoque_itens
+CREATE POLICY estoque_update ON public.estoque_itens AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.ferias.ferias_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: ferias_delete ON ferias
+CREATE POLICY ferias_delete ON public.ferias AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])));
+
+-- Policy: ferias_insert ON ferias
+CREATE POLICY ferias_insert ON public.ferias AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = get_my_funcionario_id())));
+
+-- Policy: ferias_select ON ferias
+CREATE POLICY ferias_select ON public.ferias AS PERMISSIVE FOR SELECT TO authenticated
+  USING (((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = get_my_funcionario_id())));
+
+-- Policy: ferias_update ON ferias
+CREATE POLICY ferias_update ON public.ferias AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = get_my_funcionario_id())));
+
+-- Policy: folha_delete ON folha_pagamento
+CREATE POLICY folha_delete ON public.folha_pagamento AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.ferias.ferias_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: ((funcionario_id IN ( SELECT funcionarios.id
-   FROM funcionarios
-  WHERE (funcionarios.usuario_id = ( SELECT auth.uid() AS uid)))) OR (EXISTS ( SELECT 1
+-- Policy: folha_insert ON folha_pagamento
+CREATE POLICY folha_insert ON public.folha_pagamento AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.ferias.ferias_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: ((EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))) OR (funcionario_id IN ( SELECT funcionarios.id
-   FROM funcionarios
-  WHERE (funcionarios.usuario_id = ( SELECT auth.uid() AS uid)))))
-with_check: (none)
-
--- Policy: public.ferias.ferias_update_admin
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
-
--- Policy: public.folha_pagamento.folha_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
-
--- Policy: public.folha_pagamento.folha_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-
--- Policy: public.folha_pagamento.folha_own
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: ((EXISTS ( SELECT 1
+-- Policy: folha_own ON folha_pagamento
+CREATE POLICY folha_own ON public.folha_pagamento AS PERMISSIVE FOR SELECT TO authenticated
+  USING (((EXISTS ( SELECT 1
    FROM usuarios u
   WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))) OR (funcionario_id IN ( SELECT funcionarios.id
    FROM funcionarios
-  WHERE (funcionarios.usuario_id = ( SELECT auth.uid() AS uid)))))
-with_check: (none)
+  WHERE (funcionarios.usuario_id = ( SELECT auth.uid() AS uid))))));
 
--- Policy: public.folha_pagamento.folha_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: folha_update ON folha_pagamento
+CREATE POLICY folha_update ON public.folha_pagamento AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.fornecedores.fornecedores_delete_policy
-permissive=PERMISSIVE roles=public cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: fornecedores_delete_policy ON fornecedores
+CREATE POLICY fornecedores_delete_policy ON public.fornecedores AS PERMISSIVE FOR DELETE TO 
+  USING (true);
 
--- Policy: public.fornecedores.fornecedores_insert_policy
-permissive=PERMISSIVE roles=public cmd=INSERT
-qual: (none)
-with_check: (auth.uid() IS NOT NULL)
+-- Policy: fornecedores_insert_policy ON fornecedores
+CREATE POLICY fornecedores_insert_policy ON public.fornecedores AS PERMISSIVE FOR INSERT TO 
+  WITH CHECK ((auth.uid() IS NOT NULL));
 
--- Policy: public.fornecedores.fornecedores_select_policy
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: fornecedores_select_policy ON fornecedores
+CREATE POLICY fornecedores_select_policy ON public.fornecedores AS PERMISSIVE FOR SELECT TO 
+  USING (true);
 
--- Policy: public.fornecedores.fornecedores_update_policy
-permissive=PERMISSIVE roles=public cmd=UPDATE
-qual: true
-with_check: (auth.uid() IS NOT NULL)
+-- Policy: fornecedores_update_policy ON fornecedores
+CREATE POLICY fornecedores_update_policy ON public.fornecedores AS PERMISSIVE FOR UPDATE TO 
+  USING (true)
+  WITH CHECK ((auth.uid() IS NOT NULL));
 
--- Policy: public.funcionarios.authenticated_select_funcionarios
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_funcionarios ON funcionarios
+CREATE POLICY authenticated_select_funcionarios ON public.funcionarios AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.funcionarios.func_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: func_delete_admin ON funcionarios
+CREATE POLICY func_delete_admin ON public.funcionarios AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.funcionarios.func_insert_admin
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: func_insert_admin ON funcionarios
+CREATE POLICY func_insert_admin ON public.funcionarios AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.funcionarios.func_select_admin
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: ((EXISTS ( SELECT 1
+-- Policy: func_select_admin ON funcionarios
+CREATE POLICY func_select_admin ON public.funcionarios AS PERMISSIVE FOR SELECT TO authenticated
+  USING (((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))) OR (usuario_id = ( SELECT auth.uid() AS uid)))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))) OR (usuario_id = ( SELECT auth.uid() AS uid))));
 
--- Policy: public.funcionarios.func_update_admin
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: func_update_admin ON funcionarios
+CREATE POLICY func_update_admin ON public.funcionarios AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.funcionarios_beneficios_empresas.funcionarios_beneficios_empresas_authenticated_all
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: fn_ben_delete_auth ON funcionarios_beneficios_empresas
+CREATE POLICY fn_ben_delete_auth ON public.funcionarios_beneficios_empresas AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.funcionarios_detalhes.funcionarios_detalhes_authenticated_all
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: fn_ben_insert_auth ON funcionarios_beneficios_empresas
+CREATE POLICY fn_ben_insert_auth ON public.funcionarios_beneficios_empresas AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.funcionarios_financeiro.funcionarios_financeiro_authenticated_all
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: fn_ben_select_auth ON funcionarios_beneficios_empresas
+CREATE POLICY fn_ben_select_auth ON public.funcionarios_beneficios_empresas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.funcionarios_novo.funcionarios_novo_authenticated_all
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: fn_ben_update_auth ON funcionarios_beneficios_empresas
+CREATE POLICY fn_ben_update_auth ON public.funcionarios_beneficios_empresas AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.historico_status_orcamento.authenticated_insert_historico_status_orcamento
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: funcionarios_beneficios_empresas_authenticated_all ON funcionarios_beneficios_empresas
+CREATE POLICY funcionarios_beneficios_empresas_authenticated_all ON public.funcionarios_beneficios_empresas AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.historico_status_orcamento.authenticated_select_historico_status_orcamento
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: fn_det_delete_auth ON funcionarios_detalhes
+CREATE POLICY fn_det_delete_auth ON public.funcionarios_detalhes AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.historico_status_orcamento.historico_status_orcamento_authenticated_all
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: fn_det_insert_auth ON funcionarios_detalhes
+CREATE POLICY fn_det_insert_auth ON public.funcionarios_detalhes AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.historico_status_orcamentos.authenticated_insert_historico_status_orcamentos
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: fn_det_select_auth ON funcionarios_detalhes
+CREATE POLICY fn_det_select_auth ON public.funcionarios_detalhes AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.historico_status_orcamentos.authenticated_select_historico_status_orcamentos
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: fn_det_update_auth ON funcionarios_detalhes
+CREATE POLICY fn_det_update_auth ON public.funcionarios_detalhes AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.informacoes_cliente_ubiqua.Permitir leitura admin_gerente
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: (EXISTS ( SELECT 1
+-- Policy: funcionarios_detalhes_authenticated_all ON funcionarios_detalhes
+CREATE POLICY funcionarios_detalhes_authenticated_all ON public.funcionarios_detalhes AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: fn_fin_delete_auth ON funcionarios_financeiro
+CREATE POLICY fn_fin_delete_auth ON public.funcionarios_financeiro AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: fn_fin_insert_auth ON funcionarios_financeiro
+CREATE POLICY fn_fin_insert_auth ON public.funcionarios_financeiro AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: fn_fin_select_auth ON funcionarios_financeiro
+CREATE POLICY fn_fin_select_auth ON public.funcionarios_financeiro AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: fn_fin_update_auth ON funcionarios_financeiro
+CREATE POLICY fn_fin_update_auth ON public.funcionarios_financeiro AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: funcionarios_financeiro_authenticated_all ON funcionarios_financeiro
+CREATE POLICY funcionarios_financeiro_authenticated_all ON public.funcionarios_financeiro AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: fn_novo_delete_auth ON funcionarios_novo
+CREATE POLICY fn_novo_delete_auth ON public.funcionarios_novo AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: fn_novo_insert_auth ON funcionarios_novo
+CREATE POLICY fn_novo_insert_auth ON public.funcionarios_novo AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: fn_novo_select_auth ON funcionarios_novo
+CREATE POLICY fn_novo_select_auth ON public.funcionarios_novo AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: fn_novo_update_auth ON funcionarios_novo
+CREATE POLICY fn_novo_update_auth ON public.funcionarios_novo AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: funcionarios_novo_authenticated_all ON funcionarios_novo
+CREATE POLICY funcionarios_novo_authenticated_all ON public.funcionarios_novo AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: authenticated_insert_historico_status_orcamentos ON historico_status_orcamentos
+CREATE POLICY authenticated_insert_historico_status_orcamentos ON public.historico_status_orcamentos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: authenticated_select_historico_status_orcamentos ON historico_status_orcamentos
+CREATE POLICY authenticated_select_historico_status_orcamentos ON public.historico_status_orcamentos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_update_historico_status_orcamentos ON historico_status_orcamentos
+CREATE POLICY authenticated_update_historico_status_orcamentos ON public.historico_status_orcamentos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: Permitir leitura admin_gerente ON informacoes_cliente_ubiqua
+CREATE POLICY "Permitir leitura admin_gerente" ON public.informacoes_cliente_ubiqua AS PERMISSIVE FOR SELECT TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.informacoes_cliente_ubiqua.Permitir leitura anon e auth
-permissive=PERMISSIVE roles=anon,authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: Permitir leitura anon e auth ON informacoes_cliente_ubiqua
+CREATE POLICY "Permitir leitura anon e auth" ON public.informacoes_cliente_ubiqua AS PERMISSIVE FOR SELECT TO authenticated, anon
+  USING (true);
 
--- Policy: public.informacoes_cliente_ubiqua.all_select_informacoes_cliente
-permissive=PERMISSIVE roles=anon,authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: all_select_informacoes_cliente ON informacoes_cliente_ubiqua
+CREATE POLICY all_select_informacoes_cliente ON public.informacoes_cliente_ubiqua AS PERMISSIVE FOR SELECT TO authenticated, anon
+  USING (true);
 
--- Policy: public.informacoes_cliente_ubiqua.anon_insert_informacoes_cliente
-permissive=PERMISSIVE roles=anon cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: anon_insert_informacoes_cliente ON informacoes_cliente_ubiqua
+CREATE POLICY anon_insert_informacoes_cliente ON public.informacoes_cliente_ubiqua AS PERMISSIVE FOR INSERT TO anon
+  WITH CHECK (true);
 
--- Policy: public.informacoes_cliente_ubiqua.anon_update_informacoes_cliente
-permissive=PERMISSIVE roles=anon cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: anon_update_informacoes_cliente ON informacoes_cliente_ubiqua
+CREATE POLICY anon_update_informacoes_cliente ON public.informacoes_cliente_ubiqua AS PERMISSIVE FOR UPDATE TO anon
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.informacoes_cliente_ubiqua.auth_insert_informacoes_cliente
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: auth_insert_informacoes_cliente ON informacoes_cliente_ubiqua
+CREATE POLICY auth_insert_informacoes_cliente ON public.informacoes_cliente_ubiqua AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.informacoes_cliente_ubiqua.auth_update_informacoes_cliente
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: auth_update_informacoes_cliente ON informacoes_cliente_ubiqua
+CREATE POLICY auth_update_informacoes_cliente ON public.informacoes_cliente_ubiqua AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.itens_orcamento_ubiqua.all_select_itens_orcamento_ubiqua
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: all_select_itens_orcamento_ubiqua ON itens_orcamento_ubiqua
+CREATE POLICY all_select_itens_orcamento_ubiqua ON public.itens_orcamento_ubiqua AS PERMISSIVE FOR SELECT TO 
+  USING (true);
 
--- Policy: public.itens_orcamento_ubiqua.anon_insert_itens_orcamento_ubiqua
-permissive=PERMISSIVE roles=anon cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: anon_insert_itens_orcamento_ubiqua ON itens_orcamento_ubiqua
+CREATE POLICY anon_insert_itens_orcamento_ubiqua ON public.itens_orcamento_ubiqua AS PERMISSIVE FOR INSERT TO anon
+  WITH CHECK (true);
 
--- Policy: public.itens_orcamento_ubiqua.auth_insert_itens_orcamento_ubiqua
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: auth_insert_itens_orcamento_ubiqua ON itens_orcamento_ubiqua
+CREATE POLICY auth_insert_itens_orcamento_ubiqua ON public.itens_orcamento_ubiqua AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.itens_orcamento_ubiqua.authenticated_all_itens_orcamento_ubiqua
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: authenticated_all_itens_orcamento_ubiqua ON itens_orcamento_ubiqua
+CREATE POLICY authenticated_all_itens_orcamento_ubiqua ON public.itens_orcamento_ubiqua AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.logs_auditoria.admin_all_logs
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: is_admin()
-with_check: is_admin()
+-- Policy: admin_all_logs ON logs_auditoria
+CREATE POLICY admin_all_logs ON public.logs_auditoria AS PERMISSIVE FOR ALL TO authenticated
+  USING (is_admin())
+  WITH CHECK (is_admin());
 
--- Policy: public.logs_auditoria.logs_auditoria_delete_policy
-permissive=PERMISSIVE roles=public cmd=DELETE
-qual: false
-with_check: (none)
+-- Policy: authenticated_insert_logs_auditoria ON logs_auditoria
+CREATE POLICY authenticated_insert_logs_auditoria ON public.logs_auditoria AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.logs_auditoria.logs_auditoria_insert_policy
-permissive=PERMISSIVE roles=public cmd=INSERT
-qual: (none)
-with_check: false
+-- Policy: authenticated_select_logs_auditoria ON logs_auditoria
+CREATE POLICY authenticated_select_logs_auditoria ON public.logs_auditoria AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.logs_auditoria.logs_auditoria_select_policy
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: logs_auditoria_delete_policy ON logs_auditoria
+CREATE POLICY logs_auditoria_delete_policy ON public.logs_auditoria AS PERMISSIVE FOR DELETE TO 
+  USING (false);
 
--- Policy: public.logs_auditoria.logs_auditoria_update_policy
-permissive=PERMISSIVE roles=public cmd=UPDATE
-qual: false
-with_check: (none)
+-- Policy: logs_auditoria_insert_policy ON logs_auditoria
+CREATE POLICY logs_auditoria_insert_policy ON public.logs_auditoria AS PERMISSIVE FOR INSERT TO 
+  WITH CHECK (false);
 
--- Policy: public.logs_auditoria.user_insert_logs
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (usuario_id = auth.uid())
+-- Policy: logs_auditoria_select_policy ON logs_auditoria
+CREATE POLICY logs_auditoria_select_policy ON public.logs_auditoria AS PERMISSIVE FOR SELECT TO 
+  USING (true);
 
--- Policy: public.marcas.marcas_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: logs_auditoria_update_policy ON logs_auditoria
+CREATE POLICY logs_auditoria_update_policy ON public.logs_auditoria AS PERMISSIVE FOR UPDATE TO 
+  USING (false);
+
+-- Policy: user_insert_logs ON logs_auditoria
+CREATE POLICY user_insert_logs ON public.logs_auditoria AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((usuario_id = auth.uid()));
+
+-- Policy: authenticated_select_marcas ON marcas
+CREATE POLICY authenticated_select_marcas ON public.marcas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: marcas_delete ON marcas
+CREATE POLICY marcas_delete ON public.marcas AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.marcas.marcas_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: marcas_insert ON marcas
+CREATE POLICY marcas_insert ON public.marcas AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.marcas.marcas_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: marcas_select ON marcas
+CREATE POLICY marcas_select ON public.marcas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.marcas.marcas_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: marcas_update ON marcas
+CREATE POLICY marcas_update ON public.marcas AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.negociacoes.negociacoes_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: negociacoes_select ON negociacoes
+CREATE POLICY negociacoes_select ON public.negociacoes AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.negociacoes.negociacoes_write
-permissive=PERMISSIVE roles=service_role cmd=ALL
-qual: true
-with_check: (none)
+-- Policy: negociacoes_write ON negociacoes
+CREATE POLICY negociacoes_write ON public.negociacoes AS PERMISSIVE FOR ALL TO service_role
+  USING (true);
 
--- Policy: public.notas_fiscais.authenticated_all_notas_fiscais
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: authenticated_all_notas_fiscais ON notas_fiscais
+CREATE POLICY authenticated_all_notas_fiscais ON public.notas_fiscais AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.notas_fiscais.authenticated_delete_nf
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: authenticated_delete_nf ON notas_fiscais
+CREATE POLICY authenticated_delete_nf ON public.notas_fiscais AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.notas_fiscais.authenticated_insert_nf
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: authenticated_insert_nf ON notas_fiscais
+CREATE POLICY authenticated_insert_nf ON public.notas_fiscais AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.notas_fiscais.authenticated_select_nf
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_nf ON notas_fiscais
+CREATE POLICY authenticated_select_nf ON public.notas_fiscais AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.notas_fiscais.authenticated_update_nf
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: authenticated_update_nf ON notas_fiscais
+CREATE POLICY authenticated_update_nf ON public.notas_fiscais AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.orcamento_itens.anon_insert_orcamento_itens
-permissive=PERMISSIVE roles=anon,authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: anon_insert_orcamento_itens ON orcamento_itens
+CREATE POLICY anon_insert_orcamento_itens ON public.orcamento_itens AS PERMISSIVE FOR INSERT TO authenticated, anon
+  WITH CHECK (true);
 
--- Policy: public.orcamento_itens.authenticated_delete_orcamento_itens
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: authenticated_delete_orcamento_itens ON orcamento_itens
+CREATE POLICY authenticated_delete_orcamento_itens ON public.orcamento_itens AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.orcamento_itens.authenticated_insert_orcamento_itens
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: authenticated_insert_orcamento_itens ON orcamento_itens
+CREATE POLICY authenticated_insert_orcamento_itens ON public.orcamento_itens AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.orcamento_itens.authenticated_select_orcamento_itens
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_orcamento_itens ON orcamento_itens
+CREATE POLICY authenticated_select_orcamento_itens ON public.orcamento_itens AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.orcamento_itens.authenticated_update_orcamento_itens
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: authenticated_select_orcamento_itens_financial ON orcamento_itens
+CREATE POLICY authenticated_select_orcamento_itens_financial ON public.orcamento_itens AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.orcamento_itens.orcamento_itens_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: authenticated_update_orcamento_itens ON orcamento_itens
+CREATE POLICY authenticated_update_orcamento_itens ON public.orcamento_itens AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.orcamento_itens.orcamento_itens_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: orcamento_itens_delete ON orcamento_itens
+CREATE POLICY orcamento_itens_delete ON public.orcamento_itens AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.orcamento_itens.orcamento_itens_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: orcamento_itens_insert ON orcamento_itens
+CREATE POLICY orcamento_itens_insert ON public.orcamento_itens AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.orcamento_itens.orcamento_itens_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: (none)
+-- Policy: orcamento_itens_select ON orcamento_itens
+CREATE POLICY orcamento_itens_select ON public.orcamento_itens AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.orcamentos.anon_insert_orcamentos
-permissive=PERMISSIVE roles=anon,authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: orcamento_itens_update ON orcamento_itens
+CREATE POLICY orcamento_itens_update ON public.orcamento_itens AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.orcamentos.authenticated_delete_orcamentos
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: anon_can_read_orcamento_by_token ON orcamentos
+CREATE POLICY anon_can_read_orcamento_by_token ON public.orcamentos AS PERMISSIVE FOR SELECT TO authenticated, anon
+  USING ((token_aprovacao_cliente IS NOT NULL));
 
--- Policy: public.orcamentos.authenticated_insert_orcamentos
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: anon_insert_orcamentos ON orcamentos
+CREATE POLICY anon_insert_orcamentos ON public.orcamentos AS PERMISSIVE FOR INSERT TO authenticated, anon
+  WITH CHECK (true);
 
--- Policy: public.orcamentos.authenticated_select_orcamentos
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_delete_orcamentos ON orcamentos
+CREATE POLICY authenticated_delete_orcamentos ON public.orcamentos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.orcamentos.authenticated_update_orcamentos
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: authenticated_insert_orcamentos ON orcamentos
+CREATE POLICY authenticated_insert_orcamentos ON public.orcamentos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.orcamentos.orcamentos_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: authenticated_insert_orcamentos_approval ON orcamentos
+CREATE POLICY authenticated_insert_orcamentos_approval ON public.orcamentos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.orcamentos.orcamentos_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: authenticated_select_orcamentos ON orcamentos
+CREATE POLICY authenticated_select_orcamentos ON public.orcamentos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.orcamentos.orcamentos_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_orcamentos_approval ON orcamentos
+CREATE POLICY authenticated_select_orcamentos_approval ON public.orcamentos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.orcamentos.orcamentos_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_orcamentos_financial ON orcamentos
+CREATE POLICY authenticated_select_orcamentos_financial ON public.orcamentos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.orcamentos_revenda_ubiqua.all_select_orcamentos_revenda_ubiqua
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_update_orcamentos ON orcamentos
+CREATE POLICY authenticated_update_orcamentos ON public.orcamentos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.orcamentos_revenda_ubiqua.anon_insert_orcamentos_revenda_ubiqua
-permissive=PERMISSIVE roles=anon cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: authenticated_update_orcamentos_approval ON orcamentos
+CREATE POLICY authenticated_update_orcamentos_approval ON public.orcamentos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.orcamentos_revenda_ubiqua.auth_insert_orcamentos_revenda_ubiqua
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: orcamentos_delete ON orcamentos
+CREATE POLICY orcamentos_delete ON public.orcamentos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.orcamentos_revenda_ubiqua.authenticated_all_orcamentos_revenda_ubiqua
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: orcamentos_insert ON orcamentos
+CREATE POLICY orcamentos_insert ON public.orcamentos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.orcamentos_revenda_ubiqua.authenticated_update_orcamentos_revenda_ubiqua
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: orcamentos_select ON orcamentos
+CREATE POLICY orcamentos_select ON public.orcamentos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.orcamentos_revenda_ubiqua.update_orcamentos_revenda_ubiqua
-permissive=PERMISSIVE roles=anon,authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: orcamentos_update ON orcamentos
+CREATE POLICY orcamentos_update ON public.orcamentos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true);
 
--- Policy: public.pedido_compra.Permitir leitura para autenticados
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: (auth.role() = 'authenticated'::text)
-with_check: (none)
+-- Policy: all_select_orcamentos_revenda_ubiqua ON orcamentos_revenda_ubiqua
+CREATE POLICY all_select_orcamentos_revenda_ubiqua ON public.orcamentos_revenda_ubiqua AS PERMISSIVE FOR SELECT TO 
+  USING (true);
 
--- Policy: public.pedido_compra.Permitir tudo para service_role
-permissive=PERMISSIVE roles=public cmd=ALL
-qual: (auth.role() = 'service_role'::text)
-with_check: (none)
+-- Policy: anon_insert_orcamentos_revenda_ubiqua ON orcamentos_revenda_ubiqua
+CREATE POLICY anon_insert_orcamentos_revenda_ubiqua ON public.orcamentos_revenda_ubiqua AS PERMISSIVE FOR INSERT TO anon
+  WITH CHECK (true);
 
--- Policy: public.plano_de_contas.plano_contas_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: auth_insert_orcamentos_revenda_ubiqua ON orcamentos_revenda_ubiqua
+CREATE POLICY auth_insert_orcamentos_revenda_ubiqua ON public.orcamentos_revenda_ubiqua AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.plano_de_contas.plano_contas_write
-permissive=PERMISSIVE roles=service_role cmd=ALL
-qual: true
-with_check: (none)
+-- Policy: authenticated_all_orcamentos_revenda_ubiqua ON orcamentos_revenda_ubiqua
+CREATE POLICY authenticated_all_orcamentos_revenda_ubiqua ON public.orcamentos_revenda_ubiqua AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.produtos.Permitir leitura para autenticados
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: (auth.role() = 'authenticated'::text)
-with_check: (none)
+-- Policy: authenticated_update_orcamentos_revenda_ubiqua ON orcamentos_revenda_ubiqua
+CREATE POLICY authenticated_update_orcamentos_revenda_ubiqua ON public.orcamentos_revenda_ubiqua AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.produtos.Permitir tudo para service_role
-permissive=PERMISSIVE roles=public cmd=ALL
-qual: (auth.role() = 'service_role'::text)
-with_check: (none)
+-- Policy: update_orcamentos_revenda_ubiqua ON orcamentos_revenda_ubiqua
+CREATE POLICY update_orcamentos_revenda_ubiqua ON public.orcamentos_revenda_ubiqua AS PERMISSIVE FOR UPDATE TO authenticated, anon
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.produtos.authenticated_delete_produtos
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: Permitir leitura para autenticados ON pedido_compra
+CREATE POLICY "Permitir leitura para autenticados" ON public.pedido_compra AS PERMISSIVE FOR SELECT TO 
+  USING ((auth.role() = 'authenticated'::text));
 
--- Policy: public.produtos.authenticated_insert_produtos
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: Permitir tudo para service_role ON pedido_compra
+CREATE POLICY "Permitir tudo para service_role" ON public.pedido_compra AS PERMISSIVE FOR ALL TO 
+  USING ((auth.role() = 'service_role'::text));
 
--- Policy: public.produtos.authenticated_select_produtos
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: periodos_aquis_delete ON periodos_aquisitivos
+CREATE POLICY periodos_aquis_delete ON public.periodos_aquisitivos AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])));
 
--- Policy: public.produtos.authenticated_update_produtos
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: periodos_aquis_insert ON periodos_aquisitivos
+CREATE POLICY periodos_aquis_insert ON public.periodos_aquisitivos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])));
 
--- Policy: public.produtos.prod_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: periodos_aquis_select ON periodos_aquisitivos
+CREATE POLICY periodos_aquis_select ON public.periodos_aquisitivos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])) OR (funcionario_id = get_my_funcionario_id())));
+
+-- Policy: periodos_aquis_update ON periodos_aquisitivos
+CREATE POLICY periodos_aquis_update ON public.periodos_aquisitivos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((get_user_role() = ANY (ARRAY['admin'::text, 'gerente'::text])));
+
+-- Policy: plano_contas_select ON plano_de_contas
+CREATE POLICY plano_contas_select ON public.plano_de_contas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: plano_contas_write ON plano_de_contas
+CREATE POLICY plano_contas_write ON public.plano_de_contas AS PERMISSIVE FOR ALL TO service_role
+  USING (true);
+
+-- Policy: Permitir leitura para autenticados ON produtos
+CREATE POLICY "Permitir leitura para autenticados" ON public.produtos AS PERMISSIVE FOR SELECT TO 
+  USING ((auth.role() = 'authenticated'::text));
+
+-- Policy: Permitir tudo para service_role ON produtos
+CREATE POLICY "Permitir tudo para service_role" ON public.produtos AS PERMISSIVE FOR ALL TO 
+  USING ((auth.role() = 'service_role'::text));
+
+-- Policy: authenticated_delete_produtos ON produtos
+CREATE POLICY authenticated_delete_produtos ON public.produtos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: authenticated_insert_produtos ON produtos
+CREATE POLICY authenticated_insert_produtos ON public.produtos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: authenticated_select_produtos ON produtos
+CREATE POLICY authenticated_select_produtos ON public.produtos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_update_produtos ON produtos
+CREATE POLICY authenticated_update_produtos ON public.produtos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: prod_delete ON produtos
+CREATE POLICY prod_delete ON public.produtos AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.produtos.prod_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: prod_insert ON produtos
+CREATE POLICY prod_insert ON public.produtos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.produtos.prod_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: prod_select ON produtos
+CREATE POLICY prod_select ON public.produtos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.produtos.prod_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: prod_update ON produtos
+CREATE POLICY prod_update ON public.produtos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.projeto_itens.pi_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: pi_delete_admin ON projeto_itens
+CREATE POLICY pi_delete_admin ON public.projeto_itens AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.projeto_itens.pi_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: pi_insert ON projeto_itens
+CREATE POLICY pi_insert ON public.projeto_itens AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.projeto_itens.pi_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: pi_select ON projeto_itens
+CREATE POLICY pi_select ON public.projeto_itens AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.projeto_itens.pi_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: pi_update ON projeto_itens
+CREATE POLICY pi_update ON public.projeto_itens AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.projeto_parcelas.Permitir leitura para autenticados
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: (auth.role() = 'authenticated'::text)
-with_check: (none)
+-- Policy: Permitir leitura para autenticados ON projeto_parcelas
+CREATE POLICY "Permitir leitura para autenticados" ON public.projeto_parcelas AS PERMISSIVE FOR SELECT TO 
+  USING ((auth.role() = 'authenticated'::text));
 
--- Policy: public.projeto_parcelas.Permitir tudo para service_role
-permissive=PERMISSIVE roles=public cmd=ALL
-qual: (auth.role() = 'service_role'::text)
-with_check: (none)
+-- Policy: Permitir tudo para service_role ON projeto_parcelas
+CREATE POLICY "Permitir tudo para service_role" ON public.projeto_parcelas AS PERMISSIVE FOR ALL TO 
+  USING ((auth.role() = 'service_role'::text));
 
--- Policy: public.projeto_parcelas.authenticated_all_projeto_parcelas
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: authenticated_all_projeto_parcelas ON projeto_parcelas
+CREATE POLICY authenticated_all_projeto_parcelas ON public.projeto_parcelas AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.projeto_parcelas.parcelas_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: authenticated_insert_projeto_parcelas ON projeto_parcelas
+CREATE POLICY authenticated_insert_projeto_parcelas ON public.projeto_parcelas AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: authenticated_select_projeto_parcelas ON projeto_parcelas
+CREATE POLICY authenticated_select_projeto_parcelas ON public.projeto_parcelas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_update_projeto_parcelas ON projeto_parcelas
+CREATE POLICY authenticated_update_projeto_parcelas ON public.projeto_parcelas AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: parcelas_delete_admin ON projeto_parcelas
+CREATE POLICY parcelas_delete_admin ON public.projeto_parcelas AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.projeto_parcelas.parcelas_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: parcelas_insert ON projeto_parcelas
+CREATE POLICY parcelas_insert ON public.projeto_parcelas AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.projeto_parcelas.parcelas_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: parcelas_select ON projeto_parcelas
+CREATE POLICY parcelas_select ON public.projeto_parcelas AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.projeto_parcelas.parcelas_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: parcelas_update ON projeto_parcelas
+CREATE POLICY parcelas_update ON public.projeto_parcelas AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.projeto_parcelas_backup_migration.authenticated_all
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: authenticated_all ON projeto_parcelas_backup_migration
+CREATE POLICY authenticated_all ON public.projeto_parcelas_backup_migration AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.projeto_produtos.Permitir leitura para autenticados
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: (auth.role() = 'authenticated'::text)
-with_check: (none)
+-- Policy: Permitir leitura para autenticados ON projeto_produtos
+CREATE POLICY "Permitir leitura para autenticados" ON public.projeto_produtos AS PERMISSIVE FOR SELECT TO 
+  USING ((auth.role() = 'authenticated'::text));
 
--- Policy: public.projeto_produtos.Permitir tudo para service_role
-permissive=PERMISSIVE roles=public cmd=ALL
-qual: (auth.role() = 'service_role'::text)
-with_check: (none)
+-- Policy: Permitir tudo para service_role ON projeto_produtos
+CREATE POLICY "Permitir tudo para service_role" ON public.projeto_produtos AS PERMISSIVE FOR ALL TO 
+  USING ((auth.role() = 'service_role'::text));
 
--- Policy: public.projeto_sinal.sinal_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: sinal_delete_admin ON projeto_sinal
+CREATE POLICY sinal_delete_admin ON public.projeto_sinal AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.projeto_sinal.sinal_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: sinal_insert ON projeto_sinal
+CREATE POLICY sinal_insert ON public.projeto_sinal AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.projeto_sinal.sinal_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: sinal_select ON projeto_sinal
+CREATE POLICY sinal_select ON public.projeto_sinal AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.projeto_sinal.sinal_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: sinal_update ON projeto_sinal
+CREATE POLICY sinal_update ON public.projeto_sinal AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.projetos.Permitir leitura para autenticados
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: (auth.role() = 'authenticated'::text)
-with_check: (none)
+-- Policy: Permitir leitura para autenticados ON projetos
+CREATE POLICY "Permitir leitura para autenticados" ON public.projetos AS PERMISSIVE FOR SELECT TO 
+  USING ((auth.role() = 'authenticated'::text));
 
--- Policy: public.projetos.Permitir tudo para service_role
-permissive=PERMISSIVE roles=public cmd=ALL
-qual: (auth.role() = 'service_role'::text)
-with_check: (none)
+-- Policy: Permitir tudo para service_role ON projetos
+CREATE POLICY "Permitir tudo para service_role" ON public.projetos AS PERMISSIVE FOR ALL TO 
+  USING ((auth.role() = 'service_role'::text));
 
--- Policy: public.projetos.authenticated_all_projetos
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: authenticated_all_projetos ON projetos
+CREATE POLICY authenticated_all_projetos ON public.projetos AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.projetos.authenticated_delete_projetos
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: authenticated_delete_projetos ON projetos
+CREATE POLICY authenticated_delete_projetos ON public.projetos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.projetos.authenticated_insert_projetos
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: authenticated_delete_projetos_v2 ON projetos
+CREATE POLICY authenticated_delete_projetos_v2 ON public.projetos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.projetos.authenticated_select_projetos
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_insert_projetos ON projetos
+CREATE POLICY authenticated_insert_projetos ON public.projetos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.projetos.authenticated_update_projetos
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: authenticated_insert_projetos_v2 ON projetos
+CREATE POLICY authenticated_insert_projetos_v2 ON public.projetos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.projetos.projetos_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: authenticated_select_projetos ON projetos
+CREATE POLICY authenticated_select_projetos ON public.projetos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_select_projetos_financial ON projetos
+CREATE POLICY authenticated_select_projetos_financial ON public.projetos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_select_projetos_v2 ON projetos
+CREATE POLICY authenticated_select_projetos_v2 ON public.projetos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_update_projetos ON projetos
+CREATE POLICY authenticated_update_projetos ON public.projetos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: authenticated_update_projetos_v2 ON projetos
+CREATE POLICY authenticated_update_projetos_v2 ON public.projetos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: projetos_delete_admin ON projetos
+CREATE POLICY projetos_delete_admin ON public.projetos AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.projetos.projetos_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: projetos_insert ON projetos
+CREATE POLICY projetos_insert ON public.projetos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.projetos.projetos_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: projetos_select ON projetos
+CREATE POLICY projetos_select ON public.projetos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.projetos.projetos_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: projetos_update ON projetos
+CREATE POLICY projetos_update ON public.projetos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.projetos_fechados.projetos_fechados_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: projetos_fechados_delete ON projetos_fechados
+CREATE POLICY projetos_fechados_delete ON public.projetos_fechados AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.projetos_fechados.projetos_fechados_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: projetos_fechados_insert ON projetos_fechados
+CREATE POLICY projetos_fechados_insert ON public.projetos_fechados AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.projetos_fechados.projetos_fechados_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: projetos_fechados_select ON projetos_fechados
+CREATE POLICY projetos_fechados_select ON public.projetos_fechados AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.projetos_fechados.projetos_fechados_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: projetos_fechados_update ON projetos_fechados
+CREATE POLICY projetos_fechados_update ON public.projetos_fechados AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.quote_history.all_quote_history_auth
-permissive=PERMISSIVE roles=public cmd=ALL
-qual: true
-with_check: (none)
+-- Policy: all_quote_history_auth ON quote_history
+CREATE POLICY all_quote_history_auth ON public.quote_history AS PERMISSIVE FOR ALL TO 
+  USING (true);
 
--- Policy: public.quotes.all_quotes_auth
-permissive=PERMISSIVE roles=public cmd=ALL
-qual: true
-with_check: true
+-- Policy: all_quotes_auth ON quotes
+CREATE POLICY all_quotes_auth ON public.quotes AS PERMISSIVE FOR ALL TO 
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.remessas.remessas_delete_policy
-permissive=PERMISSIVE roles=public cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: remessas_delete_policy ON remessas
+CREATE POLICY remessas_delete_policy ON public.remessas AS PERMISSIVE FOR DELETE TO 
+  USING (true);
 
--- Policy: public.remessas.remessas_insert_policy
-permissive=PERMISSIVE roles=public cmd=INSERT
-qual: (none)
-with_check: (auth.uid() IS NOT NULL)
+-- Policy: remessas_insert_policy ON remessas
+CREATE POLICY remessas_insert_policy ON public.remessas AS PERMISSIVE FOR INSERT TO 
+  WITH CHECK ((auth.uid() IS NOT NULL));
 
--- Policy: public.remessas.remessas_select_policy
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: remessas_select_policy ON remessas
+CREATE POLICY remessas_select_policy ON public.remessas AS PERMISSIVE FOR SELECT TO 
+  USING (true);
 
--- Policy: public.remessas.remessas_update_policy
-permissive=PERMISSIVE roles=public cmd=UPDATE
-qual: true
-with_check: (auth.uid() IS NOT NULL)
+-- Policy: remessas_update_policy ON remessas
+CREATE POLICY remessas_update_policy ON public.remessas AS PERMISSIVE FOR UPDATE TO 
+  USING (true)
+  WITH CHECK ((auth.uid() IS NOT NULL));
 
--- Policy: public.retornos_processados.authenticated_all_retornos
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: authenticated_all_retornos ON retornos_processados
+CREATE POLICY authenticated_all_retornos ON public.retornos_processados AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.retornos_processados.authenticated_delete_retornos
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
+-- Policy: authenticated_delete_retornos ON retornos_processados
+CREATE POLICY authenticated_delete_retornos ON public.retornos_processados AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.retornos_processados.authenticated_insert_retornos
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
+-- Policy: authenticated_insert_retornos ON retornos_processados
+CREATE POLICY authenticated_insert_retornos ON public.retornos_processados AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.retornos_processados.authenticated_select_retornos
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_retornos ON retornos_processados
+CREATE POLICY authenticated_select_retornos ON public.retornos_processados AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.retornos_processados.authenticated_update_retornos
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
+-- Policy: authenticated_update_retornos ON retornos_processados
+CREATE POLICY authenticated_update_retornos ON public.retornos_processados AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy: public.revenda_ubiqua.authenticated_select_revenda
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: authenticated_select_revenda ON revenda_ubiqua
+CREATE POLICY authenticated_select_revenda ON public.revenda_ubiqua AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.revenda_ubiqua.revenda_ubiqua_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: revenda_ubiqua_delete ON revenda_ubiqua
+CREATE POLICY revenda_ubiqua_delete ON public.revenda_ubiqua AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.revenda_ubiqua.revenda_ubiqua_delete_admin_ubiqua
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: ((EXISTS ( SELECT 1
+-- Policy: revenda_ubiqua_delete_admin_ubiqua ON revenda_ubiqua
+CREATE POLICY revenda_ubiqua_delete_admin_ubiqua ON public.revenda_ubiqua AS PERMISSIVE FOR DELETE TO authenticated
+  USING (((EXISTS ( SELECT 1
    FROM usuarios_ubiqua u
   WHERE ((u.id = auth.uid()) AND (u.nivel_acesso = 'admin'::nivel_acesso_tipo)))) OR (EXISTS ( SELECT 1
    FROM usuarios u
+  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))));
+
+-- Policy: revenda_ubiqua_insert ON revenda_ubiqua
+CREATE POLICY revenda_ubiqua_insert ON public.revenda_ubiqua AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
+   FROM usuarios u
+  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
+
+-- Policy: revenda_ubiqua_select ON revenda_ubiqua
+CREATE POLICY revenda_ubiqua_select ON public.revenda_ubiqua AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: revenda_ubiqua_select_anon ON revenda_ubiqua
+CREATE POLICY revenda_ubiqua_select_anon ON public.revenda_ubiqua AS PERMISSIVE FOR SELECT TO anon
+  USING (true);
+
+-- Policy: revenda_ubiqua_update ON revenda_ubiqua
+CREATE POLICY revenda_ubiqua_update ON public.revenda_ubiqua AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
+   FROM usuarios u
   WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))))
-with_check: (none)
-
--- Policy: public.revenda_ubiqua.revenda_ubiqua_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
+  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.revenda_ubiqua.revenda_ubiqua_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: sep_arq_delete_auth ON separacao_arquivos
+CREATE POLICY sep_arq_delete_auth ON public.separacao_arquivos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
 
--- Policy: public.revenda_ubiqua.revenda_ubiqua_select_anon
-permissive=PERMISSIVE roles=anon cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: sep_arq_insert_auth ON separacao_arquivos
+CREATE POLICY sep_arq_insert_auth ON public.separacao_arquivos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.revenda_ubiqua.revenda_ubiqua_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: sep_arq_select_auth ON separacao_arquivos
+CREATE POLICY sep_arq_select_auth ON public.separacao_arquivos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: sep_arq_update_auth ON separacao_arquivos
+CREATE POLICY sep_arq_update_auth ON public.separacao_arquivos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: separacao_arquivos_authenticated_all ON separacao_arquivos
+CREATE POLICY separacao_arquivos_authenticated_all ON public.separacao_arquivos AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: separacao_arquivos_delete ON separacao_arquivos
+CREATE POLICY separacao_arquivos_delete ON public.separacao_arquivos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: separacao_arquivos_insert ON separacao_arquivos
+CREATE POLICY separacao_arquivos_insert ON public.separacao_arquivos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: separacao_arquivos_select ON separacao_arquivos
+CREATE POLICY separacao_arquivos_select ON public.separacao_arquivos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: separacao_arquivos_update ON separacao_arquivos
+CREATE POLICY separacao_arquivos_update ON public.separacao_arquivos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: sep_itens_delete ON separacao_itens
+CREATE POLICY sep_itens_delete ON public.separacao_itens AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (EXISTS ( SELECT 1
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
+
+-- Policy: sep_itens_insert ON separacao_itens
+CREATE POLICY sep_itens_insert ON public.separacao_itens AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.separacao_arquivos.separacao_arquivos_authenticated_all
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: sep_itens_select ON separacao_itens
+CREATE POLICY sep_itens_select ON public.separacao_itens AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.separacao_itens.sep_itens_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: sep_itens_update ON separacao_itens
+CREATE POLICY sep_itens_update ON public.separacao_itens AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.separacao_itens.sep_itens_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: sep_delete_auth ON separacoes
+CREATE POLICY sep_delete_auth ON public.separacoes AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: sep_insert_auth ON separacoes
+CREATE POLICY sep_insert_auth ON public.separacoes AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: sep_select_auth ON separacoes
+CREATE POLICY sep_select_auth ON public.separacoes AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: sep_update_auth ON separacoes
+CREATE POLICY sep_update_auth ON public.separacoes AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: separacoes_delete ON separacoes
+CREATE POLICY separacoes_delete ON public.separacoes AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: separacoes_delete_admin ON separacoes
+CREATE POLICY separacoes_delete_admin ON public.separacoes AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.separacao_itens.sep_itens_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: separacoes_insert ON separacoes
+CREATE POLICY separacoes_insert ON public.separacoes AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.separacao_itens.sep_itens_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: separacoes_select ON separacoes
+CREATE POLICY separacoes_select ON public.separacoes AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: separacoes_update ON separacoes
+CREATE POLICY separacoes_update ON public.separacoes AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: separacoes_arquivos_authenticated_all ON separacoes_arquivos
+CREATE POLICY separacoes_arquivos_authenticated_all ON public.separacoes_arquivos AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: separacoes_arquivos_delete ON separacoes_arquivos
+CREATE POLICY separacoes_arquivos_delete ON public.separacoes_arquivos AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: separacoes_arquivos_insert ON separacoes_arquivos
+CREATE POLICY separacoes_arquivos_insert ON public.separacoes_arquivos AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: separacoes_arquivos_select ON separacoes_arquivos
+CREATE POLICY separacoes_arquivos_select ON public.separacoes_arquivos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: separacoes_arquivos_update ON separacoes_arquivos
+CREATE POLICY separacoes_arquivos_update ON public.separacoes_arquivos AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: authenticated_delete_solicitacoes_compra ON solicitacoes_compra
+CREATE POLICY authenticated_delete_solicitacoes_compra ON public.solicitacoes_compra AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: authenticated_insert_solicitacoes_compra ON solicitacoes_compra
+CREATE POLICY authenticated_insert_solicitacoes_compra ON public.solicitacoes_compra AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: authenticated_select_solicitacoes_compra ON solicitacoes_compra
+CREATE POLICY authenticated_select_solicitacoes_compra ON public.solicitacoes_compra AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_update_solicitacoes_compra ON solicitacoes_compra
+CREATE POLICY authenticated_update_solicitacoes_compra ON public.solicitacoes_compra AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: sync_insert ON sync_history
+CREATE POLICY sync_insert ON public.sync_history AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.separacoes.separacoes_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: sync_select ON sync_history
+CREATE POLICY sync_select ON public.sync_history AS PERMISSIVE FOR SELECT TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.separacoes.separacoes_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: admin_all_systems ON systems
+CREATE POLICY admin_all_systems ON public.systems AS PERMISSIVE FOR ALL TO authenticated
+  USING (is_admin())
+  WITH CHECK (is_admin());
+
+-- Policy: authenticated_select_systems ON systems
+CREATE POLICY authenticated_select_systems ON public.systems AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_all_transacoes ON transacoes
+CREATE POLICY authenticated_all_transacoes ON public.transacoes AS PERMISSIVE FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: authenticated_delete_transacoes ON transacoes
+CREATE POLICY authenticated_delete_transacoes ON public.transacoes AS PERMISSIVE FOR DELETE TO authenticated
+  USING (true);
+
+-- Policy: authenticated_insert_transacoes ON transacoes
+CREATE POLICY authenticated_insert_transacoes ON public.transacoes AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+-- Policy: authenticated_select_transacoes ON transacoes
+CREATE POLICY authenticated_select_transacoes ON public.transacoes AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: authenticated_update_transacoes ON transacoes
+CREATE POLICY authenticated_update_transacoes ON public.transacoes AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: trans_delete_admin ON transacoes
+CREATE POLICY trans_delete_admin ON public.transacoes AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role)))));
 
--- Policy: public.separacoes.separacoes_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
-
--- Policy: public.separacoes.separacoes_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: trans_insert ON transacoes
+CREATE POLICY trans_insert ON public.transacoes AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.separacoes_arquivos.separacoes_arquivos_authenticated_all
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
-
--- Policy: public.solicitacoes_compra.authenticated_delete_solicitacoes_compra
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: true
-with_check: (none)
-
--- Policy: public.solicitacoes_compra.authenticated_insert_solicitacoes_compra
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: true
-
--- Policy: public.solicitacoes_compra.authenticated_select_solicitacoes_compra
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
-
--- Policy: public.solicitacoes_compra.authenticated_update_solicitacoes_compra
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: true
-with_check: true
-
--- Policy: public.sync_history.sync_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: trans_select ON transacoes
+CREATE POLICY trans_select ON public.transacoes AS PERMISSIVE FOR SELECT TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.sync_history.sync_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: (EXISTS ( SELECT 1
+-- Policy: trans_update_admin ON transacoes
+CREATE POLICY trans_update_admin ON public.transacoes AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role)))));
 
--- Policy: public.systems.authenticated_select_systems
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: Permitir leitura para usuarios autenticados ON user_roles_separacao
+CREATE POLICY "Permitir leitura para usuarios autenticados" ON public.user_roles_separacao AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
 
--- Policy: public.transacoes.authenticated_all_transacoes
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: true
-with_check: true
+-- Policy: user_role_sep_insert_auth ON user_roles_separacao
+CREATE POLICY user_role_sep_insert_auth ON public.user_roles_separacao AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (true);
 
--- Policy: public.transacoes.trans_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
+-- Policy: user_role_sep_select_auth ON user_roles_separacao
+CREATE POLICY user_role_sep_select_auth ON public.user_roles_separacao AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: user_role_sep_update_auth ON user_roles_separacao
+CREATE POLICY user_role_sep_update_auth ON public.user_roles_separacao AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy: admin_all_usa ON user_system_access
+CREATE POLICY admin_all_usa ON public.user_system_access AS PERMISSIVE FOR ALL TO authenticated
+  USING (is_admin())
+  WITH CHECK (is_admin());
+
+-- Policy: user_select_usa ON user_system_access
+CREATE POLICY user_select_usa ON public.user_system_access AS PERMISSIVE FOR SELECT TO authenticated
+  USING ((user_id = auth.uid()));
+
+-- Policy: usuarios_delete_admin ON usuarios
+CREATE POLICY usuarios_delete_admin ON public.usuarios AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((get_user_role() = 'admin'::text));
+
+-- Policy: usuarios_select_all ON usuarios
+CREATE POLICY usuarios_select_all ON public.usuarios AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+
+-- Policy: usuarios_select_own_or_funcionario ON usuarios
+CREATE POLICY usuarios_select_own_or_funcionario ON public.usuarios AS PERMISSIVE FOR SELECT TO authenticated
+  USING (((id = auth.uid()) OR current_user_is_funcionario()));
+
+-- Policy: usuarios_update_own ON usuarios
+CREATE POLICY usuarios_update_own ON public.usuarios AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((id = auth.uid()))
+  WITH CHECK ((id = auth.uid()));
+
+-- Policy: usuarios_ubiqua_delete ON usuarios_ubiqua
+CREATE POLICY usuarios_ubiqua_delete ON public.usuarios_ubiqua AS PERMISSIVE FOR DELETE TO authenticated
+  USING (((id = auth.uid()) OR is_ubiqua_admin()));
+
+-- Policy: usuarios_ubiqua_insert ON usuarios_ubiqua
+CREATE POLICY usuarios_ubiqua_insert ON public.usuarios_ubiqua AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK (((id = auth.uid()) OR is_ubiqua_admin()));
+
+-- Policy: usuarios_ubiqua_select ON usuarios_ubiqua
+CREATE POLICY usuarios_ubiqua_select ON public.usuarios_ubiqua AS PERMISSIVE FOR SELECT TO authenticated
+  USING (((id = auth.uid()) OR is_ubiqua_admin()));
+
+-- Policy: usuarios_ubiqua_update ON usuarios_ubiqua
+CREATE POLICY usuarios_ubiqua_update ON public.usuarios_ubiqua AS PERMISSIVE FOR UPDATE TO authenticated
+  USING (((id = auth.uid()) OR is_ubiqua_admin()))
+  WITH CHECK (((id = auth.uid()) OR is_ubiqua_admin()));
+
+-- Policy: Permitir leitura para autenticados ON vendas
+CREATE POLICY "Permitir leitura para autenticados" ON public.vendas AS PERMISSIVE FOR SELECT TO 
+  USING ((auth.role() = 'authenticated'::text));
+
+-- Policy: Permitir tudo para service_role ON vendas
+CREATE POLICY "Permitir tudo para service_role" ON public.vendas AS PERMISSIVE FOR ALL TO 
+  USING ((auth.role() = 'service_role'::text));
+
+-- Policy: vendas_delete ON vendas_marca
+CREATE POLICY vendas_delete ON public.vendas_marca AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.transacoes.trans_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
+-- Policy: vendas_insert ON vendas_marca
+CREATE POLICY vendas_insert ON public.vendas_marca AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.transacoes.trans_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: (EXISTS ( SELECT 1
+-- Policy: vendas_select ON vendas_marca
+CREATE POLICY vendas_select ON public.vendas_marca AS PERMISSIVE FOR SELECT TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role]))))));
 
--- Policy: public.transacoes.trans_update_admin
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
+-- Policy: vendas_update ON vendas_marca
+CREATE POLICY vendas_update ON public.vendas_marca AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((EXISTS ( SELECT 1
    FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role))))
-with_check: (none)
+  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role]))))));
 
--- Policy: public.user_roles_separacao.Permitir leitura para usuarios autenticados
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: Admin Delete ON objects
+CREATE POLICY "Admin Delete" ON storage.objects AS PERMISSIVE FOR DELETE TO authenticated
+  USING ((bucket_id = 'revenda-ubiqua-images'::text));
 
--- Policy: public.user_system_access.admin_all_usa
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: is_admin()
-with_check: is_admin()
+-- Policy: Admin Update ON objects
+CREATE POLICY "Admin Update" ON storage.objects AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((bucket_id = 'revenda-ubiqua-images'::text));
 
--- Policy: public.user_system_access.user_select_usa
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: (user_id = auth.uid())
-with_check: (none)
+-- Policy: Admin Upload ON objects
+CREATE POLICY "Admin Upload" ON storage.objects AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((bucket_id = 'revenda-ubiqua-images'::text));
 
--- Policy: public.usuarios.admin_all_usuarios
-permissive=PERMISSIVE roles=authenticated cmd=ALL
-qual: is_admin()
-with_check: is_admin()
+-- Policy: Anon can upload ON objects
+CREATE POLICY "Anon can upload" ON storage.objects AS PERMISSIVE FOR INSERT TO anon
+  WITH CHECK ((bucket_id = 'orcamentos'::text));
 
--- Policy: public.usuarios.authenticated_select_self
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: (auth.uid() = id)
-with_check: (none)
+-- Policy: Anon public read for catalogos ON objects
+CREATE POLICY "Anon public read for catalogos" ON storage.objects AS PERMISSIVE FOR SELECT TO anon
+  USING ((bucket_id = 'revenda-ubiqua-images'::text));
 
--- Policy: public.usuarios.authenticated_select_usuarios
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: Authenticated Users can upload ON objects
+CREATE POLICY "Authenticated Users can upload" ON storage.objects AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((bucket_id = 'orcamentos'::text));
 
--- Policy: public.usuarios.usuarios_delete_admin
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role))))
-with_check: (none)
+-- Policy: Authenticated public read for catalogos ON objects
+CREATE POLICY "Authenticated public read for catalogos" ON storage.objects AS PERMISSIVE FOR SELECT TO authenticated
+  USING ((bucket_id = 'revenda-ubiqua-images'::text));
 
--- Policy: public.usuarios.usuarios_insert_admin
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = 'admin'::usuario_role))))
+-- Policy: Give anon users access to JPG images in folder 1ps91ds_0 ON objects
+CREATE POLICY "Give anon users access to JPG images in folder 1ps91ds_0" ON storage.objects AS PERMISSIVE FOR INSERT TO public
+  WITH CHECK (((bucket_id = 'revenda-ubiqua-images'::text) AND (storage.extension(name) = 'jpg'::text) AND (lower((storage.foldername(name))[1]) = 'public'::text) AND (auth.role() = 'anon'::text)));
 
--- Policy: public.usuarios.usuarios_select_own
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: true
-with_check: (none)
+-- Policy: Give anon users access to JPG images in folder 1ps91ds_1 ON objects
+CREATE POLICY "Give anon users access to JPG images in folder 1ps91ds_1" ON storage.objects AS PERMISSIVE FOR UPDATE TO public
+  USING (((bucket_id = 'revenda-ubiqua-images'::text) AND (storage.extension(name) = 'jpg'::text) AND (lower((storage.foldername(name))[1]) = 'public'::text) AND (auth.role() = 'anon'::text)));
 
--- Policy: public.usuarios.usuarios_update_own
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: ((id = auth.uid()) OR (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = auth.uid()) AND (u.role = 'admin'::usuario_role)))))
-with_check: (none)
+-- Policy: Give anon users access to JPG images in folder 1ps91ds_2 ON objects
+CREATE POLICY "Give anon users access to JPG images in folder 1ps91ds_2" ON storage.objects AS PERMISSIVE FOR SELECT TO public
+  USING (((bucket_id = 'revenda-ubiqua-images'::text) AND (storage.extension(name) = 'jpg'::text) AND (lower((storage.foldername(name))[1]) = 'public'::text) AND (auth.role() = 'anon'::text)));
 
--- Policy: public.usuarios_ubiqua.usuarios_ubiqua_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: ((id = auth.uid()) OR is_ubiqua_admin())
-with_check: (none)
+-- Policy: Public Access ON objects
+CREATE POLICY "Public Access" ON storage.objects AS PERMISSIVE FOR SELECT TO public
+  USING ((bucket_id = 'orcamentos'::text));
 
--- Policy: public.usuarios_ubiqua.usuarios_ubiqua_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: ((id = auth.uid()) OR is_ubiqua_admin())
+-- Policy: orcamentos_anon_insert ON objects
+CREATE POLICY orcamentos_anon_insert ON storage.objects AS PERMISSIVE FOR INSERT TO anon
+  WITH CHECK ((bucket_id = 'orcamentos'::text));
 
--- Policy: public.usuarios_ubiqua.usuarios_ubiqua_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: ((id = auth.uid()) OR is_ubiqua_admin())
-with_check: (none)
+-- Policy: orcamentos_authenticated_insert ON objects
+CREATE POLICY orcamentos_authenticated_insert ON storage.objects AS PERMISSIVE FOR INSERT TO authenticated
+  WITH CHECK ((bucket_id = 'orcamentos'::text));
 
--- Policy: public.usuarios_ubiqua.usuarios_ubiqua_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: ((id = auth.uid()) OR is_ubiqua_admin())
-with_check: ((id = auth.uid()) OR is_ubiqua_admin())
+-- Policy: orcamentos_authenticated_update ON objects
+CREATE POLICY orcamentos_authenticated_update ON storage.objects AS PERMISSIVE FOR UPDATE TO authenticated
+  USING ((bucket_id = 'orcamentos'::text));
 
--- Policy: public.vendas.Permitir leitura para autenticados
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: (auth.role() = 'authenticated'::text)
-with_check: (none)
+-- Policy: orcamentos_public_read ON objects
+CREATE POLICY orcamentos_public_read ON storage.objects AS PERMISSIVE FOR SELECT TO public
+  USING ((bucket_id = 'orcamentos'::text));
 
--- Policy: public.vendas.Permitir tudo para service_role
-permissive=PERMISSIVE roles=public cmd=ALL
-qual: (auth.role() = 'service_role'::text)
-with_check: (none)
+-- ==== Adicionado em 2026-07-07 (SPEC-008/010-hardening/011/015) ====
 
--- Policy: public.vendas_marca.vendas_delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
-
--- Policy: public.vendas_marca.vendas_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-
--- Policy: public.vendas_marca.vendas_select
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role, 'operador'::usuario_role])))))
-with_check: (none)
-
--- Policy: public.vendas_marca.vendas_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (EXISTS ( SELECT 1
-   FROM usuarios u
-  WHERE ((u.id = ( SELECT auth.uid() AS uid)) AND (u.role = ANY (ARRAY['admin'::usuario_role, 'gerente'::usuario_role])))))
-with_check: (none)
-
--- Policy: storage.objects.Admin Delete
-permissive=PERMISSIVE roles=authenticated cmd=DELETE
-qual: (bucket_id = 'revenda-ubiqua-images'::text)
-with_check: (none)
-
--- Policy: storage.objects.Admin Update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (bucket_id = 'revenda-ubiqua-images'::text)
-with_check: (none)
-
--- Policy: storage.objects.Admin Upload
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (bucket_id = 'revenda-ubiqua-images'::text)
-
--- Policy: storage.objects.Anon can upload
-permissive=PERMISSIVE roles=anon cmd=INSERT
-qual: (none)
-with_check: (bucket_id = 'orcamentos'::text)
-
--- Policy: storage.objects.Anon public read for catalogos
-permissive=PERMISSIVE roles=anon cmd=SELECT
-qual: (bucket_id = 'revenda-ubiqua-images'::text)
-with_check: (none)
-
--- Policy: storage.objects.Authenticated Users can upload
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (bucket_id = 'orcamentos'::text)
-
--- Policy: storage.objects.Authenticated public read for catalogos
-permissive=PERMISSIVE roles=authenticated cmd=SELECT
-qual: (bucket_id = 'revenda-ubiqua-images'::text)
-with_check: (none)
-
--- Policy: storage.objects.Give anon users access to JPG images in folder 1ps91ds_0
-permissive=PERMISSIVE roles=public cmd=INSERT
-qual: (none)
-with_check: ((bucket_id = 'revenda-ubiqua-images'::text) AND (storage.extension(name) = 'jpg'::text) AND (lower((storage.foldername(name))[1]) = 'public'::text) AND (auth.role() = 'anon'::text))
-
--- Policy: storage.objects.Give anon users access to JPG images in folder 1ps91ds_1
-permissive=PERMISSIVE roles=public cmd=UPDATE
-qual: ((bucket_id = 'revenda-ubiqua-images'::text) AND (storage.extension(name) = 'jpg'::text) AND (lower((storage.foldername(name))[1]) = 'public'::text) AND (auth.role() = 'anon'::text))
-with_check: (none)
-
--- Policy: storage.objects.Give anon users access to JPG images in folder 1ps91ds_2
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: ((bucket_id = 'revenda-ubiqua-images'::text) AND (storage.extension(name) = 'jpg'::text) AND (lower((storage.foldername(name))[1]) = 'public'::text) AND (auth.role() = 'anon'::text))
-with_check: (none)
-
--- Policy: storage.objects.Public Access
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: (bucket_id = 'orcamentos'::text)
-with_check: (none)
-
--- Policy: storage.objects.orcamentos_anon_insert
-permissive=PERMISSIVE roles=anon cmd=INSERT
-qual: (none)
-with_check: (bucket_id = 'orcamentos'::text)
-
--- Policy: storage.objects.orcamentos_authenticated_insert
-permissive=PERMISSIVE roles=authenticated cmd=INSERT
-qual: (none)
-with_check: (bucket_id = 'orcamentos'::text)
-
--- Policy: storage.objects.orcamentos_authenticated_update
-permissive=PERMISSIVE roles=authenticated cmd=UPDATE
-qual: (bucket_id = 'orcamentos'::text)
-with_check: (none)
-
--- Policy: storage.objects.orcamentos_public_read
-permissive=PERMISSIVE roles=public cmd=SELECT
-qual: (bucket_id = 'orcamentos'::text)
-with_check: (none)
-
+-- Policy: authenticated_select_devolucoes_estoque ON devolucoes_estoque
+CREATE POLICY authenticated_select_devolucoes_estoque ON public.devolucoes_estoque AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+-- Policy: authenticated_select_estoque_movimentos_projeto_item ON estoque_movimentos_projeto_item
+CREATE POLICY authenticated_select_estoque_movimentos_projeto_item ON public.estoque_movimentos_projeto_item AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+-- Policy: authenticated_select_estoque_saldos_projeto_item ON estoque_saldos_projeto_item
+CREATE POLICY authenticated_select_estoque_saldos_projeto_item ON public.estoque_saldos_projeto_item AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+-- Policy: authenticated_select_retorno_bancario_arquivos ON retorno_bancario_arquivos
+CREATE POLICY authenticated_select_retorno_bancario_arquivos ON public.retorno_bancario_arquivos AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+-- Policy: authenticated_select_retorno_bancario_registros ON retorno_bancario_registros
+CREATE POLICY authenticated_select_retorno_bancario_registros ON public.retorno_bancario_registros AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);
+-- Policy: authenticated_select_transferencias_estoque ON transferencias_estoque
+CREATE POLICY authenticated_select_transferencias_estoque ON public.transferencias_estoque AS PERMISSIVE FOR SELECT TO authenticated
+  USING (true);

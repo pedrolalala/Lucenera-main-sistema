@@ -1,6 +1,6 @@
 # Status, enums e campos de seleção do DB atual
 
-Status: atualizado com base no schema real extraído do Supabase em 2026-06-25.
+Status: atualizado com base no schema real extraído do Supabase em 2026-07-06.
 
 Fonte principal: `supabase/db/current/01_schema_full.sql`.
 
@@ -53,7 +53,7 @@ Estas tabelas têm campo `status` como `text` sem enum/check específico no sche
 | --- | --- | --- |
 | `boletos` | `Pendente` | Usado no financeiro/administração bancária. Pode evoluir para status mais controlado em migration futura. |
 | `fornecedores` | `ativo` | Cadastro. Atenção à diferença de caixa em relação a `Ativo` de funcionários. |
-| `orcamentos` | `aguardando_aprovacao` | Fluxo antigo/legado de orçamento. |
+| `orcamentos` | `aguardando_aprovacao` | Texto livre. No banco real de 06/07/2026 há registros em `enviado_cliente`, `Aprovação Financeira` e `Orçamento Aprovado`; a SPEC-009 também desenha `aprovado_cliente`/`recusado_cliente`. A SPEC-016 implementou o contrato oficial `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`; valores como `aprovado_cliente`, `aprovado` e `aprovado_financeiro` devem ser tratados como legados/compatibilidade. |
 | `orcamentos_revenda_ubiqua` | `rascunho` | Fluxo atual do sistema de orçamentos. A aprovação usada pela integração financeira trabalha com `aprovado`. |
 | `pedido_compra` | `Pendente` | Compra/estoque. Ainda precisa ser consolidado com o novo sistema de Estoque/Compras. |
 | `quotes` | `aberto` | Orçamentos/cotações legadas. |
@@ -86,7 +86,7 @@ No fluxo novo, o orçamento aprovado deve alimentar `projeto_itens` e abrir o ca
 
 O vínculo principal decidido é `orcamento_id`. O financeiro deve conseguir exibir orçamento, projeto e cliente a partir desse vínculo, sem exigir `venda_id`.
 
-Ação a ser realizada: manter a integração baseada em `orcamento_id`, usando a aprovação do orçamento para gerar ou atualizar itens do projeto e pendências financeiras conforme a SPEC-001.
+Diretriz ativa: manter a integração baseada em `orcamento_id`, usando somente a aprovação financeira final para gerar ou atualizar itens do projeto e pendências financeiras conforme a SPEC-001/SPEC-016. O contrato único implementado é `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`; `aprovado_cliente`, `aprovado` e `aprovado_financeiro` devem ser tratados como legados/compatibilidade.
 
 ### Logística
 
@@ -102,12 +102,12 @@ O novo sistema de Estoque/Compras deve possuir os dados operacionais. O Cadastro
 
 As vendas representam itens aprovados. O restante das movimentações relacionadas a clientes deve ser tratado como movimentação de estoque.
 
-Ação a ser realizada: ao especificar o sistema de Estoque/Compras, revisar `estoque_local`, `solicitacao_status`, `pedido_compra.status` e `solicitacoes_compra.status` para evitar duplicidade entre compra, reserva, separação e entrega.
+Ação a ser realizada: ao especificar o sistema de Estoque/Compras, revisar `estoque_local`, `solicitacao_status`, `pedido_compra.status` e `solicitacoes_compra.status` para evitar duplicidade entre compra, reserva, separação e entrega. A SPEC-010 já criou saldos numéricos por `projeto_item_id` (`q_reserva`, `q_entrega_futura`, `q_ag_separar`, `q_separado`, `q_entregue`, `q_devolvida`, `q_transferida_saida`) e `status_operacional` no banco real; antes de consumir esses campos em UI, aplicar o hardening `20260707_023` e definir a policy de RLS. `estoque_itens.quantidade_reservada` permanece como agregado de compatibilidade dos saldos abertos.
 
 ## Pendências de normalização
 
 - Avaliar se `solicitacoes_compra.status` deve usar `solicitacao_status`.
 - Avaliar se `boletos.status` e `remessas.status` precisam de enum/check próprio.
 - Avaliar padronização de caixa/acentos em `separacao_status`.
-- Confirmar se `orcamentos` ainda será mantida ou se ficará apenas como legado diante de `orcamentos_revenda_ubiqua`.
+- Homologar o fluxo completo de `orcamentos` depois da normalização da SPEC-016 e da UI das SPECs 017/018.
 - Após a arrumação funcional do DB, fazer análise específica de segurança, permissões, RLS, roles e exposição pública.

@@ -65,6 +65,8 @@ O sistema não será responsável por saldo, reservas, movimentos, cotações, p
 
 **Critério de aceite:** o produto alterado no Cadastro aparece atualizado em Orçamentos e Estoque/Compras.
 
+**Atualização 06/07/2026:** a SPEC-018 permite criar produto diretamente no modal de criar/editar orçamento, sem trocar de sistema. Essa criação continua sendo cadastro canônico: grava em `produtos`, reaproveita validações de código/SKU e não cria catálogo local no sistema de Orçamentos.
+
 ## SPEC-CAD-04 — Cadastro mestre de fornecedores
 
 **Achado:** fornecedores são necessários em cadastro, produto e compras.
@@ -93,6 +95,10 @@ O sistema não será responsável por saldo, reservas, movimentos, cotações, p
 
 **Critério de aceite:** nenhuma ação do Cadastro cria movimento de estoque ou pedido de compra.
 
+**Atualização 06/07/2026:** após a SPEC-010, Cadastro pode exibir "Reservado por projeto/cliente" no detalhe da peça, lendo views derivadas de `estoque_saldos_projeto_item`, mas continua sem escrever reserva, transferência, compra ou movimento operacional.
+
+**Atualização 06/07/2026:** a criação de produto pela SPEC-018 é permitida como conveniência de fluxo comercial, mas não autoriza Cadastro ou Orçamentos a escrever saldo, reserva, separação, cotação, pedido ou recebimento.
+
 ## SPEC-CAD-06 — Projetos fora da responsabilidade de cadastro
 
 **Achado:** Cadastro e CRM possuem telas de projetos, e a tela de Cadastro lê `vw_projetos_dashboard`.
@@ -106,6 +112,8 @@ O sistema não será responsável por saldo, reservas, movimentos, cotações, p
 **Ação a ser realizada:** remover edição concorrente e redirecionar ações de projeto para o CRM, mantendo no Cadastro apenas consulta/atalho quando necessário.
 
 **Critério de aceite:** alterações do projeto são executadas apenas no CRM.
+
+**Atualização 30/06/2026:** as rotas `/clientes` e `/projetos` passaram a redirecionar para `/pecas` (commit `Refactor: Remove projects and clients modules`) — os módulos saíram da navegação principal. O código-fonte de `Clientes`/`Projetos` e a leitura de `vw_projetos_dashboard` ainda existem no repositório; falta confirmar que nenhuma tela remanescente grava em `projetos` e, se for o caso, retirar o código morto. Ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md).
 
 ## SPEC-CAD-07 — Importação e origem
 

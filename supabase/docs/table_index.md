@@ -1,6 +1,6 @@
 # Índice de tabelas por domínio
 
-Atualizado a partir do Supabase real em: 2026-06-25T14:57:08.908Z
+Atualizado a partir do Supabase real em: 2026-07-06.
 
 Este índice é operacional: lista os objetos reais encontrados. A classificação por domínio ainda pode ser refinada manualmente.
 
@@ -176,3 +176,5 @@ Este índice é operacional: lista os objetos reais encontrados. A classificaç�
 Refinar manualmente a classificação por domínio e remover ambiguidades. Este arquivo foi gerado por nomes reais de tabela/view, não por migrations antigas.
 
 Observação: `historico_status_orcamentos` (plural) pertence ao fluxo novo Lucenera e referencia `public.orcamentos(id)`. `historico_status_orcamento` (singular) permanece ligado ao fluxo Ubiqua/revenda.
+
+Observação 2026-07-07: `orcamentos` já possui colunas de aprovação do cliente e RPCs relacionadas no snapshot real. A SPEC-010 foi confirmada no Supabase real com `estoque_saldos_projeto_item`, `estoque_movimentos_projeto_item` e views de saldo; aplicar o hardening `20260707_023` e reextrair `db/current/` antes de destravar SPEC-011/012/015 e badges ricos da SPEC-014.

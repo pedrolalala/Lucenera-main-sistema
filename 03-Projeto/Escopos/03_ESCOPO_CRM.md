@@ -190,6 +190,8 @@ O CRM não será dividido em espaços. Cada projeto executará uma versão de um
 
 **Critério de aceite:** cada item informa origem, quantidade aprovada e situação atual.
 
+**Atualização 07/07/2026:** a SPEC-014 detalha o card de itens aprovados e a SPEC-010 já existe no banco real. O CRM deve diferenciar `Reservado`, `Entrega futura`, `Separado`, `Entregue` e `Cancelado` lendo a view de saldos por `projeto_item_id` somente depois do hardening `20260707_023` e da policy de RLS; até lá, pode usar o rótulo genérico `Ativo` para itens válidos sem rastreabilidade detalhada.
+
 ## SPEC-CRM-12 — Registro manual de aceite/documento
 
 **Achado:** a integração com DocSign não entra nesta versão, mas continua mapeada como plano futuro de baixa prioridade — não é um item descartado, apenas adiado. O processo, enquanto isso, precisa registrar que um documento foi concluído.
@@ -217,6 +219,10 @@ O CRM não será dividido em espaços. Cada projeto executará uma versão de um
 **Ação a ser realizada:** manter APIs/comandos de projeto no CRM e tornar outras telas apenas consultas ou atalhos.
 
 **Critério de aceite:** não existe segunda interface alterando o mesmo projeto de forma concorrente.
+
+**Atualização 01/07/2026:** coluna `responsavel_obra_id` adicionada a `projetos`, com FK para `usuarios` (migration `20260701134423_add_responsavel_obra_id.sql`), corrigindo o erro `PGRST200` ao buscar o engenheiro responsável — formaliza o vínculo projeto↔responsável. Cadastro removeu Clientes/Projetos da navegação no mesmo período (ver `02_ESCOPO_CADASTRO.md`, SPEC-CAD-06), avançando esta SPEC pelo lado do Cadastro.
+
+**Achado novo, fora do escopo desta SPEC:** no mesmo período, o CRM implementou **login próprio via Supabase Auth** (migration `20260701133912_seed_pedro_user_skip_pass.sql`), em vez de consumir a sessão central do Hub prevista em `01_ESCOPO_HUB_TI.md` (SPEC-HUB-05) e na `SPEC-007_Token_Acesso_Compartilhado_Entre_Sistemas.md`. A mesma migration commitou a senha do usuário seed em texto plano no repositório — ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md), seção 5, e a pendência 11 do checklist geral.
 
 ## Itens removidos ou adiados
 

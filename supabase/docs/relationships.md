@@ -1,6 +1,6 @@
 # Relacionamentos principais do DB Lucenera
 
-Status: atualizado com base no schema real extraído do Supabase em 2026-06-25.
+Status: atualizado com base no schema real extraído do Supabase em 2026-07-06.
 
 Fonte principal: `supabase/db/current/01_schema_full.sql`.
 
@@ -178,6 +178,7 @@ orcamentos.arquiteto_id            -> contatos.id
 orcamentos.vendedor_id             -> funcionarios.id
 orcamentos.informacoes_cliente_id  -> informacoes_cliente_ubiqua.id
 orcamentos.projeto_id              -> projetos.id
+orcamentos.enviado_cliente_por     -> auth.users.id
 
 orcamento_itens.orcamento_id       -> orcamentos.id
 projeto_itens.orcamento_id         -> orcamentos.id
@@ -212,12 +213,37 @@ itens_orcamento_ubiqua.produto_id   -> revenda_ubiqua.id
 Somente orçamento aprovado vira item aprovado de projeto.
 
 ```text
-orcamentos aprovado
+orcamentos Orçamento Aprovado
   -> orcamento_itens
   -> projeto_itens
   -> projeto_parcelas
   -> boletos / notas_fiscais
 ```
+
+### Aprovação do cliente — estado real de 06/07/2026
+
+`orcamentos` já possui as colunas:
+
+```text
+enviado_cliente_em
+enviado_cliente_por -> auth.users.id
+aprovado_cliente_em
+recusado_cliente_em
+motivo_recusa_cliente
+token_aprovacao_cliente
+requer_revisao_financeira
+data_base_vencimento
+```
+
+Também existem RPCs de aprovação do cliente (`enviar_orcamento_para_cliente`, `cliente_aprovar_orcamento`, `cliente_recusar_orcamento`, `adm_aprovar_pelo_cliente`) e funções/triggers alternativas (`aprovar_orcamento_cliente*`, `handle_orcamento_workflow`, `normalize_orcamento_status`).
+
+A SPEC-016 decidiu e implementou que o fluxo oficial é `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`. `aprovado_cliente`, `aprovado` e `aprovado_financeiro` são legados/compatibilidade, e efeitos financeiros devem ser disparados só pela aprovação financeira por `orcamento_id`.
+
+### Saldos de estoque por item de projeto — aplicado, com hardening pendente
+
+Em 07/07/2026, o banco real já possui `estoque_saldos_projeto_item`, `estoque_movimentos_projeto_item` e as views da SPEC-010. A reserva agregada em `estoque_itens.quantidade_reservada` deve reconciliar com os saldos abertos (`q_reserva + q_entrega_futura + q_ag_separar + q_separado`); a migration corretiva `20260707_023_spec010_hardening` foi escrita para alinhar essa compatibilidade e fechar a exposição das views.
+
+Ação a ser realizada: aplicar o hardening `20260707_023`, reextrair `db/current/` e definir a policy de RLS antes de tratar transferência entre itens de projeto, entrega futura detalhada, devolução automatizada ou badges ricos de reserva no CRM. A chave operacional deve ser `projeto_item_id`; produto, projeto, orçamento e cliente são derivados por relacionamento.
 
 Para o fluxo novo, `projeto_itens.orcamento_id`, `projeto_parcelas.orcamento_id`, `boletos.orcamento_id` e `notas_fiscais.orcamento_id` permitem rastrear a origem financeira e operacional do orçamento aprovado.
 

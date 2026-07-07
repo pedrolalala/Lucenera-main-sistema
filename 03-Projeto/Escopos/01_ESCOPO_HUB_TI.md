@@ -40,6 +40,8 @@ O Hub nao sera sistema de processos de negocio, BI executivo geral, ou ferrament
 
 **Criterio de aceite:** a TI cadastra ou altera um sistema e o Hub reflete a mudanca sem novo deploy do Hub.
 
+**Atualizacao 29/06/2026 e 30/06/2026:** implementado painel administrativo (`UsersTab`) e flag `ativo` em `systems`; RLS ligada em `systems` e `usuarios` com policy `admin_all_*` checando `is_admin()` — mais restritiva que o padrao visto nos demais sistemas no mesmo periodo (ver Adendo abaixo). Cards renomeados ("Cadastro Lucenera" -> "Consultar Produtos") e rebranding visual (logo Luce Nera). Isso e reforco de seguranca/nomenclatura, nao avanco da administracao completa do catalogo (ambientes, modulos, responsaveis, criticidade), que continua dependendo do Sistema de TI. Ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md).
+
 ## SPEC-HUB-02 — Cartoes por permissao
 
 **Achado:** os cartoes podem aparecer para todos os usuarios autenticados se o filtro de permissao nao estiver aplicado.
@@ -95,6 +97,8 @@ O Hub nao sera sistema de processos de negocio, BI executivo geral, ou ferrament
 **Acao a ser realizada:** remover criacao ou manutencao local de papeis no Hub, deixando somente consumo de identidade e autorizacao.
 
 **Criterio de aceite:** alterar acesso no Sistema de TI muda a experiencia do usuario no Hub.
+
+**Achado 01/07/2026:** o CRM implementou login proprio via Supabase Auth nesta mesma janela (ver `03_ESCOPO_CRM.md`, SPEC-CRM-13), em vez de aguardar a sessao central do Hub/`SPEC-007`. Reforca a urgencia de implementar a SPEC-006/SPEC-007 antes que outros sistemas repitam o mesmo padrao de identidade paralela. Ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md).
 
 ## SPEC-HUB-06 — Evento de acesso
 

@@ -29,3 +29,6 @@ supabase/.temp/
 *.mov
 *.avi
 
+
+__pycache__/
+*.pyc

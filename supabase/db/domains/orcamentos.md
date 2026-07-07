@@ -25,6 +25,20 @@ Antes da aprovação, o orçamento precisa ter:
 - prazo de cobrança interpretável (`prazo_inicio_cobranca_dias` e/ou `prazo_pagamento_dias`);
 - frete estruturado (`frete_tipo = com_frete | sem_frete` e `frete_valor` coerente);
 - forma de pagamento e quantidade de parcelas compatíveis com a RPC.
+- aprovação do cliente concluída e orçamento em `Aprovação Financeira` conforme contrato consolidado na SPEC-016.
+
+## Aprovação do cliente e aprovação financeira
+
+O banco real de 06/07/2026 já contém colunas e RPCs de aprovação do cliente e a normalização da SPEC-016 foi aplicada para consolidar o contrato oficial:
+
+- `enviar_orcamento_para_cliente`, `cliente_aprovar_orcamento`, `cliente_recusar_orcamento`, `adm_aprovar_pelo_cliente`, com status `enviado_cliente`, `aprovado_cliente`, `recusado_cliente`.
+- `aprovar_orcamento_cliente`, `aprovar_orcamento_cliente_manual`, `aprovar_orcamento_cliente_publico`, `handle_orcamento_workflow`, com transição para `Aprovação Financeira`.
+
+O banco real possui registros em `Orçamento Aprovado`, `enviado_cliente` e `Aprovação Financeira`.
+
+A SPEC-016 decidiu o contrato oficial: `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`. A aprovação do cliente apenas coloca o orçamento na fila financeira; geração de `projeto_itens`, `projeto_parcelas`, boletos, nota fiscal manual e reserva só pode ocorrer quando o financeiro aprovar por `orcamento_id`.
+
+A SPEC-017 foi implementada na UI de Orçamentos em 06/07/2026: a aba financeira lista orçamentos em `Aprovação Financeira`, usa a tela padrão de edição de orçamento e chama a RPC por `orcamento_id`. `aprovado_cliente`, `aprovado` e `aprovado_financeiro` devem seguir tratados como legados/compatibilidade.
 
 ## Relação com planilhas da Connect
 
@@ -41,8 +55,13 @@ As demais movimentações com cliente devem ser tratadas como estoque/operação
 
 Automatizações identificadas no Supabase real relacionadas a Orçamentos/Projetos:
 
-- `public.aprovar_orcamento_financeiro(p_orcamento_id uuid)`: RPC principal do fluxo orçamento aprovado -> itens/parcelas/boletos.
-- `public.aprovar_orcamento_financeiro_base_spec001(p_orcamento_id uuid)`: base/refinamento da SPEC-001.
+- `public.aprovar_orcamento_financeiro(p_orcamento_id uuid)`: RPC principal do fluxo `Aprovação Financeira -> Orçamento Aprovado`; aceita somente orçamento em fila financeira no caminho normal.
+- `public.aprovar_orcamento_financeiro_base_spec001(p_orcamento_id uuid)`: wrapper de compatibilidade para a RPC oficial da SPEC-016.
+- `public.enviar_orcamento_para_cliente(p_orcamento_id uuid)`: envia orçamento ao cliente e gera token.
+- `public.cliente_aprovar_orcamento(p_orcamento_id uuid, p_token text)`: aprova via token conforme SPEC-009.
+- `public.cliente_recusar_orcamento(p_orcamento_id uuid, p_token text, p_motivo text)`: recusa via token conforme SPEC-009.
+- `public.adm_aprovar_pelo_cliente(p_orcamento_id uuid, p_observacao text)`: registra aprovação manual.
+- `public.aprovar_orcamento_cliente*`: família alternativa real mantida compatível com a transição para `Aprovação Financeira`.
 - `public._lucenera_parse_prazo_pagamento(...)`: interpreta prazos de pagamento para cálculo de parcelas/vencimentos.
 - `public.fn_gerar_numero_orcamento()` e `public.set_orcamento_numero()`: geração/atribuição de número de orçamento.
 - `public.fn_update_orcamento_timestamp()`: atualização de timestamp do orçamento.
@@ -54,6 +73,8 @@ Automatizações identificadas no Supabase real relacionadas a Orçamentos/Proje
 Triggers relacionadas:
 
 - `public.orcamentos.trigger_set_orcamento_numero`
+- `public.orcamentos.trg_normalize_orcamento_status`
+- `public.orcamentos.trg_orcamento_workflow`
 - `public.orcamentos_revenda_ubiqua.trigger_auto_numero_orcamento`
 - `public.orcamentos_revenda_ubiqua.trigger_orcamento_updated_at`
 - `public.projeto_itens.trg_sync_valor_total`
@@ -75,6 +96,6 @@ Observações:
 - `process-billing-automation` ainda aparece no remoto como Edge Function legada, mas não deve ser usada nem evoluída; o fluxo novo deve usar a RPC `public.aprovar_orcamento_financeiro(p_orcamento_id uuid)`.
 - `historico_status_orcamentos` é a tabela de auditoria do fluxo Lucenera; `historico_status_orcamento` permanece ligado à família Ubiqua/revenda.
 
-## Ação a ser realizada
+## Diretriz ativa
 
-Manter a função/RPC `public.aprovar_orcamento_financeiro(p_orcamento_id uuid)` como ponto transacional do fluxo de aprovação. Ao evoluir, garantir que ela não dependa de `venda_id` e que o financeiro derive projeto/cliente via `orcamento_id -> orcamentos`.
+Manter uma função/RPC transacional única para aprovação financeira por `orcamento_id`. O contrato oficial decidido pela SPEC-016 é `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`; o frontend deve listar/editar orçamentos nessa fila e só disparar efeitos financeiros após confirmação final do financeiro.

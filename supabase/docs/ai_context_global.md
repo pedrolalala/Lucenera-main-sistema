@@ -22,21 +22,26 @@ Não trate migrations dispersas em `Sistema/*/supabase/migrations` como verdade 
 - Prazo de cobrança deve ser interpretável por `prazo_inicio_cobranca_dias` / `prazo_pagamento_dias`.
 - Histórico de aprovação do fluxo Lucenera usa `historico_status_orcamentos`; não usar `historico_status_orcamento` para esse fluxo, porque ele pertence à família Ubiqua/revenda.
 - A aprovação não deve depender de `public.fn_aprovar_orcamento()` nem de `public.orcamentos.trg_aprovar_orcamento`; ambos foram removidos pela SPEC-005.
+- O banco real de 06/07/2026 já tem a normalização da SPEC-016 aplicada. O contrato oficial é `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`; `aprovado_cliente`, `aprovado` e `aprovado_financeiro` são legados/compatibilidade.
+- A SPEC-018 está aplicada no banco pela RPC `public.criar_produto_orcamento(p_payload jsonb)`, que grava no cadastro canônico `produtos` e não cria catálogo paralelo.
+- A UI de Orçamentos foi atualizada em 06/07/2026 pelas SPECs 017/018 no projeto Skip `32554`: a aba financeira lista orçamentos em `Aprovação Financeira`, aprova por `orcamento_id` e permite criar produto dentro do fluxo de orçamento.
+- A SPEC-010 já está aplicada no banco real em 07/07/2026: `estoque_saldos_projeto_item`, `estoque_movimentos_projeto_item` e as views de saldo existem. Antes de liberar consumo amplo em CRM/Estoque/Logística, aplicar o hardening `20260707_023_spec010_hardening`: views com `security_invoker`, ajuste de grants, reconciliação de `quantidade_reservada`, bloqueio de entrega direta de `q_entrega_futura` e reextração de `db/current/`.
 - `process-billing-automation` ainda pode existir remotamente como legado, mas não é o fluxo novo.
 - Hub/TI deve controlar sistemas, saúde, acesso e permissões pela UI.
 
 ## Fluxo orçamento aprovado -> financeiro
 
-1. Pessoa aprova orçamento.
-2. Sistema chama `public.aprovar_orcamento_financeiro(p_orcamento_id uuid)`.
-3. Função cria/vincula itens aprovados, parcelas e boletos.
+1. Cliente aprova orçamento e o status vai para `Aprovação Financeira`.
+2. Financeiro/ADM processa aprovação financeira pela RPC transacional oficial da SPEC-016.
+3. Função cria/vincula itens aprovados, parcelas, boletos e reserva agregada.
 4. Administração Bancária passa a exibir boleto/pendência financeira pelo `orcamento_id`.
 5. Projeto e cliente são exibidos por relacionamento, não por duplicação de chave no financeiro.
 6. Nota fiscal fica pendente de integração futura com API.
 
 ## Pendências globais
 
-- Reextrair `supabase/db/current` após a SPEC-005; a tentativa de 2026-06-26 falhou sem Docker/`pg_dump`.
+- Homologar no preview Skip o fluxo completo de Orçamentos: enviar ao cliente, cliente aprovar, financeiro revisar/editar, criar produto quando necessário e aprovar financeiramente.
+- Aplicar o hardening `20260707_023_spec010_hardening` e definir a policy de RLS da SPEC-010 antes de transferência, entrega futura detalhada, devolução automatizada e badges ricos no CRM.
 - Consolidar novas migrations centrais sempre que houver alteração real no banco.
 - Decidir ferramenta/API de emissão de nota fiscal.
 - Migrar armazenamento de boletos/notas fiscais para OneDrive/SharePoint.

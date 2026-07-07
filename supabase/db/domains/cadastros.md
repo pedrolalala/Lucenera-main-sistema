@@ -42,6 +42,8 @@ Esse relacionamento não deve ser tratado automaticamente como erro. `contatos.e
 - Financeiro deriva cliente/projeto a partir do orçamento aprovado.
 - Estoque/Compras usa clientes/projetos para registrar movimentações.
 - Hub/TI usa usuários e permissões para controlar acesso.
+- Pela SPEC-018, Orçamentos pode abrir um modal de criação de produto usando `public.criar_produto_orcamento(p_payload jsonb)`, mas a gravação continua no cadastro canônico `produtos` e tabelas auxiliares, sem criar catálogo paralelo.
+- Após a SPEC-010, Cadastro pode ler views derivadas de `estoque_saldos_projeto_item` para detalhar "Reservado por projeto/cliente" em produtos, mas não deve escrever reserva, transferência ou compra.
 
 ## Automações atuais
 
@@ -66,4 +68,4 @@ Triggers relacionadas:
 
 ## Ação a ser realizada
 
-Quando consolidar o schema, preservar a distinção entre `empresas` como empresas do grupo Lucenera e `contatos.empresa_id` como empresa/PJ vinculada a um contato. Depois, registrar nas telas e integrações esse significado para evitar conciliação incorreta.
+Quando consolidar o schema, preservar a distinção entre `empresas` como empresas do grupo Lucenera e `contatos.empresa_id` como empresa/PJ vinculada a um contato. Depois, registrar nas telas e integrações esse significado para evitar conciliação incorreta. No frontend da SPEC-018, reaproveitar `public.criar_produto_orcamento(p_payload jsonb)`, manter validações cadastrais de produto (`codigo_produto`, `sku`, marca, categoria e fornecedor) e impedir que a criação pelo Orçamentos escreva dados operacionais de estoque/compras.

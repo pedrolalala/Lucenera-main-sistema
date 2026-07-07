@@ -10,6 +10,8 @@ No Supabase atual existem 1.757 registros em `estoque_itens`, 4.392 produtos ati
 
 Os vídeos do Connect mostram que cada item aprovado possui uma vida operacional própria: quantidade vendida imutável, reserva, entrega futura, solicitação de separação, separado, entregue, devolvido e transferido.
 
+A reunião 08 de 06/07/2026 consolidou a terminologia: "estoque de cliente" e "itens reservados" são o mesmo conceito de tela/operação; estoque disponível é estoque físico menos reservado; entrega futura é o compromisso sem cobertura física; necessidade de compra deve ser agregada por produto, sem vínculo fixo com cliente.
+
 ## Objetivo
 
 Criar o sistema responsável por:
@@ -101,6 +103,10 @@ Os dados cadastrais continuarão sendo mantidos no sistema de Cadastro e reutili
 
 **Critério de aceite:** todo item aprovado aparece uma única vez para atendimento, e a quantidade vendida original permanece imutável.
 
+**Atualização 30/06/2026:** a migration `20260630_010_reserva_estoque_aprovacao`, no repositório central, já calcula uma posição inicial simples ao aprovar o orçamento — soma em `estoque_itens.quantidade_reservada`. **Isso não é a implementação desta SPEC**: roda dentro de Orçamentos (`aprovar_orcamento_financeiro_base_spec001`), não como comando de um sistema Estoque/Compras, não distingue reserva de entrega futura por déficit, e não consome a carga histórica das 16.621 linhas `VENDAS`. Deve ser tratada como ponte a avaliar quando este sistema for construído — decidir se a lógica migra para cá ou se é substituída. Ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md).
+
+**Atualização 07/07/2026:** a SPEC-010 foi confirmada no Supabase real com saldos operacionais por `projeto_item_id` em `estoque_saldos_projeto_item`, com auditoria em `estoque_movimentos_projeto_item`. Produto, projeto, orçamento e cliente são resolvidos por `JOIN` a partir de `projeto_itens`, não duplicados no saldo vivo. Antes de liberar operação em Estoque/Compras, aplicar o hardening `20260707_023_spec010_hardening`, reconciliar `estoque_itens.quantidade_reservada` e definir RLS.
+
 ## SPEC-EST-06 — Reserva
 
 **Achado:** material disponível precisa ser separado do saldo livre. No Connect, somente quantidade em `Reserva` pode ser solicitada para separação.
@@ -109,7 +115,7 @@ Os dados cadastrais continuarão sendo mantidos no sistema de Cadastro e reutili
 
 **Justificativa:** impede que o mesmo saldo seja prometido a dois projetos.
 
-**Relação com o banco:** `estoque_reservas`, movimentos de reserva/liberação, quantidade aguardando separação e vínculo com `projeto_item`.
+**Relação com o banco:** `estoque_saldos_projeto_item`, `estoque_movimentos_projeto_item`, quantidade em reserva, entrega futura, aguardando separação, separado, entregue, devolvido e vínculo com `projeto_item`.
 
 **Ação a ser realizada:** implementar reserva total ou parcial, registrar motivo de liberação e bloquear solicitação de separação acima da quantidade reservada. Quando compra/produção chegar para um item em entrega futura, mover a quantidade atendida para reserva do cliente correto.
 
@@ -121,19 +127,21 @@ Regra adicional de transferência entre clientes:
 - a transferência não pode ultrapassar a quantidade vendida original;
 - o movimento deve apontar o `projeto_item` de origem e o `projeto_item` de destino.
 
+**Atualização 30/06/2026, 02/07/2026 e 06/07/2026:** reserva simples e reversão de reserva já funcionam via `estoque_itens.quantidade_reservada`, mas a transferência operacional segue pendente. A reunião 08 definiu a regra de negócio em linguagem de cliente; a modelagem consolidada traduz isso para transferência entre `projeto_item_id`: Vitória aprova, origem perde `q_reserva` e ganha `q_entrega_futura`, destino ganha `q_reserva`, e a compra de reposição continua agregada por produto. Ver SPEC-010, SPEC-011 e SPEC-012.
+
 ## SPEC-EST-07 — Necessidade de compra
 
 **Achado:** a diferença entre quantidade aprovada e disponível precisa virar ação de compra.
 
-**Evolução:** criar necessidade vinculada ao item do projeto.
+**Evolução:** criar necessidade agregada por produto, com visualização informativa dos clientes/projetos impactados.
 
-**Justificativa:** mantém rastreabilidade entre a venda e o pedido.
+**Justificativa:** a reunião 08 confirmou que a compra não deve ficar amarrada a um cliente específico, porque transferências podem mudar quem receberá o material quando ele chegar.
 
-**Relação com o banco:** `necessidades_compra`, produto, quantidade, prioridade, projeto e situação.
+**Relação com o banco:** necessidade por produto/quantidade/prioridade/situação; vínculos com clientes/projetos devem ser informativos para priorização, não chave da compra.
 
 **Ação a ser realizada:** calcular déficit após a reserva e permitir ajuste justificado.
 
-**Critério de aceite:** o comprador identifica quais projetos originaram a necessidade.
+**Critério de aceite:** o comprador identifica quanto comprar por produto e consegue consultar quais clientes/projetos estão impactados, sem prender o pedido de compra a um cliente.
 
 ## SPEC-EST-08 — Cotações
 
@@ -246,6 +254,8 @@ Regra adicional de transferência entre clientes:
 **Ação a ser realizada:** criar fluxos simples para receber defeituoso, reservar substituto, comprar se necessário e concluir a troca. Para devolução, receber a quantidade total e gerar movimentos automaticamente na ordem `E. Futura → Reserva → Entregue`; quando a quantidade atravessar mais de um status, o sistema deve dividir internamente os movimentos.
 
 **Critério de aceite:** o histórico mostra o produto devolvido e o produto entregue em substituição, sem reduzir `Q. Venda`.
+
+**Atualização 06/07/2026:** os vídeos Connect já definem a regra base de devolução: reduzir primeiro `E. Futura`, depois `Reserva`, por último `Entregue`, preservando `Q. Venda`. A SPEC-015 foi atualizada para esse desenho; seguem pendentes apenas aprovação, efeito financeiro e coleta física quando houver item já entregue.
 
 ## SPEC-EST-16 — Painel operacional
 

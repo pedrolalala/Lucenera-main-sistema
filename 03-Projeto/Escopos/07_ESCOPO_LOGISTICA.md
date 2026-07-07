@@ -51,6 +51,8 @@ Logística não cria o compromisso comercial nem decide a compra. Ela executa qu
 
 **Critério de aceite:** toda nova separação operacional possui projeto e pelo menos um item, e nenhuma separação é criada a partir de quantidade ainda em entrega futura.
 
+**Atualização 06/07/2026:** a reunião 08 reforçou que separação/logística só deve receber material com cobertura física (`reservado`). Itens em `entrega_futura` ficam no fluxo de Estoque/Compras até recebimento/re-reserva.
+
 ## SPEC-LOG-02 — Itens e quantidades
 
 **Achado:** a separação precisa acompanhar quantidades solicitadas, separadas, entregues e devolvidas.
@@ -78,6 +80,8 @@ Logística não cria o compromisso comercial nem decide a compra. Ela executa qu
 **Ação a ser realizada:** criar tabela de status/configuração ou enum consolidado após validar o fluxo; migrar valores antigos com relatório.
 
 **Critério de aceite:** cada estado antigo possui destino documentado.
+
+**Atualização 30/06/2026:** sete commits seguidos (`Fix calendar view enum value mismatch`, `Fix separation list status filter enum mapping` etc.) corrigiram sintomas desse mesmo problema no calendário e nos filtros de status, sem consolidar o enum em si — confirma que a causa raiz descrita aqui segue pendente. Ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md).
 
 ## SPEC-LOG-04 — Separação parcial
 
@@ -149,6 +153,8 @@ Logística não cria o compromisso comercial nem decide a compra. Ela executa qu
 
 **Critério de aceite:** a coleta e a entrega ficam vinculadas à mesma ocorrência.
 
+**Atualização 06/07/2026:** a regra base de devolução já está nos vídeos Connect e foi consolidada na SPEC-015: reduzir `E. Futura`, depois `Reserva`, por último `Entregue`. Logística só entra automaticamente quando a devolução tocar quantidade já entregue, gerando coleta/retorno físico.
+
 ## SPEC-LOG-09 — Integração com CRM
 
 **Achado:** o responsável pelo projeto precisa acompanhar separação e entrega.
@@ -190,6 +196,8 @@ Logística não cria o compromisso comercial nem decide a compra. Ela executa qu
 **Ação a ser realizada:** remover dados locais e calcular pendências, atrasos, entregas e produtividade.
 
 **Critério de aceite:** todos os indicadores podem ser abertos até o registro de origem.
+
+**Atualização 30/06/2026:** implementado dashboard de separação e entrega (cards com detalhe expandido, modal de finalização de entrega, upload de arquivos por separação). Os anexos continuam em Supabase Storage, não OneDrive (ver SPEC-LOG-06). RLS ligada pela primeira vez em `separacoes`, `separacao_arquivos` e `entregas_finalizadas`, com policy `USING (true)` para qualquer autenticado — ver pendência 7 do checklist geral e o [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md).
 
 ## Itens removidos ou adiados
 

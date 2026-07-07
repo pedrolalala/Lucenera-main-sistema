@@ -54,6 +54,8 @@ Edge Functions descontinuadas:
 
 Observação: apesar de existirem automações atuais de fluxo/status, a decisão de produto é evoluir CRM para configuração pela UI, sem hardcode de etapas/sub-status/checklists.
 
+Observação sobre itens aprovados: a SPEC-014 prevê leitura de `projeto_itens` no detalhe do projeto. A SPEC-010 já existe no banco, mas o CRM só deve enriquecer a situação do item lendo a view de saldos por `projeto_item_id` (`q_reserva`, `q_entrega_futura`, `q_separado`, `q_entregue`) depois do hardening `20260707_023` e da policy de RLS. Até lá, deve usar rótulo genérico para itens válidos.
+
 ## Ação a ser realizada
 
 Modelar tabelas de configuração para etapas, sub-status, checklists, regras de bloqueio, paralelismo/sequência, SLA e responsáveis. O código deve ler essas configurações da UI, não codificar regras fixas por etapa.

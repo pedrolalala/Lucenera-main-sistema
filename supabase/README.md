@@ -20,7 +20,11 @@ As migrations antigas dentro de `Sistema/*/supabase/migrations` ajudam a entende
 
 ## Estado operacional atual
 
-- Snapshot em `db/current/`: reextraído em **2026-06-26** via `pg_dump`/`psql` (`libpq` do Homebrew), já refletindo a SPEC-005 (confirmado: `trg_aprovar_orcamento`/`fn_aprovar_orcamento()` e `boletos.projeto_id` não existem mais no banco real).
+- Snapshot em `db/current/`: reextraído em **2026-07-07** via `pg_dump`/`psql` (`libpq` do Homebrew) e `information_schema`/`pg_catalog`, já refletindo a SPEC-005, `20260703_017_razao_social_clientes`, `20260704_018_aprovacao_cliente_orcamento`, `20260706_020` (SPEC-016), `20260706_021` (SPEC-018), `20260706_022` (SPEC-010) e o hardening `20260707_023`.
+- Estado confirmado em 06/07/2026: a SPEC-016 foi aplicada no Supabase real e normalizou o fluxo oficial `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`; `aprovado_cliente`, `aprovado` e `aprovado_financeiro` permanecem apenas como legados/compatibilidade.
+- Estado confirmado em 06/07/2026: a SPEC-018 criou `public.criar_produto_orcamento(p_payload jsonb)` para o modal de Orçamentos gravar no cadastro canônico `produtos`, sem catálogo paralelo.
+- Estado confirmado em 07/07/2026: a SPEC-010 está aplicada no Supabase real com `estoque_saldos_projeto_item`, `estoque_movimentos_projeto_item` e as views `vw_estoque_por_produto_projeto`, `vw_estoque_resumo`, `vw_estoque_saldos_projeto_item`, `vw_orcamentos_aprovacao_financeira_auditoria`. O hardening `20260707_023` já aplicou `security_invoker=true` nas views de estoque; `db/current/` foi reextraído e reflete esse estado.
+- Achado na reextração de 07/07/2026: `04_triggers.sql` e `07_rls_policies.sql` cobriam apenas o schema `public` desde 26/06/2026, mesmo o manifesto sempre tendo declarado cobertura de `public`+`auth`+`storage`. A lacuna foi corrigida — foram adicionados 5 triggers reais (`auth.users`, `storage.buckets`, `storage.objects`) e 15 policies de `storage.objects` que estavam ausentes. Não é efeito de migration recente, é correção de uma extração incompleta anterior.
 - Edge Functions: baixadas do projeto remoto em 2026-06-26. `sync-fechamentos-automatica` não aparece mais no remoto. `process-billing-automation` foi removida do remoto em 2026-06-26 após confirmação de que não tinha chamador (ver `functions/process-billing-automation/README.md`).
 
 ## Estrutura

@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-008 — Conciliação de Retorno Bancário e Baixa Automática de Parcelas"
-status: não iniciado
+status: implementada (backend + frontend); homologação com arquivo real pendente
 data_ultima_modificacao: 2026-06-26
 sistemas_envolvidos:
   - Financeiro / Administração Bancária
@@ -25,7 +25,7 @@ sistemas_envolvidos:
 - [ ] Aplicar a migration no banco remoto compartilhado (`vcvcwzmbiftcawncibke`).
 - [ ] Reextrair o snapshot de `supabase/db/current/` após aplicar.
 - [ ] Validar com um arquivo de retorno real (ou um de teste no mesmo layout) que a baixa, a divergência e o "não encontrado" se comportam como esperado antes de usar em produção.
-- [ ] Confirmar que `boletos.nosso_numero` é, de fato, único na prática (não há constraint `UNIQUE` hoje) — se não for, decidir a regra de precedência antes de depender dele como chave de match.
+- [x] Confirmar que `boletos.nosso_numero` é, de fato, único na prática — **já resolvido**: constraint `boletos_nosso_numero_key UNIQUE (nosso_numero)` confirmada em `supabase/db/current/01_schema_full.sql` em 07/07/2026 (achado durante a implementação, contradiz a premissa original desta SPEC de que não havia constraint).
 
 ## Objetivo
 
@@ -191,12 +191,19 @@ $$;
 
 ## Realizado
 
-(nada implementado ainda — esta SPEC define o desenho a ser aprovado e construído.)
+### 2026-07-07
+
+- Migration `20260707_028_spec008_conciliacao_retorno_bancario`: tabelas `retorno_bancario_arquivos`/`retorno_bancario_registros`, RPC `processar_retorno_bancario`. Aplicada em produção.
+- Corrigido em relação ao desenho original: `transacao_tipo` real é `('receita','despesa','transferencia')`, sem `'entrada'` — a RPC usa `'receita'`.
+- **Bug pré-existente encontrado e corrigido (aprovado pelo usuário)**: trigger órfão `update_parcelas_updated_at` em `projeto_parcelas` referenciava uma coluna `updated_at` inexistente, quebrando qualquer `UPDATE` nessa tabela em produção — inclusive o update manual que `RetornoBoletos.tsx` já tentava fazer antes desta SPEC. Removido.
+- **Bug próprio encontrado e corrigido**: `hash_conteudo UNIQUE` impedia o fluxo de "forçar reprocessamento" (nova linha de auditoria com o mesmo hash). Trocado por índice comum; o bloqueio de reprocessamento normal continua garantido pela própria RPC.
+- Testado em transação com `ROLLBACK` (nenhum dado real afetado): aplicado (valor exato), divergente (valor diferente, nada alterado), não encontrado (`nosso_numero` inexistente, resto do lote continua), bloqueio de reprocessamento sem forçar, e forçar reprocessamento com sucesso.
+- Frontend `RetornoBoletos.tsx` (`04-Sistemas/retorno-bancario-bradesco-5392a`) reescrito: sem dados de exemplo, chama a RPC via hash SHA-256 do arquivo, coluna de status por registro, modal de confirmação para forçar reprocessamento, e botão "Log" abrindo o histórico real de `retorno_bancario_arquivos`/`retorno_bancario_registros`. `tsc --noEmit` e `vite build` passaram sem erros.
 
 ## Pendências
 
-- [ ] Confirmar o enum real de `public.transacao_tipo` e ajustar o valor usado no `INSERT INTO transacoes` (o desenho acima usa `'entrada'` como placeholder).
-- [ ] Confirmar se `boletos.nosso_numero` deve ganhar constraint `UNIQUE` antes de depender dele como chave de match na RPC.
-- [ ] Implementar as tabelas, a RPC e as mudanças de frontend descritas nesta SPEC.
-- [ ] Decidir a regra de exibição/ação para registros `divergente` e `nao_encontrado` na UI (hoje só "aplicado" tem um caminho claro).
+- [x] Confirmar o enum real de `public.transacao_tipo` — resolvido, ver "Realizado".
+- [x] Confirmar se `boletos.nosso_numero` deve ganhar constraint `UNIQUE` — já existia (`boletos_nosso_numero_key`).
+- [x] Implementar as tabelas, a RPC e as mudanças de frontend descritas nesta SPEC.
+- [ ] Decidir a regra de exibição/ação para registros `divergente` e `nao_encontrado` na UI além da coluna de status (hoje não há ação de correção manual na tela).
 - [ ] Testar com um arquivo de retorno real (ou de teste no mesmo layout) antes de usar em produção — depende também da homologação do CNAB (`FIN-08`) para o ciclo completo (remessa → retorno) ser validado ponta a ponta.

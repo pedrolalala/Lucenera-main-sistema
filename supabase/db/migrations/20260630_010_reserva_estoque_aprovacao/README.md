@@ -77,6 +77,7 @@ ROLLBACK; -- não confirmar em teste
 
 ## Pendência futura (não bloqueante)
 
-Criar tabela `estoque_reservas` (SPEC-EST-06) para rastreabilidade por projeto/cliente.
+Criar as tabelas da SPEC-010 (`estoque_saldos_projeto_item` e
+`estoque_movimentos_projeto_item`) para rastreabilidade por `projeto_item_id`.
 Hoje `quantidade_reservada` é um contador total; não é possível saber quais
-projetos compõem esse total sem recalcular por `projeto_itens`.
+projetos/itens compõem esse total sem recalcular por `projeto_itens`.

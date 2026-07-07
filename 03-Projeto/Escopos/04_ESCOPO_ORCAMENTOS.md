@@ -50,7 +50,7 @@ O sistema não deve manter cadastro paralelo de projeto, cliente, produto ou usu
 
 **Relação com o banco:** `projetos`, `contatos`, `produtos`, `usuarios` e `empresas`.
 
-**Ação a ser realizada:** remover qualquer criação paralela e usar comandos do sistema responsável quando um cadastro novo for necessário.
+**Ação a ser realizada:** remover qualquer criação paralela e usar dados canônicos quando um cadastro novo for necessário. Pela SPEC-018, o orçamento pode abrir um modal de criação de produto sem trocar de sistema, mas esse modal deve gravar em `produtos` e nas tabelas cadastrais auxiliares oficiais, reutilizando o contrato do Cadastro.
 
 **Critério de aceite:** o orçamento referencia IDs canônicos.
 
@@ -96,6 +96,10 @@ O sistema não deve manter cadastro paralelo de projeto, cliente, produto ou usu
 
 **Critério de aceite:** repetir a solicitação de aprovação não duplica venda nem item, sem bloquear novos aditivos ou versões aprovadas posteriores. Orçamento com item especial sem preço ou condição de pagamento/frete impossível de interpretar não avança para a geração financeira.
 
+**Atualização 03/07/2026:** implementado fluxo de aprovação *financeira* dedicado por cima da RPC `aprovar_orcamento_financeiro` (`FinancialApprovalTab`, `FinancialApprovalDialog`), com auditoria em `logs_auditoria`, e uma tela de configuração de alçadas (`ApprovalSettings.tsx`). Ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md).
+
+**Atualização 06/07/2026:** o banco real já contém colunas/RPCs de aprovação do cliente (SPEC-009), mas havia dois desenhos concorrentes de status: `aprovado_cliente`/`aprovado` e `Aprovação Financeira`/`Orçamento Aprovado`. A SPEC-016 consolidou o contrato oficial como `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`: a aprovação do cliente não dispara itens, parcelas, boletos nem reserva; apenas a aprovação financeira final dispara esses efeitos. A SPEC-017 complementa o frontend: ver/editar na fila financeira deve abrir o mesmo editor/modal de orçamento usado nos demais fluxos.
+
 ## SPEC-ORC-06 — Integração com CRM
 
 **Achado:** CRM precisa mostrar o andamento e o resultado do orçamento.
@@ -124,6 +128,8 @@ O sistema não deve manter cadastro paralelo de projeto, cliente, produto ou usu
 
 **Critério de aceite:** Estoque/Compras recebe os itens estruturados do projeto.
 
+**Atualização 30/06/2026, 06/07/2026 e 07/07/2026:** implementada reserva agregada dentro da própria aprovação (migration `20260630_010_reserva_estoque_aprovacao`) — a cada item aprovado com produto vinculado, `estoque_itens.quantidade_reservada` é incrementado. A reunião 08 confirmou que "estoque de cliente" e "itens reservados" são sinônimos de tela/operação. A SPEC-010 já foi confirmada no banco real como a modelagem canônica para `estoque_saldos_projeto_item` e `estoque_movimentos_projeto_item`, derivando cliente/projeto/orçamento/produto por relacionamento. Falta aplicar o hardening `20260707_023` para reconciliar o agregado, proteger as views e bloquear entrega direta de `q_entrega_futura`. Ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md) e reunião 08.
+
 ## SPEC-ORC-08 — Condições e parcelas previstas
 
 **Achado:** orçamento pode definir pagamento, mas a operação financeira pertence ao Financeiro. Nos vídeos do Connect, vencimentos são conferidos manualmente; no novo sistema, essa conferência deve virar cálculo automático com validação financeira.
@@ -151,6 +157,8 @@ O sistema não deve manter cadastro paralelo de projeto, cliente, produto ou usu
 **Ação a ser realizada:** criar operações explícitas de cancelamento, complemento e substituição.
 
 **Critério de aceite:** o saldo operacional reflete o ajuste e o histórico anterior continua consultável.
+
+**Atualização 02/07/2026:** implementada `cancelar_orcamento(orcamento_id, motivo)` em duas etapas (migrations `20260702_015` e `20260702_016`) — reverte a reserva de estoque, cancela parcelas e boletos pendentes e invalida `projeto_itens` sem apagar nada (soft-cancel, preserva auditoria). Idempotente. **Cobre apenas cancelamento total**; complemento e substituição continuam sem operação explícita. Ver [Adendo 03/07/2026](../06_ADENDO_ATUALIZACAO_03_07_2026.md).
 
 ## SPEC-ORC-10 — Limpeza da identidade antiga
 

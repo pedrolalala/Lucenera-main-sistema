@@ -61,6 +61,7 @@ Os documentos foram escritos para leitura do cliente e do colaborador responsáv
 - [SPECs — SPEC-016 Normalização da Aprovação Financeira de Orçamentos (implementada em homologação)](Planos%20de%20Ação/SPECs/SPEC-016_Normalizacao_Aprovacao_Financeira_Orcamento.md)
 - [SPECs — SPEC-017 Modal Unificado da Aprovação Financeira em Orçamentos (implementada em homologação)](Planos%20de%20Ação/SPECs/SPEC-017_Modal_Unificado_Aprovacao_Financeira_Orcamento.md)
 - [SPECs — SPEC-018 Criar Produto Dentro do Modal de Orçamento (implementada em homologação)](Planos%20de%20Ação/SPECs/SPEC-018_Criar_Produto_no_Modal_de_Orcamento.md)
+- [SPECs — SPEC-019 Origem da Aprovação do Cliente e Reset Pós-Aprovação (concluída; estende a SPEC-016, não substitui)](Planos%20de%20Ação/SPECs/SPEC-019_Origem_Aprovacao_Cliente_e_Reset_Pos_Aprovacao.md)
 
 ## Decisões consolidadas
 

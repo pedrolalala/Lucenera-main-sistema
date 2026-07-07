@@ -43,9 +43,53 @@ Edge Functions relacionadas:
 - `welcome-email`: e-mail de boas-vindas.
 - `sync-teams`: integração/simulação Teams.
 - `sync-sharepoint`: integração SharePoint/OneDrive/Microsoft.
+- `generate-cross-system-code`: SPEC-007, gera código opaco de curta duração para abrir outro sistema sem reenviar token cru pela URL.
+- `exchange-cross-system-code`: SPEC-007, consome o código uma única vez e hidrata sessão Supabase no sistema de destino.
 
 Observação: o Hub/TI deve evoluir permissões pela UI. As funções atuais ajudam, mas não substituem um modelo configurável de permissões por sistema/módulo/ação.
 
+## SPEC-006 — permissões granulares V1 no Hub
+
+Migration central: `supabase/db/migrations/20260708_029_spec006_permissoes_granulares_hub/`.
+
+Estado remoto em 2026-07-07: aplicado/verificado no projeto Supabase `vcvcwzmbiftcawncibke` e refletido em `supabase/db/current/`.
+
+Objetos publicados:
+
+- `systems.slug` e `systems.visivel_no_hub`;
+- `modulos`, `modulo_acoes`;
+- `papeis`, `papel_permissoes`;
+- `usuario_papeis`, `usuario_permissao_excecoes`;
+- `auditoria_permissoes`;
+- `hub_pode_executar(p_usuario_id uuid, p_system_slug text, p_modulo_chave text, p_acao text)`;
+- `hub_sistemas_permitidos(p_usuario_id uuid)`.
+
+Regras:
+
+- Exceção individual prevalece sobre papel.
+- `papel_permissoes.modulo_id IS NULL` significa sistema inteiro.
+- `papel_permissoes.acao IS NULL` significa todas as ações.
+- A UI administrativa do Hub lê/escreve diretamente nas tabelas novas, protegidas por RLS `is_admin()`.
+- Outros sistemas devem consumir o contrato via RPC, não por leitura direta das tabelas.
+
+## SPEC-007 — SSO entre sistemas
+
+Migration central: `supabase/db/migrations/20260708_030_spec007_sso_cross_system/`.
+
+Estado remoto em 2026-07-07: migration aplicada e Edge Functions `generate-cross-system-code`/`exchange-cross-system-code` publicadas como `ACTIVE`.
+
+Objeto publicado:
+
+- `cross_system_session_codes`.
+
+Regras:
+
+- A tabela fica sem acesso direto para `anon`/`authenticated`.
+- Origem chama `generate-cross-system-code` autenticada.
+- Destino chama `exchange-cross-system-code` antes de exibir login.
+- URL recebe somente `sso_code`; nunca `access_token` nem `refresh_token`.
+- Códigos expiram em 60 segundos e são de uso único.
+
 ## Ação a ser realizada
 
-Modelar tabelas centrais para sistemas, papéis, permissões, vínculos usuário-sistema e regras de acesso. Sistemas devem consultar essas regras em vez de manter permissões hardcoded.
+Homologar SSO ponta a ponta com usuário real, validar a matriz inicial de papéis/módulos/ações com a operação e então migrar sistema por sistema para consultar `hub_pode_executar` em vez de permissões hardcoded.

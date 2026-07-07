@@ -11,8 +11,8 @@ CREATE OR REPLACE VIEW public.v_cash_flow_lucenera AS
     descricao,
     status_pago
    FROM transacoes
-  WHERE ((status_pago = 1) AND (dt_pagamento IS NOT NULL));;
-
+  WHERE ((status_pago = 1) AND (dt_pagamento IS NOT NULL));
+;
 -- View: vw_catalogo_ubiqua
 CREATE OR REPLACE VIEW public.vw_catalogo_ubiqua AS
  SELECT TRIM(BOTH FROM descricao) AS nome_exibicao,
@@ -23,8 +23,8 @@ CREATE OR REPLACE VIEW public.vw_catalogo_ubiqua AS
     array_agg(json_build_object('cor', TRIM(BOTH FROM cor), 'disponivel', disponivel, 'referencia', referencia)) AS detalhes_por_cor
    FROM revenda_ubiqua
   WHERE (descricao IS NOT NULL)
-  GROUP BY (TRIM(BOTH FROM descricao));;
-
+  GROUP BY (TRIM(BOTH FROM descricao));
+;
 -- View: vw_catalogo_unificado
 CREATE OR REPLACE VIEW public.vw_catalogo_unificado AS
  SELECT TRIM(BOTH FROM regexp_replace(referencia, '-IS$'::text, ''::text, 'i'::text)) AS referencia_base,
@@ -34,8 +34,8 @@ CREATE OR REPLACE VIEW public.vw_catalogo_unificado AS
     max(imagem_catalogo_url) AS imagem_principal,
     min(valor_revenda) AS valor_minimo
    FROM revenda_ubiqua
-  GROUP BY (TRIM(BOTH FROM regexp_replace(referencia, '-IS$'::text, ''::text, 'i'::text)));;
-
+  GROUP BY (TRIM(BOTH FROM regexp_replace(referencia, '-IS$'::text, ''::text, 'i'::text)));
+;
 -- View: vw_comissao_mensal
 CREATE OR REPLACE VIEW public.vw_comissao_mensal AS
  SELECT fn.id AS funcionario_id,
@@ -52,8 +52,8 @@ CREATE OR REPLACE VIEW public.vw_comissao_mensal AS
      JOIN funcionarios_financeiro ff ON ((ff.equipes_id = ep.id)))
      JOIN funcionarios_novo fn ON ((fn.id = ff.funcionario_id)))
   WHERE ((p.valor_total > (0)::numeric) AND (p.data_entrada IS NOT NULL) AND (fn.ativo IS TRUE))
-  GROUP BY fn.id, fn.nome, ep.id, ep.equipes, ff.comissao_percentual, (date_trunc('month'::text, (p.data_entrada)::timestamp with time zone));;
-
+  GROUP BY fn.id, fn.nome, ep.id, ep.equipes, ff.comissao_percentual, (date_trunc('month'::text, (p.data_entrada)::timestamp with time zone));
+;
 -- View: vw_conferencia_financeira
 CREATE OR REPLACE VIEW public.vw_conferencia_financeira AS
  SELECT t.data_transacao,
@@ -66,8 +66,8 @@ CREATE OR REPLACE VIEW public.vw_conferencia_financeira AS
    FROM ((transacoes t
      LEFT JOIN empresas e ON ((t.empresa_id = e.id)))
      LEFT JOIN contatos c ON ((t.parcela_id = c.id)))
-  ORDER BY t.data_transacao DESC;;
-
+  ORDER BY t.data_transacao DESC;
+;
 -- View: vw_controle_ferias_clt
 CREATE OR REPLACE VIEW public.vw_controle_ferias_clt AS
  WITH resumo_periodos AS (
@@ -86,8 +86,8 @@ CREATE OR REPLACE VIEW public.vw_controle_ferias_clt AS
     direito_total_acumulado,
     total_gozado,
     (direito_total_acumulado - total_gozado) AS saldo_disponivel
-   FROM resumo_periodos;;
-
+   FROM resumo_periodos;
+;
 -- View: vw_custos_pendentes_mes
 CREATE OR REPLACE VIEW public.vw_custos_pendentes_mes AS
  SELECT cr.descricao,
@@ -101,8 +101,8 @@ CREATE OR REPLACE VIEW public.vw_custos_pendentes_mes AS
      LEFT JOIN categorias_financeiras cf ON ((cf.id = cr.categoria_id)))
      LEFT JOIN contas_bancarias cb ON ((cb.id = cr.conta_id)))
   WHERE ((crl.status = 'pendente'::lancamento_status) AND (date_trunc('month'::text, (crl.data_vencimento)::timestamp with time zone) = date_trunc('month'::text, now())))
-  ORDER BY crl.data_vencimento;;
-
+  ORDER BY crl.data_vencimento;
+;
 -- View: vw_dashboard_crm_fechamento
 CREATE OR REPLACE VIEW public.vw_dashboard_crm_fechamento AS
  SELECT date_trunc('month'::text, (p.data_entrada)::timestamp with time zone) AS mes,
@@ -119,8 +119,8 @@ CREATE OR REPLACE VIEW public.vw_dashboard_crm_fechamento AS
           WHERE (vendas.projeto_id = p.id)) v ON (true))
   WHERE (p.data_entrada IS NOT NULL)
   GROUP BY (date_trunc('month'::text, (p.data_entrada)::timestamp with time zone))
-  ORDER BY (date_trunc('month'::text, (p.data_entrada)::timestamp with time zone)) DESC;;
-
+  ORDER BY (date_trunc('month'::text, (p.data_entrada)::timestamp with time zone)) DESC;
+;
 -- View: vw_detalhe_produto_estoque
 CREATE OR REPLACE VIEW public.vw_detalhe_produto_estoque AS
  SELECT produto_id,
@@ -128,8 +128,34 @@ CREATE OR REPLACE VIEW public.vw_detalhe_produto_estoque AS
     COALESCE(sum((quantidade - COALESCE(quantidade_reservada, (0)::numeric))), (0)::numeric) AS estoque_disponivel,
     COALESCE(sum(COALESCE(quantidade_reservada, (0)::numeric)), (0)::numeric) AS estoque_reservado
    FROM estoque_itens
-  GROUP BY produto_id;;
-
+  GROUP BY produto_id;
+;
+-- View: vw_entrega_futura_projeto_item
+CREATE OR REPLACE VIEW public.vw_entrega_futura_projeto_item AS
+ SELECT esp.projeto_item_id,
+    pi.produto_id,
+    p.nome AS produto,
+    p.codigo_produto AS produto_codigo,
+    pi.projeto_id,
+    pr.codigo AS projeto_codigo,
+    pi.orcamento_id,
+    o.numero AS orcamento_numero,
+    COALESCE(o.cliente_id, pr.cliente_id, pr.client_id) AS cliente_id,
+    c.nome AS cliente,
+    pi.quantidade AS q_venda,
+    esp.q_entrega_futura,
+    esp.q_reserva,
+    esp.q_transferida_saida,
+    esp.atualizado_em
+   FROM (((((estoque_saldos_projeto_item esp
+     JOIN projeto_itens pi ON ((pi.id = esp.projeto_item_id)))
+     LEFT JOIN produtos p ON ((p.id = pi.produto_id)))
+     LEFT JOIN projetos pr ON ((pr.id = pi.projeto_id)))
+     LEFT JOIN orcamentos o ON ((o.id = pi.orcamento_id)))
+     LEFT JOIN contatos c ON ((c.id = COALESCE(o.cliente_id, pr.cliente_id, pr.client_id))))
+  WHERE ((esp.status_operacional = 'ativo'::text) AND (esp.q_entrega_futura > (0)::numeric))
+  ORDER BY p.nome, esp.atualizado_em;
+;
 -- View: vw_estoque_liquido
 CREATE OR REPLACE VIEW public.vw_estoque_liquido AS
  WITH calc AS (
@@ -169,8 +195,8 @@ CREATE OR REPLACE VIEW public.vw_estoque_liquido AS
         END AS alerta_estoque,
     round((qtd_fisico * preco_venda), 2) AS valor_estoque_total,
     round((qtd_reservado * preco_venda), 2) AS valor_reservado_total
-   FROM calc;;
-
+   FROM calc;
+;
 -- View: vw_estoque_por_marca
 CREATE OR REPLACE VIEW public.vw_estoque_por_marca AS
  SELECT m.nome AS marca,
@@ -181,8 +207,8 @@ CREATE OR REPLACE VIEW public.vw_estoque_por_marca AS
    FROM ((marcas m
      LEFT JOIN produtos p ON ((p.marca_id = m.id)))
      LEFT JOIN estoque_itens e ON ((e.produto_id = p.id)))
-  GROUP BY m.id, m.nome;;
-
+  GROUP BY m.id, m.nome;
+;
 -- View: vw_estoque_por_produto_projeto
 CREATE OR REPLACE VIEW public.vw_estoque_por_produto_projeto AS
  SELECT projeto_item_id,
@@ -205,8 +231,8 @@ CREATE OR REPLACE VIEW public.vw_estoque_por_produto_projeto AS
     status_operacional,
     atualizado_em
    FROM vw_estoque_saldos_projeto_item
-  WHERE (status_operacional = 'ativo'::text);;
-
+  WHERE (status_operacional = 'ativo'::text);
+;
 -- View: vw_estoque_produtos
 CREATE OR REPLACE VIEW public.vw_estoque_produtos AS
  SELECT p.codigo_legado AS codigo_produto,
@@ -227,8 +253,8 @@ CREATE OR REPLACE VIEW public.vw_estoque_produtos AS
      LEFT JOIN marcas m ON ((m.id = p.marca_id)))
      LEFT JOIN categorias_produto cp ON ((cp.id = p.categoria_id)))
   WHERE (p.ativo = true)
-  ORDER BY p.nome;;
-
+  ORDER BY p.nome;
+;
 -- View: vw_estoque_resumo
 CREATE OR REPLACE VIEW public.vw_estoque_resumo AS
  SELECT ei.produto_id,
@@ -247,8 +273,8 @@ CREATE OR REPLACE VIEW public.vw_estoque_resumo AS
              JOIN projeto_itens pi ON ((pi.id = esp.projeto_item_id)))
           WHERE (esp.status_operacional = 'ativo'::text)
           GROUP BY pi.produto_id) comprometido ON ((comprometido.produto_id = ei.produto_id)))
-  WHERE (ei.local = 'Estoque'::estoque_local);;
-
+  WHERE (ei.local = 'Estoque'::estoque_local);
+;
 -- View: vw_estoque_saldos_projeto_item
 CREATE OR REPLACE VIEW public.vw_estoque_saldos_projeto_item AS
  SELECT esp.projeto_item_id,
@@ -274,8 +300,8 @@ CREATE OR REPLACE VIEW public.vw_estoque_saldos_projeto_item AS
      JOIN projeto_itens pi ON ((pi.id = esp.projeto_item_id)))
      LEFT JOIN projetos pr ON ((pr.id = pi.projeto_id)))
      LEFT JOIN orcamentos o ON ((o.id = pi.orcamento_id)))
-     LEFT JOIN produtos p ON ((p.id = pi.produto_id)));;
-
+     LEFT JOIN produtos p ON ((p.id = pi.produto_id)));
+;
 -- View: vw_financeiro_projetos
 CREATE OR REPLACE VIEW public.vw_financeiro_projetos AS
  SELECT p.id,
@@ -307,8 +333,8 @@ CREATE OR REPLACE VIEW public.vw_financeiro_projetos AS
             count(*) FILTER (WHERE (vendas.status_pagamento = 'Pago'::status_pagamento)) AS parcelas_pagas,
             count(*) FILTER (WHERE (vendas.status_pagamento <> 'Pago'::status_pagamento)) AS parcelas_pendentes
            FROM vendas
-          WHERE (vendas.projeto_id = p.id)) v ON (true));;
-
+          WHERE (vendas.projeto_id = p.id)) v ON (true));
+;
 -- View: vw_fluxo_caixa_projetado
 CREATE OR REPLACE VIEW public.vw_fluxo_caixa_projetado AS
  SELECT date_trunc('month'::text, (data_vencimento)::timestamp with time zone) AS mes,
@@ -320,8 +346,8 @@ CREATE OR REPLACE VIEW public.vw_fluxo_caixa_projetado AS
    FROM projeto_parcelas
   WHERE (data_vencimento IS NOT NULL)
   GROUP BY (date_trunc('month'::text, (data_vencimento)::timestamp with time zone))
-  ORDER BY (date_trunc('month'::text, (data_vencimento)::timestamp with time zone));;
-
+  ORDER BY (date_trunc('month'::text, (data_vencimento)::timestamp with time zone));
+;
 -- View: vw_fornecedores_remessas
 CREATE OR REPLACE VIEW public.vw_fornecedores_remessas AS
  SELECT f.id,
@@ -340,8 +366,8 @@ CREATE OR REPLACE VIEW public.vw_fornecedores_remessas AS
    FROM ((fornecedores f
      LEFT JOIN empresas e ON ((e.id = f.empresa_id)))
      LEFT JOIN remessas r ON ((r.fornecedor_id = f.id)))
-  GROUP BY f.id, f.nome, f.cnpj_cpf, f.status, e.id, e.nome;;
-
+  GROUP BY f.id, f.nome, f.cnpj_cpf, f.status, e.id, e.nome;
+;
 -- View: vw_fornecedores_resumo
 CREATE OR REPLACE VIEW public.vw_fornecedores_resumo AS
  SELECT f.id,
@@ -356,8 +382,8 @@ CREATE OR REPLACE VIEW public.vw_fornecedores_resumo AS
     f.created_at,
     f.updated_at
    FROM (fornecedores f
-     LEFT JOIN empresas e ON ((e.id = f.empresa_id)));;
-
+     LEFT JOIN empresas e ON ((e.id = f.empresa_id)));
+;
 -- View: vw_funcionarios_completo
 CREATE OR REPLACE VIEW public.vw_funcionarios_completo AS
  SELECT fn.id,
@@ -381,8 +407,8 @@ CREATE OR REPLACE VIEW public.vw_funcionarios_completo AS
    FROM (((funcionarios_novo fn
      LEFT JOIN funcionarios_detalhes fd ON ((fd.funcionario_id = fn.id)))
      LEFT JOIN funcionarios_financeiro ff ON ((ff.funcionario_id = fn.id)))
-     LEFT JOIN funcionarios_beneficios_empresas fb ON ((fb.funcionario_id = fn.id)));;
-
+     LEFT JOIN funcionarios_beneficios_empresas fb ON ((fb.funcionario_id = fn.id)));
+;
 -- View: vw_historico_faltas
 CREATE OR REPLACE VIEW public.vw_historico_faltas AS
  SELECT f.id AS funcionario_id,
@@ -397,8 +423,8 @@ CREATE OR REPLACE VIEW public.vw_historico_faltas AS
      JOIN funcionarios f ON ((cf.funcionario_id = f.id)))
      JOIN periodos_aquisitivos pa ON ((cf.funcionario_id = pa.funcionario_id)))
   WHERE ((cf.data >= pa.data_inicio) AND (cf.data <= pa.data_fim))
-  ORDER BY cf.data DESC;;
-
+  ORDER BY cf.data DESC;
+;
 -- View: vw_logs_auditoria_recentes
 CREATE OR REPLACE VIEW public.vw_logs_auditoria_recentes AS
  SELECT id,
@@ -412,8 +438,27 @@ CREATE OR REPLACE VIEW public.vw_logs_auditoria_recentes AS
     observacao
    FROM logs_auditoria
   ORDER BY created_at DESC
- LIMIT 1000;;
-
+ LIMIT 1000;
+;
+-- View: vw_necessidade_compra
+CREATE OR REPLACE VIEW public.vw_necessidade_compra AS
+ SELECT pi.produto_id,
+    p.nome AS produto,
+    p.codigo_produto AS produto_codigo,
+    COALESCE(ei.quantidade, (0)::numeric) AS qtd_fisica,
+    sum((((esp.q_reserva + esp.q_entrega_futura) + esp.q_ag_separar) + esp.q_separado)) AS qtd_comprometida,
+    sum(esp.q_entrega_futura) AS necessidade_compra,
+    (COALESCE(ei.quantidade, (0)::numeric) - sum((((esp.q_reserva + esp.q_entrega_futura) + esp.q_ag_separar) + esp.q_separado))) AS qtd_disponivel,
+    count(DISTINCT pi.projeto_id) FILTER (WHERE (esp.q_entrega_futura > (0)::numeric)) AS projetos_com_entrega_futura
+   FROM (((estoque_saldos_projeto_item esp
+     JOIN projeto_itens pi ON ((pi.id = esp.projeto_item_id)))
+     LEFT JOIN produtos p ON ((p.id = pi.produto_id)))
+     LEFT JOIN estoque_itens ei ON (((ei.produto_id = pi.produto_id) AND (ei.local = 'Estoque'::estoque_local))))
+  WHERE ((esp.status_operacional = 'ativo'::text) AND (pi.produto_id IS NOT NULL))
+  GROUP BY pi.produto_id, p.nome, p.codigo_produto, ei.quantidade
+ HAVING (sum(esp.q_entrega_futura) > (0)::numeric)
+  ORDER BY (sum(esp.q_entrega_futura)) DESC, p.nome;
+;
 -- View: vw_orcamentos_aprovacao_financeira_auditoria
 CREATE OR REPLACE VIEW public.vw_orcamentos_aprovacao_financeira_auditoria AS
  SELECT o.id AS orcamento_id,
@@ -437,8 +482,8 @@ CREATE OR REPLACE VIEW public.vw_orcamentos_aprovacao_financeira_auditoria AS
      LEFT JOIN projeto_itens pi ON ((pi.orcamento_id = o.id)))
      LEFT JOIN projeto_parcelas pp ON ((pp.orcamento_id = o.id)))
      LEFT JOIN boletos b ON ((b.orcamento_id = o.id)))
-  GROUP BY o.id, o.numero, o.status, o.projeto_id, o.cliente_id, o.valor_total, o.requer_revisao_financeira, o.aprovado_cliente_em;;
-
+  GROUP BY o.id, o.numero, o.status, o.projeto_id, o.cliente_id, o.valor_total, o.requer_revisao_financeira, o.aprovado_cliente_em;
+;
 -- View: vw_produtos_estoque_detalhado
 CREATE OR REPLACE VIEW public.vw_produtos_estoque_detalhado AS
  WITH estoque_calculado AS (
@@ -481,8 +526,8 @@ CREATE OR REPLACE VIEW public.vw_produtos_estoque_detalhado AS
     COALESCE(ec.qtd_separacao, (0)::numeric) AS separacao,
     ((COALESCE(ec.qtd_geral, (0)::numeric) - COALESCE(ec.qtd_reserva, (0)::numeric)) - COALESCE(ec.qtd_separacao, (0)::numeric)) AS disponivel
    FROM (produtos p
-     LEFT JOIN estoque_calculado ec ON ((p.id = ec.produto_id)));;
-
+     LEFT JOIN estoque_calculado ec ON ((p.id = ec.produto_id)));
+;
 -- View: vw_produtos_estoque_por_local
 CREATE OR REPLACE VIEW public.vw_produtos_estoque_por_local AS
  SELECT p.codigo_produto,
@@ -498,8 +543,8 @@ CREATE OR REPLACE VIEW public.vw_produtos_estoque_por_local AS
     e.quantidade,
     e.quantidade_reservada
    FROM (produtos p
-     JOIN estoque_itens e ON ((p.id = e.produto_id)));;
-
+     JOIN estoque_itens e ON ((p.id = e.produto_id)));
+;
 -- View: vw_projetos_dashboard
 CREATE OR REPLACE VIEW public.vw_projetos_dashboard AS
  SELECT p.id,
@@ -532,8 +577,8 @@ CREATE OR REPLACE VIEW public.vw_projetos_dashboard AS
      LEFT JOIN contatos a ON ((p.arquiteto_id = a.id)))
      LEFT JOIN empresas e ON ((p.empresa_id = e.id)))
   WHERE (p.arquivado = false)
-  ORDER BY p.created_at DESC;;
-
+  ORDER BY p.created_at DESC;
+;
 -- View: vw_projetos_pipeline
 CREATE OR REPLACE VIEW public.vw_projetos_pipeline AS
  SELECT p.id,
@@ -550,8 +595,8 @@ CREATE OR REPLACE VIEW public.vw_projetos_pipeline AS
      LEFT JOIN LATERAL ( SELECT sum(vendas.valor_total) AS valor_total
            FROM vendas
           WHERE (vendas.projeto_id = p.id)) v ON (true))
-  WHERE ((p.arquivado = false) OR (p.arquivado IS NULL));;
-
+  WHERE ((p.arquivado = false) OR (p.arquivado IS NULL));
+;
 -- View: vw_projetos_por_responsavel
 CREATE OR REPLACE VIEW public.vw_projetos_por_responsavel AS
  SELECT u.id AS usuario_id,
@@ -571,8 +616,8 @@ CREATE OR REPLACE VIEW public.vw_projetos_por_responsavel AS
      LEFT JOIN projetos p ON ((u.id = p.responsavel_id)))
   GROUP BY u.id, u.nome
  HAVING (count(p.id) > 0)
-  ORDER BY (count(p.id)) DESC;;
-
+  ORDER BY (count(p.id)) DESC;
+;
 -- View: vw_projetos_por_status
 CREATE OR REPLACE VIEW public.vw_projetos_por_status AS
  SELECT p.status,
@@ -585,8 +630,8 @@ CREATE OR REPLACE VIEW public.vw_projetos_por_status AS
           WHERE (vendas.projeto_id = p.id)) v ON (true))
   WHERE ((p.arquivado = false) OR (p.arquivado IS NULL))
   GROUP BY p.status
-  ORDER BY (count(*)) DESC;;
-
+  ORDER BY (count(*)) DESC;
+;
 -- View: vw_projetos_resumo
 CREATE OR REPLACE VIEW public.vw_projetos_resumo AS
  SELECT p.id,
@@ -598,8 +643,8 @@ CREATE OR REPLACE VIEW public.vw_projetos_resumo AS
     COALESCE((sum(v.valor_total) - sum(v.valor_pago)), (0)::numeric) AS valor_pendente
    FROM (projetos p
      LEFT JOIN vendas v ON ((v.projeto_id = p.id)))
-  GROUP BY p.id, p.codigo, p.status;;
-
+  GROUP BY p.id, p.codigo, p.status;
+;
 -- View: vw_projetos_sem_empresa
 CREATE OR REPLACE VIEW public.vw_projetos_sem_empresa AS
  SELECT id,
@@ -611,8 +656,8 @@ CREATE OR REPLACE VIEW public.vw_projetos_sem_empresa AS
     created_at
    FROM projetos
   WHERE ((empresa_id IS NULL) AND (arquivado = false))
-  ORDER BY created_at DESC;;
-
+  ORDER BY created_at DESC;
+;
 -- View: vw_projetos_sem_responsavel
 CREATE OR REPLACE VIEW public.vw_projetos_sem_responsavel AS
  SELECT id,
@@ -625,16 +670,16 @@ CREATE OR REPLACE VIEW public.vw_projetos_sem_responsavel AS
     arquiteto_id
    FROM projetos
   WHERE ((responsavel_id IS NULL) AND (arquivado = false))
-  ORDER BY created_at DESC;;
-
+  ORDER BY created_at DESC;
+;
 -- View: vw_projetos_status_enum
 CREATE OR REPLACE VIEW public.vw_projetos_status_enum AS
  SELECT DISTINCT status,
     count(*) AS total
    FROM projetos
   GROUP BY status
-  ORDER BY (count(*)) DESC;;
-
+  ORDER BY (count(*)) DESC;
+;
 -- View: vw_remessas_completa
 CREATE OR REPLACE VIEW public.vw_remessas_completa AS
  SELECT r.id,
@@ -656,8 +701,8 @@ CREATE OR REPLACE VIEW public.vw_remessas_completa AS
     r.updated_at
    FROM ((remessas r
      LEFT JOIN fornecedores f ON ((f.id = r.fornecedor_id)))
-     LEFT JOIN empresas e ON ((e.id = r.empresa_id)));;
-
+     LEFT JOIN empresas e ON ((e.id = r.empresa_id)));
+;
 -- View: vw_remessas_resumo_status
 CREATE OR REPLACE VIEW public.vw_remessas_resumo_status AS
  SELECT e.id AS empresa_id,
@@ -668,8 +713,8 @@ CREATE OR REPLACE VIEW public.vw_remessas_resumo_status AS
     COALESCE(sum(r.valor_pago), (0)::numeric) AS valor_pago_total
    FROM (remessas r
      LEFT JOIN empresas e ON ((e.id = r.empresa_id)))
-  GROUP BY e.id, e.nome, r.status;;
-
+  GROUP BY e.id, e.nome, r.status;
+;
 -- View: vw_remessas_vencimento
 CREATE OR REPLACE VIEW public.vw_remessas_vencimento AS
  SELECT r.id,
@@ -700,8 +745,8 @@ CREATE OR REPLACE VIEW public.vw_remessas_vencimento AS
    FROM ((remessas r
      LEFT JOIN fornecedores f ON ((f.id = r.fornecedor_id)))
      LEFT JOIN empresas e ON ((e.id = r.empresa_id)))
-  WHERE (r.status <> ALL (ARRAY['pago'::text, 'cancelado'::text]));;
-
+  WHERE (r.status <> ALL (ARRAY['pago'::text, 'cancelado'::text]));
+;
 -- View: vw_separacoes_agenda
 CREATE OR REPLACE VIEW public.vw_separacoes_agenda AS
  SELECT s.id AS separacao_id,
@@ -747,8 +792,8 @@ CREATE OR REPLACE VIEW public.vw_separacoes_agenda AS
         CASE
             WHEN ((s.data_entrega < CURRENT_DATE) AND (s.status <> ALL (ARRAY['Enviado'::separacao_status, 'Cancelado'::separacao_status]))) THEN 0
             ELSE 1
-        END, s.data_entrega;;
-
+        END, s.data_entrega;
+;
 -- View: vw_staging_resumo
 CREATE OR REPLACE VIEW public.vw_staging_resumo AS
  SELECT 'conta_pagar'::text AS tabela,
@@ -781,8 +826,8 @@ UNION ALL
     count(*) FILTER (WHERE (staging_pedido_compra.processado = false)) AS pendentes,
     min(staging_pedido_compra.importado_em) AS primeira_importacao,
     max(staging_pedido_compra.importado_em) AS ultima_importacao
-   FROM staging_pedido_compra;;
-
+   FROM staging_pedido_compra;
+;
 -- View: vw_transacoes_completas
 CREATE OR REPLACE VIEW public.vw_transacoes_completas AS
  SELECT t.id,
@@ -839,8 +884,43 @@ CREATE OR REPLACE VIEW public.vw_transacoes_completas AS
      LEFT JOIN plano_de_contas gr ON ((gr.id = sg.parent_id)))
      LEFT JOIN contas_bancarias cb ON ((cb.id = t.conta_id)))
      LEFT JOIN projetos pj ON ((pj.id = COALESCE(n.projeto_id, t.projeto_id))))
-     LEFT JOIN projeto_parcelas pp ON ((pp.transacao_id = t.id)));;
-
+     LEFT JOIN projeto_parcelas pp ON ((pp.transacao_id = t.id)));
+;
+-- View: vw_transferencias_estoque
+CREATE OR REPLACE VIEW public.vw_transferencias_estoque AS
+ SELECT t.id AS transferencia_id,
+    t.status,
+    pi_o.produto_id,
+    p.nome AS produto,
+    p.codigo_produto AS produto_codigo,
+    t.quantidade,
+    t.origem_projeto_item_id,
+    pr_o.codigo AS origem_projeto_codigo,
+    o_o.numero AS origem_orcamento_numero,
+    c_o.nome AS origem_cliente,
+    t.destino_projeto_item_id,
+    pr_d.codigo AS destino_projeto_codigo,
+    o_d.numero AS destino_orcamento_numero,
+    c_d.nome AS destino_cliente,
+    t.motivo,
+    t.solicitado_por,
+    t.aprovado_por,
+    t.solicitado_em,
+    t.aprovado_em,
+    t.cancelado_em,
+    t.motivo_cancelamento
+   FROM (((((((((transferencias_estoque t
+     JOIN projeto_itens pi_o ON ((pi_o.id = t.origem_projeto_item_id)))
+     JOIN projeto_itens pi_d ON ((pi_d.id = t.destino_projeto_item_id)))
+     LEFT JOIN produtos p ON ((p.id = pi_o.produto_id)))
+     LEFT JOIN projetos pr_o ON ((pr_o.id = pi_o.projeto_id)))
+     LEFT JOIN orcamentos o_o ON ((o_o.id = pi_o.orcamento_id)))
+     LEFT JOIN contatos c_o ON ((c_o.id = COALESCE(o_o.cliente_id, pr_o.cliente_id, pr_o.client_id))))
+     LEFT JOIN projetos pr_d ON ((pr_d.id = pi_d.projeto_id)))
+     LEFT JOIN orcamentos o_d ON ((o_d.id = pi_d.orcamento_id)))
+     LEFT JOIN contatos c_d ON ((c_d.id = COALESCE(o_d.cliente_id, pr_d.cliente_id, pr_d.client_id))))
+  ORDER BY t.solicitado_em DESC;
+;
 -- View: vw_vendas_loja
 CREATE OR REPLACE VIEW public.vw_vendas_loja AS
  SELECT p.id AS produto_id,
@@ -860,8 +940,8 @@ CREATE OR REPLACE VIEW public.vw_vendas_loja AS
      JOIN produtos p ON ((p.id = si.produto_id)))
      JOIN separacoes s ON ((s.id = si.separacao_id)))
      LEFT JOIN marcas m ON ((m.id = p.marca_id)))
-  WHERE ((si.produto_id IS NOT NULL) AND (s.projeto_id IS NULL));;
-
+  WHERE ((si.produto_id IS NOT NULL) AND (s.projeto_id IS NULL));
+;
 -- View: vw_vendas_por_projeto
 CREATE OR REPLACE VIEW public.vw_vendas_por_projeto AS
  SELECT p.id AS produto_id,
@@ -888,8 +968,8 @@ CREATE OR REPLACE VIEW public.vw_vendas_por_projeto AS
      JOIN projetos pr ON ((pr.id = s.projeto_id)))
      LEFT JOIN marcas m ON ((m.id = p.marca_id)))
      LEFT JOIN contatos cli ON ((cli.id = pr.cliente_id)))
-  WHERE ((si.produto_id IS NOT NULL) AND (s.projeto_id IS NOT NULL));;
-
+  WHERE ((si.produto_id IS NOT NULL) AND (s.projeto_id IS NOT NULL));
+;
 -- View: vw_vendas_produtos
 CREATE OR REPLACE VIEW public.vw_vendas_produtos AS
  SELECT 'projeto'::text AS origem,
@@ -932,82 +1012,5 @@ UNION ALL
      JOIN produtos p ON ((p.id = si.produto_id)))
      JOIN separacoes s ON ((s.id = si.separacao_id)))
      LEFT JOIN marcas m ON ((m.id = p.marca_id)))
-  WHERE ((si.produto_id IS NOT NULL) AND (s.projeto_id IS NULL));;
-
-
--- ==== Adicionado em 2026-07-07 (SPEC-011/012) ====
-
--- View: vw_entrega_futura_projeto_item
-CREATE OR REPLACE VIEW public.vw_entrega_futura_projeto_item AS\n  SELECT esp.projeto_item_id,
-    pi.produto_id,
-    p.nome AS produto,
-    p.codigo_produto AS produto_codigo,
-    pi.projeto_id,
-    pr.codigo AS projeto_codigo,
-    pi.orcamento_id,
-    o.numero AS orcamento_numero,
-    COALESCE(o.cliente_id, pr.cliente_id, pr.client_id) AS cliente_id,
-    c.nome AS cliente,
-    pi.quantidade AS q_venda,
-    esp.q_entrega_futura,
-    esp.q_reserva,
-    esp.q_transferida_saida,
-    esp.atualizado_em
-   FROM (((((estoque_saldos_projeto_item esp
-     JOIN projeto_itens pi ON ((pi.id = esp.projeto_item_id)))
-     LEFT JOIN produtos p ON ((p.id = pi.produto_id)))
-     LEFT JOIN projetos pr ON ((pr.id = pi.projeto_id)))
-     LEFT JOIN orcamentos o ON ((o.id = pi.orcamento_id)))
-     LEFT JOIN contatos c ON ((c.id = COALESCE(o.cliente_id, pr.cliente_id, pr.client_id))))
-  WHERE ((esp.status_operacional = 'ativo'::text) AND (esp.q_entrega_futura > (0)::numeric))
-  ORDER BY p.nome, esp.atualizado_em;
--- View: vw_necessidade_compra
-CREATE OR REPLACE VIEW public.vw_necessidade_compra AS\n  SELECT pi.produto_id,
-    p.nome AS produto,
-    p.codigo_produto AS produto_codigo,
-    COALESCE(ei.quantidade, (0)::numeric) AS qtd_fisica,
-    sum((((esp.q_reserva + esp.q_entrega_futura) + esp.q_ag_separar) + esp.q_separado)) AS qtd_comprometida,
-    sum(esp.q_entrega_futura) AS necessidade_compra,
-    (COALESCE(ei.quantidade, (0)::numeric) - sum((((esp.q_reserva + esp.q_entrega_futura) + esp.q_ag_separar) + esp.q_separado))) AS qtd_disponivel,
-    count(DISTINCT pi.projeto_id) FILTER (WHERE (esp.q_entrega_futura > (0)::numeric)) AS projetos_com_entrega_futura
-   FROM (((estoque_saldos_projeto_item esp
-     JOIN projeto_itens pi ON ((pi.id = esp.projeto_item_id)))
-     LEFT JOIN produtos p ON ((p.id = pi.produto_id)))
-     LEFT JOIN estoque_itens ei ON (((ei.produto_id = pi.produto_id) AND (ei.local = 'Estoque'::estoque_local))))
-  WHERE ((esp.status_operacional = 'ativo'::text) AND (pi.produto_id IS NOT NULL))
-  GROUP BY pi.produto_id, p.nome, p.codigo_produto, ei.quantidade
- HAVING (sum(esp.q_entrega_futura) > (0)::numeric)
-  ORDER BY (sum(esp.q_entrega_futura)) DESC, p.nome;
--- View: vw_transferencias_estoque
-CREATE OR REPLACE VIEW public.vw_transferencias_estoque AS\n  SELECT t.id AS transferencia_id,
-    t.status,
-    pi_o.produto_id,
-    p.nome AS produto,
-    p.codigo_produto AS produto_codigo,
-    t.quantidade,
-    t.origem_projeto_item_id,
-    pr_o.codigo AS origem_projeto_codigo,
-    o_o.numero AS origem_orcamento_numero,
-    c_o.nome AS origem_cliente,
-    t.destino_projeto_item_id,
-    pr_d.codigo AS destino_projeto_codigo,
-    o_d.numero AS destino_orcamento_numero,
-    c_d.nome AS destino_cliente,
-    t.motivo,
-    t.solicitado_por,
-    t.aprovado_por,
-    t.solicitado_em,
-    t.aprovado_em,
-    t.cancelado_em,
-    t.motivo_cancelamento
-   FROM (((((((((transferencias_estoque t
-     JOIN projeto_itens pi_o ON ((pi_o.id = t.origem_projeto_item_id)))
-     JOIN projeto_itens pi_d ON ((pi_d.id = t.destino_projeto_item_id)))
-     LEFT JOIN produtos p ON ((p.id = pi_o.produto_id)))
-     LEFT JOIN projetos pr_o ON ((pr_o.id = pi_o.projeto_id)))
-     LEFT JOIN orcamentos o_o ON ((o_o.id = pi_o.orcamento_id)))
-     LEFT JOIN contatos c_o ON ((c_o.id = COALESCE(o_o.cliente_id, pr_o.cliente_id, pr_o.client_id))))
-     LEFT JOIN projetos pr_d ON ((pr_d.id = pi_d.projeto_id)))
-     LEFT JOIN orcamentos o_d ON ((o_d.id = pi_d.orcamento_id)))
-     LEFT JOIN contatos c_d ON ((c_d.id = COALESCE(o_d.cliente_id, pr_d.cliente_id, pr_d.client_id))))
-  ORDER BY t.solicitado_em DESC;
+  WHERE ((si.produto_id IS NOT NULL) AND (s.projeto_id IS NULL));
+;

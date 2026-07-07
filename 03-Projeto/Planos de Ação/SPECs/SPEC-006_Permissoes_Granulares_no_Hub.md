@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-006 — Permissões Granulares no Hub (sistema, módulo/aba e ação)"
-status: não iniciado
-data_ultima_modificacao: 2026-06-26
+status: aplicado no remoto; adoção/homologação operacional pendente
+data_ultima_modificacao: 2026-07-07
 sistemas_envolvidos:
   - Hub / Central
   - Cadastro
@@ -17,23 +17,23 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Criar migration central com as tabelas novas de permissão (`modulos`, `modulo_acoes`, `papeis`, `papel_permissoes`, `usuario_papeis`, `usuario_permissao_excecoes`, `auditoria_permissoes`).
-- [ ] Criar RPC `public.hub_pode_executar(p_usuario_id uuid, p_system_slug text, p_modulo_chave text, p_acao text)` com a precedência exceção > papel.
-- [ ] Criar RPC `public.hub_sistemas_permitidos(p_usuario_id uuid)` para substituir a leitura atual de `user_system_access` nos cards do Hub.
-- [ ] Criar trigger/função de auditoria automática em `papeis`, `papel_permissoes`, `usuario_papeis`, `usuario_permissao_excecoes` gravando em `auditoria_permissoes`.
-- [ ] Seed inicial: criar papéis equivalentes aos valores atuais de `usuarios.role` (`admin`, `gerente`, `operador`, `funcionario`, `viewer`) com visibilidade "sistema inteiro" e todas as ações, para não quebrar o acesso de ninguém na migração.
-- [ ] Reescrever `AccessTab.tsx` (Hub) substituindo o grid de toggle binário por sistema por uma matriz sistema × módulo × ação, com seleção de papel(éis) por usuário.
-- [ ] Criar `RolesTab.tsx` (Hub) para CRUD de papéis e de `papel_permissoes`.
-- [ ] Criar tela/aba de exceções individuais (`usuario_permissao_excecoes`) com justificativa e validade opcional.
-- [ ] Estender `LogsTab.tsx` (ou criar `AuditTab.tsx`) para exibir o histórico de `auditoria_permissoes`.
-- [ ] Cadastrar o próprio módulo de permissões do Hub em `modulos`/`modulo_acoes`, para que ele também seja regido pela matriz (auto-governança).
-- [ ] Publicar contrato de consumo (RPC `hub_pode_executar`) documentado em `supabase/db/domains/` para os outros 8 sistemas adotarem.
+- [x] Criar migration central com as tabelas novas de permissão (`modulos`, `modulo_acoes`, `papeis`, `papel_permissoes`, `usuario_papeis`, `usuario_permissao_excecoes`, `auditoria_permissoes`).
+- [x] Criar RPC `public.hub_pode_executar(p_usuario_id uuid, p_system_slug text, p_modulo_chave text, p_acao text)` com a precedência exceção > papel.
+- [x] Criar RPC `public.hub_sistemas_permitidos(p_usuario_id uuid)` para substituir a leitura atual de `user_system_access` nos cards do Hub.
+- [x] Criar trigger/função de auditoria automática em `papeis`, `papel_permissoes`, `usuario_papeis`, `usuario_permissao_excecoes` gravando em `auditoria_permissoes`.
+- [x] Seed inicial: criar papéis equivalentes aos valores atuais de `usuarios.role` (`admin`, `gerente`, `operador`, `funcionario`, `viewer`) com visibilidade "sistema inteiro" e todas as ações, para não quebrar o acesso de ninguém na migração.
+- [x] Reescrever `AccessTab.tsx` (Hub) substituindo o grid de toggle binário por sistema por uma matriz sistema × módulo × ação, com seleção de papel(éis) por usuário.
+- [x] Criar `RolesTab.tsx` (Hub) para CRUD de papéis e de `papel_permissoes`.
+- [x] Criar tela/aba de exceções individuais (`usuario_permissao_excecoes`) com justificativa e validade opcional.
+- [x] Estender `LogsTab.tsx` (ou criar `AuditTab.tsx`) para exibir o histórico de `auditoria_permissoes`.
+- [x] Cadastrar o próprio módulo de permissões do Hub em `modulos`/`modulo_acoes`, para que ele também seja regido pela matriz (auto-governança).
+- [x] Publicar contrato de consumo (RPC `hub_pode_executar`) documentado em `supabase/db/domains/` para os outros 8 sistemas adotarem.
 
 ### Passos manuais do usuário
 
-- [ ] Revisar e aprovar a lista de módulos/ações iniciais por sistema antes da migration (esta SPEC propõe um rascunho, mas quem conhece a operação de cada sistema deve validar).
-- [ ] Aplicar a migration no banco remoto compartilhado (`vcvcwzmbiftcawncibke`).
-- [ ] Reextrair o snapshot de `supabase/db/current/` após aplicar.
+- [ ] Revisar e aprovar a lista de módulos/ações iniciais por sistema (a migration já está no remoto, mas a operação ainda precisa validar a matriz antes da adoção ampla).
+- [x] Aplicar/verificar a migration no banco remoto compartilhado (`vcvcwzmbiftcawncibke`).
+- [x] Reextrair o snapshot de `supabase/db/current/` após aplicar/verificar.
 - [ ] Decidir, sistema por sistema, quando cada um deixa de usar sua checagem própria (`is_admin()`, `useUserRole`, etc.) e passa a chamar `hub_pode_executar` — isso é trabalho de adoção, não desta SPEC.
 
 ## Objetivo
@@ -218,12 +218,15 @@ O módulo de permissões do próprio Hub (`modulos` com `system_id` = Hub) entra
 
 ## Realizado
 
-(nada implementado ainda — esta SPEC define o desenho a ser aprovado e construído.)
+- 2026-07-07: criada a migration central `supabase/db/migrations/20260708_029_spec006_permissoes_granulares_hub/` com tabelas, RLS admin, RPCs, auditoria, seed de papéis e auto-governança do Hub.
+- 2026-07-07: a Central passou a ter `AccessTab`, `RolesTab`, `ExceptionsTab` e `AuditTab` sobre as tabelas novas.
+- 2026-07-07: o dashboard do Hub passou a preferir `hub_sistemas_permitidos(p_usuario_id)`, mantendo `user_system_access` como fallback de transição.
+- 2026-07-07: contrato documentado em `supabase/db/domains/hub_ti.md`.
+- 2026-07-07: verificado no Supabase remoto que SPEC-006 já estava aplicada: tabelas, RPCs `hub_pode_executar`/`hub_sistemas_permitidos`, triggers de auditoria, RLS e seed base existem no schema `public`.
+- 2026-07-07: `supabase/db/current/` reextraído e atualizado para refletir os objetos da SPEC-006.
 
 ## Pendências
 
-- [ ] Validar com quem opera cada sistema a lista inicial de módulos/ações antes de rodar a migration (o desenho acima é um rascunho, não uma lista final).
-- [ ] Implementar as tabelas, RPCs e telas descritas nesta SPEC.
-- [ ] Migrar o seed inicial de papéis a partir dos valores atuais de `usuarios.role`, sem quebrar acesso existente.
+- [ ] Validar com quem opera cada sistema a lista inicial de módulos/ações antes de ativar a matriz como regra operacional ampla.
 - [ ] Definir, sistema por sistema, o cronograma de adoção de `hub_pode_executar` no lugar de `is_admin()`/`useUserRole`/checagens próprias — começar pela Logística, que é o caso mais espalhado (8-9 arquivos) e tem um bypass de RBAC já identificado em auditoria anterior.
 - [ ] Decidir se/quando `user_system_access` e o enum `usuarios.role` são descontinuados, depois que todos os sistemas migrarem.

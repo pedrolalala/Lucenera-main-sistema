@@ -10,6 +10,8 @@ Atualização operacional em 24 de junho de 2026: a pasta `Sistema/` deve conter
 
 Atualização de implementação em 03 de julho de 2026: cobre a semana de 26/06 a 03/07/2026 — 7 novos grupos de migration no banco central (reserva de estoque na aprovação do orçamento, cancelamento de orçamento, comissão por equipe), fluxo de aprovação financeira em Orçamentos, e um achado crítico de segurança (credencial em texto plano commitada em 3 repositórios). Ver [Adendo de atualização 03/07/2026](06_ADENDO_ATUALIZACAO_03_07_2026.md).
 
+Atualização de análise em 07 de julho de 2026: relatório de lacunas compara reuniões, processos mapeados, SPECs, snapshot Supabase e código dos sistemas, separando implementado, parcial, bloqueado e não iniciado. Ver [Análise de lacunas de implementação 07/07/2026](07_ANALISE_LACUNAS_IMPLEMENTACAO_2026_07_07.md). A implementação e aplicação/publicação remota das SPEC-006/007 tem evidência em [Evidência TDD — SPEC-006/007](Evidencias%20TDD/SPEC-006-007_TDD_2026_07_07.md) e no snapshot `supabase/db/current/`.
+
 ## Objetivo
 
 Esta pasta consolida o diagnóstico e o plano de evolução do ecossistema Lucenera. O foco desta versão é substituir as funções ainda dependentes do Connect sem criar complexidade desnecessária.
@@ -24,16 +26,18 @@ Os documentos foram escritos para leitura do cliente e do colaborador responsáv
 4. [Adendo de atualização 24/06/2026](04_ADENDO_ATUALIZACAO_24_06_2026.md)
 5. [Adendo — Regras operacionais dos Videos Connect](05_ADENDO_REGRAS_VIDEOS_CONNECT.md)
 6. [Adendo de atualização 03/07/2026](06_ADENDO_ATUALIZACAO_03_07_2026.md)
-7. [Escopo do Hub / Central](Escopos/01_ESCOPO_HUB_TI.md)
-8. [Escopo do sistema de Cadastro](Escopos/02_ESCOPO_CADASTRO.md)
-9. [Escopo do CRM](Escopos/03_ESCOPO_CRM.md)
-10. [Escopo do sistema de Orçamentos](Escopos/04_ESCOPO_ORCAMENTOS.md)
-11. [Escopo do novo sistema de Estoque e Compras](Escopos/05_ESCOPO_ESTOQUE_COMPRAS.md)
-12. [Escopo do sistema Financeiro](Escopos/06_ESCOPO_FINANCEIRO.md)
-13. [Escopo do sistema de Logística](Escopos/07_ESCOPO_LOGISTICA.md)
-14. [Escopo do sistema de RH](Escopos/08_ESCOPO_RH.md)
-15. [Escopo do sistema Ubiqua](Escopos/09_ESCOPO_UBIQUA.md)
-16. [Escopo do Sistema de TI](Escopos/10_ESCOPO_SISTEMA_TI.md)
+7. [Análise de lacunas de implementação 07/07/2026](07_ANALISE_LACUNAS_IMPLEMENTACAO_2026_07_07.md)
+8. [Evidência TDD — SPEC-006/007](Evidencias%20TDD/SPEC-006-007_TDD_2026_07_07.md)
+9. [Escopo do Hub / Central](Escopos/01_ESCOPO_HUB_TI.md)
+10. [Escopo do sistema de Cadastro](Escopos/02_ESCOPO_CADASTRO.md)
+11. [Escopo do CRM](Escopos/03_ESCOPO_CRM.md)
+12. [Escopo do sistema de Orçamentos](Escopos/04_ESCOPO_ORCAMENTOS.md)
+13. [Escopo do novo sistema de Estoque e Compras](Escopos/05_ESCOPO_ESTOQUE_COMPRAS.md)
+14. [Escopo do sistema Financeiro](Escopos/06_ESCOPO_FINANCEIRO.md)
+15. [Escopo do sistema de Logística](Escopos/07_ESCOPO_LOGISTICA.md)
+16. [Escopo do sistema de RH](Escopos/08_ESCOPO_RH.md)
+17. [Escopo do sistema Ubiqua](Escopos/09_ESCOPO_UBIQUA.md)
+18. [Escopo do Sistema de TI](Escopos/10_ESCOPO_SISTEMA_TI.md)
 
 ## Planos de ação
 
@@ -43,20 +47,20 @@ Os documentos foram escritos para leitura do cliente e do colaborador responsáv
 - [SPECs — SPEC-003 Validação e Coleta de Frete no Orçamento](Planos%20de%20Ação/SPECs/SPEC-003_Validacao_Coleta_Frete_Orcamento.md)
 - [SPECs — SPEC-004 Auditoria e Proteção de Parcelas do Orçamento Aprovado](Planos%20de%20Ação/SPECs/SPEC-004_Auditoria_Parcelas_Orcamento_Aprovado.md)
 - [SPECs — SPEC-005 Remoção de Triggers Legados que Bloqueavam a Aprovação](Planos%20de%20Ação/SPECs/SPEC-005_Remocao_Triggers_Legados_Bloqueio_Aprovacao.md)
-- [SPECs — SPEC-006 Permissões Granulares no Hub (não implementada)](Planos%20de%20Ação/SPECs/SPEC-006_Permissoes_Granulares_no_Hub.md)
-- [SPECs — SPEC-007 Token de Acesso Compartilhado entre Sistemas (não implementada)](Planos%20de%20Ação/SPECs/SPEC-007_Token_Acesso_Compartilhado_Entre_Sistemas.md)
-- [SPECs — SPEC-008 Conciliação de Retorno Bancário e Baixa de Parcelas (não implementada)](Planos%20de%20Ação/SPECs/SPEC-008_Conciliacao_Retorno_Bancario_Baixa_Parcelas.md)
-- [SPECs — SPEC-009 Aprovação do Cliente no Orçamento (não implementada)](Planos%20de%20Ação/SPECs/SPEC-009_Aprovacao_Cliente_Orcamento.md)
+- [SPECs — SPEC-006 Permissões Granulares no Hub (aplicada no remoto; adoção/homologação pendente)](Planos%20de%20Ação/SPECs/SPEC-006_Permissoes_Granulares_no_Hub.md)
+- [SPECs — SPEC-007 Token de Acesso Compartilhado entre Sistemas (publicada no remoto; homologação ponta-a-ponta pendente)](Planos%20de%20Ação/SPECs/SPEC-007_Token_Acesso_Compartilhado_Entre_Sistemas.md)
+- [SPECs — SPEC-008 Conciliação de Retorno Bancário e Baixa de Parcelas (implementada; homologação com arquivo real pendente)](Planos%20de%20Ação/SPECs/SPEC-008_Conciliacao_Retorno_Bancario_Baixa_Parcelas.md)
+- [SPECs — SPEC-009 Aprovação do Cliente no Orçamento (aplicada no banco; normalizada pela SPEC-016)](Planos%20de%20Ação/SPECs/SPEC-009_Aprovacao_Cliente_Orcamento.md)
 - [SPECs — SPEC-009 Prompt Frontend da Aprovação do Cliente](Planos%20de%20Ação/SPECs/SPEC-009_PROMPT_FRONTEND.md)
-- [SPECs — SPEC-010 Saldos Operacionais de Estoque por Item de Projeto (aplicada, hardening pendente)](Planos%20de%20Ação/SPECs/SPEC-010_Saldos_Estoque_por_Item_de_Projeto.md)
-- [SPECs — SPEC-011 Transferência de Reserva Entre Itens de Projeto (não implementada)](Planos%20de%20Ação/SPECs/SPEC-011_Transferencia_Reserva_Entre_Itens_de_Projeto.md)
-- [SPECs — SPEC-012 Entrega Futura e Necessidade de Compra (não implementada)](Planos%20de%20Ação/SPECs/SPEC-012_Entrega_Futura_Necessidade_Compra.md)
+- [SPECs — SPEC-010 Saldos Operacionais de Estoque por Item de Projeto (aplicada e endurecida; consumo frontend pendente)](Planos%20de%20Ação/SPECs/SPEC-010_Saldos_Estoque_por_Item_de_Projeto.md)
+- [SPECs — SPEC-011 Transferência de Reserva Entre Itens de Projeto (backend implementado; sem frontend)](Planos%20de%20Ação/SPECs/SPEC-011_Transferencia_Reserva_Entre_Itens_de_Projeto.md)
+- [SPECs — SPEC-012 Entrega Futura e Necessidade de Compra (views implementadas; sem frontend)](Planos%20de%20Ação/SPECs/SPEC-012_Entrega_Futura_Necessidade_Compra.md)
 - [SPECs — SPEC-013 Complemento Absorvido pela SPEC-010](Planos%20de%20Ação/SPECs/SPEC-013_Rastreabilidade_Reserva_Estoque_Por_Projeto.md)
-- [SPECs — SPEC-014 Itens Aprovados do Projeto Visíveis no CRM (não implementada)](Planos%20de%20Ação/SPECs/SPEC-014_Aba_Itens_Aprovados_CRM.md)
-- [SPECs — SPEC-015 Devolução de Estoque por Item de Projeto (não implementada)](Planos%20de%20Ação/SPECs/SPEC-015_Devolucao_Estoque_por_Item_de_Projeto.md)
-- [SPECs — SPEC-016 Normalização da Aprovação Financeira de Orçamentos (não implementada)](Planos%20de%20Ação/SPECs/SPEC-016_Normalizacao_Aprovacao_Financeira_Orcamento.md)
-- [SPECs — SPEC-017 Modal Unificado da Aprovação Financeira em Orçamentos (não implementada)](Planos%20de%20Ação/SPECs/SPEC-017_Modal_Unificado_Aprovacao_Financeira_Orcamento.md)
-- [SPECs — SPEC-018 Criar Produto Dentro do Modal de Orçamento (não implementada)](Planos%20de%20Ação/SPECs/SPEC-018_Criar_Produto_no_Modal_de_Orcamento.md)
+- [SPECs — SPEC-014 Itens Aprovados do Projeto Visíveis no CRM (implementada; badges ricos pendentes)](Planos%20de%20Ação/SPECs/SPEC-014_Aba_Itens_Aprovados_CRM.md)
+- [SPECs — SPEC-015 Devolução de Estoque por Item de Projeto (backend implementado; sem frontend)](Planos%20de%20Ação/SPECs/SPEC-015_Devolucao_Estoque_por_Item_de_Projeto.md)
+- [SPECs — SPEC-016 Normalização da Aprovação Financeira de Orçamentos (implementada em homologação)](Planos%20de%20Ação/SPECs/SPEC-016_Normalizacao_Aprovacao_Financeira_Orcamento.md)
+- [SPECs — SPEC-017 Modal Unificado da Aprovação Financeira em Orçamentos (implementada em homologação)](Planos%20de%20Ação/SPECs/SPEC-017_Modal_Unificado_Aprovacao_Financeira_Orcamento.md)
+- [SPECs — SPEC-018 Criar Produto Dentro do Modal de Orçamento (implementada em homologação)](Planos%20de%20Ação/SPECs/SPEC-018_Criar_Produto_no_Modal_de_Orcamento.md)
 
 ## Decisões consolidadas
 

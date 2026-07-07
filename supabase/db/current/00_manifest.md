@@ -1,6 +1,16 @@
 # Manifesto do snapshot atual
 
-Status: snapshot reextraído do Supabase real em **2026-07-07 (segunda rodada)**, já refletindo as migrations `20260706_020_normalizacao_aprovacao_financeira_orcamento`, `20260706_021_criar_produto_orcamento`, `20260706_022_saldos_estoque_projeto_item`, o hardening `20260707_023_spec010_hardening`, a RLS de leitura `20260707_024_rls_leitura_estoque_projeto_item`, as SPECs `20260707_025_spec012_entrega_futura_necessidade_compra`, `20260707_026_spec011_transferencia_reserva`, `20260707_027_spec015_devolucao_estoque` e `20260707_028_spec008_conciliacao_retorno_bancario` (incluindo a remoção do trigger órfão `update_parcelas_updated_at` e o ajuste do índice de `retorno_bancario_arquivos.hash_conteudo`).
+Status: snapshot reextraído do Supabase real em **2026-07-07 (terceira rodada)**, já refletindo as migrations `20260706_020_normalizacao_aprovacao_financeira_orcamento`, `20260706_021_criar_produto_orcamento`, `20260706_022_saldos_estoque_projeto_item`, o hardening `20260707_023_spec010_hardening`, a RLS de leitura `20260707_024_rls_leitura_estoque_projeto_item`, as SPECs `20260707_025_spec012_entrega_futura_necessidade_compra`, `20260707_026_spec011_transferencia_reserva`, `20260707_027_spec015_devolucao_estoque`, `20260707_028_spec008_conciliacao_retorno_bancario`, a SPEC-006 (`20260708_029_spec006_permissoes_granulares_hub`) e a SPEC-007 (`20260708_030_spec007_sso_cross_system`).
+
+## Terceira rodada de reextração (2026-07-07)
+
+`01_schema_full.sql` foi regerado por completo via `pg_dump --schema=public --schema-only --no-owner --no-privileges`. `03_functions.sql`, `04_triggers.sql`, `05_views.sql`, `07_rls_policies.sql` e `09_schema_inventory.md` também foram regerados a partir de `pg_catalog`/`information_schema` para refletir o banco remoto depois das SPECs 006/007.
+
+Confirmações desta rodada:
+
+- SPEC-006 já estava aplicada no Supabase remoto quando a verificação começou: tabelas `modulos`, `modulo_acoes`, `papeis`, `papel_permissoes`, `usuario_papeis`, `usuario_permissao_excecoes`, `auditoria_permissoes`, RPCs `hub_pode_executar`/`hub_sistemas_permitidos` e triggers de auditoria existem no schema `public`.
+- SPEC-007 foi aplicada nesta rodada: tabela `cross_system_session_codes` criada com RLS habilitada e sem grants diretos para `anon`/`authenticated`.
+- Edge Functions `generate-cross-system-code` e `exchange-cross-system-code` publicadas no projeto remoto `vcvcwzmbiftcawncibke`, ambas `ACTIVE` em 2026-07-07.
 
 ## Segunda rodada de reextração (2026-07-07)
 
@@ -29,10 +39,10 @@ As migrations dos sistemas em `Sistema/*/supabase/migrations` não são fonte de
 ## Resumo extraído (07/07/2026)
 
 - Banco: PostgreSQL 17.6.
-- Schema `public`: 74 tabelas base, 42 views/materialized views e 79 funções.
-- Triggers em `public`, `auth` e `storage`: 53.
-- Tabelas com RLS em `public`, `auth` e `storage`: 92.
-- Policies em `public`, `auth` e `storage`: 345 (330 em `public`, 15 em `storage`, 0 em `auth`).
+- Schema `public`: 86 tabelas base, 45 views/materialized views e 88 funções.
+- Triggers em `public`, `auth` e `storage`: 56.
+- Tabelas com RLS em `public`, `auth` e `storage`: 104.
+- Policies em `public`, `auth` e `storage`: 358 (343 em `public`, 15 em `storage`, 0 em `auth`).
 - `09_schema_inventory.md` regenerado nesta rodada.
 
 ## Observações da reextração (07/07/2026)
@@ -42,9 +52,11 @@ As migrations dos sistemas em `Sistema/*/supabase/migrations` não são fonte de
 - **Confirmado**: views de estoque da SPEC-010 têm `security_invoker=true` — o hardening de `20260707_023` já foi aplicado.
 - **Achado**: `04_triggers.sql` e `07_rls_policies.sql` cobriam apenas o schema `public` desde a extração de 26/06/2026, apesar deste manifesto sempre ter declarado cobertura de `public`+`auth`+`storage`. Nesta rodada foram adicionados os 5 triggers reais de `auth`/`storage` (`on_auth_user_created`, triggers de `storage.buckets`/`storage.objects`) e as 15 policies de `storage.objects` que estavam ausentes. Isso não é efeito das migrations recentes — é uma lacuna da extração anterior, agora corrigida.
 - **Confirmado**: schema (`01_schema_full.sql`), funções (`03_functions.sql`) e views (`05_views.sql`) já estavam com o conteúdo correto desde 06/07/2026 (a nota "ainda precisa ser reextraído" estava desatualizada); a reextração de hoje confirma que não houve mudança de conteúdo além do já registrado acima.
+- **Confirmado**: `modulos`, `modulo_acoes`, `papeis`, `papel_permissoes`, `usuario_papeis`, `usuario_permissao_excecoes`, `auditoria_permissoes`, `hub_pode_executar`, `hub_sistemas_permitidos` e `cross_system_session_codes` existem no banco real e agora estão refletidos no schema, nas funções, nos triggers, nas policies e no inventário.
 - `historico_status_orcamento` permanece como tabela da família Ubiqua/revenda; o fluxo novo usa `historico_status_orcamentos`.
 
 ## Próximos passos
 
 1. Atualizar os contextos locais dos sistemas quando novas decisões estruturais forem feitas.
-2. Fazer análise de segurança/RLS em etapa própria depois da consolidação funcional do banco — agora com cobertura completa de `storage` no inventário de RLS.
+2. Homologar ponta a ponta o SSO real com usuário autenticado (Hub → sistema, CRM → Orçamentos, Orçamentos → Financeiro), porque a verificação desta rodada cobriu publicação e endpoints, mas não um login real sem credenciais de usuário.
+3. Fazer análise de segurança/RLS em etapa própria depois da consolidação funcional do banco — agora com cobertura completa de `storage` no inventário de RLS.

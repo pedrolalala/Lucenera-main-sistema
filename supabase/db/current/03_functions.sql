@@ -61,8 +61,8 @@ BEGIN
   RETURN v_nums;
 END;
 $function$
-;
 
+;
 -- Function: adm_aprovar_pelo_cliente
 CREATE OR REPLACE FUNCTION public.adm_aprovar_pelo_cliente(p_orcamento_id uuid, p_observacao text DEFAULT 'Aprovação registrada manualmente pela administração'::text)
  RETURNS jsonb
@@ -115,8 +115,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: admin_update_user_password
 CREATE OR REPLACE FUNCTION public.admin_update_user_password(p_user_id uuid, p_new_password text)
  RETURNS void
@@ -139,8 +139,8 @@ BEGIN
   WHERE id = p_user_id;
 END;
 $function$
-;
 
+;
 -- Function: admin_update_user_role
 CREATE OR REPLACE FUNCTION public.admin_update_user_role(p_user_id uuid, p_role text)
  RETURNS void
@@ -163,8 +163,8 @@ BEGIN
   WHERE id = p_user_id;
 END;
 $function$
-;
 
+;
 -- Function: admin_update_user_status
 CREATE OR REPLACE FUNCTION public.admin_update_user_status(p_user_id uuid, p_ativo boolean)
  RETURNS void
@@ -187,8 +187,8 @@ BEGIN
   WHERE id = p_user_id;
 END;
 $function$
-;
 
+;
 -- Function: aprovar_orcamento_cliente
 CREATE OR REPLACE FUNCTION public.aprovar_orcamento_cliente(p_orcamento_id uuid)
  RETURNS jsonb
@@ -258,8 +258,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: aprovar_orcamento_cliente_manual
 CREATE OR REPLACE FUNCTION public.aprovar_orcamento_cliente_manual(p_orcamento_id uuid)
  RETURNS jsonb
@@ -325,8 +325,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: aprovar_orcamento_cliente_publico
 CREATE OR REPLACE FUNCTION public.aprovar_orcamento_cliente_publico(p_orcamento_id uuid, p_token text)
  RETURNS jsonb
@@ -383,8 +383,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: aprovar_orcamento_financeiro
 CREATE OR REPLACE FUNCTION public.aprovar_orcamento_financeiro(p_orcamento_id uuid)
  RETURNS jsonb
@@ -722,8 +722,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: aprovar_orcamento_financeiro_base_spec001
 CREATE OR REPLACE FUNCTION public.aprovar_orcamento_financeiro_base_spec001(p_orcamento_id uuid)
  RETURNS jsonb
@@ -1090,8 +1090,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: aprovar_projeto_financeiro
 CREATE OR REPLACE FUNCTION public.aprovar_projeto_financeiro(p_project_id uuid)
  RETURNS jsonb
@@ -1104,8 +1104,84 @@ BEGIN
     USING ERRCODE = 'P0002';
 END;
 $function$
-;
 
+;
+-- Function: aprovar_transferencia_estoque
+CREATE OR REPLACE FUNCTION public.aprovar_transferencia_estoque(p_transferencia_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    v_transf     public.transferencias_estoque%ROWTYPE;
+    v_origem     public.estoque_saldos_projeto_item%ROWTYPE;
+    v_destino    public.estoque_saldos_projeto_item%ROWTYPE;
+    v_role       public.usuario_role;
+    v_reduzir_ef numeric(10,3);
+BEGIN
+    SELECT role INTO v_role FROM public.usuarios WHERE id = auth.uid();
+    IF v_role IS NULL OR v_role NOT IN ('admin', 'gerente') THEN
+        RAISE EXCEPTION 'Apenas admin ou gerente pode aprovar transferencia de estoque.' USING ERRCODE = '42501';
+    END IF;
+
+    SELECT * INTO v_transf FROM public.transferencias_estoque WHERE id = p_transferencia_id FOR UPDATE;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Transferencia % nao encontrada.', p_transferencia_id USING ERRCODE = 'P0001';
+    END IF;
+
+    IF v_transf.status <> 'solicitada' THEN
+        RAISE EXCEPTION 'Transferencia % nao esta mais solicitada (status atual: %).', p_transferencia_id, v_transf.status USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT * INTO v_origem
+    FROM public.estoque_saldos_projeto_item
+    WHERE projeto_item_id = v_transf.origem_projeto_item_id
+    FOR UPDATE;
+
+    SELECT * INTO v_destino
+    FROM public.estoque_saldos_projeto_item
+    WHERE projeto_item_id = v_transf.destino_projeto_item_id
+    FOR UPDATE;
+
+    IF v_origem.q_reserva < v_transf.quantidade THEN
+        RAISE EXCEPTION 'Origem nao tem mais q_reserva suficiente (era % no momento da solicitacao).', v_transf.quantidade USING ERRCODE = 'P0001';
+    END IF;
+
+    v_reduzir_ef := LEAST(v_transf.quantidade, v_destino.q_entrega_futura);
+
+    UPDATE public.estoque_saldos_projeto_item
+    SET q_reserva = q_reserva - v_transf.quantidade,
+        q_entrega_futura = q_entrega_futura + v_transf.quantidade,
+        q_transferida_saida = q_transferida_saida + v_transf.quantidade,
+        atualizado_em = now()
+    WHERE projeto_item_id = v_transf.origem_projeto_item_id;
+
+    UPDATE public.estoque_saldos_projeto_item
+    SET q_entrega_futura = q_entrega_futura - v_reduzir_ef,
+        q_reserva = q_reserva + v_transf.quantidade,
+        atualizado_em = now()
+    WHERE projeto_item_id = v_transf.destino_projeto_item_id;
+
+    INSERT INTO public.estoque_movimentos_projeto_item
+        (projeto_item_id, projeto_item_destino_id, tipo, quantidade, origem, referencia_id, criado_por)
+    VALUES
+        (v_transf.origem_projeto_item_id, v_transf.destino_projeto_item_id, 'transferencia_saida', v_transf.quantidade, 'transferencia_estoque', v_transf.id, auth.uid());
+
+    INSERT INTO public.estoque_movimentos_projeto_item
+        (projeto_item_id, projeto_item_destino_id, tipo, quantidade, origem, referencia_id, criado_por)
+    VALUES
+        (v_transf.destino_projeto_item_id, v_transf.origem_projeto_item_id, 'transferencia_entrada', v_transf.quantidade, 'transferencia_estoque', v_transf.id, auth.uid());
+
+    UPDATE public.transferencias_estoque
+    SET status = 'aprovada', aprovado_por = auth.uid(), aprovado_em = now()
+    WHERE id = p_transferencia_id;
+
+    RETURN jsonb_build_object('transferencia_id', p_transferencia_id, 'status', 'aprovada');
+END;
+$function$
+
+;
 -- Function: can_user_approve_quotes
 CREATE OR REPLACE FUNCTION public.can_user_approve_quotes()
  RETURNS boolean
@@ -1120,8 +1196,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: cancelar_orcamento
 CREATE OR REPLACE FUNCTION public.cancelar_orcamento(p_orcamento_id uuid, p_motivo text DEFAULT NULL::text)
  RETURNS jsonb
@@ -1296,8 +1372,36 @@ BEGIN
     );
 END;
 $function$
-;
 
+;
+-- Function: cancelar_transferencia_estoque
+CREATE OR REPLACE FUNCTION public.cancelar_transferencia_estoque(p_transferencia_id uuid, p_motivo text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    v_transf public.transferencias_estoque%ROWTYPE;
+BEGIN
+    SELECT * INTO v_transf FROM public.transferencias_estoque WHERE id = p_transferencia_id FOR UPDATE;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Transferencia % nao encontrada.', p_transferencia_id USING ERRCODE = 'P0001';
+    END IF;
+
+    IF v_transf.status <> 'solicitada' THEN
+        RAISE EXCEPTION 'Só é possível cancelar transferencia com status solicitada (atual: %). Transferencia aprovada exige nova transferencia no sentido contrario.', v_transf.status USING ERRCODE = 'P0001';
+    END IF;
+
+    UPDATE public.transferencias_estoque
+    SET status = 'cancelada', cancelado_em = now(), motivo_cancelamento = p_motivo
+    WHERE id = p_transferencia_id;
+
+    RETURN jsonb_build_object('transferencia_id', p_transferencia_id, 'status', 'cancelada');
+END;
+$function$
+
+;
 -- Function: cliente_aprovar_orcamento
 CREATE OR REPLACE FUNCTION public.cliente_aprovar_orcamento(p_orcamento_id uuid, p_token text)
  RETURNS jsonb
@@ -1354,8 +1458,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: cliente_recusar_orcamento
 CREATE OR REPLACE FUNCTION public.cliente_recusar_orcamento(p_orcamento_id uuid, p_token text, p_motivo text DEFAULT NULL::text)
  RETURNS jsonb
@@ -1413,8 +1517,8 @@ BEGIN
     );
 END;
 $function$
-;
 
+;
 -- Function: criar_produto_orcamento
 CREATE OR REPLACE FUNCTION public.criar_produto_orcamento(p_payload jsonb)
  RETURNS jsonb
@@ -1571,8 +1675,8 @@ BEGIN
   RETURN to_jsonb(v_produto) || jsonb_build_object('source', 'produtos');
 END;
 $function$
-;
 
+;
 -- Function: criar_usuario
 CREATE OR REPLACE FUNCTION public.criar_usuario(p_email text, p_password text, p_nome text, p_role usuario_role DEFAULT 'viewer'::usuario_role)
  RETURNS uuid
@@ -1615,8 +1719,8 @@ BEGIN
   RETURN v_new_id;
 END;
 $function$
-;
 
+;
 -- Function: current_user_funcionario_id
 CREATE OR REPLACE FUNCTION public.current_user_funcionario_id()
  RETURNS uuid
@@ -1628,8 +1732,8 @@ AS $function$
   WHERE usuario_id = auth.uid()
   LIMIT 1;
 $function$
-;
 
+;
 -- Function: current_user_is_funcionario
 CREATE OR REPLACE FUNCTION public.current_user_is_funcionario()
  RETURNS boolean
@@ -1642,8 +1746,8 @@ AS $function$
     WHERE usuario_id = auth.uid()
   );
 $function$
-;
 
+;
 -- Function: enviar_orcamento_para_cliente
 CREATE OR REPLACE FUNCTION public.enviar_orcamento_para_cliente(p_orcamento_id uuid)
  RETURNS jsonb
@@ -1705,8 +1809,8 @@ BEGIN
     );
 END;
 $function$
-;
 
+;
 -- Function: finalizar_validacao_financeira
 CREATE OR REPLACE FUNCTION public.finalizar_validacao_financeira(p_project_id uuid, p_project_data jsonb, p_orcamentos jsonb)
  RETURNS jsonb
@@ -1719,8 +1823,8 @@ BEGIN
     USING ERRCODE = 'P0002';
 END;
 $function$
-;
 
+;
 -- Function: fn_atualiza_updated_at
 CREATE OR REPLACE FUNCTION public.fn_atualiza_updated_at()
  RETURNS trigger
@@ -1731,8 +1835,8 @@ BEGIN
     RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: fn_atualizar_preco_venda
 CREATE OR REPLACE FUNCTION public.fn_atualizar_preco_venda()
  RETURNS trigger
@@ -1770,8 +1874,50 @@ BEGIN
     RETURN NEW;
 END;
 $function$
-;
 
+;
+-- Function: fn_auditoria_permissoes
+CREATE OR REPLACE FUNCTION public.fn_auditoria_permissoes()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  INSERT INTO public.auditoria_permissoes (autor_id, entidade, entidade_id, antes, depois)
+  VALUES (
+    auth.uid(),
+    TG_TABLE_NAME,
+    CASE WHEN TG_OP = 'DELETE' THEN (to_jsonb(OLD)->>'id')::uuid ELSE (to_jsonb(NEW)->>'id')::uuid END,
+    CASE WHEN TG_OP IN ('UPDATE','DELETE') THEN to_jsonb(OLD) ELSE NULL END,
+    CASE WHEN TG_OP IN ('INSERT','UPDATE') THEN to_jsonb(NEW) ELSE NULL END
+  );
+  RETURN COALESCE(NEW, OLD);
+END;
+$function$
+
+;
+-- Function: fn_auditoria_usuario_papeis
+CREATE OR REPLACE FUNCTION public.fn_auditoria_usuario_papeis()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  INSERT INTO public.auditoria_permissoes (autor_id, entidade, entidade_id, antes, depois)
+  VALUES (
+    auth.uid(),
+    'usuario_papeis',
+    CASE WHEN TG_OP = 'DELETE' THEN OLD.usuario_id ELSE NEW.usuario_id END,
+    CASE WHEN TG_OP IN ('UPDATE','DELETE') THEN to_jsonb(OLD) ELSE NULL END,
+    CASE WHEN TG_OP IN ('INSERT','UPDATE') THEN to_jsonb(NEW) ELSE NULL END
+  );
+  RETURN COALESCE(NEW, OLD);
+END;
+$function$
+
+;
 -- Function: fn_auto_numero_orcamento
 CREATE OR REPLACE FUNCTION public.fn_auto_numero_orcamento()
  RETURNS trigger
@@ -1784,8 +1930,8 @@ BEGIN
     RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: fn_gerar_numero_orcamento
 CREATE OR REPLACE FUNCTION public.fn_gerar_numero_orcamento()
  RETURNS text
@@ -1809,8 +1955,8 @@ BEGIN
     RETURN numero;
 END;
 $function$
-;
 
+;
 -- Function: fn_log_auditoria
 CREATE OR REPLACE FUNCTION public.fn_log_auditoria()
  RETURNS trigger
@@ -1834,8 +1980,8 @@ BEGIN
     RETURN NULL;
 END;
 $function$
-;
 
+;
 -- Function: fn_sync_equipe_por_responsavel
 CREATE OR REPLACE FUNCTION public.fn_sync_equipe_por_responsavel()
  RETURNS trigger
@@ -1863,8 +2009,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: fn_update_orcamento_timestamp
 CREATE OR REPLACE FUNCTION public.fn_update_orcamento_timestamp()
  RETURNS trigger
@@ -1875,8 +2021,8 @@ BEGIN
     RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: fn_validar_saldo_projeto_item
 CREATE OR REPLACE FUNCTION public.fn_validar_saldo_projeto_item()
  RETURNS trigger
@@ -1903,8 +2049,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: gen_token_hex
 CREATE OR REPLACE FUNCTION public.gen_token_hex()
  RETURNS text
@@ -1914,8 +2060,8 @@ CREATE OR REPLACE FUNCTION public.gen_token_hex()
 AS $function$
   SELECT md5(gen_random_uuid()::text) || md5(gen_random_uuid()::text);
 $function$
-;
 
+;
 -- Function: generate_product_slug
 CREATE OR REPLACE FUNCTION public.generate_product_slug(nome text, preco numeric)
  RETURNS text
@@ -1941,8 +2087,8 @@ BEGIN
   RETURN base_slug || '-' || price_str;
 END;
 $function$
-;
 
+;
 -- Function: get_dashboard_crm_by_closing
 CREATE OR REPLACE FUNCTION public.get_dashboard_crm_by_closing(data_inicial date, data_final date)
  RETURNS SETOF projetos
@@ -1956,8 +2102,8 @@ WHERE EXISTS (
     AND pp.data_fechamento BETWEEN data_inicial AND data_final
 );
 $function$
-;
 
+;
 -- Function: get_dashboard_kpi
 CREATE OR REPLACE FUNCTION public.get_dashboard_kpi(p_date_now date)
  RETURNS json
@@ -2032,8 +2178,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: get_dashboard_stats
 CREATE OR REPLACE FUNCTION public.get_dashboard_stats()
  RETURNS json
@@ -2081,8 +2227,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: get_faltas_injustificadas
 CREATE OR REPLACE FUNCTION public.get_faltas_injustificadas(p_funcionario_id uuid, p_inicio date, p_fim date)
  RETURNS integer
@@ -2100,8 +2246,8 @@ BEGIN
     );
 END;
 $function$
-;
 
+;
 -- Function: get_latest_transaction_id
 CREATE OR REPLACE FUNCTION public.get_latest_transaction_id()
  RETURNS uuid
@@ -2114,8 +2260,8 @@ BEGIN
   RETURN (SELECT id FROM public.transactions ORDER BY created_at DESC, id DESC LIMIT 1);
 END;
 $function$
-;
 
+;
 -- Function: get_my_funcionario_id
 CREATE OR REPLACE FUNCTION public.get_my_funcionario_id()
  RETURNS uuid
@@ -2125,8 +2271,8 @@ CREATE OR REPLACE FUNCTION public.get_my_funcionario_id()
 AS $function$
   SELECT id FROM public.funcionarios WHERE usuario_id = auth.uid();
 $function$
-;
 
+;
 -- Function: get_next_sku
 CREATE OR REPLACE FUNCTION public.get_next_sku(prefix text)
  RETURNS text
@@ -2161,8 +2307,8 @@ BEGIN
   RETURN next_sku;
 END;
 $function$
-;
 
+;
 -- Function: get_user_role
 CREATE OR REPLACE FUNCTION public.get_user_role()
  RETURNS text
@@ -2172,8 +2318,8 @@ CREATE OR REPLACE FUNCTION public.get_user_role()
 AS $function$
   SELECT role::text FROM public.usuarios WHERE id = auth.uid();
 $function$
-;
 
+;
 -- Function: get_vendedores
 CREATE OR REPLACE FUNCTION public.get_vendedores()
  RETURNS TABLE(id uuid, email character varying, name text)
@@ -2184,8 +2330,8 @@ BEGIN
   RETURN QUERY SELECT u.id, u.email, (u.raw_user_meta_data->>'name')::TEXT as name FROM auth.users u;
 END;
 $function$
-;
 
+;
 -- Function: handle_contato_tipo
 CREATE OR REPLACE FUNCTION public.handle_contato_tipo()
  RETURNS trigger
@@ -2200,8 +2346,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: handle_new_auth_user
 CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
  RETURNS trigger
@@ -2221,8 +2367,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: handle_new_user
 CREATE OR REPLACE FUNCTION public.handle_new_user()
  RETURNS trigger
@@ -2254,8 +2400,8 @@ BEGIN
     RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: handle_orcamento_item_workflow
 CREATE OR REPLACE FUNCTION public.handle_orcamento_item_workflow()
  RETURNS trigger
@@ -2296,8 +2442,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: handle_orcamento_workflow
 CREATE OR REPLACE FUNCTION public.handle_orcamento_workflow()
  RETURNS trigger
@@ -2353,15 +2499,72 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: handle_updated_at
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
  RETURNS trigger
  LANGUAGE plpgsql
 AS $function$ BEGIN NEW.updated_at = now(); RETURN NEW; END; $function$
-;
 
+;
+-- Function: hub_pode_executar
+CREATE OR REPLACE FUNCTION public.hub_pode_executar(p_usuario_id uuid, p_system_slug text, p_modulo_chave text, p_acao text)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_excecao text;
+BEGIN
+  -- 1. Excecao individual tem precedencia. modulo_id NULL na excecao = vale
+  -- para o sistema inteiro; caso contrario precisa bater com o modulo pedido.
+  SELECT e.tipo INTO v_excecao
+  FROM usuario_permissao_excecoes e
+  JOIN systems s ON s.id = e.system_id AND s.slug = p_system_slug
+  LEFT JOIN modulos m ON m.id = e.modulo_id
+  WHERE e.usuario_id = p_usuario_id
+    AND e.acao = p_acao
+    AND (e.valido_até IS NULL OR e.valido_até > now())
+    AND (e.modulo_id IS NULL OR m.chave = p_modulo_chave)
+  ORDER BY e.criado_em DESC
+  LIMIT 1;
+
+  IF v_excecao = 'negar' THEN RETURN false; END IF;
+  IF v_excecao = 'conceder' THEN RETURN true; END IF;
+
+  -- 2. Papel do usuario (sistema inteiro OU modulo especifico; acao NULL = todas)
+  RETURN EXISTS (
+    SELECT 1
+    FROM usuario_papeis up
+    JOIN papel_permissoes pp ON pp.papel_id = up.papel_id
+    JOIN systems s ON s.id = pp.system_id AND s.slug = p_system_slug
+    LEFT JOIN modulos m ON m.id = pp.modulo_id
+    WHERE up.usuario_id = p_usuario_id
+      AND (pp.acao IS NULL OR pp.acao = p_acao)
+      AND (pp.modulo_id IS NULL OR m.chave = p_modulo_chave)
+  );
+END;
+$function$
+
+;
+-- Function: hub_sistemas_permitidos
+CREATE OR REPLACE FUNCTION public.hub_sistemas_permitidos(p_usuario_id uuid)
+ RETURNS SETOF systems
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  SELECT DISTINCT s.*
+  FROM systems s
+  JOIN papel_permissoes pp ON pp.system_id = s.id
+  JOIN usuario_papeis up ON up.papel_id = pp.papel_id AND up.usuario_id = p_usuario_id
+  WHERE (pp.acao = 'visualizar' OR pp.acao IS NULL)
+    AND s.visivel_no_hub = true
+$function$
+
+;
 -- Function: is_admin
 CREATE OR REPLACE FUNCTION public.is_admin()
  RETURNS boolean
@@ -2375,8 +2578,8 @@ BEGIN
   RETURN v_role = 'admin'::public.usuario_role;
 END;
 $function$
-;
 
+;
 -- Function: is_ubiqua_admin
 CREATE OR REPLACE FUNCTION public.is_ubiqua_admin()
  RETURNS boolean
@@ -2390,8 +2593,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: limpar_staging_processados
 CREATE OR REPLACE FUNCTION public.limpar_staging_processados()
  RETURNS integer
@@ -2422,8 +2625,8 @@ BEGIN
     RETURN total_deletado;
 END;
 $function$
-;
 
+;
 -- Function: link_my_funcionario_record
 CREATE OR REPLACE FUNCTION public.link_my_funcionario_record()
  RETURNS void
@@ -2475,8 +2678,8 @@ BEGIN
     END IF;
 END;
 $function$
-;
 
+;
 -- Function: log_can_approve_quotes_change
 CREATE OR REPLACE FUNCTION public.log_can_approve_quotes_change()
  RETURNS trigger
@@ -2514,8 +2717,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: normalize_orcamento_status
 CREATE OR REPLACE FUNCTION public.normalize_orcamento_status()
  RETURNS trigger
@@ -2533,8 +2736,114 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
+-- Function: processar_retorno_bancario
+CREATE OR REPLACE FUNCTION public.processar_retorno_bancario(p_nome_arquivo text, p_hash text, p_conta text, p_registros jsonb, p_forcar boolean DEFAULT false)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_arquivo_id     uuid;
+  v_reg            jsonb;
+  v_boleto         public.boletos%ROWTYPE;
+  v_transacao_id   uuid;
+  v_aplicados      integer := 0;
+  v_divergentes    integer := 0;
+  v_nao_encontrados integer := 0;
+BEGIN
+  IF p_registros IS NULL OR jsonb_typeof(p_registros) <> 'array' THEN
+    RAISE EXCEPTION 'p_registros deve ser um array JSON.' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF NOT p_forcar AND EXISTS (SELECT 1 FROM public.retorno_bancario_arquivos WHERE hash_conteudo = p_hash) THEN
+    RAISE EXCEPTION 'Arquivo % já foi processado anteriormente (hash %). Use a opção de forçar reprocessamento se isso for intencional.', p_nome_arquivo, p_hash
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  INSERT INTO public.retorno_bancario_arquivos (nome_arquivo, hash_conteudo, conta, processado_por, forcado, total_registros)
+  VALUES (p_nome_arquivo, p_hash, p_conta, auth.uid(), p_forcar, jsonb_array_length(p_registros))
+  RETURNING id INTO v_arquivo_id;
+
+  FOR v_reg IN SELECT * FROM jsonb_array_elements(p_registros)
+  LOOP
+    SELECT * INTO v_boleto FROM public.boletos WHERE nosso_numero = v_reg->>'nosso_numero' LIMIT 1;
+
+    IF NOT FOUND THEN
+      INSERT INTO public.retorno_bancario_registros
+        (arquivo_id, nosso_numero, valor_recebido, data_pagamento, ocorrencia_codigo, status_aplicacao)
+      VALUES
+        (v_arquivo_id, v_reg->>'nosso_numero', (v_reg->>'valor_recebido')::numeric, (v_reg->>'data_pagamento')::date, v_reg->>'ocorrencia_codigo', 'nao_encontrado');
+      v_nao_encontrados := v_nao_encontrados + 1;
+      CONTINUE;
+    END IF;
+
+    IF coalesce((v_reg->>'valor_recebido')::numeric, 0) <> coalesce(v_boleto.valor, 0) THEN
+      INSERT INTO public.retorno_bancario_registros
+        (arquivo_id, nosso_numero, boleto_id, parcela_id, valor_esperado, valor_recebido, data_pagamento, ocorrencia_codigo, status_aplicacao, motivo_divergencia)
+      VALUES
+        (v_arquivo_id, v_reg->>'nosso_numero', v_boleto.id, v_boleto.parcela_id, v_boleto.valor, (v_reg->>'valor_recebido')::numeric, (v_reg->>'data_pagamento')::date, v_reg->>'ocorrencia_codigo', 'divergente', 'Valor recebido difere do valor esperado do boleto.');
+      v_divergentes := v_divergentes + 1;
+      CONTINUE;
+    END IF;
+
+    UPDATE public.boletos
+    SET status = 'pago',
+        valor_pago = (v_reg->>'valor_recebido')::numeric,
+        data_pagamento = (v_reg->>'data_pagamento')::date
+    WHERE id = v_boleto.id;
+
+    IF v_boleto.parcela_id IS NOT NULL THEN
+      UPDATE public.projeto_parcelas
+      SET status = 'paga'::public.parcela_status,
+          valor_pago = (v_reg->>'valor_recebido')::numeric,
+          data_pagamento = (v_reg->>'data_pagamento')::date
+      WHERE id = v_boleto.parcela_id;
+    END IF;
+
+    INSERT INTO public.transacoes (parcela_id, tipo, descricao, valor, data_transacao, vl_pago, dt_pagamento, status_pago, created_by)
+    VALUES (
+      v_boleto.parcela_id,
+      'receita'::public.transacao_tipo,
+      'Recebimento boleto ' || v_boleto.nosso_numero,
+      v_boleto.valor,
+      (v_reg->>'data_pagamento')::date,
+      (v_reg->>'valor_recebido')::numeric,
+      (v_reg->>'data_pagamento')::date,
+      1,
+      auth.uid()
+    )
+    RETURNING id INTO v_transacao_id;
+
+    IF v_boleto.parcela_id IS NOT NULL THEN
+      UPDATE public.projeto_parcelas
+      SET transacao_id = v_transacao_id
+      WHERE id = v_boleto.parcela_id;
+    END IF;
+
+    INSERT INTO public.retorno_bancario_registros
+      (arquivo_id, nosso_numero, boleto_id, parcela_id, transacao_id, valor_esperado, valor_recebido, data_pagamento, ocorrencia_codigo, status_aplicacao)
+    VALUES
+      (v_arquivo_id, v_reg->>'nosso_numero', v_boleto.id, v_boleto.parcela_id, v_transacao_id, v_boleto.valor, (v_reg->>'valor_recebido')::numeric, (v_reg->>'data_pagamento')::date, v_reg->>'ocorrencia_codigo', 'aplicado');
+    v_aplicados := v_aplicados + 1;
+  END LOOP;
+
+  UPDATE public.retorno_bancario_arquivos
+  SET total_aplicados = v_aplicados, total_divergentes = v_divergentes, total_nao_encontrados = v_nao_encontrados
+  WHERE id = v_arquivo_id;
+
+  RETURN jsonb_build_object(
+    'arquivo_id', v_arquivo_id,
+    'aplicados', v_aplicados,
+    'divergentes', v_divergentes,
+    'nao_encontrados', v_nao_encontrados
+  );
+END;
+$function$
+
+;
 -- Function: propagate_contato_nome
 CREATE OR REPLACE FUNCTION public.propagate_contato_nome()
  RETURNS trigger
@@ -2554,8 +2863,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: propagate_projeto_codigo
 CREATE OR REPLACE FUNCTION public.propagate_projeto_codigo()
  RETURNS trigger
@@ -2575,8 +2884,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: propagate_usuario_nome
 CREATE OR REPLACE FUNCTION public.propagate_usuario_nome()
  RETURNS trigger
@@ -2596,8 +2905,99 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
+-- Function: registrar_devolucao_projeto_item
+CREATE OR REPLACE FUNCTION public.registrar_devolucao_projeto_item(p_projeto_item_id uuid, p_quantidade numeric, p_motivo text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    v_saldo             public.estoque_saldos_projeto_item%ROWTYPE;
+    v_produto_id        uuid;
+    v_de_entrega_futura numeric(10,3);
+    v_de_reserva        numeric(10,3);
+    v_de_entregue       numeric(10,3);
+    v_restante          numeric(10,3);
+    v_status            text;
+    v_devolucao_id      uuid;
+BEGIN
+    IF p_quantidade IS NULL OR p_quantidade <= 0 THEN
+        RAISE EXCEPTION 'Quantidade deve ser maior que zero.' USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT produto_id INTO v_produto_id FROM public.projeto_itens WHERE id = p_projeto_item_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Item de projeto % nao encontrado.', p_projeto_item_id USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT * INTO v_saldo
+    FROM public.estoque_saldos_projeto_item
+    WHERE projeto_item_id = p_projeto_item_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Item de projeto % nao possui saldo operacional (estoque_saldos_projeto_item).', p_projeto_item_id USING ERRCODE = 'P0001';
+    END IF;
+
+    IF p_quantidade > (v_saldo.q_entrega_futura + v_saldo.q_reserva + v_saldo.q_entregue) THEN
+        RAISE EXCEPTION 'Quantidade de devolucao (%) excede o total disponivel para devolver (entrega futura + reserva + entregue = %).',
+            p_quantidade, (v_saldo.q_entrega_futura + v_saldo.q_reserva + v_saldo.q_entregue) USING ERRCODE = 'P0001';
+    END IF;
+
+    v_de_entrega_futura := LEAST(p_quantidade, v_saldo.q_entrega_futura);
+    v_restante := p_quantidade - v_de_entrega_futura;
+    v_de_reserva := LEAST(v_restante, v_saldo.q_reserva);
+    v_restante := v_restante - v_de_reserva;
+    v_de_entregue := LEAST(v_restante, v_saldo.q_entregue);
+
+    UPDATE public.estoque_saldos_projeto_item
+    SET q_entrega_futura = q_entrega_futura - v_de_entrega_futura,
+        q_reserva = q_reserva - v_de_reserva,
+        q_entregue = q_entregue - v_de_entregue,
+        q_devolvida = q_devolvida + p_quantidade,
+        atualizado_em = now()
+    WHERE projeto_item_id = p_projeto_item_id;
+
+    -- RN-08: estoque_itens.quantidade_reservada so eh reduzido pela parte que
+    -- estava em saldo aberto (entrega futura ou reserva); devolucao de entregue
+    -- depende de coleta/entrada fisica, tratada em fluxo logistico proprio.
+    IF (v_de_entrega_futura + v_de_reserva) > 0 AND v_produto_id IS NOT NULL THEN
+        UPDATE public.estoque_itens
+        SET quantidade_reservada = GREATEST(quantidade_reservada - (v_de_entrega_futura + v_de_reserva), 0)
+        WHERE produto_id = v_produto_id
+          AND local = 'Estoque'::public.estoque_local;
+    END IF;
+
+    v_status := CASE WHEN v_de_entregue > 0 THEN 'aguardando_coleta' ELSE 'registrada' END;
+
+    INSERT INTO public.devolucoes_estoque (
+        projeto_item_id, quantidade, qtd_de_entrega_futura, qtd_de_reserva, qtd_de_entregue,
+        status, motivo, solicitado_por
+    ) VALUES (
+        p_projeto_item_id, p_quantidade, v_de_entrega_futura, v_de_reserva, v_de_entregue,
+        v_status, p_motivo, auth.uid()
+    )
+    RETURNING id INTO v_devolucao_id;
+
+    INSERT INTO public.estoque_movimentos_projeto_item
+        (projeto_item_id, tipo, quantidade, origem, referencia_id, observacao, criado_por)
+    VALUES
+        (p_projeto_item_id, 'devolucao', p_quantidade, 'devolucao_estoque', v_devolucao_id, p_motivo, auth.uid());
+
+    RETURN jsonb_build_object(
+        'devolucao_id', v_devolucao_id,
+        'status', v_status,
+        'de_entrega_futura', v_de_entrega_futura,
+        'de_reserva', v_de_reserva,
+        'de_entregue', v_de_entregue
+    );
+END;
+$function$
+
+;
 -- Function: replace_orcamento_itens
 CREATE OR REPLACE FUNCTION public.replace_orcamento_itens(p_orcamento_id uuid, p_items jsonb)
  RETURNS integer
@@ -2654,8 +3054,8 @@ BEGIN
   RETURN inserted_count;
 END;
 $function$
-;
 
+;
 -- Function: set_orcamento_numero
 CREATE OR REPLACE FUNCTION public.set_orcamento_numero()
  RETURNS trigger
@@ -2675,8 +3075,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: set_projeto_itens_descricao
 CREATE OR REPLACE FUNCTION public.set_projeto_itens_descricao()
  RETURNS trigger
@@ -2695,8 +3095,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: set_updated_at
 CREATE OR REPLACE FUNCTION public.set_updated_at()
  RETURNS trigger
@@ -2708,8 +3108,63 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
+-- Function: solicitar_transferencia_estoque
+CREATE OR REPLACE FUNCTION public.solicitar_transferencia_estoque(p_origem_projeto_item_id uuid, p_destino_projeto_item_id uuid, p_quantidade numeric, p_motivo text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    v_origem_produto  uuid;
+    v_destino_produto uuid;
+    v_origem_saldo    public.estoque_saldos_projeto_item%ROWTYPE;
+    v_transferencia_id uuid;
+BEGIN
+    IF p_quantidade IS NULL OR p_quantidade <= 0 THEN
+        RAISE EXCEPTION 'Quantidade deve ser maior que zero.' USING ERRCODE = 'P0001';
+    END IF;
+
+    IF p_origem_projeto_item_id = p_destino_projeto_item_id THEN
+        RAISE EXCEPTION 'Origem e destino nao podem ser o mesmo item de projeto.' USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT produto_id INTO v_origem_produto FROM public.projeto_itens WHERE id = p_origem_projeto_item_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Item de projeto de origem % nao encontrado.', p_origem_projeto_item_id USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT produto_id INTO v_destino_produto FROM public.projeto_itens WHERE id = p_destino_projeto_item_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Item de projeto de destino % nao encontrado.', p_destino_projeto_item_id USING ERRCODE = 'P0001';
+    END IF;
+
+    IF v_origem_produto IS DISTINCT FROM v_destino_produto THEN
+        RAISE EXCEPTION 'Origem e destino precisam ser do mesmo produto.' USING ERRCODE = 'P0001';
+    END IF;
+
+    SELECT * INTO v_origem_saldo
+    FROM public.estoque_saldos_projeto_item
+    WHERE projeto_item_id = p_origem_projeto_item_id;
+
+    IF NOT FOUND OR v_origem_saldo.q_reserva < p_quantidade THEN
+        RAISE EXCEPTION 'Origem nao tem q_reserva suficiente para a transferencia solicitada.' USING ERRCODE = 'P0001';
+    END IF;
+
+    INSERT INTO public.transferencias_estoque (
+        origem_projeto_item_id, destino_projeto_item_id, quantidade, motivo, solicitado_por
+    ) VALUES (
+        p_origem_projeto_item_id, p_destino_projeto_item_id, p_quantidade, p_motivo, auth.uid()
+    )
+    RETURNING id INTO v_transferencia_id;
+
+    RETURN jsonb_build_object('transferencia_id', v_transferencia_id, 'status', 'solicitada');
+END;
+$function$
+
+;
 -- Function: stats_datacenter
 CREATE OR REPLACE FUNCTION public.stats_datacenter()
  RETURNS json
@@ -2728,8 +3183,8 @@ BEGIN
   );
 END;
 $function$
-;
 
+;
 -- Function: sync_contact_type_on_budget
 CREATE OR REPLACE FUNCTION public.sync_contact_type_on_budget()
  RETURNS trigger
@@ -2754,8 +3209,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: sync_projeto_valor_total
 CREATE OR REPLACE FUNCTION public.sync_projeto_valor_total()
  RETURNS trigger
@@ -2773,8 +3228,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: sync_responsavel_nome
 CREATE OR REPLACE FUNCTION public.sync_responsavel_nome()
  RETURNS trigger
@@ -2789,8 +3244,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: sync_separacao_cliente
 CREATE OR REPLACE FUNCTION public.sync_separacao_cliente()
  RETURNS trigger
@@ -2806,8 +3261,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: sync_separacao_codigo_obra
 CREATE OR REPLACE FUNCTION public.sync_separacao_codigo_obra()
  RETURNS trigger
@@ -2823,8 +3278,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: track_reagendamento
 CREATE OR REPLACE FUNCTION public.track_reagendamento()
  RETURNS trigger
@@ -2843,8 +3298,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: trg_estoque_saldos_projeto_item_atualizado_em
 CREATE OR REPLACE FUNCTION public.trg_estoque_saldos_projeto_item_atualizado_em()
  RETURNS trigger
@@ -2855,8 +3310,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: trigger_fechar_projeto
 CREATE OR REPLACE FUNCTION public.trigger_fechar_projeto()
  RETURNS trigger
@@ -3019,8 +3474,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: trigger_proteger_fechamento
 CREATE OR REPLACE FUNCTION public.trigger_proteger_fechamento()
  RETURNS trigger
@@ -3062,8 +3517,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: trigger_proteger_parcelas
 CREATE OR REPLACE FUNCTION public.trigger_proteger_parcelas()
  RETURNS trigger
@@ -3088,8 +3543,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: trigger_separacao_pronta
 CREATE OR REPLACE FUNCTION public.trigger_separacao_pronta()
  RETURNS trigger
@@ -3149,8 +3604,8 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: trigger_update_revenda_ubiqua_slug
 CREATE OR REPLACE FUNCTION public.trigger_update_revenda_ubiqua_slug()
  RETURNS trigger
@@ -3161,40 +3616,40 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: unaccent
 CREATE OR REPLACE FUNCTION public.unaccent(regdictionary, text)
  RETURNS text
  LANGUAGE c
  STABLE PARALLEL SAFE STRICT
 AS '$libdir/unaccent', $function$unaccent_dict$function$
-;
 
+;
 -- Function: unaccent
 CREATE OR REPLACE FUNCTION public.unaccent(text)
  RETURNS text
  LANGUAGE c
  STABLE PARALLEL SAFE STRICT
 AS '$libdir/unaccent', $function$unaccent_dict$function$
-;
 
+;
 -- Function: unaccent_init
 CREATE OR REPLACE FUNCTION public.unaccent_init(internal)
  RETURNS internal
  LANGUAGE c
  PARALLEL SAFE
 AS '$libdir/unaccent', $function$unaccent_init$function$
-;
 
+;
 -- Function: unaccent_lexize
 CREATE OR REPLACE FUNCTION public.unaccent_lexize(internal, internal, internal, internal)
  RETURNS internal
  LANGUAGE c
  PARALLEL SAFE
 AS '$libdir/unaccent', $function$unaccent_lexize$function$
-;
 
+;
 -- Function: update_revenda_ubiqua_ordem
 CREATE OR REPLACE FUNCTION public.update_revenda_ubiqua_ordem(payload jsonb)
  RETURNS void
@@ -3219,8 +3674,8 @@ BEGIN
   END LOOP;
 END;
 $function$
-;
 
+;
 -- Function: update_revenda_ubiqua_updated_at
 CREATE OR REPLACE FUNCTION public.update_revenda_ubiqua_updated_at()
  RETURNS trigger
@@ -3231,8 +3686,8 @@ BEGIN
     RETURN NEW;
 END;
 $function$
-;
 
+;
 -- Function: update_updated_at_column
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
  RETURNS trigger
@@ -3243,364 +3698,5 @@ BEGIN
     RETURN NEW;
 END;
 $function$
+
 ;
-
-
--- ==== Adicionado em 2026-07-07 (SPEC-008/011/012/015) ====
-
--- Function: aprovar_transferencia_estoque
-CREATE OR REPLACE FUNCTION public.aprovar_transferencia_estoque(p_transferencia_id uuid)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-DECLARE
-    v_transf     public.transferencias_estoque%ROWTYPE;
-    v_origem     public.estoque_saldos_projeto_item%ROWTYPE;
-    v_destino    public.estoque_saldos_projeto_item%ROWTYPE;
-    v_role       public.usuario_role;
-    v_reduzir_ef numeric(10,3);
-BEGIN
-    SELECT role INTO v_role FROM public.usuarios WHERE id = auth.uid();
-    IF v_role IS NULL OR v_role NOT IN ('admin', 'gerente') THEN
-        RAISE EXCEPTION 'Apenas admin ou gerente pode aprovar transferencia de estoque.' USING ERRCODE = '42501';
-    END IF;
-
-    SELECT * INTO v_transf FROM public.transferencias_estoque WHERE id = p_transferencia_id FOR UPDATE;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Transferencia % nao encontrada.', p_transferencia_id USING ERRCODE = 'P0001';
-    END IF;
-
-    IF v_transf.status <> 'solicitada' THEN
-        RAISE EXCEPTION 'Transferencia % nao esta mais solicitada (status atual: %).', p_transferencia_id, v_transf.status USING ERRCODE = 'P0001';
-    END IF;
-
-    SELECT * INTO v_origem
-    FROM public.estoque_saldos_projeto_item
-    WHERE projeto_item_id = v_transf.origem_projeto_item_id
-    FOR UPDATE;
-
-    SELECT * INTO v_destino
-    FROM public.estoque_saldos_projeto_item
-    WHERE projeto_item_id = v_transf.destino_projeto_item_id
-    FOR UPDATE;
-
-    IF v_origem.q_reserva < v_transf.quantidade THEN
-        RAISE EXCEPTION 'Origem nao tem mais q_reserva suficiente (era % no momento da solicitacao).', v_transf.quantidade USING ERRCODE = 'P0001';
-    END IF;
-
-    v_reduzir_ef := LEAST(v_transf.quantidade, v_destino.q_entrega_futura);
-
-    UPDATE public.estoque_saldos_projeto_item
-    SET q_reserva = q_reserva - v_transf.quantidade,
-        q_entrega_futura = q_entrega_futura + v_transf.quantidade,
-        q_transferida_saida = q_transferida_saida + v_transf.quantidade,
-        atualizado_em = now()
-    WHERE projeto_item_id = v_transf.origem_projeto_item_id;
-
-    UPDATE public.estoque_saldos_projeto_item
-    SET q_entrega_futura = q_entrega_futura - v_reduzir_ef,
-        q_reserva = q_reserva + v_transf.quantidade,
-        atualizado_em = now()
-    WHERE projeto_item_id = v_transf.destino_projeto_item_id;
-
-    INSERT INTO public.estoque_movimentos_projeto_item
-        (projeto_item_id, projeto_item_destino_id, tipo, quantidade, origem, referencia_id, criado_por)
-    VALUES
-        (v_transf.origem_projeto_item_id, v_transf.destino_projeto_item_id, 'transferencia_saida', v_transf.quantidade, 'transferencia_estoque', v_transf.id, auth.uid());
-
-    INSERT INTO public.estoque_movimentos_projeto_item
-        (projeto_item_id, projeto_item_destino_id, tipo, quantidade, origem, referencia_id, criado_por)
-    VALUES
-        (v_transf.destino_projeto_item_id, v_transf.origem_projeto_item_id, 'transferencia_entrada', v_transf.quantidade, 'transferencia_estoque', v_transf.id, auth.uid());
-
-    UPDATE public.transferencias_estoque
-    SET status = 'aprovada', aprovado_por = auth.uid(), aprovado_em = now()
-    WHERE id = p_transferencia_id;
-
-    RETURN jsonb_build_object('transferencia_id', p_transferencia_id, 'status', 'aprovada');
-END;
-$function$
-
-
--- Function: cancelar_transferencia_estoque
-CREATE OR REPLACE FUNCTION public.cancelar_transferencia_estoque(p_transferencia_id uuid, p_motivo text DEFAULT NULL::text)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-DECLARE
-    v_transf public.transferencias_estoque%ROWTYPE;
-BEGIN
-    SELECT * INTO v_transf FROM public.transferencias_estoque WHERE id = p_transferencia_id FOR UPDATE;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Transferencia % nao encontrada.', p_transferencia_id USING ERRCODE = 'P0001';
-    END IF;
-
-    IF v_transf.status <> 'solicitada' THEN
-        RAISE EXCEPTION 'Só é possível cancelar transferencia com status solicitada (atual: %). Transferencia aprovada exige nova transferencia no sentido contrario.', v_transf.status USING ERRCODE = 'P0001';
-    END IF;
-
-    UPDATE public.transferencias_estoque
-    SET status = 'cancelada', cancelado_em = now(), motivo_cancelamento = p_motivo
-    WHERE id = p_transferencia_id;
-
-    RETURN jsonb_build_object('transferencia_id', p_transferencia_id, 'status', 'cancelada');
-END;
-$function$
-
-
--- Function: processar_retorno_bancario
-CREATE OR REPLACE FUNCTION public.processar_retorno_bancario(p_nome_arquivo text, p_hash text, p_conta text, p_registros jsonb, p_forcar boolean DEFAULT false)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-DECLARE
-  v_arquivo_id     uuid;
-  v_reg            jsonb;
-  v_boleto         public.boletos%ROWTYPE;
-  v_transacao_id   uuid;
-  v_aplicados      integer := 0;
-  v_divergentes    integer := 0;
-  v_nao_encontrados integer := 0;
-BEGIN
-  IF p_registros IS NULL OR jsonb_typeof(p_registros) <> 'array' THEN
-    RAISE EXCEPTION 'p_registros deve ser um array JSON.' USING ERRCODE = 'P0001';
-  END IF;
-
-  IF NOT p_forcar AND EXISTS (SELECT 1 FROM public.retorno_bancario_arquivos WHERE hash_conteudo = p_hash) THEN
-    RAISE EXCEPTION 'Arquivo % já foi processado anteriormente (hash %). Use a opção de forçar reprocessamento se isso for intencional.', p_nome_arquivo, p_hash
-      USING ERRCODE = 'P0001';
-  END IF;
-
-  INSERT INTO public.retorno_bancario_arquivos (nome_arquivo, hash_conteudo, conta, processado_por, forcado, total_registros)
-  VALUES (p_nome_arquivo, p_hash, p_conta, auth.uid(), p_forcar, jsonb_array_length(p_registros))
-  RETURNING id INTO v_arquivo_id;
-
-  FOR v_reg IN SELECT * FROM jsonb_array_elements(p_registros)
-  LOOP
-    SELECT * INTO v_boleto FROM public.boletos WHERE nosso_numero = v_reg->>'nosso_numero' LIMIT 1;
-
-    IF NOT FOUND THEN
-      INSERT INTO public.retorno_bancario_registros
-        (arquivo_id, nosso_numero, valor_recebido, data_pagamento, ocorrencia_codigo, status_aplicacao)
-      VALUES
-        (v_arquivo_id, v_reg->>'nosso_numero', (v_reg->>'valor_recebido')::numeric, (v_reg->>'data_pagamento')::date, v_reg->>'ocorrencia_codigo', 'nao_encontrado');
-      v_nao_encontrados := v_nao_encontrados + 1;
-      CONTINUE;
-    END IF;
-
-    IF coalesce((v_reg->>'valor_recebido')::numeric, 0) <> coalesce(v_boleto.valor, 0) THEN
-      INSERT INTO public.retorno_bancario_registros
-        (arquivo_id, nosso_numero, boleto_id, parcela_id, valor_esperado, valor_recebido, data_pagamento, ocorrencia_codigo, status_aplicacao, motivo_divergencia)
-      VALUES
-        (v_arquivo_id, v_reg->>'nosso_numero', v_boleto.id, v_boleto.parcela_id, v_boleto.valor, (v_reg->>'valor_recebido')::numeric, (v_reg->>'data_pagamento')::date, v_reg->>'ocorrencia_codigo', 'divergente', 'Valor recebido difere do valor esperado do boleto.');
-      v_divergentes := v_divergentes + 1;
-      CONTINUE;
-    END IF;
-
-    UPDATE public.boletos
-    SET status = 'pago',
-        valor_pago = (v_reg->>'valor_recebido')::numeric,
-        data_pagamento = (v_reg->>'data_pagamento')::date
-    WHERE id = v_boleto.id;
-
-    IF v_boleto.parcela_id IS NOT NULL THEN
-      UPDATE public.projeto_parcelas
-      SET status = 'paga'::public.parcela_status,
-          valor_pago = (v_reg->>'valor_recebido')::numeric,
-          data_pagamento = (v_reg->>'data_pagamento')::date
-      WHERE id = v_boleto.parcela_id;
-    END IF;
-
-    INSERT INTO public.transacoes (parcela_id, tipo, descricao, valor, data_transacao, vl_pago, dt_pagamento, status_pago, created_by)
-    VALUES (
-      v_boleto.parcela_id,
-      'receita'::public.transacao_tipo,
-      'Recebimento boleto ' || v_boleto.nosso_numero,
-      v_boleto.valor,
-      (v_reg->>'data_pagamento')::date,
-      (v_reg->>'valor_recebido')::numeric,
-      (v_reg->>'data_pagamento')::date,
-      1,
-      auth.uid()
-    )
-    RETURNING id INTO v_transacao_id;
-
-    IF v_boleto.parcela_id IS NOT NULL THEN
-      UPDATE public.projeto_parcelas
-      SET transacao_id = v_transacao_id
-      WHERE id = v_boleto.parcela_id;
-    END IF;
-
-    INSERT INTO public.retorno_bancario_registros
-      (arquivo_id, nosso_numero, boleto_id, parcela_id, transacao_id, valor_esperado, valor_recebido, data_pagamento, ocorrencia_codigo, status_aplicacao)
-    VALUES
-      (v_arquivo_id, v_reg->>'nosso_numero', v_boleto.id, v_boleto.parcela_id, v_transacao_id, v_boleto.valor, (v_reg->>'valor_recebido')::numeric, (v_reg->>'data_pagamento')::date, v_reg->>'ocorrencia_codigo', 'aplicado');
-    v_aplicados := v_aplicados + 1;
-  END LOOP;
-
-  UPDATE public.retorno_bancario_arquivos
-  SET total_aplicados = v_aplicados, total_divergentes = v_divergentes, total_nao_encontrados = v_nao_encontrados
-  WHERE id = v_arquivo_id;
-
-  RETURN jsonb_build_object(
-    'arquivo_id', v_arquivo_id,
-    'aplicados', v_aplicados,
-    'divergentes', v_divergentes,
-    'nao_encontrados', v_nao_encontrados
-  );
-END;
-$function$
-
-
--- Function: registrar_devolucao_projeto_item
-CREATE OR REPLACE FUNCTION public.registrar_devolucao_projeto_item(p_projeto_item_id uuid, p_quantidade numeric, p_motivo text DEFAULT NULL::text)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-DECLARE
-    v_saldo             public.estoque_saldos_projeto_item%ROWTYPE;
-    v_produto_id        uuid;
-    v_de_entrega_futura numeric(10,3);
-    v_de_reserva        numeric(10,3);
-    v_de_entregue       numeric(10,3);
-    v_restante          numeric(10,3);
-    v_status            text;
-    v_devolucao_id      uuid;
-BEGIN
-    IF p_quantidade IS NULL OR p_quantidade <= 0 THEN
-        RAISE EXCEPTION 'Quantidade deve ser maior que zero.' USING ERRCODE = 'P0001';
-    END IF;
-
-    SELECT produto_id INTO v_produto_id FROM public.projeto_itens WHERE id = p_projeto_item_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Item de projeto % nao encontrado.', p_projeto_item_id USING ERRCODE = 'P0001';
-    END IF;
-
-    SELECT * INTO v_saldo
-    FROM public.estoque_saldos_projeto_item
-    WHERE projeto_item_id = p_projeto_item_id
-    FOR UPDATE;
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Item de projeto % nao possui saldo operacional (estoque_saldos_projeto_item).', p_projeto_item_id USING ERRCODE = 'P0001';
-    END IF;
-
-    IF p_quantidade > (v_saldo.q_entrega_futura + v_saldo.q_reserva + v_saldo.q_entregue) THEN
-        RAISE EXCEPTION 'Quantidade de devolucao (%) excede o total disponivel para devolver (entrega futura + reserva + entregue = %).',
-            p_quantidade, (v_saldo.q_entrega_futura + v_saldo.q_reserva + v_saldo.q_entregue) USING ERRCODE = 'P0001';
-    END IF;
-
-    v_de_entrega_futura := LEAST(p_quantidade, v_saldo.q_entrega_futura);
-    v_restante := p_quantidade - v_de_entrega_futura;
-    v_de_reserva := LEAST(v_restante, v_saldo.q_reserva);
-    v_restante := v_restante - v_de_reserva;
-    v_de_entregue := LEAST(v_restante, v_saldo.q_entregue);
-
-    UPDATE public.estoque_saldos_projeto_item
-    SET q_entrega_futura = q_entrega_futura - v_de_entrega_futura,
-        q_reserva = q_reserva - v_de_reserva,
-        q_entregue = q_entregue - v_de_entregue,
-        q_devolvida = q_devolvida + p_quantidade,
-        atualizado_em = now()
-    WHERE projeto_item_id = p_projeto_item_id;
-
-    -- RN-08: estoque_itens.quantidade_reservada so eh reduzido pela parte que
-    -- estava em saldo aberto (entrega futura ou reserva); devolucao de entregue
-    -- depende de coleta/entrada fisica, tratada em fluxo logistico proprio.
-    IF (v_de_entrega_futura + v_de_reserva) > 0 AND v_produto_id IS NOT NULL THEN
-        UPDATE public.estoque_itens
-        SET quantidade_reservada = GREATEST(quantidade_reservada - (v_de_entrega_futura + v_de_reserva), 0)
-        WHERE produto_id = v_produto_id
-          AND local = 'Estoque'::public.estoque_local;
-    END IF;
-
-    v_status := CASE WHEN v_de_entregue > 0 THEN 'aguardando_coleta' ELSE 'registrada' END;
-
-    INSERT INTO public.devolucoes_estoque (
-        projeto_item_id, quantidade, qtd_de_entrega_futura, qtd_de_reserva, qtd_de_entregue,
-        status, motivo, solicitado_por
-    ) VALUES (
-        p_projeto_item_id, p_quantidade, v_de_entrega_futura, v_de_reserva, v_de_entregue,
-        v_status, p_motivo, auth.uid()
-    )
-    RETURNING id INTO v_devolucao_id;
-
-    INSERT INTO public.estoque_movimentos_projeto_item
-        (projeto_item_id, tipo, quantidade, origem, referencia_id, observacao, criado_por)
-    VALUES
-        (p_projeto_item_id, 'devolucao', p_quantidade, 'devolucao_estoque', v_devolucao_id, p_motivo, auth.uid());
-
-    RETURN jsonb_build_object(
-        'devolucao_id', v_devolucao_id,
-        'status', v_status,
-        'de_entrega_futura', v_de_entrega_futura,
-        'de_reserva', v_de_reserva,
-        'de_entregue', v_de_entregue
-    );
-END;
-$function$
-
-
--- Function: solicitar_transferencia_estoque
-CREATE OR REPLACE FUNCTION public.solicitar_transferencia_estoque(p_origem_projeto_item_id uuid, p_destino_projeto_item_id uuid, p_quantidade numeric, p_motivo text DEFAULT NULL::text)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-DECLARE
-    v_origem_produto  uuid;
-    v_destino_produto uuid;
-    v_origem_saldo    public.estoque_saldos_projeto_item%ROWTYPE;
-    v_transferencia_id uuid;
-BEGIN
-    IF p_quantidade IS NULL OR p_quantidade <= 0 THEN
-        RAISE EXCEPTION 'Quantidade deve ser maior que zero.' USING ERRCODE = 'P0001';
-    END IF;
-
-    IF p_origem_projeto_item_id = p_destino_projeto_item_id THEN
-        RAISE EXCEPTION 'Origem e destino nao podem ser o mesmo item de projeto.' USING ERRCODE = 'P0001';
-    END IF;
-
-    SELECT produto_id INTO v_origem_produto FROM public.projeto_itens WHERE id = p_origem_projeto_item_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Item de projeto de origem % nao encontrado.', p_origem_projeto_item_id USING ERRCODE = 'P0001';
-    END IF;
-
-    SELECT produto_id INTO v_destino_produto FROM public.projeto_itens WHERE id = p_destino_projeto_item_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Item de projeto de destino % nao encontrado.', p_destino_projeto_item_id USING ERRCODE = 'P0001';
-    END IF;
-
-    IF v_origem_produto IS DISTINCT FROM v_destino_produto THEN
-        RAISE EXCEPTION 'Origem e destino precisam ser do mesmo produto.' USING ERRCODE = 'P0001';
-    END IF;
-
-    SELECT * INTO v_origem_saldo
-    FROM public.estoque_saldos_projeto_item
-    WHERE projeto_item_id = p_origem_projeto_item_id;
-
-    IF NOT FOUND OR v_origem_saldo.q_reserva < p_quantidade THEN
-        RAISE EXCEPTION 'Origem nao tem q_reserva suficiente para a transferencia solicitada.' USING ERRCODE = 'P0001';
-    END IF;
-
-    INSERT INTO public.transferencias_estoque (
-        origem_projeto_item_id, destino_projeto_item_id, quantidade, motivo, solicitado_por
-    ) VALUES (
-        p_origem_projeto_item_id, p_destino_projeto_item_id, p_quantidade, p_motivo, auth.uid()
-    )
-    RETURNING id INTO v_transferencia_id;
-
-    RETURN jsonb_build_object('transferencia_id', v_transferencia_id, 'status', 'solicitada');
-END;
-$function$
-
-

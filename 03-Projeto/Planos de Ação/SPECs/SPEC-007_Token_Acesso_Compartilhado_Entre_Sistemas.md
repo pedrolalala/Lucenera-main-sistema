@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-007 — Token de Acesso Compartilhado entre Sistemas (SSO sem novo login)"
-status: não iniciado
-data_ultima_modificacao: 2026-06-26
+status: aplicado/publicado no remoto; homologação ponta-a-ponta pendente
+data_ultima_modificacao: 2026-07-07
 sistemas_envolvidos:
   - Hub / Central
   - Orçamentos
@@ -17,20 +17,20 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Criar tabela central `cross_system_session_codes` (code curto-vivo, usuário, sistema origem/destino, expiração, uso único).
-- [ ] Criar Edge Function `generate-cross-system-code` (chamada pelo sistema de origem: gera o código, vincula ao usuário autenticado da própria sessão).
-- [ ] Criar Edge Function `exchange-cross-system-code` (chamada pelo sistema de destino: valida o código, marca como usado, devolve sessão válida).
-- [ ] Criar helper de frontend compartilhado (`lib/cross-system-auth.ts`, replicado ou publicado como pacote simples) com duas funções: `redirectWithCode(destinoUrl)` e `consumeCodeFromUrl()`.
-- [ ] Integrar no Hub: ao abrir um sistema pelo card (HUB-03), usar o mesmo mecanismo em vez de link direto puro.
-- [ ] Integrar no Orçamentos: o modal pós-aprovação que redireciona para o Financeiro (boleto) passa a usar `redirectWithCode`.
-- [ ] Integrar no Financeiro: ao carregar, chamar `consumeCodeFromUrl()` antes de pedir login.
-- [ ] Job de limpeza (ou `DELETE` direto na leitura) para códigos expirados/usados em `cross_system_session_codes`.
-- [ ] Documentar o contrato em `supabase/db/domains/` para os demais sistemas adotarem o mesmo padrão ao linkar entre si.
+- [x] Criar tabela central `cross_system_session_codes` (code curto-vivo, usuário, sistema origem/destino, expiração, uso único).
+- [x] Criar Edge Function `generate-cross-system-code` (chamada pelo sistema de origem: gera o código, vincula ao usuário autenticado da própria sessão).
+- [x] Criar Edge Function `exchange-cross-system-code` (chamada pelo sistema de destino: valida o código, marca como usado, devolve sessão válida).
+- [x] Criar helper de frontend compartilhado (`lib/cross-system-auth.ts`, replicado ou publicado como pacote simples) com duas funções: `redirectWithCode(destinoUrl)` e `consumeCodeFromUrl()`.
+- [x] Integrar no Hub: ao abrir um sistema pelo card (HUB-03), usar o mesmo mecanismo em vez de link direto puro.
+- [x] Integrar no Orçamentos: o modal pós-aprovação que redireciona para o Financeiro (boleto) passa a usar `redirectWithCode`.
+- [x] Integrar no Financeiro: ao carregar, chamar `consumeCodeFromUrl()` antes de pedir login.
+- [x] Job de limpeza (ou `DELETE` direto na leitura) para códigos expirados/usados em `cross_system_session_codes`.
+- [x] Documentar o contrato em `supabase/db/domains/` para os demais sistemas adotarem o mesmo padrão ao linkar entre si.
 
 ### Passos manuais do usuário
 
-- [ ] Aplicar a migration no banco remoto compartilhado (`vcvcwzmbiftcawncibke`).
-- [ ] Publicar as duas Edge Functions novas no projeto remoto.
+- [x] Aplicar a migration no banco remoto compartilhado (`vcvcwzmbiftcawncibke`).
+- [x] Publicar as duas Edge Functions novas no projeto remoto.
 - [ ] Publicar o app do Financeiro (`retorno-bancario-bradesco-5392a`) — pré-requisito independente desta SPEC, mas necessário para testar o fluxo ponta-a-ponta do boleto.
 - [ ] Configurar o `.env`/VITE do Financeiro com a URL/anon key do Supabase — também pré-requisito independente, registrado em `ORC-05`.
 - [ ] Testar manualmente a navegação Orçamentos → Financeiro (boleto) e Hub → qualquer sistema, confirmando que não pede login de novo.
@@ -146,11 +146,16 @@ No sistema de Orçamentos, o modal pós-aprovação que hoje tenta redirecionar 
 
 ## Realizado
 
-(nada implementado ainda — esta SPEC define o desenho a ser aprovado e construído; depende do Financeiro estar publicado e configurado para teste ponta-a-ponta.)
+- 2026-07-07: criada a migration central `supabase/db/migrations/20260708_030_spec007_sso_cross_system/`.
+- 2026-07-07: criadas as Edge Functions `generate-cross-system-code` e `exchange-cross-system-code`.
+- 2026-07-07: criado helper `src/lib/cross-system-auth.ts` em Hub, Orçamentos, Financeiro e CRM.
+- 2026-07-07: Hub abre cards via `redirectWithCode`; Orçamentos abre Financeiro via `redirectWithCode`; Financeiro consome `sso_code`; CRM abre Orçamentos via `redirectWithCode` e também consome `sso_code`.
+- 2026-07-07: migration 030 aplicada no Supabase remoto via `SUPABASE_DB_URL` do `.env`; `cross_system_session_codes` confirmado com RLS habilitada e sem grants diretos para `anon`/`authenticated`.
+- 2026-07-07: Edge Functions `generate-cross-system-code` e `exchange-cross-system-code` publicadas no projeto remoto `vcvcwzmbiftcawncibke` e listadas como `ACTIVE`.
+- 2026-07-07: smoke remoto validado sem expor segredos: `generate-cross-system-code` responde 401 sem usuário autenticado e `exchange-cross-system-code` responde 400 para código inválido.
 
 ## Pendências
 
-- [ ] Implementar tabela, Edge Functions e helper de frontend descritos nesta SPEC.
-- [ ] Decidir o mecanismo exato de geração de sessão dentro de `exchange-cross-system-code` (Admin API `generateLink` vs. emissão direta de JWT assinado pela service role) — escolher o que a versão instalada do `supabase-js`/GoTrue suporta sem gambiarra.
-- [ ] Integrar nos 8 sistemas restantes conforme cada um precisar linkar para outro (não é tudo de uma vez nesta SPEC — começar pelo par Orçamentos → Financeiro, que é o bloqueio conhecido).
+- [ ] Homologar no ambiente remoto o mecanismo `generateLink`/`verifyOtp` usado por `exchange-cross-system-code`.
+- [ ] Integrar nos demais sistemas conforme cada um precisar linkar para outro.
 - [ ] Testar ponta-a-ponta depois que o Financeiro estiver publicado e configurado (pré-requisitos de `ORC-05`).

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict VN4g9iMstwNUxyEBiYv6gSI7NeOmDQUStMETcPYPZKdYwwtQGIAEbGZfSAxbCxS
+\restrict e7TVCb6GY9ci1jGtCdkQIknYgVn4jxgjRbp53wNeV6ps8QEOAthc7ikZraw1yjP
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.4
@@ -2305,6 +2305,57 @@ $$;
 
 
 --
+-- Name: fn_auditoria_permissoes(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_auditoria_permissoes() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  INSERT INTO public.auditoria_permissoes (autor_id, entidade, entidade_id, antes, depois)
+  VALUES (
+    auth.uid(),
+    TG_TABLE_NAME,
+    CASE WHEN TG_OP = 'DELETE' THEN (to_jsonb(OLD)->>'id')::uuid ELSE (to_jsonb(NEW)->>'id')::uuid END,
+    CASE WHEN TG_OP IN ('UPDATE','DELETE') THEN to_jsonb(OLD) ELSE NULL END,
+    CASE WHEN TG_OP IN ('INSERT','UPDATE') THEN to_jsonb(NEW) ELSE NULL END
+  );
+  RETURN COALESCE(NEW, OLD);
+END;
+$$;
+
+
+--
+-- Name: FUNCTION fn_auditoria_permissoes(); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.fn_auditoria_permissoes() IS 'SPEC-006. Grava em auditoria_permissoes toda alteracao de papel/permissao/atribuicao/excecao. entidade_id vem da coluna id de cada tabela (usuario_papeis nao tem id proprio - ver excecao abaixo).';
+
+
+--
+-- Name: fn_auditoria_usuario_papeis(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_auditoria_usuario_papeis() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  INSERT INTO public.auditoria_permissoes (autor_id, entidade, entidade_id, antes, depois)
+  VALUES (
+    auth.uid(),
+    'usuario_papeis',
+    CASE WHEN TG_OP = 'DELETE' THEN OLD.usuario_id ELSE NEW.usuario_id END,
+    CASE WHEN TG_OP IN ('UPDATE','DELETE') THEN to_jsonb(OLD) ELSE NULL END,
+    CASE WHEN TG_OP IN ('INSERT','UPDATE') THEN to_jsonb(NEW) ELSE NULL END
+  );
+  RETURN COALESCE(NEW, OLD);
+END;
+$$;
+
+
+--
 -- Name: fn_auto_numero_orcamento(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -3020,6 +3071,109 @@ $$;
 CREATE FUNCTION public.handle_updated_at() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ BEGIN NEW.updated_at = now(); RETURN NEW; END; $$;
+
+
+--
+-- Name: hub_pode_executar(uuid, text, text, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.hub_pode_executar(p_usuario_id uuid, p_system_slug text, p_modulo_chave text, p_acao text) RETURNS boolean
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  v_excecao text;
+BEGIN
+  -- 1. Excecao individual tem precedencia. modulo_id NULL na excecao = vale
+  -- para o sistema inteiro; caso contrario precisa bater com o modulo pedido.
+  SELECT e.tipo INTO v_excecao
+  FROM usuario_permissao_excecoes e
+  JOIN systems s ON s.id = e.system_id AND s.slug = p_system_slug
+  LEFT JOIN modulos m ON m.id = e.modulo_id
+  WHERE e.usuario_id = p_usuario_id
+    AND e.acao = p_acao
+    AND (e.valido_até IS NULL OR e.valido_até > now())
+    AND (e.modulo_id IS NULL OR m.chave = p_modulo_chave)
+  ORDER BY e.criado_em DESC
+  LIMIT 1;
+
+  IF v_excecao = 'negar' THEN RETURN false; END IF;
+  IF v_excecao = 'conceder' THEN RETURN true; END IF;
+
+  -- 2. Papel do usuario (sistema inteiro OU modulo especifico; acao NULL = todas)
+  RETURN EXISTS (
+    SELECT 1
+    FROM usuario_papeis up
+    JOIN papel_permissoes pp ON pp.papel_id = up.papel_id
+    JOIN systems s ON s.id = pp.system_id AND s.slug = p_system_slug
+    LEFT JOIN modulos m ON m.id = pp.modulo_id
+    WHERE up.usuario_id = p_usuario_id
+      AND (pp.acao IS NULL OR pp.acao = p_acao)
+      AND (pp.modulo_id IS NULL OR m.chave = p_modulo_chave)
+  );
+END;
+$$;
+
+
+--
+-- Name: FUNCTION hub_pode_executar(p_usuario_id uuid, p_system_slug text, p_modulo_chave text, p_acao text); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.hub_pode_executar(p_usuario_id uuid, p_system_slug text, p_modulo_chave text, p_acao text) IS 'SPEC-006. Combina papel + excecao individual (excecao sempre tem prioridade). Contrato publicado para os demais sistemas adotarem quando quiserem.';
+
+
+--
+-- Name: systems; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.systems (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL,
+    link text NOT NULL,
+    icon_name text,
+    display_order integer DEFAULT 0,
+    slug text NOT NULL,
+    visivel_no_hub boolean DEFAULT true NOT NULL
+);
+
+
+--
+-- Name: COLUMN systems.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.systems.slug IS 'SPEC-006. Identificador estavel usado por hub_pode_executar/hub_sistemas_permitidos.';
+
+
+--
+-- Name: COLUMN systems.visivel_no_hub; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.systems.visivel_no_hub IS 'SPEC-006. Diferencia sistemas exibidos como card na Central dos regidos apenas por permissao (ex.: o proprio Hub, para auto-governanca). Nao substitui a distincao completa de TI-14.';
+
+
+--
+-- Name: hub_sistemas_permitidos(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.hub_sistemas_permitidos(p_usuario_id uuid) RETURNS SETOF public.systems
+    LANGUAGE sql STABLE SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+  SELECT DISTINCT s.*
+  FROM systems s
+  JOIN papel_permissoes pp ON pp.system_id = s.id
+  JOIN usuario_papeis up ON up.papel_id = pp.papel_id AND up.usuario_id = p_usuario_id
+  WHERE (pp.acao = 'visualizar' OR pp.acao IS NULL)
+    AND s.visivel_no_hub = true
+$$;
+
+
+--
+-- Name: FUNCTION hub_sistemas_permitidos(p_usuario_id uuid); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.hub_sistemas_permitidos(p_usuario_id uuid) IS 'SPEC-006. Substitui a leitura direta de user_system_access nos cards do Hub. Exclui sistemas com visivel_no_hub = false (ex.: o proprio Hub).';
 
 
 --
@@ -4205,6 +4359,28 @@ $$;
 
 
 --
+-- Name: auditoria_permissoes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.auditoria_permissoes (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    autor_id uuid,
+    entidade text NOT NULL,
+    entidade_id uuid,
+    antes jsonb,
+    depois jsonb,
+    criado_em timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: TABLE auditoria_permissoes; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.auditoria_permissoes IS 'SPEC-006. Auditoria automatica de alteracoes em papeis/permissoes/atribuicoes/excecoes.';
+
+
+--
 -- Name: boletos; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -4412,6 +4588,29 @@ CREATE TABLE public.controle_falta (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT controle_ponto_status_check CHECK ((status = ANY (ARRAY['presente'::text, 'ausente'::text, 'atraso'::text, 'meio_periodo'::text, 'atestado'::text, 'licenca_maternidade'::text, 'falta_injustificada'::text, 'licenca_paternidade'::text, 'licenca_obito'::text, 'licenca_casamento'::text, 'licenca_militar'::text, 'licenca_medica'::text])))
 );
+
+
+--
+-- Name: cross_system_session_codes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.cross_system_session_codes (
+    code uuid DEFAULT gen_random_uuid() NOT NULL,
+    usuario_id uuid NOT NULL,
+    sistema_origem text NOT NULL,
+    sistema_destino text,
+    contexto jsonb,
+    criado_em timestamp with time zone DEFAULT now() NOT NULL,
+    expira_em timestamp with time zone DEFAULT (now() + '00:01:00'::interval) NOT NULL,
+    usado_em timestamp with time zone
+);
+
+
+--
+-- Name: TABLE cross_system_session_codes; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.cross_system_session_codes IS 'SPEC-007. Codigo opaco de curta duracao e uso unico para hidratar sessao Supabase entre apps.';
 
 
 --
@@ -5026,6 +5225,46 @@ CREATE TABLE public.marcas (
 
 
 --
+-- Name: modulo_acoes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.modulo_acoes (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    modulo_id uuid NOT NULL,
+    chave text NOT NULL,
+    CONSTRAINT modulo_acoes_chave_check CHECK ((chave = ANY (ARRAY['criar'::text, 'editar'::text, 'deletar'::text, 'visualizar'::text])))
+);
+
+
+--
+-- Name: TABLE modulo_acoes; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.modulo_acoes IS 'SPEC-006. Acoes possiveis dentro de um modulo.';
+
+
+--
+-- Name: modulos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.modulos (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    system_id uuid NOT NULL,
+    chave text NOT NULL,
+    nome text NOT NULL,
+    descricao text,
+    ordem integer DEFAULT 0
+);
+
+
+--
+-- Name: TABLE modulos; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.modulos IS 'SPEC-006. Modulos/abas configuraveis por sistema.';
+
+
+--
 -- Name: negociacoes; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -5215,6 +5454,46 @@ CREATE TABLE public.orcamentos_revenda_ubiqua (
     versao integer DEFAULT 1,
     CONSTRAINT orcamentos_revenda_ubiqua_desconto_percentual_check CHECK (((desconto_percentual >= (0)::numeric) AND (desconto_percentual <= (100)::numeric)))
 );
+
+
+--
+-- Name: papeis; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.papeis (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    nome text NOT NULL,
+    descricao text,
+    criado_em timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: TABLE papeis; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.papeis IS 'SPEC-006. Papeis configuraveis; convivem com usuarios.role durante a transicao.';
+
+
+--
+-- Name: papel_permissoes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.papel_permissoes (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    papel_id uuid NOT NULL,
+    system_id uuid NOT NULL,
+    modulo_id uuid,
+    acao text,
+    CONSTRAINT papel_permissoes_acao_check CHECK ((acao = ANY (ARRAY['criar'::text, 'editar'::text, 'deletar'::text, 'visualizar'::text])))
+);
+
+
+--
+-- Name: TABLE papel_permissoes; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.papel_permissoes IS 'SPEC-006. modulo_id NULL = todos os modulos ("ver tudo"); acao NULL = todas as acoes.';
 
 
 --
@@ -6074,20 +6353,6 @@ ALTER TABLE public.sync_history ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY
 
 
 --
--- Name: systems; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.systems (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    name text NOT NULL,
-    description text NOT NULL,
-    link text NOT NULL,
-    icon_name text,
-    display_order integer DEFAULT 0
-);
-
-
---
 -- Name: transacoes; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -6201,6 +6466,50 @@ CREATE TABLE public.user_system_access (
     system_id uuid NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL
 );
+
+
+--
+-- Name: usuario_papeis; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.usuario_papeis (
+    usuario_id uuid NOT NULL,
+    papel_id uuid NOT NULL
+);
+
+
+--
+-- Name: TABLE usuario_papeis; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.usuario_papeis IS 'SPEC-006. Atribuicao de papeis a usuarios (um usuario pode ter mais de um papel).';
+
+
+--
+-- Name: usuario_permissao_excecoes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.usuario_permissao_excecoes (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    usuario_id uuid NOT NULL,
+    system_id uuid NOT NULL,
+    modulo_id uuid,
+    acao text NOT NULL,
+    tipo text NOT NULL,
+    justificativa text,
+    "valido_até" timestamp with time zone,
+    criado_por uuid,
+    criado_em timestamp with time zone DEFAULT now(),
+    CONSTRAINT usuario_permissao_excecoes_acao_check CHECK ((acao = ANY (ARRAY['criar'::text, 'editar'::text, 'deletar'::text, 'visualizar'::text]))),
+    CONSTRAINT usuario_permissao_excecoes_tipo_check CHECK ((tipo = ANY (ARRAY['conceder'::text, 'negar'::text])))
+);
+
+
+--
+-- Name: TABLE usuario_permissao_excecoes; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.usuario_permissao_excecoes IS 'SPEC-006. Excecao individual, com precedencia sobre o papel do usuario.';
 
 
 --
@@ -7630,6 +7939,14 @@ ALTER TABLE ONLY public.equipes_projetos
 
 
 --
+-- Name: auditoria_permissoes auditoria_permissoes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auditoria_permissoes
+    ADD CONSTRAINT auditoria_permissoes_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: boletos boletos_nosso_numero_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -7755,6 +8072,14 @@ ALTER TABLE ONLY public.controle_falta
 
 ALTER TABLE ONLY public.controle_falta
     ADD CONSTRAINT controle_ponto_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: cross_system_session_codes cross_system_session_codes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cross_system_session_codes
+    ADD CONSTRAINT cross_system_session_codes_pkey PRIMARY KEY (code);
 
 
 --
@@ -8070,6 +8395,38 @@ ALTER TABLE ONLY public.marcas
 
 
 --
+-- Name: modulo_acoes modulo_acoes_modulo_id_chave_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.modulo_acoes
+    ADD CONSTRAINT modulo_acoes_modulo_id_chave_key UNIQUE (modulo_id, chave);
+
+
+--
+-- Name: modulo_acoes modulo_acoes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.modulo_acoes
+    ADD CONSTRAINT modulo_acoes_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: modulos modulos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.modulos
+    ADD CONSTRAINT modulos_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: modulos modulos_system_id_chave_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.modulos
+    ADD CONSTRAINT modulos_system_id_chave_key UNIQUE (system_id, chave);
+
+
+--
 -- Name: negociacoes negociacoes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -8107,6 +8464,38 @@ ALTER TABLE ONLY public.orcamentos
 
 ALTER TABLE ONLY public.orcamentos_revenda_ubiqua
     ADD CONSTRAINT orcamentos_revenda_ubiqua_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: papeis papeis_nome_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.papeis
+    ADD CONSTRAINT papeis_nome_key UNIQUE (nome);
+
+
+--
+-- Name: papeis papeis_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.papeis
+    ADD CONSTRAINT papeis_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: papel_permissoes papel_permissoes_papel_id_system_id_modulo_id_acao_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.papel_permissoes
+    ADD CONSTRAINT papel_permissoes_papel_id_system_id_modulo_id_acao_key UNIQUE (papel_id, system_id, modulo_id, acao);
+
+
+--
+-- Name: papel_permissoes papel_permissoes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.papel_permissoes
+    ADD CONSTRAINT papel_permissoes_pkey PRIMARY KEY (id);
 
 
 --
@@ -8374,6 +8763,14 @@ ALTER TABLE ONLY public.systems
 
 
 --
+-- Name: systems systems_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.systems
+    ADD CONSTRAINT systems_slug_key UNIQUE (slug);
+
+
+--
 -- Name: transacoes transacoes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -8451,6 +8848,22 @@ ALTER TABLE ONLY public.user_roles_separacao
 
 ALTER TABLE ONLY public.user_system_access
     ADD CONSTRAINT user_system_access_pkey PRIMARY KEY (user_id, system_id);
+
+
+--
+-- Name: usuario_papeis usuario_papeis_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuario_papeis
+    ADD CONSTRAINT usuario_papeis_pkey PRIMARY KEY (usuario_id, papel_id);
+
+
+--
+-- Name: usuario_permissao_excecoes usuario_permissao_excecoes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuario_permissao_excecoes
+    ADD CONSTRAINT usuario_permissao_excecoes_pkey PRIMARY KEY (id);
 
 
 --
@@ -8648,6 +9061,20 @@ CREATE INDEX idx_cr_decisao ON public.contatos_revisao USING btree (decisao) WHE
 --
 
 CREATE INDEX idx_cr_score ON public.contatos_revisao USING btree (score DESC);
+
+
+--
+-- Name: idx_cross_system_codes_expira; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_cross_system_codes_expira ON public.cross_system_session_codes USING btree (expira_em);
+
+
+--
+-- Name: idx_cross_system_codes_usuario; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_cross_system_codes_usuario ON public.cross_system_session_codes USING btree (usuario_id, criado_em DESC);
 
 
 --
@@ -9988,6 +10415,34 @@ CREATE TRIGGER trg_atualizar_preco_venda BEFORE INSERT OR UPDATE OF preco_custo,
 
 
 --
+-- Name: papeis trg_auditoria_papeis; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_auditoria_papeis AFTER INSERT OR DELETE OR UPDATE ON public.papeis FOR EACH ROW EXECUTE FUNCTION public.fn_auditoria_permissoes();
+
+
+--
+-- Name: papel_permissoes trg_auditoria_papel_permissoes; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_auditoria_papel_permissoes AFTER INSERT OR DELETE OR UPDATE ON public.papel_permissoes FOR EACH ROW EXECUTE FUNCTION public.fn_auditoria_permissoes();
+
+
+--
+-- Name: usuario_papeis trg_auditoria_usuario_papeis; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_auditoria_usuario_papeis AFTER INSERT OR DELETE OR UPDATE ON public.usuario_papeis FOR EACH ROW EXECUTE FUNCTION public.fn_auditoria_usuario_papeis();
+
+
+--
+-- Name: usuario_permissao_excecoes trg_auditoria_usuario_permissao_excecoes; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_auditoria_usuario_permissao_excecoes AFTER INSERT OR DELETE OR UPDATE ON public.usuario_permissao_excecoes FOR EACH ROW EXECUTE FUNCTION public.fn_auditoria_permissoes();
+
+
+--
 -- Name: produtos trg_calculo_preco_venda; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -10226,6 +10681,14 @@ CREATE TRIGGER usuarios_updated_at BEFORE UPDATE ON public.usuarios FOR EACH ROW
 
 
 --
+-- Name: auditoria_permissoes auditoria_permissoes_autor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auditoria_permissoes
+    ADD CONSTRAINT auditoria_permissoes_autor_id_fkey FOREIGN KEY (autor_id) REFERENCES public.usuarios(id);
+
+
+--
 -- Name: boletos boletos_empresa_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10335,6 +10798,14 @@ ALTER TABLE ONLY public.contatos
 
 ALTER TABLE ONLY public.controle_falta
     ADD CONSTRAINT controle_ponto_funcionario_id_fkey FOREIGN KEY (funcionario_id) REFERENCES public.funcionarios(id) ON DELETE CASCADE;
+
+
+--
+-- Name: cross_system_session_codes cross_system_session_codes_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cross_system_session_codes
+    ADD CONSTRAINT cross_system_session_codes_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
 
 
 --
@@ -10626,6 +11097,22 @@ ALTER TABLE ONLY public.logs_operacoes
 
 
 --
+-- Name: modulo_acoes modulo_acoes_modulo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.modulo_acoes
+    ADD CONSTRAINT modulo_acoes_modulo_id_fkey FOREIGN KEY (modulo_id) REFERENCES public.modulos(id) ON DELETE CASCADE;
+
+
+--
+-- Name: modulos modulos_system_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.modulos
+    ADD CONSTRAINT modulos_system_id_fkey FOREIGN KEY (system_id) REFERENCES public.systems(id);
+
+
+--
 -- Name: negociacoes negociacoes_contato_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10767,6 +11254,30 @@ ALTER TABLE ONLY public.orcamentos_revenda_ubiqua
 
 ALTER TABLE ONLY public.orcamentos
     ADD CONSTRAINT orcamentos_vendedor_id_fkey FOREIGN KEY (vendedor_id) REFERENCES public.funcionarios(id) ON DELETE SET NULL;
+
+
+--
+-- Name: papel_permissoes papel_permissoes_modulo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.papel_permissoes
+    ADD CONSTRAINT papel_permissoes_modulo_id_fkey FOREIGN KEY (modulo_id) REFERENCES public.modulos(id);
+
+
+--
+-- Name: papel_permissoes papel_permissoes_papel_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.papel_permissoes
+    ADD CONSTRAINT papel_permissoes_papel_id_fkey FOREIGN KEY (papel_id) REFERENCES public.papeis(id) ON DELETE CASCADE;
+
+
+--
+-- Name: papel_permissoes papel_permissoes_system_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.papel_permissoes
+    ADD CONSTRAINT papel_permissoes_system_id_fkey FOREIGN KEY (system_id) REFERENCES public.systems(id);
 
 
 --
@@ -11226,6 +11737,54 @@ ALTER TABLE ONLY public.user_system_access
 
 
 --
+-- Name: usuario_papeis usuario_papeis_papel_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuario_papeis
+    ADD CONSTRAINT usuario_papeis_papel_id_fkey FOREIGN KEY (papel_id) REFERENCES public.papeis(id) ON DELETE CASCADE;
+
+
+--
+-- Name: usuario_papeis usuario_papeis_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuario_papeis
+    ADD CONSTRAINT usuario_papeis_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
+-- Name: usuario_permissao_excecoes usuario_permissao_excecoes_criado_por_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuario_permissao_excecoes
+    ADD CONSTRAINT usuario_permissao_excecoes_criado_por_fkey FOREIGN KEY (criado_por) REFERENCES public.usuarios(id);
+
+
+--
+-- Name: usuario_permissao_excecoes usuario_permissao_excecoes_modulo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuario_permissao_excecoes
+    ADD CONSTRAINT usuario_permissao_excecoes_modulo_id_fkey FOREIGN KEY (modulo_id) REFERENCES public.modulos(id);
+
+
+--
+-- Name: usuario_permissao_excecoes usuario_permissao_excecoes_system_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuario_permissao_excecoes
+    ADD CONSTRAINT usuario_permissao_excecoes_system_id_fkey FOREIGN KEY (system_id) REFERENCES public.systems(id);
+
+
+--
+-- Name: usuario_permissao_excecoes usuario_permissao_excecoes_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuario_permissao_excecoes
+    ADD CONSTRAINT usuario_permissao_excecoes_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
 -- Name: usuarios usuarios_empresa_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11388,6 +11947,34 @@ CREATE POLICY admin_all_logs ON public.logs_auditoria TO authenticated USING (pu
 
 
 --
+-- Name: modulo_acoes admin_all_modulo_acoes; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY admin_all_modulo_acoes ON public.modulo_acoes TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+
+--
+-- Name: modulos admin_all_modulos; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY admin_all_modulos ON public.modulos TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+
+--
+-- Name: papeis admin_all_papeis; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY admin_all_papeis ON public.papeis TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+
+--
+-- Name: papel_permissoes admin_all_papel_permissoes; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY admin_all_papel_permissoes ON public.papel_permissoes TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+
+--
 -- Name: systems admin_all_systems; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -11399,6 +11986,27 @@ CREATE POLICY admin_all_systems ON public.systems TO authenticated USING (public
 --
 
 CREATE POLICY admin_all_usa ON public.user_system_access TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+
+--
+-- Name: usuario_papeis admin_all_usuario_papeis; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY admin_all_usuario_papeis ON public.usuario_papeis TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+
+--
+-- Name: usuario_permissao_excecoes admin_all_usuario_permissao_excecoes; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY admin_all_usuario_permissao_excecoes ON public.usuario_permissao_excecoes TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+
+--
+-- Name: auditoria_permissoes admin_select_auditoria_permissoes; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY admin_select_auditoria_permissoes ON public.auditoria_permissoes FOR SELECT TO authenticated USING (public.is_admin());
 
 
 --
@@ -11491,6 +12099,12 @@ CREATE POLICY anon_select_empresas ON public.empresas FOR SELECT TO authenticate
 
 CREATE POLICY anon_update_informacoes_cliente ON public.informacoes_cliente_ubiqua FOR UPDATE TO anon USING (true) WITH CHECK (true);
 
+
+--
+-- Name: auditoria_permissoes; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.auditoria_permissoes ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: informacoes_cliente_ubiqua auth_insert_informacoes_cliente; Type: POLICY; Schema: public; Owner: -
@@ -12442,6 +13056,12 @@ CREATE POLICY controle_falta_update ON public.controle_falta FOR UPDATE TO authe
 
 
 --
+-- Name: cross_system_session_codes; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.cross_system_session_codes ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: custos_recorrentes custos_rec_delete; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -13201,6 +13821,18 @@ CREATE POLICY marcas_update ON public.marcas FOR UPDATE TO authenticated USING (
 
 
 --
+-- Name: modulo_acoes; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.modulo_acoes ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: modulos; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.modulos ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: negociacoes; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -13299,6 +13931,18 @@ CREATE POLICY orcamentos_select ON public.orcamentos FOR SELECT TO authenticated
 
 CREATE POLICY orcamentos_update ON public.orcamentos FOR UPDATE TO authenticated USING (true);
 
+
+--
+-- Name: papeis; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.papeis ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: papel_permissoes; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.papel_permissoes ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: projeto_parcelas parcelas_delete_admin; Type: POLICY; Schema: public; Owner: -
@@ -14090,6 +14734,18 @@ CREATE POLICY user_select_usa ON public.user_system_access FOR SELECT TO authent
 ALTER TABLE public.user_system_access ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: usuario_papeis; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.usuario_papeis ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: usuario_permissao_excecoes; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.usuario_permissao_excecoes ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: usuarios; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -14209,5 +14865,5 @@ CREATE POLICY vendas_update ON public.vendas_marca FOR UPDATE TO authenticated U
 -- PostgreSQL database dump complete
 --
 
-\unrestrict VN4g9iMstwNUxyEBiYv6gSI7NeOmDQUStMETcPYPZKdYwwtQGIAEbGZfSAxbCxS
+\unrestrict e7TVCb6GY9ci1jGtCdkQIknYgVn4jxgjRbp53wNeV6ps8QEOAthc7ikZraw1yjP
 

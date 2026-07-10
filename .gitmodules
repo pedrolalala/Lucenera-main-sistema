@@ -19,3 +19,6 @@
 [submodule "04-Sistemas/cadastro-lucenera-b86fe"]
 	path = 04-Sistemas/cadastro-lucenera-b86fe
 	url = https://github.com/pedrolalala/cadastro-lucenera.git
+[submodule "04-Sistemas/compras-lucenera"]
+	path = 04-Sistemas/compras-lucenera
+	url = https://github.com/pedrolalala/compras-lucenera.git

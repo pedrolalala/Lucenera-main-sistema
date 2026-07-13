@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-022 — Destino da Necessidade de Compra por Projeto e Cliente"
-status: planejado
+status: implementado
 data_ultima_modificacao: 2026-07-13
 sistemas_envolvidos:
   - Supabase (banco central)
@@ -25,15 +25,15 @@ dependencias:
 ## Checklist de Ação
 
 ### Backend
-- [ ] Criar migration `20260713_038_spec022_necessidade_compra_detalhe`
-- [ ] Criar view `vw_necessidade_compra_detalhe`
-- [ ] `GRANT SELECT` para `authenticated`
-- [ ] Aplicar no Supabase SQL Editor
+- [x] Criar migration `20260713_038_spec022_necessidade_compra_detalhe`
+- [x] Criar view `vw_necessidade_compra_detalhe`
+- [x] `GRANT SELECT` para `authenticated`
+- [x] Aplicar no Supabase (via `supabase db query --linked`, 2026-07-13)
 
 ### Frontend (`compras-lucenera-3o23t98ee`)
-- [ ] Criar `src/services/necessidade-compra-detalhe.ts` (tipo + query)
-- [ ] Criar `src/components/compra/NecessidadeCompraDetalhe.tsx` (sub-tabela expansível)
-- [ ] Modificar `src/pages/NecessidadeCompra.tsx`: linhas expansíveis pelo contador de projetos
+- [x] Criar `src/services/necessidade-compra-detalhe.ts` (tipo + query)
+- [x] Criar `src/components/compra/NecessidadeCompraDetalhe.tsx` (sub-tabela expansível)
+- [x] Modificar `src/pages/NecessidadeCompra.tsx`: linhas expansíveis pelo contador de projetos
 - [ ] Testar: expandir linha com 1 projeto, com vários, com `q_reserva` e `q_entrega_futura` diferentes
 - [ ] Testar: produto sem `estoque_saldos_projeto_item` não quebra a view
 

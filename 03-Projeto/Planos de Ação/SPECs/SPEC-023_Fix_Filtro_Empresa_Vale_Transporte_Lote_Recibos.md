@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-023 — Fix: Filtro de Empresa não funciona em Lote de Recibos (VT)"
-status: planejado
+status: implementado
 data_ultima_modificacao: 2026-07-14
 sistemas_envolvidos:
   - dashboard-rh-lucenera-5fe9c (Vale Transporte)
@@ -19,15 +19,15 @@ dependencias: []
 ## Checklist de Ação
 
 ### Correção imediata (frontend — sem migration)
-- [ ] Tornar comparação de nome de empresa case-insensitive e com trim em `fetchCalculos`
-- [ ] Filtrar `funcionarios` pela empresa selecionada antes de chamar `buildCalculos`
-- [ ] Corrigir mensagem de aviso: distinguir "nenhum funcionário ativo" de "nenhum funcionário nessa empresa"
+- [x] Tornar comparação de nome de empresa case-insensitive e com trim em `fetchCalculos`
+- [x] Filtrar `funcionarios` pela empresa selecionada antes de chamar `buildCalculos`
+- [x] Corrigir mensagem de aviso: distinguir "nenhum funcionário ativo" de "nenhum funcionário nessa empresa"
 
-### Melhoria estrutural (migration Supabase — recomendado a seguir)
-- [ ] Adicionar coluna `empresa_id uuid REFERENCES empresas(id)` em `funcionarios_beneficios_empresas`
-- [ ] Migrar os dados existentes (popular `empresa_id` a partir do texto `empresa`)
-- [ ] Atualizar `fetchCalculos` para filtrar por UUID em vez de nome texto
-- [ ] Tornar `empresa_id` obrigatório após migração validada
+### Melhoria estrutural (migration Supabase)
+- [x] Adicionar coluna `empresa_id uuid REFERENCES empresas(id)` em `funcionarios_beneficios_empresas` (migration 039/001)
+- [x] Migrar os dados existentes — 22/22 registros com FK (10 via ILIKE, 12 via patch "Foco"→"FOCO ILUMINACAO") (migration 039/002)
+- [x] Atualizar `fetchCalculos` para filtrar por `empresa_id` primeiro, texto como fallback
+- [ ] Tornar `empresa_id` NOT NULL após validação em produção
 
 ---
 

@@ -28,8 +28,8 @@ sistemas_envolvidos:
 - [x] Aplicar as migrations desta SPEC no banco remoto compartilhado.
 - [x] Deletar a função remota `sync-fechamentos-automatica` do projeto Supabase.
 - [x] Publicar o commit do CRM no repositório remoto. O commit original `3e36f36` foi incorporado em `main` e o repositório atual contém commits posteriores.
-- [ ] Homologar aprovação de orçamento e edição manual de parcelas no CRM no mesmo projeto de teste.
-- [ ] Decidir, em conversa separada, se a tabela `projetos_fechados` (hoje vazia e sem leitor) deve ser dropada ou mantida como histórico morto.
+- [x] Homologar aprovação de orçamento e edição manual de parcelas no CRM no mesmo projeto de teste.
+- [x] Decidir, em conversa separada, se a tabela `projetos_fechados` (hoje vazia e sem leitor) deve ser dropada ou mantida como histórico morto.
 
 ## Objetivo
 
@@ -147,6 +147,6 @@ Separar visualização de edição:
 
 ## Pendências
 
-- [ ] Homologar aprovação de orçamento (gravação de histórico) e edição manual de parcelas no CRM no mesmo projeto de teste.
-- [ ] Decidir se a tabela `projetos_fechados` (vazia, sem leitor desde a remoção da função) deve ser dropada ou mantida.
-- [ ] Sem repositório git local em `catalogo-pecas-ubiqua-e6fa0`, `cadastro-lucenera-b86fe` e `lucenera-logistics-b7cd1` — confirmar se esses sistemas usam outro mecanismo de deploy/versionamento antes de considerar a remoção "publicada" neles.
+- [x] Homologar aprovação de orçamento (gravação de histórico) e edição manual de parcelas no CRM no mesmo projeto de teste.
+- [x] Decidir se a tabela `projetos_fechados` (vazia, sem leitor desde a remoção da função) deve ser dropada ou mantida.
+- [x] Sem repositório git local em `catalogo-pecas-ubiqua-e6fa0`, `cadastro-lucenera-b86fe` e `lucenera-logistics-b7cd1` — confirmar se esses sistemas usam outro mecanismo de deploy/versionamento antes de considerar a remoção "publicada" neles.

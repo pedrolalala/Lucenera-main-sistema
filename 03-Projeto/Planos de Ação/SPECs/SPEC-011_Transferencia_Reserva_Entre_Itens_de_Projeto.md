@@ -15,18 +15,18 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Criar tabela `transferencias_estoque`.
-- [ ] Criar RPC `solicitar_transferencia_estoque`.
-- [ ] Criar RPC `aprovar_transferencia_estoque` (executada pela Vitória ou perfil autorizado).
-- [ ] Criar RPC `cancelar_transferencia_estoque`.
-- [ ] Criar view `vw_transferencias_estoque` para histórico e pendências.
-- [ ] Atualizar `current/01_schema_full.sql` após aplicar migration.
+- [x] Criar tabela `transferencias_estoque`.
+- [x] Criar RPC `solicitar_transferencia_estoque`.
+- [x] Criar RPC `aprovar_transferencia_estoque` (executada pela Vitória ou perfil autorizado).
+- [x] Criar RPC `cancelar_transferencia_estoque`.
+- [x] Criar view `vw_transferencias_estoque` para histórico e pendências.
+- [x] Atualizar `current/01_schema_full.sql` após aplicar migration.
 
 ### Passos manuais do usuário
 
-- [ ] Confirmar com Vitória o fluxo de aprovação e os campos obrigatórios de motivo/observação.
-- [ ] Confirmar com Débora como quer visualizar itens que perderam reserva e voltaram para entrega futura.
-- [ ] Definir role/permissão para aprovar transferência.
+- [x] Confirmar com Vitória o fluxo de aprovação e os campos obrigatórios de motivo/observação.
+- [x] Confirmar com Débora como quer visualizar itens que perderam reserva e voltaram para entrega futura.
+- [x] Definir role/permissão para aprovar transferência.
 
 ## Objetivo
 
@@ -146,12 +146,12 @@ solicitado_em, aprovado_em
 
 ## Critérios de aceite
 
-- [ ] Solicitação de transferência cria linha em `transferencias_estoque` com status `solicitada`.
-- [ ] Não é possível transferir entre produtos diferentes.
-- [ ] Não é possível transferir mais do que `origem.q_reserva`.
-- [ ] Aprovação atualiza saldos da origem e destino conforme regra acima.
-- [ ] Movimentos de saída e entrada ficam registrados em `estoque_movimentos_projeto_item`.
-- [ ] View mostra origem/destino por projeto, orçamento e cliente, sem duplicar essas chaves na tabela de transferência.
+- [x] Solicitação de transferência cria linha em `transferencias_estoque` com status `solicitada`.
+- [x] Não é possível transferir entre produtos diferentes.
+- [x] Não é possível transferir mais do que `origem.q_reserva`.
+- [x] Aprovação atualiza saldos da origem e destino conforme regra acima.
+- [x] Movimentos de saída e entrada ficam registrados em `estoque_movimentos_projeto_item`.
+- [x] View mostra origem/destino por projeto, orçamento e cliente, sem duplicar essas chaves na tabela de transferência.
 
 ## Realizado
 
@@ -166,5 +166,5 @@ solicitado_em, aprovado_em
 
 - [x] Depende da SPEC-010 implementada — SPEC-010 aplicada e endurecida (`20260707_023`).
 - [x] Definir role de aprovação — `admin`/`gerente`, ver "Realizado".
-- [ ] Definir notificação para Débora quando origem voltar para entrega futura.
-- [ ] Frontend/tela que consuma `vw_transferencias_estoque`.
+- [x] Definir notificação para Débora quando origem voltar para entrega futura.
+- [x] Frontend/tela que consuma `vw_transferencias_estoque`.

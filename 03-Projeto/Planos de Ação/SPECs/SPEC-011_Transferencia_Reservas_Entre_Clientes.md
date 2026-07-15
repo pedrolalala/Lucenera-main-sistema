@@ -13,20 +13,20 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Criar tabela `transferencias_estoque`
-- [ ] Criar RPC `solicitar_transferencia_estoque`
-- [ ] Criar RPC `aprovar_transferencia_estoque` (executada pela Vitória)
-- [ ] Criar RPC `cancelar_transferencia_estoque`
-- [ ] Criar view `vw_transferencias_estoque` para histórico e pendências
-- [ ] Atualizar `current/01_schema_full.sql`
-- [ ] Executar migration no Supabase SQL Editor
+- [x] Criar tabela `transferencias_estoque`
+- [x] Criar RPC `solicitar_transferencia_estoque`
+- [x] Criar RPC `aprovar_transferencia_estoque` (executada pela Vitória)
+- [x] Criar RPC `cancelar_transferencia_estoque`
+- [x] Criar view `vw_transferencias_estoque` para histórico e pendências
+- [x] Atualizar `current/01_schema_full.sql`
+- [x] Executar migration no Supabase SQL Editor
 
 ### Passos manuais do usuário
 
-- [ ] Executar migration no Supabase SQL Editor
-- [ ] Confirmar com Vitória o fluxo de aprovação (campo de observação, notificação por e-mail?)
-- [ ] Confirmar com Débora como quer receber o aviso de "material chegou — precisa re-reservar"
-- [ ] Definir quem tem permissão para aprovar (apenas Vitória, ou qualquer admin?)
+- [x] Executar migration no Supabase SQL Editor
+- [x] Confirmar com Vitória o fluxo de aprovação (campo de observação, notificação por e-mail?)
+- [x] Confirmar com Débora como quer receber o aviso de "material chegou — precisa re-reservar"
+- [x] Definir quem tem permissão para aprovar (apenas Vitória, ou qualquer admin?)
 
 ## Objetivo
 
@@ -243,16 +243,16 @@ ORDER BY t.solicitado_em DESC;
 
 ### Critérios de aceite
 
-- [ ] Solicitação de transferência cria linha em `transferencias_estoque` com status `'solicitada'`
-- [ ] Tentativa de transferir mais do que a reserva disponível retorna erro claro
-- [ ] Aprovação cria nova `estoque_reservas` para o destino e reduz/fecha a de origem
-- [ ] `estoque_itens.quantidade_reservada` permanece igual antes e depois da transferência
-- [ ] `vw_transferencias_estoque` mostra produto, de quem tirou, para quem foi, quem aprovou
-- [ ] Histórico dos últimos 3+ meses acessível para consulta
+- [x] Solicitação de transferência cria linha em `transferencias_estoque` com status `'solicitada'`
+- [x] Tentativa de transferir mais do que a reserva disponível retorna erro claro
+- [x] Aprovação cria nova `estoque_reservas` para o destino e reduz/fecha a de origem
+- [x] `estoque_itens.quantidade_reservada` permanece igual antes e depois da transferência
+- [x] `vw_transferencias_estoque` mostra produto, de quem tirou, para quem foi, quem aprovou
+- [x] Histórico dos últimos 3+ meses acessível para consulta
 
 ## Pendências
 
-- [ ] Depende de SPEC-010 (tabela `estoque_reservas`) estar implementada antes.
-- [ ] Definir com Pedro/Vitória quem tem permissão de aprovar transferências (role específico?).
-- [ ] Definir notificação para Débora quando transferência é aprovada (e-mail? notificação no sistema?).
-- [ ] Regra de devolução mencionada por Filippo ao final da reunião — será SPEC-013 após esta estar funcionando.
+- [x] Depende de SPEC-010 (tabela `estoque_reservas`) estar implementada antes.
+- [x] Definir com Pedro/Vitória quem tem permissão de aprovar transferências (role específico?).
+- [x] Definir notificação para Débora quando transferência é aprovada (e-mail? notificação no sistema?).
+- [x] Regra de devolução mencionada por Filippo ao final da reunião — será SPEC-013 após esta estar funcionando.

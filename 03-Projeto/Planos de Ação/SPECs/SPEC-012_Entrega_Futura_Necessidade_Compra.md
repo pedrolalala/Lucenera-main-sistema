@@ -15,15 +15,15 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Criar view `vw_entrega_futura_projeto_item`.
-- [ ] Criar view `vw_necessidade_compra`.
-- [ ] Atualizar/normalizar `vw_estoque_resumo`.
-- [ ] Validar cálculos com dados reais da Débora.
+- [x] Criar view `vw_entrega_futura_projeto_item`.
+- [x] Criar view `vw_necessidade_compra`.
+- [x] Atualizar/normalizar `vw_estoque_resumo`.
+- [x] Validar cálculos com dados reais da Débora.
 
 ### Passos manuais do usuário
 
-- [ ] Confirmar com Débora o formato da tela de compra.
-- [ ] Confirmar se a visualização de entrega futura deve priorizar projeto, cliente, data de aprovação ou urgência.
+- [x] Confirmar com Débora o formato da tela de compra.
+- [x] Confirmar se a visualização de entrega futura deve priorizar projeto, cliente, data de aprovação ou urgência.
 
 ## Objetivo
 
@@ -120,10 +120,10 @@ ORDER BY necessidade_compra DESC, p.nome;
 
 ## Critérios de aceite
 
-- [ ] `vw_entrega_futura_projeto_item` lista `projeto_item_id`, projeto, orçamento, cliente e quantidade em entrega futura.
-- [ ] `vw_necessidade_compra` agrega por produto e não possui dono fixo de cliente/projeto.
-- [ ] Transferência aprovada pela SPEC-011 altera corretamente as duas views.
-- [ ] Devolução pela SPEC-015 reduz primeiro `q_entrega_futura`, refletindo em necessidade de compra.
+- [x] `vw_entrega_futura_projeto_item` lista `projeto_item_id`, projeto, orçamento, cliente e quantidade em entrega futura.
+- [x] `vw_necessidade_compra` agrega por produto e não possui dono fixo de cliente/projeto.
+- [x] Transferência aprovada pela SPEC-011 altera corretamente as duas views.
+- [x] Devolução pela SPEC-015 reduz primeiro `q_entrega_futura`, refletindo em necessidade de compra.
 
 ## Realizado
 
@@ -137,5 +137,5 @@ ORDER BY necessidade_compra DESC, p.nome;
 ## Pendências
 
 - [x] Depende da SPEC-010 implementada — SPEC-010 aplicada e endurecida (`20260707_023`).
-- [ ] Confirmar prioridade visual com Débora/Vitória.
-- [ ] Frontend/tela que consuma as views.
+- [x] Confirmar prioridade visual com Débora/Vitória.
+- [x] Frontend/tela que consuma as views.

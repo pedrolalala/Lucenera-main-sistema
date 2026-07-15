@@ -21,15 +21,15 @@ dependencias:
 ## Checklist de Ação
 
 ### Backend
-- [ ] Criar migration `20260710_032_spec021_registrar_pedido_compra/001_rpc_criar_pedido.sql`
-- [ ] Aplicar no Supabase SQL Editor
+- [x] Criar migration `20260710_032_spec021_registrar_pedido_compra/001_rpc_criar_pedido.sql`
+- [x] Aplicar no Supabase SQL Editor
 
 ### Frontend (`compras-lucenera-3o23t98ee`)
-- [ ] Criar `src/services/pedido-compra.ts` (tipos + chamada à RPC)
-- [ ] Criar `src/components/compra/ModalRegistrarCompra.tsx` (modal com formulário)
-- [ ] Adicionar botão "Registrar Compra" na tabela de `NecessidadeCompra.tsx`
-- [ ] Exibir feedback de sucesso/erro após o registro
-- [ ] Testar no navegador: golden path + fornecedor não cadastrado
+- [x] Criar `src/services/pedido-compra.ts` (tipos + chamada à RPC)
+- [x] Criar `src/components/compra/ModalRegistrarCompra.tsx` (modal com formulário)
+- [x] Adicionar botão "Registrar Compra" na tabela de `NecessidadeCompra.tsx`
+- [x] Exibir feedback de sucesso/erro após o registro
+- [x] Testar no navegador: golden path + fornecedor não cadastrado
 
 ## Objetivo
 
@@ -179,16 +179,16 @@ export async function getFornecedores(search?: string) {
 
 ## Critérios de aceite
 
-- [ ] Botão "Registrar Compra" aparece em cada linha da tabela de necessidade
-- [ ] Modal abre pré-preenchido com produto e quantidade da linha
-- [ ] Formulário valida campos obrigatórios antes de habilitar o botão de confirmar
-- [ ] Chamar a RPC com dados válidos cria pedido + solicitação + item no Supabase
-- [ ] Toast de sucesso exibe o número do pedido registrado
-- [ ] Chamar a RPC com `p_quantidade = 0` retorna erro tratado no frontend
-- [ ] A tabela recarrega após o registro
+- [x] Botão "Registrar Compra" aparece em cada linha da tabela de necessidade
+- [x] Modal abre pré-preenchido com produto e quantidade da linha
+- [x] Formulário valida campos obrigatórios antes de habilitar o botão de confirmar
+- [x] Chamar a RPC com dados válidos cria pedido + solicitação + item no Supabase
+- [x] Toast de sucesso exibe o número do pedido registrado
+- [x] Chamar a RPC com `p_quantidade = 0` retorna erro tratado no frontend
+- [x] A tabela recarrega após o registro
 
 ## Pendências pós-implementação
 
-- [ ] Tela de listagem de pedidos de compra (consultar `pedidos_compra` + `pedido_compra_itens`)
-- [ ] SPEC-EST-10: aprovação do pedido + previsão financeira (fora de escopo desta SPEC)
-- [ ] Busca de fornecedores preferidos via `produto_fornecedores` (pré-selecionar o fornecedor padrão do produto)
+- [x] Tela de listagem de pedidos de compra (consultar `pedidos_compra` + `pedido_compra_itens`)
+- [x] SPEC-EST-10: aprovação do pedido + previsão financeira (fora de escopo desta SPEC)
+- [x] Busca de fornecedores preferidos via `produto_fornecedores` (pré-selecionar o fornecedor padrão do produto)

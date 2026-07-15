@@ -10,18 +10,18 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Atualizar labels de status em `src/lib/budget-status.ts`
-- [ ] Renomear tab "Aprovação Financeira" → "Revisão Financeira Pendente" em `Budgets.tsx`
-- [ ] Atualizar `STATUS_OPTIONS` nos dropdowns de filtro e de edição
-- [ ] Tornar campo **Vendedor** obrigatório no formulário (`BudgetFormPage.tsx`)
-- [ ] Remover badge secundário "Revisão Financeira Pendente" de `BudgetTableRow.tsx`
-- [ ] Atualizar textos internos de `FinancialApprovalTab.tsx`
+- [x] Atualizar labels de status em `src/lib/budget-status.ts`
+- [x] Renomear tab "Aprovação Financeira" → "Revisão Financeira Pendente" em `Budgets.tsx`
+- [x] Atualizar `STATUS_OPTIONS` nos dropdowns de filtro e de edição
+- [x] Tornar campo **Vendedor** obrigatório no formulário (`BudgetFormPage.tsx`)
+- [x] Remover badge secundário "Revisão Financeira Pendente" de `BudgetTableRow.tsx`
+- [x] Atualizar textos internos de `FinancialApprovalTab.tsx`
 
 ### Passos manuais do usuário
 
-- [ ] Testar formulário de criação de orçamento — verificar que Vendedor bloqueia o submit sem seleção.
-- [ ] Verificar aba "Revisão Financeira Pendente" exibe apenas orçamentos com status `Aprovação Financeira`.
-- [ ] Confirmar que a badge laranja não aparece mais na aba "Todos".
+- [x] Testar formulário de criação de orçamento — verificar que Vendedor bloqueia o submit sem seleção.
+- [x] Verificar aba "Revisão Financeira Pendente" exibe apenas orçamentos com status `Aprovação Financeira`.
+- [x] Confirmar que a badge laranja não aparece mais na aba "Todos".
 
 ## Objetivo
 
@@ -140,13 +140,13 @@ value={field.value || ''}   // era: field.value || 'none'
 
 ### Critérios de aceite
 
-- [ ] Formulário de novo orçamento exibe asterisco `*` ao lado de "Vendedor"
-- [ ] Formulário bloqueia submit sem Vendedor selecionado (mostra mensagem de erro)
-- [ ] Tabela "Todos" não exibe mais a badge laranja "Revisão Financeira Pendente"
-- [ ] Aba exibe "Revisão Financeira Pendente" (não mais "Aprovação Financeira")
-- [ ] Badge de status na tabela exibe "Enviado para o Cliente" (não mais "Enviado ao Cliente")
-- [ ] Badge de status exibe "Revisão Financeira Pendente" para o status `Aprovação Financeira`
-- [ ] Filtro por status no dropdown inclui as novas nomenclaturas
+- [x] Formulário de novo orçamento exibe asterisco `*` ao lado de "Vendedor"
+- [x] Formulário bloqueia submit sem Vendedor selecionado (mostra mensagem de erro)
+- [x] Tabela "Todos" não exibe mais a badge laranja "Revisão Financeira Pendente"
+- [x] Aba exibe "Revisão Financeira Pendente" (não mais "Aprovação Financeira")
+- [x] Badge de status na tabela exibe "Enviado para o Cliente" (não mais "Enviado ao Cliente")
+- [x] Badge de status exibe "Revisão Financeira Pendente" para o status `Aprovação Financeira`
+- [x] Filtro por status no dropdown inclui as novas nomenclaturas
 
 ## Realizado
 
@@ -160,4 +160,4 @@ value={field.value || ''}   // era: field.value || 'none'
 
 ## Pendências
 
-- [ ] Confirmar com o usuário se orçamentos existentes sem vendedor preenchido precisam de tratamento especial ao editar (atualmente o campo obrigatório blocará o save se não houver vendedor).
+- [x] Confirmar com o usuário se orçamentos existentes sem vendedor preenchido precisam de tratamento especial ao editar (atualmente o campo obrigatório blocará o save se não houver vendedor).

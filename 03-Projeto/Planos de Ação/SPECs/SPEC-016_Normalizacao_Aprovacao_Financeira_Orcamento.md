@@ -23,13 +23,13 @@ sistemas_envolvidos:
 - [x] Remover tolerância operacional a `aprovado_cliente`, `aprovado` e `aprovado_financeiro` como entrada de aprovação financeira.
 - [x] Atualizar triggers/funções de normalização de status para não mascararem erro de fluxo.
 - [x] Atualizar o frontend de Orçamentos para chamar só a RPC oficial na etapa financeira.
-- [ ] Atualizar `supabase/db/current/` depois da migration aplicada.
+- [x] Atualizar `supabase/db/current/` depois da migration aplicada.
 
 ### Passos manuais do usuário
 
 - [x] Executar a migration no Supabase real após revisão.
-- [ ] Homologar um orçamento real no fluxo completo: criar/enviar ao cliente, cliente aprovar, financeiro aprovar.
-- [ ] Confirmar com Financeiro se o status visível final deve permanecer literalmente `Orçamento Aprovado`.
+- [x] Homologar um orçamento real no fluxo completo: criar/enviar ao cliente, cliente aprovar, financeiro aprovar.
+- [x] Confirmar com Financeiro se o status visível final deve permanecer literalmente `Orçamento Aprovado`.
 
 ## Objetivo
 
@@ -226,5 +226,5 @@ Regras sugeridas:
 
 ## Pendências
 
-- [ ] Reextrair/atualizar `supabase/db/current/` com as novas funções/view sem sobrescrever alterações locais pendentes.
-- [ ] Homologar aprovação financeira real de um orçamento em `Aprovação Financeira`.
+- [x] Reextrair/atualizar `supabase/db/current/` com as novas funções/view sem sobrescrever alterações locais pendentes.
+- [x] Homologar aprovação financeira real de um orçamento em `Aprovação Financeira`.

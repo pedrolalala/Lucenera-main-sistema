@@ -8,7 +8,7 @@ sistemas_envolvidos:
 
 # SPEC-030 — Fix filtro tipo fornecedor + Pedido em Lote por Fornecedor + Busca Fuzzy (compras)
 
-Esta SPEC tem duas partes. A **Parte 1** (abaixo) é o fix original, já implementado e aguardando só teste manual/publish. A **Parte 2** (mais abaixo, seção "Parte 2") é uma expansão de escopo pedida por Pedro em 2026-07-16: consolidar Necessidade de Compra por fornecedor, criar um fluxo de "Pedido em Lote" e tornar a busca de fornecedor tolerante a erro de digitação. A Parte 2 ainda **não foi implementada** — é só planejamento nesta etapa.
+Esta SPEC tem duas partes. A **Parte 1** (abaixo) é o fix original, já implementado e aguardando só teste manual/publish. A **Parte 2** (mais abaixo, seção "Parte 2") é uma expansão de escopo pedida por Pedro em 2026-07-16: consolidar Necessidade de Compra por fornecedor, criar um fluxo de "Pedido em Lote" e tornar a busca de fornecedor tolerante a erro de digitação. A Parte 2 já está **implementada em código** (migrations em rascunho + frontend, ver "Realizado (Parte 2)") — falta aplicar as migrations no Supabase real, fazer o backfill de `marcas.fornecedor_id`, testar manualmente e publicar (ver "Passos manuais do usuário (Parte 2)").
 
 ## Parte 1 — Fix filtro de tipo (já implementado)
 
@@ -107,23 +107,34 @@ A função duplicada em `services/compras.ts` deve ser removida (é código mort
 
 ### Checklist de Ação (Parte 2)
 
-- [ ] Reextrair o snapshot `supabase/db/current/` (está desatualizado desde 2026-07-07 — não reflete `pedidos_compra`, `pedido_compra_itens`, `produto_fornecedores`, `produtos.fornecedor_principal_id`/`marca_id` nem as reescritas de `vw_necessidade_compra*`). Pode rodar em paralelo, não bloqueia o resto.
-- [ ] Migration: estender `vw_necessidade_compra` (ou criar `vw_necessidade_compra_fornecedor`) com `fornecedor_id` e `fornecedor_nome`, via `LEFT JOIN produtos.fornecedor_principal_id -> contatos.id`.
-- [ ] Migration: nova RPC `criar_pedido_compra_lote` recebendo `fornecedor_id` único + array de itens (`produto_id, quantidade, custo_unitario`), criando 1 `pedidos_compra` + N `solicitacoes_compra` + N `pedido_compra_itens` numa transação — generalização da RPC singular `criar_pedido_compra_de_necessidade` (`20260710_032`).
-- [ ] Migration: novo índice `idx_contatos_nome_unaccent_trgm` (`gin (unaccent(lower(nome)) gin_trgm_ops)`) em `contatos`.
-- [ ] Frontend: corrigir `getFornecedores()` (`services/pedido-compra.ts`) para busca fuzzy — `similarity(unaccent(lower(nome)), unaccent(lower($termo))) > 0.3`, mantendo o filtro `contato_tipos.tipo = 'fornecedor'` já corrigido na Parte 1.
-- [ ] Frontend: `NecessidadeCompra.tsx` — adicionar coluna/filtro "Fornecedor" e seleção múltipla de linhas restrita a um único fornecedor por vez.
-- [ ] Frontend: modal "Pedido em Lote" — lista os itens selecionados do fornecedor filtrado, quantidade/custo editável por linha, um único número de pedido, chama a nova RPC.
-- [ ] Rodar `oxlint`/`oxfmt`/`vite build` do sistema após a implementação.
-- [ ] Testar manualmente e publicar via Skip (mesmo gate da Parte 1).
+- [ ] Reextrair o snapshot `supabase/db/current/` (está desatualizado desde 2026-07-07 — não reflete `pedidos_compra`, `pedido_compra_itens`, `produto_fornecedores`, `produtos.fornecedor_principal_id`/`marca_id` nem as reescritas de `vw_necessidade_compra*`). Pode rodar em paralelo, não bloqueia o resto. **Não feito nesta sessão** (fora do escopo de implementação de código; requer acesso ao Supabase real, que o agente implementador não aciona).
+- [x] Migration (rascunho, não aplicada): `ALTER TABLE marcas ADD COLUMN fornecedor_id uuid REFERENCES contatos(id)` — vínculo explícito marca -> fornecedor (novo, não existe hoje).
+- [x] Migration (rascunho, não aplicada): estende `vw_necessidade_compra` (mesmo nome, `CREATE OR REPLACE VIEW`) com `marca_id`, `marca_nome`, `fornecedor_id` e `fornecedor_nome`, via `LEFT JOIN produtos.marca_id -> marcas` + `COALESCE(produtos.fornecedor_principal_id, marcas.fornecedor_id)` resolvido para nome via `contatos`. Base usada foi a versão real e mais recente da view (migration `20260713_036`, que já inclui `preco_custo` — não a versão desatualizada de `db/current/05_views.sql`).
+- [x] Migration (rascunho, não aplicada): nova RPC `criar_pedido_compra_lote` recebendo `fornecedor_id` único + array de itens (`produto_id, quantidade, custo_unitario`), criando 1 `pedidos_compra` + N `solicitacoes_compra` + N `pedido_compra_itens` numa transação — generalização da RPC singular `criar_pedido_compra_de_necessidade` (`20260710_032`).
+- [x] Migration (rascunho, não aplicada): novo índice `idx_contatos_nome_unaccent_trgm` (`gin (unaccent(lower(nome)) extensions.gin_trgm_ops)`) em `contatos`.
+- [x] Frontend: corrigido `getFornecedores()` (`services/pedido-compra.ts`) para busca fuzzy via nova RPC auxiliar `buscar_fornecedores_fuzzy` (`similarity(unaccent(lower(nome)), unaccent(lower($termo))) > 0.3`), mantendo o filtro `contato_tipos.tipo = 'fornecedor'` já corrigido na Parte 1.
+- [x] Frontend: `NecessidadeCompra.tsx` — adicionado filtro "Marca" (dropdown derivado de `rows`), coluna "Marca" na tabela e seleção múltipla (checkbox) de linhas restrita a um único fornecedor resolvido por vez.
+- [x] Frontend: modal "Pedido em Lote" (`components/compra/ModalPedidoLote.tsx`) — lista os itens selecionados, quantidade/custo editável por linha, um único número de pedido, chama a nova RPC `criar_pedido_compra_lote` via `services/pedido-compra.ts`.
+- [x] Rodado `oxlint`/`oxfmt`/`vite build` do sistema após a implementação — ver Realizado (Parte 2).
+- [ ] Testar manualmente e publicar via Skip (mesmo gate da Parte 1) — pendente do usuário (ver Passos manuais).
+
+### Passos manuais do usuário (Parte 2)
+
+- [ ] Aplicar as 5 migrations em `supabase/db/migrations/20260716_049_spec030_pedido_lote_marca_fornecedor/` no Supabase real (na ordem `001` a `005`) — este agente redige `.sql`, nunca aplica.
+- [ ] Fazer o backfill de `marcas.fornecedor_id` (mapear cada marca cadastrada ao fornecedor/contato correspondente) — sem isso, nenhum item aparece selecionável para Pedido em Lote na tela.
+- [ ] Reextrair o snapshot `supabase/db/current/` depois de aplicar as migrations, para não deixar o próximo agente consultando um schema desatualizado.
+- [ ] Testar manualmente no navegador (golden path): filtrar Necessidade de Compra por uma marca com fornecedor já mapeado, marcar 2+ itens, abrir "Fechar pedido em lote", editar quantidade/custo e confirmar — checar que 1 `pedidos_compra` + N `pedido_compra_itens` foram criados. Testar também o caso de bloqueio (tentar marcar item de fornecedor diferente) e a busca fuzzy de fornecedor (digitar nome com erro de digitação/sem acento).
+- [ ] Publicar a mudança via Skip e repetir o teste no app publicado (mesmo bloqueio de OAuth do MCP `skip` documentado na Parte 1, se ainda não resolvido).
 
 ### Objetivo (Parte 2)
 
-Hoje o registro de pedido de compra é 1 produto + 1 fornecedor por chamada (RPC `criar_pedido_compra_de_necessidade`), forçando o usuário a repetir o modal manualmente para cada item quando quer fechar várias compras do mesmo fornecedor de uma vez (ex.: todos os produtos da Stella). Além disso, a busca de fornecedor (`getFornecedores`) usa `ilike` puro e não tolera erro de digitação/variação de nome. Esta parte da SPEC cobre: (1) consolidar/filtrar a Necessidade de Compra por fornecedor, (2) criar um fluxo de "Pedido em Lote" que gera um único pedido por fornecedor com múltiplos itens numa só operação, e (3) tornar a busca de fornecedor tolerante a typo/variação via `pg_trgm` + `unaccent`.
+Hoje o registro de pedido de compra é 1 produto + 1 fornecedor por chamada (RPC `criar_pedido_compra_de_necessidade`), forçando o usuário a repetir o modal manualmente para cada item quando quer fechar várias compras de uma vez (ex.: todos os produtos da marca Stella). Além disso, a busca de fornecedor (`getFornecedores`) usa `ilike` puro e não tolera erro de digitação/variação de nome. Esta parte da SPEC cobre: (1) consolidar/filtrar a Necessidade de Compra por **marca** (não por fornecedor direto — ver Decisões), (2) criar um fluxo de "Pedido em Lote" que gera um único pedido por fornecedor com múltiplos itens numa só operação, e (3) tornar a busca de fornecedor tolerante a typo/variação via `pg_trgm` + `unaccent`.
 
 ### Decisões aprovadas (Parte 2)
 
-- **Fonte do fornecedor por produto**: `produtos.fornecedor_principal_id` (FK para `contatos.id`) — 1 fornecedor principal por produto, campo que já existe hoje. Não usar `produto_fornecedores` (que suporta múltiplos fornecedores por produto) nesta primeira versão, para manter a view e o fluxo simples. O contato apontado por `fornecedor_principal_id` deve continuar validado como `contato_tipos.tipo = 'fornecedor'` — mesma fonte de verdade já estabelecida na Parte 1 desta SPEC.
+- **Filtro principal passa a ser por Marca, não por fornecedor direto** (mudança de decisão em 2026-07-16, a pedido de Pedro): a tela filtra por `produtos.marca_id -> marcas.nome` — é o relacionamento que já existe e já é exibido/buscável hoje em `vw_estoque_produtos`. Pedro confirmou que, na prática, **marca equivale a fornecedor** (ex.: marca Stella = fornecedor Stella).
+- **Vínculo marca -> fornecedor real (novo)**: hoje `public.marcas` não tem nenhuma coluna ligando a um fornecedor/contato — só `id, nome, ativo, created_at, codigo_legado`. Para o Pedido em Lote precisar de um `fornecedor_id` real (a tabela `pedidos_compra.fornecedor_id` é `NOT NULL REFERENCES contatos(id)`), é necessária uma migration nova: `ALTER TABLE marcas ADD COLUMN fornecedor_id uuid REFERENCES contatos(id)`. Casar por nome (`contatos.nome` = `marcas.nome`) não é confiável (é exatamente o tipo de inconsistência de nome que a Parte 1 desta SPEC já teve que corrigir) — precisa ser um FK explícito, preenchido manualmente por Pedro/Filippo (ver Pendências).
+- **Resolução do fornecedor de um produto passa a ser em cascata**, seguindo o mesmo padrão já usado em `produtos.prazo_entrega_dias`/`marcas.prazo_entrega_dias` (SPEC-026: produto sobrescreve, marca é o fallback): `COALESCE(produtos.fornecedor_principal_id, marcas.fornecedor_id)` — um produto pode ter um fornecedor específico diferente do fornecedor padrão da marca (exceção), mas na maioria dos casos herda da marca. `produtos.fornecedor_principal_id` continua existindo e sendo validado como `contato_tipos.tipo = 'fornecedor'`, só deixa de ser a única fonte.
 - **Modelo do lote**: 1 pedido = 1 fornecedor, fixo. O comprador filtra a Necessidade de Compra por um fornecedor, seleciona os itens daquele fornecedor e fecha 1 pedido. Não haverá split automático de seleção multi-fornecedor em sub-pedidos nesta versão.
 - **Produto sem fornecedor cadastrado**: fica **fora do lote**. É pré-requisito ter `fornecedor_principal_id` preenchido para o item entrar em um Pedido em Lote — sem fornecedor cadastrado, a compra desse item continua pelo fluxo atual (1 produto por vez, escolhendo o fornecedor manualmente no modal).
 - Extensões `pg_trgm` e `unaccent` já estão habilitadas no banco (evidência: índice `idx_contatos_nome_trgm` e uso de `unaccent()` em `fn_sync_equipe_por_responsavel()`) — não é necessário `CREATE EXTENSION`, só o novo índice expression e a nova query.
@@ -134,20 +145,21 @@ Hoje o registro de pedido de compra é 1 produto + 1 fornecedor por chamada (RPC
 
 - `public.pedidos_compra` (`supabase/db/migrations/20260710_031_spec020_operacionalizacao_compras/004_pedidos_compra.sql`): `fornecedor_id uuid NOT NULL REFERENCES contatos(id)`, `numero`, `status`, `valor_total`. Já modela "1 pedido = 1 fornecedor" — não precisa de alteração de schema.
 - `public.pedido_compra_itens`: `pedido_id, solicitacao_id, produto_id, quantidade, custo_unitario, qtd_recebida`. Já suporta N linhas por `pedido_id` — não precisa de alteração de schema.
-- `public.produtos.fornecedor_principal_id` (FK `contatos.id`, `01_schema_full.sql:11312`) — fonte do fornecedor por produto (ver Decisões).
-- `vw_necessidade_compra` (definição real e atual em `supabase/db/migrations/20260713_035_fix_necessidade_compra_fonte_estoque_itens/001_fix_vw_necessidade_compra.sql`, não a de `05_views.sql` que está desatualizada): hoje não tem coluna de fornecedor — precisa do `LEFT JOIN` novo.
+- `public.produtos.fornecedor_principal_id` (FK `contatos.id`, `01_schema_full.sql:11312`) e `public.produtos.marca_id` (FK `marcas.id`, `01_schema_full.sql:11320`) — as duas pontas da resolução em cascata (ver Decisões).
+- `public.marcas` (`01_schema_full.sql:5218`): hoje só `id, nome, ativo, created_at, codigo_legado`. Precisa da coluna nova `fornecedor_id` (ver Decisões e Checklist).
+- `vw_necessidade_compra` (definição real e atual em `supabase/db/migrations/20260713_035_fix_necessidade_compra_fonte_estoque_itens/001_fix_vw_necessidade_compra.sql`, não a de `05_views.sql` que está desatualizada): hoje não tem coluna de marca nem de fornecedor — precisa do `LEFT JOIN` novo com `produtos.marca_id -> marcas` e `COALESCE(produtos.fornecedor_principal_id, marcas.fornecedor_id)`.
 - `vw_necessidade_compra_detalhe` (`20260715_043_necessidade_compra_dias_em_aberto/001_dias_em_aberto.sql`, SPEC-022/026): agrupa por projeto/cliente, não por fornecedor — não é a base certa para o agrupamento por fornecedor, mas pode ganhar a mesma coluna de fornecedor por consistência.
 - `criar_pedido_compra_de_necessidade` (`20260710_032_spec021_registrar_pedido_compra/001_rpc_criar_pedido.sql`): RPC singular existente, modelo de referência para a nova RPC em lote — mesma lógica transacional, generalizada para array de itens.
 - `contato_tipos` (`tipo = 'fornecedor'`): continua a fonte de verdade de "quem é fornecedor", já usada na Parte 1.
 
 #### Fluxo proposto
 
-1. `NecessidadeCompra.tsx` passa a exibir a coluna "Fornecedor" (vinda do novo join) e um filtro por fornecedor.
-2. O comprador filtra por um fornecedor (ex.: Stella), vê só os itens em déficit daquele fornecedor.
-3. Seleção múltipla (checkbox) das linhas desejadas — todas do mesmo fornecedor, pela própria natureza do filtro.
-4. Botão "Fechar pedido em lote" abre um modal listando os itens selecionados, com quantidade/custo editável por linha e um único número de pedido.
+1. `NecessidadeCompra.tsx` passa a exibir a coluna "Marca" e um filtro (dropdown) por marca, vindos do novo join com `produtos.marca_id -> marcas.nome`.
+2. O comprador filtra por uma marca (ex.: Stella), vê só os itens em déficit daquela marca.
+3. Seleção múltipla (checkbox) das linhas desejadas — todas da mesma marca, pela própria natureza do filtro.
+4. Botão "Fechar pedido em lote" abre um modal listando os itens selecionados, com quantidade/custo editável por linha e um único número de pedido. O fornecedor do pedido é resolvido automaticamente por `COALESCE(produtos.fornecedor_principal_id, marcas.fornecedor_id)` — se os itens selecionados resolverem para fornecedores diferentes (produto com override específico divergente do fornecedor da marca), a UI deve avisar em vez de gerar um pedido com fornecedor errado (ver Critério de aceite).
 5. Confirmar chama a nova RPC `criar_pedido_compra_lote`, que cria 1 `pedidos_compra` + N `solicitacoes_compra` + N `pedido_compra_itens` numa transação.
-6. Itens sem `fornecedor_principal_id` preenchido não aparecem como selecionáveis para lote (ver Decisões) — continuam compráveis individualmente pelo fluxo atual.
+6. Itens cuja marca não tem `fornecedor_id` preenchido (e que também não têm `fornecedor_principal_id` próprio) não aparecem como selecionáveis para lote (ver Decisões) — continuam compráveis individualmente pelo fluxo atual, escolhendo o fornecedor manualmente no modal.
 
 #### Requisitos técnicos de busca (fuzzy/tolerante a erro de digitação)
 
@@ -158,14 +170,39 @@ Hoje o registro de pedido de compra é 1 produto + 1 fornecedor por chamada (RPC
 
 ### Critério de aceite (Parte 2)
 
-- Filtrar a Necessidade de Compra por um fornecedor mostra só os itens cujo `fornecedor_principal_id` aponta para aquele fornecedor.
-- Selecionar N itens do mesmo fornecedor e confirmar "Pedido em Lote" cria exatamente 1 `pedidos_compra` com N `pedido_compra_itens`, em uma única transação (tudo ou nada).
-- Itens sem fornecedor cadastrado não podem ser incluídos em um pedido em lote.
+- Filtrar a Necessidade de Compra por uma marca mostra só os itens cujo `produtos.marca_id` aponta para aquela marca.
+- Selecionar N itens da mesma marca e confirmar "Pedido em Lote" cria exatamente 1 `pedidos_compra` (com `fornecedor_id` resolvido via `COALESCE(produtos.fornecedor_principal_id, marcas.fornecedor_id)`) com N `pedido_compra_itens`, em uma única transação (tudo ou nada).
+- Se os itens selecionados resolverem para mais de um fornecedor diferente (produto com override específico), a UI bloqueia o fechamento do lote com um aviso claro em vez de silenciosamente escolher um dos dois.
+- Itens cuja marca (e produto) não têm fornecedor resolvido não podem ser incluídos em um pedido em lote.
 - Buscar "Stela" encontra fornecedores cadastrados como "Stella" (e variações de acento/caixa), respeitando o filtro de `contato_tipos.tipo = 'fornecedor'` já existente.
 - Lint e `vite build` passam sem novo erro.
 
 ### Pendências (Parte 2)
 
+- [ ] **Backfill de `marcas.fornecedor_id`**: é uma decisão de dado, não de código — Pedro/Filippo precisam mapear qual fornecedor (contato) corresponde a cada marca já cadastrada. Sem isso preenchido, nenhum item fica selecionável para Pedido em Lote.
 - [ ] Definir o threshold de `similarity()` com dados reais de fornecedores (0.3 é ponto de partida, não validado com nomes reais).
 - [ ] Decidir se a busca fuzzy deve considerar também `nome_empresa` (nome fantasia), não só `nome` — hoje o rascunho cobre só `nome`.
 - [ ] Reextrair `supabase/db/current/` (desatualizado desde 2026-07-07) — não bloqueia esta SPEC, mas deve ser feito para não confundir o próximo agente que consultar o snapshot em vez das migrations reais.
+- [ ] Investigar o "cabeçalho duplicado" relatado por Pedro em 2026-07-16 — não reproduzido por leitura de código (`AppHeader`/`AppNav` são componentes distintos, cada um renderizado uma única vez em `App.tsx`/`ProtectedRoute.tsx`). Pode ser sintoma do app publicado no Skip estar desatualizado em relação ao repositório (mesma causa do bloqueio de publish da Parte 1). Aguardando descrição/print de Pedro para diagnosticar.
+
+### Realizado (Parte 2)
+
+#### 2026-07-16
+
+- **Migrations (rascunho, `supabase/db/migrations/20260716_049_spec030_pedido_lote_marca_fornecedor/`, NÃO aplicadas no Supabase real)**:
+  - `001_marcas_fornecedor_id.sql`: `ALTER TABLE marcas ADD COLUMN IF NOT EXISTS fornecedor_id uuid REFERENCES contatos(id)` (nullable, com índice) + comentário deixando explícito que o backfill é manual/futuro.
+  - `002_vw_necessidade_compra_marca_fornecedor.sql`: `CREATE OR REPLACE VIEW vw_necessidade_compra` com `marca_id`, `marca_nome`, `fornecedor_id`, `fornecedor_nome` adicionados via `LEFT JOIN marcas` + `LEFT JOIN contatos` sobre `COALESCE(produtos.fornecedor_principal_id, marcas.fornecedor_id)`. Base real usada: a definição da migration `20260713_036` (última a reescrever a view, inclui `preco_custo`), não a de `20260713_035` nem a desatualizada de `db/current/05_views.sql` — todas as colunas pré-existentes (SPEC-013/022/026/036) foram preservadas, `security_invoker = true` e `GRANT SELECT` mantidos.
+  - `003_rpc_criar_pedido_compra_lote.sql`: nova RPC `criar_pedido_compra_lote(p_fornecedor_id uuid, p_itens jsonb, p_numero text, p_data_prevista_entrega date, p_condicoes_pagamento text, p_observacao text)`, generalização transacional de `criar_pedido_compra_de_necessidade` (`20260710_032`). Valida cabeçalho e cada item do array **antes** de criar qualquer registro; cria 1 `pedidos_compra` (status `enviado`, mesmo status inicial da RPC singular) + N `solicitacoes_compra` (`pedido_gerado`) + N `pedido_compra_itens`. Nenhuma exceção é capturada — qualquer erro reverte a transação inteira (comportamento padrão de função plpgsql).
+  - `004_idx_contatos_nome_unaccent_trgm.sql`: índice `gin (unaccent(lower(nome)) extensions.gin_trgm_ops)` em `contatos` — o op class foi qualificado com o schema `extensions` (em vez do `gin_trgm_ops` sem schema sugerido no plano) para bater com o padrão já usado por `idx_contatos_nome_trgm` no banco real, evidência de que a extensão `pg_trgm` está instalada nesse schema.
+  - `005_rpc_buscar_fornecedores_fuzzy.sql`: RPC auxiliar `buscar_fornecedores_fuzzy(p_termo text)` (`SECURITY INVOKER`, `SET search_path = public, extensions`) — necessária porque supabase-js não expõe `similarity()` em `.from().select()`. Sem termo, mantém o comportamento anterior (lista completa de fornecedores ativos, ordenada por nome); com termo, filtra por `similarity(unaccent(lower(nome)), unaccent(lower($termo))) > 0.3` e ordena por similaridade desc.
+- **Frontend (`04-Sistemas/compras-lucenera-3o23t98ee/src`)**:
+  - `services/pedido-compra.ts`: `getFornecedores()` agora chama `buscar_fornecedores_fuzzy` via `.rpc()` em vez de `ilike`; adicionados `ItemPedidoLote`, `CriarPedidoLoteInput`, `CriarPedidoLoteResult` e `criarPedidoCompraLote()`.
+  - `services/necessidade-compra.ts`: `NecessidadeCompraRow` estendido com `marca_id`, `marca_nome`, `fornecedor_id`, `fornecedor_nome` (a função `getNecessidadeCompra` já usava `select('*')`, então nenhuma outra mudança de query foi necessária).
+  - `pages/NecessidadeCompra.tsx`: adicionado filtro "Marca" (dropdown derivado de `rows`, sem query separada), coluna "Marca" na tabela, checkbox de seleção por linha (desabilitado quando `fornecedor_id` é nulo, com `title` explicando o motivo) e botão "Fechar pedido em lote" (aparece só quando há seleção). `toggleSelect()` bloqueia com toast destrutivo se o item selecionado resolver para um `fornecedor_id` diferente do já selecionado.
+  - `components/compra/ModalPedidoLote.tsx` (novo, seguindo o padrão visual/estrutural de `ModalRegistrarCompra.tsx`): lista os itens selecionados com quantidade/custo unitário editáveis por linha (pré-preenchidos com `necessidade_compra`/`preco_custo`), um único número de pedido, e chama `criarPedidoCompraLote`.
+- **Escolhas técnicas dentro do espaço já aprovado pela SPEC** (para confirmar com Pedro se necessário):
+  - Formato do array de itens da RPC: `jsonb` (array de `{produto_id, quantidade, custo_unitario}`), conforme sugerido na SPEC como opção mais simples — não foi criado tipo composto novo no schema.
+  - Foi necessária, sim, uma RPC auxiliar (`buscar_fornecedores_fuzzy`) para a busca fuzzy, pelo motivo já explicado (supabase-js não expõe `similarity()`).
+  - O op class do índice fuzzy foi qualificado como `extensions.gin_trgm_ops` (em vez de `gin_trgm_ops` puro) para seguir o padrão já existente no banco.
+- **Verificado**: `oxlint src` limpo (único warning é o pré-existente em `Cotacoes.tsx`, não relacionado); `vite build` limpo (únicos avisos são pré-existentes: classe Tailwind ambígua `duration-[800ms]` e aviso de chunk >500kB, ambos não relacionados a esta mudança); `oxfmt --check` reporta "Format issues" em ~113 arquivos do projeto, mas isso já ocorre **antes** desta mudança (confirmado via `git stash` — é uma condição pré-existente do repositório, provavelmente ligada a diferença de terminador de linha CRLF/LF no checkout Windows, não introduzida por esta implementação).
+- **Não feito nesta sessão** (fora do escopo de um agente implementador, ou dependente de decisão/dado do usuário): reextração do snapshot `supabase/db/current/`; aplicação real da migration no Supabase; backfill de `marcas.fornecedor_id`; teste manual no navegador; publicação via Skip.

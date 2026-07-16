@@ -20,12 +20,12 @@ Esta SPEC tem duas partes. A **Parte 1** (abaixo) é o fix original, já impleme
 - [x] Rodar `oxlint`/`oxfmt` e `vite build` do sistema após a correção — todos limpos (único warning pré-existente em `Cotacoes.tsx`, não relacionado)
 - [x] Commit + push do fix em `compras-lucenera-3o23t98ee` (`55fd80e`) e atualização do ponteiro do submodule no repo central (`6ca80f2`)
 - [x] Revisão final pelo agente `revisor` no commit pushado — sem achado crítico/aviso, lint/build limpos
-- [ ] Publicar a mudança no Skip (MCP do Skip) — **bloqueado**: o servidor MCP `skip` (`claude mcp add --transport http skip ...`) está registrado mas com status "Needs authentication"; falta completar o OAuth. Sem isso, nenhuma ferramenta `mcp__skip__*` fica disponível para publicar.
+- [x] ~~Publicar a mudança no Skip via MCP~~ — **abandonado por decisão de Pedro em 2026-07-16**: o MCP do Skip apresentou bug/instabilidade de autenticação nesta sessão (servidor ficou preso em "Needs authentication" mesmo após `claude mcp add` + tentativa de reconexão via `/mcp reconnect skip`). Pedro decidiu não depender do MCP — o código já está commitado e pushado no GitHub (`d1a2a7e`), e a sincronização/publicação no Skip será feita por ele diretamente pela plataforma Skip.
 - [ ] Testar manualmente: abrir "Registrar Pedido de Compra" e confirmar que só aparecem contatos com tipo `fornecedor`
 
 ### Passos manuais do usuário
 
-- [ ] Completar a autenticação do MCP do Skip nesta máquina — o servidor já está registrado (`claude mcp add --transport http skip https://api.goskip.dev/mcp` já rodou), mas falta concluir o fluxo OAuth (normalmente abre o navegador) e reiniciar a sessão do Claude Code para as ferramentas `mcp__skip__*` ficarem disponíveis
+- [ ] Pedro sincroniza/publica o app diretamente pela plataforma Skip (decisão de 2026-07-16 — não depender mais do MCP nesta máquina para publish)
 - [ ] Pedro testa no navegador (golden path) **depois de publicado**: abrir modal de Registrar Pedido de Compra, buscar por um nome que hoje aparece errado (ex. um arquiteto/cliente conhecido) e confirmar que não aparece mais na lista
 - [ ] Pedro confirma se algum contato que É fornecedor mas nunca teve `contato_tipos.tipo = 'fornecedor'` gravado precisa de backfill manual (ver Pendências)
 
@@ -99,7 +99,7 @@ A função duplicada em `services/compras.ts` deve ser removida (é código mort
 ### Pendências (Parte 1)
 
 - [ ] Confirmar com Pedro/Filippo se existem fornecedores reais no banco que **nunca** tiveram `contato_tipos.tipo = 'fornecedor'` gravado (ex.: cadastrados antes do trigger `handle_contato_tipo()` existir, ou só com `contatos.tipo` preenchido sem o backfill correspondente na tabela de junção) — se existirem, precisam de um `INSERT` de backfill em `contato_tipos`, o que é uma decisão de dado, não algo que este fix de frontend resolve sozinho.
-- [ ] Completar autenticação OAuth do MCP `skip` (registrado, mas "Needs authentication") e então publicar esta correção no Skip, e só então repetir o teste manual no app publicado.
+- [x] ~~Completar autenticação OAuth do MCP `skip`~~ — abandonado (ver Checklist acima); Pedro publica direto pela plataforma Skip.
 
 ---
 
@@ -124,7 +124,7 @@ A função duplicada em `services/compras.ts` deve ser removida (é código mort
 - [ ] Fazer o backfill de `marcas.fornecedor_id` (mapear cada marca cadastrada ao fornecedor/contato correspondente) — sem isso, nenhum item aparece selecionável para Pedido em Lote na tela.
 - [ ] Reextrair o snapshot `supabase/db/current/` depois de aplicar as migrations, para não deixar o próximo agente consultando um schema desatualizado.
 - [ ] Testar manualmente no navegador (golden path): filtrar Necessidade de Compra por uma marca com fornecedor já mapeado, marcar 2+ itens, abrir "Fechar pedido em lote", editar quantidade/custo e confirmar — checar que 1 `pedidos_compra` + N `pedido_compra_itens` foram criados. Testar também o caso de bloqueio (tentar marcar item de fornecedor diferente) e a busca fuzzy de fornecedor (digitar nome com erro de digitação/sem acento).
-- [ ] Publicar a mudança via Skip e repetir o teste no app publicado (mesmo bloqueio de OAuth do MCP `skip` documentado na Parte 1, se ainda não resolvido).
+- [ ] Pedro publica direto pela plataforma Skip (não mais via MCP — ver decisão na Parte 1) e repete o teste no app publicado.
 
 ### Objetivo (Parte 2)
 
@@ -183,7 +183,7 @@ Hoje o registro de pedido de compra é 1 produto + 1 fornecedor por chamada (RPC
 - [ ] Definir o threshold de `similarity()` com dados reais de fornecedores (0.3 é ponto de partida, não validado com nomes reais).
 - [ ] Decidir se a busca fuzzy deve considerar também `nome_empresa` (nome fantasia), não só `nome` — hoje o rascunho cobre só `nome`.
 - [ ] Reextrair `supabase/db/current/` (desatualizado desde 2026-07-07) — não bloqueia esta SPEC, mas deve ser feito para não confundir o próximo agente que consultar o snapshot em vez das migrations reais.
-- [ ] Investigar o "cabeçalho duplicado" relatado por Pedro em 2026-07-16 — não reproduzido por leitura de código (`AppHeader`/`AppNav` são componentes distintos, cada um renderizado uma única vez em `App.tsx`/`ProtectedRoute.tsx`). Pode ser sintoma do app publicado no Skip estar desatualizado em relação ao repositório (mesma causa do bloqueio de publish da Parte 1). Aguardando descrição/print de Pedro para diagnosticar.
+- [x] **"Cabeçalho duplicado" — causa raiz confirmada, já corrigida em código, só falta publicar.** Pedro mandou print do app publicado mostrando a barra de navegação (Necessidade de Compra / Estoque / Solicitações / Cotações / Pedidos / Recebimento) duplicada. Investigação: no commit atualmente publicado no Skip (`fc3b3c7`, ver `.skip.config.json` do sistema), `src/App.tsx` renderizava `<AppNav />` diretamente dentro de `AppShell` **além** de `ProtectedRoute` também renderizar `<AppNav />` — daí a barra aparecer duas vezes. Essa duplicação **já não existe no HEAD atual** (commit `d1a2a7e`, pushado): `App.tsx` só renderiza `<AppHeader />` em `AppShell`, e `AppNav` é renderizado uma única vez, dentro de `ProtectedRoute`. Ou seja, o print de Pedro reflete uma versão do app anterior até ao fix original da Parte 1 desta SPEC — nunca foi um bug pendente de investigação, só nunca foi publicado. Resolve junto com a publicação pendente (ver Passos manuais).
 
 ### Realizado (Parte 2)
 

@@ -22,3 +22,6 @@
 [submodule "04-Sistemas/compras-lucenera-3o23t98ee"]
 	path = 04-Sistemas/compras-lucenera-3o23t98ee
 	url = https://github.com/pedrolalala/compras-lucenera-3o23t98ee.git
+[submodule "04-Sistemas/dashboard-lucenera-b02z85wa3"]
+	path = 04-Sistemas/dashboard-lucenera-b02z85wa3
+	url = https://github.com/pedrolalala/dashboard-lucenera-b02z85wa3.git

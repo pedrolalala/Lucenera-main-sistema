@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-18 (3)
+
+### Adicionado
+
+- Criada e implementada `SPEC-033_Fornecedor_por_Marca_e_Melhorias_Necessidade_Compra.md` (fluxo completo planner → implementador → revisor). Diagnóstico: o Pedido em Lote (SPEC-030 Parte 2) estava 100% travado — 0 de 233 produtos com necessidade de compra tinham `fornecedor_id` resolvido, porque `marcas.fornecedor_id` nunca foi preenchido para nenhuma das 110 marcas (não existia tela para isso). Entregue nesta sessão: tela nova "Marcas" (`/marcas`) em `compras-lucenera-3o23t98ee` para mapear marca → fornecedor pela UI (sem SQL manual); coluna "Disponível" em "Necessidade de Compra" (saldo real, pode ser negativo — campo já existia na view, só não era exibido); contexto de estoque (física/comprometida/disponível) dentro do modal "Pedido em Lote". Nenhuma migration nova. Revisado sem achado crítico, commitado (`1ebbace`), pushado e publicado em produção via Skip MCP (`pagina-em-branco-cdd79.goskip.app`, versão `0.0.41`).
+- **Pendente**: o backfill em si (mapear cada uma das ~110 marcas ao fornecedor correspondente) continua sendo trabalho manual de Pedro/Filippo pela nova tela — sem isso, o Pedido em Lote continua sem itens selecionáveis.
+
 ## 2026-07-18 (2)
 
 ### Adicionado

@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-18 (2)
+
+### Adicionado
+
+- Criada e implementada `SPEC-032_Header_Unico_Itens_Orcamento.md`: na tela de edição de orçamento, o cabeçalho de colunas dos itens (`Luminária, Código Produto, Código de Referência, Produto, Qtd, Preço Unit., Desc %, Subtotal`) deixa de se repetir a cada item — passa a aparecer uma única vez, no topo da lista, em telas largas (mobile inalterado, a pedido do usuário). Componente novo `BudgetItemsHeader.tsx`; `BudgetItemCard.tsx` esconde os rótulos por campo via `lg:hidden`. Commitado/pushado (`2e139e8`) e publicado em produção via Skip MCP (versão `0.0.295`).
+- Achado durante a publicação: `BudgetFormPage.tsx` no Skip tem um campo (`prazo_entrega_dias`, schema + UI completos) que não existe em nenhum commit do GitHub — usado `skip_file_patch` (busca/substituição cirúrgica) em vez de sobrescrever o arquivo inteiro, para não perder essa funcionalidade só-Skip. Registrado como pendência de investigação na SPEC-032.
+
 ## 2026-07-18
 
 ### Adicionado

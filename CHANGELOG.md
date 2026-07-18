@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-18
+
+### Adicionado
+
+- Criada e implementada `SPEC-031_Etapa_Aprovacao_Equipe_Orcamentos.md`: novo status `Aprovação da Equipe` no fluxo de orçamentos (`enviado_cliente -> Aprovação da Equipe -> Aprovação Financeira -> Orçamento Aprovado`), permitindo que a equipe confirme ou devolva ao cliente (com motivo obrigatório, trocando peça/cor) depois da visita à obra. Migration aplicada no Supabase real (`supabase/db/migrations/20260718_050_spec031_aprovacao_equipe_orcamentos/`): altera as 5 funções de aprovação do cliente para parar em `Aprovação da Equipe`, cria as RPCs `equipe_aprovar_orcamento`/`equipe_devolver_orcamento_cliente`, e cadastra o módulo `aprovacao_equipe` no Hub (SPEC-006, reaproveitando a ação `editar` já existente). Frontend implementado em `gestao-financeira-clone-544cb (1)` (`TeamApprovalTab.tsx` novo, `budget-status.ts`, `Budgets.tsx`, `BudgetFormPage.tsx`, `useBudgetStore.ts`), commitado/pushado (`066f2f3`, após reconciliar com 2 commits que já estavam em `origin/main`) e **publicado em produção via Skip MCP** (`https://gestao-financeira-clone-544cb.goskip.app`, versão `0.0.294`). Lint/build limpos, QA do Skip limpo. **Pendente**: conceder a permissão do módulo a algum papel no Hub (só admin/gerente conseguem agir por enquanto), homologar no app publicado.
+- Achado durante a publicação: o projeto Skip tinha uma versão (`5492ca4`) sem correspondência em nenhum commit do GitHub, e o arquivo `useBudgetStore.ts` no Skip tinha um campo (`prazo_entrega_dias`) ausente do GitHub — preservado ao escrever a atualização (não sobrescrito às cegas). Risco de divergência Skip x GitHub documentado como pendência aberta na SPEC-031.
+- Durante a implementação, confirmado por query direta no Supabase real que os objetos da SPEC-019 (`aprovado_cliente_origem`, `financeiro_editar_orcamento`, `buscar_orcamento_para_aprovacao`, `recusar_orcamento_cliente_publico`, trigger de reset) existem em produção — o snapshot local (`supabase/db/current/`) é que está desatualizado desde 2026-07-07, não a SPEC-019.
+
 ## 2026-07-17
 
 ### Corrigido

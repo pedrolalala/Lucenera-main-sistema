@@ -25,3 +25,6 @@
 [submodule "04-Sistemas/dashboard-lucenera-b02z85wa3"]
 	path = 04-Sistemas/dashboard-lucenera-b02z85wa3
 	url = https://github.com/pedrolalala/dashboard-lucenera-b02z85wa3.git
+[submodule "04-Sistemas/catalogo-pecas-ubiqua-e6fa0"]
+	path = 04-Sistemas/catalogo-pecas-ubiqua-e6fa0
+	url = https://github.com/pedrolalala/cat-logo-pe-as-ubiqua-.git

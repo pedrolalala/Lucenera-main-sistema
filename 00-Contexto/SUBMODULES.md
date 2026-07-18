@@ -91,9 +91,11 @@ Nao commitar no repo central um ponteiro de submodule para commit local que aind
 | Dashboard RH Lucenera | `04-Sistemas/dashboard-rh-lucenera-5fe9c` | `https://github.com/pedrolalala/dashboard-rh-lucenera-6g2endmv7.git` |
 | Logistica Lucenera | `04-Sistemas/lucenera-logistics-b7cd1` | `https://github.com/pedrolalala/lucenera-logistics-bz5s7xehm.git` |
 | Cadastro Lucenera | `04-Sistemas/cadastro-lucenera-b86fe` | `https://github.com/pedrolalala/cadastro-lucenera.git` |
+| Compras Lucenera / Necessidade de Compra | `04-Sistemas/compras-lucenera-3o23t98ee` | `https://github.com/pedrolalala/compras-lucenera-3o23t98ee.git` |
+| Dashboard Lucenera | `04-Sistemas/dashboard-lucenera-b02z85wa3` | `https://github.com/pedrolalala/dashboard-lucenera-b02z85wa3.git` |
+| Catalogo de Pecas Ubiqua | `04-Sistemas/catalogo-pecas-ubiqua-e6fa0` | `https://github.com/pedrolalala/cat-logo-pe-as-ubiqua-.git` |
 
 ## Pendencias
 
-- `catalogo-pecas-ubiqua-e6fa0`: falta repo GitHub definido.
 - `lucenera-logistica-atual-backup`: manter como backup ate a migracao.
 - `Lucenera-Power-point`: repo de apoio; adicionar como submodule apenas se o time quiser versionar o artefato dentro do central.

@@ -2,6 +2,31 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-18 (6)
+
+### Adicionado
+
+- Registrado o sistema "Catálogo de Peças Ubiqua" (`04-Sistemas/catalogo-pecas-ubiqua-e6fa0`, `pedrolalala/cat-logo-pe-as-ubiqua-`) como submodule central. Achado arquitetural: usa o mesmo projeto Supabase central (`vcvcwzmbiftcawncibke`), não um projeto separado.
+- Criada e implementada `SPEC-036_Catalogo_Ubiqua_Marca_Isolamento_Clientes_e_Cores.md` (planner → implementador → revisor), a partir da análise da reunião com o Vinicius (representante/sócio Ubiqua). Entregue: subtítulo de marca "Ubiqua Representações" no header/footer; menus renomeados para deixar explícito "Cadastro de Cliente"/"Cadastro de Representante"; isolamento de clientes por representante individual — nova coluna `informacoes_cliente_ubiqua.cadastrado_por_usuario_id` + RLS restrita ao dono ou a `nivel_acesso IN ('admin','interno')`, substituindo policies antigas totalmente abertas (`USING (true)` para anon/authenticated); `AI_DB_CONTEXT.md` novo documentando o domínio Ubiqua.
+- **Efeito colateral corrigido de brinde**: não existia nenhuma policy de DELETE em `informacoes_cliente_ubiqua` — exclusão de cliente nunca funcionava. Corrigido pela mesma migration.
+- Migration `supabase/db/migrations/20260718_052_spec036_ubiqua_isolamento_clientes/` aplicada no Supabase real e verificada (coluna, 5 policies, índice, os 4 clientes pré-existentes ficaram com `cadastrado_por_usuario_id = NULL`, sem atribuição automática).
+
+### Corrigido
+
+- Achado crítico separado durante o teste do fluxo: o app Ubiqua não tinha **nenhuma forma de um representante novo criar conta** — `AuthWrapper.tsx` só implementava login; a função `signUp()` já existia no hook `use-auth.tsx` mas nunca era chamada por nenhum componente. Corrigido: alternador Entrar/Criar Conta no mesmo formulário, com validação de confirmação de senha. Ajuste adicional: `signUp()` passou a retornar `hasSession`, para mostrar a mensagem certa ao usuário conforme o projeto Supabase exigir ou não confirmação de e-mail.
+
+### Investigado, não corrigido (decisão consciente)
+
+- Hipótese original da SPEC de que o agrupamento de variantes de cor (`groupCatalogItems()` em `use-parts.ts`) tinha um bug de chave de agrupamento não se confirmou por auditoria direta dos dados reais: só 1 produto ("CRYSTAL") tem cores com preços diferentes, e mesmo esse caso vem de descrições/preços conflitantes entre 3 planilhas de origem diferentes (`fonte_planilha1/2/3`) — não é um bug de código, é dado duplicado/conflitante entre fontes. `use-parts.ts` não foi alterado; fica pendente decisão de qual planilha é autoritativa.
+- Cadastro de cliente PJ completo (campos além de nome/email/telefone/CNPJ) segue bloqueado até o Vinicius enviar a lista/print combinada na reunião.
+
+### Pendente
+
+- Vinicius enviar campos completos do cadastro de cliente PJ.
+- Decidir fonte de planilha autoritativa em `revenda_ubiqua` antes de revisitar o agrupamento por cor.
+- Homologação manual do golden path completo (criar conta → onboarding → catálogo → cadastro de cliente → orçamento) em dispositivo real — não testável por leitura de código.
+- Commit e push do submodule + ponteiro no repo central.
+
 ## 2026-07-18 (5)
 
 ### Adicionado

@@ -1,0 +1,373 @@
+[00:07] no dashboard. De repente, sabe uma coisa que poderíamos fazer que fica legal para aposentar? Pedir ajuda deles, que vai ter também um ganho de inércia. Ajudar eles a fazer uma série de dashboard bacana e graficamente interessante e também ajudar, que dados são interessantes, colocar aqui no dashboard. É, o Power
+
+[01:03] BI eu acho que eles não vão querer que mostre trazer,
+
+[01:10] pelo menos que por enquanto seja um pouco mais de mexer com os datos, mas trazer aqueles gráficos, tanto financeiros quanto do stock para aqui.
+
+[01:24] Sim, o que eu vou fazer? Eu consegui fazer a conexão com a Inteligência Artificial Cloud, com o Power BI, e eu tenho como integrar com o Super Base e o Skip. Então eu vou fazer ele analisar o meu Power BI, o nosso, o da empresa, e puxar todas as informações para dentro do skip e fazer um novo dash.
+
+[01:48] Ok, vamos um momentinho ver o Power BI, porque eu sempre vejo o computador, ou no celular, ou no iPad, eu acho que não tem todas as funções. Me lembra até como que é bom um Power BI, quando o SharePoint Não,
+
+[02:06] é num site do Power BI mesmo. Calma aí que eu vou te mandar no Whatsapp. Te mandei o link recente também. Eu te mandei o link, já vai direcionar certinho para o... Vai em workspace, meu workspace, aí tem lutineira contas, é o lutineira contas correto 8 do 7. Foi o último que eu atualizei aqui.
+
+[03:15] Você
+
+[03:21] conseguiu ver? Porque senão eu compartilho com seu e-mail aqui.
+
+[03:43] Então
+
+[03:53] não tá certo. Entra na nossa conversa. Pode ser no Teams. Eu vou te mandar aqui agora. Eu tava mandando no WhatsApp.
+
+[04:35] Como é que eu vejo? Como é aqui de selecionar?
+
+[04:43] Vamos por o que você quer, 2026, janeiro, por exemplo. É só selecionar e ele automaticamente vai filtrar tudo.
+
+[05:11] Despesas...
+
+[05:45] É uma diferença de 60 mil.
+
+[05:51] Agora, esses gráficos que eu quero, eu quero que trabalhamos para ficar bem legal a apresentação. Trabalhamos um pouco nesses gráficos, ou seja, que gráficos a mais nós podemos ver. Tem que um momentinho dar uma pesquisada.
+
+[06:15] É a parte que você e a Manuela tiram da empresa. Porque isso estava contabilizando como despesa e no final das contas...
+
+[06:46] E custo relativo.
+
+[06:50] Tá, perfeito.
+
+[06:52] O custo fixo, mesmo que, por exemplo, energia elétrica é fixo, não importa que não seja sempre o mesmo valor, mas é o custo fixo. Salários são custos fixos. Todo dinheiro que de qualquer jeito lhe cai. Agora, comissões não é custo fixo, é custo variável. de arquitetos, pontuação de crudimais, tudo que é relativo ao vendido. Se eu não vendo, não tenho aquele custo. Se eu vendo, tenho aquele custo. Assim eu consigo ver sempre o custo fixo como varia. Isso lá, conseguimos fazer gráficos de custo fixos.
+
+[07:42] É, literalmente para a gente conseguir começar a entender o que é e o que não é.
+
+[07:48] Exato, estrechar mais visualizações gráficas disso, mostrar como agora conseguimos gerenciar realmente os dados.
+
+[07:58] Um exemplo aqui, se você for um pouco para o lado aqui na parte inferior, vou até te mostrar aqui que tem as abas embaixo, está vendo? Aqui essas abas aqui ó, tem uma em específico que é contas a pagar. Aqui ó, você tem que mexer nesse botãozinho aqui embaixo.
+
+[08:31] Ah,
+
+[08:35] é ali no lado esquerdo. Tá vendo que tem a nomenclatura? Deixa eu entrar aqui. É que você está no... Quais as opções que tem aí? É contas apagar, contas apagar foco. Vou até trocar um ano depois de foco.
+
+[09:00] Ok, ok, ok, entendi. Tá.
+
+[09:04] Aí aqui tem como você filtrar, por exemplo. A data. Vou colocar em janeiro de 2026. A data é na parte ali de cima, inclusive. Tem mês, ano e dia. Aqui ó.
+
+[09:26] Tá vendo aqui ó.
+
+[09:28] É, aí eu selecionei janeiro. Aí ele automaticamente aqui colocou as despesas de janeiro. E aí aqui, em descrição subgrupo, tem administrativas, bancárias, com pessoal, com vendas, Filipe, fixas. Aí tem como selecionar as fixas e ver qual que é o valor mensal. Aqui, no caso, 10 mil.
+
+[10:32] em forma de agrupamento, fazer umas telas de... Por exemplo, tem uma tela de markup importantíssima que é quanto eu preciso vender para eu sustentar como está indo cada mês. Se eu vender menos de um milhão, eu perco dinheiro. Se eu vendo mais, eu ganho nessa medida. Então, é...
+
+[11:03] A questão do marcado? De tentar trazer o dashboard para dentro do SQL. É do dia 8.
+
+[11:26] Sim.
+
+[11:32] Eles estão, só que aí eles ficam separados em contas a pagar, contas a receber, fica em vários locais diferentes. Mas todas as informações que eu tenho aqui, eles estão também nos OBS.
+
+[11:46] Então, diretamente poderia já pedir os gráficos quase.
+
+[11:50] Sim.
+
+[11:52] Você pode até mostrar isso.
+
+[11:54] Isso busca desse lugar, que forma esse gráfico a partir do... Na realidade é projetos parcela. Projetos parcela misturado com despesa. Ah tá. Pode até ser, mas o CRM é uma utilidade geral da empresa. Eu deixaria o dashboard em um lugar só para você ou para você, para o Vinícius.
+
+[12:41] Talvez
+
+[12:46] na parte da administração bancária, porque é uma coisa bem restrita. Ou criar um novo... Sistema só para o dashboard.
+
+[13:06] Por exemplo, o estoque...
+
+[13:14] O estoque está atualizado no sistema.
+
+[13:18] Se não, está pensando em ser simples o dashboard. Ou faz uma... Um base para dashboards. Tipo, tudo que é...
+
+[13:28] É porque na realidade o dashboard é literalmente a visualização. Sim. E é uma visualização... É, eu acho que é mais ou menos isso. O dashboard é mais para tomar decisão e análise de dados e o resto do sistema é para as pessoas conseguirem desenvolver. Tá. A gente pode colocar, fazer um novo sistema só para dashboard. E aí também, com base no que a gente estava conversando, eu fiz a questão da necessidade de compra. Não sei se você chegou a ver o sistema. Aqui, na hora que você entrar no sistema, você me avisa.
+
+[14:32] Basicamente,
+
+[14:43] ele tem as informações, aí tem a opção de comprar, você coloca o valor. Tem as solicitações que eu ainda tô fazendo.
+
+[15:00] Sabe que é uma coisa que eu acho importante que...
+
+[15:34] A data do pedido. É, mas aí quando você clica em cima ele aparece, é que no caso
+
+[15:52] aqui não tem nenhum...
+
+[16:03] de qual projeto que é.
+
+[16:32] uma semana, a outra fizeram hoje. Então, o número de dias de pedido deve aparecer o mais antigo, 13 dias. Pessoas não devem ver que tem um pedido daquilo há 13 dias na América. dias, 35, uma semana, 12 hoje, ok?
+
+[17:03] Sim.
+
+[17:04] Mas, sem precisar, lógico, eu acho que é importante ver essa coisa, porque eu mesmo, às vezes, assim como quando faz o pedido, poderia ter uma... Vamos uma coisa cada vez mais, isso aqui.
+
+[17:26] Não, mas é interessante a gente...
+
+[17:58] Então essa informação que eu... Entendi.
+
+[18:20] Eu pensei aqui, então essa parte também tem que aparecer no orçamento. porque é a partir do orçamento aprovado que gera a necessidade de compra.
+
+[18:32] O prazo de entrega em que nós comprometimos nenhum orçamento é importante colocar. É importante colocar mesmo. É um número importantíssimo. Hoje nós não fazemos isso, mas a informação que perdemos é que, na verdade, a máquina tem que ajudar a não perder...
+
+[18:50] Essa informação não pode deixar.
+
+[18:56] Aumenta, aumenta, aumenta, vem São Paulo, coisa... As pessoas não tem mais isso na
+
+[19:01] cabeça, tem que estar realmente... Sim, com certeza. Então isso é uma coisa que...
+
+[19:07] É preferir o prazo de entrega no orçamento. É educar as pessoas a começarem a usá-lo.
+
+[19:18] Sim, isso é o mais importante.
+
+[19:21] Tem uma série de informações todas que não podem faltar para aprovar o orçamento. Da parte de projeto, é prazo deles. E... E também, entendeu?
+
+[19:48] Mas no caso aqui, só pensando, não é necessariamente obrigatório colocar a data. A data é melhor quando tem a necessidade de comprar com um curto período de tempo. A data de entrega no orçamento.
+
+[20:12] Tecnicamente, se o orçamento é dado, o prazo é dado em dias úteis. A data vem automaticamente, eu coloco os dias úteis e a data vem. Temos que entregar até o dietal, que é importante também. Ele calcula já os dias úteis.
+
+[20:31] A média de quanto mesmo?
+
+[20:34] A média é uns 25, 30 dias úteis. Tem coisas com menos.
+
+[20:44] Isso vai depender do que é...
+
+[20:46] Depois tem a questão do prazo. A produção da cidade tem o prazo que cada item tem média de ter. Porque lá eu sei que... Quando vai se entregar, cuidado que está passando de prazo, porque esse produto demora 30 dias corridos. Não, 20 dias úteis. Está faltando 21 dias úteis. Tem que pedir. Se não, não conseguiu entregar. Então aí... Também sobre os produtos, essa informação Então, eu vejo, falando, a gente vê mais coisas. Não falo que agora se consiga carregar, porque isso aqui não carregamos nunca, então
+
+[21:57] precisamos... Idealizar e estruturar como que vai ser, né? Até colocar as informações de fornecedor, quanto tempo demora...
+
+[22:07] Exato, porque de repente, depois vamos ver, então vamos, ok, estamos prontos para fazer essa coisa, é,
+
+[22:36] dá pra fazer a partir da marca dá pra fazer a partir da marca já linkar com todos os produtos Aquela marca demora uma média de 20 a 25 dias no exemplo. Aí a outra...
+
+[22:50] A outra marca te dá uma planilha de quanto demora por peça.
+
+[22:53] Sim.
+
+[22:55] Mas é só para ter uma visão mais completa. Por enquanto beleza, mas se inseriria os prazos já. Tá,
+
+[23:20] perfeito. Então, aqui a gente precisa, só recapitulando, a gente vai estruturar, não, apresentar o CRM, o sistema de RH com a geração de vale-transporte, a consulta de produtos, que já está funcionando, o orçamento, que foi o que a Erika pediu, e o sistema de entrega?
+
+[23:52] Sim. Eu
+
+[24:24] vou até ver porque eu coloquei as informações de estoque era pra necessidade de compra tá fiel com a quantidade... É pra estar, calma aí.
+
+[24:50] Deixa eu desligar só um segundinho. Vai, tá ligou o Josá.
+
+[24:53] Tá bom.
+
+[00:03] Provavelmente tem que ter mais. Eu tô criando o prompt aqui pra ele analisar e já ver o que, porque que não tá.
+
+[00:11] Provavelmente ele... Do
+
+[00:18] SupaBase, é teoricamente estoque itens, mas eu acho que tá em...
+
+[00:56] Vai tudo lá, o que precisa ser colocado.
+
+[01:01] É, vai em projetos e itens e... E estoque itens. Estoque itens vai ter a quantidade.
+
+[01:16] Não entendo então a planilha projetos e itens pra que serve. Aqui a quantidade que precisa quando é aprovado o projeto, eles vêm aqui, certo? Depois, quando, talvez, vamos ver então esses stock itens, se por acaso... Vamos pensar uma coisa, para gerar... necessidade de compra. Orçamento aprovado vai todos os itens que estão aprovados, que nós vendemos, certo?
+
+[02:12] Sim.
+
+[02:14] Hoje nós estamos com 100 peças no estoque e nós vendemos hoje 90. Amanhã vamos vender 30. Então amanhã vai ter que ter uma necessidade, você vai criar uma necessidade de 20. É que nós já temos 100 no estoque. Então tem toda essa... enfim, joguinho. Ou seja, o lugar vai todos os que foram pedidos. Depois tem que pegar essa quantidade e num outro lugar, provavelmente, não ali, com certeza, em outra farinha, tem que ver o quanto eu tenho no estoque. Então será estoque-itens, sim. E no estoque-itens eu vejo a quantidade que eu tenho no estoque. e qualidade necessária a mais.
+
+[03:07] Quantidade reservada.
+
+[03:11] A necessária você tinha... No estoque tem o total do contenho que é feito de quantidade reservada e de quantidade disponível. Essas três, tem que ter as três, ou seja, são duas, que é uma soma das duas. Quantidade reservada, chave reservada, que é o reservógico orçamento. Quantidade disponível, quantidade total. Quantidade nos pedidos, que é a coluna da quantidade nos pedidos, que é justamente pega da dos projetos íntens. É igualzinha. Só que depois tem uma coluna ou se faz uma planilha especial só realmente para necessidade de compra que talvez seja melhor.
+
+[04:15] Eu acho que já tem.
+
+[04:18] Qual é? Vamos lá. Vamos ver. Onde vão o número de o que eu tenho menos O que eu preciso. E ainda menos o estoque que eu preciso manter. Tenho alguns itens que tem que ter. Não sei se isso já tem. A quantidade que sempre deve permanecer. Tipo eu, em determinados spots quando chega abaixo de 80 compro de novo.
+
+[04:53] Aqui é pedido de compra. Aí tem pedido de compra item, pedido de compra, duplicado. Vou ver qual que é o... Cotação fornecedor...
+
+[05:09] Mas pedido de compra é uma coisa, pedido de compra de itens é outra, teoricamente.
+
+[05:14] É, de itens é outra.
+
+[05:16] Porque pedido de compra tem código pedido, ou seja, o ID do pedido é o código pedido, o código do fornecedor é o fornecedor, o valor da nota, pedido, compra itens, tem. ID é solicitação ID. Produto, o que é essa solicitação ID? Não sei, mas é produto ID. Tem um produto ID. Então, quando...
+
+[05:46] Solicitação ID?
+
+[05:49] Quantidade recebida, custo unitário, observação... Isso é criado pelo ESCIP, mas não tem muita ligação com a nossa realidade. Por isso que não está funcionando aí. Acho que é a questão da... Não,
+
+[06:22] mas aqui só vai aparecer o pedido quando a pessoa entrar no sistema e dar baixa no pedido. Então ela vai entrar na necessidade de compra e apertar aqui como se tivesse pedido, como se tivesse não, porque ela pediu a...
+
+[06:40] Beleza, mas como funciona para isso funcionar? É que é isso, lá em projetos itens, está toda a coluna. Estão todos os produtos que estão nos pedidos. E nesta planilha de pedidos, compra, item, itens, nós temos que colocar essas informações que não estão, por exemplo. Quantidade, aqui deve entrar aquele ítem que vai em projetos ítens, deve entrar aqui. Na verdade, deveria entrar aqui só exclusivamente, já depois de ter calculado que é necessário comprá-lo, teoricamente. Se precisarmos fazer uma planilha disso, assim, Ou você já automaticamente pode pedir, ó, você vai colocar ele só quando confrontado com um exército perigoso, porque você não vê onde está essa informação. Então eu acho que tem que fazer...
+
+[07:36] É, tem que ter a visualização.
+
+[07:38] É, tem que ter essa família onde se vê que aquele que está em projetos íntens está aqui em tal estalte. Mas devido ao estalte não precisa comprar. Por exemplo, eu peguei muitas coisas que tem, 500 peças, tem que pegar hoje no banco. Entendeu?
+
+[08:04] Sim. Eu entendi.
+
+[08:08] Aí é que eu consigo... Número que é positiva, que aliás tem que ser corrigida também automaticamente em função de quantos itens temos que comprar por cada item, porque tem caixa fechada. A gente tem um corpo reachado, quebrado.
+
+[08:27] Ah, isso eu não sabia.
+
+[08:30] Isso é parte foda. Tem que atacá-la aí também.
+
+[08:40] É, isso eu vou ter que ver, vou sentar um dia com a Débora só pra conversar como que é feito, como que funciona, porque é ela que mexe com o pedido.
+
+[08:57] Se pode ver bem a questão do prazo, coluna dos prazos, vai já anotando pra não esquecer e depois pôr.
+
+[09:24] É, tá anotando a janela.
+
+[09:26] os prazos, os padrões daquele item e a coluna dos múltiplos que podemos comprar. Terá um que é 1, porque podemos comprar 1, 2, 3, 4, igual. Vai ter muitos itens que será 10, outro item 5, outro item 8, entendeu?
+
+[09:45] Sim.
+
+[09:46] E ele deve respeitar, toda vez que faz o pedido, a compra da caixa.
+
+[09:50] Da caixa fechada, da quantidade mínima de pedido, né? E a gente pode determinar a nomenclatura, mas é como se fosse a caixa fechada, né? Daquele item específico. Tá, isso foi um tópico bem interessante que a gente já deveria ter cobrido, mas tudo bem.
+
+[10:12] Olha, os progressos que poderíamos estar fazendo nessa parte aqui... Beleza, porque tá desmontando. Eu repito, eu acho que só podemos... Eu acho que vale a pena trabalhar na... É,
+
+[10:35] eu vou, além de ter a reunião quarta, eu vou mandar uma mensagem agora para a Kimberly, já falando com ela que a gente teve essa reunião, puxando os tópicos principais, porque a gente, seu case deles, É muito interessante, tanto para a Kimberly quanto para a Erika, né? Então elas estão também se mexendo para isso acontecer. Aí é bom...
+
+[11:01] As coisas que ainda devem ser atacadas melhor, tipo, talvez apresentadas como um sistema completo já, da necessidade de fomento.
+
+[11:46] Não, mas isso pelo menos já está tudo anotado aqui na... O skip já anotou o skip não, né? O wizard. Então eu já vou pegar, já vou fazer a transcrição. Se você quiser eu te mando também.
+
+[12:01] Sim, até que eu quero ver essas nossas reuniões que são tão longas como realmente conseguem ser...
+
+[12:16] O que eu estou fazendo, inclusive, foi uma orientação da Kimberly. Toda reunião que eu tenho, eu estou pegando e levando para o VS Code e aí eu tenho todas as informações da luteineira. Então, as planilhas, tudo eu tenho lá. E aí eu pego e mando o Prompter dentro desse sistema, falando, ó, eu quero que faça isso, isso, isso. Ele automaticamente já faz com base, eu falo, ó, com base na reunião que eu tive hoje com o Filipe, que vai estar aqui dentro. Aí ele vai lá, interpreta a reunião e faz.
+
+[12:53] Não, mas ele faz uma expect. Na reunião, às vezes até informações contraditórias. Eu posso falar uma coisa e depois corrijo e evaluo de outra maneira. Então é importante, na realidade, essas reuniões, primeiro, ter uma síntese que a gente consiga ver os problemas e falar, é isso mesmo, é isso mesmo, é isso mesmo, é isso mesmo. E depois você pode fazer isso de verdade. Porque se não, eu acho que vai dar merda. Com certeza. É que... É,
+
+[13:37] na realidade ele não faz isso. Eu peço, antes dele criar qualquer coisa, eu peço pra ele criar uma spec. O que é a spec? um cabeçalho de tudo que ele vai fazer, a descrição de tudo que ele captou do que eu pedi, e aí ele cria etapas por etapas do que ele vai fazer. Aí eu vou lá, leio ele inteiro, aí eu dou, aí eu falo, não, tá certo ou não, aqui é onde você colocou no spec, tá errado. E aí eu corrijo, eu vou te mandar um spec aqui, só pra você
+
+[14:09] ter... Então, na medida que você faz isso, você pode me envolver, por exemplo, Ah, é, tá.
+
+[14:18] Perfeito, eu vou te mandar. Calma aí, deixa eu só achar. Cada um, né? Reuniões específicas.
+
+[14:29] Ah, e a coisa, você tinha visto que eu tinha falado, tá? Nas entranhas, de poder colocar uma procura por cliente. Tipo, vai dar a cliente e tal, me fala, ah, mas meu material era pra este... Tudo bem que não são muitas coisas, mas eu entro e já digito. Aqui tem todas, né? Última semana, último mês, né? Mas eu falo por nome cliente, entendeu?
+
+[14:58] Então, o que eu fiz no lovable, a gente tem aqui, Tem a separação, que aqui a separação é o que está acontecendo no momento. E aí tem um checkzinho ali em cima escrito finalizadas. Em finalizadas você tem a forma de buscar. Então, vamos supor que foi um cliente que foi entregue e tal, você consegue buscar. Mas eu posso...
+
+[15:23] Não, não foi entregue. Eu posso também na hora sem ter que ligar para ninguém quando planejada. Tudo bem que posso correr aqui, mas é mais rápido. É, a pessoa me chama, eu... Preciso estar parado. Fala, não, tudo bem. Já, já, confio e te falo. Mas quanto mais fácil é achar, melhor. Não sei se... Porque finalizada... Finalizada, deixa eu ver. Por cliente, né? Sim. Legal. Sou legal. Essa busca por crédito poderia ser colocada nas coisas que estão pendentes?
+
+[16:10] Sim, inclusive eu vou pegar aqui. Vou tentar ver se eu ainda tenho crédito no Logobo.
+
+[16:21] Mas tudo bem, não é urgente essa coisa, não é importante.
+
+[16:27] Mas isso eu já posso deixar esquematizado no sistema, no skip.
+
+[16:33] Teoricamente
+
+[16:38] ele já está refeito, né? Se você entrar aqui no... Ah, você está no skip? É porque a gente tem o sistema que está sendo utilizado atualmente, que eu vou até te mandar o link aqui que é no logo,
+
+[17:06] Então, o que eu vejo, vai estar real também. Esse aqui
+
+[17:20] é o do lovable,
+
+[17:23] que
+
+[17:24] eu acabei de te mandar. E o do skip? É a mesma visualização, tudo igual. Ah, ele tá mandando pro... pro lovable.
+
+[17:49] É, tá mandando pro lovable, né?
+
+[17:52] Uhum. Dentro do... central da rotineira.
+
+[17:59] Por aqui não entra. Lembro
+
+[18:18] que você tinha trocado a última vez que a gente conversou.
+
+[18:40] Olha, tenho só uma coisinha aqui, como... Pode falar. Quando abro uma... Eu sou voltado atrás, né? Volto aos sistemas internos. Gostaria que os sistemas internos, vocês... Tivesse
+
+[18:59] uma aba em todos.
+
+[19:01] Não, quando eu clico em qualquer uma dos sistemas internos, abre uma nova janela automaticamente.
+
+[19:07] Ah, tá. Entendi.
+
+[19:09] Eu acho melhor isso.
+
+[19:12] Que aí fica a aba dos sistemas internos sempre aberta e vai abrindo uma nova.
+
+[19:16] Exato. Até para apresentar muito melhor, se não, tudo bem, prepara, mas é melhor que mostre tudo.
+
+[19:25] Sim.
+
+[19:28] É isso que você pode fazer.
+
+[19:30] Sim, é facinho. E aí, uma outra coisa que eu fiquei de te falar e esqueci que eu entrei agora e eu vi, a Kathleen mandou mensagem hoje, aí toda a parte que ela me falou assim, que ela tinha visto, eu corrigi, mandei pra ela, aí falei pra ela, ó, com base em tudo que você me falou, eu dei uma olhada e eu vi que o que você me passou tá certo. Dá uma olhada, vê você, ver o que você acha, que ela tinha colocado até questão de nomenclatura, de como estavam as informações internas, que tinha um específico que estava tudo maiúsculo, outro que estava tudo minúsculo. E aí eu deixei só as informações importantes maiúsculas, as outras minúsculas, enfim. Aí fui fazendo com base no que ela me falou. Eu vou até te mandar o... Que coisa foi gerada?
+
+[20:33] Até
+
+[20:38] para você ver também. Mas isso eu não sei se eles vão querer mostrar a ficha técnica, porque a gente não usou o skip. Foi tudo Python.
+
+[21:05] Foi.
+
+[21:06] Mas também usando inteligência artificial, né?
+
+[21:12] Sim.
+
+[21:25] Aí depende, a gente vê com eles, vê o que eles falam.
+
+[21:33] Quanto nos dão, quanto nos pagam atrás da gente. Mentira.
+
+[21:38] Ué, você deu mais um ingresso, né?
+
+[21:42] Mais um ano de consultoria.
+
+[21:45] Pô, seria bom, hein? Ser o case de sucesso deles pra sempre. É.
+
+[21:54] Porque a Yaga faz tudo sozinho.
+
+[21:57] É, do jeito que tá indo mesmo.
+
+[22:04] Tá bom, vai, muito bom. Eu esqueci, porque é bem legal, tem
+
+[22:13] aqui uma lista... De um código, na realidade. Eu vou te mandar, inclusive, o código pra você ver como que ele é. Tipo, é a partir disso daqui. As meninas não tem que relar em nada, não tem que fazer nada, elas só tem que depois visualizar, ver se tá tudo certo. Ó, a partir desse código aqui que eu tô te mandando.
+
+[22:36] Não,
+
+[22:42] é a partir desse código aqui. Esse código é o orçamento, só que em código. Mas tem todas as informações... É, na realidade isso aqui é para a máquina interpretar.
+
+[23:08] Entendeu?
+
+[23:09] Então aqui você pode...
+
+[23:11] É que
+
+[23:20] aqui ele vem todas as informações de uma forma muito melhor para a máquina interpretar. No caso aqui tem um L1, aí depois você consegue ver embutido, piso, flat, LED.
+
+[23:36] Obviamente uma coisa, isso aqui deverá ser ligado, obviamente, ao orçamento. Quando fica o orçamento fechado...
+
+[23:49] Na teoria isso já vai ser automático, na hora que a...
+
+[23:54] O orçamento já se come, se passa pra lá e...
+
+[23:57] Elas não vão ter que pegar o código. Atualmente, elas fazem desse jeito. Elas pegam o XML, levam para o sistema que eu fiz e dentro do sistema elas colocam o XML. E aí gera o PowerPoint. No caso do nosso sistema, a gente vai fazer tudo integrado. Orçamento aprovado. Aí fica separado lá para o pessoal conseguir fazer o download. Então, qualquer pessoa que é daquele projeto, vamos por a Marina, Isabela, aquelas pessoas conseguem entrar e pegar aquele XML referente ao cliente delas. XML não, PowerPoint. E aí já manda para o cliente.
+
+[24:48] Perfeito. Muito bom. Então tá, vai. Amanhã vai estar bem corrido.
+
+[24:56] Tá.
+
+[24:56] Na quarta a gente se fala.
+
+[24:59] Então tá bom. É isso. Eu vou ver que horas que a Erika vai marcar e eu te mando. Você tem um horário de preferência?
+
+[25:08] Preferiria não ser no começo da tarde, porque eu marquei já a coisa na hora que tem que trabalhar o projeto.
+
+[25:13] Não, perfeito. Ela tá se encaixando com a noite.
+
+[25:17] Sem problema.
+
+[25:18] De manhã.
+
+[25:19] Sem problema. Eu chego... Então eu vou te mandar, vou verificar bem aqui a minha passagem, te falo.
+
+[25:32] Tá. Então tá bom.
+
+[25:36] Senão pode ser também quarta, metade da tarde, umas quatro, cinco horas.
+
+[25:41] Ela falou as duas, eu vou falar que as duas... Ah, bem as duas, né? É, então vai ser o horário que você já marcou. Eu vou falar pra ela agora que as duas você não pode, perguntando se pode ser a...
+
+[25:56] Mas espera só um momentinho pra eu te falar. Deixa eu ver que horário tem.
+
+[26:01] É, melhor.
+
+[26:03] Eu também posso tentar me ajustar aqui, mas... Se puder as quatro, melhor.
+
+[26:14] Tá. Obrigado você. Tchau, tchau. Até.

@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-030 — Fix filtro tipo fornecedor + Pedido em Lote por Fornecedor + Busca Fuzzy (compras)"
 status: pendente
-data_ultima_modificacao: 2026-07-16
+data_ultima_modificacao: 2026-07-17
 sistemas_envolvidos:
   - compras-lucenera-3o23t98ee
 ---
@@ -116,12 +116,12 @@ A função duplicada em `services/compras.ts` deve ser removida (é código mort
 - [x] Frontend: `NecessidadeCompra.tsx` — adicionado filtro "Marca" (dropdown derivado de `rows`), coluna "Marca" na tabela e seleção múltipla (checkbox) de linhas restrita a um único fornecedor resolvido por vez.
 - [x] Frontend: modal "Pedido em Lote" (`components/compra/ModalPedidoLote.tsx`) — lista os itens selecionados, quantidade/custo editável por linha, um único número de pedido, chama a nova RPC `criar_pedido_compra_lote` via `services/pedido-compra.ts`.
 - [x] Rodado `oxlint`/`oxfmt`/`vite build` do sistema após a implementação — ver Realizado (Parte 2).
-- [ ] Testar manualmente e publicar via Skip (mesmo gate da Parte 1) — pendente do usuário (ver Passos manuais).
+- [x] Testar manualmente via SQL direto no Supabase real (ver Realizado 2026-07-17) — confirmado que `vw_necessidade_compra` retorna `marca_nome` preenchido. Teste end-to-end no navegador (golden path) segue pendente do usuário.
 
 ### Passos manuais do usuário (Parte 2)
 
-- [ ] Aplicar as 5 migrations em `supabase/db/migrations/20260716_049_spec030_pedido_lote_marca_fornecedor/` no Supabase real (na ordem `001` a `005`) — este agente redige `.sql`, nunca aplica.
-- [ ] Fazer o backfill de `marcas.fornecedor_id` (mapear cada marca cadastrada ao fornecedor/contato correspondente) — sem isso, nenhum item aparece selecionável para Pedido em Lote na tela.
+- [x] Aplicar as 5 migrations em `supabase/db/migrations/20260716_049_spec030_pedido_lote_marca_fornecedor/` no Supabase real — aplicado em 2026-07-17 (ver Realizado), com 2 bugs corrigidos no processo (ver abaixo). Exceção ao "nunca aplica migration": Pedro pediu explicitamente para aplicar nesta sessão, via conexão direta `SUPABASE_DB_URL` (psycopg2), não pelo agente `implementador`.
+- [ ] Fazer o backfill de `marcas.fornecedor_id` (mapear cada marca cadastrada ao fornecedor/contato correspondente) — sem isso, `fornecedor_id`/`fornecedor_nome` continuam nulos e nenhum item aparece selecionável para Pedido em Lote na tela. **`marca_id`/`marca_nome` já funcionam sem esse backfill** (vêm direto de `produtos.marca_id -> marcas`, relação que já existia).
 - [ ] Reextrair o snapshot `supabase/db/current/` depois de aplicar as migrations, para não deixar o próximo agente consultando um schema desatualizado.
 - [ ] Testar manualmente no navegador (golden path): filtrar Necessidade de Compra por uma marca com fornecedor já mapeado, marcar 2+ itens, abrir "Fechar pedido em lote", editar quantidade/custo e confirmar — checar que 1 `pedidos_compra` + N `pedido_compra_itens` foram criados. Testar também o caso de bloqueio (tentar marcar item de fornecedor diferente) e a busca fuzzy de fornecedor (digitar nome com erro de digitação/sem acento).
 - [ ] Pedro publica direto pela plataforma Skip (não mais via MCP — ver decisão na Parte 1) e repete o teste no app publicado.
@@ -180,7 +180,7 @@ Hoje o registro de pedido de compra é 1 produto + 1 fornecedor por chamada (RPC
 ### Pendências (Parte 2)
 
 - [ ] **Backfill de `marcas.fornecedor_id`**: é uma decisão de dado, não de código — Pedro/Filippo precisam mapear qual fornecedor (contato) corresponde a cada marca já cadastrada. Sem isso preenchido, nenhum item fica selecionável para Pedido em Lote.
-- [ ] Definir o threshold de `similarity()` com dados reais de fornecedores (0.3 é ponto de partida, não validado com nomes reais).
+- [ ] **Threshold de `similarity()` invalidado por teste real (2026-07-17)**: buscar `'Stella'` contra o fornecedor real `STELLA IMPORTACAO E EXPORTACAO DE LUMINARIAS LTDA` retorna `similarity() = 0.119` — abaixo do threshold `0.3` — porque `similarity()` do pg_trgm compara a string inteira, e o nome cadastrado é muito mais longo que o termo buscado. **A busca fuzzy de fornecedor está, na prática, retornando 0 resultados para buscas curtas hoje**, mesmo com a RPC funcionando tecnicamente. Precisa de uma correção de algoritmo (não só de threshold), ex.: `word_similarity()`/`<%` (compara o termo contra a melhor substring, não a string inteira) em vez de `similarity()`, ou aplicar sobre `nome_empresa` quando existir um nome mais curto. Não corrigido nesta sessão — é uma decisão de UX/algoritmo, não um bug de aplicação de migration.
 - [ ] Decidir se a busca fuzzy deve considerar também `nome_empresa` (nome fantasia), não só `nome` — hoje o rascunho cobre só `nome`.
 - [ ] Reextrair `supabase/db/current/` (desatualizado desde 2026-07-07) — não bloqueia esta SPEC, mas deve ser feito para não confundir o próximo agente que consultar o snapshot em vez das migrations reais.
 - [x] **"Cabeçalho duplicado" — causa raiz confirmada; corrigido duas vezes nesta sessão (ver "Realizado" para o histórico).** Causa original: no commit então publicado no Skip (`fc3b3c7`), `src/App.tsx` renderizava `<AppNav />` diretamente em `AppShell` **além** de `ProtectedRoute` também renderizar `<AppNav />`. Corrigido em `d1a2a7e`. Reapareceu porque um `git merge origin/main` posterior (nesta mesma sessão) trouxe de volta a versão antiga do arquivo sem que eu conferisse — corrigido de novo em `eb5cc7e`.
@@ -207,3 +207,13 @@ Hoje o registro de pedido de compra é 1 produto + 1 fornecedor por chamada (RPC
   - O op class do índice fuzzy foi qualificado como `extensions.gin_trgm_ops` (em vez de `gin_trgm_ops` puro) para seguir o padrão já existente no banco.
 - **Verificado**: `oxlint src` limpo (único warning é o pré-existente em `Cotacoes.tsx`, não relacionado); `vite build` limpo (únicos avisos são pré-existentes: classe Tailwind ambígua `duration-[800ms]` e aviso de chunk >500kB, ambos não relacionados a esta mudança); `oxfmt --check` reporta "Format issues" em ~113 arquivos do projeto, mas isso já ocorre **antes** desta mudança (confirmado via `git stash` — é uma condição pré-existente do repositório, provavelmente ligada a diferença de terminador de linha CRLF/LF no checkout Windows, não introduzida por esta implementação).
 - **Não feito nesta sessão** (fora do escopo de um agente implementador, ou dependente de decisão/dado do usuário): reextração do snapshot `supabase/db/current/`; aplicação real da migration no Supabase; backfill de `marcas.fornecedor_id`; teste manual no navegador; publicação via Skip.
+
+#### 2026-07-17
+
+- **Pedro reportou** (fala/transcrição): "a marca não está sendo vinculada... em Necessidade de Compra", pedindo a mesma visualização/vínculo de marca já existente em Estoque de Produtos. Diagnóstico: exatamente o gap desta SPEC (Parte 2) — código pronto, migrations em rascunho nunca aplicadas ao Supabase real. Confirmado via agente `Explore` que `vw_estoque_produtos` (migration `20260713_033`, já aplicada) usa o mesmo padrão `LEFT JOIN marcas m ON m.id = p.marca_id` que a `002` desta migration replica para `vw_necessidade_compra`.
+- **As 5 migrations de `20260716_049_spec030_pedido_lote_marca_fornecedor/` foram aplicadas no Supabase real** (conexão direta via `SUPABASE_DB_URL` do `.env`, `psycopg2`, autorizado explicitamente por Pedro nesta sessão — não pelo agente `implementador`, que nunca aplica migration real). Ordem: `001` (coluna `marcas.fornecedor_id`) → `002` (view) → `003` (RPC lote) em uma transação; depois `004`+`005` em outra transação, após corrigir 2 bugs encontrados só ao rodar contra o Postgres real (impossível detectar sem aplicar de fato):
+  1. **`004_idx_contatos_nome_unaccent_trgm.sql`**: falhava com `functions in index expression must be marked IMMUTABLE` — `public.unaccent(text)` é `STABLE`, não `IMMUTABLE`, e Postgres exige `IMMUTABLE` em expressão de índice. Corrigido criando `public.immutable_unaccent(text)` (wrapper `IMMUTABLE` fixando o dicionário `'public.unaccent'`) e usando-o no índice.
+  2. **`005_rpc_buscar_fornecedores_fuzzy.sql`**: falhava com `for SELECT DISTINCT, ORDER BY expressions must appear in select list` no branch "com termo" (`SELECT DISTINCT c.id, c.nome ... ORDER BY similarity(...)`). Corrigido movendo o `DISTINCT` (incluindo a coluna de similaridade) para uma subquery, ordenando a query externa por ela. Também migrado para usar `public.immutable_unaccent()` em vez de `unaccent()` puro, para bater com a expressão indexada em `004` e o planner conseguir usar o índice.
+  - Os arquivos `004` e `005` no repositório já refletem a versão corrigida (foram editados antes/depois da aplicação, nunca existiu uma versão aplicada divergente do que está commitado).
+- **Verificado após aplicação**: `vw_necessidade_compra` agora expõe `marca_id, marca_nome, fornecedor_id, fornecedor_nome`; `230` de `233` linhas têm `marca_nome` preenchido (os `3` restantes são produtos sem `marca_id` cadastrado — dado, não bug). `fornecedor_id`/`fornecedor_nome` ainda nulos até o backfill de `marcas.fornecedor_id` (pendência já conhecida). `buscar_fornecedores_fuzzy()` executa sem erro (antes e depois da correção do bug 2), mas ver pendência nova sobre o threshold/algoritmo não retornar resultado para buscas curtas.
+- **Não feito**: reextração do snapshot `supabase/db/current/` (pendência já existia); teste end-to-end no navegador; publicação via Skip; backfill de dado de `marcas.fornecedor_id`; correção do algoritmo de busca fuzzy (nova pendência acima).

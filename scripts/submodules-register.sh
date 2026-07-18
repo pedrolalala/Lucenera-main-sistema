@@ -85,6 +85,7 @@ add_submodule "https://github.com/pedrolalala/lucenera-crm.git" "04-Sistemas/luc
 add_submodule "https://github.com/pedrolalala/dashboard-rh-lucenera-6g2endmv7.git" "04-Sistemas/dashboard-rh-lucenera-5fe9c"
 add_submodule "https://github.com/pedrolalala/lucenera-logistics-bz5s7xehm.git" "04-Sistemas/lucenera-logistics-b7cd1"
 add_submodule "https://github.com/pedrolalala/cadastro-lucenera.git" "04-Sistemas/cadastro-lucenera-b86fe"
+add_submodule "https://github.com/pedrolalala/dashboard-lucenera-b02z85wa3.git" "04-Sistemas/dashboard-lucenera-b02z85wa3"
 
 echo
 echo "Registro finalizado. Revise com:"

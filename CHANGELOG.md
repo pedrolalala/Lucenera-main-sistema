@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-18 (5)
+
+### Adicionado
+
+- Criada e implementada `SPEC-034_Sugestao_Automatica_Fornecedor_por_Marca.md` (fluxo planner → implementador → revisor). Análise real no Supabase mostrou que 63 das 109 marcas sem fornecedor tinham candidato de nome quase idêntico via `word_similarity()`. Entregue: correção da RPC `buscar_fornecedores_fuzzy` (usava `similarity()`, que não achava termo curto em nome de fornecedor longo — pendência aberta desde a SPEC-030), nova RPC `sugerir_fornecedores_marcas()`, e tela "Marcas" ganhou badge de sugestão + confirmação individual ou em lote (sempre com revisão explícita, nunca aplicação automática). Migrations aplicadas no Supabase real, revisado sem achado crítico, commitado (`51123f8`) e publicado em produção via Skip (`0.0.43`).
+- **61 das 63 marcas de alta confiança foram vinculadas ao fornecedor** nesta sessão, a pedido do usuário. 2 casos foram sinalizados como possível falso positivo (encontrados só ao revisar a lista completa, fora da amostra que embasou a SPEC) e excluídos após confirmação do usuário: "LIGHT LIGHT"→"OMEGA LIGHT" (match por palavra genérica "LIGHT") e "OUTROS"→"OUTROS" (parecem registros placeholder dos dois lados). Total de marcas com fornecedor vinculado: 62 de 109.
+
 ## 2026-07-18 (4)
 
 ### Corrigido

@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-18 (4)
+
+### Corrigido
+
+- SPEC-033 (`compras-lucenera-3o23t98ee`): Pedro reportou que, mesmo após usar a tela nova "Marcas" para vincular fornecedor, os checkboxes de "Necessidade de Compra" continuavam desabilitados. Diagnóstico confirmado por teste direto no Supabase real: `UPDATE marcas SET fornecedor_id = ...` via SQL puro funciona e a view reflete corretamente — o bug estava só no frontend. Causa raiz: `atualizarFornecedorMarca()` chamava `.update().eq('id', ...)` **sem `.select()`**; quando a policy RLS bloqueia a escrita (0 linhas afetadas), o Postgrest não gera erro nenhum (`Prefer: return=minimal`), então a função assumia sucesso e mostrava toast de confirmação mesmo sem nada persistir. Corrigido encadeando `.select('id').single()` e tratando ausência de dado retornado como falha explícita. Revisado sem achado crítico, commitado (`255d30b`), pushado e republicado em produção via Skip (`0.0.42`).
+- Registrada suspeita não confirmada para acompanhamento caso o erro persista após a correção: sessão JWT expirada/anônima no frontend, ou mismatch entre `auth.uid()` e `usuarios.id` para o usuário real logado — ambas as causas ficariam agora visíveis via toast de erro explícito, em vez de falso sucesso.
+
 ## 2026-07-18 (3)
 
 ### Adicionado

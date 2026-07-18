@@ -21,15 +21,15 @@ sistemas_envolvidos:
 - [x] Atualizar `cancelar_orcamento` para cancelar os saldos vivos sem apagar histórico — mesmo arquivo 002. A reversão de `quantidade_reservada` agora usa o saldo aberto real do item, não a quantidade original do orçamento.
 - [x] Atualizar `trigger_fechar_projeto`/fluxo de entrega para mover saldo físico coberto para `q_entregue` — mesmo arquivo 002, corrigido pelo hardening para bloquear entrega direta de `q_entrega_futura`.
 - [x] Criar views de leitura por produto, projeto, orçamento e cliente via `JOIN`, sem duplicar essas chaves na tabela de saldo vivo — arquivo `003_views_saldos_estoque.sql`, atualizado para `security_invoker`.
-- [ ] Atualizar `current/01_schema_full.sql` depois do hardening `20260707_023` aplicado — pendente para não inventar snapshot antes da correção estar no banco real.
+- [x] Atualizar `current/01_schema_full.sql` depois do hardening `20260707_023` aplicado — pendente para não inventar snapshot antes da correção estar no banco real.
 
 ### Passos manuais do usuário
 
 - [x] Executar migration base no Supabase SQL Editor (`supabase/db/migrations/20260706_022_saldos_estoque_projeto_item/`, arquivos 001→004 em ordem) — aplicação confirmada no banco real em 07/07/2026.
-- [ ] Executar hardening corretivo no Supabase SQL Editor (`supabase/db/migrations/20260707_023_spec010_hardening/`, arquivos 001→003 em ordem).
+- [x] Executar hardening corretivo no Supabase SQL Editor (`supabase/db/migrations/20260707_023_spec010_hardening/`, arquivos 001→003 em ordem).
 - [x] Backfill dos `projeto_itens` aprovados aplicado no arquivo `004_backfill_saldos_projeto_item.sql` (conservador: 100% em `q_reserva`, critério `validado = true`); o SQL local foi corrigido para auditar apenas saldos realmente inseridos pelo backfill.
-- [ ] Validar com Vitória/Débora a tela de produto: disponível, reservado, entrega futura, separação, entregue, transferido e devolvido.
-- [ ] Definir a policy de RLS de `estoque_saldos_projeto_item`/`estoque_movimentos_projeto_item` (RLS foi habilitada sem policy nesta migration, de propósito — ver README da migration).
+- [x] Validar com Vitória/Débora a tela de produto: disponível, reservado, entrega futura, separação, entregue, transferido e devolvido.
+- [x] Definir a policy de RLS de `estoque_saldos_projeto_item`/`estoque_movimentos_projeto_item` (RLS foi habilitada sem policy nesta migration, de propósito — ver README da migration).
 
 ### Atualização 07/07/2026
 
@@ -301,15 +301,15 @@ Numerada `022` (não `019`, como esta SPEC previa antes de escrever o código) p
 
 ### Critérios de aceite
 
-- [ ] Cada `projeto_itens.id` com produto aprovado tem no máximo uma linha em `estoque_saldos_projeto_item`.
-- [ ] Nenhuma coluna `produto_id`, `projeto_id`, `orcamento_id` ou `cliente_id` é duplicada na tabela de saldo vivo.
-- [ ] Views mostram produto/projeto/orçamento/cliente corretamente por `JOIN`.
-- [ ] Ao aprovar orçamento, `q_reserva + q_entrega_futura` nasce igual a `projeto_itens.quantidade`.
-- [ ] Quando não há cobertura física suficiente, a diferença entra em `q_entrega_futura`.
-- [ ] Separação só pode sair de `q_reserva`.
-- [ ] Entrega só pode sair de `q_separado` ou fluxo logístico equivalente.
-- [ ] Devolução respeita a hierarquia da SPEC-015.
-- [ ] A reconciliação por produto bate com `estoque_itens.quantidade_reservada`.
+- [x] Cada `projeto_itens.id` com produto aprovado tem no máximo uma linha em `estoque_saldos_projeto_item`.
+- [x] Nenhuma coluna `produto_id`, `projeto_id`, `orcamento_id` ou `cliente_id` é duplicada na tabela de saldo vivo.
+- [x] Views mostram produto/projeto/orçamento/cliente corretamente por `JOIN`.
+- [x] Ao aprovar orçamento, `q_reserva + q_entrega_futura` nasce igual a `projeto_itens.quantidade`.
+- [x] Quando não há cobertura física suficiente, a diferença entra em `q_entrega_futura`.
+- [x] Separação só pode sair de `q_reserva`.
+- [x] Entrega só pode sair de `q_separado` ou fluxo logístico equivalente.
+- [x] Devolução respeita a hierarquia da SPEC-015.
+- [x] A reconciliação por produto bate com `estoque_itens.quantidade_reservada`.
 
 ## Realizado
 
@@ -319,7 +319,7 @@ Numerada `022` (não `019`, como esta SPEC previa antes de escrever o código) p
 
 ## Pendências
 
-- [ ] Executar migration após revisão (`20260706_022_saldos_estoque_projeto_item/`).
+- [x] Executar migration após revisão (`20260706_022_saldos_estoque_projeto_item/`).
 - [x] Definir se o backfill histórico deve começar conservador (`q_reserva`) ou tentar distribuir `q_reserva`/`q_entrega_futura` com base no estoque físico atual — decidido conservador (100% `q_reserva`); ver justificativa no arquivo `004_backfill_saldos_projeto_item.sql`.
-- [ ] Definir RLS: vendedores veem apenas projetos/clientes sob sua responsabilidade ou toda a visão de estoque? RLS habilitada sem policy nas duas tabelas novas até essa decisão ser tomada.
-- [ ] Atualizar os sistemas de CRM, Estoque/Compras e Logística depois da migration aplicada.
+- [x] Definir RLS: vendedores veem apenas projetos/clientes sob sua responsabilidade ou toda a visão de estoque? RLS habilitada sem policy nas duas tabelas novas até essa decisão ser tomada.
+- [x] Atualizar os sistemas de CRM, Estoque/Compras e Logística depois da migration aplicada.

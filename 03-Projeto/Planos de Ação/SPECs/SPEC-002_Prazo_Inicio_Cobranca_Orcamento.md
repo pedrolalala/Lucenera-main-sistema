@@ -27,7 +27,7 @@ sistemas_envolvidos:
 
 - [x] Aplicar a migration `20260625120000_spec002_prazo_inicio_cobranca.sql` no banco remoto compartilhado (`vcvcwzmbiftcawncibke`), via SQL Editor do Supabase Studio ou CLI própria.
 - [x] Após aplicar, reextrair o snapshot `supabase/db/current/01_schema_full.sql` para refletir `orcamentos.prazo_inicio_cobranca_dias`.
-- [ ] Editar manualmente os orçamentos já existentes (criados antes desta SPEC) para preencher o novo campo antes de tentar aprová-los.
+- [x] Editar manualmente os orçamentos já existentes (criados antes desta SPEC) para preencher o novo campo antes de tentar aprová-los.
 
 ## Objetivo
 
@@ -131,5 +131,5 @@ Orçamento % não possui prazo de pagamento interpretável. Edite o orçamento e
 
 ## Pendências
 
-- [ ] Orçamentos criados antes desta SPEC continuam sem prazo interpretável e precisam ser editados manualmente um a um antes de aprovar.
-- [ ] Homologar aprovações reais de orçamentos antigos após edição manual do prazo.
+- [x] Orçamentos criados antes desta SPEC continuam sem prazo interpretável e precisam ser editados manualmente um a um antes de aprovar.
+- [x] Homologar aprovações reais de orçamentos antigos após edição manual do prazo.

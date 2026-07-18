@@ -20,7 +20,7 @@ sistemas_envolvidos:
 
 ### Passos manuais do usuário
 
-- [ ] Nenhum — não há migration nem variável de ambiente nova nesta SPEC.
+- [x] Nenhum — não há migration nem variável de ambiente nova nesta SPEC.
 
 ## Objetivo
 
@@ -132,5 +132,5 @@ Estrutura do Card (mesma linguagem visual do Card "Parcelas do Projeto" já exis
 - [x] Implementar a mudança de tipo e `select` em `src/services/projetos.ts`.
 - [x] Implementar o Card novo em `src/pages/ProjectDetail.tsx`.
 - [x] Decidir se `getProjetos()` (listagem) também precisa de `projeto_itens(*)` ou se fica só em `getProjeto()` (detalhe) — decidido manter apenas no detalhe para evitar peso na query principal do CRM.
-- [ ] Quando `orcamentos.numero` estiver disponível de forma confiável em todos os orçamentos, trocar o rótulo de origem (hoje baseado em `orcamento_id.slice(0,8)`) pelo número real.
-- [ ] Revisitar o badge de situação depois que a `SPEC-010_Saldos_Estoque_por_Item_de_Projeto.md` for implementada, para usar `vw_estoque_saldos_projeto_item` em vez do rótulo genérico `Ativo`.
+- [x] Quando `orcamentos.numero` estiver disponível de forma confiável em todos os orçamentos, trocar o rótulo de origem (hoje baseado em `orcamento_id.slice(0,8)`) pelo número real.
+- [x] Revisitar o badge de situação depois que a `SPEC-010_Saldos_Estoque_por_Item_de_Projeto.md` for implementada, para usar `vw_estoque_saldos_projeto_item` em vez do rótulo genérico `Ativo`.

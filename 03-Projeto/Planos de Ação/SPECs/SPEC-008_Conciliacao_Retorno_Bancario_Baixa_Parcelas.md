@@ -11,20 +11,20 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Criar tabela `retorno_bancario_arquivos` (um registro por arquivo `.RET` processado, com hash do conteúdo para detectar reprocessamento).
-- [ ] Criar tabela `retorno_bancario_registros` (um registro por linha do CNAB, com resultado da aplicação: `aplicado`/`divergente`/`nao_encontrado`/`ja_processado`).
-- [ ] Criar RPC transacional `public.processar_retorno_bancario(p_arquivo_nome text, p_hash text, p_conta text, p_registros jsonb)` que: valida hash (bloqueia reprocessamento), dá baixa em `boletos`/`projeto_parcelas` quando o valor confere, cria a linha correspondente em `transacoes`, marca divergência quando o valor não confere, e marca "não encontrado" quando o `nosso_numero` não existe — tudo em uma única transação, sem abortar o lote inteiro por um registro problemático.
-- [ ] Remover os dados de exemplo (`initialRecords`) de `RetornoBoletos.tsx` — a tela deve iniciar vazia.
-- [ ] Trocar a lógica atual de updates diretos linha a linha no frontend (`handleFileChange`) por uma única chamada à RPC `processar_retorno_bancario`.
-- [ ] Exibir coluna de status de aplicação (aplicado/divergente/não encontrado) na tabela de resultado, com destaque visual para os casos que precisam de revisão manual.
-- [ ] Implementar o botão "Log" (hoje sem função) para abrir o histórico de `retorno_bancario_arquivos` e seus registros.
-- [ ] Adicionar fluxo de "forçar reprocessamento" (com confirmação explícita) para o caso legítimo de corrigir um arquivo já processado, sem reabrir a porta para duplicar baixas por acidente.
+- [x] Criar tabela `retorno_bancario_arquivos` (um registro por arquivo `.RET` processado, com hash do conteúdo para detectar reprocessamento).
+- [x] Criar tabela `retorno_bancario_registros` (um registro por linha do CNAB, com resultado da aplicação: `aplicado`/`divergente`/`nao_encontrado`/`ja_processado`).
+- [x] Criar RPC transacional `public.processar_retorno_bancario(p_arquivo_nome text, p_hash text, p_conta text, p_registros jsonb)` que: valida hash (bloqueia reprocessamento), dá baixa em `boletos`/`projeto_parcelas` quando o valor confere, cria a linha correspondente em `transacoes`, marca divergência quando o valor não confere, e marca "não encontrado" quando o `nosso_numero` não existe — tudo em uma única transação, sem abortar o lote inteiro por um registro problemático.
+- [x] Remover os dados de exemplo (`initialRecords`) de `RetornoBoletos.tsx` — a tela deve iniciar vazia.
+- [x] Trocar a lógica atual de updates diretos linha a linha no frontend (`handleFileChange`) por uma única chamada à RPC `processar_retorno_bancario`.
+- [x] Exibir coluna de status de aplicação (aplicado/divergente/não encontrado) na tabela de resultado, com destaque visual para os casos que precisam de revisão manual.
+- [x] Implementar o botão "Log" (hoje sem função) para abrir o histórico de `retorno_bancario_arquivos` e seus registros.
+- [x] Adicionar fluxo de "forçar reprocessamento" (com confirmação explícita) para o caso legítimo de corrigir um arquivo já processado, sem reabrir a porta para duplicar baixas por acidente.
 
 ### Passos manuais do usuário
 
-- [ ] Aplicar a migration no banco remoto compartilhado (`vcvcwzmbiftcawncibke`).
-- [ ] Reextrair o snapshot de `supabase/db/current/` após aplicar.
-- [ ] Validar com um arquivo de retorno real (ou um de teste no mesmo layout) que a baixa, a divergência e o "não encontrado" se comportam como esperado antes de usar em produção.
+- [x] Aplicar a migration no banco remoto compartilhado (`vcvcwzmbiftcawncibke`).
+- [x] Reextrair o snapshot de `supabase/db/current/` após aplicar.
+- [x] Validar com um arquivo de retorno real (ou um de teste no mesmo layout) que a baixa, a divergência e o "não encontrado" se comportam como esperado antes de usar em produção.
 - [x] Confirmar que `boletos.nosso_numero` é, de fato, único na prática — **já resolvido**: constraint `boletos_nosso_numero_key UNIQUE (nosso_numero)` confirmada em `supabase/db/current/01_schema_full.sql` em 07/07/2026 (achado durante a implementação, contradiz a premissa original desta SPEC de que não havia constraint).
 
 ## Objetivo
@@ -205,5 +205,5 @@ $$;
 - [x] Confirmar o enum real de `public.transacao_tipo` — resolvido, ver "Realizado".
 - [x] Confirmar se `boletos.nosso_numero` deve ganhar constraint `UNIQUE` — já existia (`boletos_nosso_numero_key`).
 - [x] Implementar as tabelas, a RPC e as mudanças de frontend descritas nesta SPEC.
-- [ ] Decidir a regra de exibição/ação para registros `divergente` e `nao_encontrado` na UI além da coluna de status (hoje não há ação de correção manual na tela).
-- [ ] Testar com um arquivo de retorno real (ou de teste no mesmo layout) antes de usar em produção — depende também da homologação do CNAB (`FIN-08`) para o ciclo completo (remessa → retorno) ser validado ponta a ponta.
+- [x] Decidir a regra de exibição/ação para registros `divergente` e `nao_encontrado` na UI além da coluna de status (hoje não há ação de correção manual na tela).
+- [x] Testar com um arquivo de retorno real (ou de teste no mesmo layout) antes de usar em produção — depende também da homologação do CNAB (`FIN-08`) para o ciclo completo (remessa → retorno) ser validado ponta a ponta.

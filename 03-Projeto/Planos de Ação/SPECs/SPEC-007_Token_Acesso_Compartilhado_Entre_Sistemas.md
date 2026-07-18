@@ -31,9 +31,9 @@ sistemas_envolvidos:
 
 - [x] Aplicar a migration no banco remoto compartilhado (`vcvcwzmbiftcawncibke`).
 - [x] Publicar as duas Edge Functions novas no projeto remoto.
-- [ ] Publicar o app do Financeiro (`retorno-bancario-bradesco-5392a`) — pré-requisito independente desta SPEC, mas necessário para testar o fluxo ponta-a-ponta do boleto.
-- [ ] Configurar o `.env`/VITE do Financeiro com a URL/anon key do Supabase — também pré-requisito independente, registrado em `ORC-05`.
-- [ ] Testar manualmente a navegação Orçamentos → Financeiro (boleto) e Hub → qualquer sistema, confirmando que não pede login de novo.
+- [x] Publicar o app do Financeiro (`retorno-bancario-bradesco-5392a`) — pré-requisito independente desta SPEC, mas necessário para testar o fluxo ponta-a-ponta do boleto.
+- [x] Configurar o `.env`/VITE do Financeiro com a URL/anon key do Supabase — também pré-requisito independente, registrado em `ORC-05`.
+- [x] Testar manualmente a navegação Orçamentos → Financeiro (boleto) e Hub → qualquer sistema, confirmando que não pede login de novo.
 
 ## Objetivo
 
@@ -156,6 +156,6 @@ No sistema de Orçamentos, o modal pós-aprovação que hoje tenta redirecionar 
 
 ## Pendências
 
-- [ ] Homologar no ambiente remoto o mecanismo `generateLink`/`verifyOtp` usado por `exchange-cross-system-code`.
-- [ ] Integrar nos demais sistemas conforme cada um precisar linkar para outro.
-- [ ] Testar ponta-a-ponta depois que o Financeiro estiver publicado e configurado (pré-requisitos de `ORC-05`).
+- [x] Homologar no ambiente remoto o mecanismo `generateLink`/`verifyOtp` usado por `exchange-cross-system-code`.
+- [x] Integrar nos demais sistemas conforme cada um precisar linkar para outro.
+- [x] Testar ponta-a-ponta depois que o Financeiro estiver publicado e configurado (pré-requisitos de `ORC-05`).

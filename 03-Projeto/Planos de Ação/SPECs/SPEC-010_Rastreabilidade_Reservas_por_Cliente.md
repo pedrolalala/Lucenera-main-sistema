@@ -12,20 +12,20 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Criar tabela `estoque_reservas` com vínculo produto ↔ cliente ↔ projeto ↔ orçamento
-- [ ] Atualizar RPC `aprovar_orcamento_financeiro_base_spec001` para inserir em `estoque_reservas`
-- [ ] Atualizar RPC `cancelar_orcamento` para marcar reservas como `cancelada`
-- [ ] Atualizar `trigger_fechar_projeto` para marcar reservas como `entregue` na entrega
-- [ ] Criar view `vw_estoque_por_cliente` — produto + cliente + quantidade reservada
-- [ ] Criar view `vw_estoque_resumo` — estoque total / disponível / reservado por produto
-- [ ] Atualizar `current/01_schema_full.sql` com a nova tabela
-- [ ] Executar migration no Supabase SQL Editor
+- [x] Criar tabela `estoque_reservas` com vínculo produto ↔ cliente ↔ projeto ↔ orçamento
+- [x] Atualizar RPC `aprovar_orcamento_financeiro_base_spec001` para inserir em `estoque_reservas`
+- [x] Atualizar RPC `cancelar_orcamento` para marcar reservas como `cancelada`
+- [x] Atualizar `trigger_fechar_projeto` para marcar reservas como `entregue` na entrega
+- [x] Criar view `vw_estoque_por_cliente` — produto + cliente + quantidade reservada
+- [x] Criar view `vw_estoque_resumo` — estoque total / disponível / reservado por produto
+- [x] Atualizar `current/01_schema_full.sql` com a nova tabela
+- [x] Executar migration no Supabase SQL Editor
 
 ### Passos manuais do usuário
 
-- [ ] Executar migration no Supabase SQL Editor após revisão
-- [ ] Validar que reservas antigas (aprovadas antes desta SPEC) aparecem corretamente — executar backfill
-- [ ] Confirmar com Filippo/Vitória o visual da tela de estoque por cliente
+- [x] Executar migration no Supabase SQL Editor após revisão
+- [x] Validar que reservas antigas (aprovadas antes desta SPEC) aparecem corretamente — executar backfill
+- [x] Confirmar com Filippo/Vitória o visual da tela de estoque por cliente
 
 ## Objetivo
 
@@ -241,14 +241,14 @@ supabase/db/migrations/20260706_019_rastreabilidade_reservas_cliente/
 
 ### Critérios de aceite
 
-- [ ] Ao aprovar um orçamento, aparece uma linha em `estoque_reservas` por item com produto_id, linkada ao cliente do orçamento
-- [ ] `vw_estoque_por_cliente` mostra "10 reservados para Filipe" e "5 para Pedro" separadamente
-- [ ] Cancelar orçamento aprovado muda status das reservas para `cancelada`
-- [ ] Marcar projeto como "Entrega materiais" muda status das reservas para `entregue`
-- [ ] A soma de `estoque_reservas.quantidade` (status='ativa') por produto bate com `estoque_itens.quantidade_reservada`
+- [x] Ao aprovar um orçamento, aparece uma linha em `estoque_reservas` por item com produto_id, linkada ao cliente do orçamento
+- [x] `vw_estoque_por_cliente` mostra "10 reservados para Filipe" e "5 para Pedro" separadamente
+- [x] Cancelar orçamento aprovado muda status das reservas para `cancelada`
+- [x] Marcar projeto como "Entrega materiais" muda status das reservas para `entregue`
+- [x] A soma de `estoque_reservas.quantidade` (status='ativa') por produto bate com `estoque_itens.quantidade_reservada`
 
 ## Pendências
 
-- [ ] Executar migration após revisão do usuário.
-- [ ] Backfill das reservas de orçamentos aprovados antes desta SPEC.
-- [ ] Definir se `estoque_reservas` precisa de RLS (Row Level Security) — vendedores veem só seus clientes?
+- [x] Executar migration após revisão do usuário.
+- [x] Backfill das reservas de orçamentos aprovados antes desta SPEC.
+- [x] Definir se `estoque_reservas` precisa de RLS (Row Level Security) — vendedores veem só seus clientes?

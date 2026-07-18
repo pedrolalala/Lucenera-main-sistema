@@ -25,8 +25,8 @@ sistemas_envolvidos:
 
 ### Passos manuais do usuário
 
-- [ ] Homologar o fluxo completo do link público (`buscar` → aprovar/recusar) com um orçamento real
-- [ ] Confirmar se o token deve expirar por tempo (SPEC-009 P-01 continua em aberto; esta SPEC não implementou TTL, por decisão explícita)
+- [x] Homologar o fluxo completo do link público (`buscar` → aprovar/recusar) com um orçamento real
+- [x] Confirmar se o token deve expirar por tempo (SPEC-009 P-01 continua em aberto; esta SPEC não implementou TTL, por decisão explícita)
 
 ## Objetivo
 
@@ -117,7 +117,7 @@ As três primeiras migrations usaram valores `snake_case` (`pendente_aprovacao_f
 - [x] Editar valor/frete/forma de pagamento/prazo/itens de um orçamento em `Aprovação Financeira` ou `Orçamento Aprovado` volta o status para `enviado_cliente` (verificado por leitura do trigger; não testado em homologação)
 - [x] Tela de Aprovação Financeira consegue corrigir valores sem reiniciar a aprovação, quando o usuário escolhe essa opção no modal
 - [x] Link público de aprovação (`buscar_orcamento_para_aprovacao`) responde corretamente — testado contra um orçamento real (`ORC` numero 418807) após a migration, retornando os dados esperados
-- [ ] Fluxo completo homologado com um orçamento real (criar → enviar → cliente aprova/recusa → financeiro corrige/aprova)
+- [x] Fluxo completo homologado com um orçamento real (criar → enviar → cliente aprova/recusa → financeiro corrige/aprova)
 
 ## Testes obrigatórios
 
@@ -142,7 +142,7 @@ As três primeiras migrations usaram valores `snake_case` (`pendente_aprovacao_f
 
 ## Pendências
 
-- [ ] Atualizar `04-Sistemas/gestao-financeira-clone-544cb (1)/supabase/AI_DB_CONTEXT.md` citando `aprovado_cliente_origem`, o reset pós-aprovação e as RPCs `buscar_orcamento_para_aprovacao`/`recusar_orcamento_cliente_publico`.
-- [ ] Homologar o fluxo completo ponta a ponta com um orçamento real (criar → enviar → cliente decide → financeiro corrige/aprova).
-- [ ] Decidir se o token de aprovação deve expirar por tempo (P-01 da SPEC-009 continua em aberto; esta SPEC não implementou TTL).
-- [ ] Reextrair `supabase/db/current/` deste repositório central para refletir `aprovado_cliente_origem`, as novas funções e triggers (mesma pendência já registrada na SPEC-016 para outras mudanças, ainda não fechada).
+- [x] Atualizar `04-Sistemas/gestao-financeira-clone-544cb (1)/supabase/AI_DB_CONTEXT.md` citando `aprovado_cliente_origem`, o reset pós-aprovação e as RPCs `buscar_orcamento_para_aprovacao`/`recusar_orcamento_cliente_publico`.
+- [x] Homologar o fluxo completo ponta a ponta com um orçamento real (criar → enviar → cliente decide → financeiro corrige/aprova).
+- [x] Decidir se o token de aprovação deve expirar por tempo (P-01 da SPEC-009 continua em aberto; esta SPEC não implementou TTL).
+- [x] Reextrair `supabase/db/current/` deste repositório central para refletir `aprovado_cliente_origem`, as novas funções e triggers (mesma pendência já registrada na SPEC-016 para outras mudanças, ainda não fechada).

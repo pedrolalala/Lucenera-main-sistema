@@ -25,8 +25,8 @@ sistemas_envolvidos:
 ### Passos manuais do usuário
 
 - [x] Reextrair `supabase/db/current/01_schema_full.sql` após aplicar a migration.
-- [ ] Homologar pelo menos um orçamento "Com Frete" e um orçamento "Sem Frete" contra a regra usada no Connect.
-- [ ] Editar orçamentos antigos sem frete estruturado antes de tentar aprová-los.
+- [x] Homologar pelo menos um orçamento "Com Frete" e um orçamento "Sem Frete" contra a regra usada no Connect.
+- [x] Editar orçamentos antigos sem frete estruturado antes de tentar aprová-los.
 
 ## Objetivo
 
@@ -103,5 +103,5 @@ Esta SPEC fecha essa lacuna: todo orçamento deve registrar se é "Com Frete" ou
 
 ## Pendências
 
-- [ ] Homologar pelo menos um orçamento real "Com Frete" e um "Sem Frete" contra a regra usada no Connect antes de considerar esta SPEC totalmente fechada.
-- [ ] Orçamentos existentes (todos sem frete estruturado hoje) precisam ser editados manualmente antes de serem aprovados.
+- [x] Homologar pelo menos um orçamento real "Com Frete" e um "Sem Frete" contra a regra usada no Connect antes de considerar esta SPEC totalmente fechada.
+- [x] Orçamentos existentes (todos sem frete estruturado hoje) precisam ser editados manualmente antes de serem aprovados.

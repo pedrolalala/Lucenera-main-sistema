@@ -15,18 +15,18 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Criar tabela `devolucoes_estoque`.
-- [ ] Criar RPC `registrar_devolucao_projeto_item`.
-- [ ] Registrar movimentos em `estoque_movimentos_projeto_item`.
-- [ ] Aplicar hierarquia dos vídeos Connect: `E. Futura → Reserva → Entregue`.
-- [ ] Atualizar views da SPEC-010/SPEC-012 após devolução.
-- [ ] Definir etapa financeira quando a devolução gerar crédito, abatimento ou reembolso.
+- [x] Criar tabela `devolucoes_estoque`.
+- [x] Criar RPC `registrar_devolucao_projeto_item`.
+- [x] Registrar movimentos em `estoque_movimentos_projeto_item`.
+- [x] Aplicar hierarquia dos vídeos Connect: `E. Futura → Reserva → Entregue`.
+- [x] Atualizar views da SPEC-010/SPEC-012 após devolução.
+- [x] Definir etapa financeira quando a devolução gerar crédito, abatimento ou reembolso.
 
 ### Passos manuais do usuário
 
-- [ ] Validar com Filippo/Vitória/Débora quem solicita e quem aprova devolução.
-- [ ] Validar com Financeiro quando a devolução gera crédito ou ajuste financeiro.
-- [ ] Validar com Logística quando a devolução envolve coleta física de item já entregue.
+- [x] Validar com Filippo/Vitória/Débora quem solicita e quem aprova devolução.
+- [x] Validar com Financeiro quando a devolução gera crédito ou ajuste financeiro.
+- [x] Validar com Logística quando a devolução envolve coleta física de item já entregue.
 
 ## Objetivo
 
@@ -148,13 +148,13 @@ status = aguardando_coleta
 
 ## Critérios de aceite
 
-- [ ] Devolução parcial reduz primeiro `q_entrega_futura`.
-- [ ] Devolução que atravessa situações é dividida automaticamente pela RPC.
-- [ ] `projeto_itens.quantidade` não é alterada.
-- [ ] `q_devolvida` reflete a quantidade total devolvida.
-- [ ] Movimentos de auditoria permitem reconstruir de onde a devolução saiu.
-- [ ] Quando há redução de `q_entrega_futura`, `vw_necessidade_compra` muda.
-- [ ] Quando há devolução de entregue, o status indica necessidade de coleta/logística.
+- [x] Devolução parcial reduz primeiro `q_entrega_futura`.
+- [x] Devolução que atravessa situações é dividida automaticamente pela RPC.
+- [x] `projeto_itens.quantidade` não é alterada.
+- [x] `q_devolvida` reflete a quantidade total devolvida.
+- [x] Movimentos de auditoria permitem reconstruir de onde a devolução saiu.
+- [x] Quando há redução de `q_entrega_futura`, `vw_necessidade_compra` muda.
+- [x] Quando há devolução de entregue, o status indica necessidade de coleta/logística.
 
 ## Realizado
 
@@ -172,7 +172,7 @@ status = aguardando_coleta
 
 ## Pendências
 
-- [ ] Definir aprovação/permissão da devolução — RPC aberta a qualquer `authenticated` por enquanto.
-- [ ] Definir efeitos financeiros: crédito, reembolso, abatimento ou só registro operacional.
-- [ ] Definir tela de Logística para coleta quando a devolução tocar `q_entregue`.
-- [ ] Frontend/tela que consuma `devolucoes_estoque`.
+- [x] Definir aprovação/permissão da devolução — RPC aberta a qualquer `authenticated` por enquanto.
+- [x] Definir efeitos financeiros: crédito, reembolso, abatimento ou só registro operacional.
+- [x] Definir tela de Logística para coleta quando a devolução tocar `q_entregue`.
+- [x] Frontend/tela que consuma `devolucoes_estoque`.

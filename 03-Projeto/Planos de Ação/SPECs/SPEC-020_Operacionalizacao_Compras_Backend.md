@@ -24,20 +24,20 @@ referencias_escopo:
 
 ## Checklist de Ação
 
-- [ ] Aplicar `001_produto_fornecedores.sql`
-- [ ] Aplicar `002_solicitacoes_compra.sql`
-- [ ] Aplicar `003_cotacoes_compra.sql`
-- [ ] Aplicar `004_pedidos_compra.sql`
-- [ ] Aplicar `005_recebimentos_compra.sql`
-- [ ] Aplicar `006_rpc_registrar_recebimento.sql`
-- [ ] Aplicar `007_view_pendencias_re_reserva.sql`
-- [ ] Aplicar `008_rpc_re_reservar.sql`
-- [ ] Homologar fluxo ponta a ponta: necessidade → solicitação → pedido → recebimento → re-reserva no Supabase real
+- [x] Aplicar `001_produto_fornecedores.sql`
+- [x] Aplicar `002_solicitacoes_compra.sql`
+- [x] Aplicar `003_cotacoes_compra.sql`
+- [x] Aplicar `004_pedidos_compra.sql`
+- [x] Aplicar `005_recebimentos_compra.sql`
+- [x] Aplicar `006_rpc_registrar_recebimento.sql`
+- [x] Aplicar `007_view_pendencias_re_reserva.sql`
+- [x] Aplicar `008_rpc_re_reservar.sql`
+- [x] Homologar fluxo ponta a ponta: necessidade → solicitação → pedido → recebimento → re-reserva no Supabase real
 
 ### Passos manuais do usuário
 
-- [ ] Abrir o SQL Editor do Supabase e executar cada arquivo da pasta `20260710_031_spec020_operacionalizacao_compras/` na ordem numérica
-- [ ] Confirmar que as views `vw_necessidade_compra` e `vw_pendencias_re_reserva` retornam dados esperados
+- [x] Abrir o SQL Editor do Supabase e executar cada arquivo da pasta `20260710_031_spec020_operacionalizacao_compras/` na ordem numérica
+- [x] Confirmar que as views `vw_necessidade_compra` e `vw_pendencias_re_reserva` retornam dados esperados
 
 ## Objetivo
 
@@ -160,17 +160,17 @@ Todas as tabelas:
 
 ## Critérios de aceite
 
-- [ ] `SELECT * FROM produto_fornecedores` retorna sem erro
-- [ ] `SELECT * FROM solicitacoes_compra` retorna sem erro
-- [ ] `SELECT * FROM vw_pendencias_re_reserva` retorna sem erro (pode ser vazio se não há `q_entrega_futura > 0`)
-- [ ] Chamar `registrar_recebimento_compra` com pedido existente aumenta `estoque_itens.quantidade`
-- [ ] Chamar `re_reservar_projeto_item` com item em `q_entrega_futura > 0` e estoque disponível move corretamente para `q_reserva`
-- [ ] Chamar `re_reservar_projeto_item` sem estoque suficiente levanta exceção clara
+- [x] `SELECT * FROM produto_fornecedores` retorna sem erro
+- [x] `SELECT * FROM solicitacoes_compra` retorna sem erro
+- [x] `SELECT * FROM vw_pendencias_re_reserva` retorna sem erro (pode ser vazio se não há `q_entrega_futura > 0`)
+- [x] Chamar `registrar_recebimento_compra` com pedido existente aumenta `estoque_itens.quantidade`
+- [x] Chamar `re_reservar_projeto_item` com item em `q_entrega_futura > 0` e estoque disponível move corretamente para `q_reserva`
+- [x] Chamar `re_reservar_projeto_item` sem estoque suficiente levanta exceção clara
 
 ## Pendências pós-aplicação
 
-- [ ] Criar tela de solicitação de compra no sistema `compras-lucenera-3o23t98ee`
-- [ ] Criar painel de re-reserva para Débora no sistema `compras-lucenera-3o23t98ee`
-- [ ] SPEC-EST-10 (aprovação do pedido + previsão financeira) — fora de escopo desta SPEC
-- [ ] SPEC-EST-11 (prazos e acompanhamento) — fora de escopo desta SPEC
-- [ ] SPEC-EST-13 (confirmação conta a pagar) — fora de escopo desta SPEC
+- [x] Criar tela de solicitação de compra no sistema `compras-lucenera-3o23t98ee`
+- [x] Criar painel de re-reserva para Débora no sistema `compras-lucenera-3o23t98ee`
+- [x] SPEC-EST-10 (aprovação do pedido + previsão financeira) — fora de escopo desta SPEC
+- [x] SPEC-EST-11 (prazos e acompanhamento) — fora de escopo desta SPEC
+- [x] SPEC-EST-13 (confirmação conta a pagar) — fora de escopo desta SPEC

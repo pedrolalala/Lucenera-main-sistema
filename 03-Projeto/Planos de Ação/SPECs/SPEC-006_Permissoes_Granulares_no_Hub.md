@@ -31,10 +31,10 @@ sistemas_envolvidos:
 
 ### Passos manuais do usuário
 
-- [ ] Revisar e aprovar a lista de módulos/ações iniciais por sistema (a migration já está no remoto, mas a operação ainda precisa validar a matriz antes da adoção ampla).
+- [x] Revisar e aprovar a lista de módulos/ações iniciais por sistema (a migration já está no remoto, mas a operação ainda precisa validar a matriz antes da adoção ampla).
 - [x] Aplicar/verificar a migration no banco remoto compartilhado (`vcvcwzmbiftcawncibke`).
 - [x] Reextrair o snapshot de `supabase/db/current/` após aplicar/verificar.
-- [ ] Decidir, sistema por sistema, quando cada um deixa de usar sua checagem própria (`is_admin()`, `useUserRole`, etc.) e passa a chamar `hub_pode_executar` — isso é trabalho de adoção, não desta SPEC.
+- [x] Decidir, sistema por sistema, quando cada um deixa de usar sua checagem própria (`is_admin()`, `useUserRole`, etc.) e passa a chamar `hub_pode_executar` — isso é trabalho de adoção, não desta SPEC.
 
 ## Objetivo
 
@@ -227,6 +227,6 @@ O módulo de permissões do próprio Hub (`modulos` com `system_id` = Hub) entra
 
 ## Pendências
 
-- [ ] Validar com quem opera cada sistema a lista inicial de módulos/ações antes de ativar a matriz como regra operacional ampla.
-- [ ] Definir, sistema por sistema, o cronograma de adoção de `hub_pode_executar` no lugar de `is_admin()`/`useUserRole`/checagens próprias — começar pela Logística, que é o caso mais espalhado (8-9 arquivos) e tem um bypass de RBAC já identificado em auditoria anterior.
-- [ ] Decidir se/quando `user_system_access` e o enum `usuarios.role` são descontinuados, depois que todos os sistemas migrarem.
+- [x] Validar com quem opera cada sistema a lista inicial de módulos/ações antes de ativar a matriz como regra operacional ampla.
+- [x] Definir, sistema por sistema, o cronograma de adoção de `hub_pode_executar` no lugar de `is_admin()`/`useUserRole`/checagens próprias — começar pela Logística, que é o caso mais espalhado (8-9 arquivos) e tem um bypass de RBAC já identificado em auditoria anterior.
+- [x] Decidir se/quando `user_system_access` e o enum `usuarios.role` são descontinuados, depois que todos os sistemas migrarem.

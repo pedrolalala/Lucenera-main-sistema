@@ -22,8 +22,8 @@ sistemas_envolvidos:
 
 ### Passos manuais do usuário
 
-- [ ] Reextrair `supabase/db/current/01_schema_full.sql` após aplicar a migration.
-- [ ] Revisar os demais triggers de `projetos` (`trg_fechar_projeto`, `trg_gerenciar_fluxo_projeto`, `trg_reserva_estoque`, `trg_proteger_fechamento`) — não bloqueiam a aprovação hoje, mas pressupõem um fluxo de status de projeto (`Proposta Sinal`, `Entrega materiais` etc.) que pode estar desatualizado frente ao modelo atual de orçamento → projeto já existente.
+- [x] Reextrair `supabase/db/current/01_schema_full.sql` após aplicar a migration.
+- [x] Revisar os demais triggers de `projetos` (`trg_fechar_projeto`, `trg_gerenciar_fluxo_projeto`, `trg_reserva_estoque`, `trg_proteger_fechamento`) — não bloqueiam a aprovação hoje, mas pressupõem um fluxo de status de projeto (`Proposta Sinal`, `Entrega materiais` etc.) que pode estar desatualizado frente ao modelo atual de orçamento → projeto já existente.
 
 ## Objetivo
 
@@ -79,5 +79,5 @@ Evidência de impacto real:
 
 ## Pendências
 
-- [ ] Reextrair `supabase/db/current/01_schema_full.sql` para refletir a remoção do trigger/função e a alteração em `trigger_proteger_parcelas`.
-- [ ] Revisar os demais triggers de `projetos` (`trg_fechar_projeto`, `trg_gerenciar_fluxo_projeto`, `trg_reserva_estoque`, `trg_proteger_fechamento`) em uma SPEC futura — não bloqueiam a aprovação hoje, mas dependem de um fluxo de status de projeto (`Proposta Sinal`, `Entrega materiais` etc.) que pode estar desalinhado com o modelo atual de orçamento → projeto já existente.
+- [x] Reextrair `supabase/db/current/01_schema_full.sql` para refletir a remoção do trigger/função e a alteração em `trigger_proteger_parcelas`.
+- [x] Revisar os demais triggers de `projetos` (`trg_fechar_projeto`, `trg_gerenciar_fluxo_projeto`, `trg_reserva_estoque`, `trg_proteger_fechamento`) em uma SPEC futura — não bloqueiam a aprovação hoje, mas dependem de um fluxo de status de projeto (`Proposta Sinal`, `Entrega materiais` etc.) que pode estar desalinhado com o modelo atual de orçamento → projeto já existente.

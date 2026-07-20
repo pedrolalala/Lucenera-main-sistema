@@ -2,6 +2,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { PDFDocument, StandardFonts } from 'npm:pdf-lib@1.17.1'
 import { encodeBase64 } from 'jsr:@std/encoding/base64'
+import nodemailer from 'npm:nodemailer@6.9.14'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,7 +11,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 }
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+const GMAIL_USER = Deno.env.get('GMAIL_USER')
+const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD')
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -187,8 +189,8 @@ Deno.serve(async (req: Request) => {
     const { data: publicUrlData } = supabase.storage.from('orcamentos').getPublicUrl(fileName)
     const fileUrl = publicUrlData.publicUrl
 
-    // Send Email
-    if (RESEND_API_KEY) {
+    // Send Email (via Gmail SMTP)
+    if (GMAIL_USER && GMAIL_APP_PASSWORD) {
       const b64Pdf = encodeBase64(pdfBytes)
       const emailHtml = `
         <h2>Novo Orçamento Recebido</h2>
@@ -198,35 +200,38 @@ Deno.serve(async (req: Request) => {
         <p><a href="${fileUrl}">Clique aqui para baixar o PDF</a></p>
       `
 
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${RESEND_API_KEY}`,
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          user: GMAIL_USER,
+          pass: GMAIL_APP_PASSWORD,
         },
-        body: JSON.stringify({
-          from: 'suporte@lucenera.com',
+      })
+
+      try {
+        await transporter.sendMail({
+          from: GMAIL_USER,
           to: ['vinicius@lucenera.com.br', 'pedro@lucenera.com.br'],
           subject: `Novo Orçamento Recebido - ${budget.numero_orcamento || budget.id} - ${budget.cliente?.nome}`,
           html: emailHtml,
           attachments: [
             {
-              filename: fileName,
+              filename: `${numOrcto}.pdf`,
               content: b64Pdf,
+              encoding: 'base64',
             },
           ],
-        }),
-      })
-
-      if (!res.ok) {
-        const errorData = await res.text()
-        console.error('Resend API Error:', errorData)
-        throw new Error(`Falha ao enviar e-mail de notificação via Resend: ${errorData}`)
+        })
+      } catch (smtpError: any) {
+        console.error('Gmail SMTP Error:', smtpError)
+        throw new Error(`Falha ao enviar e-mail de notificação via Gmail: ${smtpError.message}`)
       }
     } else {
-      console.warn('RESEND_API_KEY not found. Email not sent.')
+      console.warn('GMAIL_USER/GMAIL_APP_PASSWORD not found. Email not sent.')
       throw new Error(
-        'RESEND_API_KEY não configurada neste projeto Supabase — e-mail de notificação não enviado.',
+        'GMAIL_USER/GMAIL_APP_PASSWORD não configurados neste projeto Supabase — e-mail de notificação não enviado.',
       )
     }
 

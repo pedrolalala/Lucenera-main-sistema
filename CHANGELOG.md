@@ -27,9 +27,15 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Corrigido bug adjacente: `process-budget-pdf` escondia falha de envio (`console.error`/`console.warn` sem `throw`, sempre retornava `success:true`). Agora propaga erro real. Deployado no Supabase real (`supabase functions deploy`, confirmado pelo usuário) — corrigido nas duas cópias (submodule e repo central).
 - **Achado**: `supabase functions deploy` rodado da raiz do repo central publicou a partir de `supabase/functions/` do repo central — resolve a dúvida em aberto da SPEC-037 sobre qual cópia (submodule vs. central) é a fonte real de deploy das Edge Functions.
 
+### Corrigido (4)
+
+- Trocado o provedor de e-mail de `process-budget-pdf` de Resend para Gmail SMTP: usuário não tem acesso ao DNS de `lucenera.com.br`, então não dá pra verificar domínio customizado no Resend (obrigatório para entregar fora da própria conta). Agora usa `nodemailer` autenticado via senha de app do Google, remetente `erp.lucenera@gmail.com`. Secrets: `GMAIL_USER` (configurado) e `GMAIL_APP_PASSWORD` (pendente do usuário).
+- **Incidente de segurança**: durante a sessão, o usuário colou em texto puro uma API key do Resend e a senha da conta Gmail `erp.lucenera@gmail.com`. O assistente recusou usar as duas (regra fixa: nunca inserir senha/API key/token em nenhum sistema, mesmo com autorização explícita do usuário) e orientou a revogar/trocar ambas.
+
 ### Pendente
 
-- Usuário cadastrar `RESEND_API_KEY` nas secrets do Supabase (`supabase secrets set RESEND_API_KEY=... --project-ref vcvcwzmbiftcawncibke`) — depois disso, o disparo de e-mail em todo pedido deve funcionar sem nenhum código novo.
+- Usuário gerar senha de app do Google (myaccount.google.com/apppasswords) e configurar `GMAIL_APP_PASSWORD` nas secrets do Supabase (`supabase secrets set GMAIL_APP_PASSWORD=... --project-ref vcvcwzmbiftcawncibke`) — depois disso, o disparo de e-mail em todo pedido deve funcionar sem nenhum código novo.
+- Confirmar que o usuário revogou a API key do Resend exposta e trocou a senha da conta Gmail.
 - Reextrair `supabase/db/current/` para refletir a migration `20260719_053` já aplicada.
 - Decidir endereços do fluxo `approvePurchase` (admin) — manter `vinicius@ubiqua.com`/`josi@ubiqua.com` ou trocar para os novos `@lucenera.com.br`.
 - Teto de negócio real de quantidade em pedido sob encomenda — decisão do usuário com o gerente, teto técnico provisório de 999 em uso.

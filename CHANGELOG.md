@@ -21,9 +21,15 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Migration `20260719_053_ubiqua_necessidade_importacao` **aplicada no Supabase real** (coluna `sem_estoque_no_pedido` e view `vw_necessidade_importacao_ubiqua`, verificadas via `information_schema`), com confirmação explícita do usuário, pelo orquestrador.
 - Teste ponta a ponta em produção após os dois fixes: orçamento **ORC-2026-000012** salvo com sucesso, usando cliente real já cadastrado. Esse salvamento também dispara `process-budget-pdf` — pendente o usuário confirmar se o e-mail chegou em `vinicius@lucenera.com.br`/`pedro@lucenera.com.br`.
 
+### Corrigido (3)
+
+- **Causa raiz de "e-mail não chega" identificada**: usuário confirmou que nenhum e-mail chegou no teste do ORC-2026-000012. Verificado via `supabase secrets list --project-ref vcvcwzmbiftcawncibke`: a secret `RESEND_API_KEY` **não existe** no projeto Supabase real — nem para `process-budget-pdf`, `welcome-email` ou `enviar-confirmacao-email`. Não é bug de código, é configuração ausente; usuário precisa cadastrar a chave da própria conta Resend (o assistente não manuseia essa credencial).
+- Corrigido bug adjacente: `process-budget-pdf` escondia falha de envio (`console.error`/`console.warn` sem `throw`, sempre retornava `success:true`). Agora propaga erro real. Deployado no Supabase real (`supabase functions deploy`, confirmado pelo usuário) — corrigido nas duas cópias (submodule e repo central).
+- **Achado**: `supabase functions deploy` rodado da raiz do repo central publicou a partir de `supabase/functions/` do repo central — resolve a dúvida em aberto da SPEC-037 sobre qual cópia (submodule vs. central) é a fonte real de deploy das Edge Functions.
+
 ### Pendente
 
-- Confirmar se o e-mail de `process-budget-pdf` chegou no teste do orçamento ORC-2026-000012 — decide se falta código de e-mail novo (SPEC-037, Novo requisito 2) ou só configuração/correção do bug de erro engolido nessa function.
+- Usuário cadastrar `RESEND_API_KEY` nas secrets do Supabase (`supabase secrets set RESEND_API_KEY=... --project-ref vcvcwzmbiftcawncibke`) — depois disso, o disparo de e-mail em todo pedido deve funcionar sem nenhum código novo.
 - Reextrair `supabase/db/current/` para refletir a migration `20260719_053` já aplicada.
 - Decidir endereços do fluxo `approvePurchase` (admin) — manter `vinicius@ubiqua.com`/`josi@ubiqua.com` ou trocar para os novos `@lucenera.com.br`.
 - Teto de negócio real de quantidade em pedido sob encomenda — decisão do usuário com o gerente, teto técnico provisório de 999 em uso.

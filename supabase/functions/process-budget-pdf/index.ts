@@ -221,9 +221,13 @@ Deno.serve(async (req: Request) => {
       if (!res.ok) {
         const errorData = await res.text()
         console.error('Resend API Error:', errorData)
+        throw new Error(`Falha ao enviar e-mail de notificação via Resend: ${errorData}`)
       }
     } else {
       console.warn('RESEND_API_KEY not found. Email not sent.')
+      throw new Error(
+        'RESEND_API_KEY não configurada neste projeto Supabase — e-mail de notificação não enviado.',
+      )
     }
 
     return new Response(JSON.stringify({ success: true, url: fileUrl }), {

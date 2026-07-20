@@ -2,6 +2,27 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-20 (1)
+
+### Adicionado
+
+- Criada `SPEC-037_Ubiqua_Backorder_Sem_Estoque_e_Necessidade_Importacao.md`: toda a marca Ubiqua é importada pela empresa do usuário, então "sem estoque" e "aguardando importação" são o mesmo conceito. Implementado: texto "Não tem aquela peça em estoque" trocado por "Sem estoque" em `PartCard.tsx`/`QuantityModal.tsx`/`NewQuote.tsx`; botão "Adicionar ao Orçamento" deixou de ser bloqueado por falta de estoque (`PartCard.tsx`, combobox de busca e controles de quantidade em `NewQuote.tsx`, guard silencioso removido de `use-cart.tsx`); `QuantityModal.tsx` ganhou aviso de backorder com card visual (logo `og-image.png`) e checkbox de ciência do prazo de até 3 meses, com teto técnico de quantidade de 999 quando sem estoque.
+- Migration `supabase/db/migrations/20260719_053_ubiqua_necessidade_importacao/` (rascunhada, **não aplicada** no Supabase real): coluna `itens_orcamento_ubiqua.sem_estoque_no_pedido` (snapshot no momento do pedido) + view `vw_necessidade_importacao_ubiqua` (demanda agregada por produto, decisão tomada após comparar 3 alternativas de modelagem — ver SPEC-037). `NewQuote.tsx` já grava a coluna e preenche `orcamentos_revenda_ubiqua.prazo_entrega` com aviso de importação quando o orçamento tem item de backorder.
+- `AI_DB_CONTEXT.md` do sistema Ubiqua atualizado com a nova coluna, view e a seção "Necessidade de importação".
+
+### Corrigido
+
+- Bug crítico bloqueando testes: `CustomersPage.tsx` usava `formatCNPJ`/`isValidCNPJ` sem importar de `@/lib/utils` (diferente de `ProfilePage.tsx`/`Onboarding.tsx`, que importam certo) — o campo de CNPJ do cadastro de cliente não aceitava digitação (o `onChange` lançava `ReferenceError` antes de atualizar o estado).
+- Sincronização com Skip: corrigido bug de imagem sumindo na página de detalhe do produto — a causa real não era o `onLoad`/cache de imagem (hipótese original), e sim o plugin legado `@tailwindcss/aspect-ratio` em `tailwind.config.ts` desabilitando a utility nativa `aspect-square` do Tailwind v3, colapsando o container da imagem para ~2px de altura. Removido o plugin (não usado por nenhum componente).
+
+### Pendente
+
+- Escopo de e-mail (SPEC-037): achado crítico durante o levantamento — `NewQuote.tsx` já chama `process-budget-pdf` em todo pedido salvo, e essa function já envia e-mail via Resend para `vinicius@lucenera.com.br`/`pedro@lucenera.com.br` (o pedido do usuário) **se** `RESEND_API_KEY` estiver configurada. Usuário precisa testar salvando um orçamento real antes de decidir se cria um disparo novo via `enviar-confirmacao-email` (hoje stub, não envia nada) ou só corrige o bug de erro engolido em `process-budget-pdf`.
+- Aplicar migration `20260719_053` no Supabase real e reextrair `supabase/db/current/`.
+- Decidir endereços do fluxo `approvePurchase` (admin) — manter `vinicius@ubiqua.com`/`josi@ubiqua.com` ou trocar para os novos `@lucenera.com.br`.
+- Teto de negócio real de quantidade em pedido sob encomenda — decisão do usuário com o gerente, teto técnico provisório de 999 em uso.
+- Commit e push do submodule + ponteiro no repo central.
+
 ## 2026-07-18 (6)
 
 ### Adicionado

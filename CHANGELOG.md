@@ -15,10 +15,16 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Bug crítico bloqueando testes: `CustomersPage.tsx` usava `formatCNPJ`/`isValidCNPJ` sem importar de `@/lib/utils` (diferente de `ProfilePage.tsx`/`Onboarding.tsx`, que importam certo) — o campo de CNPJ do cadastro de cliente não aceitava digitação (o `onChange` lançava `ReferenceError` antes de atualizar o estado).
 - Sincronização com Skip: corrigido bug de imagem sumindo na página de detalhe do produto — a causa real não era o `onLoad`/cache de imagem (hipótese original), e sim o plugin legado `@tailwindcss/aspect-ratio` em `tailwind.config.ts` desabilitando a utility nativa `aspect-square` do Tailwind v3, colapsando o container da imagem para ~2px de altura. Removido o plugin (não usado por nenhum componente).
 
+### Corrigido (2)
+
+- Bug crítico bloqueando qualquer salvamento de orçamento novo, achado no primeiro teste real do usuário: `itens_orcamento_ubiqua.valor_total` é coluna `GENERATED ALWAYS` (calculada como `quantidade * valor_unitario - desconto_item`) no schema real, mas `NewQuote.tsx` tentava inserir um valor nela explicitamente — Postgres rejeitava com `cannot insert a non-DEFAULT value into column "valor_total"`. Bug pré-existente, não introduzido pela SPEC-037. Corrigido removendo o campo do insert.
+- Migration `20260719_053_ubiqua_necessidade_importacao` **aplicada no Supabase real** (coluna `sem_estoque_no_pedido` e view `vw_necessidade_importacao_ubiqua`, verificadas via `information_schema`), com confirmação explícita do usuário, pelo orquestrador.
+- Teste ponta a ponta em produção após os dois fixes: orçamento **ORC-2026-000012** salvo com sucesso, usando cliente real já cadastrado. Esse salvamento também dispara `process-budget-pdf` — pendente o usuário confirmar se o e-mail chegou em `vinicius@lucenera.com.br`/`pedro@lucenera.com.br`.
+
 ### Pendente
 
-- Escopo de e-mail (SPEC-037): achado crítico durante o levantamento — `NewQuote.tsx` já chama `process-budget-pdf` em todo pedido salvo, e essa function já envia e-mail via Resend para `vinicius@lucenera.com.br`/`pedro@lucenera.com.br` (o pedido do usuário) **se** `RESEND_API_KEY` estiver configurada. Usuário precisa testar salvando um orçamento real antes de decidir se cria um disparo novo via `enviar-confirmacao-email` (hoje stub, não envia nada) ou só corrige o bug de erro engolido em `process-budget-pdf`.
-- Aplicar migration `20260719_053` no Supabase real e reextrair `supabase/db/current/`.
+- Confirmar se o e-mail de `process-budget-pdf` chegou no teste do orçamento ORC-2026-000012 — decide se falta código de e-mail novo (SPEC-037, Novo requisito 2) ou só configuração/correção do bug de erro engolido nessa function.
+- Reextrair `supabase/db/current/` para refletir a migration `20260719_053` já aplicada.
 - Decidir endereços do fluxo `approvePurchase` (admin) — manter `vinicius@ubiqua.com`/`josi@ubiqua.com` ou trocar para os novos `@lucenera.com.br`.
 - Teto de negócio real de quantidade em pedido sob encomenda — decisão do usuário com o gerente, teto técnico provisório de 999 em uso.
 - Commit e push do submodule + ponteiro no repo central.

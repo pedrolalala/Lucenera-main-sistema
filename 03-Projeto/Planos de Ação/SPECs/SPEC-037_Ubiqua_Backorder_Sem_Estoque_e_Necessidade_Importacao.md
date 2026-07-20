@@ -44,7 +44,7 @@ sistemas_envolvidos:
 - [ ] Confirmar se os endereços do fluxo `approvePurchase` devem mudar de `vinicius@ubiqua.com`/`josi@ubiqua.com` para `vinicius@lucenera.com.br`/`pedro@lucenera.com.br` (tirando o Josi), ou permanecer como estão.
 - [ ] Confirmar a URL pública de produção a ser usada para o `og-image.png` no HTML do e-mail (ex.: domínio publicado do catálogo) ou decidir por hospedar via Supabase Storage.
 - [ ] Confirmar que `RESEND_API_KEY` está configurado nas secrets deste projeto Supabase e que o remetente (`from`) usado está com domínio verificado no Resend — sem isso, nenhum e-mail (nem o existente, nem o novo) sai de verdade.
-- [ ] Rodar a migration no Supabase real e reextrair `supabase/db/current/` após aplicação.
+- [x] Rodar a migration no Supabase real e reextrair `supabase/db/current/` após aplicação. **Aplicada em 2026-07-20** pelo orquestrador (nunca por subagente), com confirmação explícita do usuário — coluna `sem_estoque_no_pedido` e view `vw_necessidade_importacao_ubiqua` verificadas via `information_schema` pós-aplicação. Reextração completa de `supabase/db/current/` ainda pendente (não bloqueante).
 - [ ] Homologar manualmente o golden path no navegador (catálogo → peça sem estoque → aviso com logo → confirmar → carrinho → salvar orçamento → `SELECT` de conferência na view → conferir chegada real dos e-mails nas caixas de entrada).
 - [ ] Commit/push no repositório próprio do submodule e atualização do ponteiro no repo central.
 
@@ -269,7 +269,10 @@ Diretriz de layout (sem prescrever CSS pixel a pixel):
 
 ## Realizado
 
-_(nada implementado ainda — SPEC aguardando aprovação)_
+- **2026-07-20**: implementados todos os itens de código do Checklist de Ação (texto "Sem estoque", backorder liberado nos 4 pontos de bloqueio, card de aviso com logo Ubiqua no `QuantityModal.tsx`, gravação de `sem_estoque_no_pedido`/`prazo_entrega`). Publicado em produção, testado no navegador.
+- **2026-07-20**: durante o primeiro teste real do usuário, apareceu um bug **pré-existente e não relacionado à SPEC-037**: `itens_orcamento_ubiqua.valor_total` é coluna `GENERATED ALWAYS` no schema real, e `NewQuote.tsx` tentava inserir um valor nela explicitamente — Postgres rejeitava com `cannot insert a non-DEFAULT value into column "valor_total"`, bloqueando qualquer salvamento de orçamento novo (não só os com backorder). Corrigido removendo o campo do insert (o valor já é calculado automaticamente pelo banco a partir de `quantidade * valor_unitario - desconto_item`).
+- **2026-07-20**: migration `20260719_053` aplicada no Supabase real, com confirmação explícita do usuário.
+- **2026-07-20**: teste ponta a ponta em produção, com o cliente real já cadastrado pelo usuário — orçamento **ORC-2026-000012** salvo com sucesso (item com estoque, quantidade 5). Esse salvamento também disparou `process-budget-pdf`, que já envia e-mail para `vinicius@lucenera.com.br`/`pedro@lucenera.com.br` se `RESEND_API_KEY` estiver configurada — pendente confirmação do usuário se o e-mail chegou (ver Pendência crítica).
 
 ## Pendências
 

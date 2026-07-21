@@ -2,6 +2,21 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-21 (2)
+
+### Adicionado
+
+- Criada e implementada `SPEC-039_Necessidade_Compra_Grid_Fullscreen_Fix_Busca.md` (fluxo planner → implementador → revisor → orquestrador) no sistema `compras-lucenera-3o23t98ee`: layout full-screen da tela Necessidade de Compra (container e grid ocupam 100% da viewport, todas as colunas sempre visíveis com scroll horizontal em vez de esconder colunas em telas menores); colunas novas Fornecedor, Empresa que comprou, Status do pedido e Data prevista de entrega; correção de um bug real de busca; recálculo de "Pendente" descontando pedidos de compra já em aberto.
+- Causa raiz do bug de busca confirmada via chamada HTTP direta ao PostgREST: `produtos.codigo_produto` é `integer`, e o filtro antigo usava `ilike` sobre essa coluna (`operator does not exist: integer ~~* unknown`, erro `42883`) — isso derrubava a query inteira, ou seja, **toda busca não vazia falhava**, não só a busca por código. Corrigido tratando termos só-numéricos como busca exata por código (`.eq`) e o restante como busca por nome (`.ilike`), sem cast em runtime.
+- 4 migrations aplicadas e testadas no Supabase real (`20260722_056_spec039_necessidade_compra_grid`): `pedidos_compra.empresa_id` (preenchida automaticamente pela RPC a partir da empresa do usuário autenticado, sem input manual no frontend); views `vw_necessidade_compra_pedidos_abertos`/`vw_necessidade_compra_pedido_detalhe` (resumo agregado por produto + detalhe pedido a pedido no painel expansível, resolvendo o conflito de granularidade produto-vs-pedido); `vw_necessidade_compra` recriada com as colunas `pendente`/`qtd_pedidos_abertos`/`proxima_data_prevista_entrega`, e o filtro de visibilidade da lista mudou de "só estoque físico" para "descontando também pedidos de compra já em aberto" (decisão do usuário: produto sai da lista quando o déficit já está 100% coberto por pedido em andamento).
+- Teste end-to-end encontrou e corrigiu um resíduo de dados de teste da sessão da SPEC-038 (um pedido de teste `PC-2026-0001` que não foi limpo corretamente por um bug de ordem no script de cleanup daquela sessão) — removido da base real, sem relação com o código desta SPEC.
+- Frontend sincronizado com o Skip (projeto 40326), QA completo e publicado em produção — versão `0.0.45`.
+
+### Pendente
+
+- Reextrair `supabase/db/current/` — pendência crônica reafirmada mais uma vez.
+- Testar o golden path pela UI (a validação desta sessão foi via chamadas diretas à API/RPC, não clicando na tela).
+
 ## 2026-07-21 (1)
 
 ### Adicionado

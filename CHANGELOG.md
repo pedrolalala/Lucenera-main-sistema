@@ -2,6 +2,27 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-21 (3)
+
+### Adicionado
+
+- Criada e implementada `SPEC-040_Necessidade_Compra_Granularidade_L_Fixo.md` no sistema `compras-lucenera-3o23t98ee`: nova aba "Por Item de Orçamento" na tela Necessidade de Compra, permitindo comprar uma peça específica de uma posição específica ("L Fixo") de um orçamento específico, sem misturar com outras posições do mesmo produto — coexistindo com a aba "Por Produto" (agregada, SPEC-039), que permanece 100% inalterada.
+- Isso reverteu, só para esta aba nova, a decisão de "necessidade de compra agregada por produto" (reunião 08/06/2026) — decisão explícita do usuário nesta sessão, confirmada depois de eu alertar sobre o conflito com a decisão documentada.
+- Backend: `projeto_itens.orcamento_item_id`/`l_fixo` (FK real para `orcamento_itens`, gravada automaticamente na aprovação financeira do orçamento); backfill best-effort para itens já existentes (9 de 11 preenchidos; casos ambíguos — mesmo produto em 2+ posições do mesmo orçamento — ficam sem vínculo, sem adivinhação); view nova `vw_necessidade_compra_item_orcamento`; vínculo de origem (`pedido_compra_item_origem`) passa a ser obrigatório (não mais melhor-esforço) nas compras feitas por este fluxo novo.
+
+### Corrigido — achado crítico #2: migration de outro domínio nunca aplicada + hotfix não documentado
+
+- Ao preparar a migration que recria `aprovar_orcamento_financeiro` (função central de Orçamentos/Financeiro, SPEC-016 — precisava ganhar 2 colunas novas para viabilizar a SPEC-040), confirmei via consulta direta ao Supabase real que a função ao vivo diverge significativamente tanto da migration `20260706_020` quanto de `supabase/db/current/03_functions.sql`: falta checagem de permissão (admin/gerente), falta validação de frete obrigatório, falta reserva automática de estoque na aprovação — ou seja, essa migration nunca foi de fato aplicada neste banco (mesmo padrão do achado crítico da SPEC-038 com `pedidos_compra`, agora num domínio diferente). Em contrapartida, a função ao vivo tem lógica (cálculo de subtotal, fallback de descrição) que não existe em nenhuma migration do repositório — um hotfix aplicado direto em produção, nunca capturado em arquivo.
+- A migration da SPEC-040 foi reescrita para copiar o corpo real da função (confirmado byte a byte via `pg_get_functiondef`), preservando exatamente o comportamento ao vivo — sem adicionar nem remover a checagem de permissão, validação de frete ou reserva de estoque, que ficam como decisão de produto em aberto, separada, do domínio de Orçamentos/Financeiro.
+- Todas as 4 migrations da SPEC-040 aplicadas e testadas via chamadas reais (RPC + REST): backfill confirmado, view nova validada, vínculo de origem obrigatório testado com sucesso.
+- Frontend sincronizado com o Skip (projeto 40326), QA completo e publicado em produção — versão `0.0.46`.
+
+### Pendente
+
+- Decidir separadamente (fora do escopo de Compras) se a migration `20260706_020` (checagem de permissão, validação de frete, reserva automática de estoque na aprovação de orçamento) deve ser aplicada intencionalmente, ou se foi abandonada por algum motivo que precisa ser investigado primeiro.
+- Reextrair `supabase/db/current/` — pendência crônica, agora reforçada por dois achados críticos do mesmo tipo em dois domínios diferentes.
+- Testar o golden path pela UI (validação desta sessão foi via API/RPC direta).
+
 ## 2026-07-21 (2)
 
 ### Adicionado

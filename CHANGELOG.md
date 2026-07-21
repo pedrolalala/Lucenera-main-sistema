@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-20 (2)
+
+### Corrigido (5)
+
+- **E-mail de notificação confirmado funcionando** (SPEC-037): usuário confirmou que o e-mail do teste caiu na pasta de spam de `vinicius@lucenera.com.br`/`pedro@lucenera.com.br` — ou seja, o envio via Gmail SMTP está funcionando; falta só os destinatários marcarem "Não é spam" para melhorar a reputação do remetente.
+- Bug achado pelo usuário: botão "Baixar PDF" (na tela de orçamento salvo) sempre falhava com "Erro ao gerar o documento" — `savedQuote` nunca incluía a lista de itens (`QuoteData.items` ficava `undefined`), e `generateQuoteHTML` precisa desse array. Corrigido anexando o `items` do carrinho (capturado antes do `clearCart()`) ao `savedQuote`. Mesma causa também afetava "Enviar por E-mail".
+
+### Adicionado (2)
+
+- Cadastro de cliente (`CustomersPage.tsx`) passou a aceitar **CPF ou CNPJ**, não só CNPJ — pedido do usuário, revisando a decisão da SPEC-036 ("sempre CNPJ, nunca CPF"). Novo helper `formatCPFOuCNPJ`/`isValidCPFOuCNPJ` em `src/lib/utils.ts` detecta automaticamente qual dos dois pelo número de dígitos digitados. `AI_DB_CONTEXT.md` atualizado.
+
 ## 2026-07-20 (1)
 
 ### Adicionado

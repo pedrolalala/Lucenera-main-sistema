@@ -2,6 +2,30 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-21 (1)
+
+### Adicionado
+
+- Criada e implementada `SPEC-038_Impostos_Numeracao_Vinculo_Parcelas_Desconto_Compras.md` (fluxo planner → implementador → revisor → orquestrador) no sistema `compras-lucenera-3o23t98ee` (Necessidade de Compra / Cotações): custo separado em líquido+ICMS+IPI+ST (editável, pré-preenchido do cadastro do produto); numeração automática de pedido (`PC-<ano>-NNNN`); vínculo informativo (opcional, nunca bloqueante) entre item de pedido e item de projeto de origem; parcelas reais do pedido de compra ao fornecedor, geradas automaticamente e com valor/vencimento editáveis manualmente por parcela (decisão explícita do usuário); campo "% desconto" em Cotações isolado do desconto que já afeta o preço de venda ao cliente.
+- Revisão (`revisor`) encontrou 2 avisos técnicos antes do commit — ambos corrigidos: `criar_pedido_compra_de_necessidade` teria virado uma sobrecarga órfã no Postgres (assinatura mudou de 8 para 12 parâmetros, `CREATE OR REPLACE` não substitui function com número de parâmetros diferente — corrigido com `DROP FUNCTION` explícito da assinatura antiga); tabela nova `pedido_compra_item_origem` tinha policy de INSERT aberta em vez de escrita só via RPC (padrão do resto do domínio) — corrigido com nova RPC `vincular_origem_pedido_compra_item`.
+
+### Corrigido — achado crítico: "Registrar Compra" estava quebrado em produção desde 10/07
+
+- Antes de aplicar as migrations da SPEC-038, uma checagem direta no Supabase real (não em `supabase/db/current/`, que documentava errado) revelou que a tabela `pedidos_compra` — usada pelas RPCs `criar_pedido_compra_de_necessidade`/`criar_pedido_compra_lote` desde a SPEC-021 (10/07) — **nunca existiu de verdade**. A migration que deveria criá-la (`20260710_031_spec020_operacionalizacao_compras/004_pedidos_compra.sql`) nunca tinha sido aplicada, só as vizinhas do mesmo lote. Como PL/pgSQL não valida tabelas referenciadas na criação da function, só na execução, as RPCs existiam e pareciam normais, mas todo INSERT real falhava. A funcionalidade de "Registrar Compra" (individual e em lote) esteve quebrada em produção por ~11 dias sem detecção — inclusive a SPEC-035 (análise de lacunas, 18/07) repetiu o engano de assumir "backend pronto" sem checar o banco real.
+- Aplicada a migration retroativa `004_pedidos_compra.sql` (cria a tabela + FK que faltava em `pedido_compra_itens.pedido_id`), e corrigidas 2 colunas legadas com `NOT NULL` indevido em `solicitacoes_compra` (`projeto_id`, `quantidade_pedida`) que também bloqueavam as RPCs. As 2 RPCs de registrar pedido de compra foram testadas de ponta a ponta via chamada HTTP real (não simulação) e funcionaram — provavelmente a primeira vez desde que foram criadas.
+- As 5 migrations da SPEC-038 aplicadas e testadas em seguida (numeração automática, geração/edição de parcelas, vínculo de origem, desconto de compra, view estendida) — tudo confirmado funcionando via teste real, dados de teste removidos depois.
+- A correção retroativa (aplicação de `004_pedidos_compra.sql` + FK `pedido_compra_itens.pedido_id` + as 2 colunas `NOT NULL` removidas) foi capturada em arquivo de migration próprio, `20260721_055_fix_pedidos_compra_base`, para reprodutibilidade em outros ambientes (as 3 correções já haviam sido aplicadas diretamente no banco antes de existir o arquivo).
+
+### Publicado
+
+- Frontend de `compras-lucenera-3o23t98ee` sincronizado com o Skip (projeto 40326), QA completo (setup/análise estática/build/integrações/testes) e publicado em produção — versão `0.0.44`, `https://pagina-em-branco-cdd79.goskip.app`.
+- Commit no submodule `compras-lucenera-3o23t98ee` (`977e36e`) com os 11 arquivos de frontend da SPEC-038 (9 modificados + 2 novos: `PedidosCompra.tsx`, `PedidoParcelasPanel.tsx`).
+
+### Pendente
+
+- Testar o golden path pela UI (não só via RPC direta) dos 5 itens da SPEC-038 — backend e frontend já publicados, falta o usuário clicar no fluxo completo.
+- Reextrair `supabase/db/current/` — pendência crônica (SPEC-030/033/034/038), agora ainda mais urgente: a documentação estava desatualizada a ponto de esconder que uma tabela inteira não existia.
+
 ## 2026-07-20 (2)
 
 ### Corrigido (5)

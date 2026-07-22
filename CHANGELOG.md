@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-22 (5)
+
+### Adicionado — SPEC-041: nomenclatura Realizado × Previsto + card Necessidade de Compra no Dashboard
+
+- Reunião 21/07/2026 (Filippo) pediu 4 ajustes de nomenclatura/visualização no `dashboard-lucenera-b02z85wa3`: distinguir "Realizado" de valores "em aberto"/futuros, sem misturar necessidade de compra no fluxo de caixa realizado.
+- Antes de implementar, descoberto que o espelho local do submodule estava desatualizado em relação ao Skip Cloud publicado (projeto 41135): `Index.tsx` e `cash-flow.ts` locais refletiam um protótipo antigo (KPIs de sincronização), enquanto a versão real em produção já tinha a implementação financeira completa (SPEC-025). Corrigido puxando o conteúdo real do Skip para o git local antes de qualquer edição.
+- Implementado: item de menu/`<h1>` "Visão Geral" → "Fluxo de Caixa Realizado (Mês Atual)" (com filtro de mês/ano defaultando ao mês atual, editável); "Contas a Receber/Pagar Foco" → "Agenda de Recebimentos"/"Agenda de Pagamentos"; tooltip (`Info` + `Tooltip`) nos KPIs "Em Aberto (Receber/Pagar)" esclarecendo que são valores acumulados totais, não filtrados pelo período; novo card "Necessidade de Compra (Gasto Futuro Inevitável)" na página principal (`SUM(pendente × preco_custo)` de `vw_necessidade_compra`, via novo `src/services/necessidade-compra.ts`), com tom visual distinto (violeta) para reforçar que não é dado realizado.
+- QA (setup/lint/build/testes) passou limpo no Skip; publicado em produção (`dashboard-empresa-40d7d.goskip.app`, versão `a47805c`) com autorização do usuário.
+- `vw_necessidade_compra` passa a ter um segundo consumidor (o dashboard, além de `compras-lucenera-3o23t98ee`) — registrado em `supabase/db/domains/estoque_compras.md`.
+
 ## 2026-07-22 (4)
 
 ### Corrigido — achado adicional: reserva de estoque por item nunca acontecia na aprovação

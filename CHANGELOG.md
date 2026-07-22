@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-22 (3)
+
+### Corrigido — backfill pontual de ORC-0010
+
+- Após o hotfix de `aprovar_orcamento_financeiro`, auditados todos os 12 orçamentos com status `Orçamento Aprovado` para ver quais tinham `projeto_itens`/`projeto_parcelas`/`boletos` faltando. Achado: 4 já estavam corretos, 1 (ORC-0010) tinha dados válidos mas nunca foi processado (0 itens/parcelas/boletos), 1 (ORC-0013) tem 2 itens avulsos textualmente idênticos — impossível vincular ao L Fixo correto sem adivinhar, deixado como está por desenho (decisão P-05 da SPEC-040); 6 (ORC-0004, LEG-1092/1100/1108/1115/1169) ficam pendentes por motivos próprios (dado incompleto no orçamento ou parcela órfã pré-existente da importação legada).
+- Corrigido apenas o ORC-0010: status voltado temporariamente para `Aprovação Financeira` (sem alterar itens, não reinicia o ciclo), `aprovar_orcamento_financeiro` chamada de verdade, gerou os 3 `projeto_itens` (vinculados a L01/L02/L03 corretamente), 1 parcela e 1 boleto, status retornado a `Orçamento Aprovado`.
+- Os outros 6 orçamentos com pendência continuam documentados em `supabase/db/domains/orcamentos.md`, cada um com o motivo específico — não corrigidos nesta rodada, por decisão explícita do usuário.
+
 ## 2026-07-22 (2)
 
 ### Corrigido — achado crítico: aprovação de orçamento quebrada em produção há ~2 semanas

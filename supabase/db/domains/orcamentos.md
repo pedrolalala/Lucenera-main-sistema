@@ -108,6 +108,16 @@ Descoberto durante a SPEC-040 (Necessidade de Compra — granularidade por L Fix
 
 **Reextrair `supabase/db/current/` para este domínio também** — mesma pendência crônica já registrada em `supabase/db/domains/estoque_compras.md` para o domínio de Compras, agora confirmada aqui também.
 
+## Auditoria dos orçamentos aprovados (22/07/2026, pós-hotfix)
+
+Com a função corrigida, auditados os 12 orçamentos em `Orçamento Aprovado` para achar quais tinham `projeto_itens`/`projeto_parcelas`/`boletos` incompletos (provavelmente vítimas do mesmo bug, ou de uma importação legada que nunca passou pela RPC):
+
+- **4 já corretos**: ORC-0005, ORC-0006, ORC-0007, ORC-0009 — itens/parcelas/boletos consistentes.
+- **1 corrigido nesta sessão**: **ORC-0010** — tinha dados válidos (forma de pagamento, prazo) mas nunca foi processado. Status voltado para `Aprovação Financeira` (sem tocar em itens, não reinicia o ciclo do cliente), `aprovar_orcamento_financeiro` chamada de verdade, gerou 3 `projeto_itens` (vinculados a L01/L02/L03), 1 parcela e 1 boleto. Status retornado a `Orçamento Aprovado`.
+- **1 bloqueado por ambiguidade, por desenho — ORC-0013**: 2 `projeto_itens` já existem, mas os 2 itens de orçamento de origem são avulsos (sem `produto_id`) e **textualmente idênticos** entre si (mesma descrição, quantidade e preço) — não há como saber com certeza qual `projeto_item` corresponde a L01 e qual a L02. Deixado sem vínculo, seguindo a mesma decisão de não adivinhar já tomada na SPEC-040 (P-05).
+- **2 bloqueados por dado incompleto no próprio orçamento — ORC-0004 e LEG-1100**: nenhum tem `forma_pagamento` nem prazo de pagamento cadastrado — a RPC não consegue processar sem essa informação, e não deve ser inventada.
+- **4 bloqueados por dado pré-existente inconsistente — LEG-1092, LEG-1108, LEG-1115, LEG-1169**: cada um já tem uma parcela solta no banco (criada pela importação legada, sem nenhum `projeto_itens` correspondente), o que faz a própria RPC recusar rodar (`processamento parcial inconsistente`). Corrigir exigiria decidir manualmente o que fazer com essa parcela órfã antes — não decidido nesta sessão.
+
 ## Diretriz ativa
 
 Manter uma função/RPC transacional única para aprovação financeira por `orcamento_id`. O contrato oficial decidido pela SPEC-016 é `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`; o frontend deve listar/editar orçamentos nessa fila e só disparar efeitos financeiros após confirmação final do financeiro.

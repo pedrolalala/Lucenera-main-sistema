@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-040 — Necessidade de Compra: Granularidade por Item de Orçamento (L Fixo)"
-status: implementado, aplicado e publicado em produção (Skip v0.0.46)
-data_ultima_modificacao: 2026-07-21
+status: implementado e publicado; correção de layout pós-publicação em 22/07/2026 (pendente verificação visual do usuário); "Por Item de Orçamento" vazio confirmado como esperado (volume de dados de teste)
+data_ultima_modificacao: 2026-07-22
 sistemas_envolvidos:
   - Supabase (banco central) — toca também a RPC aprovar_orcamento_financeiro,
     que é do domínio Orçamentos/Financeiro (SPEC-016), não só Compras
@@ -326,3 +326,80 @@ P-06 fechadas pelo usuário em 21/07/2026, ver seção abaixo).
 
 - [x] P-01 a P-06 decididas (ver acima)
 - [ ] Reextrair `supabase/db/current/` — pendência crônica do domínio, reforçada pelo achado desta SPEC sobre `aprovar_orcamento_financeiro_base_spec001` (função legada com corpo divergente entre `db/current` e o que a migration SPEC-016 deveria ter deixado).
+
+## Correção pós-publicação (22/07/2026)
+
+> Usuário reportou, via print da tela em produção: (1) aba "Por Produto"
+> mostra só ~2 linhas numa caixa pequena, exigindo scroll, quando deveria
+> ocupar o resto da altura vertical da página; (2) aba "Por Item de
+> Orçamento" sempre retorna "0 de 0". Investigação abaixo, feita consultando
+> o Supabase real (REST, service role) e lendo o código publicado — nenhuma
+> das duas causas exigiu nova decisão de UI/UX, mas a causa raiz de cada uma
+> é diferente e precisava ser separada antes de mexer em código.
+
+### Causa 1 — bug real de layout (Por Produto), corrigido
+
+`AppNav` (barra de sub-navegação "Estoque · Solicitações · Cotações...")
+é renderizada em `ProtectedRoute.tsx`, **fora** do container que definia
+`h-[calc(100vh-4rem)]` em `NecessidadeCompra.tsx`. O `<main>` em `App.tsx`
+não era flex nem tinha altura própria, então `AppNav` empurrava o conteúdo
+para baixo sem que o cálculo `100vh - 4rem` (que só descontava a altura do
+`AppHeader`, 64px) levasse isso em conta — o container da tabela recebia
+menos altura do que devia, sobrando espaço em branco não utilizado na
+página.
+
+**Fix aplicado** (`compras-lucenera-3o23t98ee`, sem migration, só CSS/JSX):
+
+- `App.tsx` — `AppShell` passa a ser `h-screen flex flex-col overflow-hidden`;
+  `<main>` vira `flex-1 min-h-0`, com `flex flex-col overflow-hidden` nas
+  rotas full-width (`/`, `/necessidade-compra`) e `overflow-y-auto` nas
+  demais (preserva o scroll de página das outras rotas, só move o scroll
+  para dentro do `<main>`).
+- `AppNav.tsx` — adiciona `shrink-0` (necessário agora que é filho direto de
+  um flex container nas rotas full-width).
+- `NecessidadeCompra.tsx` — troca `h-[calc(100vh-4rem)]` (cálculo fixo que
+  não conhecia a altura do `AppNav`) por `flex-1 min-h-0 overflow-hidden`,
+  deixando o `<main>` (agora flex-bound por `h-screen`) determinar a altura
+  disponível corretamente, incluindo o espaço já ocupado por `AppHeader` e
+  `AppNav`.
+
+`oxlint` e `vite build` rodados com sucesso após a mudança (sem erros novos,
+só os 2 warnings pré-existentes em `Cotacoes.tsx`, não relacionados).
+
+**Não verificado visualmente no navegador** — tentativa de rodar o dev
+server + Playwright headless esbarrou na necessidade de autenticar; gerar
+sessão via Admin API (magic link) para um usuário real foi bloqueado pelo
+classificador de segurança do Claude Code, e a IA optou por não contornar
+isso. Usuário deve confirmar visualmente em dev/produção antes de encerrar
+este item.
+
+### Causa 2 — "Por Item de Orçamento" vazio: não é bug, é volume de dados de teste
+
+Consulta direta ao Supabase real (REST, service role key) em 22/07/2026:
+
+| Tabela | Linhas totais |
+|---|---|
+| `projeto_itens` | 11 |
+| `estoque_saldos_projeto_item` | 9 (todas com `q_entrega_futura = 0`) |
+| `orcamentos` | 22 |
+| `orcamento_itens` | 75 |
+| `estoque_itens` (fonte do Fluxo A / "Por Produto") | 5062 |
+
+A view `vw_necessidade_compra_item_orcamento` está correta e não tem bug —
+ela é alimentada por `projeto_itens`/`estoque_saldos_projeto_item`, que por
+sua vez só são populados pela RPC `aprovar_orcamento_financeiro` (SPEC-016).
+Como o ambiente ainda está em fase de teste (confirmado pelo usuário), essas
+tabelas têm pouquíssimas linhas, e nenhuma das 9 linhas com saldo tem
+`q_entrega_futura > 0` — por isso a view retorna `0 de 0`, corretamente,
+dado o estado atual dos dados. Não é o mesmo caminho que alimenta
+`estoque_itens` (fonte dos 233 produtos do Fluxo A), que tem volume muito
+maior — os dois fluxos cobrem universos de dados diferentes por design
+(Fluxo A é amplo/agregado, Fluxo B é estrito a orçamentos formais
+aprovados via a RPC).
+
+**Nenhuma mudança de código ou banco necessária para este item.** a aba
+"Por Item de Orçamento" deve começar a mostrar linhas reais conforme mais
+orçamentos forem aprovados via `aprovar_orcamento_financeiro` com itens que
+tenham entrega futura pendente. Se, depois de mais uso real, a aba
+continuar vazia com volume de dados maior, isso passa a ser sinal de um
+problema real a investigar (não coberto por esta correção).

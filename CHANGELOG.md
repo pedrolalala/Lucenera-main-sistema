@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-22 (1)
+
+### Corrigido
+
+- Layout da tela Necessidade de Compra (`compras-lucenera-3o23t98ee`) — correção pós-publicação da SPEC-040 feita pelo usuário: shell da aplicação (`App.tsx`) passa a `h-screen flex flex-col overflow-hidden`, com `<main>` distribuindo altura via `flex-1 min-h-0`; `AppNav.tsx` ganhou `shrink-0` para não ser comprimido pelo flex do shell; `NecessidadeCompra.tsx` trocou o cálculo fixo de altura (`h-[calc(100vh-4rem)]`) por `flex-1 min-h-0`, seguindo o padrão flex do shell em vez de um valor calculado manualmente. Publicado em produção — Skip v0.0.47.
+
 ## 2026-07-21 (3)
 
 ### Adicionado

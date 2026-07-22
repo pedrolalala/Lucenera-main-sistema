@@ -104,9 +104,21 @@ Descoberto durante a SPEC-040 (Necessidade de Compra — granularidade por L Fix
 
 **Corrigido em 22/07/2026** via `supabase/db/migrations/20260722_058_hotfix_aprovar_orcamento_subtotal_gerado/001_...sql` — remove `subtotal` do `INSERT INTO projeto_itens`, mesma técnica já usada em `20260626_009/002` para a função legada. Testado com aprovação real (orçamento sintético com 2 itens do mesmo produto em L Fixos diferentes, L01/L35): RPC retornou sucesso, 2 `projeto_itens` criados e corretamente vinculados por item de orçamento, 1 parcela e 1 boleto gerados.
 
-**Pendência separada, não resolvida por este hotfix**: `supabase/db/migrations/20260706_020_normalizacao_aprovacao_financeira_orcamento/001_...sql` (SPEC-016 — checagem de permissão admin/gerente, validação de `frete_tipo` obrigatório, reserva automática de estoque na aprovação) nunca foi de fato aplicada neste banco, apesar de `supabase/db/current/` documentar como se estivesse. Decidir se isso deve ser aplicado intencionalmente é uma decisão de produto do domínio de Orçamentos/Financeiro, fora do escopo deste hotfix.
+**Pendência separada, não resolvida por este hotfix**: `supabase/db/migrations/20260706_020_normalizacao_aprovacao_financeira_orcamento/001_...sql` (SPEC-016 — checagem de permissão admin/gerente, validação de `frete_tipo` obrigatório) nunca foi de fato aplicada neste banco, apesar de `supabase/db/current/` documentar como se estivesse. Decidir se isso deve ser aplicado intencionalmente é uma decisão de produto do domínio de Orçamentos/Financeiro, fora do escopo deste hotfix.
 
 **Reextrair `supabase/db/current/` para este domínio também** — mesma pendência crônica já registrada em `supabase/db/domains/estoque_compras.md` para o domínio de Compras, agora confirmada aqui também.
+
+## Achado adicional e correção: reserva de estoque por item nunca acontecia (22/07/2026)
+
+Ao verificar visualmente se os itens do ORC-0010 apareciam na Necessidade de Compra "Por Item de Orçamento" (`compras-lucenera-3o23t98ee`), descoberto que **`aprovar_orcamento_financeiro` nunca criou `estoque_saldos_projeto_item` (SPEC-010) nem reservou `estoque_itens.quantidade_reservada`** — só cria `projeto_itens`/`projeto_parcelas`/`boletos`. Sem o saldo operacional por item, a peça nunca tem como aparecer numa tela de déficit de estoque, mesmo com o vínculo de L Fixo correto.
+
+Achado: existe uma SEGUNDA função no banco, `aprovar_orcamento_financeiro_base_spec001`, que já fazia isso corretamente (lock de `estoque_itens`, cálculo de cobertura física disponível, criação do saldo por item, registro em `estoque_movimentos_projeto_item`) — mas usa a nomenclatura de status antiga (`'aprovado'` minúsculo, não o contrato oficial `'Orçamento Aprovado'` da SPEC-016) e não é a função que o sistema chama.
+
+**Corrigido** via `supabase/db/migrations/20260722_059_unificar_reserva_estoque_aprovacao/001_...sql` — incorpora a lógica de reserva de `_base_spec001` dentro da função oficial `aprovar_orcamento_financeiro`, preservando o contrato de status correto e as colunas `orcamento_item_id`/`l_fixo` da SPEC-040. Testado com orçamento sintético (quantidade proposital maior que o estoque físico, para forçar entrega futura real): RPC criou o saldo operacional corretamente, e o item apareceu na view `vw_necessidade_compra_item_orcamento` de verdade. Dados de teste removidos, estoque revertido ao valor original.
+
+**Backfill retroativo do ORC-0010** (com autorização explícita do usuário, já que a RPC não permite reprocessar um orçamento já totalmente aprovado): aplicada manualmente a mesma lógica de reserva para os 3 itens já existentes. Resultado real: L01 e L02 ficaram cobertos pelo estoque físico disponível (sem necessidade de compra, corretamente); L03 ficou com `q_entrega_futura = 1` — item confirmado aparecendo na tela real (`ORC-0010 / L03 / PLAFON DE EMB ECO / Pendente 1`).
+
+`aprovar_orcamento_financeiro_base_spec001` não foi alterada nem removida — permanece como estava, variante não usada pelo sistema.
 
 ## Auditoria dos orçamentos aprovados (22/07/2026, pós-hotfix)
 

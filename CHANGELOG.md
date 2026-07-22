@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-22 (4)
+
+### Corrigido — achado adicional: reserva de estoque por item nunca acontecia na aprovação
+
+- Ao confirmar visualmente se os itens do ORC-0010 apareciam na Necessidade de Compra "Por Item de Orçamento", descoberto que `aprovar_orcamento_financeiro` nunca criava `estoque_saldos_projeto_item` (SPEC-010) nem reservava `estoque_itens.quantidade_reservada` — só criava `projeto_itens`/`projeto_parcelas`/`boletos`. Sem o saldo por item, nenhuma peça consegue aparecer numa tela de déficit de estoque, mesmo com L Fixo vinculado corretamente.
+- Existia uma segunda função no banco (`aprovar_orcamento_financeiro_base_spec001`) que já fazia essa reserva corretamente, mas não era a chamada pelo sistema e usava nomenclatura de status desatualizada.
+- Corrigido via `supabase/db/migrations/20260722_059_unificar_reserva_estoque_aprovacao/` — incorpora a lógica de reserva na função oficial, preservando o contrato de status da SPEC-016 e o vínculo de L Fixo da SPEC-040. Testado com orçamento sintético (déficit forçado): reserva criada corretamente, item apareceu na view real.
+- Backfill retroativo aplicado ao ORC-0010 (autorizado pelo usuário): confirmado visualmente na tela publicada — `ORC-0010 / L03 / PLAFON DE EMB ECO / Pendente 1`.
+
 ## 2026-07-22 (3)
 
 ### Corrigido — backfill pontual de ORC-0010

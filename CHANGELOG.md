@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-22 (6)
+
+### Importado — planilhas Connect (ContaPagar/ContaReceber/Produtos) de 22/07/2026
+
+- Rodados `scripts/importar_contas_pagar_receber.py` e `scripts/importar_produtos_estoque.py` sobre as novas planilhas exportadas do Connect (`ContaPagar_2026-07-22.xlsx`, `ContaReceber_2026-07-22.xlsx`, `Produtos__2026-07-22.xlsx`) — constantes de nome de arquivo hardcoded nos dois scripts atualizadas antes da execução.
+- Contas a Pagar/Receber: 64 negociações novas (empresa LUCE NERA), 127 transações novas, 2.953 atualizadas, 0 erros. 488 linhas com `(cod_duplicata, tipo)` ambíguo entre empresas puladas por desenho.
+- Produtos: inicialmente 250/252 produtos atualizados — 2 falharam com `numeric field overflow` em `percentual_lucro` (`numeric(5,2)`, máx 999,99), pois 2 produtos de custo residual (R$0,10) têm margem de 1150% na planilha (dado legítimo). Corrigido via migration `20260722_060_ampliar_precisao_percentual_lucro` (`percentual_lucro` → `numeric(9,2)`), aplicada em produção; reimport confirmou os 252/252 sincronizados sem erros.
+- Detalhes em `supabase/db/domains/cadastros.md`.
+
 ## 2026-07-22 (5)
 
 ### Adicionado — SPEC-041: nomenclatura Realizado × Previsto + card Necessidade de Compra no Dashboard

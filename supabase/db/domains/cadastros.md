@@ -66,6 +66,12 @@ Triggers relacionadas:
 - `public.usuarios.trg_propagate_usuario_nome`
 - `public.usuarios.usuarios_updated_at`
 
+## Import periódico de planilhas (Connect legado)
+
+- `scripts/importar_produtos_estoque.py` sincroniza `produtos.estoque_total/estoque_showroom/estoque_disponivel/custo_total/valor_venda/percentual_lucro` a partir da planilha `Produtos__AAAA-MM-DD.xlsx` (export "Estoque" do sistema legado Connect). Só atualiza produtos existentes (match por `codigo_produto`); nunca cria produto novo. `estoque_itens` é sincronizado automaticamente por trigger (`fn_sync_estoque_itens_from_produtos`), não pelo script.
+- O nome do arquivo padrão está hardcoded no script (`PLANILHA_PADRAO`) — precisa ser atualizado manualmente a cada nova planilha antes de rodar. Mesmo padrão em `scripts/importar_contas_pagar_receber.py` (`CP_PADRAO`/`CR_PADRAO`).
+- **Achado (22/07/2026)**: `produtos.percentual_lucro` era `numeric(5,2)` (máx 999,99) e o import falhou (`numeric field overflow`) em 2 produtos de custo residual (R$0,10) com margem de 1150% — valor legítimo da planilha, não erro de cadastro. Corrigido via migration `20260722_060_ampliar_precisao_percentual_lucro` (`numeric(9,2)`). Como o `UPDATE` é atômico por linha, os 2 produtos ficaram sem NENHUM campo atualizado (nem estoque/custo/venda) até a correção — reforça rodar `--dry-run` e conferir a contagem de erros antes de considerar um import concluído.
+
 ## Ação a ser realizada
 
 Quando consolidar o schema, preservar a distinção entre `empresas` como empresas do grupo Lucenera e `contatos.empresa_id` como empresa/PJ vinculada a um contato. Depois, registrar nas telas e integrações esse significado para evitar conciliação incorreta. No frontend da SPEC-018, reaproveitar `public.criar_produto_orcamento(p_payload jsonb)`, manter validações cadastrais de produto (`codigo_produto`, `sku`, marca, categoria e fornecedor) e impedir que a criação pelo Orçamentos escreva dados operacionais de estoque/compras.

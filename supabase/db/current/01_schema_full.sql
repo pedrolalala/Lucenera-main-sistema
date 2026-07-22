@@ -5570,7 +5570,7 @@ CREATE TABLE public.produtos (
     estoque_disponivel numeric(15,3) DEFAULT 0,
     unidade text DEFAULT 'UN'::text,
     custo_total numeric(15,2) DEFAULT 0,
-    percentual_lucro numeric(5,2) DEFAULT 0,
+    percentual_lucro numeric(9,2) DEFAULT 0,
     valor_venda numeric(15,2) DEFAULT 0,
     codigo_legado integer,
     categoria_id uuid,

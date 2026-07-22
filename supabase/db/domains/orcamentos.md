@@ -96,6 +96,18 @@ Observações:
 - `process-billing-automation` ainda aparece no remoto como Edge Function legada, mas não deve ser usada nem evoluída; o fluxo novo deve usar a RPC `public.aprovar_orcamento_financeiro(p_orcamento_id uuid)`.
 - `historico_status_orcamentos` é a tabela de auditoria do fluxo Lucenera; `historico_status_orcamento` permanece ligado à família Ubiqua/revenda.
 
+## Achado crítico e hotfix (22/07/2026)
+
+`aprovar_orcamento_financeiro` esteve **quebrada em produção para toda aprovação nova desde algum momento após 06/07/2026** (nenhum `projeto_itens` no banco tem `created_at` posterior a essa data). Causa: `projeto_itens.subtotal` virou coluna `GENERATED ALWAYS` na migration `20260626_009_spec005_remocao_triggers_legados_aprovacao/002_fix_subtotal_coluna_gerada.sql`, que corrigiu o `INSERT` — mas na função **errada** (`aprovar_orcamento_financeiro_base_spec001`, a variante legada/wrapper, não a função oficial que o sistema realmente chama). A função oficial nunca foi corrigida naquele momento; um hotfix não documentado (nenhuma migration deste repositório o captura) aplicado depois de 06/07/2026 reintroduziu o `INSERT` explícito em `subtotal` na função oficial, quebrando toda aprovação nova com `cannot insert a non-DEFAULT value into column "subtotal"` (Postgres `428C9`).
+
+Descoberto durante a SPEC-040 (Necessidade de Compra — granularidade por L Fixo), ao investigar por que itens de orçamentos já aprovados não apareciam vinculados. Confirmado com um orçamento sintético de teste (criado e removido na mesma sessão) reproduzindo o erro ao vivo antes da correção.
+
+**Corrigido em 22/07/2026** via `supabase/db/migrations/20260722_058_hotfix_aprovar_orcamento_subtotal_gerado/001_...sql` — remove `subtotal` do `INSERT INTO projeto_itens`, mesma técnica já usada em `20260626_009/002` para a função legada. Testado com aprovação real (orçamento sintético com 2 itens do mesmo produto em L Fixos diferentes, L01/L35): RPC retornou sucesso, 2 `projeto_itens` criados e corretamente vinculados por item de orçamento, 1 parcela e 1 boleto gerados.
+
+**Pendência separada, não resolvida por este hotfix**: `supabase/db/migrations/20260706_020_normalizacao_aprovacao_financeira_orcamento/001_...sql` (SPEC-016 — checagem de permissão admin/gerente, validação de `frete_tipo` obrigatório, reserva automática de estoque na aprovação) nunca foi de fato aplicada neste banco, apesar de `supabase/db/current/` documentar como se estivesse. Decidir se isso deve ser aplicado intencionalmente é uma decisão de produto do domínio de Orçamentos/Financeiro, fora do escopo deste hotfix.
+
+**Reextrair `supabase/db/current/` para este domínio também** — mesma pendência crônica já registrada em `supabase/db/domains/estoque_compras.md` para o domínio de Compras, agora confirmada aqui também.
+
 ## Diretriz ativa
 
 Manter uma função/RPC transacional única para aprovação financeira por `orcamento_id`. O contrato oficial decidido pela SPEC-016 é `enviado_cliente -> Aprovação Financeira -> Orçamento Aprovado`; o frontend deve listar/editar orçamentos nessa fila e só disparar efeitos financeiros após confirmação final do financeiro.

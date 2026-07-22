@@ -2,6 +2,20 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-22 (2)
+
+### Corrigido — achado crítico: aprovação de orçamento quebrada em produção há ~2 semanas
+
+- Durante investigação de por que itens de orçamentos já aprovados não apareciam vinculados ao L Fixo na Necessidade de Compra (SPEC-040), descoberto que `aprovar_orcamento_financeiro` — a RPC oficial de aprovação financeira, domínio Orçamentos/Financeiro (SPEC-016) — estava falhando em **toda chamada real** desde algum momento após 06/07/2026 (nenhum `projeto_itens` no banco tem data de criação posterior a essa data).
+- Causa: `projeto_itens.subtotal` virou coluna `GENERATED ALWAYS` em 26/06/2026, e a correção necessária (remover o `INSERT` explícito nessa coluna) foi aplicada só numa função legada (`aprovar_orcamento_financeiro_base_spec001`), não na função oficial. Um hotfix não documentado (nenhuma migration deste repositório o captura) reintroduziu o `INSERT` explícito na função oficial depois de 06/07, quebrando a aprovação.
+- Corrigido via `supabase/db/migrations/20260722_058_hotfix_aprovar_orcamento_subtotal_gerado/`, testado com um orçamento sintético real (2 itens do mesmo produto em L Fixos diferentes, L01/L35) — aprovação funcionou, `projeto_itens` corretamente vinculados por item, parcela e boleto gerados. Dados de teste removidos.
+- Detalhes completos em `supabase/db/domains/orcamentos.md`.
+
+### Pendente
+
+- Decisão de produto separada: aplicar ou não a migration `20260706_020` (checagem de permissão, validação de frete, reserva automática de estoque na aprovação) — nunca foi aplicada de fato, fora do escopo deste hotfix.
+- Reextrair `supabase/db/current/` para o domínio de Orçamentos também (mesma pendência crônica já registrada para Compras).
+
 ## 2026-07-22 (1)
 
 ### Corrigido

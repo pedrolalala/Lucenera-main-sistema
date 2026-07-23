@@ -39,7 +39,7 @@ sys.path.insert(0, str(ROOT / "dashboard"))
 
 from config import get_client, SUPABASE_URL  # noqa: E402
 
-PLANILHA_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "Produtos__2026-07-22.xlsx"
+PLANILHA_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "Atualização 23.07.2026" / "Produtos__2026-07-23.xlsx"
 
 BATCH_SIZE = 200
 PAGE_SIZE = 1000

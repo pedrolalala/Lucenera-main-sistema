@@ -2,6 +2,62 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-07-23 (7)
+
+### Aplicado — cruzamento 7 (completar cadastro do cliente): 14 clientes
+
+- Telefone/email/endereço completados via planilha `Cliente` (só onde estava `NULL`, nunca sobrescreve): 9 telefone, 9 email, 9 email_financeiro, 9 endereço, 11 bairro, 9 cidade, 9 estado — 14 clientes distintos afetados.
+- Cobertura já estava alta (82-90%) antes — essa planilha aparenta ter sido a fonte original de importação de `contatos`, não uma planilha nova trazendo dado inédito.
+
+## 2026-07-23 (6)
+
+### Aplicado — cruzamento 6 (Projeto → Arquiteto): 1.610 projetos ligados ao arquiteto real
+
+- `projetos.arquiteto_id` preenchido para 1.610 de 3.039 projetos sem arquiteto, via nome exato entre `projetos."Nome Arquiteto"` e `contatos` tipo=arquiteto. `arquiteto_id`: 662 → 2.272.
+- `responsavel_obra_id` não aplicado — os valores da planilha ("Responsável da Obra") são nomes de arquitetos/escritórios terceiros, não batem com nenhum dos 9 usuários internos do sistema (0 de 814).
+
+## 2026-07-23 (5)
+
+### Aplicado — cruzamento 5 (Financeiro → Projeto): 2.132 negociações ligadas ao projeto real
+
+- `negociacoes.projeto_id` preenchido para 2.132 de 12.750 negociações, via `cod_venda` → planilha `venda` → código do projeto embutido no nome do cliente → `projetos.codigo`.
+- 309 negociações sem `cod_venda`; das 12.441 restantes, só 17% resolvem projeto — mesmo gargalo de dado ausente dos outros cruzamentos.
+
+## 2026-07-23 (4)
+
+### Aplicado — cruzamento 2 (Projeto → Responsável): 1.774 projetos ligados ao usuário real
+
+- Segundo cruzamento do projeto "Cruzamento de Dados" (ver `01-Documento/01 - Planilhas/DECISOES.md`): `projetos.responsavel_id` preenchido para 1.774 dos 2.901 projetos com `responsavel_nome` mas sem `responsavel_id`, via match de nome (case-insensitive/trim) contra os 9 usuários reais do sistema.
+- 1.127 projetos continuam sem `responsavel_id` — nome histórico não corresponde a nenhum usuário ativo (equipe antiga, sem login).
+- `projetos.responsavel_id`: 394 → 2.168 preenchidos.
+
+## 2026-07-23 (3)
+
+### Aplicado — cruzamento 1 (Projeto → Cliente): 546 projetos ligados ao cliente real
+
+- Primeiro cruzamento do projeto "Cruzamento de Dados" (ver `01-Documento/01 - Planilhas/DECISOES.md`) aplicado em produção: `projetos.cliente_id` preenchido para 546 dos 3.182 projetos que estavam sem cliente vinculado, via match seguro (código do projeto embutido no cadastro do cliente, ou nome do projeto = nome do cliente, ambos únicos).
+- 7 casos com pistas conflitantes ficaram de fora (não aplicados) — pelo menos um investigado é cadastro de cliente duplicado, não erro de cruzamento.
+- 2.629 projetos continuam sem `cliente_id` por falta de qualquer pista rastreável nas fontes disponíveis hoje.
+- `projetos.cliente_id`: 519 → 1.065 preenchidos (de 3.701 projetos).
+
+## 2026-07-23 (1)
+
+### Corrigido — `projetos.client_id` removido; 4 dashboards que estavam "cegos" para cliente voltaram a funcionar
+
+- Início do projeto "Cruzamento de Dados" (ver `01-Documento/01 - Planilhas/AGENTS.md` e `DECISOES.md`, novos): plano de 9 cruzamentos para preencher `cliente_id`/`responsavel_id` de projetos e ligar o histórico de vendas (planilha `Cruzamento de dados.xlsx`, cruzada contra o Supabase real).
+- Antes do cruzamento 1 (Projeto → Cliente), validado se `projetos.client_id` (coluna duplicada de `projetos.cliente_id`, nunca preenchida) era código morto. Não era: usada em 10 views do banco, sendo 4 delas (`vw_projetos_pipeline`, `vw_projetos_por_status`, `vw_financeiro_projetos`, `vw_dashboard_crm_fechamento` — Pipeline, Status, Financeiro por Projeto e Fechamento do CRM) sem nenhum fallback, retornando cliente/contagem vazios para 100% dos projetos desde sempre.
+- Corrigido via `supabase/db/migrations/20260723_061_remove_projetos_client_id/`: as 10 views passaram a usar `cliente_id`; índice e FK de `client_id` removidos; coluna `client_id` removida de `projetos`. Aplicada em produção via `psycopg2`, com verificação antes do commit (ex: `vw_projetos_por_status` passou de `total_clientes = 0` em todas as linhas para contagens reais).
+- `supabase/db/current/01_schema_full.sql` atualizado para refletir a remoção (coluna, comentário, índice, FK e as 10 views).
+
+## 2026-07-23 (2)
+
+### Importado — planilhas Connect (ContaPagar/ContaReceber/Produtos) de 23/07/2026
+
+- Preparação de dados antes do cruzamento 1 (ver `01-Documento/01 - Planilhas/DECISOES.md`): rodados `scripts/importar_contas_pagar_receber.py` e `scripts/importar_produtos_estoque.py` sobre as planilhas mais recentes, agora localizadas em `01-Documento/01 - Planilhas/Atualização 23.07.2026/` (`ContaPagar_2026-07-23.xlsx`, `ContaReceber_2026-07-23.xlsx`, `Produtos__2026-07-23.xlsx`) — constantes de caminho hardcoded nos dois scripts atualizadas antes da execução (apontavam para a pasta/arquivos de 22/07).
+- Contas a Pagar/Receber: 21 negociações novas (empresa LUCE NERA), 68 transações novas, 2.904 atualizadas, 0 erros. 488 linhas com `(cod_duplicata, tipo)` ambíguo entre empresas puladas por desenho (mesmo comportamento documentado no ciclo de 22/07).
+- Produtos: 291 de 4.409 atualizados (4.061 já sincronizados, 57 sem match no banco — códigos ainda não cadastrados), 0 erros.
+- Ambiente Python do repositório central não tinha `pandas` instalado (só `psycopg2`/`supabase`/`dotenv`) — instalado via `pip install pandas` antes de rodar os scripts.
+
 ## 2026-07-22 (6)
 
 ### Importado — planilhas Connect (ContaPagar/ContaReceber/Produtos) de 22/07/2026

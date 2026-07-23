@@ -2566,7 +2566,6 @@ CREATE TABLE public.projetos (
     created_by uuid,
     equipe_responsavel_obra_id uuid,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    client_id uuid,
     area_do_projeto jsonb,
     "Nome Arquiteto" text,
     codigo_legado integer,
@@ -2586,12 +2585,6 @@ CREATE TABLE public.projetos (
 
 COMMENT ON COLUMN public.projetos.historico IS 'Array JSON. Cada entrada: {"campo":"status","valor_anterior":"...","valor_novo":"...","alterado_em":"ISO8601","alterado_por":"uuid","sistema_origem":"crm|sharepoint|rh"}';
 
-
---
--- Name: COLUMN projetos.client_id; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.projetos.client_id IS 'ID do cliente (FK para contatos onde tipo=cliente). Identifica o cliente responsável pelo projeto.';
 
 
 --
@@ -6748,7 +6741,7 @@ CREATE VIEW public.vw_custos_pendentes_mes WITH (security_invoker='on') AS
 CREATE VIEW public.vw_dashboard_crm_fechamento AS
  SELECT date_trunc('month'::text, (p.data_entrada)::timestamp with time zone) AS mes,
     count(*) AS total_projetos,
-    count(DISTINCT p.client_id) AS total_clientes,
+    count(DISTINCT p.cliente_id) AS total_clientes,
     COALESCE(sum(v.valor_total), (0)::numeric) AS valor_total,
     count(*) FILTER (WHERE ((p.area_do_projeto ->> 'tipo'::text) = 'Residential'::text)) AS projetos_residenciais,
     count(*) FILTER (WHERE ((p.area_do_projeto ->> 'tipo'::text) = 'Corporativo'::text)) AS projetos_corporativos,
@@ -6796,7 +6789,7 @@ CREATE VIEW public.vw_entrega_futura_projeto_item WITH (security_invoker='true')
     pr.codigo AS projeto_codigo,
     pi.orcamento_id,
     o.numero AS orcamento_numero,
-    COALESCE(o.cliente_id, pr.cliente_id, pr.client_id) AS cliente_id,
+    COALESCE(o.cliente_id, pr.cliente_id) AS cliente_id,
     c.nome AS cliente,
     pi.quantidade AS q_venda,
     esp.q_entrega_futura,
@@ -6808,7 +6801,7 @@ CREATE VIEW public.vw_entrega_futura_projeto_item WITH (security_invoker='true')
      LEFT JOIN public.produtos p ON ((p.id = pi.produto_id)))
      LEFT JOIN public.projetos pr ON ((pr.id = pi.projeto_id)))
      LEFT JOIN public.orcamentos o ON ((o.id = pi.orcamento_id)))
-     LEFT JOIN public.contatos c ON ((c.id = COALESCE(o.cliente_id, pr.cliente_id, pr.client_id))))
+     LEFT JOIN public.contatos c ON ((c.id = COALESCE(o.cliente_id, pr.cliente_id))))
   WHERE ((esp.status_operacional = 'ativo'::text) AND (esp.q_entrega_futura > (0)::numeric))
   ORDER BY p.nome, esp.atualizado_em;
 
@@ -6890,7 +6883,7 @@ CREATE VIEW public.vw_estoque_saldos_projeto_item WITH (security_invoker='true')
     pi.projeto_id,
     pi.orcamento_id,
     pi.produto_id,
-    COALESCE(o.cliente_id, pr.cliente_id, pr.client_id) AS cliente_id,
+    COALESCE(o.cliente_id, pr.cliente_id) AS cliente_id,
     p.nome AS produto,
     p.codigo_produto AS produto_codigo,
     pr.codigo AS projeto_codigo,
@@ -7020,7 +7013,7 @@ CREATE VIEW public.vw_financeiro_projetos AS
     p.codigo,
     p.nome,
     p.status,
-    p.client_id,
+    p.cliente_id,
     c.nome AS cliente_nome,
     v.valor_total,
     v.valor_recebido,
@@ -7029,7 +7022,7 @@ CREATE VIEW public.vw_financeiro_projetos AS
     v.parcelas_pagas,
     v.parcelas_pendentes
    FROM ((public.projetos p
-     LEFT JOIN public.contatos c ON (((c.id = p.client_id) AND (c.tipo = 'cliente'::public.contato_tipo))))
+     LEFT JOIN public.contatos c ON (((c.id = p.cliente_id) AND (c.tipo = 'cliente'::public.contato_tipo))))
      LEFT JOIN LATERAL ( SELECT sum(vendas.valor_total) AS valor_total,
             sum(
                 CASE
@@ -7375,11 +7368,11 @@ CREATE VIEW public.vw_projetos_pipeline AS
     p.status,
     p.data_entrada,
     (p.area_do_projeto ->> 'tipo'::text) AS tipo_projeto,
-    p.client_id,
+    p.cliente_id,
     c.nome AS cliente_nome,
     COALESCE(v.valor_total, (0)::numeric) AS valor_total
    FROM ((public.projetos p
-     LEFT JOIN public.contatos c ON (((c.id = p.client_id) AND (c.tipo = 'cliente'::public.contato_tipo))))
+     LEFT JOIN public.contatos c ON (((c.id = p.cliente_id) AND (c.tipo = 'cliente'::public.contato_tipo))))
      LEFT JOIN LATERAL ( SELECT sum(vendas.valor_total) AS valor_total
            FROM public.vendas
           WHERE (vendas.projeto_id = p.id)) v ON (true))
@@ -7432,7 +7425,7 @@ COMMENT ON VIEW public.vw_projetos_por_responsavel IS 'Estatísticas de projetos
 CREATE VIEW public.vw_projetos_por_status AS
  SELECT p.status,
     count(*) AS total_projetos,
-    count(DISTINCT p.client_id) AS total_clientes,
+    count(DISTINCT p.cliente_id) AS total_clientes,
     COALESCE(sum(v.valor_total), (0)::numeric) AS valor_total
    FROM (public.projetos p
      LEFT JOIN LATERAL ( SELECT sum(vendas.valor_total) AS valor_total
@@ -7804,10 +7797,10 @@ CREATE VIEW public.vw_transferencias_estoque WITH (security_invoker='true') AS
      LEFT JOIN public.produtos p ON ((p.id = pi_o.produto_id)))
      LEFT JOIN public.projetos pr_o ON ((pr_o.id = pi_o.projeto_id)))
      LEFT JOIN public.orcamentos o_o ON ((o_o.id = pi_o.orcamento_id)))
-     LEFT JOIN public.contatos c_o ON ((c_o.id = COALESCE(o_o.cliente_id, pr_o.cliente_id, pr_o.client_id))))
+     LEFT JOIN public.contatos c_o ON ((c_o.id = COALESCE(o_o.cliente_id, pr_o.cliente_id))))
      LEFT JOIN public.projetos pr_d ON ((pr_d.id = pi_d.projeto_id)))
      LEFT JOIN public.orcamentos o_d ON ((o_d.id = pi_d.orcamento_id)))
-     LEFT JOIN public.contatos c_d ON ((c_d.id = COALESCE(o_d.cliente_id, pr_d.cliente_id, pr_d.client_id))))
+     LEFT JOIN public.contatos c_d ON ((c_d.id = COALESCE(o_d.cliente_id, pr_d.cliente_id))))
   ORDER BY t.solicitado_em DESC;
 
 
@@ -9798,12 +9791,6 @@ CREATE INDEX idx_projetos_arquiteto ON public.projetos USING btree (arquiteto_id
 CREATE INDEX idx_projetos_arquivado ON public.projetos USING btree (arquivado);
 
 
---
--- Name: idx_projetos_client_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_projetos_client_id ON public.projetos USING btree (client_id);
-
 
 --
 -- Name: idx_projetos_cliente_id; Type: INDEX; Schema: public; Owner: -
@@ -11408,12 +11395,6 @@ ALTER TABLE ONLY public.projetos
     ADD CONSTRAINT projetos_arquiteto_id_fkey FOREIGN KEY (arquiteto_id) REFERENCES public.contatos(id) ON DELETE CASCADE;
 
 
---
--- Name: projetos projetos_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.projetos
-    ADD CONSTRAINT projetos_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.contatos(id) ON DELETE SET NULL;
 
 
 --

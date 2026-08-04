@@ -2,28 +2,377 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-04 (5)
+
+### Fechado — "Regime de Apuração" vira Select fixo (Simples Nacional / Regime Normal)
+
+- Usuário confirmou por texto as duas únicas opções do campo (pendência aberta desde a implementação inicial da SPEC-052, quando o print de referência só mostrava o dropdown fechado).
+- Migration `supabase/db/migrations/20260804_070_spec052_regime_apuracao_fixo/001_regime_apuracao_check.sql` — `CHECK` em `contatos.regime_apuracao` restringindo a `simples_nacional | regime_normal`. Confirmado antes de aplicar que nenhum dos 3.861 contatos tinha valor preenchido (sem risco de violar a constraint). **Aplicada no Supabase real em 2026-08-04.**
+- `lucenera-crm-3bd29 (1)` (Skip `projectId 24580`, versão `0.0.289`/`e26e02d`): `ClientFormFields.tsx` e `ContatoDetail.tsx` (que ganhou reforço no suporte a `FieldType: 'select'` para reaproveitar o mesmo padrão do "Tipo Cliente") trocaram o `Input` livre por `Select`.
+- `gestao-financeira-clone-544cb (1)` (Skip `projectId 32554`, versão `0.0.300`/`e64d787`): mesmo tratamento em `ClientCreateModal.tsx`.
+- Com isso, a única pendência aberta da SPEC-052 original (opções do regime tributário) está resolvida.
+
+## 2026-08-04 (4)
+
+### Adicionado — campo "Tipo Cliente" (consumidor/não contribuinte/indústria/revendedor)
+
+- Usuário anexou os prints do sistema de referência do Vinicius e confirmou que o campo deve ser criado como Select fixo.
+- Migration `supabase/db/migrations/20260804_069_spec052_tipo_cliente/001_add_tipo_cliente.sql` — coluna `contatos.tipo_cliente varchar` (nullable, sem default) com `CHECK` restringindo a `consumidor | nao_contribuinte | industria | revendedor` (mesmo padrão de `tipo_pessoa`, sem criar ENUM novo). **Aplicada no Supabase real em 2026-08-04.**
+- Escopo: campo específico de cliente (o print é da tela "Cadastro de Clientes"), não estendido a arquiteto/engenheiro/eletricista/fornecedor.
+- `lucenera-crm-3bd29 (1)` (Skip `projectId 24580`, versão `0.0.288`/`57cae50`): `ClientFormFields.tsx` ganhou o Select; `ContatoDetail.tsx` ganhou suporte genérico a `FieldType: 'select'` (com `options`) e a entrada `tipo_cliente` no `FIELD_CONFIGS.cliente`.
+- `gestao-financeira-clone-544cb (1)` (Skip `projectId 32554`, versão `0.0.299`/`11ece1b`): `ClientCreateModal.tsx` ganhou o mesmo Select.
+- Nenhuma migration de dados retroativa — os ~360 clientes/contatos existentes ficam com `tipo_cliente = NULL` até serem editados manualmente.
+
+## 2026-08-04 (3)
+
+### Adicionado — CRM: aba de Fornecedores (achado da Reunião.01 com Vinicius)
+
+- Revisando os prints que o usuário anexou da Reunião.01 (`02-Reunioes/12. lucenera (Vinicius) - 27.07.2026_ correcoes necessarias/`), Vinicius também pediu: "no sistema que envolver produtos, preciso que tenha o campo de cadastro de Fornecedores - não encontrei... basicamente no CRM precisa de uma nova aba para adicionar fornecedores". Esse pedido não tinha sido coberto pela SPEC-052 (focada em cadastro de cliente).
+- Achado: `contatos.tipo = 'fornecedor'` já existe e já tem 357 registros reais no Supabase (da importação Connect, SPEC-050) e é usado pela criação rápida de fornecedor em `cadastro-lucenera` (SPEC-053) — mas **nenhum sistema tinha uma tela de listagem/edição para esse tipo**. Os registros existentes usam `cnpj`/`razao_social`, não `cpf_cnpj` (diferente dos outros tipos de contato do CRM).
+- `lucenera-crm-3bd29 (1)` (publicado direto no Skip, `projectId 24580`, seguindo o mesmo padrão de `Arquitetos.tsx`): nova página `src/pages/contatos/Fornecedores.tsx` (listagem cards/planilha, filtros por nome/razão social/cidade/UF, criação rápida); `src/pages/contatos/ContatoDetail.tsx` ganhou o tipo `fornecedor` (rota `/contatos/fornecedores/:id`, campos nome/razão social/CNPJ/contato/endereço); rota `/contatos/fornecedores` adicionada em `src/App.tsx`; item "Fornecedores" adicionado ao menu lateral em `src/components/Layout.tsx`. Versão publicada `0.0.287` (`f75c848`).
+- Pendência levantada mas **não implementada** (requer decisão do usuário antes de mexer no schema): os prints também mostram um campo "Tipo Cliente" no sistema de referência do Vinicius, com opções fixas `CONSUMIDOR / NÃO CONTRIBUINTE / INDÚSTRIA / REVENDEDOR` — não existe coluna equivalente em `contatos` hoje, e não é o mesmo campo que "Regime Apuração" (que no print aparece fechado, mostrando só "SIMPLES NACIONAL", sem revelar a lista completa de opções). Fica em aberto até confirmação com o usuário se esse campo deve ser adicionado e com qual semântica exata.
+
+## 2026-08-04 (2)
+
+### Corrigido — SPEC-052/053/054: código já escrito nunca tinha chegado à produção (Skip)
+
+- Usuário pediu para conferir se as correções da reunião com Vinicius (27/07/2026, `02-Reunioes/12. lucenera (Vinicius) - 27.07.2026_ correcoes necessarias/`) tinham sido de fato aplicadas. Achado: as três SPECs (052 cadastro de cliente, 053 cadastro de produto, 054 devolução por setor) estavam com código completo e correto no submodule local, mas **nada disso estava rodando em produção** — os 4 sistemas envolvidos (`lucenera-crm`, `gestao-financeira-clone`, `cadastro-lucenera`, `compras-lucenera`/Necessidade de Compra) são todos projetos Skip Cloud, e a working tree do Skip nunca recebeu essas mudanças (mesma divergência já registrada para SPEC-042/043/044). Verificado por leitura direta do código publicado em cada projeto Skip via `skip_file_read`, não pelo submodule.
+- **SPEC-054 (devolução por setor)**: RPC `registrar_devolucao_projeto_item_setor` já estava aplicada e funcionando no Supabase real (confirmado via SQL direto), mas nenhum frontend a consumia. Publicado no Skip do projeto "Necessidade de Compra" (`projectId 40326`): `src/services/devolucoes.ts`, `src/components/compra/DevolucaoEstoqueTab.tsx`, `src/components/compra/ModalDevolucaoItem.tsx` (novos) e nova aba "Devolução" em `src/pages/NecessidadeCompra.tsx`. Versão publicada `0.0.49` (`fab8e56`).
+- **SPEC-053 (cadastro de produto)**: publicado no Skip do projeto "Cadastro Lucenera" (`projectId 36668`): `src/services/produtos.ts` ganhou `checkCodigoExists`/`createMarca`/`createFornecedor`; `src/components/forms/PecaForm.tsx` — botões "+" de criação rápida de marca/fornecedor, campo `Código` virou somente leitura (a sequence `produtos_codigo_produto_seq` já existia no banco real, mas o formulário publicado ainda pedia digitação manual, então nunca era usada), e bordas coloridas separando os 4 blocos do formulário. Versão publicada `0.0.50` (`f97bb9c`).
+- **SPEC-052 (cadastro de cliente)**: publicado em 3 sistemas — `gestao-financeira-clone` (`projectId 32554`, `src/components/ClientCreateModal.tsx`, versão `0.0.298`/`615d29e`) e `lucenera-crm` (`projectId 24580`, versão `0.0.286`/`b4752f9`). No CRM a versão local do formulário (`Clientes.tsx`) já estava obsoleta em relação ao Skip (que evoluiu para um componente compartilhado `ClientFormFields.tsx` + página cheia `ContatoDetail.tsx`, ver SPEC-044) — em vez de sobrescrever, os campos do SPEC-052 (autofill de CEP via ViaCEP, autofill de CNPJ via BrasilAPI, "Nome e Razão Social"/"Nome Fantasia", Inscrição Estadual + Regime de Apuração separados do RG, blocos de Endereço de Entrega/Cobrança) foram portados para dentro dos dois componentes já em produção: `src/components/ClientFormFields.tsx` (usado no diálogo "Novo Cliente") e `src/pages/contatos/ContatoDetail.tsx` (usado na edição em página cheia, incluindo a mesma lógica de autofill de CEP/CNPJ). Em todos os casos as colunas usadas (`rg`, `inscricao_estadual`, `regime_apuracao`, `*_entrega`, `*_cobranca`) já existiam em `contatos` no Supabase real — nenhuma migration foi necessária.
+- Todas as 4 publicações passaram pelo pipeline de QA do Skip (`skip_project_apply_changes` em modo `development`, depois `skip_project_publish`) antes de ir ao ar.
+- **Não alterado nesta correção**: os submodules locais em `04-Sistemas/` permanecem como estavam (já tinham o código certo) — a divergência entre local e Skip continua existindo para os arquivos não tocados aqui e deve ser tratada como um problema estrutural à parte (mesmo já apontado nas notas de SPEC-042/043/044).
+- Pendências herdadas, não resolvidas nesta correção: "diferença de cor" em produtos (SPEC-053, aguardando definição), papel/permissão de quem pode registrar devolução e efeito financeiro de `gera_credito_financeiro` (SPEC-054), opções fixas do regime tributário (SPEC-052, aguardando print do Vinicius), homologação manual no navegador em todos os 4 sistemas.
+
+## 2026-08-04 (1)
+
+### Ajustado — CRM: larguras de coluna da tabela de Projetos
+
+- Usuário reportou que colunas da tabela de Projetos (view "Planilha") cortavam texto com reticências, dificultando leitura de nome de projeto, cidade e engenheiro/arquiteto.
+- `lucenera-crm-3bd29 (1)/src/pages/Projetos.tsx`: tabela trocada de `table-fixed` para `table-auto`. Coluna "Projeto" teve a largura reduzida (`w-[160px]`) e passou a quebrar em múltiplas linhas (`whitespace-normal break-words`) em vez de truncar com `...`. Colunas "Cidade" e "Eng./Arquiteto" tiveram a largura-base aumentada (`w-[140px]`/`w-[160px]`). Todas as demais colunas (Responsável, Entrada, Status, Fechamento, Valor Total, Eng./Arquiteto, Cidade) tiveram a classe `truncate` removida e passaram a usar `whitespace-nowrap`, exibindo o texto sempre por completo (a coluna cresce e o container já tem `overflow-x-auto` para rolagem horizontal quando necessário).
+- Importante: este sistema é servido via Skip Cloud (projeto "Lucenera CRM", id 24580) e a working tree do Skip já estava divergente do submodule local (`Projetos.tsx` local usa componentes shadcn diferentes e não reflete o que está em produção). A edição foi feita diretamente na working tree do Skip via `skip_file_write`, aplicada (`skip_project_apply_changes`, QA completo passou) e publicada em produção (`skip_project_publish`, versão `0.0.285`, ref `e0956bf`). O submodule local `04-Sistemas/lucenera-crm-3bd29 (1)` não foi tocado e permanece desatualizado em relação ao Skip — mesma divergência já registrada nas SPEC-042/043/044.
+- Pendência: sincronizar o submodule local com a working tree do Skip para eliminar a divergência (fora do escopo desta mudança pontual).
+
+## 2026-08-03 (1)
+
+### Sincronizado — Produtos desatualizados no Supabase (planilha Connect 31/07)
+
+- Usuário reportou que o valor dos produtos estava desatualizado. Causa: existia uma planilha `Produtos__2026-07-31.xlsx` (export "Estoque" do Connect) já disponível em `01-Documento/01 - Planilhas/`, mais recente que a última sincronizada (23/07, commit `1989773`), mas o script `scripts/importar_produtos_estoque.py` ainda apontava para o arquivo antigo.
+- Atualizada a constante `PLANILHA_PADRAO` do script para `Produtos__2026-07-31.xlsx` e rodado o import contra o Supabase real: dry-run confirmou 685 produtos divergentes; gravação real aplicou os 685 updates (custo_total, valor_venda, percentual_lucro, estoque_total/showroom/disponivel) com 0 erros. 3.667 produtos já estavam sincronizados. `estoque_itens` foi atualizado automaticamente pelo trigger `fn_sync_estoque_itens_from_produtos`.
+- Pendência: 61 `CodProduto` da planilha não têm match em `produtos` (prováveis produtos novos, ainda não cadastrados — fora do escopo deste script, que só atualiza existentes). Lista completa disponível rodando `python scripts/importar_produtos_estoque.py --dry-run`.
+
+## 2026-07-27 (9)
+
+### Implementado — SPEC-053: Correções do Cadastro de Produto (código automático, criação rápida de marca/fornecedor, referência livre)
+
+- SPEC desmembrada de uma SPEC única (origem: reunião com Vinicius, 27/07/2026), com decisão do usuário já resolvida: `produtos.codigo_produto` passa a ser gerado por sequence do Postgres (buracos na numeração aceitáveis), não por RPC dedicada, porque há dois caminhos de INSERT independentes em `produtos` (Cadastro grava direto, Orçamentos via RPC).
+- Migration redigida (não aplicada no Supabase real): `supabase/db/migrations/20260727_068_spec053_codigo_produto_sequence/` — `001_sequence_codigo_produto.sql` cria `public.produtos_codigo_produto_seq` e associa como `DEFAULT nextval(...)` de `produtos.codigo_produto`; `002_criar_produto_orcamento_sem_codigo.sql` reescreve `public.criar_produto_orcamento(p_payload jsonb)` removendo a exigência/uso de `codigo_produto` do payload (corpo extraído do `db/current/03_functions.sql` real, resto do comportamento preservado).
+- Achado incidental: `supabase/db/current/01_schema_full.sql` está desatualizado para `public.marcas` — não lista `fornecedor_id` (SPEC-030) nem `prazo_entrega_dias` (migration `20260715_041`), embora ambas já estejam aplicadas no banco real segundo `CHANGELOG.md`/`estoque_compras.md`. Os nomes de coluna usados nesta SPEC foram confirmados lendo as migrations originais. Recomendado reextrair `db/current/` na próxima oportunidade.
+- `cadastro-lucenera-b86fe`: `src/services/produtos.ts` ganhou `createMarca()`/`createFornecedor()`; `src/components/forms/PecaForm.tsx` — `codigo_produto` virou campo somente leitura (gerado ao salvar), botões "+" ao lado de Marca e Fornecedor abrindo modais de criação rápida com auto-seleção, e separação visual (borda colorida) entre os 4 blocos do formulário.
+- `gestao-financeira-clone-544cb (1)`: `src/services/productCatalogService.ts` ganhou `createMarcaQuick()`/`createFornecedorQuick()` e removeu `codigo_produto` do payload da RPC; `src/components/budgets/ProductCreateModal.tsx` — mesmo tratamento de código automático e botões "+" replicados.
+- Confirmado que `referencia` não tinha (e continua sem) nenhuma máscara/regex/CHECK restritiva em nenhum dos dois formulários nem no banco — nenhuma mudança de código foi necessária.
+- Verificação de RLS pedida pela SPEC: `marcas_insert` e `contatos_insert` existem para `authenticated` (não é o cenário deny-all-silencioso da SPEC-049), mas há uma assimetria — `contatos_insert` libera `admin`/`gerente`/`operador`, `marcas_insert` só `admin`/`gerente`. Documentado como achado, não corrigido (decisão de acesso, não técnica).
+- Fora do escopo, propositalmente não implementado: campo de "cor"/"diferença de cor" em `produtos` — bloqueado até Vinicius definir o formato.
+- `npm run lint` (oxlint), `npm run build` (vite) e formatação (`oxfmt` no Cadastro, `prettier` em Orçamentos) rodados sem erros/warnings novos em ambos os sistemas.
+- Pendências: aplicar a migration no Supabase real e reextrair `supabase/db/current/`; esclarecer "diferença de cor"; confirmar se a restrição de formato relatada por Vinicius existe de fato em produção; decidir se `marcas_insert` deve liberar `operador`; homologação manual no navegador em ambos os sistemas. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-053_Correcao_Cadastro_Produto.md`.
+
+## 2026-07-27 (8)
+
+### Implementado — SPEC-052: Correções do Cadastro de Cliente (rótulos, campos ausentes, autopreenchimento CEP/CNPJ)
+
+- SPEC desmembrada de uma SPEC única (origem: reunião com Vinicius, 27/07/2026), com decisões já resolvidas pelo usuário: provedor de CNPJ gratuito (BrasilAPI), e `regime_apuracao` implementado como texto livre por enquanto (print de referência do regime tributário ainda não chegou).
+- Nenhuma migration foi necessária — todas as colunas usadas (`inscricao_estadual`, `regime_apuracao`, `cep_entrega`/`endereco_entrega`/`numero_entrega`/`bairro_entrega`/`cidade_entrega`/`estado_entrega`, equivalentes `_cobranca`) já existiam em `contatos` (`supabase/db/current/01_schema_full.sql`).
+- `lucenera-crm-3bd29 (1)/src/pages/contatos/Clientes.tsx` (alvo principal): relabel `nome` → "Nome e Razão Social" e `nome_empresa` → "Nome Fantasia"; adicionados campos `inscricao_estadual` e `regime_apuracao`; busca automática de CEP (ViaCEP) nos 3 blocos de endereço (principal/entrega/cobrança) sem cruzar dados entre blocos; busca automática de CNPJ (BrasilAPI) preenchendo razão social/nome fantasia só quando o campo está vazio; adicionados os blocos "Endereço de Entrega" e "Endereço de Cobrança".
+- `gestao-financeira-clone-544cb (1)/src/components/ClientCreateModal.tsx` (alvo secundário): mesmo tratamento de relabel, autofill de CEP/CNPJ e blocos de entrega/cobrança; `inscricao_estadual`/`regime_apuracao` já existiam neste formulário.
+- `cadastro-lucenera-b86fe/src/components/modals/ClienteModal.tsx` não foi alterado (rota `/clientes` redirecionada, código morto) — usado apenas como referência de padrão (ViaCEP + 3 blocos de endereço).
+- `npm run build`, `npm run lint` (oxlint) e formatação (`oxfmt` no CRM, `prettier` em Orçamentos) rodados com sucesso em ambos os sistemas, sem warnings novos.
+- Pendências: homologação manual no navegador em ambos os sistemas, confirmação com Vinicius de qual tela ele testou, e o print do regime tributário (para decidir se `regime_apuracao` vira Select fixo). Nenhum commit/push foi feito nos submodules por este agente. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-052_Correcao_Cadastro_Cliente.md`.
+
+## 2026-07-27 (7)
+
+### Implementado — SPEC-054: Interface de Devolução de Estoque (linhas manuais por setor de origem)
+
+- SPEC desmembrada de uma SPEC única por decisão do usuário (origem: reunião com Vinicius, 27/07/2026), já com o texto completo da nova função SQL verificado contra o banco real (`pg_get_functiondef`) na própria SPEC — implementação copiou o SQL literalmente, sem reescrita.
+- Migration redigida (não aplicada no Supabase real): `supabase/db/migrations/20260727_067_spec054_devolucao_por_setor/001_registrar_devolucao_projeto_item_setor.sql` — RPC nova `registrar_devolucao_projeto_item_setor(p_projeto_item_id, p_setor_origem, p_quantidade, p_motivo)`, que recebe o setor de origem explicitamente por chamada (`entrega_futura | reserva | entregue`), em vez do rateio automático em cascata que `registrar_devolucao_projeto_item` (SPEC-015, mantida intocada) já faz — decisão do usuário: a tela exige lançamento manual de uma linha por setor.
+- Frontend (`compras-lucenera-3o23t98ee`): nova aba "Devolução" em `src/pages/NecessidadeCompra.tsx`, ao lado de "Por Produto" e "Por Item de Orçamento". Componentes novos `src/components/compra/DevolucaoEstoqueTab.tsx` (lista itens com saldo aberto via `vw_estoque_saldos_projeto_item`) e `src/components/compra/ModalDevolucaoItem.tsx` (lançamento em linhas múltiplas por item, uma chamada de RPC por linha, validação client-side de soma por setor, erro tratado individualmente por linha via toast). Serviço novo `src/services/devolucoes.ts`, seguindo o mesmo padrão de `services/necessidade-compra-item.ts`.
+- `supabase/db/domains/estoque_compras.md` atualizado: removida a afirmação desatualizada de que `devolucoes_estoque`/`transferencias_estoque` "ainda não existem" (achado da SPEC-054, tabelas confirmadas em produção desde 07/07/2026); documentada a nova RPC.
+- Fora do escopo (decisão explícita, ver Pendências da SPEC): tela/ação de "confirmar coleta" (`status: aguardando_coleta -> coletada`) e efeito de `devolucoes_estoque.gera_credito_financeiro`, ambos herdados sem resolução da SPEC-015.
+- `oxlint`, `oxfmt`/`format:check` e `vite build` de `compras-lucenera-3o23t98ee` rodados sem erros/warnings novos.
+- Pendências: aplicar a migration no Supabase real, definir papel/permissão para registrar devolução, definir efeito de `gera_credito_financeiro`, definir tela de "confirmar coleta", homologar manualmente no navegador (devolução em 1/2/3 setores simultâneos). Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-054_Interface_Devolucao_Estoque.md`.
+
+## 2026-07-27 (6)
+
+### Implementado — SPEC-051: Fase explícita de Rascunho antes do envio ao cliente em Orçamentos
+
+- Usuário aprovou a SPEC-051 (decisões P-1 a P-4 já resolvidas, com o texto real das funções/triggers extraído do Supabase de produção) e pediu a implementação.
+- Migration redigida (não aplicada no Supabase real): `supabase/db/migrations/20260727_066_spec051_fase_rascunho_orcamento/` — `001_...sql` remove o bloco final de `handle_orcamento_workflow()` que promovia automaticamente `rascunho`/`aguardando_cliente`/`aguardando_aprovacao` para `enviado_cliente`; `002_...sql` remove por completo o trigger `trg_orcamento_item_workflow` e a função `handle_orcamento_item_workflow()` (gatilho mais direto do problema, disparava no primeiro `INSERT` de item); `003_...sql` adiciona validação de completude (empresa, projeto, cliente, forma de pagamento, ao menos 1 item) em `enviar_orcamento_para_cliente`, que agora é o único ponto de entrada para `enviado_cliente`.
+- Achado de bug pré-existente corrigido: `src/stores/useBudgetStore.ts` (`enviarOrcamentoCliente`) chamava a RPC inexistente `enviar_orcamento_cliente` (sem "para") — corrigido para `enviar_orcamento_para_cliente`, a função real confirmada no banco.
+- Frontend (`gestao-financeira-clone-544cb (1)`): nova aba "Rascunho" em `Budgets.tsx` (`DraftBudgetsTab.tsx`, novo), novo branch de ação em `BudgetTableRow.tsx`, helper `isDraftStatus` em `budget-status.ts`, toast pós-criação em `BudgetFormPage.tsx` ajustado para orientar o uso da aba "Rascunho". Ação "Enviar para o Cliente" aberta a qualquer usuário autenticado (P-2), sem botão "Salvar e Enviar" no formulário (P-4).
+- Pendências: aplicar a migration no Supabase real, homologar manualmente no navegador (criar rascunho, editar sem "escapar" sozinho, enviar ao cliente explicitamente), `pnpm run lint`/`build`, reextrair `supabase/db/current/` e publicar no Skip. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-051_Fase_Rascunho_Antes_Envio_Cliente.md`.
+
+## 2026-07-27 (5)
+
+### Corrigido — SPEC-050: revisor achou arredondamento indevido de quantidade/desconto no import/export de XML
+
+- `revisor` encontrou achado crítico antes de qualquer commit/publicação: `xml-budget-import.ts` arredondava `quantidade` e `desconto` para número inteiro (`Math.round`), apesar de `orcamento_itens.quantidade`/`desconto` suportarem decimais (`numeric(10,3)`/`numeric(12,2)`). XMLs reais do Connect têm itens fracionários genuínos (ex. metro linear de perfil de alumínio, `qtd_produto` `4,5`/`2,5`) — importar um desses inflava/reduzia a quantidade em até 25%, e um item com `qtd_produto` `0,5` viraria `1` (100% de erro) por causa de um `Math.max(1, ...)` adicional.
+- Corrigido em `xml-budget-import.ts` (3 casas decimais para quantidade, 2 para desconto, sem arredondar para inteiro) e espelhado em `xml-budget-export.ts` (`computeItemSubtotal`, `buildItemXml`), já que o export usava o mesmo padrão de arredondamento no roundtrip.
+- Também corrigido `findOrcamentoJaImportado()` (checagem de idempotência): antes engolia erro de rede/permissão e retornava `null` (interpretado como "não importado ainda", liberando o botão de aplicar sem garantia real); agora propaga o erro para a UI mostrar mensagem clara.
+- `vite build` reexecutado após a correção, sem erros. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-050_Import_Export_XML_Connect_Orcamento.md`.
+
+## 2026-07-27 (4)
+
+### Implementado — SPEC-050: Importação e Exportação de XML no padrão Connect no sistema de Orçamentos
+
+- Usuário aprovou a SPEC-050 (incluindo as decisões P-1 item avulso sem match, P-2 abrir `ClientCreateModal` quando cliente não é encontrado, P-3 ignorar `dt_devolucao`, e P-6 usar `orcamentos.numero` como `<cod_orcamento>` exportado) e pediu a implementação.
+- Migration redigida (não aplicada no Supabase real): `supabase/db/migrations/20260727_065_spec050_import_export_xml_connect/001_orcamentos_origem_connect.sql` — `orcamentos.origem_connect_cod_orcamento integer` + `orcamentos.origem_connect_importado_em timestamptz` + índice único parcial, para idempotência do import de um mesmo XML.
+- Frontend (`gestao-financeira-clone-544cb (1)`): `src/lib/xml-budget-import.ts` (parser client-side via `DOMParser`, porta simplificada de `OrçamentoParser` em `04-Sistemas/script python power point/data_manager.py`, sem a lógica de agrupamento/PowerPoint), `src/lib/xml-budget-export.ts` (serializador com raiz `Laghi_systems`), `src/components/budgets/ImportConnectXmlModal.tsx` (novo), botões "Importar XML (Connect)" e "Exportar XML" em `BudgetFormPage.tsx`. `use-options.ts` passa a trazer `codigo`/`cnpj` de `empresas` para casar o XML.
+- Resolução determinística por código (não fuzzy como no import de PDF): `empresa_id` por `cnpj`/`codigo`, `cliente_id` por `contatos.codigo_legado`, `produto_id` por item via `produtos.codigo_produto` (confirmado no banco real como equivalente a `codigo_legado`, com `referencia` de fallback). Diferente do PDF, o import de XML sempre preserva a `descricao` textual do XML mesmo quando o produto foi casado.
+- Lint (`oxlint`), `prettier --check` e `vite build` do `gestao-financeira-clone-544cb (1)` passaram sem novos erros/avisos.
+- Pendências: aplicar a migration no Supabase real, homologar manualmente (import de XML real, reimport bloqueado, export), publicar no Skip. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-050_Import_Export_XML_Connect_Orcamento.md`.
+
+## 2026-07-27 (3)
+
+### Corrigido — SPEC-049: código publicado no Skip (não só no submodule) + achado crítico de RLS em `equipes_projetos`
+
+- Usuário testou o card publicado e reportou que nenhuma das 3 seções novas apareceu. Causa raiz real: o projeto no Skip (`Cadastro Lucenera`, id 36668) tem sua própria cópia de arquivos, separada do submodule local — os agentes anteriores só editaram o arquivo em disco, que nunca chegou ao Skip. Confirmado via `skip_project_status`/`skip_file_read`: a versão publicada (`4eed663`) não tinha nenhuma linha da SPEC-049.
+- Corrigido escrevendo `src/services/produtos.ts` e `src/components/pecas/PecaDetailsPanel.tsx` direto no projeto Skip via MCP (`skip_file_write`), após confirmar que as duas versões eram idênticas fora das partes da SPEC-049 (sem risco de sobrescrever mudança divergente). QA completo (`skip_project_apply_changes`, modo produção) passou em setup/análise estática/build/testes — só "integrations" falhou por 3 Edge Functions ausentes do pod, pré-existente e sem relação com esta mudança. Publicado como versão `0.0.47` (hash `b81c1fd`) em `https://cadastro-lucenera-b86fe.goskip.app`. Confirmado por download direto do bundle JS de produção que as strings novas (`Reservado por Cliente`, `Fornecedor Sugerido`, `vw_cadastro_produto_reserva_detalhe`) estão presentes.
+- Usuário reportou de novo "não foi" após a publicação. Investigação usando `SET ROLE authenticated` no Supabase real (em vez de só `SUPABASE_DB_URL`/service role, que ignora RLS) achou um bug pré-existente real: **`equipes_projetos` tem RLS habilitado desde a migration `20260630_012_equipe_projetos_comissao` sem nenhuma policy de leitura** — `pg_policies` vazio para essa tabela, e `SELECT * FROM equipes_projetos` como `authenticated` sempre retornava 0 linhas (sem erro). Como a SPEC-049 é o primeiro consumidor autenticado real dessa tabela (todo acesso anterior era via `service_role`), esse bug nunca tinha sido percebido. `equipe_nome` sempre voltava `NULL` no card, mesmo com cliente/projeto corretos.
+- Corrigido com migration `supabase/db/migrations/20260727_064_spec049_rls_equipes_projetos/001_select_policy_equipes_projetos.sql` — `CREATE POLICY authenticated_select_equipes_projetos ... FOR SELECT TO authenticated USING (true)`, mesmo padrão já usado nas outras tabelas do domínio (tabela sem dado sensível). **Aplicada em produção** e validada com `SET ROLE authenticated`: `equipe_nome` agora retorna "Thairine" corretamente para o produto 11307 do exemplo do usuário.
+- Todas as 3 views usadas pelo card (`vw_cadastro_produto_reserva_detalhe`, `vw_necessidade_compra_pedido_detalhe`, `vw_necessidade_compra`) testadas com sucesso como `authenticated` após o fix, sem erro e com dado correto — cliente, equipe e fornecedor sugerido todos retornando certo para o produto de teste.
+- **Lição registrada** em `supabase/db/domains/estoque_compras.md`: verificação de view/schema feita só via `SUPABASE_DB_URL` (service role/postgres) não detecta bug de RLS, porque esse role ignora RLS — é preciso testar como `authenticated` (`SET ROLE authenticated`) antes de considerar uma feature de leitura "pronta".
+- Recusado, por regra do projeto: usuário pediu para eu logar no sistema real com email/senha para testar visualmente — negado (entrar com senha é ação proibida mesmo com autorização explícita do usuário); pedido que o próprio usuário valide no navegador.
+
+## 2026-07-27 (2)
+
+### Aplicado + ampliado — SPEC-049: migration da view de reserva aplicada em produção, card ganha "Fornecedor Sugerido"
+
+- Usuário testou o card no app publicado e reportou que as informações novas (cliente/equipe/pedido) não apareciam — causa raiz: os dois passos manuais da entrada anterior (aplicar migration, publicar no Skip) ainda não tinham sido feitos.
+- Antes de aplicar, validado por consulta direta (somente leitura) ao Supabase real que a view nova retornaria dado correto para o exemplo do usuário (produto código 11307, projeto 26.105, ORC-0010): cliente "MARIANA FERNANDES DE JESUS", equipe "Thairine".
+- Migration `supabase/db/migrations/20260727_063_spec049_cadastro_reserva_detalhe/001_view_reserva_detalhe.sql` **aplicada em produção** via `psycopg2` (usuário confirmou explicitamente antes da execução), validada novamente pós-aplicação com o mesmo produto.
+- Usuário pediu um adicional: mostrar também o "Fornecedor Sugerido" e a quantidade pendente mesmo quando ainda não existe nenhum pedido de compra real feito (caso do produto 11307, que aparece na tela "Necessidade de Compra → Por Item de Orçamento" com fornecedor STELLA e Pendente 1, sem pedido em trânsito). Confirmado por leitura do banco que esse "Fornecedor" vem de `vw_necessidade_compra` (`COALESCE(produtos.fornecedor_principal_id, marcas.fornecedor_id)`), view já em produção, sem precisar de migration nova.
+- Frontend (`cadastro-lucenera-b86fe`): `getFornecedorSugeridoProduto` nova em `src/services/produtos.ts` (mesmo padrão das demais funções); `PecaDetailsPanel.tsx` ganhou uma linha "Fornecedor Sugerido · Pendente", visível só quando `pendente > 0`, independente da seção "Pedido de Compra em Trânsito" (uma pode aparecer sem a outra).
+- `vw_necessidade_compra` passa a ter um **terceiro consumidor** (`cadastro-lucenera-b86fe`, ao lado de `compras-lucenera-3o23t98ee` e `dashboard-lucenera-b02z85wa3`) — registrado em `supabase/db/domains/estoque_compras.md`.
+- Lint (`oxlint`/`oxfmt`) e `vite build` do `cadastro-lucenera-b86fe` passaram sem novos avisos/erros, para as duas rodadas desta entrada.
+- Pendências: validar visualmente no navegador, publicar no Skip, reextrair `supabase/db/current/` do domínio de Compras (pendência crônica pré-existente). Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-049_Card_Lateral_Peca_Reserva_Cliente_Equipe_Pedido.md`.
+
+## 2026-07-27 (1)
+
+### Executado — SPEC-049: card lateral de peça no Cadastro ganha reserva por cliente/equipe e pedido em trânsito
+
+- Usuário aprovou a SPEC-049 (incluindo as decisões P-01 "equipe" = `projetos.equipe_id` e P-02 uma linha por projeto/cliente sem agregação) e pediu a implementação.
+- Migration redigida (não aplicada no Supabase real): `supabase/db/migrations/20260727_063_spec049_cadastro_reserva_detalhe/001_view_reserva_detalhe.sql`, criando `vw_cadastro_produto_reserva_detalhe` (reaproveita `vw_estoque_por_produto_projeto` da SPEC-010, soma `cliente_nome`/`equipe_nome` por `JOIN`, sem duplicar saldo).
+- Confirmado, conforme pedido pela SPEC (P-05), que as colunas de `vw_necessidade_compra_pedido_detalhe` (SPEC-039) usadas pela seção "Pedido de Compra em Trânsito" batem com o arquivo de migration real (`20260722_056_spec039_necessidade_compra_grid/003_vw_necessidade_compra_pedido_resumo.sql`), já que o snapshot `supabase/db/current/` continua desatualizado nesse domínio.
+- Frontend (`cadastro-lucenera-b86fe`): `getReservasProduto`/`getPedidosCompraEmTransito` novas em `src/services/produtos.ts` (mesmo padrão `supabase.from(...).select('*')` do arquivo); `PecaDetailsPanel.tsx` ganhou duas seções somente leitura abaixo de "Estoque por Local" — "Reservado por Cliente/Projeto" e "Pedido de Compra em Trânsito" — reaproveitando os componentes visuais já usados (Table, Skeleton, empty state). Dicionário de rótulos de status de pedido duplicado do `compras-lucenera-3o23t98ee` (sem import cross-repo).
+- Lint (`oxlint`/`oxfmt`) e `vite build` do `cadastro-lucenera-b86fe` passaram sem novos avisos/erros.
+- Pendências: aplicar a migration no Supabase real (passo manual do usuário), reextrair `supabase/db/current/` do domínio de Compras, testar o golden path no navegador, publicar no Skip. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-049_Card_Lateral_Peca_Reserva_Cliente_Equipe_Pedido.md`.
+
+## 2026-07-25 (2)
+
+### Executado — SPEC-048: schema + seed de dados mockados aplicados no Supabase de demo
+
+- Usuário pediu para aplicar de fato o schema e os dados mockados no Supabase de demo (projeto dedicado, ref `cojwpzfpeqgdelixudyj`), a partir do que a SPEC-048 tinha planejado.
+- **Achado de segurança durante a cópia dos sistemas:** `robocopy` trouxe o `dashboard/.env` original (dotfile, não aparecia em `ls`), que continha a `service_role` **real de produção** (projeto `vcvcwzmbiftcawncibke`). Sobrescrito imediatamente com as credenciais do projeto de demo antes de qualquer uso — nenhuma chave de produção chegou a ficar exposta na pasta da réplica além desse momento.
+- Conexão direta ao banco (`db.<ref>.supabase.co`) falhou por só ter endereço IPv6 sem rota nesta rede; resolvido usando o Session Pooler do Supabase (IPv4), localizado com ajuda de navegação assistida no painel (conta `erp.lucenera@gmail.com`, com autorização do usuário).
+- **Correção de abordagem:** a SPEC-048 recomendava recriar o schema via replay de `supabase/db/migrations/*`, mas a primeira migration (`001_snapshot_db_atual`) é um placeholder vazio — as tabelas base nunca foram capturadas em nenhuma migration deste repositório. Schema montado em duas camadas: base = `supabase/db/current/*.sql` (dump real de 07/07/2026) + delta = migrations `031` a `061`. Aplicado com sucesso: 95 tabelas, 54 views, 101 funções, 53 triggers, 356 policies no projeto de demo.
+- **Dois gaps de drift de produção encontrados** durante a aplicação (documentados em `supabase/schema/README.md` da réplica, pendente de registro formal no repo de produção): (1) `estoque_itens.quantidade_disponivel` é usada pela migration `20260716_048` mas nunca foi criada por nenhuma migration — foi adicionada direto em produção fora do controle de versão; (2) o backfill da migration `20260715_045_custo_fixo_variavel` depende de uma tabela de staging (`stg_duplicatas_vigentes`) que não existe em nenhuma migration, provavelmente criada manualmente em produção durante uma limpeza pontual.
+- 4 buckets de Storage criados no projeto de demo (`orcamentos`, `revenda-ubiqua-images` públicos; `notas_fiscais`, `materiais-separacao` privados), localizados por grep em `.storage.from(...)` no código dos sistemas.
+- Seed de dados mockados escrito e aplicado (`supabase/seed/seed_data.py` na pasta da réplica, idempotente): cadastros, CRM/projetos, orçamentos, financeiro e estoque, incluindo 5 usuários de **login real** criados via Supabase Auth Admin API (não só linhas decorativas no banco — login funcional pra demo).
+- Build validado com sucesso em 1 dos 10 sistemas (`central-lucenera`), confirmando que os apps rodam fora do Skip Cloud como Vite/React padrão.
+- Detalhes completos, decisões e pendências (Edge Functions ainda não republicadas, 9 sistemas sem build validado, roteiro de apresentação ainda não ensaiado) em `03-Projeto/Planos de Ação/SPECs/SPEC-048_Replica_Demo_Convencao_Dados_Mockados.md`.
+
+## 2026-07-25 (1)
+
+### Criado — SPEC-048: réplica de demonstração do ecossistema para convenção (dados mockados + Supabase dedicado)
+
+- Usuário pediu uma SPEC para replicar integralmente o ecossistema Lucenera em `C:\script python\Replica SISTEMA LUCENERA`, com dados mockados e um Supabase próprio, para apresentar numa convenção.
+- Verificação encontrou a pasta-alvo **vazia** (criada minutos antes da conversa); usuário confirmou que é o destino da réplica, não a origem — a origem é o próprio repositório atual (`04-Sistemas/*` + `dashboard/` + `supabase/`).
+- Usuário colou credenciais reais de um projeto Supabase (`sb_publishable_...`, `sb_secret_...`, JWT `anon`/`service_role`) no chat; confirmado que é um **projeto novo dedicado à demo**, não produção. Nenhuma chave foi gravada na SPEC ou em qualquer arquivo commitável, por regra do `AGENTS.md` e por já existir um incidente anterior (03/07/2026) de credencial commitada em texto plano.
+- Levantamento do estado atual corrigiu uma desatualização na memória: são **10 sistemas React** em `04-Sistemas/` (não 6), incluindo `compras-lucenera-3o23t98ee` (Compras, distinto de Gestão Financeira) e `dashboard-lucenera-b02z85wa3` (dashboard de métricas web, distinto do `dashboard/` Python). `cadastro-lucenera-b86fe` aparece como não-rastreada no `git status`; `lucenera-crm-3bd29 (1)` está desatualizada em relação à versão publicada no Skip.
+- Achado importante: `supabase/db/current/` (snapshot do schema) está desatualizado desde 07/07/2026 — faltam ~31 migrations. SPEC recomenda recriar o schema do projeto de demo via replay de `supabase/db/migrations/*` (62 pastas), não via esse snapshot. `08_seed_minimo.sql` está vazio — não há seed reaproveitável, todo dado mockado é novo.
+- Usuário sinalizou interesse numa opção multi-tenant para o Supabase de demo; SPEC registra isso como decisão em aberto (duas opções), não como algo já implementado.
+- Nenhuma implementação feita ainda. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-048_Replica_Demo_Convencao_Dados_Mockados.md`.
+
+## 2026-07-24 (5)
+
+### Criado — SPEC-047: sincronização diária automática (SharePoint → CRM + link)
+
+- Usuário pediu pra pensar em sincronizar a lista "Organização Projetos" do SharePoint (onde os projetos nascem de verdade) com o CRM, pra projeto novo lá já aparecer aqui — e já preferiu que rode como agendamento diário no próprio Supabase (Edge Function + Cron), em vez de depender de sessão do Claude Code.
+- Investigação (só leitura, via Graph API) achou que a Edge Function `sync-sharepoint` já existente **nunca deve ter funcionado**: ela tenta gravar campos (`responsavel`, `arquiteto_responsavel`, `prazo`, `valor`...) que não existem na tabela `projetos` real, e casa por `nome` em vez de `codigo`.
+- Mapeamento real dos campos da lista confirmado por leitura direta: código, nome, responsável, cidade, nível estratégico e arquivado batem limpo com colunas do CRM. Status (`field_10`, valores tipo "Contrato de Projeto") não bate com o enum controlado do CRM, e arquiteto/engenheiro na lista são texto livre enquanto no CRM são vínculo por ID — ambos ficaram de fora do escopo v1 por risco de gravar errado.
+- SPEC-047 registra a decisão: escopo v1 só com campos seguros (status/arquiteto/engenheiro continuam manuais), reaproveitando a lógica de link do SharePoint já testada na SPEC-046. Nenhuma implementação feita ainda.
+- Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-047_Sincronizacao_Diaria_SharePoint_Projetos.md`.
+
+## 2026-07-24 (4)
+
+### Executado — SPEC-046: sincronização de Links do SharePoint para o histórico completo (`11.xxx`–`25.439`)
+
+- Usuário pediu para estender a sincronização pra todo o histórico abaixo de `26.000` — 3.431 projetos, até o código `11.002` (bem mais do que os 165 do lote `26.xxx`).
+- `--dry-run` revelou 472 matches, 2.002 "pasta não encontrada" (esperado pra histórico antigo), 295 sem `responsavel_nome`, e 661 erros de site 404 — mas o erro é **sistemático por pessoa**, não aleatório: os sites "PROJETOS\<NOME\>" não existem pra 11 responsáveis (Bender, Angélica, Ligia, Rianne, Amanda, Filippo, Vilber, Mary, Eduardo, Lais, Maria, João), provavelmente sites antigos renomeados/arquivados ou fora do padrão de nome assumido.
+- Rodado sem `--dry-run`: **472 projetos atualizados** com sucesso (resultado idêntico ao dry-run).
+- Total do dia com as 3 rodadas desta SPEC: **620 projetos** com `link_sharepoint` preenchido automaticamente, de um universo de ~3.600 projetos com código `XX.XXX`.
+- Pendência registrada: descobrir o nome real dos 11 sites que deram 404 pra poder reprocessar os 661 projetos afetados.
+- Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-046_Sincronizacao_Links_SharePoint_Projetos.md`.
+
+## 2026-07-24 (3)
+
+### Executado — SPEC-046: sincronização de Links do SharePoint para todos os projetos `26.xxx`
+
+- Após validar o teste inicial (26.170–26.180), usuário pediu para rodar `scripts/sincronizar_links_sharepoint.py` para todos os projetos com código `26.xxx` (`--min 26.000 --max 26.999`).
+- Resultado: **140 projetos atualizados** com `link_sharepoint`, 0 erros de site. 10 já tinham link e não foram sobrescritos (regra de segurança do script). 15 ficaram sem preencher automaticamente: 10 por "pasta não encontrada no site" (pasta pode não existir, ter nome fora do padrão, ou estar em subpasta — o script só olha a raiz da biblioteca) e 5 por falta de `responsavel_nome` no projeto (script não sabe em qual site "PROJETOS X" procurar).
+- Lista completa dos 15 pendentes registrada na SPEC-046 (seção Realizado/Pendências) para acompanhamento manual.
+- Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-046_Sincronizacao_Links_SharePoint_Projetos.md`.
+
+## 2026-07-24 (2)
+
+### Adicionado — SPEC-046: script de sincronização de Links do SharePoint (teste inicial, 8 projetos)
+
+- Complemento da SPEC-045 (campo `link_sharepoint` manual): criado `scripts/sincronizar_links_sharepoint.py`, que lê a estrutura real do SharePoint via Microsoft Graph API (app "Lucenera Conexão Sharepoint para Skip", permissão `Files.Read.All` já concedida) e preenche `projetos.link_sharepoint` automaticamente — resolve o site pelo `responsavel_nome` (`PROJETOS<NOME>`), lista as pastas do site e casa pelo código no início do nome da pasta.
+- Regra de segurança: só preenche projetos com link vazio, nunca sobrescreve. Suporta `--dry-run`.
+- Testado no intervalo `26.170`–`26.180` a pedido do usuário, pra conferência antes de rodar geral: 2 tentativas de autenticação falharam por confusão entre "ID secreto" e "Valor" do client secret no Azure (erro AADSTS7000215) — resolvido depois de gerar um novo segredo e copiar a coluna certa. Rodado com sucesso: 8 projetos atualizados, 2 ignorados (já tinham link — um deles, 26.173, com um link suspeito apontando pra Home do site em vez da pasta), 1 sem `responsavel_nome` (26.178, ficou de fora).
+- Ainda não rodado para o restante dos projetos — aguardando o usuário conferir os 8 links no CRM.
+- Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-046_Sincronizacao_Links_SharePoint_Projetos.md`.
+
+## 2026-07-24 (1)
+
+### Adicionado — SPEC-045: Link do SharePoint no card de Projeto (CRM)
+
+- Chefe quer acompanhar projetos de perto; o CRM só tem os dados do Supabase, não o que está no SharePoint (pasta por projeto com subpastas WhatsApp, Projetos, Originais, Orçamentos, Fotos, Email, DocuSign). Pedido: um campo no projeto para guardar o link da pasta raiz do SharePoint, editável junto com o resto do projeto.
+- Nova coluna `projetos.link_sharepoint` (text, nullable) — migration `20260724_061_link_sharepoint_projeto`, **aplicada no Supabase real** via script Python (`psycopg2`) usando `SUPABASE_DB_URL` do `.env`. Primeira tentativa bloqueada automaticamente pelo classificador de segurança (escrita direta em infraestrutura compartilhada); usuário confirmou explicitamente antes da segunda tentativa, que aplicou com sucesso.
+- `src/pages/ProjectDetail.tsx` (CRM, Skip `projectId 24580`): novo card "Link do SharePoint" entre "Informações Gerais/Responsáveis" e "Itens Aprovados do Projeto" — mostra link clicável (abre em nova aba) em modo leitura, campo de URL no mesmo toggle Editar/Salvar/Cancelar já existente.
+- Não usa nem altera a Edge Function `sync-sharepoint` já existente no projeto (sincroniza listas de um site SharePoint diferente para popular `projetos`/`tabela_precos` em massa) — são funcionalidades independentes.
+- Limitação registrada: `src/lib/supabase/types.ts` (tipos gerados) não foi atualizado — arquivo grande demais para a ferramenta de patch desta sessão; contornado com `as any` nos pontos que leem/escrevem `link_sharepoint`, documentado como pendência para quando os tipos forem regerados.
+- QA completo `ok`, publicado como versão `0.0.284` (hash `c590768`).
+- Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-045_CRM_Link_SharePoint_no_Projeto.md`.
+
+## 2026-07-23 (11)
+
+### Corrigido — limite de largura de página (`max-w-[1400px]`) removido globalmente
+
+- Usuário sugeriu, com print, que o certo era o container/Card se adaptar à largura real da tela em vez de ficar travado, e que isso deveria valer pra outras páginas do sistema também.
+- Causa raiz: `src/components/Layout.tsx` tem `<main className="... max-w-[1400px]">`, compartilhado por todas as páginas via `<Outlet />` — travava o conteúdo em 1400px mesmo em monitores maiores, sobrando espaço vazio. Removido o `max-w-[1400px]` do `<main>`.
+- Além disso, `src/pages/Index.tsx` (Dashboard), `src/pages/contatos/Clientes.tsx`, `Arquitetos.tsx` e `Engenheiros.tsx` tinham cada uma o mesmo `max-w-[1400px] mx-auto` duplicado no próprio container raiz da página — removido nas 4, senão continuariam travadas mesmo com o Layout corrigido.
+- Efeito: a Planilha de Projetos (e as demais páginas) agora usam a largura real disponível da tela, dando mais espaço pras colunas sem precisar cortar tanto texto.
+- QA completo `ok`, publicado como versão `0.0.282` (hash `f211e67`).
+
+## 2026-07-23 (10)
+
+### Corrigido — texto cortado nas colunas da Planilha de Projetos após o fix anterior
+
+- Usuário mandou print mostrando que, embora a tabela agora coubesse na tela sem scroll, o conteúdo estava sendo cortado mesmo em colunas "largas o bastante" (`26...` em vez de `26.180`, `24/06/...` em vez da data completa).
+- Causa: o componente `TableHead`/`TableCell` (shadcn) já vem com `px-4` (16px de cada lado) embutido por padrão; como as larguras de coluna do ajuste anterior não levaram esse padding em conta, sobrava pouco espaço real pro texto. Corrigido adicionando `px-2` (8px) em todas as células dessa tabela, reduzindo o padding herdado, e reajustando as larguras (`Código` 70px, `Nível` 56px, `Entrada`/`Fechamento` 92px, `Valor Total` 105px, `Cidade` 100px, `UF` 40px, `Ações` 88px) para acomodar o conteúdo real (código completo, data completa dd/mm/aaaa) sem cortar.
+- QA completo `ok`, publicado como versão `0.0.281` (hash `807d3c2`).
+
+## 2026-07-23 (9)
+
+### Corrigido — Planilha de Projetos (modo Completa) exigia scroll horizontal
+
+- Usuário reportou, com prints, que a visão "Planilha" de Projetos no modo "Completa" (12 colunas) exigia arrastar a tabela para os lados para ver todas as informações — no modo "Operacional" (menos colunas) cabia sem problema.
+- `src/pages/Projetos.tsx`: tabela passou a usar `table-fixed` com largura fixa reduzida por coluna (a coluna "Projeto" é a única flexível, absorve o espaço restante). Removido o `min-w-[700px]` que forçava a tabela a ser mais larga que o necessário. Rótulos de cabeçalho encurtados onde fazia sentido (ex.: "Nível Estratégico" → "Nível", "Data Entrada" → "Entrada"), texto menor (`text-xs`/`text-[10px]`) e `truncate` com tooltip (`title`) nas células que podem ter texto longo (nome do projeto, responsável, engenheiro/arquiteto, cidade).
+- QA completo `ok`, publicado como versão `0.0.280` (hash `01f83aa`).
+- Não é uma mudança de dado/banco, só de layout — não gerou entrada de SPEC nova (ajuste vinculado ao trabalho de padronização de visualização já registrado na SPEC-044).
+
+## 2026-07-23 (8)
+
+### Ajustado — SPEC-044: CPF e Endereço no cadastro de pessoas de Arquiteto
+
+- Usuário pediu que cada pessoa adicionada em "Pessoas da Empresa" também tenha CPF e Endereço, não só nome/data de nascimento/e-mail.
+- Adicionados os campos `cpf_cnpj` e `endereco` nos dois lugares onde uma pessoa é criada: no diálogo "Novo Arquiteto" (`Arquitetos.tsx`) e no "+ Adicionar Pessoa" da página cheia (`ContatoDetail.tsx`).
+- QA completo `ok`, publicado como versão `0.0.279` (hash `a66db01`).
+- Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-044_CRM_Visualizacao_Tela_Cheia_e_Pessoas_por_Empresa_Arquitetos.md`.
+
 ## 2026-07-23 (7)
+
+### Ajustado — SPEC-044: adicionar pessoas já dentro do diálogo "Novo Arquiteto"
+
+- Usuário pediu explicitamente a segunda abordagem (não escolhida na rodada anterior): poder adicionar mais de uma pessoa da empresa **direto no diálogo de criação**, sem precisar salvar e ser redirecionado para a página cheia primeiro.
+- `Arquitetos.tsx`: diálogo "Novo Arquiteto" ganhou seção "Pessoas da Empresa (opcional)" com "+ Adicionar Pessoa" — linhas locais (nome/data nascimento/e-mail) editáveis e removíveis, mantidas em estado até o submit. Ao salvar: valida nome obrigatório em cada linha adicionada, cria o registro da empresa, insere todas as pessoas em lote com `empresa_id` apontando para a empresa recém-criada, e navega para a página cheia dela (onde as pessoas já aparecem).
+- QA completo `ok`, publicado como versão `0.0.278` (hash `bebf76a`).
+- Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-044_CRM_Visualizacao_Tela_Cheia_e_Pessoas_por_Empresa_Arquitetos.md`.
+
+## 2026-07-23 (6)
+
+### Ajustado — SPEC-044: Data de Nascimento/RG no cadastro rápido de Arquiteto + redirect pós-criação
+
+- Usuário testou a SPEC-044 e reportou não encontrar Data de Nascimento, e-mail nem opção de mais de uma pessoa — estava no diálogo "Novo Arquiteto" (cadastro rápido), que tinha ficado fora do escopo original de propósito (só a página cheia pós-criação ganhou esses campos). Usuário confirmou que em alguns casos precisa disso já na criação.
+- `Arquitetos.tsx`: diálogo "Novo Arquiteto" ganhou os campos Data de Nascimento (novo) e RG (já existia no schema, faltava o campo de formulário). Ao salvar, o insert usa `.select().single()` e navega direto para a página cheia do registro recém-criado (`/contatos/arquitetos/:id`), onde o usuário já pode clicar em "+ Adicionar Pessoa" na hora — evita a abordagem mais complexa de duplicar a lógica de "adicionar pessoa" dentro do próprio diálogo de criação.
+- QA completo `ok`, publicado como versão `0.0.277` (hash `abb984d`).
+- Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-044_CRM_Visualizacao_Tela_Cheia_e_Pessoas_por_Empresa_Arquitetos.md`.
+
+## 2026-07-23 (5)
+
+### Implementado — SPEC-044: tela cheia no CRM + Pessoas por Empresa em Arquitetos
+
+- Usuário confirmou a SPEC-044 e pediu para executar. Implementado direto no projeto Skip "Lucenera CRM" (`projectId 24580`, mesmo caminho das SPEC-042/043, já que o submodule local está desatualizado).
+- Criada página cheia genérica `src/pages/contatos/ContatoDetail.tsx` (rota `/contatos/:tipoPlural/:id`), com campos configurados por tipo e alternância Editar/Salvar/Cancelar, no padrão de `ProjectDetail.tsx`. `Clientes.tsx`, `Arquitetos.tsx`, `Engenheiros.tsx`, `Eletricistas.tsx` e `Projetos.tsx` foram reescritos para navegar até essa página (ou até `/projeto/:id`, já existente) em vez de abrir Sheet/Dialog — Sheet lateral de Projetos e Clientes removido, Dialogs de visualização/edição de Arquitetos/Engenheiros/Eletricistas removidos (criação continua igual).
+- Campo `data_nascimento` (já existia no banco, nunca exposto) passou a ser editável nos 4 tipos de contato. Eletricista ganhou edição completa (antes só tinha cadastro + visualização) e exclusão.
+- "Pessoas da Empresa" implementado em Arquitetos usando o relacionamento já existente `contatos.empresa_id -> contatos.id` (documentado em `supabase/db/domains/cadastros.md`) — nenhuma migration necessária. Pessoas vinculadas a uma empresa não aparecem na listagem principal de Arquitetos nem nos combos de seleção de arquiteto (`ProjectNew.tsx`, `ProjectDetail.tsx`) — filtro `empresa_id IS NULL` aplicado nesses três lugares.
+- `supabase/AI_DB_CONTEXT.md` do CRM atualizado com uma seção "SPEC-044" documentando essa regra para qualquer código futuro que liste/selecione arquitetos.
+- QA completo no Skip passou em todas as etapas (setup, análise estática, build, integrações, testes). Publicado em produção, versão final `0.0.276` (hash `2e63bae`), `https://lucenera-crm-3bd29.goskip.app`.
+- Nenhuma mudança de schema ou dado no Supabase.
+- Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-044_CRM_Visualizacao_Tela_Cheia_e_Pessoas_por_Empresa_Arquitetos.md`.
+
+## 2026-07-23 (4)
+
+### Criado — SPEC-044: tela cheia no CRM (Projetos/Clientes/Arquitetos/Engenheiros/Eletricistas) + pessoas por empresa em Arquitetos
+
+- Usuário reportou que a visualização/edição de Projetos, Clientes, Arquitetos, Engenheiros e Eletricistas hoje abre um card lateral (Sheet) ou modal central (Dialog), e pediu que virasse uma aba/página cheia, igual ao padrão já usado em "Novo Projeto" e em `ProjectDetail.tsx`.
+- Levantamento confirmou 3 padrões diferentes hoje: Projetos e Clientes usam `<Sheet>` lateral; Arquitetos/Engenheiros/Eletricistas usam `<Dialog>` central; Eletricistas nem tem formulário de edição (só cadastro + visualização somente-leitura). Nenhuma das 5 telas usa página cheia por padrão, embora `ProjectDetail.tsx` (`/projeto/:id`) já exista e funcione.
+- Durante o desenho, usuário pediu também que Arquitetos ganhe suporte a "várias pessoas no mesmo cadastro" (para escritórios com múltiplos arquitetos) — precisa ficar no mesmo cadastro para não fragmentar comissão por projeto, mas precisa registrar nome/aniversário/e-mail de cada pessoa para contato individual. Achado: o banco já modela exatamente essa relação via `contatos.empresa_id -> contatos.id` (documentado em `supabase/db/domains/cadastros.md`), então a SPEC não precisa de nenhuma migration — só passa a usar essa coluna que já existe.
+- Decisões fechadas com o usuário: (1) um único componente de página cheia genérico por tipo de contato, não 4 páginas separadas; (2) Sheet de Projetos é removido, vai direto para `/projeto/:id`; (3) Eletricistas ganha edição nesta SPEC; (4) pessoas vinculadas a uma empresa de Arquitetos não aparecem na listagem principal nem em combos de seleção — só dentro da página cheia da empresa.
+- Nenhuma implementação feita ainda. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-044_CRM_Visualizacao_Tela_Cheia_e_Pessoas_por_Empresa_Arquitetos.md`.
+
+## 2026-07-23 (3)
+
+### Otimizado — CRM: elimina fetch triplicado e storm de realtime (SPEC-043)
+
+- Usuário aprovou implementar a SPEC-043 com uma restrição: sem mudanças estruturais no sistema nem no schema/dados do Supabase nesta rodada — só otimização de aplicação.
+- Implementado direto no projeto Skip "Lucenera CRM" (`projectId 24580`), já que o submodule local está desatualizado (ver entrada anterior). `src/stores/useProjectStore.tsx` reescrito com `loading` no contexto e debounce de 1,5s nos dois canais de realtime (`proj_changes`/`cont_changes`), que antes disparavam refetch completo a cada evento individual, para todos os usuários conectados. `src/pages/Index.tsx` e `src/pages/Projetos.tsx` pararam de chamar `getProjetos()` por conta própria e passaram a consumir a store compartilhada — antes, navegar entre `/` e `/projetos` disparava até 3 buscas independentes da tabela `projetos` inteira (4 joins + parcelas cada). `Index.tsx` também parou de rebuscar a lista completa a cada evento realtime; seu canal ficou só para a RPC `get_dashboard_stats` + 5 projetos recentes, também debounced.
+- Deliberadamente fora do escopo desta rodada: paginação real de servidor em `getProjetos()`, troca do dashboard para usar RPC de agregação, code splitting por rota, e qualquer índice/RLS no banco — todos ficam registrados como pendência na SPEC-043 para uma rodada futura, se necessário.
+- QA completo no Skip (`skip_project_apply_changes`): setup, análise estática, build, integrações e testes, todos `ok`. Publicado como versão `0.0.274` (hash `4e1d103`) em produção (`https://lucenera-crm-3bd29.goskip.app`).
+- Nenhuma medição objetiva de tempo de carregamento disponível (Skip Cloud não integrado ao projeto, sem logs de request) — validação de que a lentidão melhorou fica pendente de uso real pelo usuário.
+- Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-043_Otimizacao_Performance_CRM.md`.
+
+## 2026-07-23 (2)
+
+### Adicionado — `lucenera-crm` registrado como submodule em `04-Sistemas/`
+
+- Pendência aberta desde a SPEC-042 (e reforçada na SPEC-043): usuário aprovou trazer o CRM para dentro do repositório central.
+- `git submodule add -f https://github.com/pedrolalala/lucenera-crm.git "04-Sistemas/lucenera-crm-3bd29 (1)"` — `.gitmodules` já tinha a entrada declarada (nunca havia sido efetivamente inicializada); `04-Sistemas/` é ignorado no `.gitignore` geral, por isso precisou de `-f`, mesmo padrão usado pelo `scripts/submodules-register.sh` para os demais sistemas.
+- Ponteiro aponta para `heads/main` do GitHub, commit `9078947` — **defasado** em relação ao publicado em produção no Skip (projeto `24580`, versão `0.0.273`, hash `16f6c06`): as mudanças da SPEC-042 (formulário completo de cliente, edição de vínculos no Sheet de Projeto) foram commitadas no Skip mas o push para o GitHub `main` nunca foi confirmado. Ou seja, o conteúdo local do submodule ainda não reflete o que está em produção — ver pendência registrada na SPEC-043.
+- Nenhum commit feito ainda no repositório central (apenas `git submodule add`, staged); commit fica pendente de confirmação do usuário.
+
+## 2026-07-23 (1)
+
+### Criado — SPEC-043: diagnóstico de performance do CRM
+
+- Usuário relatou CRM muito lento/travando, "às vezes parece que não está funcionando" por horas. Sistema não está carregado como submodule em `04-Sistemas/` (mesma situação da SPEC-042); diagnóstico feito lendo o código-fonte real via MCP Skip (projeto "Lucenera CRM", `projectId 24580`) e o schema no snapshot central `supabase/db/current/`.
+- Achados principais (severidade alta): `getProjetos()` (`src/services/projetos.ts`) faz full-fetch paginado da tabela `projetos` inteira com 4 joins de FK + parcelas, chamado de forma independente 3x (`useProjectStore.tsx`, `Index.tsx`, `Projetos.tsx`); realtime (`postgres_changes` em `projetos`/`contatos`) dispara esse full-fetch e um `select('*').limit(5000)` de contatos em todos os navegadores conectados a cada INSERT/UPDATE/DELETE, sem debounce; `Projetos.tsx` ignora a store global e refaz o fetch por conta própria.
+- Achados secundários (média/a confirmar): dashboard recalcula agregações no cliente em vez de usar a RPC `get_dashboard_stats` já existente; ausência de `@tanstack/react-query`/cache no frontend; zero code splitting por rota em `App.tsx`; índice possivelmente ausente em `projetos.arquiteto_id`/`responsavel_id`/`projeto_itens.projeto_id` (não confirmado, migrations locais do CRM não são fonte confiável); volume alto de policies RLS por tabela (14–16), sem evidência de subquery complexa.
+- Nenhuma implementação feita ainda — SPEC fica pendente de priorização do usuário entre os 9 itens do checklist antes de qualquer mudança de código ou migration.
+- Detalhes completos em `03-Projeto/Planos de Ação/SPECs/SPEC-043_Otimizacao_Performance_CRM.md`.
+
+## 2026-07-23 (18)
 
 ### Aplicado — cruzamento 7 (completar cadastro do cliente): 14 clientes
 
 - Telefone/email/endereço completados via planilha `Cliente` (só onde estava `NULL`, nunca sobrescreve): 9 telefone, 9 email, 9 email_financeiro, 9 endereço, 11 bairro, 9 cidade, 9 estado — 14 clientes distintos afetados.
 - Cobertura já estava alta (82-90%) antes — essa planilha aparenta ter sido a fonte original de importação de `contatos`, não uma planilha nova trazendo dado inédito.
 
-## 2026-07-23 (6)
+## 2026-07-23 (17)
 
 ### Aplicado — cruzamento 6 (Projeto → Arquiteto): 1.610 projetos ligados ao arquiteto real
 
 - `projetos.arquiteto_id` preenchido para 1.610 de 3.039 projetos sem arquiteto, via nome exato entre `projetos."Nome Arquiteto"` e `contatos` tipo=arquiteto. `arquiteto_id`: 662 → 2.272.
 - `responsavel_obra_id` não aplicado — os valores da planilha ("Responsável da Obra") são nomes de arquitetos/escritórios terceiros, não batem com nenhum dos 9 usuários internos do sistema (0 de 814).
 
-## 2026-07-23 (5)
+## 2026-07-23 (16)
 
 ### Aplicado — cruzamento 5 (Financeiro → Projeto): 2.132 negociações ligadas ao projeto real
 
 - `negociacoes.projeto_id` preenchido para 2.132 de 12.750 negociações, via `cod_venda` → planilha `venda` → código do projeto embutido no nome do cliente → `projetos.codigo`.
 - 309 negociações sem `cod_venda`; das 12.441 restantes, só 17% resolvem projeto — mesmo gargalo de dado ausente dos outros cruzamentos.
 
-## 2026-07-23 (4)
+## 2026-07-23 (15)
 
 ### Aplicado — cruzamento 2 (Projeto → Responsável): 1.774 projetos ligados ao usuário real
 
@@ -31,7 +380,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - 1.127 projetos continuam sem `responsavel_id` — nome histórico não corresponde a nenhum usuário ativo (equipe antiga, sem login).
 - `projetos.responsavel_id`: 394 → 2.168 preenchidos.
 
-## 2026-07-23 (3)
+## 2026-07-23 (14)
 
 ### Aplicado — cruzamento 1 (Projeto → Cliente): 546 projetos ligados ao cliente real
 
@@ -40,7 +389,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - 2.629 projetos continuam sem `cliente_id` por falta de qualquer pista rastreável nas fontes disponíveis hoje.
 - `projetos.cliente_id`: 519 → 1.065 preenchidos (de 3.701 projetos).
 
-## 2026-07-23 (1)
+## 2026-07-23 (13)
 
 ### Corrigido — `projetos.client_id` removido; 4 dashboards que estavam "cegos" para cliente voltaram a funcionar
 
@@ -49,7 +398,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Corrigido via `supabase/db/migrations/20260723_061_remove_projetos_client_id/`: as 10 views passaram a usar `cliente_id`; índice e FK de `client_id` removidos; coluna `client_id` removida de `projetos`. Aplicada em produção via `psycopg2`, com verificação antes do commit (ex: `vw_projetos_por_status` passou de `total_clientes = 0` em todas as linhas para contagens reais).
 - `supabase/db/current/01_schema_full.sql` atualizado para refletir a remoção (coluna, comentário, índice, FK e as 10 views).
 
-## 2026-07-23 (2)
+## 2026-07-23 (12)
 
 ### Importado — planilhas Connect (ContaPagar/ContaReceber/Produtos) de 23/07/2026
 
@@ -57,6 +406,33 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Contas a Pagar/Receber: 21 negociações novas (empresa LUCE NERA), 68 transações novas, 2.904 atualizadas, 0 erros. 488 linhas com `(cod_duplicata, tipo)` ambíguo entre empresas puladas por desenho (mesmo comportamento documentado no ciclo de 22/07).
 - Produtos: 291 de 4.409 atualizados (4.061 já sincronizados, 57 sem match no banco — códigos ainda não cadastrados), 0 erros.
 - Ambiente Python do repositório central não tinha `pandas` instalado (só `psycopg2`/`supabase`/`dotenv`) — instalado via `pip install pandas` antes de rodar os scripts.
+
+## 2026-07-22 (8)
+
+### Adicionado — 51 pedidos históricos em `pedidos_compra` (tela real), sem item de produto (decisão do usuário)
+
+- Após o import (7) para as tabelas órfãs `pedido_compra`/`staging_pedido_compra`, o usuário pediu que esses pedidos aparecessem na tela real "Pedidos de Compra" (`/pedidos`, `compras-lucenera-3o23t98ee`) — mas **sem** vincular a item de produto, porque um pedido linkado a produto reduziria "Pendente" na Necessidade de Compra para um déficit que pode não existir mais hoje (pedido de abril/2025 não deve mexer em necessidade de julho/2026).
+- Confirmado tecnicamente antes de implementar: `PedidosCompra.tsx`/`getPedidosCompra()` lê `pedidos_compra` direto (`select('*, contatos!fornecedor_id(nome)')`), sem exigir item — um pedido sem `pedido_compra_itens` aparece na lista e **não** entra em `vw_necessidade_compra`/`vw_necessidade_compra_pedidos_abertos` (que só agregam via item→produto).
+- Script novo `scripts/criar_pedidos_compra_legado.py`: cria 1 pedido em `pedidos_compra` por `codigo_pedido` (numero `PC-LEGADO-<codigo_pedido>`, status `enviado`, `empresa_id` = LUCE NERA grupo — mesmo padrão do import ContaPagar/ContaReceber), fornecedor resolvido por match exato de nome contra `contatos` (tipo=fornecedor; não existe `codigo_fornecedor` em `contatos`, só `codigo_legado` para clientes). Grava também as parcelas **reais** da planilha (`vl_duplicata`/`dt_vencimento`/`num_parc`) em `pedido_compra_parcelas`, em vez de gerar por divisão automática — mais preciso.
+- **9 dos 60 pedidos ficaram de fora, propositalmente, por fornecedor ambíguo/sem cadastro** (não adivinhado, mesmo princípio já usado no import ContaPagar/ContaReceber para `(cod_duplicata,tipo)` ambíguo):
+  - STELLA (pedidos 646, 1699, 1700, 1713, 1714): 2 contatos com o mesmo nome em `contatos`, CNPJs de filiais diferentes (SC `10.691.158/0003-70` vs RS `10.691.158/0001-09`) — planilha não traz CNPJ para desambiguar.
+  - TENSOFLEX (pedidos 1702, 1709, 1723): mesma situação, 2 contatos com CNPJs diferentes, ambos Rio de Janeiro.
+  - METALURGICA IL INDUSTRIA DE ILUMINAÇÃO LTDA (pedido 1659): não existe em `contatos` (é diferente de "METALURGICA AVER METAIS LTDA", que já existe).
+  - **Pendência do usuário**: decidir qual CNPJ é o correto para STELLA/TENSOFLEX (ou consolidar os contatos duplicados) e cadastrar o fornecedor faltante, depois rodar o script de novo (idempotente — pula `codigo_pedido` já convertido em `PC-LEGADO-*`, e teria que remover esses 3 nomes de `CODIGOS_PEDIDO_PULADOS` no script).
+- Executado com sucesso: 51 pedidos novos em `pedidos_compra`, 45 parcelas reais em `pedido_compra_parcelas`, 0 erros. Confirmado pós-import: `pedido_compra_itens` continua em 0 registros (Necessidade de Compra intocada, como pretendido).
+- Detalhes em `supabase/db/domains/estoque_compras.md`.
+
+## 2026-07-22 (7)
+
+### Importado — planilha PedidoCompra (financeiro) de 22/07/2026, novo script `importar_pedido_compra.py`
+
+- Pedido do usuário: migrar `PedidoCompra_2026-07-22.xlsx` para popular "o campo do sistema de necessidade de compra" com dados reais.
+- Investigação prévia encontrou um descompasso: a planilha só tem dados financeiros por pedido (`codigo_pedido`, fornecedor, `vl_nota`, parcelas) — nenhuma linha de produto/quantidade. A tela "Necessidade de Compra" (`compras-lucenera-3o23t98ee`) usa uma arquitetura totalmente separada (`pedidos_compra` plural + `pedido_compra_itens`, granular por produto), que exige item de produto para um pedido aparecer nela — dado que essa planilha não tem.
+- Achado adicional: já existiam no banco `pedido_compra` (singular) + `staging_pedido_compra`, com colunas desenhadas exatamente para essa planilha, mas **órfãs** — nenhum código do ecossistema as lê (confirmado por busca em `04-Sistemas/`, `dashboard/`, `scripts/`, `supabase/functions/`) e não existia script de import nem função de transformação `staging → final`.
+- Apresentado o achado ao usuário, que optou por importar mesmo assim como dado financeiro puro (pedido → fornecedor → parcelas), ciente de que **não afeta** as colunas Pendente/Status do Pedido/Entrega Prevista da tela de Necessidade de Compra.
+- Script novo `scripts/importar_pedido_compra.py`: carrega a aba "Financeiro", grava fidelidade total (91 linhas, 1 por linha de Excel/parcela) em `staging_pedido_compra` (delete+insert por `codigo_pedido`, rerun-safe) e um header deduplicado por `codigo_pedido` (UNIQUE no schema real) em `pedido_compra` — upsert por `codigo_pedido`. Pedidos com 2+ parcelas na planilha (14 de 60) ficam com `numero_parcela`/`data_vencimento`/`valor_duplicata` `NULL` no header (1 linha não comporta N parcelas), preservados por completo em `staging_pedido_compra`.
+- Executado com sucesso: 60 pedidos novos em `pedido_compra`, 91 linhas em `staging_pedido_compra`, 0 erros. Tabela estava 100% vazia antes desta importação.
+- Detalhes em `supabase/db/domains/estoque_compras.md`.
 
 ## 2026-07-22 (6)
 

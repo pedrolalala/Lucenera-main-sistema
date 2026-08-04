@@ -72,6 +72,20 @@ Triggers relacionadas:
 - O nome do arquivo padrão está hardcoded no script (`PLANILHA_PADRAO`) — precisa ser atualizado manualmente a cada nova planilha antes de rodar. Mesmo padrão em `scripts/importar_contas_pagar_receber.py` (`CP_PADRAO`/`CR_PADRAO`).
 - **Achado (22/07/2026)**: `produtos.percentual_lucro` era `numeric(5,2)` (máx 999,99) e o import falhou (`numeric field overflow`) em 2 produtos de custo residual (R$0,10) com margem de 1150% — valor legítimo da planilha, não erro de cadastro. Corrigido via migration `20260722_060_ampliar_precisao_percentual_lucro` (`numeric(9,2)`). Como o `UPDATE` é atômico por linha, os 2 produtos ficaram sem NENHUM campo atualizado (nem estoque/custo/venda) até a correção — reforça rodar `--dry-run` e conferir a contagem de erros antes de considerar um import concluído.
 
+## Geração de `codigo_produto` (SPEC-053 — aplicada)
+
+- Decisão do usuário (2026-07-27): `produtos.codigo_produto` (integer, único via `produtos_codigo_produto_key`) passa a ser gerado por uma sequence Postgres (`public.produtos_codigo_produto_seq`) associada como `DEFAULT nextval(...)` da coluna, em vez de digitado manualmente nos dois formulários que gravam em `produtos` (Cadastro via `createProduto()`, Orçamentos via RPC `criar_produto_orcamento`). Buracos na numeração são aceitáveis para o negócio.
+- Migration `supabase/db/migrations/20260727_068_spec053_codigo_produto_sequence/` **aplicada no Supabase real** (confirmado 2026-08-04: `DEFAULT nextval('produtos_codigo_produto_seq')` presente na coluna). `criar_produto_orcamento` foi reescrita na mesma migration para não exigir/usar `codigo_produto` do payload. O frontend de `cadastro-lucenera` (Skip) só passou a de fato omitir o campo do payload em 2026-08-04, junto com a sincronização do SPEC-053 (ver `CHANGELOG.md`).
+- `supabase/db/current/` ainda não foi reextraído para refletir o `DEFAULT` novo e o corpo atualizado da função — pendente.
+
+## `contatos.tipo_cliente` (SPEC-052, achado 2026-08-04)
+
+- Coluna nova `contatos.tipo_cliente varchar` (nullable, `CHECK` com 4 valores: `consumidor | nao_contribuinte | industria | revendedor`), migration `20260804_069_spec052_tipo_cliente`, aplicada no Supabase real. Mesmo padrão de `tipo_pessoa` (varchar + CHECK, sem ENUM). Distinto de `regime_apuracao` (regime tributário). Escopo: só cliente, sem backfill dos contatos existentes.
+
+## `contatos.regime_apuracao` (SPEC-052, fechado 2026-08-04)
+
+- Coluna já existia como `text` livre; ganhou `CHECK` restringindo a `simples_nacional | regime_normal` (migration `20260804_070_spec052_regime_apuracao_fixo`), aplicada no Supabase real depois de confirmar que nenhum dos 3.861 contatos tinha valor preenchido. Opções confirmadas pelo usuário — **não** são as 3 opções (Simples Nacional/Lucro Presumido/Lucro Real) do código morto em `cadastro-lucenera-b86fe/src/components/modals/ClienteModal.tsx`; esse componente ficou desatualizado, não usar como referência.
+
 ## Ação a ser realizada
 
-Quando consolidar o schema, preservar a distinção entre `empresas` como empresas do grupo Lucenera e `contatos.empresa_id` como empresa/PJ vinculada a um contato. Depois, registrar nas telas e integrações esse significado para evitar conciliação incorreta. No frontend da SPEC-018, reaproveitar `public.criar_produto_orcamento(p_payload jsonb)`, manter validações cadastrais de produto (`codigo_produto`, `sku`, marca, categoria e fornecedor) e impedir que a criação pelo Orçamentos escreva dados operacionais de estoque/compras.
+Quando consolidar o schema, preservar a distinção entre `empresas` como empresas do grupo Lucenera e `contatos.empresa_id` como empresa/PJ vinculada a um contato. Depois, registrar nas telas e integrações esse significado para evitar conciliação incorreta. No frontend da SPEC-018/SPEC-053, reaproveitar `public.criar_produto_orcamento(p_payload jsonb)`, manter validações cadastrais de produto (`sku`, marca, categoria e fornecedor — `codigo_produto` agora é gerado por sequence, não mais validado a partir do payload) e impedir que a criação pelo Orçamentos escreva dados operacionais de estoque/compras.

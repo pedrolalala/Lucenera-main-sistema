@@ -2,6 +2,19 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-05 (6)
+
+### Adicionado — SPEC-064: campo "Perfil" (Ribeirão/São Paulo) em 6 sistemas + tela de classificação no Dashboard Financeiro
+
+- Lucenera está abrindo uma filial em São Paulo — toda a operação financeira/de projetos continua em Ribeirão Preto, mas o usuário precisa conseguir visualizar separadamente o que é de São Paulo. Detalhes completos em `03-Projeto/Planos de Ação/SPECs/SPEC-064_Perfil_Ribeirao_Sao_Paulo.md`.
+- **Decisões**: perfil é só rótulo/visualização, não influencia nenhuma lógica de negócio; sem herança automática entre cliente/projeto/orçamento/pedido/boleto/transação — cada um tem seu próprio campo, manual; campo fixo de 2 valores (`ribeirao`/`sao_paulo`), mesmo padrão de `tipo_cliente`; dashboard novo = filtro no Dashboard Financeiro existente, não um app duplicado.
+- **Achado crítico**: o Dashboard Financeiro não lê `orcamentos`/`boletos`/`pedidos_compra` — lê `v_financeiro_realizado`, derivada de `transacoes` (livro-caixa importado do Connect, desconectado do fluxo atual). Sem isso, o filtro do dashboard nunca teria dado nenhum resultado.
+- Migration `20260805_077_spec064_perfil_ribeirao_sao_paulo` (4 arquivos, **aplicada no Supabase real**): coluna `perfil` em `contatos`, `projetos`, `funcionarios`, `funcionarios_novo`, `orcamentos`, `pedidos_compra`, `boletos`, `transacoes`; RPCs `criar_pedido_compra_lote`/`criar_pedido_compra_de_necessidade` recriadas com `p_perfil`; views `vw_funcionarios_completo` e `v_financeiro_realizado` recriadas.
+- **Achado ao implementar RH**: existem 2 tabelas de funcionário (`funcionarios`, legada, usada por Férias/Faltas; `funcionarios_novo`, real, usada pela tela de Cadastro) — a coluna precisou ir nas duas.
+- Publicado em produção nos 6 sistemas: CRM (`lucenera-crm-3bd29`, `0.0.290`/`f1f98f0` — cliente e projeto, independentes), RH (`dashboard-rh-lucenera-5fe9c`, `0.0.218`/`c742130`), Orçamentos (`gestao-financeira-clone-544cb`, `0.0.301`/`d55c64a`), Necessidade de Compra (`compras-lucenera-3o23t98ee`, `0.0.52`/`e616728`), Administração Bancária (`retorno-bancario-bradesco-5392a`, `0.0.55`/`87e9a2c`), Dashboard Financeiro (`dashboard-lucenera-b02z85wa3`, `0.0.23`/`6cb8462` — nova tela `/transacoes` de classificação manual + filtro Ribeirão/São Paulo/Todos em Contas a Pagar/Receber).
+- Fora de escopo por decisão do usuário: Consultar Produtos (estoque só em Ribeirão), Sistema de Entregas, Fichas Técnicas.
+- **Pendência**: submodules locais de CRM/Orçamentos/Compras/Adm. Bancária/Dashboard Financeiro não foram sincronizados nesta SPEC (só o Skip, fonte real de produção); sincronizar quando for mexer de novo em algum desses sistemas.
+
 ## 2026-08-05 (5)
 
 ### Corrigido — SPEC-063: Dashboard Financeiro não checava permissão do Hub (vazamento de acesso)

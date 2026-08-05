@@ -56,6 +56,15 @@ Observação: apesar de existirem automações atuais de fluxo/status, a decisã
 
 Observação sobre itens aprovados: a SPEC-014 prevê leitura de `projeto_itens` no detalhe do projeto. A SPEC-010 já existe no banco, mas o CRM só deve enriquecer a situação do item lendo a view de saldos por `projeto_item_id` (`q_reserva`, `q_entrega_futura`, `q_separado`, `q_entregue`) depois do hardening `20260707_023` e da policy de RLS. Até lá, deve usar rótulo genérico para itens válidos.
 
+## SPEC-045 — Link do SharePoint no projeto
+
+- `projetos.link_sharepoint` (text, nullable) — link da pasta raiz do projeto no SharePoint (subpastas padrão: WhatsApp, Projetos, Originais, Orçamentos, Fotos, Email, DocuSign). Preenchido manualmente pelo usuário no CRM (`/projeto/:id`), sem sincronização automática. Migration `20260724_061_link_sharepoint_projeto`.
+- Não confundir com a Edge Function `sync-sharepoint` (acima) — essa sincroniza LISTAS de um site SharePoint diferente (`LUCENERAPROJETOS345`) para popular `projetos`/`tabela_precos` em massa; `link_sharepoint` é só um campo de texto livre, sem integração.
+
+## SPEC-064 — Perfil Ribeirão/São Paulo (2026-08-05)
+
+`contatos.perfil` e `projetos.perfil` (`text`, `CHECK IN ('ribeirao','sao_paulo')`, nullable) — rótulo puramente informativo para a filial que a Lucenera está abrindo em São Paulo. **Não influencia nenhuma lógica de negócio.** Cliente e projeto têm cada um seu próprio campo, preenchido manualmente, sem herança/derivação entre eles — um projeto pode ter perfil diferente do cliente vinculado. Implementado em `ClientFormFields.tsx`/`ContatoDetail.tsx` (cliente) e `ProjectDetail.tsx` (projeto), Skip `projectId 24580`.
+
 ## Ação a ser realizada
 
 Modelar tabelas de configuração para etapas, sub-status, checklists, regras de bloqueio, paralelismo/sequência, SLA e responsáveis. O código deve ler essas configurações da UI, não codificar regras fixas por etapa.

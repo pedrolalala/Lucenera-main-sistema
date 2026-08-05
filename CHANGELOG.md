@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-05 (3)
+
+### Corrigido — SPEC-062: campo "Colaborador" sem busca em Nova Solicitação de Férias
+
+- Usuário reportou que o campo "Colaborador" no formulário de férias (RH) só permitia "buscar" (typeahead nativo do `<Select>` do Radix, sem caixa de busca visível — dropdown de 29 funcionários ativos, digitar só pulava/realçava um item), não selecionar de forma confiável. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-062_RH_Ferias_Combobox_Busca_Colaborador.md`.
+- `dashboard-rh-lucenera-5fe9c` (Skip `projectId 23919`, versão `0.0.216`/`dbdf1a5`, **publicada em produção**): `VacationForm.tsx` — campo "Colaborador" trocado de `<Select>` simples para combobox (`Popover`+`Command`, caixa de busca real que filtra por nome, clique seleciona). Resto do formulário (período aquisitivo, datas, saldo) inalterado.
+- **Nota**: o submodule local desse sistema tem WIP da SPEC-058 (remoção de bloqueio duro de férias, ainda não publicado nem com migrations aplicadas) no mesmo arquivo — não foi misturado nesta mudança, que foi feita 100% direto no Skip.
+
 ## 2026-08-05 (2)
 
 ### Adicionado — SPEC-060: cancelar pedido de compra + reversão do pedido 1768 (fictício)

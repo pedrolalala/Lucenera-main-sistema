@@ -2,6 +2,22 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-05 (7)
+
+### Corrigido — SPEC-065: RH — Férias não criava (coluna gerada) + Vale Transporte não salvava
+
+- `ferias.dias` é `GENERATED ALWAYS AS (data_fim - data_inicio + 1) STORED` — `VacationForm.tsx` enviava valor explícito nesse campo, rejeitado pelo Postgres em 100% das tentativas (confirmado: os 12 registros existentes são todos de seed no mesmo segundo, nenhum criado pelo app). Corrigido removendo `dias` dos payloads de insert/update.
+- `EmployeeFinance.tsx`: `funcionarios_beneficios_empresas.empresa` é `NOT NULL` mas não era enviada no insert, e o erro não era verificado — mostrava "sucesso" falso sem gravar o VT. Corrigido: envia `empresa` sempre e bloqueia com mensagem clara se o funcionário não tiver Empresa definida no cadastro.
+- `dashboard-rh-lucenera-5fe9c` (Skip `projectId 23919`, versão `0.0.219`/`42e7121`, **publicada em produção**).
+
+### Adicionado — SPEC-061: Novo Orçamento (autopreenchimento) + cadastro de cliente (e-mail obrigatório, complemento, vendedor)
+
+- 5 pontos trazidos pela equipe de Projetos sobre "Novo Orçamento" e cadastro de cliente. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-061_Novo_Orcamento_Autopreenchimento_Projeto_e_Cadastro_Cliente.md`.
+- Migration `20260805_078_spec061_complemento_e_vendedor_funcionarios` (**aplicada no Supabase real**): `contatos.complemento`/`complemento_entrega`/`complemento_cobranca`; FK de `vendedor_id`/`vendedor_padrao_id` trocada de `auth.users` para `funcionarios(id)` (0 linhas afetadas, sem backfill).
+- `lucenera-crm-3bd29` (Skip `projectId 24580`, versão `0.0.291`/`df632c5`, **publicada**): e-mail obrigatório no cadastro de cliente, complemento nos 3 blocos de endereço, `cliente_id` de verdade obrigatório em Novo Projeto (achado: validação existente não bloqueava nada — sentinela `'null'` passava em `min(1)`).
+- `gestao-financeira-clone-544cb` (Skip `projectId 32554`, versão `0.0.302`/`2262db0`, **publicada**): e-mail obrigatório, complemento, Vendedor/Vendedor Padrão via `funcionarios` (não mais `usuarios`), autopreenchimento de Arquiteto por nome quando só existe o texto legado, aviso claro (não mais "Não encontrado" genérico) quando projeto não tem cliente/empresa vinculado na origem.
+- Bug relatado pela Mariane (cliente cadastrado não aparece para montar orçamento): confirmado no Skip que o código correto já estava publicado — não é dessincronia Skip/local. Não reaberto sem reprodução.
+
 ## 2026-08-05 (6)
 
 ### Adicionado — SPEC-064: campo "Perfil" (Ribeirão/São Paulo) em 6 sistemas + tela de classificação no Dashboard Financeiro

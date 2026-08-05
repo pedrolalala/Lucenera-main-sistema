@@ -156,6 +156,10 @@ Contrato de status passa a ter 5 etapas: `rascunho -> enviado_cliente -> Aprova�
 - Frontend (`gestao-financeira-clone-544cb (1)`): nova aba "Rascunho" (`DraftBudgetsTab.tsx`) e novo branch em `BudgetTableRow.tsx`, ambos com ação "Enviar para o Cliente" aberta a qualquer usuário autenticado, sem restrição de papel (decisão do usuário, P-2 — diferente das demais ações de aprovação/reenvio do sistema, que exigem `admin`/`gerente`/`operador`). Por decisão do usuário (P-3), orçamentos já em `enviado_cliente`/etapas posteriores no momento da implementação não recebem tratamento retroativo. Por decisão do usuário (P-4), não existe botão "Salvar e Enviar" no formulário de criação/edição — o envio é sempre uma ação separada feita pela aba "Rascunho".
 - Ver SPEC-051 completa para os arquivos exatos tocados e o texto integral do SQL.
 
+## SPEC-061 — Autopreenchimento por projeto + cadastro de cliente (2026-08-05)
+
+`BudgetFormPage.tsx`: quando o projeto não tem `arquiteto_id` mas tem a coluna legada de texto `"Nome Arquiteto"`, busca em `contatos` por correspondência única de nome e pré-seleciona (sem inventar vínculo em caso de ambiguidade). Card de detalhes do projeto agora distingue "Não encontrado" (erro) de "sem vínculo na origem" (normal) para cliente/empresa. `ClientCreateModal.tsx`: e-mail obrigatório, campo "Complemento" nos 3 blocos de endereço, Vendedor/Vendedor Padrão passam a vir de `funcionarios` (não mais `usuarios`) — FK de `contatos.vendedor_id`/`vendedor_padrao_id` migrada para `funcionarios(id)`. Skip `projectId 32554`.
+
 ## SPEC-064 — Perfil Ribeirão/São Paulo (2026-08-05)
 
 `orcamentos.perfil` (`text`, `CHECK IN ('ribeirao','sao_paulo')`, nullable) — rótulo puramente informativo, preenchido manualmente em `BudgetFormPage.tsx`, sem afetar cálculo, aprovação ou qualquer outro fluxo. Skip `projectId 32554`.

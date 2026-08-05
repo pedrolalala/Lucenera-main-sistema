@@ -61,6 +61,10 @@ Observação sobre itens aprovados: a SPEC-014 prevê leitura de `projeto_itens`
 - `projetos.link_sharepoint` (text, nullable) — link da pasta raiz do projeto no SharePoint (subpastas padrão: WhatsApp, Projetos, Originais, Orçamentos, Fotos, Email, DocuSign). Preenchido manualmente pelo usuário no CRM (`/projeto/:id`), sem sincronização automática. Migration `20260724_061_link_sharepoint_projeto`.
 - Não confundir com a Edge Function `sync-sharepoint` (acima) — essa sincroniza LISTAS de um site SharePoint diferente (`LUCENERAPROJETOS345`) para popular `projetos`/`tabela_precos` em massa; `link_sharepoint` é só um campo de texto livre, sem integração.
 
+## SPEC-061 — Cadastro de cliente: e-mail obrigatório, complemento, projeto exige cliente (2026-08-05)
+
+`contatos` ganhou `complemento`/`complemento_entrega`/`complemento_cobranca` (text, nullable) — os 3 blocos de endereço só tinham número, sem complemento. `clientSchema` (`ClientFormFields.tsx`, usado por `Clientes.tsx` e `NewContactModal.tsx`) passa a exigir e-mail no formulário (coluna do banco continua nullable, sem quebrar dados legados). `ProjectNew.tsx`: Cliente agora é obrigatório de verdade na criação de projeto — achado: a validação existente (`z.string().min(1)`) nunca bloqueava nada, porque o valor "não selecionado" é a string `'null'` (sentinela do combobox), que passa em `min(1)`. `contatos.vendedor_id`/`vendedor_padrao_id`: FK trocada de `auth.users(id)` para `funcionarios(id)` (decisão do usuário; 0 linhas afetadas). Skip `projectId 24580`.
+
 ## SPEC-064 — Perfil Ribeirão/São Paulo (2026-08-05)
 
 `contatos.perfil` e `projetos.perfil` (`text`, `CHECK IN ('ribeirao','sao_paulo')`, nullable) — rótulo puramente informativo para a filial que a Lucenera está abrindo em São Paulo. **Não influencia nenhuma lógica de negócio.** Cliente e projeto têm cada um seu próprio campo, preenchido manualmente, sem herança/derivação entre eles — um projeto pode ter perfil diferente do cliente vinculado. Implementado em `ClientFormFields.tsx`/`ContatoDetail.tsx` (cliente) e `ProjectDetail.tsx` (projeto), Skip `projectId 24580`.

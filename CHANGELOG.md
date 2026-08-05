@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-05 (5)
+
+### Corrigido — SPEC-063: Dashboard Financeiro não checava permissão do Hub (vazamento de acesso)
+
+- Usuário reportou que configurou pelo Hub o que a Lana (`financeiro@lucenera.com.br`, papel "gerente") pode ver, mas ela estava vendo o "Dashboard Financeiro" mesmo assim. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-063_Dashboard_Financeiro_Checagem_Permissao_Hub.md`.
+- **Achado**: a permissão granular do Hub (SPEC-006) estava configurada corretamente no banco (`papel_permissoes` do papel "gerente" não inclui "Dashboard Financeiro") — o bug era que **nenhum sistema-satélite** consultava essa permissão. `Layout.tsx` do Dashboard Financeiro só checava se havia uma sessão Supabase válida; como todos os 8 sistemas compartilham o mesmo `auth.users`, qualquer login válido em qualquer sistema Lucenera bastava para abrir esse dashboard e ver Contas a Pagar/Receber, Estoque etc. Confirmado que os outros 7 sistemas têm a mesma lacuna (fora do escopo desta SPEC, registrada como pendência em `supabase/db/domains/hub_ti.md`).
+- `dashboard-lucenera-b02z85wa3` (Skip `projectId 41135`, produção `dashboard-empresa-40d7d.goskip.app`, versão `0.0.22`/`7f37a25`, **publicada em produção**): `use-auth.tsx` ganhou `hasAccess` (chama `hub_pode_executar`, SPEC-006); `Layout.tsx` bloqueia com tela "Acesso negado" quem não tem o sistema liberado.
+- Achado à parte, não corrigido nesta SPEC: `Login.tsx` desse mesmo sistema tem credenciais reais (`pedro@lucenera.com.br`/senha) pré-preenchidas no código-fonte, visíveis sem login.
+
 ## 2026-08-05 (4)
 
 ### Publicado — SPEC-058: RH sem bloqueio duro de férias + folga compensatória

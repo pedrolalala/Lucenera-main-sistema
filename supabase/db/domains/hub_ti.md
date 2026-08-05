@@ -90,6 +90,16 @@ Regras:
 - URL recebe somente `sso_code`; nunca `access_token` nem `refresh_token`.
 - Códigos expiram em 60 segundos e são de uso único.
 
+## SPEC-063 — primeiro sistema-satélite a checar `hub_pode_executar` de verdade
+
+Achado em 2026-08-05: até esta SPEC, **nenhum** sistema-satélite consultava permissão granular nenhuma — todo `Layout.tsx`/`ProtectedRoute.tsx` dos 8 sistemas fora do Hub só verificava se existia uma sessão Supabase válida (`session`/`user`). Como todos compartilham o mesmo `auth.users`, qualquer login válido em qualquer sistema Lucenera bastava para abrir qualquer outro sistema pela URL direta, **mesmo que o papel/exceção da pessoa não desse acesso a ele** — a checagem granular só decidia quais cards apareciam no Hub, nunca bloqueava o sistema de destino.
+
+Caso concreto: usuário configurou o papel "gerente" (atribuído à Lana, `financeiro@lucenera.com.br`) sem acesso a "Dashboard Financeiro" (`papel_permissoes` confirmava isso corretamente), mas ela conseguia abrir `dashboard-empresa-40d7d.goskip.app` (Skip `projectId 41135`, pasta local `dashboard-lucenera-b02z85wa3`) e ver tudo, porque esse app nunca checava nada além do login.
+
+Corrigido só neste sistema (`dashboard-empresa-40d7d`/`dashboard-financeiro`), a pedido explícito do usuário — os outros 7 continuam com a mesma lacuna: `use-auth.tsx` ganhou `hasAccess` (chama `hub_pode_executar(auth.uid(), 'dashboard-financeiro', null, null)` assim que a sessão é conhecida) e `Layout.tsx` passou a bloquear com tela "Acesso negado" quando `hasAccess === false`. Publicado em produção (Skip `projectId 41135`, versão `0.0.22`/`7f37a25`). Ver `03-Projeto/Planos de Ação/SPECs/SPEC-063_Dashboard_Financeiro_Checagem_Permissao_Hub.md`.
+
+**Padrão a reaplicar nos outros 7 sistemas quando for a vez de cada um**: mesmo par de mudanças (`hasAccess` no `AuthProvider` + bloqueio no wrapper de rota), trocando só o `p_system_slug` pelo slug real do sistema em `systems.slug`.
+
 ## Ação a ser realizada
 
-Homologar SSO ponta a ponta com usuário real, validar a matriz inicial de papéis/módulos/ações com a operação e então migrar sistema por sistema para consultar `hub_pode_executar` em vez de permissões hardcoded.
+Homologar SSO ponta a ponta com usuário real, validar a matriz inicial de papéis/módulos/ações com a operação e então migrar sistema por sistema para consultar `hub_pode_executar` em vez de permissões hardcoded — **"Dashboard Financeiro" é o primeiro migrado (SPEC-063, 2026-08-05); faltam CRM, RH, Cadastro, Orçamentos, Necessidade de Compra, Administração Bancária e Sistema de Entregas**.

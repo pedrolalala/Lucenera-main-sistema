@@ -2,6 +2,24 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-05
+
+### Adicionado — SPEC-059: Central Lucenera ganha cadastro fácil de usuário (email + senha)
+
+- A aba "Gestão de Usuários" da Central Lucenera (Hub) só listava/editava usuários existentes; criar um usuário novo só era possível chamando a RPC `criar_usuario` direto no banco. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-059_Central_Lucenera_Cadastro_Facil_Usuarios.md`.
+- Nenhuma migration necessária — `public.criar_usuario(p_email, p_password, p_nome, p_role)` já existia publicada no Supabase real e já valida que só `admin` pode chamar.
+- `central-lucenera-dashboard-1c9ba` (Skip `projectId 37750`, versão `0.0.37`/`737e6c0`, **publicada em produção**): `UsersTab.tsx` ganhou botão "Novo Usuário" com dialog (Nome/Email/Senha/Papel) que chama a RPC e atualiza a lista. Espelhado no submodule local e enviado ao GitHub (`central-lucenera`, commit `2f2c389`).
+
+## 2026-08-04 (6)
+
+### Corrigido — SPEC-057: Necessidade de Compra e Pedido em Lote (teste ao vivo com Débora)
+
+- Reunião de teste ao vivo do sistema com a Débora (compradora real), conduzida pelo Filippo (`02-Reunioes/14. Lucenera (Filippo) - 04.08.2026 - necessidade de compra debora/`), cruzada com os PDFs de referência do sistema legado Connect (`01-Documento/02 - Descritivo Connect/PDF/`). Detalhes completos em `03-Projeto/Planos de Ação/SPECs/SPEC-057_Correcoes_Necessidade_Compra_Pedido_Lote.md`.
+- **Achado central**: `pedidos_compra.empresa_id` já existia e as RPCs já tentavam preenchê-lo automaticamente a partir de `usuarios.empresa_id` — mas nenhum dos 9 usuários tem essa coluna definida, então todo pedido criado pelo app gravava `empresa_id = NULL` silenciosamente. Não era campo faltando no banco, era campo faltando na tela.
+- Migration `20260804_071_numeracao_pedido_compra_legado`: numeração de `pedidos_compra.numero` trocada de `PC-<ano>-NNNN` (nunca usado em produção) para sequencial simples sem prefixo, igual ao legado Connect — sequence nova começando em 1768 (usuário confirmou 1767 como último número real do sistema legado). **Aplicada no Supabase real.**
+- Migration `20260804_072_pedido_compra_empresa_explicita`: adiciona `p_empresa_id` explícito às RPCs `criar_pedido_compra_lote`/`criar_pedido_compra_de_necessidade`. Achado ao aplicar: `CREATE OR REPLACE FUNCTION` com parâmetro novo no final cria uma segunda sobrecarga ambígua em vez de substituir — corrigido com `DROP FUNCTION` explícito da assinatura antiga antes de recriar. **Aplicada no Supabase real.**
+- `compras-lucenera-3o23t98ee` (Skip `projectId 40326`, versão `0.0.50`/`1b027fc`): `NecessidadeCompra.tsx` (aba "Por Produto") perdeu as colunas Fornecedor/Comprometida/Necessidade/Empresa que comprou/Status do pedido/Entrega prevista (redundantes ou sempre vazias nesse contexto, por pedido direto da Débora); "Física" virou "Estoque"; novo checkbox "selecionar todos" no cabeçalho (respeita o mesmo agrupamento por fornecedor do checkbox individual). `ModalPedidoLote.tsx` e `ModalRegistrarCompra.tsx` ganharam campo obrigatório "Empresa" (novo `getEmpresas()` em `services/pedido-compra.ts`). Quantidades exibidas passam por arredondamento defensivo de 3 casas decimais (bug "5906,9999" relatado pela Débora não foi reproduzível nos dados atuais — mitigação preventiva, causa raiz não confirmada).
+
 ## 2026-08-04 (5)
 
 ### Fechado — "Regime de Apuração" vira Select fixo (Simples Nacional / Regime Normal)

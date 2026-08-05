@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-05 (4)
+
+### Publicado — SPEC-058: RH sem bloqueio duro de férias + folga compensatória
+
+- Usuário pediu para publicar também o trabalho da SPEC-058 (feito em 2026-08-04, só codificado localmente até então) junto com a correção da busca de colaborador (SPEC-062). Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-058_RH_Ferias_Sem_Bloqueio_e_Folga_Compensatoria.md`.
+- Migrations **aplicadas no Supabase real**: `20260804_074_rh_ferias_periodo_opcional` (`ferias.periodo_aquisitivo_id` agora nullable) e `20260804_075_rh_controle_falta_folga` (novo status `'folga'` em `controle_falta`).
+- `dashboard-rh-lucenera-5fe9c` (Skip `projectId 23919`, versão `0.0.217`/`9b88f1d`, **publicada em produção**): `VacationForm.tsx` — removido bloqueio duro do botão "Solicitar" por saldo excedido ou período aquisitivo ausente (alertas visuais continuam aparecendo, só pararam de travar o clique); `FaltasDialog.tsx`/`FaltasTabela.tsx`/`FaltasCalendario.tsx` — novo status "Folga Compensatória" (grupo próprio no select, badge teal, entrada no calendário).
+- Submodule local sincronizado e enviado ao GitHub (`dashboard-rh-lucenera-6g2endmv7`, commit `989fd15`).
+- **Pendências que continuam em aberto**: datas exatas da folga da funcionária Cris (SPEC-058, P-07) e o agente `revisor` não foi rodado antes desta publicação (fora do fluxo padrão, a pedido do usuário).
+
 ## 2026-08-05 (3)
 
 ### Corrigido — SPEC-062: campo "Colaborador" sem busca em Nova Solicitação de Férias

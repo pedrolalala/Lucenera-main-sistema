@@ -88,4 +88,4 @@ Sem mudança — mesma condição de `disabled` já existente hoje.
 ## Pendências
 
 - [ ] Teste manual em produção (digitar nome, clicar, confirmar seleção) ainda não foi feito pelo usuário.
-- [ ] Não relacionado a esta SPEC, mas achado no processo: o submodule local `dashboard-rh-lucenera-5fe9c` tem WIP da SPEC-058 (remoção de bloqueio duro de férias/folga compensatória) ainda não publicado no Skip nem com as migrations aplicadas no Supabase real — segue como pendência da SPEC-058, não desta.
+- [x] ~~Não relacionado a esta SPEC, mas achado no processo: o submodule local `dashboard-rh-lucenera-5fe9c` tem WIP da SPEC-058...~~ — **resolvido em 2026-08-05**: usuário pediu para publicar também, SPEC-058 foi aplicada e publicada junto (mesmo arquivo `VacationForm.tsx`, versão `0.0.217`/`9b88f1d`). Ver `SPEC-058_RH_Ferias_Sem_Bloqueio_e_Folga_Compensatoria.md`.

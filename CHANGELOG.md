@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-05 (2)
+
+### Adicionado — SPEC-060: cancelar pedido de compra + reversão do pedido 1768 (fictício)
+
+- Usuário relatou que o pedido de compra nº 1768 (ACEND ILUMINACAO LTDA, R$9.935,45, criado em teste no dia anterior junto da SPEC-057) estava distorcendo a tela Necessidade de Compra — reduzindo artificialmente o "Pendente" dos 7 produtos daquele pedido. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-060_Cancelar_Pedido_Compra.md`.
+- **Achado**: não existia nenhuma forma de cancelar um pedido de compra pela interface — `pedidos_compra` só tem policy de `SELECT`, toda escrita passa por RPC `SECURITY DEFINER`.
+- Migration `20260805_076_spec060_cancelar_pedido_compra` (**aplicada no Supabase real**): `pedidos_compra` ganhou `cancelado_em`/`cancelado_por`/`motivo_cancelamento` + RPC `cancelar_pedido_compra(p_pedido_id, p_motivo)` (bloqueada para pedido já recebido/parcialmente recebido/cancelado; cancela junto parcelas não pagas). Nenhuma view precisou mudar — `vw_necessidade_compra_pedidos_abertos`/`pedido_detalhe` (SPEC-039) já filtravam por `status NOT IN ('recebido', 'cancelado')`.
+- Pedido 1768 cancelado via SQL direto no mesmo dia (antes do frontend ir ao ar) — confirmado que ele parou de contar como "pedido em aberto".
+- `compras-lucenera-3o23t98ee` (Skip `projectId 40326`, versão `0.0.51`/`fe7bc4e`, **publicada em produção**): botão "Cancelar Pedido" em `PedidosCompra.tsx`, com confirmação (`AlertDialog`) e motivo opcional.
+- **Nota**: o submodule local `04-Sistemas/compras-lucenera-3o23t98ee` estava com dezenas de arquivos modificados sem commit no momento desta SPEC — implementação feita 100% via Skip, submodule local não tocado (ficou fora do escopo desta SPEC; precisa de higienização à parte).
+
 ## 2026-08-05
 
 ### Adicionado — SPEC-059: Central Lucenera ganha cadastro fácil de usuário (email + senha)

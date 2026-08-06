@@ -22,8 +22,8 @@ CREATE TRIGGER trg_fornecedores_auditoria AFTER INSERT OR DELETE OR UPDATE ON pu
 CREATE TRIGGER trg_fornecedores_updated_at BEFORE UPDATE ON public.fornecedores FOR EACH ROW EXECUTE FUNCTION fn_atualiza_updated_at();
 -- Trigger: funcionarios_updated_at ON funcionarios
 CREATE TRIGGER funcionarios_updated_at BEFORE UPDATE ON public.funcionarios FOR EACH ROW EXECUTE FUNCTION set_updated_at();
--- Trigger: trg_orcamento_item_workflow ON orcamento_itens
-CREATE TRIGGER trg_orcamento_item_workflow AFTER INSERT ON public.orcamento_itens FOR EACH ROW EXECUTE FUNCTION handle_orcamento_item_workflow();
+-- SPEC-051 (27/07/2026): trg_orcamento_item_workflow removido (existia só para
+-- promover rascunho -> enviado_cliente sozinho ao inserir o primeiro item).
 -- Trigger: trg_normalize_orcamento_status ON orcamentos
 CREATE TRIGGER trg_normalize_orcamento_status BEFORE INSERT OR UPDATE OF status ON public.orcamentos FOR EACH ROW EXECUTE FUNCTION normalize_orcamento_status();
 -- Trigger: trg_orcamento_workflow ON orcamentos

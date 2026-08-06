@@ -1749,6 +1749,10 @@ $function$
 
 ;
 -- Function: enviar_orcamento_para_cliente
+-- SPEC-051 (27/07/2026): adicionada validação de completude (empresa,
+-- projeto, cliente, forma de pagamento, ao menos 1 item) antes de aceitar o
+-- envio — esta RPC passou a ser o único ponto de entrada para
+-- enviado_cliente após a remoção da auto-promoção automática.
 CREATE OR REPLACE FUNCTION public.enviar_orcamento_para_cliente(p_orcamento_id uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -1760,6 +1764,9 @@ DECLARE
     v_numero     text;
     v_status_ant text;
     v_token      text;
+    v_has_items  boolean := false;
+    v_faltando   text[] := ARRAY[]::text[];
+    v_msg        text;
 BEGIN
     SELECT * INTO v_orcamento
     FROM public.orcamentos
@@ -1780,6 +1787,38 @@ BEGIN
             'Permitido apenas em: aguardando_aprovacao, recusado_cliente.',
             v_numero, v_status_ant
             USING ERRCODE = 'P0002';
+    END IF;
+
+    IF v_orcamento.empresa_id IS NULL THEN
+        v_faltando := array_append(v_faltando, 'Empresa');
+    END IF;
+    IF v_orcamento.projeto_id IS NULL THEN
+        v_faltando := array_append(v_faltando, 'Projeto');
+    END IF;
+    IF v_orcamento.cliente_id IS NULL THEN
+        v_faltando := array_append(v_faltando, 'Cliente');
+    END IF;
+    IF v_orcamento.forma_pagamento IS NULL THEN
+        v_faltando := array_append(v_faltando, 'Forma de Pagamento');
+    END IF;
+
+    SELECT EXISTS(
+        SELECT 1 FROM public.orcamento_itens WHERE orcamento_id = p_orcamento_id
+    ) INTO v_has_items;
+
+    IF array_length(v_faltando, 1) > 0 OR NOT v_has_items THEN
+        v_msg := 'Não é possível enviar ao cliente: ';
+        IF array_length(v_faltando, 1) > 0 THEN
+            v_msg := v_msg || 'preencha ' || array_to_string(v_faltando, ', ') || '.';
+        END IF;
+        IF NOT v_has_items THEN
+            IF array_length(v_faltando, 1) > 0 THEN
+                v_msg := v_msg || ' ';
+            END IF;
+            v_msg := v_msg || 'Adicione pelo menos um item.';
+        END IF;
+        RAISE EXCEPTION '%', v_msg
+            USING ERRCODE = 'P0003';
     END IF;
 
     v_token := gen_random_uuid()::text;
@@ -2402,49 +2441,12 @@ END;
 $function$
 
 ;
--- Function: handle_orcamento_item_workflow
-CREATE OR REPLACE FUNCTION public.handle_orcamento_item_workflow()
- RETURNS trigger
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-DECLARE
-  v_status text;
-  v_empresa_id uuid;
-  v_projeto_id uuid;
-  v_cliente_id uuid;
-  v_forma_pagamento public.pagamento_forma;
-BEGIN
-  SELECT status, empresa_id, projeto_id, cliente_id, forma_pagamento
-    INTO v_status, v_empresa_id, v_projeto_id, v_cliente_id, v_forma_pagamento
-  FROM public.orcamentos
-  WHERE id = NEW.orcamento_id;
-
-  IF NOT FOUND THEN
-    RETURN NEW;
-  END IF;
-
-  IF (v_status IN ('rascunho', 'aguardando_cliente') OR v_status IS NULL) THEN
-    IF v_empresa_id IS NOT NULL
-       AND v_projeto_id IS NOT NULL
-       AND v_cliente_id IS NOT NULL
-       AND v_forma_pagamento IS NOT NULL THEN
-      UPDATE public.orcamentos
-      SET status = 'enviado_cliente',
-          token_aprovacao_cliente = COALESCE(token_aprovacao_cliente, public.gen_token_hex()),
-          enviado_cliente_em = COALESCE(enviado_cliente_em, now()),
-          enviado_cliente_por = COALESCE(enviado_cliente_por, auth.uid())
-      WHERE id = NEW.orcamento_id;
-    END IF;
-  END IF;
-
-  RETURN NEW;
-END;
-$function$
-
-;
 -- Function: handle_orcamento_workflow
+-- SPEC-051 (27/07/2026): handle_orcamento_item_workflow() foi removida por
+-- completo (existia só para promover rascunho -> enviado_cliente sozinha ao
+-- inserir o primeiro item). handle_orcamento_workflow() perdeu o bloco
+-- final de auto-promoção — a transição rascunho -> enviado_cliente agora só
+-- acontece via RPC public.enviar_orcamento_para_cliente(p_orcamento_id).
 CREATE OR REPLACE FUNCTION public.handle_orcamento_workflow()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -2453,7 +2455,6 @@ CREATE OR REPLACE FUNCTION public.handle_orcamento_workflow()
 AS $function$
 DECLARE
   v_old_status text;
-  v_has_items boolean := false;
 BEGIN
   v_old_status := COALESCE(OLD.status, '');
 
@@ -2474,25 +2475,6 @@ BEGIN
     NEW.requer_revisao_financeira := true;
     IF NEW.aprovado_cliente_em IS NULL THEN
       NEW.aprovado_cliente_em := now();
-    END IF;
-  END IF;
-
-  -- Auto-transition from rascunho/aguardando_cliente to enviado_cliente
-  -- when all mandatory data AND at least one item exist
-  IF (NEW.status IN ('rascunho', 'aguardando_cliente') OR NEW.status IS NULL) THEN
-    IF NEW.empresa_id IS NOT NULL
-       AND NEW.projeto_id IS NOT NULL
-       AND NEW.cliente_id IS NOT NULL
-       AND NEW.forma_pagamento IS NOT NULL THEN
-      SELECT EXISTS(
-        SELECT 1 FROM public.orcamento_itens WHERE orcamento_id = NEW.id
-      ) INTO v_has_items;
-      IF v_has_items THEN
-        NEW.status := 'enviado_cliente';
-        NEW.token_aprovacao_cliente := public.gen_token_hex();
-        NEW.enviado_cliente_em := COALESCE(NEW.enviado_cliente_em, now());
-        NEW.enviado_cliente_por := COALESCE(NEW.enviado_cliente_por, auth.uid());
-      END IF;
     END IF;
   END IF;
 

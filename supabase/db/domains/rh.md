@@ -52,6 +52,16 @@ Observação: functions locais encontradas apenas no projeto de RH não são fon
 
 **Achado**: `dashboard-rh-lucenera-5fe9c` tem 2 tabelas de funcionário — `funcionarios` (legada, 29 linhas, usada por Férias/Faltas) e `funcionarios_novo` (28 linhas, tela real de Cadastro via `EmployeeForm.tsx`, exposta por `vw_funcionarios_completo`). Ambas ganharam `perfil` (`text`, `CHECK IN ('ribeirao','sao_paulo')`, nullable) — rótulo puramente informativo (local de admissão), sem nenhum efeito em cálculo de folha/VR/VT/férias. `vw_funcionarios_completo` recriada expondo a coluna. Implementado em `EmployeeForm.tsx`/`funcionarios.ts`, Skip `projectId 23919`.
 
+## Feriados e impacto no Vale Transporte (SPEC-056, 2026-08-06)
+
+- `public.feriados`: tabela nova para feriados cadastrados manualmente (nacional/estadual/municipal/ponto_facultativo/emenda), `data` + `descricao` únicos, `ativo boolean` (soft-delete). RLS permissiva para `authenticated` (mesmo padrão de `funcionarios_beneficios_empresas`) — o controle de quem pode criar/editar/remover (admin/gerente) é feito só na UI.
+- **Global, não por empresa/cidade**: um feriado cadastrado vale para todos os funcionários de todas as empresas, mesmo comportamento do hardcode `SP_HOLIDAYS` que substitui (decisão do usuário, 2026-08-05 — o feriado estadual de referência é o de São Paulo, mesmo estado de Ribeirão Preto, sede da empresa).
+- `src/hooks/use-feriados.ts` (RH) passou a mesclar a BrasilAPI com `feriados` (`ativo = true`) do ano selecionado, retornando `{ date, name, type, id?, origem: 'nacional' | 'manual' }`.
+- `src/lib/vale-transporte.ts`: removido o array hardcoded `SP_HOLIDAYS` — o feriado estadual de 9/07 deixou de ser fixo no código; se necessário, deve ser recriado como registro manual `tipo = 'estadual'` na tabela.
+- **UI**: não foi criada tela nova nem rota nova. A gestão de feriados manuais (criar/editar/remover) foi integrada ao card "Calendário de Registros e Feriados" já existente em `Faltas.tsx` (`FaltasCalendario.tsx` + novo `FeriadoDialog.tsx`), visível a todos, mas com o botão "+ Feriado" e a edição de itens manuais restritos a `user.app_role IN ('admin', 'gerente')`. Feriados nacionais (BrasilAPI) continuam somente leitura.
+- Sem backfill retroativo: a tabela só passa a valer a partir do primeiro cadastro, sem histórico de 2024/2025.
+- Migration: `supabase/db/migrations/20260806_079_spec056_feriados/001_create_feriados.sql` (**não aplicada em produção ainda** — pendente confirmação do usuário).
+
 ## Ação a ser realizada
 
 Consolidar vínculo entre funcionário, usuário de sistema, permissões e responsabilidade operacional. Evitar duplicação entre cadastro de funcionário e perfil de login.

@@ -164,6 +164,17 @@ Contrato de status passa a ter 5 etapas: `rascunho -> enviado_cliente -> Aprova�
 
 `orcamentos.perfil` (`text`, `CHECK IN ('ribeirao','sao_paulo')`, nullable) — rótulo puramente informativo, preenchido manualmente em `BudgetFormPage.tsx`, sem afetar cálculo, aprovação ou qualquer outro fluxo. Skip `projectId 32554`.
 
+## SPEC-070 — Voltar orçamento para Rascunho (2026-08-06)
+
+Migration redigida, **não aplicada no Supabase real ainda**: `supabase/db/migrations/20260806_082_spec070_voltar_orcamento_rascunho/001_voltar_orcamento_rascunho.sql`.
+
+- Nova RPC `public.voltar_orcamento_rascunho(p_orcamento_id uuid, p_motivo text)`: única forma de sair de `enviado_cliente`/`recusado_cliente` de volta para `rascunho`. Restrita a `role IN ('admin', 'gerente')`, sem fallback via `hub_pode_executar` (diferente de `equipe_devolver_orcamento_cliente`) — decisão literal do usuário.
+- `p_motivo` obrigatório, gravado em `historico_status_orcamentos.observacao`.
+- Efeito: `status = 'rascunho'`, `token_aprovacao_cliente = NULL` (invalida o link já enviado ao cliente; nenhum token novo é gerado até o orçamento ser reenviado via `enviar_orcamento_para_cliente`). `enviado_cliente_em`/`enviado_cliente_por`/`recusado_cliente_em` **não** são apagados — ficam como registro histórico do envio/recusa que aconteceu.
+- Contrato de status passa a admitir um caminho de volta pontual: `enviado_cliente|recusado_cliente -> rascunho` (além do fluxo linear `rascunho -> enviado_cliente -> Aprovação da Equipe -> Aprovação Financeira -> Orçamento Aprovado`). Não se estende às etapas de Aprovação da Equipe/Financeira/Aprovado — fora do escopo desta SPEC.
+- Frontend (`gestao-financeira-clone-544cb (1)`): botão "Voltar para Rascunho" em `BudgetTableRow.tsx` e `ClientApprovalTab.tsx`, visível para `enviado_cliente`/`recusado_cliente`, restrito à mesma checagem de `canApproveFinancial` (admin/gerente) já usada no arquivo, com dialog de motivo obrigatório no mesmo padrão de `TeamApprovalTab.tsx`.
+- Ver SPEC-070 completa para o texto integral do SQL e as decisões aprovadas (P-1 a P-4).
+
 ## Diretriz ativa
 
 Manter uma função/RPC transacional única para aprovação financeira por `orcamento_id`. O contrato oficial (SPEC-051, sobre a base da SPEC-016/SPEC-031) é `rascunho -> enviado_cliente -> Aprovação da Equipe -> Aprovação Financeira -> Orçamento Aprovado`; a transição `rascunho -> enviado_cliente` é sempre manual, via `enviar_orcamento_para_cliente`. O frontend deve listar/editar orçamentos nessa fila e só disparar efeitos financeiros após confirmação final do financeiro.

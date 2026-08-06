@@ -3682,3 +3682,63 @@ END;
 $function$
 
 ;
+-- Function: voltar_orcamento_rascunho
+-- SPEC-070 (06/08/2026): transição enviado_cliente|recusado_cliente ->
+-- rascunho, restrita a admin/gerente, motivo obrigatório, invalida
+-- token_aprovacao_cliente. Redigida a partir da migration
+-- 20260806_082_spec070_voltar_orcamento_rascunho/001_...sql — ainda NÃO
+-- aplicada no Supabase real (ver supabase/db/domains/orcamentos.md).
+-- NOTA: este bloco reflete apenas a função nova desta SPEC. A
+-- reextração completa do snapshot do domínio Orçamentos (pendência
+-- crônica desde a SPEC-031, ver supabase/db/domains/orcamentos.md)
+-- continua em aberto — não foi feita nesta sessão porque exigiria
+-- consulta direta ao Supabase real, fora do escopo permitido ao agente
+-- implementador sem autorização explícita para leitura ad-hoc do banco.
+CREATE OR REPLACE FUNCTION public.voltar_orcamento_rascunho(p_orcamento_id uuid, p_motivo text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_orcamento public.orcamentos%ROWTYPE;
+  v_status_anterior text;
+  v_numero text;
+  v_user_role text;
+BEGIN
+  IF p_motivo IS NULL OR btrim(p_motivo) = '' THEN
+    RAISE EXCEPTION 'Informe o motivo antes de voltar o orçamento para rascunho.' USING ERRCODE = 'P0001';
+  END IF;
+
+  SELECT u.role INTO v_user_role FROM public.usuarios u WHERE u.id = auth.uid();
+
+  IF v_user_role NOT IN ('admin', 'gerente') THEN
+    RAISE EXCEPTION 'Apenas admin ou gerente podem voltar um orçamento para rascunho.' USING ERRCODE = 'P0001';
+  END IF;
+
+  SELECT * INTO v_orcamento FROM public.orcamentos WHERE id = p_orcamento_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orçamento não encontrado.' USING ERRCODE = 'P0001';
+  END IF;
+
+  v_status_anterior := v_orcamento.status;
+  v_numero := COALESCE(v_orcamento.numero, left(p_orcamento_id::text, 8));
+
+  IF v_orcamento.status NOT IN ('enviado_cliente', 'recusado_cliente') THEN
+    RAISE EXCEPTION 'Orçamento % não pode voltar para rascunho a partir do status atual: %', v_numero, v_status_anterior
+      USING ERRCODE = 'P0002';
+  END IF;
+
+  UPDATE public.orcamentos
+  SET status = 'rascunho',
+      token_aprovacao_cliente = NULL
+  WHERE id = p_orcamento_id;
+
+  INSERT INTO public.historico_status_orcamentos (orcamento_id, status_anterior, status_novo, usuario, observacao)
+  VALUES (p_orcamento_id, v_status_anterior, 'rascunho', auth.uid()::text, p_motivo);
+
+  RETURN jsonb_build_object('orcamento_id', p_orcamento_id, 'numero', v_numero, 'status', 'rascunho');
+END;
+$function$
+
+;

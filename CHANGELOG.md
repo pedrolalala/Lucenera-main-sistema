@@ -2,6 +2,25 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-06 (1)
+
+### Adicionado — SPEC-067: Enviar para o Cliente — download automático de PDF + e-mail pré-preenchido (mailto)
+
+- Pedido do usuário: ao clicar "Enviar para o Cliente" num orçamento em Rascunho, quer que o PDF baixe sozinho e um e-mail já venha pronto (destinatário, assunto, corpo com o link de aprovação) para enviar ao cliente. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-067_Enviar_Cliente_PDF_Automatico_Email_Mailto.md`.
+- Escopo restrito ao **envio inicial** de um rascunho (`DraftBudgetsTab.tsx` e o botão equivalente na lista "Todos") — reenvio após recusa e o ícone de reenviar continuam sem essa automação, por decisão do usuário.
+- Sem migration — 100% frontend, reaproveitando o e-mail do cliente (já vinha via join) e a Edge Function `generate-report` (PDF) já existentes.
+- **Achado durante a homologação**: a ordem original (baixar PDF, depois abrir o `mailto:`) fazia o e-mail nunca abrir de fato — o navegador só honra a navegação para um esquema externo como `mailto:` enquanto há "ativação de usuário" válida a partir do clique, e essa ativação expirava durante a geração do PDF (chamada de rede via Edge Function). Corrigido invertendo a ordem: abre o `mailto:` primeiro (rápido, ainda dentro da janela do clique), baixa o PDF depois.
+- `gestao-financeira-clone-544cb` — implementado e publicado localmente no submodule (commits `17ca76d`, `6da70dc`), **push feito para o GitHub**. Publicação no Skip Cloud ainda pendente (fora do alcance desta sessão, sem acesso ao MCP do Skip).
+
+### Adicionado — SPEC-070: Voltar Orçamento para Rascunho (Enviado ao Cliente / Recusado)
+
+- Pedido do usuário: depois de enviar um orçamento ao cliente não havia nenhum jeito de voltar para Rascunho caso o cliente pedisse alteração antes de aprovar. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-070_Voltar_Orcamento_Rascunho_Apos_Envio_Cliente.md`.
+- **Achado**: não existia, em nenhum lugar do sistema, um caminho (manual ou automático) de `enviado_cliente`/`recusado_cliente` de volta para `rascunho` — a única "devolução" existente (`equipe_devolver_orcamento_cliente`, SPEC-031) opera um nível acima, entre "Aprovação da Equipe" e `enviado_cliente`.
+- **Decisões**: ação restrita a `enviado_cliente`/`recusado_cliente` (não mexe em orçamentos já aprovados pela equipe/financeiro); só `admin`/`gerente` (sem atalho de permissão via Hub, diferente do modelo); invalida o `token_aprovacao_cliente` (link antigo do cliente para de funcionar); motivo obrigatório, registrado em `historico_status_orcamentos`.
+- Migration `20260806_082_spec070_voltar_orcamento_rascunho` (RPC nova `voltar_orcamento_rascunho`, **aplicada no Supabase real**).
+- `gestao-financeira-clone-544cb` — implementado e publicado localmente no submodule (commit `28f1a34`), **push feito para o GitHub**. Publicação no Skip Cloud ainda pendente (fora do alcance desta sessão, sem acesso ao MCP do Skip).
+- Achado registrado (não corrigido nesta SPEC): `supabase/db/current/03_functions.sql` está desatualizado para todo o domínio Orçamentos desde a SPEC-031 (18/07/2026) — funções e o bloco de reset da SPEC-019 não aparecem no snapshot local, só nas migrations aplicadas. Reextração completa do domínio continua pendente.
+
 ## 2026-08-05 (7)
 
 ### Corrigido — SPEC-065: RH — Férias não criava (coluna gerada) + Vale Transporte não salvava

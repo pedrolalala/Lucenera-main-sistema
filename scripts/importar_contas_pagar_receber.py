@@ -39,12 +39,12 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "dashboard"))
+sys.path.insert(0, str(ROOT / "scripts"))
 
-from config import get_client, SUPABASE_URL  # noqa: E402
+from _supabase_client import get_client, SUPABASE_URL  # noqa: E402
 
-CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "Atualização 23.07.2026" / "ContaPagar_2026-07-23.xlsx"
-CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "Atualização 23.07.2026" / "ContaReceber_2026-07-23.xlsx"
+CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-08-07.xlsx"
+CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-08-07.xlsx"
 
 EMPRESA_LUCE_NERA_ID = "2470fa14-1a00-4952-92e2-7e8cf61f8943"
 

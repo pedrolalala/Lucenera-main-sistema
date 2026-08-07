@@ -21,6 +21,51 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - `gestao-financeira-clone-544cb` — implementado e publicado localmente no submodule (commit `28f1a34`), **push feito para o GitHub**. Publicação no Skip Cloud ainda pendente (fora do alcance desta sessão, sem acesso ao MCP do Skip).
 - Achado registrado (não corrigido nesta SPEC): `supabase/db/current/03_functions.sql` está desatualizado para todo o domínio Orçamentos desde a SPEC-031 (18/07/2026) — funções e o bloco de reset da SPEC-019 não aparecem no snapshot local, só nas migrations aplicadas. Reextração completa do domínio continua pendente.
 
+### Corrigido — SPEC-068: Orçamento — nome do cliente, desconto %/R$ + Sinal, vendedor via responsável da obra, dado do projeto 24.200
+
+- Pedido da equipe de Projetos (Mariane), 4 itens. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-068_Correcoes_Orcamento_Cliente_Desconto_Sinal_Vendedor_Busca_Projeto.md`.
+- **2.1** — combinação Razão Social + Nome Fantasia no painel de detalhes do projeto e no combobox de cliente do formulário de orçamento (antes só mostrava `contatos.nome` isolado). Não foi possível reproduzir/confirmar no código publicado a causa exata relatada ("mostrando código do projeto") — investigação em `ClientCreateModal.tsx` e `ClientFormFields.tsx` (CRM) não encontrou nenhum binding com `projeto.codigo`; fica como achado não fechado.
+- **2.2** — novo: seletor de tipo de desconto (percentual/valor fechado em R$) com cálculo automático nos dois sentidos, e campo Sinal (R$, fixo, informativo — não gera parcela financeira). Migration `20260806_083_spec068_desconto_tipo_sinal_orcamento` (colunas `orcamentos.desconto_tipo`/`valor_sinal`, **aplicada no Supabase real**), incluindo atualização da RPC `buscar_orcamento_para_aprovacao` para expor desconto/sinal/saldo restante ao documento do cliente.
+- **2.3** — vendedor autopreenchido agora usa `projeto.responsavel_obra_id` (fallback `responsavel_id`) em vez de `projeto.vendedor_id`, coluna que **não existe** na tabela `projetos` (referência morta desde a SPEC-061). Autopreenchimento agora só roda na criação de orçamento novo, nunca sobrescreve edição.
+- **2.4** — achado: projeto 24.200 estava com `arquivado = true` no banco (status "Obra Finalizada"), por isso ficava fora do filtro de busca do "Novo Orçamento" — dado corrigido (`arquivado = false`) por decisão do usuário, confirmando que era erro de dado, não de regra.
+- `gestao-financeira-clone-544cb` (Skip `projectId 32554`, versão `0.0.303`/`f06803c`, **publicado em produção**) — `BudgetFormPage.tsx`, `ClientApproval.tsx`, `services/clientApprovalService.ts`.
+
+### Adicionado (parcial) — SPEC-069: Matriz de Permissões por Perfil (RBAC)
+
+- Pedido do usuário: 6 papéis reutilizáveis (Administrador Geral, Gestão de RH, Administração
+  Comercial, Compras e Entregas, Equipe de Projetos, Equipe de Entrega) com níveis granulares
+  (TOTAL/EDITAR/EDITAR SEM CADASTRAR/CONSULTAR/SEM ACESSO) por sistema. Detalhes em
+  `03-Projeto/Planos de Ação/SPECs/SPEC-069_Matriz_Permissoes_Perfis_RBAC.md`.
+- Configurado sobre a infraestrutura já existente da SPEC-006 (`papeis`, `papel_permissoes`,
+  `usuario_papeis`, RPC `hub_pode_executar`) — não é um modelo novo.
+- Migration `20260806_084_spec069_rbac_matriz_perfis` **aplicada no Supabase real**: 6 papéis, 44
+  linhas de `papel_permissoes` para 9 sistemas, ação `aprovar` adicionada ao vocabulário do modelo
+  (necessária para Carol aprovar orçamentos sem ter TOTAL), `usuario_papeis` atribuído a
+  Vinícius/Lana/Débora/Mariane (Carol ainda sem login em `usuarios`, pendente).
+- **Achado crítico que bloqueia a continuação com segurança**: Lana e Mariane ainda têm o papel
+  legado `gerente` (seed de compatibilidade da SPEC-006) atribuído, que concede acesso TOTAL a
+  sistemas que a matriz nova pede como SEM ACESSO para elas — enquanto não for resolvido, qualquer
+  RLS/RPC guard baseado em `hub_pode_executar` seria ineficaz para essas duas. RLS de RH/Adm.
+  Bancária, guards de `criar_produto_orcamento`/`aprovar_orcamento_financeiro`, extensão do
+  `RolesTab.tsx` do Hub e adoção por sistema (frontend) ficaram como trabalho subsequente.
+- "Ficha Técnica" confirmada como o repositório `Lucenera-Power-point` — clonado como submodule
+  `04-Sistemas/lucenera-power-point` (não commitado). Achado: é um app Python/Flask com integração
+  SharePoint, arquitetura completamente diferente dos outros 10 sistemas (sem Supabase/React) — sem
+  URL de produção confirmada, sem nenhum código que valide permissão via `hub_pode_executar`.
+  Integrá-lo à matriz de RBAC é trabalho de engenharia novo, fora do escopo desta SPEC.
+- **Continuação na mesma sessão**: usuário confirmou que a aprovação de equipe da Mariane em
+  Orçamentos depende de `usuarios.role` (não da tabela nova de papéis) — papel legado `gerente`
+  removido de Lana e Mariane, sem efeito colateral. Conta da Carol criada (e-mail fornecido pelo
+  usuário) via RPC `criar_usuario`, atribuída a `administracao_comercial`. Com o bloqueio resolvido:
+  - Migration `20260806_085_spec069_rls_financeiro_rh` **aplicada**: RLS de `boletos`/
+    `notas_fiscais`/`remessas`/`contas_bancarias` (Administração Bancária) e `funcionarios_novo`
+    (RH) substituído de `USING (true)` para `hub_pode_executar` — testado ao vivo.
+  - Migration `20260806_086_spec069_rpc_guards_orcamentos` **aplicada**: guard novo em
+    `aprovar_orcamento_financeiro` (não tinha nenhuma checagem — agora só admin_geral/Carol
+    aprovam) e reforço em `criar_produto_orcamento` (já tinha checagem de role legado, adicionada
+    checagem granular da matriz nova).
+  - RolesTab do Hub e adoção por sistema (10 telas) continuam pendentes, fora do escopo desta sessão.
+
 ## 2026-08-05 (7)
 
 ### Corrigido — SPEC-065: RH — Férias não criava (coluna gerada) + Vale Transporte não salvava

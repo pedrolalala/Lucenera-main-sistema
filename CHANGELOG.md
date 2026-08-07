@@ -66,6 +66,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
     checagem granular da matriz nova).
   - RolesTab do Hub e adoção por sistema (10 telas) continuam pendentes, fora do escopo desta sessão.
 
+### Corrigido — Cadastro: remove "Código Progressivo (SKU)" do form/listagem de Peças, usa Referência
+
+- Pedido do usuário: para peças, o "código progressivo" (campo `sku`) é a mesma informação que a Referência — redundante mostrar/editar os dois.
+- `PecaForm.tsx`: campo SKU removido do formulário, Referência ocupa o lugar ao lado do Código (auto-gerado, intocado).
+- `Pecas.tsx` / `PecaDetailsPanel.tsx`: coluna/rótulo "SKU / Referência" vira só "Referência"; valor exibido prioriza `referencia`, cai para `sku` só em registros legados sem referência preenchida.
+- Coluna `produtos.sku` **não foi removida do banco** — continua existindo e sendo usada como chave de match em outros fluxos (import XML de orçamento, `criar_produto_orcamento`), só parou de aparecer nesta tela.
+- `cadastro-lucenera-b86fe` (Skip `projectId 36668`, versão `0.0.51`/`71e098d`, **publicado em produção**).
+
 ## 2026-08-05 (7)
 
 ### Corrigido — SPEC-065: RH — Férias não criava (coluna gerada) + Vale Transporte não salvava

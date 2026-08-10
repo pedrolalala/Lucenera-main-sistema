@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-10 (9)
+
+### Corrigido — SPEC-069: Dashboard Financeiro restrito a Filippo, Pedro e Vinícius
+
+- Usuário reportou que ninguém conseguia acessar o Dashboard Financeiro e pediu acesso exclusivo pra essas 3 pessoas. Causa raiz: só o papel `admin_geral` (só o Vinícius) tinha permissão nesse sistema — Filippo e Pedro só tinham o campo legado `usuarios.role`, não usado pelo RBAC novo.
+- Migration `20260810_094_dashboard_financeiro_acesso_restrito`: papel dedicado `dashboard_financeiro_acesso`, atribuído só aos 3. Verificado: exatamente 3 de 11 usuários com acesso.
+- A aba "Matriz de Acesso" do Hub (`/admin`) já permite administrar isso (marcar/desmarcar papéis por usuário) — não precisou de UI nova.
+
 ## 2026-08-10 (8)
 
 ### Corrigido — posição do card Separação Parcial no Hub

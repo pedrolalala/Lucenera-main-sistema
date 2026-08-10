@@ -266,6 +266,7 @@ Ações gravadas em `papel_permissoes.acao` por nível (`modulo_id` sempre `NULL
 | compras_e_entregas (Débora) | SEM ACESSO | SEM ACESSO | CONSULTAR | SEM ACESSO | SEM ACESSO | EDITAR | EDITAR | SEM ACESSO | SEM ACESSO | SEM ACESSO |
 | equipe_projetos (Mariane +) | SEM ACESSO | SEM ACESSO | EDITAR (SEM CADASTRAR) | EDITAR | EDITAR (SEM CADASTRAR) | EDITAR | EDITAR | SEM ACESSO | SEM ACESSO | EDITAR |
 | equipe_entrega | SEM ACESSO | SEM ACESSO | SEM ACESSO | SEM ACESSO | CONSULTAR | SEM ACESSO | EDITAR | SEM ACESSO | SEM ACESSO | SEM ACESSO |
+| dashboard_financeiro_acesso (Filippo, Pedro, Vinícius) | SEM ACESSO | SEM ACESSO | SEM ACESSO | SEM ACESSO | SEM ACESSO | SEM ACESSO | SEM ACESSO | SEM ACESSO | TOTAL | SEM ACESSO |
 
 \* coluna `compras` = Necessidade de Compra/Estoque-Compras — **P1 resolvida**: slug real confirmado
 `necessidade-de-compra` (`SELECT slug FROM systems`), já usado no seed aplicado.
@@ -424,6 +425,26 @@ cliente por link/token, SPEC-009) **não fazem parte deste RBAC interno** e não
   escondidos por papel — o RLS já bloqueia a escrita de verdade, essa é só uma melhoria de UX.
   Reextração de `supabase/db/current/` e atualização de `hub_ti.md`/`AI_DB_CONTEXT.md` também
   ficaram pendentes.
+
+### 2026-08-10 (continuação — Dashboard Financeiro restrito a 3 pessoas)
+
+- Usuário pediu que só Filippo, Pedro (`pedro@lucenera.com.br`, confirmado pelo usuário — existe
+  também `pedrollaghi@gmail.com`, que fica de fora) e Vinícius tenham acesso ao Dashboard
+  Financeiro, e reportou que "atualmente ninguém está conseguindo acesso".
+- **Causa raiz confirmada**: o gating (`hasAccess` via `hub_pode_executar`) já estava certo desde
+  a SPEC-063; só existia UMA linha em `papel_permissoes` para `dashboard-financeiro` — papel
+  `admin_geral` (só o Vinícius tem). Filippo e Pedro tinham o campo legado `usuarios.role = 'admin'`
+  (não usado por `hub_pode_executar`) mas zero linhas em `usuario_papeis` (RBAC novo) — por isso
+  caíam direto em "Acesso negado".
+- **Migration `20260810_094_dashboard_financeiro_acesso_restrito`**: papel novo e dedicado
+  `dashboard_financeiro_acesso` (TOTAL só neste sistema, mesmo padrão de `rh_administracao`),
+  atribuído aos 3 via `usuario_papeis`. Verificado com `hub_pode_executar` real: exatamente 3 dos
+  11 usuários cadastrados têm acesso após a mudança; nenhum outro papel (legado ou novo) concede
+  `dashboard-financeiro`.
+- **"Campo para administrar dentro da Central" já existe** — não precisou construir nada novo: aba
+  "Matriz de Acesso" (`AccessTab.tsx`, `/admin` → Matriz de Acesso) já deixa selecionar um usuário e
+  marcar/desmarcar papéis via checkbox, incluindo o papel novo. Usuário só precisa saber que já
+  existe.
 
 ## Pendências
 

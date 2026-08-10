@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-10 (4)
+
+### Corrigido — SPEC-072: remove valor de boletos na Separação Parcial
+
+- Usuário foi explícito: Separação Parcial não deve mostrar nenhuma informação de valor. Painel "Boletos desta venda" perdeu Valor/Vencimento; ficou só um resumo de parcelas pendentes + o número de cada boleto. Publicado (Skip `48801` v`0.0.10`, GitHub `6a40712`).
+- **Incidente à parte, não relacionado**: SQL de outro projeto ("Memória Perene") colado por engano diretamente no SQL Editor do Supabase da Lucenera — criou 6 tabelas/4 tipos/4 funções isoladas (`memory_organization_*`), sem tocar em nada existente. Investigado (nada da Lucenera foi afetado) e revertido por completo a pedido do usuário — banco confirmado limpo.
+
 ## 2026-08-10 (3)
 
 ### Corrigido — SPEC-072: Separação Parcial sem opções de venda + conexão com boletos

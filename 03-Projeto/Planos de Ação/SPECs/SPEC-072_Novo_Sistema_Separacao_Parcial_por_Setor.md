@@ -197,6 +197,11 @@ Hipótese (não verificada): "o aplicativo que o Pedro fez para o Matheus provav
 - **Achado técnico**: `boletos.venda` (coluna text) está sempre `NULL` nesta base — não é um campo utilizável como chave de busca; o join correto é `boletos.orcamento_id = orcamentos.id`, que `vw_estoque_saldos_projeto_item` já expõe (coluna `orcamento_id`, não estava sendo selecionada antes).
 - Testado no navegador com usuário descartável (criado e apagado depois, sem residual): confirmado que o RLS libera 21 boletos para um usuário sem nenhum acesso a `financeiro`; seletor lista as 5 vendas reais com nome do cliente; painel de boletos carrega os 3 boletos reais de ORC-0005 (parcela, vencimento, valor, status "Remessa Enviada"). Commitado e publicado (GitHub `9c576a9`, Skip `48801` v`0.0.9`).
 
+### 2026-08-10 (continuação 3 — usuário pediu para tirar valor do painel de boletos)
+
+- Usuário foi explícito: "não deve constar nada de valor" — Separação Parcial não é tela financeira. Painel "Boletos desta venda" perdeu as colunas Valor e Vencimento; ficou só um resumo ("X de Y parcelas pendentes") e uma lista com o número do boleto (`nosso_numero`) + badge "Parcela N/M" ou "Finalizado" (baseado em `status = 'Pago'`). `buscarBoletosPorOrcamento` nem busca mais `valor`/`vencimento` do banco — não fica no payload pra não vazar por engano depois.
+- Commitado e publicado (GitHub `6a40712`, Skip `48801` v`0.0.10`).
+
 ## Pendências
 
 - [x] ~~P-1~~ resolvida: nome/repositório definidos pelo usuário (`separacao-parcial`).

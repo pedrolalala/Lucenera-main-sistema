@@ -202,6 +202,14 @@ Hipótese (não verificada): "o aplicativo que o Pedro fez para o Matheus provav
 - Usuário foi explícito: "não deve constar nada de valor" — Separação Parcial não é tela financeira. Painel "Boletos desta venda" perdeu as colunas Valor e Vencimento; ficou só um resumo ("X de Y parcelas pendentes") e uma lista com o número do boleto (`nosso_numero`) + badge "Parcela N/M" ou "Finalizado" (baseado em `status = 'Pago'`). `buscarBoletosPorOrcamento` nem busca mais `valor`/`vencimento` do banco — não fica no payload pra não vazar por engano depois.
 - Commitado e publicado (GitHub `6a40712`, Skip `48801` v`0.0.10`).
 
+### 2026-08-10 (continuação 4 — usuário reportou 3 problemas de UX)
+
+- Usuário reportou: (1) lista de vendas só aparecia depois de clicar no campo de busca (o `SearchableSelect` ficava escondido até o clique); (2) uma vez dentro do detalhe de uma venda, não havia como voltar para a busca; (3) faltava a logo da Lucenera.
+- Seletor `SearchableSelect` (popover escondido) substituído por uma lista sempre visível de cards (número, cliente, projeto) com um `Input` de filtro por texto, populada pelos mesmos dados de `listarVendasDisponiveis()`.
+- Adicionado botão "Voltar à busca" na tela de detalhe da venda, que reseta `venda`/`numeroVenda`/`parciais`/`boletos`/`quantidades` de volta ao estado inicial.
+- Logo da Lucenera adicionada em `LoginPage.tsx` (substituindo o ícone genérico `PackageSearch`) e no cabeçalho principal de `SeparacaoParcialPage.tsx`, via a URL pública do Supabase Storage já usada em outros sistemas do ecossistema (`.../storage/v1/object/public/Logo/lucenera-vertical.png`).
+- Commitado localmente (Skip desconectado no momento da correção); publicação pendente de reconexão do Skip.
+
 ## Pendências
 
 - [x] ~~P-1~~ resolvida: nome/repositório definidos pelo usuário (`separacao-parcial`).

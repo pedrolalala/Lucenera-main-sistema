@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-10 (5)
+
+### Corrigido — SPEC-072: lista de vendas visível, botão voltar e logo na Separação Parcial
+
+- Usuário reportou 3 problemas de uso real: lista de vendas escondida atrás de um clique no campo de busca, sem forma de voltar da tela de detalhe para a busca, e logo da Lucenera ausente.
+- Seletor escondido (`SearchableSelect`) substituído por uma lista sempre visível de vendas (cards com número/cliente/projeto) com filtro por texto.
+- Adicionado botão "Voltar à busca" na tela de detalhe.
+- Logo da Lucenera adicionada no login e no cabeçalho principal.
+- Commitado localmente no submodule `04-Sistemas/separacao-parcial`; publicação no Skip pendente de reconexão.
+
 ## 2026-08-10 (4)
 
 ### Corrigido — SPEC-072: remove valor de boletos na Separação Parcial

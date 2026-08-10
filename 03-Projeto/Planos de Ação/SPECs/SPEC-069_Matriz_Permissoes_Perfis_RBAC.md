@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-069 — Matriz de Permissões por Perfil (RBAC) nos Sistemas Lucenera"
-status: pendente
-data_ultima_modificacao: 2026-08-06
+status: implementado (Ficha Técnica/P6 fora, botões granulares de Cadastro/Orçamentos pendentes)
+data_ultima_modificacao: 2026-08-10
 sistemas_envolvidos:
   - Hub / Central
   - RH
@@ -85,53 +85,74 @@ sistemas_envolvidos:
       `usuarios.role`, incluindo autoatendimento do funcionário (`funcionario_id =
       get_my_funcionario_id()`) — substituir por `hub_pode_executar` quebraria esse autoatendimento
       sem necessidade. `feriados` (calendário compartilhado) também não tocado, baixa sensibilidade.
-- [ ] Estender a mesma revisão de RLS para `crm`/`orcamentos`/`cadastro` em `projetos`, `contatos`,
-      `orcamentos`, `orcamento_itens`, `produtos` — usando OR entre os slugs que legitimamente
-      escrevem cada tabela compartilhada (ver "Tabelas compartilhadas entre sistemas").
-- [ ] Estender para `logistica` (`separacoes`, `entregas`) e para o app de Compras
-      (`solicitacoes_compra`, `pedidos_compra`, `pedido_compra_itens`, `cotacoes_compra` e as RPCs
+- [x] **Aplicado (2026-08-10)**, migration `20260810_091_spec069_rls_shared_tables`: `crm`/
+      `orcamentos`/`cadastro` em `projetos`, `contatos` (com split cliente/arquiteto vs
+      fornecedor, aprovado pelo usuário), `orcamentos`, `orcamento_itens`, usando OR entre os
+      slugs que legitimamente escrevem cada tabela compartilhada.
+- [x] **Aplicado (2026-08-10)**, mesma migration: `logistica` (`separacoes`, com OR para
+      `separacao-parcial` também — o sistema novo da SPEC-072 escreve nessa tabela) e Compras
+      (`solicitacoes_compra`, `pedido_compra_itens`, `cotacoes_compra`) + guards de RPC em
       `criar_pedido_compra_lote`/`criar_pedido_compra_de_necessidade`/`cancelar_pedido_compra`/
-      `registrar_devolucao_projeto_item*`/`atualizar_preco_custo_produto`).
-- [ ] Reextrair `supabase/db/current/` após aplicar as migrations acima.
+      `atualizar_preco_custo_produto`. **Achado**: `entregas` e `pedidos_compra` já não tinham
+      nenhuma policy `true` de escrita (já protegidas por role legado ou só alcançáveis via RPC
+      guardada) — nenhuma mudança necessária nelas. **Deliberadamente não guardado**:
+      `registrar_devolucao_projeto_item*` — já é chamada de dentro de
+      `aprovar_orcamento_financeiro` (que já tem seu próprio guard de `aprovar`), e um guard novo
+      ali arriscava quebrar o fluxo de devolução da SPEC-071 testado nesta mesma sessão. Fica para
+      uma iteração futura, com mais cuidado.
+- [x] Verificado com RLS real (não `SUPABASE_DB_URL`/service role): `SET ROLE authenticated` +
+      JWT claims de Lana (`rh_administracao`, SEM ACESSO em orçamentos) → `UPDATE 0` linhas;
+      mesmo teste com Vinícius (`admin_geral`) → `UPDATE 1` linha. Confirma que a policy nova
+      está de fato sendo enforçada, não só existindo.
+- [ ] Reextrair `supabase/db/current/` após todas as migrations desta SPEC — ainda não feito.
 
-### Hub / Central (`central-lucenera-dashboard-1c9ba`)
+### Hub / Central (`central-lucenera-dashboard-1c9ba`) — **aplicado (2026-08-10)**
 
-- [ ] Estender `src/pages/admin/components/RolesTab.tsx`: hoje só existe um checkbox binário
-      "Acesso total" por papel×sistema (grava `modulo_id NULL, acao NULL`) — não há forma de gravar
-      pela UI `criar+editar+visualizar` (Editar), `editar+visualizar` (Editar sem cadastrar) ou só
-      `visualizar` (Consultar). Adicionar um seletor de nível (Total/Editar/Editar sem
-      cadastrar/Consultar/Sem acesso) por papel×sistema, mesmo sem módulo cadastrado.
-- [ ] Nenhuma mudança necessária em `AccessTab.tsx` (atribuição de papéis a usuário já suporta
-      múltiplos papéis por usuário).
+- [x] `src/pages/admin/components/RolesTab.tsx` estendido: o checkbox binário "Acesso total" virou
+      um `Select` com 5 níveis (Total/Editar/Editar sem cadastrar/Consultar/Sem acesso) por
+      papel×sistema — cada nível grava o conjunto de `acao` correspondente em `papel_permissoes`
+      (`modulo_id` sempre `NULL`, permissão por módulo específico continua fora de escopo).
+      Publicado (Skip `37750`, versão `0.0.38`).
+- [x] Nenhuma mudança necessária em `AccessTab.tsx` (confirmado, sem alteração).
 
-### Adoção por sistema (frontend + guard local, padrão já usado pela SPEC-063)
+### Adoção por sistema (frontend + guard local, padrão já usado pela SPEC-063) — **os 7 restantes aplicados (2026-08-10)**
 
-- [ ] RH (`dashboard-rh-lucenera-5fe9c`): adotar `hasAccess`/bloqueio de `Layout` com
-      `p_system_slug = 'rh'`; esconder ações de criar/editar/deletar conforme o papel do usuário.
-- [ ] CRM (`lucenera-crm-3bd29 (1)`): idem, slug `crm`.
-- [ ] Cadastro (`cadastro-lucenera-b86fe`): idem, slug `cadastro`; esconder botão "Novo Produto"
-      para papéis sem `criar` (`equipe_projetos`, `compras_e_entregas`).
-- [ ] Orçamentos (`gestao-financeira-clone-544cb (1)`): idem, slug `orcamentos`; esconder "Novo
-      Orçamento" para `equipe_projetos` (sem `criar`); deixar `equipe_entrega` só em modo leitura.
-- [ ] Necessidade de Compra (`compras-lucenera-3o23t98ee`): idem, slug a confirmar (Pendência P1).
-- [ ] Administração Bancária (`retorno-bancario-bradesco-5392a`): idem, slug `financeiro`.
-- [ ] Sistema de Entregas (`lucenera-logistics-b7cd1`): idem, slug `logistica`.
-- [ ] Dashboard Financeiro (`dashboard-lucenera-b02z85wa3`): já adotado pela SPEC-063 (slug
-      `dashboard-financeiro`) — só garantir que nenhum dos 5 papéis novos (além de `admin_geral`)
-      receba linha em `papel_permissoes` para esse sistema.
-- [ ] Ficha Técnica: **bloqueado até a Pendência P6 ser resolvida.** Sem saber se é o repo
-      `Lucenera-Power-point` (ainda não clonado/registrado em `04-Sistemas/`) ou a linha existente
-      `systems.name = 'Fichas Técnicas'`/slug `ubiqua` (Catálogo de Peças Ubiqua), não é possível
-      apontar arquivo, slug ou tabela nenhuma para este item. Quando resolvido: se for o repo novo,
-      primeiro clonar/registrar como submodule e criar a linha em `systems`; se for o Ubiqua
-      existente, replicar o mesmo padrão `hasAccess`/Layout com slug `ubiqua` em
-      `catalogo-pecas-ubiqua-e6fa0`.
+Padrão replicado em todos: `hasAccess` (boolean) adicionado ao contexto de auth de cada app,
+calculado via `supabase.rpc('hub_pode_executar', { p_usuario_id, p_system_slug: '<slug>',
+p_modulo_chave: null, p_acao: null })`; a rota protegida de cada app passou a checar
+`hasAccess === false` e renderizar uma tela "Acesso negado" (mesmo texto/estrutura usados pela
+SPEC-063 em Dashboard Financeiro). QA completo do Skip (setup/staticAnalysis/build/
+integrations/test) rodado e publicado para cada um.
+
+- [x] RH (`dashboard-rh-lucenera-5fe9c`, Skip `23919`): slug `rh`, publicado `0.0.221`.
+- [x] CRM (`lucenera-crm-3bd29`, Skip `24580`): slug `crm`, publicado `0.0.292`.
+- [x] Cadastro (`cadastro-lucenera-b86fe`, Skip `36668`): slug `cadastro`, publicado `0.0.52`.
+      **Não feito**: esconder botão "Novo Produto" para papéis sem `criar` (`equipe_projetos`,
+      `compras_e_entregas`) — o guard de página (`hasAccess`) e o RLS de `produtos` (SPEC-069
+      anterior) já impedem a escrita real; falta só a UX de esconder o botão.
+- [x] Orçamentos (`gestao-financeira-clone-544cb`, Skip `32554`): slug `orcamentos`, publicado
+      `0.0.305`. Somado ao gate de role legado (`visitante`/`viewer`) que já existia. **Não
+      feito**: esconder "Novo Orçamento" para `equipe_projetos` (sem `criar`) e deixar
+      `equipe_entrega` só em modo leitura — mesma observação acima, o RLS já bloqueia a escrita
+      de verdade, falta só a UX.
+- [x] Necessidade de Compra (`compras-lucenera-3o23t98ee`, Skip `40326`): slug
+      `necessidade-de-compra`, publicado `0.0.56`.
+- [x] Administração Bancária (`retorno-bancario-bradesco-5392a`, Skip `36395`): slug `financeiro`,
+      publicado `0.0.58`.
+- [x] Sistema de Entregas (`lucenera-logistics-b7cd1`, Skip `24039`): slug `logistica`, publicado
+      `0.0.81`.
+- [x] Dashboard Financeiro (`dashboard-lucenera-b02z85wa3`): já adotado pela SPEC-063 — confirmado
+      que nenhum dos 6 papéis novos (além de `admin_geral`) recebeu linha em `papel_permissoes`
+      para esse sistema, sem alteração necessária.
+- [ ] Ficha Técnica: **segue bloqueado — usuário confirmou pular por agora** (app Flask fora do
+      Skip, sem link de produção confirmado, sem código que consulte `hub_pode_executar`;
+      integrá-lo é um projeto à parte). Ver Pendência P6.
 
 ### Documentação
 
 - [ ] Atualizar `supabase/db/domains/hub_ti.md` com a lista de sistemas adotados após esta SPEC.
 - [ ] Atualizar `AI_DB_CONTEXT.md` de cada sistema tocado.
-- [ ] Atualizar `CHANGELOG.md`.
+- [x] `CHANGELOG.md` atualizado (2026-08-10).
 
 ### Passos manuais do usuário
 
@@ -364,6 +385,14 @@ cliente por link/token, SPEC-009) **não fazem parte deste RBAC interno** e não
 - **Guards de RPC aplicados** em `criar_produto_orcamento` (camada extra sobre o role legado
   existente) e `aprovar_orcamento_financeiro` (não tinha nenhuma checagem antes) — migration
   `20260806_086_spec069_rpc_guards_orcamentos`.
+- **Achado do usuário confirmado e corrigido**: `produtos` tinha o mesmo padrão de
+  `contas_bancarias` (policy restrita neutralizada por `USING/WITH CHECK (true)` concorrente) —
+  cadastro de produto pelo Cadastro (fora do fluxo de Orçamento) ainda não estava travado. Migration
+  `20260806_087_spec069_rls_produtos` aplicada e testada: Vinícius/Carol criam produto, Mariane
+  edita mas não cria.
+- **Commitado no git** (repo central, local, sem push ainda): `.gitmodules` + submodule
+  `lucenera-power-point`, `CHANGELOG.md`, os dois arquivos de SPEC, e as 5 migrations desta sessão
+  (083 a 087).
 - Repositório `Lucenera-Power-point` (Ficha Técnica) clonado como submodule
   `04-Sistemas/lucenera-power-point` (`git submodule add -f`, ainda não commitado). Achado: é um
   app Python/Flask com integração SharePoint, não um app React/Supabase como os outros 10 sistemas
@@ -372,6 +401,29 @@ cliente por link/token, SPEC-009) **não fazem parte deste RBAC interno** e não
 - **Não iniciado nesta sessão**: extensão do `RolesTab.tsx` do Hub (task 12) e adoção frontend por
   sistema — telas escondendo botões conforme papel (task 13, 10 sistemas). RLS de `crm`/
   `orcamentos`/`cadastro`/`logistica`/`compras` (tabelas compartilhadas) também não iniciado.
+
+### 2026-08-10
+
+- **RLS estendido e aplicado** (migration `20260810_091_spec069_rls_shared_tables`): `projetos`,
+  `contatos` (split cliente/arquiteto vs fornecedor — usuário aprovou explicitamente: "se for
+  melhor separar os fornecedores por mim tudo bem"), `orcamentos`, `orcamento_itens`,
+  `separacoes` (incluindo o sistema novo `separacao-parcial` da SPEC-072), `solicitacoes_compra`,
+  `pedido_compra_itens`, `cotacoes_compra`. Guards de RPC em 4 funções de Compras. Testado com RLS
+  real via `SET ROLE authenticated` (não só `SUPABASE_DB_URL`/service role): Lana bloqueada,
+  Vinícius passa.
+- **`RolesTab.tsx` do Hub estendido**: seletor de 5 níveis por papel×sistema, publicado.
+- **Adoção frontend concluída nos 7 sistemas restantes** (RH, CRM, Cadastro, Orçamentos,
+  Necessidade de Compra, Administração Bancária, Sistema de Entregas): `hasAccess` via
+  `hub_pode_executar` + tela "Acesso negado", todos publicados no Skip com QA completo.
+- **Decisões do usuário nesta sessão**: P6 (Ficha Técnica) — pular por agora, confirmado
+  explicitamente. P3/P4 (filtro por linha) — adiado por agora (equipe_entrega vê todos os
+  orçamentos, não só os que vai entregar); usuário adicionou que Equipe de Entrega também deve
+  enxergar o sistema de Separação Parcial (já coberto — mesmo conjunto de papéis grantado em
+  `logistica` e `separacao-parcial`, SPEC-072).
+- **Não feito**: botões granulares de "Novo Produto" (Cadastro) e "Novo Orçamento" (Orçamentos)
+  escondidos por papel — o RLS já bloqueia a escrita de verdade, essa é só uma melhoria de UX.
+  Reextração de `supabase/db/current/` e atualização de `hub_ti.md`/`AI_DB_CONTEXT.md` também
+  ficaram pendentes.
 
 ## Pendências
 
@@ -382,33 +434,29 @@ cliente por link/token, SPEC-009) **não fazem parte deste RBAC interno** e não
       `administracao_comercial`, `compras_e_entregas`, `equipe_projetos`, `equipe_entrega` como
       provisórios, já aplicados no banco — renomear depois é um `UPDATE papeis SET nome = ...`
       simples caso o usuário prefira outros nomes).
-- [ ] P3 — "Equipe de Entrega: Orçamentos CONSULTAR" foi pedido como "só visualizar orçamento dos
-      pedidos que vão entregar", ou seja, um filtro por linha (quais orçamentos estão de fato
-      atribuídos à entrega da pessoa), não por sistema inteiro. O modelo atual de
-      `hub_pode_executar` é por sistema/módulo/ação, não por registro — CONSULTAR do jeito que esta
-      SPEC desenha libera ver TODOS os orçamentos, não só os da entrega dela. Decidir o design do
-      filtro por linha (ex.: via `entregas.responsavel_id`) é uma decisão de produto separada.
-- [ ] P4 — `contatos` é compartilhada entre CRM (clientes) e Cadastro/Compras (fornecedores). O
-      Escopo de Cadastro (SPEC-CAD-06) já redirecionou `/clientes` e `/projetos` para o CRM, então
-      a distinção provavelmente já é natural por rota/tipo de contato, mas esta SPEC não desenha a
-      policy final (`CASE` por `contatos.tipo` ou equivalente) — fica para o Implementador.
+- [ ] P3 — **Adiado, confirmado pelo usuário (2026-08-10)**: "Equipe de Entrega: Orçamentos
+      CONSULTAR" continua liberando ver TODOS os orçamentos, não só os da entrega da pessoa —
+      filtro por linha (ex.: via `entregas.responsavel_id`) fica para uma SPEC incremental futura,
+      não bloqueia o restante desta SPEC. O usuário confirmou à parte que Equipe de Entrega deve
+      também ter acesso ao sistema novo de Separação Parcial (SPEC-072) — já coberto, mesmo
+      conjunto de papéis grantado em `logistica` e `separacao-parcial`.
+- [x] ~~P4~~ resolvida (2026-08-10): usuário aprovou explicitamente separar `contatos` por tipo
+      ("se for melhor separar os fornecedores por mim tudo bem") — `CASE WHEN tipo = 'fornecedor'`
+      aplicado na migration `20260810_091_spec069_rls_shared_tables` (fornecedor via
+      `necessidade-de-compra`/`cadastro`, demais tipos via `crm`).
 - [x] ~~P5 — Guard de `aprovar_orcamento_financeiro`~~ resolvido: usuário confirmou Administrador
       Geral + Carol (`administracao_comercial`, ação `aprovar`) — guard aplicado no Supabase real.
-- [ ] P6 — **Resolvido qual repositório é, mas achado novo bloqueia a integração.** Usuário confirmou
-      opção (a): é o repositório `https://github.com/pedrolalala/Lucenera-Power-point.git` (clonado
-      nesta sessão como submodule `04-Sistemas/lucenera-power-point`). **Mas o sistema não é um app
-      React/Supabase como os outros 10** — é uma aplicação **Python/Flask** ("Gerador de Fichas
-      Técnicas PowerPoint", `app.py`/`app_production.py`), integrada ao Microsoft SharePoint via
-      Graph API, sem `package.json`, sem cliente Supabase, sem login via `usuarios`/`auth.users`.
-      Não tem `link` de produção confirmado (deploy via Cloudflared, não Skip) — por isso **não
-      criei a linha em `public.systems`**: inserir um `link` inventado ou conceder `papel_permissoes`
-      para um sistema que não tem nenhum código capaz de consultar `hub_pode_executar` seria
-      cosmético/enganoso. Antes de integrar este sistema à matriz de RBAC, alguém precisa: (1)
-      confirmar a URL de produção real; (2) decidir como um app Flask externo vai validar
-      permissão contra o Supabase (endpoint próprio? token compartilhado? SSO com o Hub?) — isso é
-      trabalho de integração novo, fora do escopo desta SPEC. Item "Ficha Técnica" continua fora do
-      lote de seed/adoção até o usuário confirmar (a) ou (b). Se for (a), também é preciso decidir o
-      `slug` da linha nova evitando colisão de nome com a linha legada `ubiqua`/"Fichas Técnicas".
+- [ ] P6 — **Confirmado pelo usuário (2026-08-10): pular por agora.** É o repositório
+      `https://github.com/pedrolalala/Lucenera-Power-point.git` (clonado como submodule
+      `04-Sistemas/lucenera-power-point`), mas **não é um app React/Supabase como os outros 10** —
+      é uma aplicação **Python/Flask** ("Gerador de Fichas Técnicas PowerPoint",
+      `app.py`/`app_production.py`), integrada ao Microsoft SharePoint via Graph API, sem
+      `package.json`, sem cliente Supabase, sem login via `usuarios`/`auth.users`, sem `link` de
+      produção confirmado (deploy via Cloudflared, não Skip). Continua fora do lote de
+      seed/adoção — nenhuma linha em `public.systems` nem `papel_permissoes` para ele. Quando
+      for retomado, alguém precisa: (1) confirmar a URL de produção real; (2) decidir como um app
+      Flask externo vai validar permissão contra o Supabase (endpoint próprio? token
+      compartilhado? SSO com o Hub?) — trabalho de integração novo, à parte.
 - [ ] P7 — Granularidade dentro dos apps de Compras e Cadastro: "Necessidade de Compra" e "Consulta
       de Produtos" são nomeados no pedido como se fossem sistemas isolados, mas os apps reais
       (`compras-lucenera-3o23t98ee`, `cadastro-lucenera-b86fe`) cobrem mais telas (Marcas, Pedidos,

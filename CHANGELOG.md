@@ -2,6 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-10 (2)
+
+### Concluído — SPEC-069: RBAC completo (RLS estendido, RolesTab.tsx, adoção em 7 sistemas)
+
+- Pedido do usuário: terminar todas as pendências da SPEC-069 nesta mesma sessão, com tudo commitado e publicado no Skip. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-069_Matriz_Permissoes_Perfis_RBAC.md`.
+- **RLS estendido e aplicado** (migration `20260810_091_spec069_rls_shared_tables`): `projetos`, `contatos` (split cliente/arquiteto vs fornecedor por `tipo`), `orcamentos`, `orcamento_itens`, `separacoes` (incluindo o sistema novo `separacao-parcial`), `solicitacoes_compra`, `pedido_compra_itens`, `cotacoes_compra` — todas trocaram policies `USING (true)` por checagem via `hub_pode_executar`. Guards de permissão adicionados em 4 RPCs de Compras (`criar_pedido_compra_lote`, `criar_pedido_compra_de_necessidade`, `cancelar_pedido_compra`, `atualizar_preco_custo_produto`). Leitura continua aberta em todas — só escrita foi restringida, conforme o próprio critério de aceite da SPEC.
+- Verificado com RLS real via `SET ROLE authenticated` (não `SUPABASE_DB_URL`/service role): usuária sem acesso em Orçamentos bloqueada (0 linhas afetadas), admin passa (1 linha) — confirma que a policy está de fato sendo enforçada.
+- **`RolesTab.tsx` do Hub** (Central Lucenera): checkbox binário "Acesso total" virou seletor de 5 níveis (Total/Editar/Editar sem cadastrar/Consultar/Sem acesso) por papel×sistema.
+- **Adotado o guard `hasAccess` (via `hub_pode_executar`) nos 7 sistemas restantes**: RH, CRM, Cadastro, Orçamentos, Necessidade de Compra, Administração Bancária e Sistema de Entregas — cada um publicado no Skip com QA completo (setup/staticAnalysis/build/integrations/test).
+- **Decisões do usuário nesta sessão**: Ficha Técnica (P6, app Flask fora do Skip) fica de fora deste lote; filtro por linha para Equipe de Entrega em Orçamentos (P3) adiado para SPEC futura; split de `contatos` por tipo (P4) aprovado e aplicado.
+- **Pendente**: esconder botões "Novo Produto" (Cadastro) e "Novo Orçamento" (Orçamentos) por papel — o RLS já bloqueia a escrita de verdade, falta só a UX; reextração de `supabase/db/current/`.
+
 ## 2026-08-10
 
 ### Adicionado — SPEC-072: Sistema novo "Separação Parcial" por setor de estoque

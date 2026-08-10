@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-072 — Novo Sistema de Separação Parcial por Setor de Estoque"
-status: parcialmente implementado (sistema novo publicado; remoção do campo em Logística pendente)
+status: implementado (homologação manual pendente)
 data_ultima_modificacao: 2026-08-10
 sistemas_envolvidos:
   - Logística (lucenera-logistics-b7cd1) — remoção pontual de um campo de texto livre no formulário de separação
@@ -30,15 +30,18 @@ dependencias:
 - [ ] RPCs de transição `ag_separar → separado` e `separado → entregue` **não criadas** — dependem da Pendência P-5 (integração com Logística) ser resolvida primeiro.
 - [ ] Atualizar `supabase/db/domains/logistica.md` e `supabase/db/domains/estoque_compras.md` com o desenho aplicado.
 
-### Frontend — Logística (`lucenera-logistics-b7cd1`) — **não iniciado**
+### Frontend — Logística (`lucenera-logistics-b7cd1`) — **feito e publicado** (Skip reconectado, versão `0.0.80`/`216f747`)
 
-- [ ] Bloqueado: MCP do Skip desconectado nesta sessão — sem acesso para editar/publicar o sistema de Logística. Escopo continua o mesmo: remover só o campo "SEPARAÇÃO PARCIAL" de `SeparacaoFormModal.tsx` (pasta `src/components/separacao/`, sem cedilha — confirmada como a ativa).
-- [ ] Pendência P-8 (pasta duplicada com cedilha) segue sem resolver — não foi tocada.
+- [x] Removido o campo "SEPARAÇÃO PARCIAL" de `SeparacaoFormModal.tsx` (pasta `src/components/separacao/`, sem cedilha — confirmada como a ativa: `SeparacaoPage.tsx` importa exclusivamente dela, verificado direto no Skip antes de editar). QA completo (setup/staticAnalysis/build/integrations/test) ok. Submodule local sincronizado com o mesmo diff.
+- [x] **P-8 confirmada** (não resolvida, só investigada): a pasta duplicada `src/components/separação/` (com cedilha) existe também no Skip (não é só drift local) e continua sem uso — não foi tocada/apagada, fica como limpeza futura.
 
-### Sistema novo — Separação Parcial — **criado e publicado no GitHub**
+### Sistema novo — Separação Parcial — **criado, publicado no GitHub e registrado no Hub**
 
-- [x] **P-1 resolvida**: nome/repositório definidos pelo usuário — `https://github.com/pedrolalala/separacao-parcial`. O projeto Skip já existia (scaffold `frontend-react-vite-ts-shadcn` gerado por Skip antes desta sessão, confirmado ao clonar o repo — `.skip.config.json` presente). Adicionado como submodule em `04-Sistemas/separacao-parcial`.
-- [ ] Registro em `public.systems`/RBAC do Hub **não feito** — exige o MCP do Skip (para publicar) e a Pendência P-3 (quem acessa); sistema hoje só existe como repositório + build local, sem link no Hub central.
+- [x] **P-1 resolvida**: nome/repositório definidos pelo usuário — `https://github.com/pedrolalala/separacao-parcial`. Projeto Skip `48801`. Adicionado como submodule em `04-Sistemas/separacao-parcial`.
+- [x] Registro em `public.systems` feito (slug `separacao-parcial`, ícone `PackageSearch`, `display_order` 10, `visivel_no_hub = true`) — confirmado que o Hub (`central-lucenera-dashboard-1c9ba`, `Dashboard.tsx`) é 100% orientado a dados (`SELECT * FROM systems`/RPC `hub_sistemas_permitidos`), sem precisar de nenhuma mudança de código lá.
+- [x] **P-3 resolvida**: RBAC replicado do mesmo padrão de Logística — acesso de sistema inteiro para `admin`/`gerente`/`funcionario`/`viewer`/`operador`/`admin_geral`, e ações `criar`/`editar`/`visualizar` para `compras_e_entregas`/`equipe_projetos`/`equipe_entrega` (15 linhas em `papel_permissoes`, confirmado via SQL que `hub_pode_executar` não tem bypass automático para admin — sem essa etapa, ninguém conseguiria acessar).
+- [x] Corrigido bug reportado pelo usuário em produção ("Uncaught Error: supabaseUrl is required") — as env vars `VITE_SUPABASE_URL`/`VITE_SUPABASE_PUBLISHABLE_KEY` nunca tinham sido configuradas no projeto Skip (só existiam no `.env` local usado pros meus testes, nunca commitado). Configuradas via `skip_env_set`, rebuild e publish confirmaram o preview carregando limpo.
+- [ ] Handoff de login único (SSO) a partir do Hub (`redirectWithCode`/troca de código cross-system, SPEC-007) **não implementado** neste sistema — degrada graciosamente para a tela de login normal (`window.open` no catch), não é um bloqueio, mas fica como melhoria futura.
 - [x] Login: implementado com `@supabase/supabase-js` reaproveitando o mesmo projeto Supabase central (mesma tabela `usuarios`/`auth.users`) — sem autenticação própria, seguindo o padrão dos demais sistemas.
 - [x] Tela "Buscar Venda" (`SeparacaoParcialPage.tsx`): busca por número de venda (`orcamento_numero`), mostra cliente/projeto e tabela com Código/Referência/Descrição/Classificação (`l_fixo`) e todas as colunas de setor (`Q. Dev.`, `Q. Venda`, `E. Futura`, `Transferido`, `Reserva`, `Ag. Separar`, `Separado`, `Entregue`) — layout inspirado na tela antiga do Connect (imagem de referência fornecida pelo usuário).
 - [x] Ação "Separar": coluna editável "À Separar" (limitada à Reserva no próprio input), grava em `separacoes`/`separacao_itens` (**P-5 resolvida na prática**: o sistema novo escreve nessas tabelas, hoje "de Logística") e chama `registrar_separacao_setor` por item. Histórico "Parciais desta venda" (equivalente à tabela inferior-esquerda da imagem de referência) implementado e funcional.
@@ -50,9 +53,10 @@ dependencias:
 ### Passos manuais do usuário
 
 - [x] P-1 (nome/repositório) resolvida.
+- [x] P-3 (papéis com acesso) resolvida: mesmo padrão amplo de Logística.
 - [x] P-4 (setor de origem) resolvida a favor da gravação (só Reserva) — **decisão técnica minha, não confirmada explicitamente pelo usuário**; se ele realmente quiser Entrega Futura/Entregue como setor de origem, isso exige revisar a RPC e o modelo de dados (Opção B).
-- [ ] P-2, P-3, P-6, P-7, P-8, P-9 seguem em aberto — ver Pendências.
-- [ ] Reconectar o MCP do Skip para: publicar o sistema novo (registro no Hub/RBAC), remover o campo de Logística, e rodar o pipeline de QA completo do Skip (build/staticAnalysis/integrations/test) — os testes desta sessão foram feitos manualmente (npm local + navegador), não pelo pipeline do Skip.
+- [x] Reconectado o MCP do Skip — env vars configuradas, sistema novo publicado, campo removido de Logística, QA pipeline completo do Skip rodado (não mais só testes manuais).
+- [ ] P-2, P-6, P-7, P-9 seguem em aberto — ver Pendências.
 
 ## Objetivo
 
@@ -177,17 +181,23 @@ Hipótese (não verificada): "o aplicativo que o Pedro fez para o Matheus provav
 - Migration `20260810_090_spec072_separacao_parcial_setor` aplicada no Supabase real: `separacao_itens.projeto_item_id` + RPC `registrar_separacao_setor`. Testada transacionalmente (sucesso e rejeição) contra ORC-0005, com `ROLLBACK` — sem efeito em produção.
 - Sistema novo criado: submodule `04-Sistemas/separacao-parcial` (`https://github.com/pedrolalala/separacao-parcial`), tela de busca por venda + separação por setor + histórico de parciais, autenticação reaproveitando o Supabase central. Commitado e publicado no GitHub (`860198e`).
 - Testado localmente (build/lint/typecheck limpos + fluxo completo no navegador com usuário descartável); 2 bugs reais corrigidos durante o teste (ver Checklist). Todo dado de teste revertido — nenhum resíduo em produção.
-- **Não feito**: registro no Hub/RBAC (exige Skip), publicação via Skip/QA pipeline (Skip desconectado nesta sessão), remoção do campo em Logística (mesmo motivo).
 - Decisão técnica tomada sem confirmação explícita do usuário: P-4 resolvida a favor da regra da gravação (só Reserva), não da resposta anterior do usuário (Reserva/Entrega Futura/Entregue) — **precisa ser confirmada ou corrigida**.
+
+### 2026-08-10 (continuação, Skip reconectado)
+
+- Corrigido em produção: `VITE_SUPABASE_URL`/`VITE_SUPABASE_PUBLISHABLE_KEY` configuradas via `skip_env_set` no projeto `48801` — o usuário reportou `Uncaught Error: supabaseUrl is required` no preview, causa raiz era env var nunca configurada no Skip Cloud (só existia no `.env` local de teste). Rebuild + publish confirmaram preview e produção carregando sem erro (verificado no navegador, console limpo).
+- Sistema registrado no Hub: linha em `public.systems` (slug `separacao-parcial`) + 15 linhas em `papel_permissoes` replicando exatamente o padrão de Logística (admin/gerente/funcionario/viewer/operador/admin_geral em nível de sistema; compras_e_entregas/equipe_projetos/equipe_entrega com criar/editar/visualizar). Confirmado que o Hub (`central-lucenera-dashboard-1c9ba`) é 100% data-driven, sem exigir mudança de código.
+- Campo "Separação Parcial" removido de `SeparacaoFormModal.tsx` em Logística (projectId Skip `24039`, confirmado via `skip_file_list`/`skip_project_status` — clean, sem drift). QA completo do Skip (não mais teste manual) passou limpo. Submodule local sincronizado com o mesmo diff.
+- P-8 investigada mais a fundo: a pasta duplicada `separação/` (com cedilha) existe também na árvore de trabalho do Skip, não é só artefato local — confirma que é lixo real em produção, não resolvido (não apagada).
 
 ## Pendências
 
 - [x] ~~P-1~~ resolvida: nome/repositório definidos pelo usuário (`separacao-parcial`).
 - [ ] **P-2**: O sistema novo herda os dados existentes em `separacoes.separacoes_parciais` (texto livre) de alguma forma, ou começa do zero, deixando o histórico antigo só como registro morto/consulta manual? — decisão do usuário.
-- [ ] **P-3**: Papel/permissão de quem pode acessar o sistema novo e registrar uma separação por setor (quais perfis da matriz RBAC da SPEC-069 têm acesso) — decisão do usuário. Hoje a RPC e as tabelas usadas exigem role `admin`/`gerente`/`operador` em `usuarios` (mesma regra já existente em `separacao_itens`), sem guard adicional.
+- [x] ~~P-3~~ resolvida: mesmo padrão amplo de Logística (ver Realizado).
 - [x] ~~P-4~~ resolvida (decisão técnica, pendente de confirmação do usuário): implementado só Reserva, seguindo a gravação — **se você queria mesmo Entrega Futura/Entregue como opção, avise para eu revisar a RPC e o input da UI.**
 - [x] ~~P-5~~ resolvida na prática: o sistema novo escreve em `separacoes`/`separacao_itens` (tabelas de Logística) — implementado e testado.
-- [ ] **P-6**: O que fazer com os dados já existentes em `separacoes.separacoes_parciais` depois que o campo for removido da UI de Logística (manter só leitura, migrar para o formato novo, ou não fazer nada) — decisão do usuário.
-- [ ] **P-7**: Confirmar o `projectId` do Skip da Logística (catalogado como `24039`, mas nunca confirmado nesta sessão via `skip_file_list`) e que o submodule local `lucenera-logistics-b7cd1` está de fato em sync com produção antes de editar `SeparacaoFormModal.tsx` — achado de drift já documentado nesta SPEC (hooks locais referenciam colunas inexistentes no schema real) reforça a necessidade dessa checagem.
-- [ ] **P-8**: Existem duas pastas de componentes de separação em paralelo em `04-Sistemas/lucenera-logistics-b7cd1/src/components/`: `separacao/` (sem cedilha, importada de fato por `SeparacaoPage.tsx` — confirmada como a ativa) e `separação/` (com cedilha, 4 arquivos extras que não existem na ativa: `FileUploader`, `ItemsTableInput`, `MaterialDisplay`, `MultiFileUploader`, `PasteListInput`, `PdfExtractorUploader` — parece um resquício de uma versão anterior do formulário). Confirmar com o usuário se a pasta com cedilha pode ser apagada, ou se está viva em algum outro ponto de entrada não encontrado nesta investigação, antes de editar `separacao/SeparacaoFormModal.tsx`.
+- [ ] **P-6**: O que fazer com os dados já existentes em `separacoes.separacoes_parciais` depois que o campo foi removido da UI de Logística (manter só leitura, migrar para o formato novo, ou não fazer nada) — decisão do usuário.
+- [x] ~~P-7~~ resolvida: projectId `24039` confirmado, submodule local estava em sync (sem drift neste arquivo).
+- [x] ~~P-8~~ confirmada (não resolvida): pasta `separação/` com cedilha é lixo real, existe no Skip também — segue sem apagar, aguardando confirmação do usuário.
 - [ ] **P-9**: Avaliar se o conteúdo de `Reunião.04` (setores de estoque por produto no cadastro — estoque geral, showroom, garantia, casa-cor, disponível) merece SPEC própria futura; não é a mesma coisa que "separação parcial" e não faz parte do escopo aqui.

@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-10 (3)
+
+### Corrigido — SPEC-072: Separação Parcial sem opções de venda + conexão com boletos
+
+- Pedido do usuário: "na separação parcial não tem nenhuma opção de venda orçamento! precisamos conectar com os orçamentos aprovados e também com os boletos gerados!". Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-072_Novo_Sistema_Separacao_Parcial_por_Setor.md`.
+- **Causa raiz**: o campo "Venda" era texto livre sem nenhuma forma de descobrir números válidos, e a maioria dos orçamentos aprovados na base (12) não tem `projeto_itens` de verdade — só 6 têm saldo operacional. Virou um seletor de busca (`SearchableSelect`) populado só com vendas que de fato têm o que separar.
+- **Boletos conectados**: novo painel mostra os boletos gerados na aprovação do orçamento (parcela, vencimento, valor, status). Exigiu estender a RLS de `boletos` (migration `20260810_092`) — antes só quem tinha acesso a `financeiro` conseguia ler boletos, o que bloquearia o resto da equipe que usa Separação Parcial.
+- Testado no navegador com usuário descartável, sem resíduo em produção. Commitado e publicado (Skip `48801` v`0.0.9`, GitHub `9c576a9`).
+
 ## 2026-08-10 (2)
 
 ### Concluído — SPEC-069: RBAC completo (RLS estendido, RolesTab.tsx, adoção em 7 sistemas)

@@ -10,7 +10,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Seletor escondido (`SearchableSelect`) substituído por uma lista sempre visível de vendas (cards com número/cliente/projeto) com filtro por texto.
 - Adicionado botão "Voltar à busca" na tela de detalhe.
 - Logo da Lucenera adicionada no login e no cabeçalho principal.
-- Commitado localmente no submodule `04-Sistemas/separacao-parcial`; publicação no Skip pendente de reconexão.
+- Publicado (Skip `48801` v`0.0.11`, GitHub `2b2f3f7`).
 
 ## 2026-08-10 (4)
 

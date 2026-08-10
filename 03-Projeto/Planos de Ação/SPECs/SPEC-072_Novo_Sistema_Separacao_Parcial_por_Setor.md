@@ -208,7 +208,7 @@ Hipótese (não verificada): "o aplicativo que o Pedro fez para o Matheus provav
 - Seletor `SearchableSelect` (popover escondido) substituído por uma lista sempre visível de cards (número, cliente, projeto) com um `Input` de filtro por texto, populada pelos mesmos dados de `listarVendasDisponiveis()`.
 - Adicionado botão "Voltar à busca" na tela de detalhe da venda, que reseta `venda`/`numeroVenda`/`parciais`/`boletos`/`quantidades` de volta ao estado inicial.
 - Logo da Lucenera adicionada em `LoginPage.tsx` (substituindo o ícone genérico `PackageSearch`) e no cabeçalho principal de `SeparacaoParcialPage.tsx`, via a URL pública do Supabase Storage já usada em outros sistemas do ecossistema (`.../storage/v1/object/public/Logo/lucenera-vertical.png`).
-- Commitado localmente (Skip desconectado no momento da correção); publicação pendente de reconexão do Skip.
+- Skip reconectou: sincronizado (QA completo ok — setup/staticAnalysis/build/integrations/test), publicado em produção (Skip `48801` v`0.0.11`/`d9f9f5a`) e enviado ao GitHub (`2b2f3f7`).
 
 ## Pendências
 

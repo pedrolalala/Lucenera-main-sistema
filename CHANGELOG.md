@@ -2,6 +2,26 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-10
+
+### Adicionado — SPEC-072: Sistema novo "Separação Parcial" por setor de estoque
+
+- Pedido do usuário: retirar o campo "Separação Parcial" (texto livre) de Logística e criar um sistema dedicado que implementa de verdade a separação por setor (Reserva/Entrega Futura/Entregue), a partir das reuniões com o Vinicius. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-072_Novo_Sistema_Separacao_Parcial_por_Setor.md`.
+- **Backend** (migration `20260810_090_spec072_separacao_parcial_setor`, aplicada): `separacao_itens.projeto_item_id` (FK nova) e RPC `registrar_separacao_setor` — decrementa `q_reserva`, incrementa `q_ag_separar`. Implementada só a partir da Reserva (não as 3 opções pedidas inicialmente), seguindo a regra explícita da gravação ("se não está em reserva, não pode ser separado") — decisão técnica que precisa confirmação do usuário.
+- **Sistema novo**: submodule `04-Sistemas/separacao-parcial` (`github.com/pedrolalala/separacao-parcial`), publicado diretamente no GitHub (Skip MCP estava desconectado nesta sessão, sem acesso para publicar via Skip/registrar no Hub). Tela de busca por número de venda + tabela de saldo por setor (inspirada na tela antiga do Connect, imagem de referência do usuário) + ação de separar + histórico de parciais.
+- Testado localmente (build/lint/typecheck limpos, fluxo completo no navegador com usuário de teste descartável) — 2 bugs reais corrigidos no processo (referência do produto vinha da tabela errada; falha parcial deixava registro órfão). Nenhum resíduo de teste ficou em produção.
+- **Pendente**: reconectar o Skip para publicar o sistema no Hub/RBAC e remover o campo de Logística; confirmar com o usuário se a decisão de "só Reserva" (P-4) está correta.
+
+## 2026-08-07
+
+### Adicionado — SPEC-071: Tipo de Operação Devolução no Fluxo de Orçamento
+
+- Pedido do usuário: registrar devolução de cliente como parte do fluxo normal de orçamento (não uma tela separada), com o crédito virando parcela/boleto negativo. Detalhes em `03-Projeto/Planos de Ação/SPECs/SPEC-071_Tipo_Operacao_Devolucao_Fluxo_Orcamento.md`.
+- **Backend** (migration `20260807_088_spec071_natureza_operacao_devolucao`, aplicada): `orcamentos.natureza_operacao` ('venda'|'devolucao', default 'venda'), `orcamento_itens.projeto_item_origem_id` (FK para `projeto_itens`), `aprovar_orcamento_financeiro` estendida com branch de devolução (chama `registrar_devolucao_projeto_item` por item, gera `projeto_parcelas`/`boletos` negativos em vez de cobrança), `projeto_parcelas_valor_check` trocado de `> 0` para `<> 0`. Ramo de venda existente preservado sem nenhuma mudança de lógica.
+- **Segunda migration** (`20260807_089_spec071_replace_orcamento_itens_origem`, aplicada): `replace_orcamento_itens` (RPC usada ao salvar um orçamento já existente) passou a persistir `projeto_item_origem_id` — sem isso, editar uma devolução já criada perderia o vínculo com a venda de origem.
+- **Frontend** (`gestao-financeira-clone-544cb (1)`, publicado no Skip, versão `0.0.304`/`1f10abf`, QA completo ok): toggle "Tipo de Operação" (Venda/Devolução) em `BudgetFormPage.tsx`, travado após a criação; novo `services/devolucoesService.ts` + `components/budgets/DevolucaoItemSearchModal.tsx` para buscar vendas de origem via `vw_estoque_saldos_projeto_item` (cruzando todos os projetos do cliente); `useBudgetStore.ts` estendido para propagar os dois campos novos; badge "Devolução" na listagem (`BudgetTableRow.tsx`).
+- **Pendente**: homologação manual no navegador do golden path completo; definir quem pode registrar/aprovar uma devolução (papel/permissão, herdado de SPEC-015/054 sem resolver).
+
 ## 2026-08-06 (1)
 
 ### Adicionado — SPEC-067: Enviar para o Cliente — download automático de PDF + e-mail pré-preenchido (mailto)

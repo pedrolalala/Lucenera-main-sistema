@@ -31,3 +31,6 @@
 [submodule "04-Sistemas/lucenera-power-point"]
 	path = 04-Sistemas/lucenera-power-point
 	url = https://github.com/pedrolalala/Lucenera-Power-point.git
+[submodule "04-Sistemas/separacao-parcial"]
+	path = 04-Sistemas/separacao-parcial
+	url = https://github.com/pedrolalala/separacao-parcial.git

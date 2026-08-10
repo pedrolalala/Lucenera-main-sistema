@@ -2,6 +2,22 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-10 (8)
+
+### Corrigido — posição do card Separação Parcial no Hub
+
+- Usuário pediu que "Separação Parcial" apareça no Hub logo após "Administração Bancária" e antes de "Sistema de Entregas". Migration `20260810_093_spec072_hub_reorder_separacao_parcial` reordenou `public.systems.display_order` (Hub é 100% data-driven, sem deploy de código necessário).
+- De quebra, corrigida a URL da própria linha `hub` em `public.systems`, que tinha o mesmo domínio quebrado (`central-lucenera.goskip.app`) corrigido no item anterior — não aparece como card mas ficou inconsistente.
+
+## 2026-08-10 (7)
+
+### Corrigido — CRM: "Fornecedores" sumiu do menu + URL errada do botão Central
+
+- Usuário reportou que "Fornecedores" tinha sumido do CRM e que o botão "Central" (adicionado no item anterior) levava a uma URL não publicada.
+- Causa raiz do primeiro: ao publicar o botão "Central" no CRM, o `Layout.tsx` local (submodule desatualizado) sobrescreveu a versão do Skip, que já tinha o item "Fornecedores" no menu lateral — a página/rota nunca deixaram de existir, só o link do menu. Restaurado.
+- Causa raiz do segundo: a URL usada (`https://central-lucenera.goskip.app/`) nunca foi publicada nesse domínio. Corrigida em todos os 8 sistemas para `https://central-lucenera-dashboard-1c9ba.goskip.app/dashboard` (confirmada publicada, rota `/dashboard` existe no app).
+- QA limpo, publicado em produção e enviado ao GitHub nos 8 sistemas.
+
 ## 2026-08-10 (6)
 
 ### Adicionado — botão "Voltar para a Central Lucenera" em 8 sistemas

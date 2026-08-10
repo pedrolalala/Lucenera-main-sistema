@@ -210,6 +210,11 @@ Hipótese (não verificada): "o aplicativo que o Pedro fez para o Matheus provav
 - Logo da Lucenera adicionada em `LoginPage.tsx` (substituindo o ícone genérico `PackageSearch`) e no cabeçalho principal de `SeparacaoParcialPage.tsx`, via a URL pública do Supabase Storage já usada em outros sistemas do ecossistema (`.../storage/v1/object/public/Logo/lucenera-vertical.png`).
 - Skip reconectou: sincronizado (QA completo ok — setup/staticAnalysis/build/integrations/test), publicado em produção (Skip `48801` v`0.0.11`/`d9f9f5a`) e enviado ao GitHub (`2b2f3f7`).
 
+### 2026-08-10 (continuação 5 — posição do card no Hub)
+
+- Usuário pediu que o card "Separação Parcial" apareça no Hub logo depois de "Administração Bancária" e antes de "Sistema de Entregas". O sistema já estava registrado em `public.systems` (visível, `display_order = 10`, no fim da lista) — só precisou reordenar via migration `20260810_093_spec072_hub_reorder_separacao_parcial` (Hub é 100% data-driven, sem precisar de deploy de código). Ordem final: Administração Bancária (6) → Separação Parcial (7) → Sistema de Entregas (8) → Fichas Técnicas (9) → Dashboard Financeiro (10).
+- Achado à parte: a própria linha `hub` em `public.systems` tinha a mesma URL quebrada (`central-lucenera.goskip.app`, nunca publicada) corrigida em todos os 8 sistemas satélite na sessão anterior — corrigida também aqui para `https://central-lucenera-dashboard-1c9ba.goskip.app/dashboard`, mesmo não aparecendo como card (`visivel_no_hub = false`).
+
 ## Pendências
 
 - [x] ~~P-1~~ resolvida: nome/repositório definidos pelo usuário (`separacao-parcial`).

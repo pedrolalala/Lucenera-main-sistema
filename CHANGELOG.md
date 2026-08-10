@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-10 (6)
+
+### Adicionado — botão "Voltar para a Central Lucenera" em 8 sistemas
+
+- Usuário pediu um botão de retorno ao Hub (`https://central-lucenera.goskip.app/`) em todos os sistemas-satélite. Adicionado no header/nav principal de: Cadastro Lucenera (`36668`), Necessidade de Compra (`40326`), Dashboard Financeiro (`41135`), Orçamentos (`32554`), CRM (`24580`), Logística (`24039`), Administração Bancária (`36395`) e Separação Parcial (`48801`).
+- QA completo (setup/staticAnalysis/build/integrations/test) limpo nos 8, publicado em produção e sincronizado com o GitHub de cada submodule.
+- Achado à parte: o submodule local `lucenera-logistics-b7cd1` estava em detached HEAD, um commit atrás de `main`/`origin/main` (a remoção do campo "Separação Parcial" do formulário, já publicada no Skip anteriormente, nunca tinha sido levada à branch local) — corrigido com fast-forward, sem perda de commits.
+
 ## 2026-08-10 (5)
 
 ### Corrigido — SPEC-072: lista de vendas visível, botão voltar e logo na Separação Parcial

@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-10 (10)
+
+### Corrigido — SPEC-069: SSO da Central bugava em todos os 8 sistemas satélite
+
+- Usuário reportou que clicar em qualquer sistema a partir da Central "bugava" e voltava pra tela de login. Reproduzido ao vivo com usuário de teste descartável.
+- Dois bugs pré-existentes com o mesmo sintoma: 5 sistemas (Dashboard Financeiro, Cadastro, Necessidade de Compra, Sistema de Entregas, Separação Parcial) nunca implementavam o consumo do código SSO; os outros 3 (Administração Bancária, CRM, Orçamentos) tinham uma race condition entre `onAuthStateChange` e a troca assíncrona do código, resolvendo "sem login" antes da troca terminar.
+- Corrigido nos 8: criado `cross-system-auth.ts` onde faltava, resolução de sessão agora espera a troca do SSO terminar antes de decidir "logado ou não". QA limpo, publicado em produção, sincronizado com o GitHub de cada submodule.
+
 ## 2026-08-10 (9)
 
 ### Corrigido — SPEC-069: Dashboard Financeiro restrito a Filippo, Pedro e Vinícius

@@ -446,6 +446,38 @@ cliente por link/token, SPEC-009) **não fazem parte deste RBAC interno** e não
   marcar/desmarcar papéis via checkbox, incluindo o papel novo. Usuário só precisa saber que já
   existe.
 
+### 2026-08-10 (continuação — bug de SSO da Central: clique em qualquer sistema "bugava" e voltava)
+
+- Usuário reportou: depois de logar na Central, clicar em qualquer um dos 8 sistemas satélite
+  "bugava" e o levava de volta para a Central (na prática, a aba nova ficava presa numa tela de
+  login em vez de autenticar).
+- **Reproduzido ao vivo** com usuário de teste descartável (criado e depois apagado, sem resíduo):
+  clique em "Administração Bancária" abriu a aba com `?sso_code=...`, o código foi consumido (some
+  da URL), mas a tela final mostrada foi a de login — nunca autenticou de fato.
+- **Causa raiz, dois bugs diferentes, mesmo sintoma**, ambos pré-existentes (nenhum dos dois foi
+  introduzido nesta sessão):
+  - **5 sistemas nunca implementavam o consumo do SSO** (`consumeCodeFromUrl` não existia:
+    Dashboard Financeiro, Cadastro, Necessidade de Compra, Sistema de Entregas, Separação Parcial)
+    — o `?sso_code` chegava na URL e ninguém tentava trocá-lo por uma sessão; usuário caía direto
+    na tela de login do sistema.
+  - **3 sistemas tinham o consumo mas com race condition** (Administração Bancária, CRM,
+    Orçamentos): `supabase.auth.onAuthStateChange` dispara um evento inicial com a sessão que já
+    existia ANTES do `consumeCodeFromUrl` terminar de trocar o código (tipicamente nula, numa aba
+    nova) — esse evento resolvia `loading = false` direto, e o `ProtectedRoute` interpretava
+    "carregamento terminou + sem usuário" como não autenticado e mandava pra tela de login antes da
+    troca real terminar. Confirmado via chamada direta às Edge Functions
+    (`generate-cross-system-code`/`exchange-cross-system-code`) que a troca em si funcionava
+    perfeitamente no servidor — o bug era 100% frontend, na corrida entre os dois efeitos.
+- **Correção**: criado `src/lib/cross-system-auth.ts` nos 5 sistemas que não tinham; nos 8, a
+  resolução de `loading`/sessão passou a esperar o `consumeCodeFromUrl` + `getSession()`
+  terminarem antes de resolver — eventos de auth state anteriores a isso são ignorados (variável
+  `initialized`/`initializedRef` conforme a complexidade de cada arquivo; Orçamentos tinha um
+  segundo efeito acoplado para `role`/`canApproveQuotes`, tratado à parte). QA completo
+  (setup/staticAnalysis/build/integrations/test) limpo nos 8, publicado em produção e sincronizado
+  com o GitHub de cada submodule.
+- Login direto (sem vir da Central) não é afetado — o efeito de auth state continua reagindo
+  normalmente a login/logout manual, só não resolve mais o carregamento inicial antes da hora.
+
 ## Pendências
 
 - [x] ~~Papel legado `gerente` conflitando com a matriz nova~~ resolvido — removido de Lana/Mariane,

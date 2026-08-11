@@ -8,6 +8,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 - Duplo-clique numa linha da tabela de Peças agora abre a edição direto (antes só selecionava, precisava clicar em "Editar" no painel lateral). Usuário pediu para virar padrão nos outros sistemas também — aguardando lista de telas específicas.
 - Formulário de peça: "Dados Básicos", "Engenharia de Custos" e "Dados Fiscais" agora ficam empilhados na vertical (mesmas cores de borda de cada seção); "Estoque Integrado" continua como card lateral.
+- Usuário reportou que o empilhamento sozinho ainda deixava scroll no formulário — campos que ocupavam a linha inteira sozinhos (Marca, Categoria, Fornecedor, Unidade, % ICMS, Máscara/Família, Status Comercial, Ativo) foram reagrupados em pares lado a lado, reduzindo a altura total sem tirar nenhum campo.
 - Publicado (Skip `36668` v`0.0.58`), sincronizado com o GitHub.
 
 ## 2026-08-10 (10)

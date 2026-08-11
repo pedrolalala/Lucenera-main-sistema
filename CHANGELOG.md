@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-11 (2)
+
+### Adicionado — SPEC-073: telas Cadastrar Duplicatas e Baixar Duplicata (Administração Bancária)
+
+- Usuário pediu ajustes de "interface" em 3 telas do módulo de Duplicatas com uma especificação bem detalhada. Investigação encontrou que a spec descrevia o sistema legado Connect (bate quase campo-a-campo com `staging_conta_pagar`/`staging_conta_receber`) — 2 das 3 telas (Baixar Duplicata, Cadastrar Duplicatas) não existiam, e vários campos não tinham coluna no banco. Reportado ao usuário antes de codar; usuário autorizou construir as telas e adicionar as colunas.
+- Migration `20260811_095_spec073_duplicatas_cadastro_baixa`: 10 colunas novas em `boletos` (apropriacao_id, conta_bancaria_id, forma_pagamento, bandeira, linha_digitavel, juros_multa, desconto, responsavel_id, referencia, conta_grupo_id, observacao), todas aditivas. Aplicada no Supabase real.
+- 2 telas novas + botões Editar/Exportar ligados em Consultar Duplicatas. 3 botões (Executar/Acordo/Info) sinalizados como pendentes — sem regra de negócio definida em lugar nenhum do sistema.
+- Detalhes completos em SPEC-073.
+
 ## 2026-08-11 (1)
 
 ### Corrigido/Adicionado — Cadastro Lucenera: duplo-clique na peça + layout do formulário

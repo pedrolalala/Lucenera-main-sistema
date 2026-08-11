@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-11 (1)
+
+### Corrigido/Adicionado — Cadastro Lucenera: duplo-clique na peça + layout do formulário
+
+- Duplo-clique numa linha da tabela de Peças agora abre a edição direto (antes só selecionava, precisava clicar em "Editar" no painel lateral). Usuário pediu para virar padrão nos outros sistemas também — aguardando lista de telas específicas.
+- Formulário de peça: "Dados Básicos", "Engenharia de Custos" e "Dados Fiscais" agora ficam empilhados na vertical (mesmas cores de borda de cada seção); "Estoque Integrado" continua como card lateral.
+- Publicado (Skip `36668` v`0.0.58`), sincronizado com o GitHub.
+
 ## 2026-08-10 (10)
 
 ### Corrigido — SPEC-069: SSO da Central bugava em todos os 8 sistemas satélite

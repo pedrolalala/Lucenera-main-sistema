@@ -2,6 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-12 (9)
+
+### Corrigido — SPEC-085: `hub_pode_executar` negava acesso geral (16 combinações de papel/sistema)
+
+- Débora (papel `compras_e_entregas`) reportou "Acesso negado" ao abrir Necessidade de Compra, apesar de ter `criar/editar/visualizar` corretamente concedidos em `papel_permissoes`.
+- Causa raiz real: bug de comparação com NULL em SQL na função `hub_pode_executar`. A checagem `pp.acao = p_acao` nunca é `TRUE` quando `p_acao` é `NULL` — e `p_acao = NULL` é exatamente o que os apps satélite passam ao perguntar "esse usuário tem QUALQUER acesso a este sistema" (gate de tela inteira em `ProtectedRoute`). Como nenhuma linha de `papel_permissoes` desses papéis tinha `acao IS NULL` (só ações específicas), a checagem de acesso geral sempre retornava `false`, silenciosamente.
+- Escopo real (query rodada antes do fix): **16 combinações de papel/sistema** afetadas — `administracao_comercial`, `compras_e_entregas`, `equipe_entrega`, `equipe_projetos` em cadastro/necessidade-de-compra/orcamentos/separacao-parcial/logistica/crm. Não era exclusivo da Débora nem de Necessidade de Compra.
+- Fix aditivo: `CREATE OR REPLACE FUNCTION hub_pode_executar` adiciona `p_acao IS NULL OR` nas duas checagens (exceção individual e permissão por papel) — amplia só o caso "acesso geral", não muda nenhuma checagem de ação específica já em uso.
+- Verificado: acesso geral da Débora e de um segundo papel afetado (Mariane, `equipe_projetos`) confirmados `true` depois do fix; ação não concedida (`aprovar` pra Débora) continua `false`, confirmando que o fix não passou a conceder mais do que o cadastrado.
+- Achado à parte: o submodule local `compras-lucenera-3o23t98ee` está desatualizado — não tem a checagem `hasAccess` que já existe no Skip publicado (mesmo padrão de checkout desatualizado já visto antes nesta sessão); não sincronizado, só registrado.
+- Aplicado direto no banco de produção (migration `20260812_102_fix_hub_pode_executar_null_acao`) — sem publish no Skip, é uma função de banco, não código de app.
+
 ## 2026-08-12 (8)
 
 ### Corrigido — SPEC-084 (ajuste 2): logo sobrepondo o nome da empresa no PDF (ex.: ISLIGHT)

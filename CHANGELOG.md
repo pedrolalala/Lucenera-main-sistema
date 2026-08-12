@@ -2,6 +2,19 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-12 (2)
+
+### Adicionado — SPEC-080: múltiplos L's dentro do modal "Buscar Produtos"
+
+- Usuário pediu explicitamente uma peça com **array de L's** (`{codigo_l, quantidade}[]`), com migration convertendo o L antigo em "array com 1 item" — exatamente a arquitetura rejeitada horas antes na SPEC-079, quando o usuário confirmou "linhas separadas sem mudar o banco" depois do achado de que `projeto_itens.orcamento_item_id` + `l_fixo` já rastreiam cada L por linha em todo o pipeline de estoque/entrega futura/necessidade de compra.
+- Apontado o conflito antes de implementar: todos os critérios de aceitação (painel expansível, múltiplos L's por peça, várias peças ao mesmo tempo, validações, soma em tempo real) davam pra entregar sem mudar o banco — só levando a experiência de múltiplos L's (que já existia desde a SPEC-079, num diálogo separado) pra **dentro do próprio modal "Buscar Produtos"**. Usuário confirmou manter linhas separadas.
+- `ProductSearchModal.onConfirm` muda de assinatura: de uma lista achatada (`ProductSearchItem[]`, 1 entrada por linha) para `ProductSelectionEntry[]` (`{product, entries: LEntry[]}[]`) — cada peça marcada ganha um painel inline (reaproveita o `LQuantityRepeater` da SPEC-079) que expande logo abaixo da linha, suportando múltiplas peças com L's ao mesmo tempo na mesma busca.
+- Validação por peça: L vazio, quantidade ≤ 0 ou código duplicado **na mesma peça** bloqueiam a confirmação (toast identificando a peça); o mesmo L em peças diferentes continua permitido (validação não é global).
+- O diálogo separado `MultiLAddDialog` (SPEC-079) continua existindo, mas passa a ser usado só por "Adicionar Item não Cadastrado" (que não passa pelo modal de busca).
+- Segundo consumidor do `ProductSearchModal` (`EditableBudgetItemsTable.tsx`, tela de edição de itens na Aprovação Financeira) só recebeu ajuste de tipo pra continuar compilando — mantém o comportamento pré-existente (usa só a primeira peça selecionada, ignora L's coletados); não fazia parte do pedido e tem um modelo de dados de itens diferente.
+- Sem migration de banco, sem mudança de PDF (já imprime uma linha por L desde a SPEC-078/079).
+- Publicado: Orçamentos (Skip 32554, v0.0.318, hash `51d7067`), push pro GitHub (`7e58f63..4c8af35`).
+
 ## 2026-08-12 (1)
 
 ### Corrigido — SPEC-078: 4 bugs no módulo de Novo Orçamento

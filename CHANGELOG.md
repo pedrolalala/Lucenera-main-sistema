@@ -2,6 +2,24 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-12 (1)
+
+### Corrigido — SPEC-078: 4 bugs no módulo de Novo Orçamento
+
+- Usuário pediu correção de 4 bugs, cada um com investigação obrigatória antes de corrigir (MCP do Skip estava desconectado nesta rodada — implementação feita local, publicada depois que reconectou).
+- **Bug 1 (typo "Residential")**: campo Tipo de Projeto tinha valor interno em inglês em 2 lugares (`ProjectCreateModal.tsx` no Orçamentos, `ProjetoFormDialog.tsx` no Cadastro). Achado durante a correção: existia uma CHECK constraint real no banco (`check_tipo_projeto_valido`) que só permitia `'Residential'` — não era só um valor de seed. Migration `20260812_101` recria a constraint com `'Residencial'` e corrige a única linha existente com o valor antigo.
+- **Bug 2 (cliente inline não linkava/não aparecia na busca)**: não encontrada causa determinística via leitura estática (fluxo parecia correto) — aplicado fix defensivo: cliente novo agora é injetado direto no state local (`setClientes`) em vez de depender só do round-trip de `fetchClientes()`, eliminando qualquer corrida entre criação e refetch.
+- **Bug 3 (perfil da empresa no topo)**: não existia esse componente no código (nem condicionado a itens, nem incondicional) — criado um bloco novo (nome/razão social/endereço/telefone + logo) sempre visível ao escolher a Empresa, na seção "Informações Gerais".
+- **Bug 4 (ordem do cálculo)**: achado mais sério que uma simples troca de ordem — o backend (`aprovar_orcamento_financeiro`) nunca deduzia o sinal ao gerar parcelas (dividia o valor cheio), e o PDF nunca mostrava o sinal. Consulta ao banco: só 1 orçamento em produção tem sinal>0, e esse ainda não tinha sido processado — **zero necessidade de recálculo retroativo**. Corrigido calculando `subtotal -> sinal -> desconto (+frete)` uma única vez no frontend, salvo em `valor_total`; a RPC de aprovação não precisou de nenhuma mudança de código porque já lê esse campo. PDF ganhou a linha "Sinal" e passou a respeitar `desconto_tipo` (antes mostrava o número cru de um desconto percentual como se fosse R$).
+- Publicado: Orçamentos (Skip 32554, v0.0.317, hash `0e3786a` — teve uma correção extra depois do publish inicial porque um bloco do Bug 2 ficou faltando no primeiro patch) e Cadastro (Skip 36668, v0.0.60, hash `d95b247`).
+
+### Adicionado — SPEC-079: múltiplos L's por peça + remoção do botão "Adicionar Item"
+
+- Usuário pediu suporte a vários códigos "L" (identificador de luminária/circuito) por peça, cada um com sua própria quantidade, e a remoção do botão redundante "Adicionar Item".
+- Achado técnico decisivo (confirmado no schema real do banco): `projeto_itens.orcamento_item_id` + `l_fixo` provam que cada L já é rastreado por linha em todo o pipeline de estoque/entrega/necessidade de compra — não por peça agregada. Por isso a implementação **não mudou o banco**: "múltiplos L's por peça" virou "várias linhas independentes geradas de uma vez" via um diálogo guiado (`MultiLAddDialog` + `LQuantityRepeater`), sem tocar RPC de aprovação nem PDF (que já imprime uma linha por item).
+- Confirmado por leitura de código (não só pela palavra do usuário): "Adicionar Item" e "Adicionar Item não Cadastrado" eram literalmente o mesmo `onClick`, 100% redundantes. Removido o primeiro; o segundo agora abre o mesmo diálogo de múltiplos L's usado por "Buscar Produtos" quando só 1 produto é selecionado.
+- Publicado junto com a SPEC-078, mesma versão (Orçamentos v0.0.317, hash `0e3786a`).
+
 ## 2026-08-11 (11)
 
 ### Adicionado — SPEC-077: Arquitetos múltiplos com % + Responsável vinculado a Funcionários (CRM + Orçamentos)

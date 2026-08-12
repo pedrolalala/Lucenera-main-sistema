@@ -2,6 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-12 (4)
+
+### Corrigido — SPEC-082: Vencimento de parcelas mensal por padrão, com edição individual
+
+- Usuário reportou que, ao gerar um orçamento com Boleto/3 parcelas, os "vencimentos calculados" mostrados (14/08, 17/08, 20/08) ficaram espaçados em 3 dias em vez de 1 mês, sem nenhum campo pra editar — a data era só um texto informativo.
+- **Causa raiz**: `prazo_pagamento_dias[i] = prazoDias * (i + 1)`, onde `prazoDias` = dias entre hoje e a "Data de Início do Pagamento" escolhida (SPEC-002, antiga) — reproduzia o padrão manual do Connect, mas gerava espaçamento arbitrário entre parcelas (coincidentemente igual ao prazo até a 1ª parcela) em vez de intervalos mensais.
+- Corrigido pra: cada parcela a partir da 2ª vence, por padrão, 1 mês após a anterior (`addMonths`). Novo bloco "Vencimentos das demais parcelas" mostra um seletor de data individual por parcela, pré-preenchido com o padrão, editável — a pessoa que negocia com o cliente pode sobrescrever qualquer vencimento, com link "Usar padrão (1 mês)" pra reverter.
+- Cada vencimento calendário (padrão ou manual) é convertido num offset em dias antes de submeter — preserva o contrato que o backend (`aprovar_orcamento_financeiro`) já espera (offsets em dias a partir da data de aprovação, não da criação — arquitetura pré-existente, não revista aqui). Ao editar um orçamento existente, os vencimentos calendário de cada parcela são reconstruídos a partir dos offsets salvos.
+- Sem migration — só mudou a fórmula que gera os offsets no frontend.
+- Verificado ao vivo em produção (Boleto, 3 parcelas, início 14/08 → parcela 2 = 14/09, parcela 3 = 14/10); a interação por clique/screenshot da automação de navegador ficou instável nesta sessão, contornada disparando eventos de ponteiro via JavaScript direto no DOM.
+- Publicado: Orçamentos (Skip 32554, v0.0.321, hash `f30d991`), push pro GitHub.
+
 ## 2026-08-12 (3)
 
 ### Corrigido — SPEC-081: Cliente/Vendedor não autopreenchiam, cliente sumia da busca, Arquiteto virou obrigatório

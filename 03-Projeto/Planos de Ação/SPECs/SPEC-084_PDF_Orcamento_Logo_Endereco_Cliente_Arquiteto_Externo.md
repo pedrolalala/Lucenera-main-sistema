@@ -35,12 +35,16 @@ Primeiro publish (v0.0.324) só resolvia a *ausência* do logo — depois de con
 
 Fix: `pdf-logo.ts` agora recorta o logo via `<canvas>` (bounding box medido uma vez, hardcoded) antes de gerar o base64, e o tamanho máximo no PDF subiu de 140x40 pra 110x50. Não foi feito upload de um novo arquivo PNG pro Skip — o recorte acontece em tempo de execução no navegador, reaproveitando o mesmo PNG já usado em outros lugares do app (evita manter dois arquivos de logo em sincronia).
 
+## Ajuste 2: logo sobrepondo o nome da empresa (ex.: ISLIGHT)
+
+Depois do recorte (mais alinhado e maior), usuário reportou que o logo passou a ficar "em cima" do nome da empresa (viu isso num orçamento da empresa ISLIGHT). Causa: `page.drawText` posiciona a **base** do texto em `y`, não o topo do texto — a letra sobe a partir daí pelo ascent da fonte (~7-8pt numa bold de 10pt). O código só deixava **5pt** de espaço entre a borda inferior do logo e essa base, ou seja, matematicamente a letra ficava mais alta que a borda do logo — um bug que já existia antes, só ficou visível agora que o logo está maior e mais próximo do texto. Aumentado o espaço pra 14pt.
+
 ## Verificação
 
 - `npx tsc --noEmit` + `npx oxlint` + `npm run build` limpos.
 - QA do Skip (setup/staticAnalysis/build/integrations/test) passou antes de cada publish.
-- **Verificado ao vivo em produção** (orçamento real `ORC-0018`, projeto `26.007`): PDF baixado e lido confirma endereço/CEP/cidade/telefone corretos, "Vendedor: Thairine Cristina da Silva" e "Arquiteto Externo: ROBERTA ALONSO" ambos presentes, código do projeto sem duplicar ("26.007 CLINICA TARITA ABDALA"), e — após o ajuste do recorte — **logo visualmente confirmado**: alinhado (flush) com o texto da empresa e maior que antes.
-- Publicado: Orçamentos (Skip 32554, v0.0.325, hash `0efa623`), push pro GitHub.
+- **Verificado ao vivo em produção** (orçamento real `ORC-0018`, projeto `26.007`, e depois `ORC-0020`, empresa ISLIGHT): PDF baixado e lido confirma endereço/CEP/cidade/telefone corretos, "Vendedor"/"Arquiteto Externo" ambos presentes, código do projeto sem duplicar, logo alinhado e do tamanho certo, e — após o ajuste 2 — **sem sobreposição entre logo e nome da empresa**, testado especificamente no cenário relatado (empresa ISLIGHT).
+- Publicado: Orçamentos (Skip 32554, v0.0.326, hash `c4c57bf`), push pro GitHub.
 
 ## Achado à parte (não corrigido nesta SPEC)
 

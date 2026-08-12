@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-12 (8)
+
+### Corrigido — SPEC-084 (ajuste 2): logo sobrepondo o nome da empresa no PDF (ex.: ISLIGHT)
+
+- Depois do ajuste do recorte (logo alinhado e maior), usuário reportou que o logo ficou "em cima" do nome da empresa num orçamento da ISLIGHT.
+- Causa: `page.drawText` posiciona a BASE do texto em `y`, não o topo — a letra sobe a partir daí pelo ascent da fonte (~7-8pt numa bold de 10pt). Só 5pt de espaço entre a borda inferior do logo e essa base garantia sobreposição matemática; já era assim antes, só ficou visível agora que o logo está maior e mais perto do texto.
+- Aumentado o espaço pra 14pt.
+- Verificado ao vivo no cenário exato relatado (`ORC-0020`, empresa ISLIGHT): logo e nome da empresa agora com espaçamento limpo.
+- Publicado: Orçamentos (Skip 32554, v0.0.326, hash `c4c57bf`), push pro GitHub.
+
 ## 2026-08-12 (7)
 
 ### Corrigido — SPEC-084 (ajuste): logo do PDF descentralizada e pequena

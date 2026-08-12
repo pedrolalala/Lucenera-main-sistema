@@ -29,13 +29,18 @@ O PDF é gerado pela Edge Function `supabase/functions/generate-report/index.ts`
 - **Bloco de endereço**: linhas condicionais (só desenha o que existir) — razão social (quando diferente do nome), endereço, "CEP: xxx - cidade/UF", telefone. Substitui a antiga linha única de CPF/CNPJ, que o PDF de referência não mostra.
 - **"Arquiteto Externo"**: nova coluna ao lado de "Vendedor", mostrando `arquiteto?.nome || '-'`.
 
+## Ajuste pós-publish: logo descentralizada e pequena
+
+Primeiro publish (v0.0.324) só resolvia a *ausência* do logo — depois de conferir visualmente, o usuário reportou que ele saiu "descentralizado" e pequeno demais. Investigando o PNG de origem (`lucenera-vertical-527dd.png`, 1920x1512): o conteúdo visível ocupa só a região `(329,329)-(1591,1183)` — **~17-22% de margem transparente simétrica ao redor**, herdada do uso como ícone de app (`Header.tsx`/`BudgetFormPage.tsx`). Essa margem fazia o cálculo de escala do PDF "gastar" parte do tamanho máximo em espaço vazio (resultado efetivo ~51x40pt de um orçamento de até 140x40pt) e deslocava o conteúdo visível pra longe do canto onde o texto da empresa começa — daí "descentralizada".
+
+Fix: `pdf-logo.ts` agora recorta o logo via `<canvas>` (bounding box medido uma vez, hardcoded) antes de gerar o base64, e o tamanho máximo no PDF subiu de 140x40 pra 110x50. Não foi feito upload de um novo arquivo PNG pro Skip — o recorte acontece em tempo de execução no navegador, reaproveitando o mesmo PNG já usado em outros lugares do app (evita manter dois arquivos de logo em sincronia).
+
 ## Verificação
 
 - `npx tsc --noEmit` + `npx oxlint` + `npm run build` limpos.
 - QA do Skip (setup/staticAnalysis/build/integrations/test) passou antes de cada publish.
-- **Verificado ao vivo em produção**: chamada direta à Edge Function publicada (orçamento real `ORC-0018`, projeto `26.007`, cliente com endereço completo e arquiteto vinculado) — PDF baixado e lido confirma: endereço/CEP/cidade/telefone corretos, "Vendedor: Thairine Cristina da Silva" e "Arquiteto Externo: ROBERTA ALONSO" ambos presentes. Um bug de duplicação do código do projeto foi encontrado nessa mesma verificação (cliente com código já embutido no nome) e corrigido antes do publish final.
-- **Logo**: verificado indiretamente — o fetch do logo (44.782 caracteres base64, arquivo PNG real) foi enviado com sucesso à função, e o PDF resultante cresceu de ~2.9KB pra ~44,5KB (exatamente a ordem de grandeza esperada pra uma imagem PNG embutida). Download real do PDF com logo não pôde ser confirmado visualmente nesta sessão — a automação do navegador bloqueou downloads repetidos na mesma aba (proteção anti-abuso do Chrome, não relacionada ao código). Recomenda-se conferência visual rápida por um usuário real.
-- Publicado: Orçamentos (Skip 32554, v0.0.324, hash `536ef7b`), push pro GitHub.
+- **Verificado ao vivo em produção** (orçamento real `ORC-0018`, projeto `26.007`): PDF baixado e lido confirma endereço/CEP/cidade/telefone corretos, "Vendedor: Thairine Cristina da Silva" e "Arquiteto Externo: ROBERTA ALONSO" ambos presentes, código do projeto sem duplicar ("26.007 CLINICA TARITA ABDALA"), e — após o ajuste do recorte — **logo visualmente confirmado**: alinhado (flush) com o texto da empresa e maior que antes.
+- Publicado: Orçamentos (Skip 32554, v0.0.325, hash `0efa623`), push pro GitHub.
 
 ## Achado à parte (não corrigido nesta SPEC)
 

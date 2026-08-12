@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-12 (7)
+
+### Corrigido — SPEC-084 (ajuste): logo do PDF descentralizada e pequena
+
+- Depois de conferir o publish anterior (que corrigiu a ausência do logo), usuário reportou que ele saiu descentralizado e pequeno.
+- Causa: o PNG de origem tem ~17-22% de margem transparente simétrica ao redor do conteúdo visível (herdada do uso como ícone de app) — o cálculo de escala do PDF "gastava" parte do tamanho máximo nessa margem vazia, resultando num logo pequeno (~51x40pt) e deslocado do canto onde o texto da empresa começa.
+- `pdf-logo.ts` agora recorta o logo via `<canvas>` (bounding box do conteúdo opaco, medido uma vez: região 1262x854 de uma imagem 1920x1512) antes de gerar o base64 — sem precisar subir um novo arquivo PNG pro Skip, o recorte acontece em tempo de execução no navegador. Tamanho máximo no PDF subiu de 140x40 pra 110x50.
+- Verificado ao vivo: logo agora sai alinhado (flush) com o texto da empresa logo abaixo e visivelmente maior.
+- Publicado: Orçamentos (Skip 32554, v0.0.325, hash `0efa623`), push pro GitHub.
+
 ## 2026-08-12 (6)
 
 ### Corrigido — SPEC-084: PDF do orçamento com logo, endereço do cliente e Arquiteto Externo

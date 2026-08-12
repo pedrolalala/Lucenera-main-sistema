@@ -2,7 +2,7 @@
 
 **Data:** 2026-08-12
 **Sistema:** Orçamentos (`gestao-financeira-clone-544cb`, Skip projectId `32554`)
-**Status:** Rascunho — aguardando confirmação das decisões em aberto antes de implementar
+**Status:** Publicado em produção (Skip 32554, v0.0.322, hash `32bbecb`)
 
 ## Pedido do usuário (resumo)
 
@@ -22,16 +22,28 @@ Uma aba nova, acessível só por administradores, tanto na criação quanto na e
 - Um campo "Desconto simulado (%)" no topo do painel: ao digitar, recalcula em tempo real o lucro de cada linha e o lucro total do orçamento **como se** esse desconto fosse aplicado — só um cálculo, não grava nada no orçamento (a menos que a decisão em aberto #3 defina o contrário).
 - Totais no rodapé: Subtotal de venda, Subtotal de custo, Lucro total (R$ e %) — com e sem o desconto simulado.
 
-## Decisões em aberto (preciso da sua confirmação antes de implementar)
+## Decisões confirmadas pelo usuário
 
-1. **Onde abre o painel**: modal grande (Dialog) sobre a tela atual, ou uma aba/seção que substitui o conteúdo da página (como um "tab" de verdade, saindo do formulário)? O pedido fala em "aba nova" — pode ser só um Dialog full-width com a tabela dentro (mais simples, não perde o estado do formulário embaixo) ou uma rota separada. Recomendo o Dialog, mais simples e não arrisca perder dados não salvos do orçamento em edição.
-2. **Peças sem produto cadastrado** (avulsas, "Adicionar Item não Cadastrado"): como não têm `preco_custo`, como tratar na tabela — mostrar linha com custo "—"/não calculável e excluir do lucro total, ou pedir pro admin digitar um custo manual ali mesmo (só pra essa simulação, sem salvar)?
-3. **O desconto simulado é só cálculo, ou pode ser aplicado de verdade?** Pelo exemplo dado (Vinícius decidindo "posso dar 15%?"), parece que é só uma calculadora — mas faz sentido ter um botão "Aplicar esse desconto ao orçamento" que preenche o campo `Desconto Global` já existente no formulário principal, pra não precisar digitar de novo? (Recomendo sim, evita retrabalho.)
-4. **`role === 'admin'` sozinho, ou `admin` + `gerente`** (mesmo critério já usado pro botão "Aprovar Financeiro")? Dado que o pedido especifica "só administradores", vou seguir só `admin` a menos que você confirme que gerente também deve ver.
-5. **Orçamento novo (ainda não salvo)**: a aba deve funcionar usando os itens já adicionados na tela (ainda em memória, sem `id` no banco) — os valores de venda vêm do formulário local, sem round-trip ao banco. Confirma que faz sentido mostrar a simulação mesmo antes de salvar?
+1. **Onde abre o painel**: Dialog (modal) sobre a tela atual — não sai do formulário, não arrisca perder dados não salvos.
+2. **Peças sem produto cadastrado** (avulsas): admin digita um custo manual direto na tabela, só pra essa simulação — nunca é salvo em lugar nenhum.
+3. **Desconto simulado**: pode ser aplicado de verdade — botão "Aplicar ao orçamento" preenche `desconto_tipo='percentual'` + `desconto_global` no formulário principal.
+4. **Acesso**: `role === 'admin' || role === 'gerente'` — mesmo critério já usado no botão "Aprovar Financeiro".
+5. **Orçamento novo (ainda não salvo)**: confirmado implicitamente pela escolha do Dialog — o painel lê `form.watch('itens')` diretamente (itens em memória), funciona igual em criação e edição, sem round-trip ao banco pros itens.
 
-## Fora de escopo (a menos que você peça)
+## Implementação
 
-- Nenhuma migration — todos os dados necessários (`preco_custo`, `preco_unitario`) já existem.
-- Nenhuma mudança de RLS — a leitura de `produtos.preco_custo` já é permitida pra `authenticated` (mesma tabela já lida em outros pontos do sistema); o controle de acesso à aba é 100% no frontend (gate por `role`), como o padrão já usado em "Aprovar Financeiro".
+- **Novo componente** `src/components/budgets/GerenciamentoDialog.tsx`: recebe os itens do formulário (via prop, não busca sozinho), busca `produtos.preco_custo` pros produtos cadastrados presentes no orçamento (só quando o Dialog abre), permite custo manual por linha pras peças avulsas, calcula lucro/lucro% por linha e total com um desconto simulado (input percentual, aplicado uniformemente sobre a venda de cada linha antes do cálculo de lucro). Botão "Aplicar ao orçamento" chama a prop `onAplicarDesconto`.
+- **`BudgetFormPage.tsx`**: novo botão "⋮" no cabeçalho (`DropdownMenu`, ícone `MoreVertical`), visível só pra admin/gerente, com item "Gerenciamento" que abre o dialog. Novo `produtoNomesMap` (via `useMemo` sobre `produtos` do `useOptions()`) resolve o nome de cada peça pro dialog. `onAplicarDesconto` escreve em `form.setValue('desconto_tipo', ...)` e `form.setValue('desconto_global', ...)`.
+- Lucro % calculado como margem sobre a venda já com desconto (`lucro / venda_com_desconto * 100`), não markup sobre custo — assunção não confirmada explicitamente com o usuário, mas é a leitura mais comum de "percentual de lucro" nesse tipo de painel; fácil de trocar se o usuário quiser markup.
+
+## Fora de escopo (não implementado)
+
+- Nenhuma migration — todos os dados necessários (`preco_custo`, `preco_unitario`) já existiam.
+- Nenhuma mudança de RLS — a leitura de `produtos.preco_custo` já é permitida pra `authenticated`; o controle de acesso à aba é 100% no frontend (gate por `role`), como o padrão já usado em "Aprovar Financeiro".
 - Réplica dessa aba em outros sistemas (CRM, Compras) — pedido foi só pro Orçamentos.
+
+## Verificação
+
+- `npx tsc --noEmit` + `npx oxlint` + `npm run build` limpos.
+- QA do Skip (setup/staticAnalysis/build/integrations/test) passou antes do publish.
+- **Não verificado ao vivo na UI**: a conta de teste usada nesta sessão (`pedrollaghi@gmail.com`) tem `role='viewer'`, não `admin`/`gerente` — não vê o menu "⋮". Verificação ficou restrita a leitura de código + build + QA do Skip. Recomendo o usuário (ou alguém com role admin/gerente) testar na prática antes de considerar 100% validado.

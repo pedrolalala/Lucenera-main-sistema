@@ -2,6 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-12 (5)
+
+### Adicionado — SPEC-083: aba "Gerenciamento" (admin/gerente) — lucro por peça e desconto simulado
+
+- Usuário pediu uma aba nova, só pra admin/gerente, acessível via menu "⋮" no cabeçalho do orçamento (criação e edição), mostrando todas as peças com valor de venda, valor de custo, lucro e lucro % — com um campo de desconto simulado que recalcula tudo em tempo real, pra decidir "posso dar 15% de desconto e ainda ter lucro?" antes de negociar com o cliente.
+- Investigação prévia: já existia o padrão `role === 'admin' || role === 'gerente'` reaproveitado do botão "Aprovar Financeiro"; `produtos` já tinha `preco_custo` (não usado em nenhuma query do formulário até agora); peças avulsas ("Adicionar Item não Cadastrado") não têm custo cadastrado em lugar nenhum.
+- 4 decisões confirmadas com o usuário antes de implementar: painel em Dialog (não sai do formulário); peças avulsas aceitam custo manual só pra simulação (nunca salvo); desconto simulado tem botão "Aplicar ao orçamento" que preenche o Desconto Global de verdade; acesso admin+gerente (não só admin).
+- Novo componente `GerenciamentoDialog.tsx`: busca `preco_custo` só dos produtos presentes no orçamento, calcula lucro/lucro% por linha e total, sem persistir nada além do que já existia.
+- Sem migration, sem mudança de RLS — controle de acesso 100% no frontend.
+- **Não verificado ao vivo na UI**: a conta de teste da sessão tem role `viewer`, não vê o menu — validação ficou restrita a build/tsc/oxlint/QA do Skip; recomendado teste real por alguém com role admin/gerente.
+- Publicado: Orçamentos (Skip 32554, v0.0.322, hash `32bbecb`), push pro GitHub.
+
 ## 2026-08-12 (4)
 
 ### Corrigido — SPEC-082: Vencimento de parcelas mensal por padrão, com edição individual

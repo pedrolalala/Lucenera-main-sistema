@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-12 (6)
+
+### Corrigido — SPEC-084: PDF do orçamento com logo, endereço do cliente e Arquiteto Externo
+
+- Usuário reportou 3 faltas no PDF exportado do orçamento (vs. o padrão do fluxo antigo Connect): logo vertical da Lucenera ausente, bloco do cliente sem endereço/CEP/cidade (só mostrava CPF/CNPJ e telefone, ambos "-" pra esse cliente de teste) e "Arquiteto Externo" completamente ausente ao lado de "Vendedor". Anexou 2 PDFs de referência (atual vs. esperado).
+- **Causas raiz, todas no gerador (`supabase/functions/generate-report/index.ts`)**: (1) a função já sabia desenhar um logo recebido em `logoBase64`, mas nenhum dos 2 pontos do frontend que a chamam enviava esse parâmetro; (2) a query nunca buscava `endereco/cep/cidade/estado` do cliente, só `telefone/cpf_cnpj`; (3) nem a query nem o desenho tinham qualquer referência a `arquiteto_id` do orçamento, apesar da FK já existir e ser usada em outros pontos do sistema.
+- Novo `src/lib/pdf-logo.ts` converte o logo já usado no app pra base64 e é passado nas 2 chamadas existentes. Query da Edge Function ganhou os campos de endereço do cliente, `arquiteto:contatos!orcamentos_arquiteto_id_fkey(nome)` e `projeto:projetos!orcamentos_projeto_id_fkey(codigo)`. Cabeçalho "Orçamento para" passa a mostrar código do projeto + nome do cliente (com guarda contra duplicar quando o nome legado já embute o código — achado ao testar) e um bloco de endereço completo substitui a antiga linha isolada de CPF/CNPJ; nova coluna "Arquiteto Externo" ao lado de "Vendedor".
+- Verificado ao vivo em produção via chamada direta à Edge Function (orçamento real `ORC-0018`): endereço/CEP/cidade/telefone e Arquiteto Externo confirmados corretos no PDF baixado e lido. Logo confirmado indiretamente (PDF cresceu de ~2,9KB pra ~44,5KB ao enviar o logo, consistente com a imagem embutida) — não confirmado visualmente por bloqueio de downloads repetidos na automação do navegador (limitação da sessão, não do código).
+- **Achado à parte, não corrigido aqui**: `envio-inicial-cliente.ts`/SPEC-067 (download automático + `mailto:` no envio inicial ao cliente) existe no GitHub mas nunca foi publicado no Skip — o `DraftBudgetsTab.tsx` de produção ainda usa o fluxo antigo (só copia link). Ficou de fora do escopo desta SPEC.
+- Publicado: Orçamentos (Skip 32554, v0.0.324, hash `536ef7b`), push pro GitHub.
+
 ## 2026-08-12 (5)
 
 ### Adicionado — SPEC-083: aba "Gerenciamento" (admin/gerente) — lucro por peça e desconto simulado

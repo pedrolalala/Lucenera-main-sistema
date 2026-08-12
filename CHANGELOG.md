@@ -2,6 +2,19 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-12 (3)
+
+### Corrigido — SPEC-081: Cliente/Vendedor não autopreenchiam, cliente sumia da busca, Arquiteto virou obrigatório
+
+- Usuário reportou 3 bugs no "Novo Orçamento" (Cliente e Vendedor não autopreenchiam ao selecionar projeto; cliente cadastrado — "Vinicius Bortolin" — não aparecia na busca) + 1 observação (Arquiteto(s) do formulário de projeto no CRM ficou obrigatório, deveria ser opcional).
+- Análise estática (leitura de código, RLS como `authenticated`, contagem de linhas) não encontrava defeito nenhum — o código parecia correto e o dado no banco também. Causa só apareceu com reprodução ao vivo no navegador (login manual do usuário, já que a automação não pode digitar senha) e inspeção do estado React: o array `clientes` tinha exatamente 1000 linhas.
+- **Causa raiz real (Bugs 1 e 3)**: o PostgREST do projeto trunca silenciosamente qualquer resposta em 1000 linhas (`db-max-rows`, padrão da plataforma), mesmo com `.limit(50000)` pedido no código. Como a query de clientes ordena por `codigo_legado DESC NULLS LAST`, qualquer cliente sem código legado (cadastrado direto no sistema novo) cai depois do corte e some do array inteiro — tanto do autopreenchimento quanto da busca. Mesmo problema afetava `projetos` (3703 linhas reais, 2703 invisíveis) e `produtos` (4726 reais, 3726 invisíveis, embora esse array só alimente matching de XML). `use-options.ts` (Orçamentos) ganhou paginação via `.range()` em loop pras 3 queries afetadas.
+- **Causa raiz (Bug 2, Vendedor)**: `handleProjectSelect` ainda usava a lógica pré-SPEC-077 (`responsavel_obra_id`/`responsavel_id` — campos de Engenheiro/FK morta), nunca atualizada pra usar `responsavel_funcionario_id` (coluna nova da SPEC-077, horas antes). Reescrito pra resolver, em ordem: `responsavel_funcionario_id` → nome (`responsavel_nome` contra `funcionarios.nome`, match parcial já que o texto legado é só o primeiro nome) → usuário logado.
+- **Observação (Arquiteto obrigatório)**: reverte uma exigência introduzida horas antes na SPEC-077 do mesmo dia (a pedido de uma tarefa anterior) — removido `.min(1)` do schema (`ProjectNew.tsx`) e o guard de toast equivalente (`ProjectDetail.tsx`), mantendo a validação de soma=100% só quando a lista não está vazia.
+- Verificado ao vivo: projeto "26.250 - vinicius teste" → Cliente e Vendedor autopreenchem corretamente, "Vinicius Bortolin" aparece na busca.
+- Publicado: Orçamentos (Skip 32554, v0.0.320, hash `9f1d7a6`) e CRM (Skip 24580, v0.0.301, hash `7edd387`), push pro GitHub nos dois submodules.
+- Achado sistêmico não resolvido nesta SPEC: o teto de 1000 linhas do PostgREST é config de projeto Supabase, provavelmente afeta outros sistemas com `.limit()` acima de 1000 sem paginar — decisão de levantar o `db-max-rows` global ou auditar sistema por sistema fica pra depois.
+
 ## 2026-08-12 (2)
 
 ### Adicionado — SPEC-080: múltiplos L's dentro do modal "Buscar Produtos"

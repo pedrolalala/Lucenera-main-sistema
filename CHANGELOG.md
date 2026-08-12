@@ -2,6 +2,107 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-11 (11)
+
+### Adicionado — SPEC-077: Arquitetos múltiplos com % + Responsável vinculado a Funcionários (CRM + Orçamentos)
+
+- Usuário pediu (tarefa formal, com 7 perguntas obrigatórias antes de codar): campo "Responsável" do projeto vira FK real para `funcionarios` (com cadastro inline, sem sair da tela); campo "Arquiteto" (projeto e orçamento) vira seleção múltipla com percentual de divisão de lucro, soma validada em 100% antes de salvar.
+- Respostas do usuário às perguntas de escopo: só Arquiteto ganha percentual/múltiplos (Engenheiro e Responsável continuam vínculo único); Responsável continua seleção única (só troca de texto livre pra FK).
+- **Achado crítico que mudou o desenho**: o texto livre `responsavel_nome` não é só um label — alimenta o trigger `fn_sync_equipe_por_responsavel` (`BEFORE UPDATE OF responsavel_nome`), que resolve a equipe do projeto em `equipes_projetos` e alimenta `vw_comissao_mensal`. Um trigger encadeado que setasse `responsavel_nome` por trás do novo campo FK não dispararia essa cláusula `OF` — solução foi o frontend gravar os dois campos juntos, sempre, no mesmo INSERT/UPDATE (nome vem do funcionário selecionado no dropdown).
+- Migrations `20260811_100` (5 arquivos, todas aditivas — 2 tabelas de junção `projeto_arquitetos`/`orcamento_arquitetos`, 1 coluna `projetos.responsavel_funcionario_id`, 2 RPCs `SECURITY DEFINER` `replace_projeto_arquitetos`/`replace_orcamento_arquitetos`, backfill) aplicadas no Supabase real com autorização explícita do usuário. Backfill: 2272 projetos e 20 orçamentos migrados de `arquiteto_id` singular para a tabela de junção (100% cada, sem ambiguidade).
+- **Bug de segurança real encontrado e corrigido durante smoke-test**: `replace_projeto_arquitetos` tinha um guard de permissão `IF NOT (role IN (...) OR hub_pode_executar(...))` que, quando `v_user_role` era SQL `NULL` (sessão sem `auth.uid()` válido), avaliava `NULL OR false = NULL` → `NOT NULL = NULL` → `IF NULL` é tratado como falso pelo PL/pgSQL, pulando silenciosamente a exceção esperada. Descoberto testando a RPC com um UUID falso antes de confiar nela; corrigido envolvendo a expressão inteira em `COALESCE(..., false)`. A RPC irmã (`replace_orcamento_arquitetos`, guard de condição única) não tinha esse problema.
+- Responsável e ao menos 1 arquiteto passam a ser obrigatórios ao criar projeto no CRM (`salvar-projeto` + `ProjectDetail.tsx`) — requisito explícito da tarefa, mudança de comportamento em relação ao anterior (ambos opcionais). Em Orçamentos, arquiteto continua opcional (só valida soma=100% quando preenchido) — não fazia parte do pedido tornar obrigatório ali.
+- CRM (7 arquivos: `use-auth.tsx`, `ArchitectSplitPicker.tsx` novo, `NewEmployeeModal.tsx` novo, `projetos.ts`, `salvar-projeto/index.ts`, `ProjectNew.tsx`, `ProjectDetail.tsx`) — `ProjectDetail.tsx` precisou ser resincronizado do Skip antes de editar (checkout local desatualizado, mesmo padrão recorrente desta sessão). Publicado: CRM (Skip 24580, v0.0.299, hash `761f086`), push pro GitHub (`6617894..d4308cf`).
+- Orçamentos (3 arquivos: `ArchitectSplitPicker.tsx` novo — construído sobre `SearchableSelect` já existente, diferente do Popover+Command do CRM —, `useBudgetStore.ts`, `BudgetFormPage.tsx`) — auto-vínculo legado por nome do arquiteto do projeto (SPEC-061) adaptado pra popular o split inteiro quando o projeto já tem `projeto_arquitetos`, ou 1 linha de 100% no fallback por nome ambíguo. Publicado: Orçamentos (Skip 32554, v0.0.313, hash `0f15c81`), push pro GitHub (`78b0d9b..7ceb779`).
+- Pendência sinalizada, não implementada: backfill de `responsavel_funcionario_id` a partir de `responsavel_nome` (texto livre, ~15 nomes distintos) — ambíguo demais pra automatizar com segurança, fica como revisão manual futura.
+
+## 2026-08-11 (10)
+
+### Adicionado — SPEC-076: voltar em todos os status do funil de Orçamentos
+
+- Usuário pediu: em qualquer status do orçamento, poder voltar para a instância anterior (mesma lógica de "aprovar ou não, podendo voltar para revisão").
+- Funil mapeado: `rascunho -> enviado_cliente -> Aprovação da Equipe -> Aprovação Financeira -> Orçamento Aprovado`. Dois retornos já existiam (rascunho↔enviado_cliente, via `voltar_orcamento_rascunho`; Aprovação da Equipe→enviado_cliente, via `equipe_devolver_orcamento_cliente`, SPEC-031). Faltavam dois degraus.
+- **Aprovação Financeira → Aprovação da Equipe**: RPC nova `financeiro_devolver_orcamento_equipe` — flip de status simples, nenhum side-effect existe ainda nesse ponto do funil. Botão "Devolver para Equipe" em `FinancialApprovalTab.tsx`.
+- **Orçamento Aprovado → Aprovação Financeira**: o mais arriscado — `aprovar_orcamento_financeiro` já criou `projeto_itens`, `projeto_parcelas`, `boletos` e reservou estoque real (`estoque_itens.quantidade_reservada`). Decisão do usuário: RPC nova `desfazer_aprovacao_financeira` apaga tudo que foi criado por essa aprovação e estorna a reserva, mas **bloqueia** (não apaga nada, `RAISE EXCEPTION` explicando o motivo) se algo já foi consumido a jusante — boleto pago/remessado, nota fiscal emitida, retorno bancário registrado, transação lançada, devolução/separação/transferência de estoque, ou item usado como origem de pedido de compra ou de outro orçamento de devolução. Restrito a admin/gerente. Não suporta orçamentos de devolução (natureza_operacao='devolucao') — fora de escopo. Botão em `BudgetTableRow.tsx` (cobre a aba "Aprovados" e "Todos").
+- Achado importante durante o levantamento: a migration da SPEC-031 (18/07) nunca atualizou o CHECK constraint `orcamentos_status_check` para permitir o valor `'Aprovação da Equipe'` que ela mesma introduziu — bug já corrigido nesta mesma sessão (ver entrada anterior do changelog, migration `20260811_098`), mas documentado aqui porque foi descoberto durante esta investigação.
+- Migrations `20260811_099` (2 arquivos, aditivas — só criam função nova) aplicadas no Supabase real com autorização explícita do usuário.
+- Publicado: Orçamentos (Skip 32554, v0.0.312, hash `3d9816f`), QA limpo, push pro GitHub (`365e827..78b0d9b`).
+- Pendência sinalizada ao usuário, não implementada: reversão de aprovação financeira de orçamentos de **devolução** (ramo separado de `aprovar_orcamento_financeiro`, que chama `registrar_devolucao_projeto_item` sobre item de origem em vez de criar `projeto_itens` novo) — exigiria lógica própria.
+
+## 2026-08-11 (9)
+
+### Corrigido — Orçamentos: "Aprovar Manualmente" quebrado + "Voltar para Rascunho" ausente
+
+- Usuário reportou erro ao aprovar manualmente: `new row for relation "orcamentos" violates check constraint "orcamentos_status_check"`.
+- Causa raiz: a migration `20260718_050` (SPEC-031, "Aprovação da Equipe") criou as RPCs de aprovação do cliente (`aprovar_orcamento_cliente_manual`, `aprovar_orcamento_cliente_publico`, `aprovar_orcamento_cliente`, `adm_aprovar_pelo_cliente`, `cliente_aprovar_orcamento`) fazendo `status = 'Aprovação da Equipe'`, mas nunca atualizou o CHECK constraint `orcamentos_status_check` da tabela pra permitir esse valor. Toda aprovação de cliente (manual, por token público ou pelo admin) vinha quebrando desde 18/07 — achado grave que passou despercebido ~3 semanas.
+- Corrigido via migration aditiva `20260811_098_fix_orcamentos_status_check_aprovacao_equipe` (autorizada explicitamente pelo usuário antes de aplicar em produção): amplia a lista de status permitidos, nenhum dado muda.
+- Achado 2 (mesmo relato do usuário): o botão "Voltar para Rascunho" (SPEC-070, RPC `voltar_orcamento_rascunho` já existia e funcionava no banco) tinha sumido da tela — a UI (`ClientApprovalTab.tsx`, `BudgetTableRow.tsx`) já referenciava `voltarOrcamentoRascunho` da store, mas esse método nunca foi implementado em `useBudgetStore.ts` nem publicado no Skip; feature ficou pela metade num checkout local anterior. Implementado o método na store (chama a RPC existente) e publicado.
+- Achado 3 (fora de escopo, sinalizado mas não publicado): o checkout local de `BudgetTableRow.tsx` também tinha uma automação de e-mail/PDF no envio inicial (SPEC-067, usa `src/lib/envio-inicial-cliente.ts`) nunca publicada — feature maior e com efeito colateral real (envio de e-mail), deixada de fora deste fix por não fazer parte do pedido do usuário.
+- Publicado: Orçamentos (Skip 32554, v0.0.311, hash `2322fcd`), QA limpo, push pro GitHub (`76d3e54..365e827`).
+
+## 2026-08-11 (8)
+
+### Corrigido — CRM: erro ao salvar projeto sem mensagem real (edge function `salvar-projeto`)
+
+- Usuário reportou: ao tentar salvar um projeto, aparecia o erro genérico "a função de borda retornava um código de status que não era 2xx".
+- Causa raiz: `supabase-js` sempre expõe `error.message` como esse texto fixo em falhas de `functions.invoke()` — o corpo real da resposta HTTP (com a mensagem de validação/erro do Postgres) fica em `error.context` e nunca era lido em `ProjectNew.tsx`, escondendo o motivo real de qualquer usuário e de quem for depurar depois.
+- Testado diretamente contra a edge function em produção: payload válido funciona (200); código de projeto já existente retorna 500 com `"duplicate key value violates unique constraint \"projetos_codigo_key\""` no corpo — esse é o cenário mais provável do erro relatado, já que o formulário sugere automaticamente o "próximo código" incrementando o último criado, o que pode colidir quando a sequência tem furos (códigos legados importados fora de ordem).
+- Corrigido: `ProjectNew.tsx` agora lê `error.context.json()` e usa a mensagem real no toast; `salvar-projeto/index.ts` passou a detectar especificamente a violação da constraint de código único (Postgres `23505`) e devolver `"Este código de projeto já está em uso. Escolha outro código."` em vez do erro cru do banco.
+- Achado lateral (mesmo padrão desta sessão): `ProjectNew.tsx` local estava desatualizado — faltava a validação real de `cliente_id` obrigatório (SPEC-061, usava `.refine()` em produção contra um `min(1)` bugado localmente) e o filtro `.is('empresa_id', null)` no fetch de arquitetos (SPEC-044). Resincronizado do Skip antes de aplicar o fix.
+- Publicado: CRM (Skip 24580, v0.0.298, hash `e232a09`), verificado em produção via chamada direta à edge function (mensagem amigável confirmada), push pro GitHub (`ddc3dee..6617894`).
+
+## 2026-08-11 (7)
+
+### Adicionado — CRM: Engenheiro ganha "Pessoas da Empresa" (paridade com Arquiteto)
+
+- Pedido: campo de Novo Engenheiro deveria funcionar igual Arquiteto, permitindo adicionar mais de uma pessoa (CPF/CNPJ) vinculada à empresa engenheira.
+- Generalizado o padrão da SPEC-044 (antes exclusivo de Arquiteto): `Engenheiros.tsx` ganhou a mesma seção "Pessoas da Empresa (opcional)" na criação (array dinâmico nome/data_nascimento/email/cpf_cnpj/endereco, insert em lote com `empresa_id` após criar o registro principal, navegação pra página de detalhe).
+- `ContatoDetail.tsx` generalizado: `TIPOS_COM_PESSOAS` (antes hardcoded só pra arquiteto) agora é `['arquiteto', 'engenheiro']`; `fetchPessoas`, o insert de nova pessoa e a navegação de cada linha passaram a usar o tipo dinamicamente em vez de `'arquiteto'` fixo.
+- Achado (3ª vez na mesma sessão): checkout local do CRM estava incompleto — `ContatoDetail.tsx` e `Fornecedores.tsx` não existiam localmente, e `App.tsx` local não tinha o gate RBAC (`hasAccess`) nem as rotas desses 2 arquivos. Resincronizado do Skip antes de editar.
+- Publicado: CRM (Skip 24580, v0.0.297, hash `182a18c`), QA limpo, push pro GitHub (`928aac6..ddc3dee`).
+
+## 2026-08-11 (6)
+
+### Adicionado — SPEC-075: preenchimento automático de CEP/CNPJ (Orçamentos, CRM, Compras)
+
+- Pedido genérico de "adicionar ao projeto" preenchimento automático de endereço via CEP e dados de empresa via CNPJ — perguntado em quais dos 10 sistemas isso deveria entrar. Resposta: Compras (fornecedores), Orçamentos (modal de cliente), CRM (cadastro de clientes/contatos).
+- Achado: Orçamentos e CRM já tinham essa busca implementada inline (SPEC-052/061), sem fallback/debounce/cache/loading — refatorado pra versão completa. Compras não tinha nenhum formulário de fornecedor — criado do zero (`FornecedorModal.tsx` + `services/fornecedores.ts`, gravando em `contatos` + `contato_tipos`).
+- `cepService.ts` (ViaCEP + fallback BrasilAPI) e `cnpjService.ts` (BrasilAPI + fallback ReceitaWS), cada um com cache em memória, mais `hooks/use-document-lookup.ts` (debounce 300ms + loading) — replicados como cópia própria nos 3 sistemas.
+- Achado crítico ao publicar (mesmo padrão da SPEC-073/074): `ClientCreateModal.tsx` real no Skip tinha features inteiras ausentes do checkout local (SPEC-052 `tipo_cliente`, SPEC-061 `complemento`, e-mail obrigatório, Vendedor via `funcionarios`). Refeito em cima do conteúdo real antes de publicar, verificado byte-a-byte.
+- Publicado: Orçamentos (Skip 32554 v0.0.310), CRM (Skip 24580 v0.0.296), Compras (Skip 40326 v0.0.60), todos com QA limpo e push pro GitHub.
+- Detalhes completos em SPEC-075.
+
+## 2026-08-11 (5)
+
+### Corrigido — SPEC-073 e SPEC-074 publicadas no Skip (achado grave evitado)
+
+- MCP do Skip reconectou; ao publicar as mudanças pendentes (SPEC-073 Duplicatas e SPEC-074 Tipo de Operação), descoberto que os checkouts locais dos 2 submodules estavam desatualizados em relação ao que já estava em produção — não só faltando features minhas, mas **tendo menos** do que o Skip real (SPEC-069 RBAC gate ausente em Administração Bancária; SPEC-071 Venda/Devolução completa ausente em Orçamentos).
+- Se tivesse publicado direto por cima, teria apagado o gate de acesso (`hasAccess`) de Administração Bancária e a funcionalidade inteira de Devolução (modal de busca de venda de origem, `DevolucaoItemSearchModal`, `devolucoesService.ts`) de Orçamentos.
+- Corrigido: buscado o conteúdo real via `skip_file_read`, mesclada a extensão de cada SPEC em cima do código real (não do checkout local desatualizado), verificado por diff byte-a-byte antes de aplicar. `npm run build` limpo + QA do Skip limpo em ambos.
+- Publicado: Administração Bancária (Skip `36395` v`0.0.62`) e Orçamentos (Skip `32554` v`0.0.309`), ambos com push pro GitHub.
+- Detalhes completos em SPEC-073 e SPEC-074.
+
+## 2026-08-11 (4)
+
+### Adicionado — SPEC-074: Tipo de Operação (Outros/SAC) + campo Tipo com subgrupos (Orçamentos)
+
+- Usuário pediu 2 tipos novos ("Outros" e "SAC") no toggle da tela de Orçamento, ao lado de "Venda"/"Devolução", e um campo "Tipo" (dropdown) com subgrupos fixos dependentes do tipo selecionado.
+- Achado antes de codar: o toggle Venda/Devolução da SPEC-071 nunca chegou de fato ao checkout local do submodule `gestão-financeira-clone-544cb` — só existia a coluna `natureza_operacao` no banco, zero uso no frontend (`grep` não achou nada). Sinalizado ao usuário; optou por implementar do zero neste checkout, com os 4 tipos já incluídos.
+- Achado 2: `natureza_operacao` tinha `CHECK` restrito a `'venda'`/`'devolucao'`, e não existia coluna nenhuma pra guardar o subgrupo. Sinalizado; usuário autorizou ampliar o `CHECK` pra 4 valores e criar a coluna `subgrupo text` (migration `20260811_097_orcamento_tipo_operacao_outros_sac`, aditiva).
+- Implementado em `BudgetFormPage.tsx`: novo Card "Tipo de Operação" com toggle de 4 botões (ícone + label) e Select "Tipo" cujas opções mudam conforme o tipo — troca de tipo reseta o subgrupo. Bug cosmético do Radix Select (trigger ficava em branco pro tipo SAC, que só tem 1 opção, até o usuário abrir o dropdown uma vez) corrigido trocando por um campo fixo somente-leitura quando há só 1 opção.
+- `aprovar_orcamento_financeiro()` só tem ramo pra `devolucao` — `outros`/`sac` caem no ramo "venda" por padrão na aprovação financeira; fora de escopo desta rodada (só interface), sinalizado na SPEC-074.
+- Testado com usuário de teste descartável (criado e apagado na mesma sessão) nos 4 tipos. Build/typecheck limpos. Commitado localmente no submodule — Skip desconectado durante a sessão, publish/push pendente.
+
+## 2026-08-11 (3)
+
+### Corrigido/Adicionado — Reconciliação do Plano de Contas (Apropriação, nível 3)
+
+- Usuário colou a lista oficial de ~116 categorias de "Apropriação" pra bater com o que existe no banco (103 registros em `plano_de_contas` nível 3). Comparação feita com normalização de acentos (Unicode NFKD) pra separar diferenças cosméticas de diferenças reais.
+- Achado crítico: todas as 27 categorias que só existiam no banco (e não na lista do usuário) têm lançamentos reais vinculados via `negociacoes.plano_contas_id` (de 1 a 2261 registros cada) — nenhuma órfã. Nenhuma foi removida.
+- Migration `20260811_096_reconciliacao_plano_contas_apropriacao`: 23 `UPDATE` (renomeia mantendo o `id`, zero impacto em lançamentos vinculados — 17 só acento, 6 grafia/pontuação com mesmo conceito confirmadas com o usuário) + 34 `INSERT` (categorias novas da lista do usuário, `parent_id`/Sub Grupo escolhido por semelhança com os itens irmãos já existentes, faixa `codigo_connect` 90000001+ reservada pra itens que não vêm do sistema legado Connect).
+- Não criado "DÉCIMO TERCEIRO" como categoria nova — é sinônimo de "13º SALÁRIO" (só renomeado), evitando duplicar a mesma despesa em dois lugares.
+- Usuário sinalizou querer, no futuro, uma forma dos próprios usuários cadastrarem Grupo/Sub Grupo/Apropriação pela interface — não implementado nesta rodada, fica como ideia para SPEC futura.
+
 ## 2026-08-11 (2)
 
 ### Adicionado — SPEC-073: telas Cadastrar Duplicatas e Baixar Duplicata (Administração Bancária)

@@ -95,6 +95,15 @@ negociacoes.contato_id               -> contatos.id
 separacoes.cliente_id                -> contatos.id
 ```
 
+SPEC-077 (2026-08-11) — divisão de lucro entre múltiplos arquitetos por percentual, uma tabela de junção por domínio (substitui `arquiteto_id` singular como fonte de verdade; a coluna singular continua sincronizada só por compatibilidade):
+
+```text
+projeto_arquitetos.projeto_id     -> projetos.id
+projeto_arquitetos.arquiteto_id   -> contatos.id
+orcamento_arquitetos.orcamento_id -> orcamentos.id
+orcamento_arquitetos.arquiteto_id -> contatos.id
+```
+
 ### Empresa do contato não é a mesma coisa que `empresas`
 
 No cadastro, a palavra “empresa” aparece com dois significados diferentes:
@@ -140,7 +149,10 @@ projetos.responsavel_obra_id -> contatos.id
 projetos.responsavel_id      -> usuarios.id
 projetos.created_by          -> usuarios.id
 projetos.empresa_id          -> empresas.id
+projetos.responsavel_funcionario_id -> funcionarios.id
 ```
+
+`projetos.responsavel_funcionario_id` (SPEC-077, 2026-08-11) é o Responsável real do projeto, escolhido por dropdown vinculado a `funcionarios`. `projetos.responsavel_id` (-> `usuarios.id`) é uma FK morta/legada, praticamente sempre `NULL` na prática — não confundir os dois. O texto livre `responsavel_nome` continua existindo e sendo gravado junto (não substituído) porque alimenta o trigger `fn_sync_equipe_por_responsavel` (equipe/comissão).
 
 `projetos.valor_total` é um total denormalizado mantido por `public.sync_projeto_valor_total()` a partir da soma de `projeto_itens.subtotal`. Ele existe para compatibilidade com a automação atual de itens do projeto; no fluxo financeiro novo, boletos e notas continuam rastreados por `orcamento_id`.
 

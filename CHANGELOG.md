@@ -2,6 +2,25 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-13 (6)
+
+### Corrigido — 3 bugs achados testando um projeto fictício de ponta a ponta (Orçamentos)
+
+- **L custom_id vazio (ProductSearchModal/LQuantityRepeater)**: ao adicionar um L novo numa peça, o campo mostrava "L01" como placeholder cinza — parecia preenchido, mas o valor real era string vazia. O botão "Confirmar Seleção" ficava desabilitado sem nenhum toast de erro (disabled bloqueia o onClick antes dele disparar o aviso), travando silenciosamente todo fluxo de adicionar item a um orçamento. Fix: `handleAdd` gera um código real (`L01`, `L02`...) igual ao que o placeholder já prometia visualmente.
+- **subgrupo (Tipo) vazio ao criar orçamento novo**: quando `SUBGRUPOS_POR_TIPO` tem só 1 opção pro tipo (caso de "Venda" → "VENDAS"), o campo "Tipo" renderiza um `Input` desabilitado mostrando essa opção, mas nunca chama `field.onChange`. Como "Venda" já vem selecionado por padrão, o `onClick` que preenche `subgrupo` nunca dispara — criar um orçamento novo sem trocar o Tipo de Operação falhava a validação "Selecione o Tipo" sem nenhum aviso visível até rolar a tela pro topo. Fix: `useEffect` sincroniza `subgrupo` automaticamente quando há só 1 opção.
+- **Painel "Responsável (Sistema)" sempre "Não encontrado"**: lia `projeto.responsavel_id` (FK legada pra `usuarios`, morta desde a SPEC-077), em vez de `responsavel_funcionario_id` (FK real pra `funcionarios`). Cosmético — o campo funcional "Vendedor" já usava a FK certa — mas indicava dado incorreto pro usuário.
+- **Correção do fix do subgrupo**: a 1ª tentativa (useEffect) tinha race condition com o carregamento assíncrono do projeto e podia deixar o campo vazio de novo mesmo depois de já preenchido. Fix definitivo: `subgrupo: 'VENDAS'` direto no `defaultValues` (não depende de nenhum efeito rodar na ordem certa).
+- Achados construindo um projeto de teste completo (CRM → Orçamentos) a pedido do usuário, especificamente pra achar bugs não cobertos pelos testes anteriores. Publicado Skip 32554, v0.0.329→v0.0.332. **Fluxo ponta a ponta confirmado funcionando**: orçamento `ORC-0021` criado de verdade em produção (rascunho, vinculado ao projeto de teste, nunca enviado/aprovado).
+
+## 2026-08-13 (5)
+
+### Corrigido — achados do teste ao vivo das SPECs 088-096
+
+- **Regressão PostgREST (Separação Parcial)**: a migration da SPEC-090 adicionou `alterado_por` como 2ª FK de `separacoes` para `usuarios`, tornando ambíguo o embed implícito `usuarios(nome)` já usado em `listarParciaisPorVenda` — quebrava o carregamento do histórico de parciais em produção. Não foi pego pelo QA do Skip (build/lint não executam a query real contra o Supabase); só apareceu testando ao vivo no navegador. Corrigido apontando o embed para `usuarios!responsavel_id(nome)`. Publicado Skip 48801, v0.0.21.
+- **SPEC-096 incompleta (CRM)**: a correção original só editou `ClientFormFields.tsx`, mas a tela real de editar um cliente já existente (`/contatos/clientes/:id`) usa um componente separado, `ContatoDetail.tsx`, com sua própria lista de campos hardcoded — nunca alcançada pela mudança de v0.0.302. Mesmo reordenamento (Tipo Cliente perto de CPF/CNPJ, RG+Inscrição Estadual adjacentes) aplicado também ali. Publicado Skip 24580, v0.0.303.
+- **Gap real (Separação Parcial → Logística, SPEC-089)**: a entrega criada automaticamente nunca recebia endereço — `separacoes.endereco_entrega` não é preenchido em nenhum ponto do fluxo novo, e a tela de Logística (`SeparacaoCardDetails.tsx`) mostrava literalmente "N/A" pro entregador. A SPEC original tinha documentado isso como "comportamento esperado", mas a decisão do usuário só cobria `entregador_id`, nunca o endereço. Corrigido: `finalizar_separacao_parcial_pronta` agora preenche `endereco_entrega`/`telefone` a partir do cadastro do cliente (só quando vazios, nunca sobrescreve). Migration aplicada em produção com autorização explícita.
+- Ambos os submodules locais (`separacao-parcial`, `lucenera-crm-3bd29`) sincronizados e commitados.
+
 ## 2026-08-13 (4)
 
 ### Adicionado — SPECs 090-096: fecha os 12 itens da reunião de 11/08 com Vinícius

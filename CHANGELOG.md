@@ -2,6 +2,23 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-13 (2)
+
+### Adicionado — SPEC-088: entrada de nota fiscal de compra sem pedido vinculado
+
+- `EntradaNotaFiscal.tsx` (Necessidade de Compra) só liberava o formulário de registro depois de localizar um pedido de compra existente — sem opção pra compras que chegaram fisicamente sem nunca ter passado por um pedido formal.
+- Migration `notas_fiscais_compra`: `pedido_compra_id` vira `nullable`, adiciona `fornecedor_id`, `empresa_id`, `produto_id` (todos nullable) + CHECK exigindo `pedido_compra_id` OU `fornecedor_id`.
+- Frontend ganha alternância "Tenho o número do pedido" / "Não tenho pedido (entrada avulsa)"; no modo avulso escolhe fornecedor (busca fuzzy já existente) e empresa direto, com produto opcional (pode ser linkado depois).
+- Publicado Skip 40326, v0.0.61, QA limpo. Smoke-test da query de embed (2 FKs novas: `fornecedor_id`→`contatos`, `empresa_id`→`empresas`) direto via REST contra produção, sem erro de ambiguidade.
+
+## 2026-08-13 (1)
+
+### Investigação — SPEC-086: cruzamento da reunião com Vinícius (11/08) contra o código real
+
+- Reunião de 11/08/2026 (3 gravações, CRM/Orçamentos + Compras/Separação Parcial/Logística) nunca tinha sido documentada formalmente — vários pontos já tinham virado SPEC nos dias seguintes sem o vínculo registrado.
+- 7 itens confirmados já resolvidos (SPEC-064, 075, 077, 079, 080, 081, e uma trava de quantidade que já existia desde a SPEC-072).
+- 12 itens confirmados em aberto, cada um documentado como SPEC própria (087 a 096) para implementação item a item.
+
 ## 2026-08-12 (9)
 
 ### Corrigido — SPEC-085: `hub_pode_executar` negava acesso geral (16 combinações de papel/sistema)

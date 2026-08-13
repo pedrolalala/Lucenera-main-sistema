@@ -2,6 +2,19 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-13 (4)
+
+### Adicionado — SPECs 090-096: fecha os 12 itens da reunião de 11/08 com Vinícius
+
+- **SPEC-090** (Separação Parcial): botão "Estornar" por separação — devolve o saldo pra reserva, exige motivo, avisa a entrega vinculada (se existir) pelas observações dela. RPC `estornar_separacao_parcial`, colunas `alterado_apos_registro`/`alterado_em`/`alterado_por` em `separacoes`.
+- **SPEC-091 + SPEC-093** (Separação Parcial, unificadas): ao confirmar uma separação, abre automaticamente a impressão da lista (cabeçalho venda/cliente/projeto + itens) via `window.print()` — sem lib de PDF nova, resolve as duas SPECs de uma vez.
+- **SPEC-092** (Separação Parcial): código da parcial deixa de ser um fragmento de UUID e passa a ser `{numero_venda}-P{n}` — sem migration, só cálculo no frontend.
+- **SPEC-094** (Orçamentos): filtro de fornecedor na busca de produto (`ProductSearchModal.tsx`) — marca, categoria e busca por nome/SKU já existiam, só faltava esse.
+- **SPEC-095** (Orçamentos): validade do orçamento calculada automaticamente (emissão + 10 dias), recalculada a cada mudança de emissão, com botão pra resetar ao padrão.
+- **SPEC-096** (CRM): reorganiza `ClientFormFields.tsx` — Tipo Cliente sobe pra perto de CPF/CNPJ, RG e Inscrição Estadual ficam lado a lado.
+- **SPEC-087** (achado, sem código): a trava de "empresa obrigatória" reclamada na reunião já tinha sido resolvida pela SPEC-078, um dia depois da reunião — sem relação documentada até agora.
+- Publicado em 4 sistemas: Separação Parcial (Skip 48801, v0.0.20), Orçamentos (Skip 32554, v0.0.328), CRM (Skip 24580, v0.0.302), Compras (SPEC-088, Skip 40326, v0.0.61 — ver entrada anterior).
+
 ## 2026-08-13 (3)
 
 ### Adicionado — SPEC-089: integração automática Separação Parcial → Logística

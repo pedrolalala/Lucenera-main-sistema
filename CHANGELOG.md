@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-13 (3)
+
+### Adicionado — SPEC-089: integração automática Separação Parcial → Logística
+
+- O Matheus precisava reentrar manualmente no sistema de Logística toda vez que terminava uma separação — achado técnico: a automação já existia (trigger `trg_separacao_pronta`, cria `entregas` quando `separacoes.status` vira `'Pronto'`), só que o fluxo novo de Separação Parcial (SPEC-072) nunca mudava esse status, então os dois sistemas continuavam desconectados apesar de compartilharem a mesma tabela.
+- Nova RPC `finalizar_separacao_parcial_pronta`: quando a última ação de "Separar" deixa a venda inteira sem saldo em reserva, e o usuário informa uma data de entrega, marca a separação como `Pronto` — reaproveita o trigger existente em vez de duplicar lógica.
+- `SeparacaoParcialPage.tsx` ganha campo opcional "Data de entrega (se esta ação completar a venda)".
+- Publicado Skip 48801, v0.0.18, QA limpo.
+
 ## 2026-08-13 (2)
 
 ### Adicionado — SPEC-088: entrada de nota fiscal de compra sem pedido vinculado

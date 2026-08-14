@@ -2,6 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-14 (4)
+
+### Corrigido — "Salvar Alterações" falhava sempre em orçamento já aprovado
+
+Usuário reportou "salvar uma edição em orçamento falhou também". Reproduzido ao vivo em `ORC-0005`: 3 bugs em cadeia, cada um escondendo o próximo, todos afetando especificamente orçamentos com status "Orçamento Aprovado" (90% dos ~30 orçamentos reais hoje):
+
+1. **`subgrupo` vazio trava com "Selecione o Tipo"**: orçamentos criados antes da SPEC-074 (26 de 29) têm `subgrupo` nulo no banco. Em modo de edição, "Tipo de Operação" fica desabilitado ("Não pode ser alterado após a criação"), então o `useEffect` de auto-preenchimento (que só roda fora de edição) nunca dispara e não há como o usuário corrigir manualmente. Fix: `form.reset()` em modo edição aplica o mesmo fallback que `defaultValues` já usava na criação (SPEC-097).
+2. **`data_inicio_pagamento` obrigatório + só hoje/futuro trava com "Invalid input"**: campo introduzido pela SPEC-082 (12/08) — 19 de 30 orçamentos não têm esse valor, e mesmo os que têm ficam com data no passado depois de aprovados há semanas. Exigir "hoje ou futuro" pra salvar uma edição não relacionada a pagamento (ex.: observações) travava qualquer orçamento aprovado antigo. Fix: validação de obrigatoriedade/futuro só roda quando **não** é edição de orçamento já aprovado; campos de prazo de pagamento deixam de ser recalculados/sobrescritos nesse caso (parcelas/boletos reais já existem em tabelas próprias, essas colunas em `orcamentos` só registram histórico).
+3. **`replace_orcamento_itens` sempre faz DELETE + INSERT de todos os itens** — viola a FK `projeto_itens_orcamento_item_id_fkey`, já que `projeto_itens` fica vinculado aos itens originais desde a aprovação (`aprovar_orcamento_financeiro`). Isso quebrava **qualquer** save num orçamento aprovado, mesmo sem tocar nos itens — é o erro real que finalmente apareceu depois de corrigir os 2 bugs client-side acima. Fix: `updateBudget` ganha flag `skipItens`, usada quando o orçamento já está aprovado — não escreve nada em `orcamento_itens` nesse caso (edição de itens pós-aprovação nunca funcionou; agora falha de forma segura em vez de quebrar o save inteiro, já que os itens ficam travados no que foi aprovado).
+
+Testado ao vivo: `ORC-0005` (aprovado, real) salva com sucesso, itens/parcelas/subgrupo preservados corretamente. `ORC-0018` (rascunho, com data no passado) continua corretamente bloqueado exigindo data válida — sem regressão no fluxo normal de criação/edição de rascunho. Publicado Skip 32554, v0.0.334 → v0.0.336.
+
 ## 2026-08-14 (3)
 
 ### Corrigido — "não consigo adicionar quantidade" e "não tem como reverter" em Separação Parcial

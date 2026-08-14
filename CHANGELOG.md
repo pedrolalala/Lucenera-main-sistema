@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-14 (9)
+
+### Corrigido — pedido em "Ag. Separar" ainda não aparecia no Logística + crash na página inteira
+
+- Usuário confirmou que o fluxo continuava incompleto: os fixes anteriores só cobriam separações já `'Pronto'` (venda 100% completa); uma separação recém-criada (`'Pendente'`, item em Ag. Separar) continuava invisível.
+- Fix: `'Pendente'` adicionado ao filtro do Logística.
+- Isso expôs um crash mais sério: a página inteira de Separação (não só o card) agrupa tudo por `data_entrega` sem checar null — separações `'Pendente'` da Separação Parcial não têm data ainda, e a tela ficava em branco.
+- Corrigido com uma seção nova, "Aguardando data de entrega", pra itens sem data — sem mexer no agrupamento por dia que outras partes do sistema (ex.: Criar Rota) já dependem.
+- Publicado Skip 24039, v0.0.89→v0.0.90. Testado ao vivo: a venda real (ainda em Ag. Separar) apareceu na hora, sem crash.
+
 ## 2026-08-14 (8)
 
 ### Adicionado + Corrigido — peças visíveis no card de separação do Logística + crash em produção

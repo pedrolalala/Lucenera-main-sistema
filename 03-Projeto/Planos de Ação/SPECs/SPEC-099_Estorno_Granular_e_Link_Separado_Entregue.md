@@ -111,6 +111,14 @@ Valida: item existe, `p_quantidade > 0`, `p_quantidade <= (quantidade - quantida
 - **Bug real achado no teste ao vivo, não relacionado à peças em si**: ao expandir "Detalhes" na venda real da Roberta, a tela quebrou (branco) — `separacao.numero_venda?.join(', ')` estourava porque `numero_venda` é `text` no banco para separações da Separação Parcial (guarda uma string, ex. `"ORC-0005"`), não array como o código sempre assumiu. Esse bug já existia antes desta sessão, só nunca tinha sido exercitado porque essas separações nunca apareciam. Corrigido com checagem `Array.isArray` (mesmo padrão que já existia, sem uso, na pasta duplicada com cedilha).
 - Publicado Skip 24039 (v0.0.87 peças, v0.0.88 fix do crash). Testado ao vivo na venda real: expandiu sem quebrar, mostrou as 3 peças reais corretas (10009×7, 11461×3, 12395×3), batendo com o banco.
 
+### 2026-08-14 (continuação 3 — "Pendente" ainda não aparecia, faltava o passo anterior a 'Pronto')
+
+- Usuário testou de novo e reportou que, ao clicar "Separar" (sem a venda estar 100% completa, item ainda em Ag. Separar), o pedido continuava sem aparecer no Logística. Correto: os fixes anteriores só cobriam o status `'Pronto'` — uma separação recém-criada nasce com status `'Pendente'`, que ainda não estava nos filtros do Logística.
+- Fix: `'Pendente'` adicionado ao filtro de `useSeparacoes.ts`.
+- **Isso expôs outro crash real, mais sério**: `SeparacaoPage.tsx` (a página inteira, não só o card) agrupa tudo por `data_entrega` usando `parseISO()` sem checar null — e separações `'Pendente'` da Separação Parcial não têm `data_entrega` ainda (só ganham data quando a venda completa vira `'Pronto'`). A tela toda ficava em branco.
+- Corrigido sem alterar o agrupamento por dia já existente (que outras partes do sistema, como "Criar Rota" por dia, dependem): itens sem `data_entrega` agora vão para uma seção própria, "Aguardando data de entrega", renderizada antes da lista agrupada por dia. `filteredSeparacoes`/`groupedByDate` ganharam checagens defensivas em todos os pontos que liam `s.data_entrega` sem validar.
+- Publicado Skip 24039, v0.0.89 (filtro) → v0.0.90 (fix do crash + seção nova). Testado ao vivo: a venda real da Roberta, ainda em "Pendente"/Ag. Separar, apareceu imediatamente na seção "Aguardando data de entrega", sem crash, com Detalhes/peças funcionando normalmente.
+
 ## Pendências
 
 - [ ] **P-1**: Se uma venda tiver mais de uma separação parcial em aberto (`'Pendente'`) e só a última virar `'Pronto'` (por ser a que zerou a reserva), as separações anteriores da mesma venda não têm seu próprio `'Pronto'` disparado — os itens delas só migram pra `q_separado` se/quando algo mudar o status delas individualmente. Não resolvido nesta SPEC (limitação herdada da SPEC-089); documentar e avaliar se vira SPEC própria depois que houver caso real.

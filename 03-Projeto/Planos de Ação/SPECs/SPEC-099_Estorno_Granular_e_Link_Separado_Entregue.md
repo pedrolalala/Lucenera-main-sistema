@@ -4,7 +4,7 @@ status: pendente
 data_ultima_modificacao: 2026-08-14
 sistemas_envolvidos:
   - Separação Parcial (separacao-parcial, Skip 48801)
-  - Logística (lucenera-logistics-b7cd1) — nenhuma mudança de código, só triggers no banco reagindo a updates que a tela já faz
+  - Logística (lucenera-logistics-b7cd1) — inicialmente sem mudança de código prevista, mas o teste ao vivo achou que o status 'Pronto' nunca aparecia nas telas do Matheus; fix aplicado nos filtros de `useSeparacoes.ts`/`useCalendarData.ts` (ver Realizado, continuação)
   - Supabase (banco central) — nova coluna em `separacao_itens`, RPC nova de estorno granular, 2 triggers novos
 dependencias:
   - SPEC-072 (Separação Parcial — estrutura base, `separacao_itens.projeto_item_id`)
@@ -94,6 +94,15 @@ Valida: item existe, `p_quantidade > 0`, `p_quantidade <= (quantidade - quantida
 - Testado transacionalmente no banco (`BEGIN`/`ROLLBACK`) usando o item real de ORC-0022 (produto 9524): separar 2 → estornar 1 (parcial, separação continua `Pendente`) → estornar o restante (fecha a separação como `Cancelado`). Depois, cenário do link: `registrar_separacao_setor` → `UPDATE separacoes SET status='Pronto'` moveu `q_ag_separar→q_separado` e criou a `entrega` automaticamente (trigger já existente da SPEC-089) → `UPDATE entregas SET status='Entregue'` moveu `q_separado→q_entregue`. Tudo conferido e revertido.
 - Frontend implementado em `separacao-parcial` (Skip 48801): modal de estorno reconstruído — lista os itens da separação com quantidade restante, campo de quantidade por peça, botões "Reverter tudo" e "Estornar peça(s) selecionada(s)". QA completo do Skip passou limpo. Publicado (`v0.0.25`, `ee7bda2`).
 - **Testado ao vivo no navegador**, na venda ORC-0022 (a mesma que o usuário usou pra achar o bug): separou 3 unidades reais (Reserva 5→2, Ag.Separar 0→3) → estornou 1 unidade pelo modal granular (Reserva 2→3, Ag.Separar 3→2, separação continuou "Pendente" — confirmando que a outra peça/quantidade não foi tocada) → usou "Reverter tudo" nas 2 restantes (Reserva 3→5, Ag.Separar→0, separação virou "Cancelado"). Sem dado de teste residual — tudo foi feito e desfeito via ações reais do app, voltando ao estado original.
+
+### 2026-08-14 (continuação — usuário testou o fluxo real e achou 2 bugs)
+
+- Usuário clicou "Separar" numa venda real (ORC-0005) até completar (data de entrega preenchida, virou "Pronto") e reportou dois problemas: (1) o pedido não apareceu no sistema de Logística; (2) tentar estornar deu erro "Essa peça já foi fisicamente separada" mesmo sendo admin.
+- **Causa raiz real do (1)**: nenhuma tela do Logística (`SeparacaoPage`/`useSeparacoes.ts`, `CalendarioPage`/`useCalendarData.ts`) lê a tabela `entregas`, e as duas só listam `status IN ('material_solicitado','Em separação','separado')` — o status `'Pronto'` (o que a Separação Parcial escreve) nunca esteve nessa lista. A entrega **foi criada corretamente** pelo trigger da SPEC-089 (confirmado no banco), só ficava invisível pro Matheus. Fix: `'Pronto'` adicionado aos filtros de `useSeparacoes.ts` e `useCalendarData.ts`, e ao tipo `StatusSeparacao`, no sistema Logística (Skip 24039, v0.0.86). **Testado ao vivo**: a venda "23.316 ROBERTA DEMETERCO" (a que ficou presa) passou a aparecer na tela do Matheus, dia 17/08, com os botões corretos.
+- **Achado adicional, mais sério**: mesmo corrigido (1), o fluxo real do Matheus (`finalizarEntrega` em `useSeparacoes.ts`) finaliza direto em `separacoes.status = 'finalizado'` — **nunca toca a tabela `entregas`**. Isso significa que o trigger `sync_entregue_ao_finalizar_entrega` da SPEC-099 (baseado em `entregas.status = 'Entregue'`) nunca dispararia no uso real. Corrigido com um trigger novo, `sync_entregue_ao_finalizar_separacao`, em cima do ponto onde o Matheus de fato finaliza (`separacoes.status = 'finalizado'`) — mantém o trigger antigo (inofensivo, só não é o caminho real).
+- **Causa raiz do (2)**: o guard "já separado" da SPEC-099 bloqueava geral, sem exceção. Usuário foi explícito: administrador deveria poder fazer isso. Fix: `estornar_item_separacao` agora libera admin/gerente mesmo com o item já `separado = true` (nesse caso retira de `q_separado` em vez de `q_ag_separar`); continua bloqueado pra todo mundo, sem exceção, se o item já estiver `entregue = true` (aí exige devolução física de verdade).
+- Migration `20260814_112_fix_link_logistica_real_e_estorno_admin` aplicada no Supabase real. Testado transacionalmente: admin estornando item já separado (funcionou, retirou de `q_separado`), usuário comum tentando o mesmo (bloqueado corretamente), e o trigger novo de finalização (`q_separado`→`q_entregue` ao simular `status='finalizado'`) — todos conferidos e revertidos (`ROLLBACK`).
+- A separação real da Roberta (23.316) **não foi alterada** — só passou a ficar visível; nenhuma ação foi tomada nela em nome do usuário.
 
 ## Pendências
 

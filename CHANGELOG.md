@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-14 (7)
+
+### Corrigido — pedido separado não aparecia no Logística + estorno bloqueava admin
+
+- Usuário testou o fluxo real (separar até completar uma venda) e reportou dois bugs pós-SPEC-099: o pedido não aparecia no sistema de Logística, e o estorno recusava mesmo sendo admin.
+- **Causa real do 1º bug**: nenhuma tela do Logística lê a tabela `entregas`, e as listas (`SeparacaoPage`, `CalendarioPage`) só mostravam `status IN ('material_solicitado','Em separação','separado')` — o status `'Pronto'` (o que a Separação Parcial usa) nunca esteve nesse filtro. A entrega tinha sido criada certo no banco, só ficava invisível pro Matheus. Fix: `'Pronto'` adicionado aos filtros do Logística (Skip 24039, v0.0.86) — testado ao vivo, a venda que ficou presa (23.316 Roberta Demeterco) passou a aparecer.
+- **Achado mais sério**: mesmo corrigido isso, o fluxo real do Matheus (`finalizarEntrega`) nunca toca a tabela `entregas` — finaliza direto em `separacoes.status='finalizado'`. O trigger da SPEC-099 que devia mover `q_separado→q_entregue` (baseado em `entregas.status`) nunca dispararia de verdade. Trigger novo adicionado em cima do ponto real (`separacoes.status='finalizado'`).
+- **2º bug**: o guard "já separado" do estorno granular (SPEC-099) bloqueava todo mundo sem exceção. Usuário foi explícito que admin deveria poder. Fix: admin/gerente agora conseguem estornar mesmo já fisicamente separado (retira de `q_separado`); continua bloqueado se já `entregue`.
+- Migration `20260814_112_fix_link_logistica_real_e_estorno_admin`. Testado transacionalmente (admin ok, usuário comum bloqueado, trigger de finalização ok) e ao vivo no Logística — sem alterar a venda real da Roberta, só corrigindo a visibilidade.
+
 ## 2026-08-14 (6)
 
 ### Adicionado — SPEC-099: estorno granular + link real Ag.Separar→Separado→Entregue

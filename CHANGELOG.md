@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-13 (7)
+
+### Corrigido — continuação do teste ao vivo: aprovação financeira de ponta a ponta (ORC-0021)
+
+- **Título do "Resumo Fiscal" hardcoded (Orçamentos)**: `FiscalSummaryDialog.tsx` mostrava literalmente "Resumo Fiscal (NF 4740 - Roberta Lucchesi)" — texto fixo no JSX, o mesmo em qualquer orçamento aberto, sem nenhuma relação com o orçamento real sendo visualizado. Valores (total, itens, CFOP) estavam corretos; só o título estava errado. Fix: título passa a usar `budget.numero` e o nome real do cliente. Publicado Skip 32554, v0.0.333.
+- **Descrição do item errada em `projeto_itens` (bug sistêmico, desde SPEC-040/23-07)**: `aprovar_orcamento_financeiro` gravava a descrição do item com `COALESCE(oi.descricao, oi.custom_id, p.nome, ...)` — como `oi.custom_id` é o código de circuito ("L01"), ele sempre ganhava do nome real do produto sempre que preenchido. Afetava qualquer item com produto vinculado + `custom_id` preenchido, consumido também por outras views (separação/logística). Achado ao aprovar financeiramente o orçamento de teste `ORC-0021` e ver "L01" no lugar do nome do produto no resumo fiscal. Consulta em produção achou **12 itens errados em 5 orçamentos de clientes reais** (ORC-0005, ORC-0006, ORC-0007, ORC-0009, ORC-0010), além do item de teste. Fix: `COALESCE(oi.descricao, p.nome, oi.custom_id, 'Item do Orçamento')` — nome do produto prioritário sobre o código de circuito. Migration `20260813_107_fix_descricao_projeto_itens_prioridade_custom_id` aplicada em produção com autorização explícita do usuário, incluindo backfill retroativo das 13 linhas já erradas (confirmado 0 restantes após o UPDATE).
+- **Fluxo de ponta a ponta validado até aprovação financeira**: `ORC-0021` avançou de rascunho (deixado assim na sessão anterior) até `Orçamento Aprovado`, passando por todas as etapas esperadas sem pular nenhuma (`historico_status_orcamentos` confirma: enviado_cliente → Aprovação da Equipe → Aprovação Financeira → Orçamento Aprovado). RPC criou 1 `projeto_item`, 1 `projeto_parcela`, 1 `boleto` corretamente. Item sem estoque físico foi roteado corretamente para Necessidade de Compra (`vw_necessidade_compra` mostra o projeto/cliente certo na tela de Compras) em vez de Separação — comportamento esperado, não testado até o fim de Separação/Logística por falta de estoque físico no produto de teste escolhido.
+
 ## 2026-08-13 (6)
 
 ### Corrigido — 3 bugs achados testando um projeto fictício de ponta a ponta (Orçamentos)

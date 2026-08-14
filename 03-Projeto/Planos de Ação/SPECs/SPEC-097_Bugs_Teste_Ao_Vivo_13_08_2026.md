@@ -6,6 +6,8 @@ sistemas_envolvidos:
   - Separação Parcial
   - CRM
   - Orçamentos
+  - Compras / Necessidade de Compra
+  - Banco de dados (função aprovar_orcamento_financeiro)
 ---
 
 # SPEC-097 — Bugs achados e corrigidos no teste ao vivo de 13/08/2026
@@ -26,6 +28,8 @@ sistemas_envolvidos:
 - [x] Corrigir `custom_id` vazio ao adicionar L (Orçamentos)
 - [x] Corrigir `subgrupo` vazio ao criar orçamento novo (Orçamentos)
 - [x] Corrigir painel "Responsável (Sistema)" lendo campo morto (Orçamentos)
+- [x] Corrigir título hardcoded do "Resumo Fiscal" (Orçamentos)
+- [x] Corrigir prioridade errada de `descricao` em `projeto_itens` (RPC `aprovar_orcamento_financeiro`) + backfill retroativo
 
 ### Passos manuais do usuário
 
@@ -183,6 +187,61 @@ R$ 9.368,72, vinculado ao projeto de teste `99.901`.
   `686fe49`).
 - CHANGELOG.md e memória atualizados com todos os achados.
 
+### 2026-08-13 (continuação — avançar ORC-0021 até aprovação financeira)
+
+Pedido do usuário: continuar o teste ao vivo verificando/corrigindo
+qualquer bug fora do padrão já estabelecido. `ORC-0021` estava em
+rascunho (deixado assim no fim da sessão anterior); avançado pela sessão
+até `Orçamento Aprovado`, achando 2 bugs reais novos:
+
+**7. Título do "Resumo Fiscal" hardcoded (Orçamentos)**
+
+`FiscalSummaryDialog.tsx` tinha `"Resumo Fiscal (NF 4740 - Roberta
+Lucchesi)"` escrito literalmente no JSX — aparecia idêntico em qualquer
+orçamento, sem nenhuma relação com o cliente/valor real sendo exibido
+(esses continuavam corretos, só o título estava errado). Fix: título
+passa a usar `budget.numero` e o nome do cliente real do orçamento.
+Publicado Skip 32554, v0.0.333 (hash `8d97603`).
+
+**8. Descrição errada em `projeto_itens` — bug sistêmico desde SPEC-040 (23/07)**
+
+`aprovar_orcamento_financeiro` gravava a descrição do item com
+`COALESCE(oi.descricao, oi.custom_id, p.nome, 'Item do Orçamento')` — como
+`oi.custom_id` é o código de circuito ("L01"), ele sempre ganhava do nome
+real do produto sempre que preenchido (não é exclusivo do fix do bug #4
+desta SPEC — qualquer item com `custom_id` digitado manualmente antes
+disso já sofria o mesmo problema). Achado ao ver "L01" no lugar do nome
+do produto no Resumo Fiscal do `ORC-0021` recém-aprovado. Consulta em
+produção confirmou **12 itens errados em 5 orçamentos de clientes reais**
+(ORC-0005, ORC-0006, ORC-0007, ORC-0009, ORC-0010), com datas desde
+26/06/2026 — não era um problema novo, só nunca detectado.
+
+Fix: `COALESCE(oi.descricao, p.nome, oi.custom_id, 'Item do Orçamento')`
+— nome do produto prioritário sobre o código de circuito. Migration
+`supabase/db/migrations/20260813_107_fix_descricao_projeto_itens_prioridade_custom_id/001_fix_descricao_projeto_itens.sql`
+aplicada em produção **com autorização explícita do usuário** (bug já
+afetava dados reais de clientes, não só o item de teste), incluindo
+`UPDATE` retroativo das 13 linhas já erradas. Confirmado 0 linhas
+restantes com o problema após o backfill.
+
+**Verificação adicional do fluxo**: `historico_status_orcamentos` do
+`ORC-0021` confirma nenhuma etapa pulada (`enviado_cliente` → `Aprovação
+da Equipe` → `Aprovação Financeira` → `Orçamento Aprovado`). RPC criou 1
+`projeto_item`, 1 `projeto_parcela`, 1 `boleto`, todos corretos. Como o
+produto de teste escolhido não tinha estoque físico, o item foi roteado
+corretamente para Necessidade de Compra (`vw_necessidade_compra` mostra
+projeto `99.901`/cliente `TESTE BUG SWEEP CLIENTE` corretamente na tela
+de Compras) em vez de Separação — fluxo de Separação/Logística/Entrega
+**não foi exercitado até o fim** nesta rodada por essa razão (não é um
+bug, é limitação do produto de teste escolhido).
+
+Submodule local `gestao-financeira-clone-544cb (1)` sincronizado (commit
+`f580ca0`).
+
 ## Pendências
 
-Nenhuma.
+- Fluxo de Separação → Logística → Entrega não foi testado ponta a ponta
+  nesta rodada (o item do orçamento de teste não tinha estoque físico,
+  então foi para Necessidade de Compra em vez de Separação). Repetir o
+  teste com um produto que tenha estoque físico disponível, se o objetivo
+  for validar especificamente essa parte do fluxo.

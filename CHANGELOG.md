@@ -2,6 +2,19 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-14 (5)
+
+### Adicionado — SPEC-098: troca de peça em Reserva entre projetos (Separação Parcial)
+
+- Pedido do usuário: quando uma peça está reservada pro projeto A mas o projeto B precisa dela com mais urgência, precisa dar pra "trocar" — a peça sai da reserva de A e entra na reserva de B, continuando em Reserva (não é empréstimo com devolução esperada).
+- **Achado principal**: o mecanismo já existia inteiro no banco desde a SPEC-011 (`transferencias_estoque`, `solicitar_transferencia_estoque`, `aprovar_transferencia_estoque`) e nunca teve frontend em nenhum sistema — só faltava expor.
+- **Regra de acesso**: inicialmente desenhada por equipe (`funcionarios_financeiro.equipes_id`), abandonada depois de achar que só 2 de 9 funcionários com login tinham essa equipe preenchida. Substituída, a pedido do usuário, por acesso liberado a quem tem `cargo = 'Projetista'` (3 pessoas: Marina Pousa, Thairine, Thais) ou `role` gerente/admin — sem checagem de equipe entre os projetos.
+- **Bug real corrigido antes de publicar**: `funcionarios.cargo` de Marina/Thairine está gravado como `"Projetista "` (espaço sobrando) — comparação exata nunca teria funcionado; trocado para `btrim(cargo) = 'Projetista'`.
+- Migration `20260814_110_spec098_troca_reserva_projetista`: guard novo em `aprovar_transferencia_estoque` + RPC nova `trocar_reserva_projetista` (orquestra solicitar+aprovar numa chamada só, troca fica imediata) + RPC `pode_trocar_reserva()` (pro frontend decidir se mostra o botão).
+- Frontend em `separacao-parcial`: ação "Trocar" por item reservado, modal com painel "Reservado por Cliente/Projeto" (mesma informação do card de peça do Cadastro Lucenera, SPEC-049, reaproveitando a view `vw_cadastro_produto_reserva_detalhe`) servindo de seletor de destino, e tela "Log de Trocas" no cabeçalho.
+- Testado direto no banco (sucesso e rejeição) e ao vivo no navegador na venda **ORC-0022** pedida pelo usuário, com um segundo projeto de teste criado e depois revertido — sem resíduo em produção. Publicado Skip 48801, v0.0.24.
+- Pendência conhecida: Thais Gomes Pegrucci Favaron (`cargo = 'Projetista'`) não tem login vinculado — não consegue usar a função até alguém criar o usuário dela.
+
 ## 2026-08-14 (4)
 
 ### Corrigido — "Salvar Alterações" falhava sempre em orçamento já aprovado

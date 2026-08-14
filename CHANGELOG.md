@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-14 (1)
+
+### Corrigido + achado crítico — fluxo de ponta a ponta até a entrega (ORC-0022, todos os sistemas)
+
+- **CHECK constraint de data usa UTC, frontend usa fuso do Brasil**: `orcamentos_data_inicio_pagamento_check` comparava com `CURRENT_DATE` (UTC do Postgres). Entre ~21h e meia-noite (horário de Brasília), o banco já virou o dia seguinte enquanto o calendário do frontend ainda oferece "hoje" no fuso local — toda criação de orçamento nesse horário falhava com erro cru do Postgres, todo dia. Fix: constraint compara com `(now() AT TIME ZONE 'America/Sao_Paulo')::date`. Migration `20260814_108_fix_data_inicio_pagamento_check_fuso_brasil`.
+- **Separação Parcial travava permanentemente em "Pendente" sem jeito de finalizar**: se a data de entrega não é preenchida na mesma ação que zera a reserva, a separação fica presa (não há mais reserva pra digitar quantidade, e a única ação restante é "Estornar", que desfaz tudo). Fix: nova seção "Finalizar Entrega" que aparece quando a venda está sem reserva mas ainda há parcial "Pendente" — resgate manual sem precisar estornar. Publicado Skip 48801 v0.0.22.
+- **CRÍTICO, não corrigido — reportado ao usuário**: a integração automática Separação Parcial → Logística (SPEC-089) escreve em `separacoes.status = 'Pronto'` + tabela `entregas`, mas o app real de Logística (`lucenera-logistics-b7cd1`) nunca lê a tabela `entregas` e sua query principal só busca `status IN ('material_solicitado','Em separação','separado')` — não inclui `'Pronto'`. Toda entrega criada pelo fluxo novo desde a SPEC-089 fica invisível pra quem usa a tela de Logística no dia a dia. São 2 sistemas paralelos com vocabulários de status incompatíveis sobre a mesma tabela `separacoes`. Precisa de decisão de arquitetura antes de corrigir.
+- Achado menor: em Admin Bancária, os filtros "Venda"/"Fatura"/"Boleto" de Consultar Duplicatas são decorativos (nunca aplicados) — só "Duplicata" e "Pessoa"/"Empresa" filtram de verdade.
+- Confirmado funcionando: Orçamentos (criação→aprovação equipe→aprovação financeira) → boleto aparece corretamente em Admin Bancária → item com estoque físico reserva e separa corretamente → Necessidade de Compra roteia corretamente item sem estoque.
+
 ## 2026-08-13 (7)
 
 ### Corrigido — continuação do teste ao vivo: aprovação financeira de ponta a ponta (ORC-0021)

@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-14 (8)
+
+### Adicionado + Corrigido — peças visíveis no card de separação do Logística + crash em produção
+
+- Usuário perguntou se as peças (não só o vínculo com o projeto) aparecem no Logística quando uma separação é criada — resposta era não: o card ativo nunca lia `separacao_itens` (só um hook morto numa pasta duplicada fazia isso).
+- Adicionado painel "Peças desta separação" no Detalhes do card (`SeparacaoItensList.tsx`), listando código/descrição/quantidade.
+- **Bug real achado ao testar ao vivo na venda real da Roberta**: expandir "Detalhes" quebrava a tela inteira (branco) — `numero_venda?.join(', ')` estourava porque o campo é texto no banco pra separações da Separação Parcial, não array. Bug pré-existente, nunca antes exercitado porque essas separações nunca tinham aparecido na tela. Corrigido.
+- Publicado Skip 24039, v0.0.87/v0.0.88. Testado ao vivo: peças reais (10009×7, 11461×3, 12395×3) aparecendo certas, sem crash.
+
 ## 2026-08-14 (7)
 
 ### Corrigido — pedido separado não aparecia no Logística + estorno bloqueava admin

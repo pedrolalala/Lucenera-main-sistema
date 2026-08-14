@@ -104,6 +104,13 @@ Valida: item existe, `p_quantidade > 0`, `p_quantidade <= (quantidade - quantida
 - Migration `20260814_112_fix_link_logistica_real_e_estorno_admin` aplicada no Supabase real. Testado transacionalmente: admin estornando item já separado (funcionou, retirou de `q_separado`), usuário comum tentando o mesmo (bloqueado corretamente), e o trigger novo de finalização (`q_separado`→`q_entregue` ao simular `status='finalizado'`) — todos conferidos e revertidos (`ROLLBACK`).
 - A separação real da Roberta (23.316) **não foi alterada** — só passou a ficar visível; nenhuma ação foi tomada nela em nome do usuário.
 
+### 2026-08-14 (continuação 2 — usuário perguntou se as peças aparecem vinculadas)
+
+- Usuário perguntou se, ao criar uma separação, as peças (não só o vínculo com o projeto) aparecem no Logística. Conferido no código antes de responder: **não apareciam** — o card ativo (`SeparacaoCard.tsx`) nunca lia `separacao_itens`; existia um hook pronto pra isso (`useSeparacaoItens`), mas só usado na pasta duplicada/morta (`separação`, com cedilha) que a tela ativa não importa.
+- Implementado `SeparacaoItensList.tsx` (mesmo padrão do `SeparacaoFiles.tsx` já existente) e adicionado ao painel "Detalhes" do card, listando código do produto + descrição + quantidade por peça.
+- **Bug real achado no teste ao vivo, não relacionado à peças em si**: ao expandir "Detalhes" na venda real da Roberta, a tela quebrou (branco) — `separacao.numero_venda?.join(', ')` estourava porque `numero_venda` é `text` no banco para separações da Separação Parcial (guarda uma string, ex. `"ORC-0005"`), não array como o código sempre assumiu. Esse bug já existia antes desta sessão, só nunca tinha sido exercitado porque essas separações nunca apareciam. Corrigido com checagem `Array.isArray` (mesmo padrão que já existia, sem uso, na pasta duplicada com cedilha).
+- Publicado Skip 24039 (v0.0.87 peças, v0.0.88 fix do crash). Testado ao vivo na venda real: expandiu sem quebrar, mostrou as 3 peças reais corretas (10009×7, 11461×3, 12395×3), batendo com o banco.
+
 ## Pendências
 
 - [ ] **P-1**: Se uma venda tiver mais de uma separação parcial em aberto (`'Pendente'`) e só a última virar `'Pronto'` (por ser a que zerou a reserva), as separações anteriores da mesma venda não têm seu próprio `'Pronto'` disparado — os itens delas só migram pra `q_separado` se/quando algo mudar o status delas individualmente. Não resolvido nesta SPEC (limitação herdada da SPEC-089); documentar e avaliar se vira SPEC própria depois que houver caso real.

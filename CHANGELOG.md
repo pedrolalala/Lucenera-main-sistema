@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-14 (2)
+
+### Adicionado — card de aviso pro Matheus quando separação já iniciada é estornada
+
+- Pedido do usuário: item 4 da reunião com Vinícius de 11/08 ("Estornar ela inteira ou editar... se editar essa lista tem que ter um aviso pro Matheus... tem que estornar, tem que deixar. Enquanto estiver aqui, aguardando separar, tem que ter a notificação.") só tinha sido parcialmente implementado pela SPEC-090 (estorno com motivo obrigatório existia, mas o aviso ao logístico — escrito em `entregas.observacoes` — nunca era visto por ninguém, porque a tela real de Logística não lê essa tabela).
+- **Achado ao investigar onde o aviso deveria aparecer**: a aba "Pendentes" do app de Logística (`lucenera-logistics-b7cd1`) já tinha o formato de card certo ("Motivo da Pendência" em destaque) mas estava **completamente não-funcional** — lê da tabela `entregas_pendentes`, que nunca existiu no banco real (nem local, nem produção); o modal de registrar problema também era um placeholder vazio. A tela sempre mostrava "Nenhuma pendência! Tudo em dia" — na verdade um erro de query silencioso.
+- **Achado adicional**: nenhuma função no banco jamais move estoque de `q_ag_separar` pra `q_separado`/`q_entregue` no fluxo novo de Separação Parcial — o conceito de "Separado" (distinto de "Ag Separar") nunca foi implementado de fato. Registrado como pendência separada, fora do escopo desta entrega (decisão do usuário).
+- **Implementado**: tabela `entregas_pendentes` criada de verdade (destrava a aba Pendentes do Logística pro uso normal dela também) + `estornar_separacao_parcial` (SPEC-090) atualizada pra criar uma pendência lá, com o motivo do estorno, sempre que uma separação já registrada é cancelada — independente do estágio (Ag Separar ou além). Migration `20260814_109_entregas_pendentes_e_estorno_notifica_matheus`. Testado ao vivo de ponta a ponta: estorno em Separação Parcial → card aparece em Logística/Pendentes com motivo → "Solucionar" marca como resolvido corretamente.
+- Publicado: Logística (Skip 24039, v0.0.85).
+
 ## 2026-08-14 (1)
 
 ### Corrigido + achado crítico — fluxo de ponta a ponta até a entrega (ORC-0022, todos os sistemas)

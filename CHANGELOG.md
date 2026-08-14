@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-14 (3)
+
+### Corrigido — "não consigo adicionar quantidade" e "não tem como reverter" em Separação Parcial
+
+- Usuário reportou os dois problemas testando `ORC-0005` (venda real de cliente, não teste): não conseguia digitar quantidade em 2 dos 3 itens, e não achava como reverter.
+- **Investigado, não era bug de digitação**: testei o campo do 3º item (que tinha reserva disponível) e aceitou digitação normalmente. Os outros 2 itens tinham Reserva = 0 (100% já em "Ag Separar" desde 11/08) — o campo fica corretamente desabilitado por design, só que sem nenhuma explicação visível.
+- **O botão de reverter já existia** (SPEC-090, seção "Parciais desta venda"), só que fica separado da tabela de itens, fácil de não notar.
+- **Fix**: quando um item está sem reserva mas com quantidade em "Ag Separar", o campo desabilitado agora vira um link explicando a situação ("Sem reserva — N já enviado(s), ver abaixo p/ estornar") que rola a tela até a seção de Estornar. Publicado Skip 48801, v0.0.23.
+
 ## 2026-08-14 (2)
 
 ### Adicionado — card de aviso pro Matheus quando separação já iniciada é estornada

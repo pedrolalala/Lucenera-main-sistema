@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-14 (6)
+
+### Adicionado — SPEC-099: estorno granular + link real Ag.Separar→Separado→Entregue
+
+- Usuário testou reverter uma separação com 2 peças (produto 10009 e 11461) e descobriu que o estorno devolvia as duas juntas, mesmo querendo desfazer só uma (e só parte da quantidade de uma delas). Achado ao investigar: `estornar_separacao_parcial` sempre revertia a separação inteira, sem granularidade.
+- **Estorno granular**: nova RPC `estornar_item_separacao` (peça + quantidade específica, coluna `quantidade_estornada` rastreando o acumulado) + `estornar_separacao_parcial` refatorada pra virar "reverter tudo" (orquestra a RPC granular por item). Frontend em Separação Parcial: modal com um input de quantidade por peça, mais o botão "Reverter tudo".
+- **Link Ag.Separar→Separado→Entregue**: campos `q_separado`/`q_entregue` existiam desde a SPEC-010 mas nunca eram escritos. Investigação achou que ligar no fluxo antigo de Logística (415+ registros reais) não fazia sentido — esses registros nunca tiveram `separacao_itens` vinculado (só texto livre), então não há saldo pra sincronizar ali. Conectado no que a própria Separação Parcial/SPEC-089 já usa: trigger novo quando `separacoes.status` vira `'Pronto'` (move `q_ag_separar→q_separado`) e trigger novo quando `entregas.status` vira `'Entregue'` (move `q_separado→q_entregue`). Decisão do usuário: sem backfill dos 424 registros antigos, "o fluxo antigo não funcionava".
+- Testado no banco (transacional) e ao vivo no navegador, na mesma venda ORC-0022 onde o bug foi reportado — sem resíduo de teste. Publicado Skip 48801, v0.0.25.
+- Achado colateral, ainda pendente: decisão do Vinícius de remover `boletos.nosso_numero` (reunião 11/08) não tem substituto definido — é a chave que a conciliação bancária automática (SPEC-008) usa pra casar o retorno do banco com o boleto certo.
+
 ## 2026-08-14 (5)
 
 ### Adicionado — SPEC-098: troca de peça em Reserva entre projetos (Separação Parcial)

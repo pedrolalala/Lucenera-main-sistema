@@ -52,4 +52,6 @@ Na mesma reunião ([81:52]-[82:29]), Vinícius pediu: "se tiver um pedido de com
 
 ## Pendências
 
-- [ ] Confirmar se a funcionalidade de "Devolução" (SPEC-054) deve ganhar um lugar próprio em outro sistema, ou se fica só acessível de outra forma já existente (ex.: dentro do orçamento, fluxo da SPEC-071) — não decidido nesta rodada, fora do escopo do pedido explícito (só tirar da rotina de Compras).
+Nenhuma.
+
+**Decisão do usuário (2026-08-15)**: a funcionalidade de Devolução fica só dentro do fluxo de Orçamento — não ganha tela própria em outro sistema. Confirmado que esse caminho já existe e está implementado: orçamento com `natureza_operacao = 'devolucao'` (SPEC-071), telado por `DevolucaoItemSearchModal.tsx` em Orçamentos. Nenhuma ação de código nova necessária — a aba antiga em Compras (`DevolucaoEstoqueTab.tsx`, SPEC-054) permanece obsoleta/desconectada, como já ficou após esta SPEC.

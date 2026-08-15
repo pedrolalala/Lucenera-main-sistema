@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (11)
+
+### Adicionado — SPEC-103 (parte 1): comprar por L Fixo direto em "Por Produto"
+
+- Fecha o pedido pendente da reunião de 14/08: poder comprar por item específico de orçamento (L) sem trocar de aba. Decisão do usuário: o "card de seleção por L" segue o mesmo padrão visual do Card Lateral de Peça (SPEC-049).
+- A aba separada "Por Item de Orçamento" (SPEC-040) foi removida — a tela Necessidade de Compra virou visão única. O card lateral que já mostrava "Entrega Futura por Projeto" ao selecionar um produto passou a mostrar os L's daquele produto com checkbox, fornecedor e "Gerar Compra (N)", reaproveitando o mesmo modal de geração de pedido da aba antiga.
+- Publicado Skip 40326 v0.0.66. Testado ao vivo: seleção de 2 L's do produto 10289 (Interlight) abriu o modal com as linhas e custo corretos.
+
 ## 2026-08-15 (10)
 
 ### Alterado — SPEC-115: "Excluir" peça sai do painel rápido, fica só dentro da edição completa

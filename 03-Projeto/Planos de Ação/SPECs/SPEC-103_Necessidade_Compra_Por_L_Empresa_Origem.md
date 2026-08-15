@@ -1,9 +1,9 @@
 ---
 titulo: "SPEC-103 — Necessidade de Compra: unificar visão por L + mostrar empresa de origem"
-status: pendente
+status: concluído
 data_ultima_modificacao: 2026-08-15
 sistemas_envolvidos:
-  - Compras (compras-lucenera-3o23t98ee, Skip 40326) — `NecessidadeCompra.tsx`, `NecessidadeCompraPorItemTab.tsx`
+  - Compras (compras-lucenera-3o23t98ee, Skip 40326) — `NecessidadeCompra.tsx`, `NecessidadeDetailsPanel.tsx`
   - Supabase (banco central) — `vw_necessidade_compra`, `vw_necessidade_compra_pedido_detalhe`
 dependencias:
   - SPEC-040 (aba "Por Item de Orçamento", Fluxo B)
@@ -57,9 +57,15 @@ Sobre o card de seleção por peça específica ([82:29]-[85:25]): pra produtos 
 
 - **Parte 2 (mostrar empresa de origem): concluída**, com aprovação explícita do usuário pra separar do escopo da parte 1. Migration `20260815_114_spec103_empresa_origem_necessidade_compra` adiciona `empresa_id`/`empresa_nome` (via `orcamentos.empresa_id` → `empresas.nome`) à view `vw_necessidade_compra_detalhe`, aplicada no Supabase real. `NecessidadeCompraDetalhe.tsx` (linha inline expandida por produto) e `ModalRegistrarCompra.tsx` (lista "Itens de projeto que motivaram esta compra") atualizados pra exibir a coluna Empresa. Publicado Skip 40326 v0.0.63.
 - Testado ao vivo (via `javascript_tool` pra contornar instabilidade do clique automatizado nesta tela específica — refs da árvore de acessibilidade ficavam dessincronizados do DOM real): produto 10289, expandido o detalhe por projeto — coluna "EMPRESA" mostra corretamente "FOCO ILUMINACAO" para as 4 linhas do orçamento ORC-0020/26.250.
-- **Parte 1 (fundir aba "Por Item de Orçamento" em "Por Produto", remover aba separada): não implementada** — layout não definido, fica pendente pra quando o usuário quiser detalhar o UX.
+### 2026-08-15 (parte 1)
+
+- **Decisão do usuário**: o "card de seleção por L" segue o mesmo padrão visual do Card Lateral de Peça (SPEC-049) — painel lateral, mostrando a informação da peça, reaproveitado dentro da própria tela de Necessidade de Compra.
+- A aba "Por Item de Orçamento" (SPEC-040) foi removida — não sobrou nenhuma aba (a tela virou visão única, já que "Por Produto" era a última restante depois da SPEC-104 remover "Devolução"). `NecessidadeCompraPorItemTab.tsx` foi apagado (funcionalidade absorvida, não duplicada).
+- `NecessidadeDetailsPanel.tsx` (card lateral ao selecionar um produto em "Por Produto") passou a mostrar a lista de L's/orçamento/cliente/fornecedor/pendente daquele produto (nova função `getNecessidadeCompraItemPorProduto`, mesma view `vw_necessidade_compra_item_orcamento` que já alimentava a aba antiga, agora filtrada por produto em vez de busca livre), com checkbox por linha e botão "Gerar Compra (N)" — reaproveita o mesmo `ModalGerarCompraItemOrcamento.tsx` da aba antiga, nenhuma lógica de geração de pedido foi duplicada.
+- **Achado que simplificou a implementação**: `fornecedor_id` é resolvido por produto/marca (mesma cascata de `vw_necessidade_compra`) — como o card lateral já é escopado a um único produto, todas as linhas sempre têm o mesmo fornecedor. A checagem de "fornecedor diferente" que existia na aba antiga (necessária lá porque misturava produtos diferentes) não se aplica aqui e foi removida.
+- Cliente e "dias em aberto" (que só existiam na fonte antiga do painel, `vw_entrega_futura_projeto_item`) foram mantidos via merge client-side das duas queries por `projeto_item_id` — nenhuma view nova, nenhuma migration.
+- Publicado Skip 40326 v0.0.66 — QA limpo (1ª tentativa quebrou o build por divs mal fechados após remover as abas; corrigido e republicado). Testado ao vivo: produto 10289 (Interlight) mostra 4 linhas (ORC-0020, L02/L05/L10/L11, cliente Terras Altas, fornecedor Interlight); selecionei 2, "Gerar Compra (2)" abriu o modal com as linhas certas e custo pré-preenchido (R$ 275,12); cancelado sem confirmar (não criei pedido real).
 
 ## Pendências
 
-- [ ] **Parte 1**: confirmar layout exato da fusão das duas abas (expandir linha vs. nova coluna) antes de implementar — decisão de UX explicitamente adiada pelo usuário nesta rodada.
-- [ ] Confirmar se "card de seleção por peça" (citado na reunião pra produtos sob medida) é uma tela nova ou um componente dentro do painel lateral que já existe — também faz parte do escopo adiado da parte 1.
+Nenhuma.

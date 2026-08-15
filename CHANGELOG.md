@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (4)
+
+### Adicionado — SPEC-103 (parte 2): empresa de origem na Necessidade de Compra
+
+- Reunião Vinícius 14/08/2026: tela agregava necessidade só por produto, sem mostrar de qual empresa veio a venda que originou a necessidade — decisão foi dar visibilidade (não regra automática de "comprar pela empresa que vendeu mais").
+- Migration adiciona `empresa_id`/`empresa_nome` à `vw_necessidade_compra_detalhe` (JOIN com `orcamentos`/`empresas`, já existentes na view). Coluna "Empresa" nova em `NecessidadeCompraDetalhe.tsx` (detalhe inline por produto) e no modal de registrar pedido.
+- Publicado Skip 40326 v0.0.63. Testado ao vivo: produto 10289 mostra corretamente "FOCO ILUMINACAO" nas 4 linhas do orçamento de origem.
+- Parte 1 da SPEC (fundir abas "Por Produto"/"Por Item de Orçamento") ficou pendente — layout de UX não definido, adiado a pedido do usuário.
+
 ## 2026-08-15 (3)
 
 ### Corrigido — SPEC-102: fornecedor e impostos não vinham pré-preenchidos ao registrar pedido de compra

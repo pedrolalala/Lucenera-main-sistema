@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (3)
+
+### Corrigido — SPEC-102: fornecedor e impostos não vinham pré-preenchidos ao registrar pedido de compra
+
+- Reunião Vinícius 14/08/2026: ao abrir "Registrar Pedido de Compra" a partir da Necessidade de Compra, o fornecedor já resolvido no cadastro do produto/marca não vinha pré-selecionado, e por consequência os campos de imposto (ICMS/IPI/ST, mecanismo da SPEC-038) também não disparavam.
+- Fix: `ModalRegistrarCompra.tsx` (Compras) passou a pré-selecionar o fornecedor no `useEffect` de abertura, reaproveitando a função que já existia e já disparava o pré-preenchimento de impostos.
+- Achado que corrige a própria SPEC: o 3º ponto do pedido original (valor do pedido sem BDI/impostos no fluxo de caixa) já estava certo — os 3 modais que criam pedido já somam custo+impostos antes de mandar pro banco. Nenhuma mudança de RPC foi necessária.
+- Publicado Skip 40326 v0.0.62. Testado ao vivo: produto 10289 (Interlight) já abre com fornecedor e custo pré-preenchidos.
+
 ## 2026-08-15 (2)
 
 ### Corrigido — SPEC-101: badge "Reservado" no card de peça misturava reserva com entrega futura

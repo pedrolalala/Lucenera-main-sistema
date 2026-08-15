@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (1)
+
+### Adicionado — SPEC-100: busca de produtos estilo Google no orçamento (marca/categoria)
+
+- Reunião Vinícius 14/08/2026 apontou como prioridade: buscar "interlight" (marca) na tela de Buscar Produtos do orçamento não retornava nada — marca/categoria eram filtros `<Select>` separados, nunca entravam no texto livre.
+- Confirmado com usuário: opção "de verdade estilo Google" — RPC fuzzy nova (`buscar_produtos_fuzzy`, mesmo padrão de `buscar_fornecedores_fuzzy` da SPEC-030/034, `word_similarity`+`unaccent`, tolera erro de digitação) cobrindo nome/sku/referencia/codigo_produto/marca/categoria.
+- Migration aplicada no Supabase real (`20260815_113_spec100_busca_produtos_fuzzy`). `ProductSearchModal.tsx` (Orçamentos, Skip 32554) trocado pra chamar a RPC, mantendo os filtros de marca/categoria/fornecedor já existentes. Publicado v0.0.337.
+- Testado ao vivo: "interlight" agora retorna corretamente as peças da marca.
+
 ## 2026-08-14 (9)
 
 ### Corrigido — pedido em "Ag. Separar" ainda não aparecia no Logística + crash na página inteira

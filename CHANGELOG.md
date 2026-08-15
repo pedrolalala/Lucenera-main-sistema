@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (5)
+
+### Alterado — SPEC-104: renomeia "Coberto" para "Reservado" e remove aba Devolução da Necessidade de Compra
+
+- Reunião Vinícius 14/08/2026: coluna "Coberto" no detalhe expandido por produto renomeada pra "Reservado" (mesmo termo do card de peça do Cadastro, SPEC-101). Aba "Devolução" tirada da rotina de Compras — "essa coisa nem deveria ter aqui nessa rotina de compra" — sem remover a funcionalidade do banco, só o atalho de acesso.
+- Publicado Skip 40326 v0.0.64. Testado ao vivo: abas agora só "Por Produto"/"Por Item de Orçamento", coluna mostra "Reservado".
+
 ## 2026-08-15 (4)
 
 ### Adicionado — SPEC-103 (parte 2): empresa de origem na Necessidade de Compra

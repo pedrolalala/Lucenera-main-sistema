@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (9)
+
+### Adicionado — SPEC-113: setor de estoque na busca de produto do orçamento
+
+- Pedido pendente de reunião anterior, retomado em 14/08/2026: mostrar onde a peça está fisicamente estocada (Estoque/Showroom) na hora de escolher o produto no orçamento.
+- Nova coluna "Setor" em `ProductSearchModal.tsx`, buscada em lote de `estoque_itens` (mesma fonte do hover "Distribuição por Local" já existente).
+- Publicado Skip 32554 v0.0.341. Testado ao vivo: produtos com saldo real mostram "Estoque" corretamente.
+
 ## 2026-08-15 (8)
 
 ### Adicionado — SPEC-112: destaque visual quando orçamento tem observação preenchida

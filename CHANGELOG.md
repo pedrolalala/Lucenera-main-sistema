@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (2)
+
+### Corrigido — SPEC-101: badge "Reservado" no card de peça misturava reserva com entrega futura
+
+- Reunião Vinícius 14/08/2026: card "Estoque por Local" (Cadastro Lucenera) mostrava "Reservado" como o total comprometido (reserva + entrega futura), não só o que está de fato no setor Reserva — reproduzido ao vivo com números reais.
+- Causa: `estoque_itens.quantidade_reservada` é, por desenho, o total comprometido (usado por outras RPCs com esse significado) — não deveria ter sido usado pra essa métrica de exibição.
+- Fix: badges do cabeçalho passaram a somar `q_reserva` de `vw_cadastro_produto_reserva_detalhe` (mesma fonte já usada pela tabela "Reservado por Cliente/Projeto" da SPEC-049) — nenhuma migration nova precisou ser criada, a view certa já existia. Tabela "Estoque por Local" (distribuição física por depósito) mantida como estava.
+- Publicado Skip 36668 v0.0.61. Testado ao vivo: produto 10289 (816 comprometido, 0 em reserva real) agora mostra "Reservado: 0" corretamente.
+
 ## 2026-08-15 (1)
 
 ### Adicionado — SPEC-100: busca de produtos estilo Google no orçamento (marca/categoria)

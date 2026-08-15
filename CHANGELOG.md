@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (7)
+
+### Adicionado — SPEC-111: aviso antes de salvar item de orçamento em Aprovação Financeira
+
+- Reunião Vinícius 14/08/2026: editar item de um orçamento em "Aprovação Financeira" reinicia o ciclo de aprovação do cliente silenciosamente (trigger `handle_orcamento_item_change_reset`) — comportamento correto (o próprio Vinícius validou ao vivo), mas sem nenhum aviso, foi confundido com bug.
+- Achado: `BudgetFormPage.tsx` só dispara o trigger nesse status específico — `'Orçamento Aprovado'` já pula os itens inteiramente (achado anterior de 2026-08-14), então nunca chega a disparar reset por essa tela.
+- Fix: confirmação bloqueante antes de salvar quando status = "Aprovação Financeira", + toast de sucesso menciona o reinício explicitamente.
+- Publicado Skip 32554 v0.0.339. Não testado clicando de verdade (regra da sessão: nunca disparar `window.confirm`/`alert` nativo via automação de browser) — verificado via QA (typecheck+build) do Skip.
+
 ## 2026-08-15 (6)
 
 ### Adicionado — SPEC-107: Cheque, Transferência e Permuta como forma de pagamento do orçamento

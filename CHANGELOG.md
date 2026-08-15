@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (6)
+
+### Adicionado — SPEC-107: Cheque, Transferência e Permuta como forma de pagamento do orçamento
+
+- Reunião Vinícius 14/08/2026: pediu Permuta como forma de pagamento nova. Achado: Cheque e Transferência já existiam no ENUM `pagamento_forma` mas nunca tinham sido liberados na tela do orçamento.
+- Migration `ALTER TYPE pagamento_forma ADD VALUE 'permuta'` aplicada no Supabase real. `BudgetFormPage.tsx` (Orçamentos) libera os 3 valores no `<Select>` e em `validFormas`.
+- Achado extra corrigido junto: importação de XML (Connect) recodificava silenciosamente forma de pagamento "transferência" pra "pix" (fallback só existia porque transferência nunca era válida) — removido, já que agora é opção real.
+- Publicado Skip 32554 v0.0.338. Testado ao vivo: as 7 opções aparecem corretamente no select.
+
 ## 2026-08-15 (5)
 
 ### Alterado — SPEC-104: renomeia "Coberto" para "Reservado" e remove aba Devolução da Necessidade de Compra

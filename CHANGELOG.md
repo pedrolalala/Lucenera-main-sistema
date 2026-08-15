@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (8)
+
+### Adicionado — SPEC-112: destaque visual quando orçamento tem observação preenchida
+
+- Reunião Vinícius 14/08/2026: campo "Observações" existia mas ficava escondido — pedido explícito de um "cardzinho laranja" que salta aos olhos quando preenchido, pra não perder informação importante (ex.: qual empresa faturar).
+- Ampliado além do pedido original: além da listagem dentro do detalhe do projeto (`ProjectOrcamentoList.tsx`), a listagem principal de orçamentos (`BudgetTableRow.tsx`, tela que todo mundo usa no dia a dia) também recebeu o destaque — senão ficaria incompleto.
+- Borda laranja + ícone com preview (tooltip nativo) da observação nos dois lugares. Publicado Skip 32554 v0.0.340. Testado ao vivo com dado real temporário (revertido em seguida).
+
 ## 2026-08-15 (7)
 
 ### Adicionado — SPEC-111: aviso antes de salvar item de orçamento em Aprovação Financeira

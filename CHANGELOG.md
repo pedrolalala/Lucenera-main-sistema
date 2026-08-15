@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (10)
+
+### Alterado — SPEC-115: "Excluir" peça sai do painel rápido, fica só dentro da edição completa
+
+- Reunião Vinícius 14/08/2026: um clique acidental no painel de detalhes da listagem apagava o cadastro de peça direto, sem passar pela edição completa.
+- `PecaDetailsPanel.tsx`: removido o botão "Excluir" (mantido só "Editar"). `Pecas.tsx`: removida toda a lógica de exclusão que vivia na listagem. `PecaForm.tsx` (modal de edição): novo botão "Excluir Peça" no rodapé, só na edição (não na criação), com confirmação própria.
+- Decisão do usuário: só reposicionar por agora, sem restrição de role (admin/gerente) em cima do botão.
+- Achado à parte: `Pecas.tsx` local tinha uma coluna "Código" nunca publicada no Skip — deixada de fora do push, local realinhado ao conteúdo real do Skip.
+- Publicado Skip 36668 v0.0.62. Testado ao vivo via DOM: painel rápido sem "Excluir"; edição completa com "Excluir Peça" funcionando.
+
 ## 2026-08-15 (9)
 
 ### Adicionado — SPEC-113: setor de estoque na busca de produto do orçamento

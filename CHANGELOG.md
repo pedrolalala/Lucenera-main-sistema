@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (12)
+
+### Adicionado — SPEC-108: travar valor/produto no orçamento — só admin (edição)
+
+- Reunião Vinícius 14/08/2026: só administrador (Vinícius + Lana) deveria poder editar valor de peça ou adicionar produto num orçamento; vendedoras só mexem desconto.
+- Achado antes de implementar: a mesma tela cria E edita orçamento — travar incondicionalmente quebraria a criação de orçamento novo. Escopo corrigido: trava vale só pra editar orçamento já existente.
+- Frontend: campo de preço, troca de produto e botões de adicionar produto desabilitados pra quem não é admin, só quando `isEditing`. Backend: RPC `replace_orcamento_itens` reforçada — compara preço/produto antes/depois do save e bloqueia mudança pra não-admin, migration aplicada no Supabase real.
+- Publicado Skip 32554 v0.0.342. Testado ao vivo como admin (único perfil disponível): tela sem restrição, save normal funcionando.
+
 ## 2026-08-15 (11)
 
 ### Adicionado — SPEC-103 (parte 1): comprar por L Fixo direto em "Por Produto"

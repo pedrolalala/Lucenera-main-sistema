@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (16)
+
+### Adicionado — SPEC-106 (parcial): margem padrão de 50% pra peça sem cadastro
+
+- Reunião Vinícius 14/08/2026: item avulso sem custo digitado mostrava 100% de lucro no painel "Gerenciamento do Orçamento" (custo nascia em 0), mascarando a leitura real do orçamento.
+- Custo default de item avulso passa a ser 50% da venda (editável) em vez de 0.
+- Publicado Skip 32554 v0.0.346.
+- **Não implementado nesta rodada**: os 3 campos novos (Imposto/RT/Comissão) pedidos na mesma SPEC — não existe fórmula definida em lugar nenhum do sistema, precisa de definição do usuário antes de implementar.
+
 ## 2026-08-15 (15)
 
 ### Adicionado — SPEC-109: PDF do orçamento — código real, L separado, ordenar por L, 2 modelos

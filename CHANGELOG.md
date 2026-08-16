@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (14)
+
+### Adicionado — SPEC-110: ordem Sinal/Desconto consistente + sinal pré-preenchido por cliente
+
+- Reunião Vinícius 14/08/2026: campos Sinal/Desconto pareciam trocados na tela; sinal deveria vir pré-preenchido quando o cliente tiver um valor padrão.
+- Achado: existem dois blocos Sinal/Desconto na tela (campos editáveis e resumo de totais) — só o resumo mostrava a ordem errada (Sinal antes de Desconto, por decisão antiga da SPEC-078 de seguir a ordem do cálculo). Corrigido pra mostrar Desconto antes de Sinal nos dois lugares, sem mudar o cálculo em si.
+- Novo campo `contatos.valor_sinal_padrao` (migration aplicada) — ao criar orçamento novo, se o cliente tiver um valor cadastrado, o campo Sinal vem pré-preenchido (editável). Ainda não existe campo na UI do CRM pra cadastrar esse valor — por ora só via banco.
+- Publicado Skip 32554 v0.0.344. Testado ao vivo com dado real temporário (revertido em seguida).
+
 ## 2026-08-15 (13)
 
 ### Corrigido — SPEC-105: busca de venda de origem na Devolução não achava nada

@@ -2,6 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-16 (3)
+
+### Corrigido — Cadastro Lucenera: bug antigo de PecaModal duplicado + card lateral maior
+
+- Pedido do usuário: aumentar o card lateral de peças/produtos, adicionar coluna "Código" antes de "Referência" na lista, e reduzir o scroll do formulário Nova/Editar Peça.
+- Painel lateral de detalhes: 320px → 440-520px, colunas internas das tabelas ajustadas.
+- Nova coluna "Código" (codigo_produto) antes de "Referência" na lista.
+- Formulário Nova/Editar Peça: campos de h-8→h-7, padding das seções reduzido, modal com menos padding externo — scroll bem menor.
+- **Achado ao testar ao vivo**: campo "Referência" do formulário salvava vazio. Investigando o git log, descobri que eu mesmo tinha reintroduzido um bug já corrigido e revertido 2x antes (commits `34943b6` e `2955d42`, 2026-08-11) — o rótulo "Referência" na UI sempre leu/gravou a coluna `sku` (não `referencia`, que está vazia em 4725 de 4726 peças). Revertido de volta pra `sku`.
+- **Achado maior, bug antigo desde o scaffolding original do projeto (commits `daff012`/`b97de8a`, nunca numerados por SPEC)**: `<PecaModal/>` era renderizado duas vezes (em `App.tsx` E em `Layout.tsx`), montando 2 instâncias do formulário toda vez que "Editar Peça"/"Nova Peça" abria. Isso quebrava a exibição dos campos `Select` (Marca/Categoria apareciam em branco mesmo com dado correto no banco). Removida a instância duplicada de `App.tsx`.
+- Publicado Skip 36668 v0.0.63→v0.0.68. Testado ao vivo em cada etapa (screenshots + inspeção de DOM via JS), console sem erros.
+
 ## 2026-08-16 (2)
 
 ### Corrigido — SPEC-103: seleção de L volta pra dentro da linha "Ver projetos" (2º feedback)

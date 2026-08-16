@@ -50,7 +50,14 @@ dependencias:
 - **Ponto 3 confirmado por leitura de código, sem mudança necessária**: `l.lucroPct.toFixed(1)}%` já usa 1 casa decimal, não arredonda pro inteiro mais próximo — se ainda parecer arredondado ao vivo, é porque o valor real está genuinamente perto de um número redondo (ex.: 59,95% → "60.0%"), não um bug de arredondamento.
 - Publicado Skip 32554 v0.0.346 — QA limpo. Não testado clicando de verdade: o painel só abre a partir de um orçamento real já em "Aprovação Financeira" (SPEC-083); é uma mudança de matemática pura e de baixo risco (custo = 50% da venda ⇒ lucro % = 50%, verificável por inspeção), risco de regressão mínimo.
 
+### 2026-08-16 — investigação da fonte de dado de Imposto
+
+- Usuário apontou que o imposto da peça deveria estar em `produtos` — confirmado: as colunas certas já existem (`icms_entrada`, `ipi_entrada`, `porc_st`, `porc_bdi`, `porc_frete`, `porc_despesas`), e são exatamente as mesmas já consumidas pelo fluxo de Compras (`getProdutoImpostosBulk`, SPEC-038/102) — não é um campo novo a criar.
+- **Achado**: essas colunas estão vazias/zeradas em ~98% dos produtos ativos (4645-4725 de 4726, a depender da coluna) — confirmado inclusive em produtos reais de custo alto (não só itens avulsos/serviço tipo "PINTURA"/"CONSERTO"), então não é uma leitura errada, é dado que falta de verdade no cadastro.
+- Usuário indicou `01-Documento/01 - Planilhas/Produtos__2026-08-07.xlsx` como fonte pra atualizar. Aberto: só tem 1 aba ("Estoque"), colunas `CodProduto, Referencia, DescProduto, CodMarca, DescMarca, CodCategoria, DescCategoria, EstoqueTotal, Showroom, Disponivel, Unidade, CustoTotal, Lucro, ValorVenda` — nenhuma coluna de ICMS/IPI/ST/BDI. Não dá pra usar essa planilha pra preencher os campos de imposto.
+- **Decisão do usuário**: deixar pendente por agora, sem mexer no cadastro de produtos até ter uma fonte de dado confiável (planilha certa, ou preenchimento manual/outra origem).
+
 ## Pendências
 
-- [ ] **Ponto 4 (Imposto/RT/Comissão) — não implementado, precisa de você**: não existe essas 3 fórmulas em nenhum lugar do sistema. Preciso que você defina o cálculo de cada uma (Imposto, RT, Comissão) antes de eu adicionar os campos — inventar uma fórmula aqui mostraria número financeiro errado pra quem usa o painel.
+- [ ] **Ponto 4 (Imposto/RT/Comissão) — não implementado**: campos certos identificados (`icms_entrada`/`ipi_entrada`/`porc_st`/`porc_bdi` pra Imposto), mas os dados estão vazios em quase todo o cadastro de produtos e não há ainda uma fonte confiável pra popular em massa. RT e Comissão continuam sem nenhuma fórmula definida em lugar nenhum do sistema. Aguardando usuário indicar a fonte certa de dado de imposto e definir as fórmulas de RT/Comissão.
 - [ ] Ponto 2 (dois produtos com % parecida): não é bug de cálculo (cada linha usa seu próprio `produtos.preco_custo`, sem valor compartilhado) — só falta confirmar se os produtos específicos citados na reunião (lâmpada vs. Interlight) têm `preco_custo` preenchido corretamente; não tenho os nomes exatos desses produtos pra investigar sem você.

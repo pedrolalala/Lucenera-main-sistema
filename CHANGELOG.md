@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (13)
+
+### Corrigido — SPEC-105: busca de venda de origem na Devolução não achava nada
+
+- Reunião Vinícius 14/08/2026: buscar a venda de origem pra devolução não retornou nada no teste ao vivo — investigação anterior não conseguiu confirmar se era bug ou falta de dado.
+- Reproduzido e confirmado como bug real (sem precisar do usuário): `projetos.cliente_id` pode divergir do `cliente_id` gravado na venda original. Em produção, 2 de 7 projetos com saldo ativo tinham essa divergência, e mais 2 de 7 tinham `cliente_id` nulo — a busca funcionava certo em só 3 de 7 casos.
+- Fix: a busca agora casa por cliente OU pelo projeto atual (antes só por cliente), cobrindo os dois padrões de falha.
+- Publicado Skip 32554 v0.0.343. Testado ao vivo recriando o cenário exato do bug.
+
 ## 2026-08-15 (12)
 
 ### Adicionado — SPEC-108: travar valor/produto no orçamento — só admin (edição)

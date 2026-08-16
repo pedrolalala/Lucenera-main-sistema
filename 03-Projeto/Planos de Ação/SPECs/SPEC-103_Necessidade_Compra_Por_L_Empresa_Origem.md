@@ -72,6 +72,13 @@ Sobre o card de seleção por peça específica ([82:29]-[85:25]): pra produtos 
 - Fix: extraída a lista de seleção pra um componente novo, `SelecionarLParaCompraModal.tsx` — modal de verdade, mesmo padrão visual do "Buscar Venda de Origem" da Devolução (`DevolucaoItemSearchModal.tsx`), com mais espaço pra Orçamento/L/Cliente/Fornecedor lado a lado numa tabela. `NecessidadeDetailsPanel.tsx` (o card lateral em si) ficou simples: resumo do produto + botão "Selecionar L's pra comprar" que abre o modal. Fluxo de geração de pedido (`ModalGerarCompraItemOrcamento.tsx`) não mudou, só quem abre ele.
 - Publicado Skip 40326 v0.0.67. Testado ao vivo de novo com o mesmo produto 10289: modal abriu com as 4 linhas em tabela espaçosa, selecionei 2 (L02/L05), "Gerar Compra (2)" abriu o modal de pedido com os dados certos; cancelado sem confirmar.
 
+### 2026-08-16 — revisão 2: modal também não era onde o usuário queria, seleção volta pra dentro da linha "Ver projetos"
+
+- **Segundo feedback do usuário**, ainda mais específico (mockup da tela colado no chat): a seleção deveria acontecer direto na linha expandida "Ver projetos" da tabela "Por Produto" (`NecessidadeCompraDetalhe.tsx`) — o mesmo lugar que já existe desde a SPEC-039, com Projeto/Orçamento/Cliente/Empresa/Vendido/Reservado/A Comprar — em vez de um modal à parte.
+- `SelecionarLParaCompraModal.tsx` apagado (só existiu ~1h, entre as duas rodadas de feedback). `NecessidadeDetailsPanel.tsx` voltou a ser um resumo puro do produto, com uma dica de texto apontando pra "Ver projetos" na tabela.
+- `NecessidadeCompraDetalhe.tsx`: ganhou checkbox por linha (achado: `vw_necessidade_compra_detalhe`, fonte dessa tabela, não tem L/fornecedor/custo — junta com `vw_necessidade_compra_item_orcamento` por `projeto_item_id`; linha sem correspondência = já coberta por pedido de compra aberto, checkbox desabilitado) e badge do L junto ao código do projeto. Barra "N selecionado(s) · Gerar Compra" aparece dentro da própria linha expandida quando há seleção, abrindo o mesmo `ModalGerarCompraItemOrcamento.tsx` de sempre.
+- Publicado Skip 40326 v0.0.68. Testado ao vivo: produto 10289, "Ver projetos" expande mostrando L10/L11/L05/L02 com checkbox; selecionei L10+L05, barra mostrou "2 L(s) selecionado(s)"; "Gerar Compra (2)" abriu o modal de pedido com as linhas e custo certos; cancelado sem confirmar. Console sem erros durante todo o teste.
+
 ## Pendências
 
 Nenhuma.

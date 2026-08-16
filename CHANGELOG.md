@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-16 (2)
+
+### Corrigido — SPEC-103: seleção de L volta pra dentro da linha "Ver projetos" (2º feedback)
+
+- Usuário mandou um mockup específico: queria o checkbox de seleção direto na linha expandida "Ver projetos" da tabela principal, não num modal à parte (que eu tinha acabado de criar como resposta ao primeiro feedback).
+- Modal separado apagado. Checkbox por L adicionado direto em `NecessidadeCompraDetalhe.tsx` (a linha expandida que já existia desde a SPEC-039), com badge do L junto ao projeto e barra "N selecionado(s) · Gerar Compra" aparecendo ali mesmo.
+- Publicado Skip 40326 v0.0.68. Testado ao vivo ponta a ponta, console sem erros.
+
 ## 2026-08-16 (1)
 
 ### Corrigido — SPEC-103: card de seleção por L virou modal (feedback do usuário)

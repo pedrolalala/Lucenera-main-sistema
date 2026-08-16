@@ -66,6 +66,12 @@ Sobre o card de seleção por peça específica ([82:29]-[85:25]): pra produtos 
 - Cliente e "dias em aberto" (que só existiam na fonte antiga do painel, `vw_entrega_futura_projeto_item`) foram mantidos via merge client-side das duas queries por `projeto_item_id` — nenhuma view nova, nenhuma migration.
 - Publicado Skip 40326 v0.0.66 — QA limpo (1ª tentativa quebrou o build por divs mal fechados após remover as abas; corrigido e republicado). Testado ao vivo: produto 10289 (Interlight) mostra 4 linhas (ORC-0020, L02/L05/L10/L11, cliente Terras Altas, fornecedor Interlight); selecionei 2, "Gerar Compra (2)" abriu o modal com as linhas certas e custo pré-preenchido (R$ 275,12); cancelado sem confirmar (não criei pedido real).
 
+### 2026-08-16 — revisão: card lateral confundia, virou modal
+
+- **Feedback direto do usuário ao testar ao vivo**: o card lateral (~320px de largura) era apertado demais pra escolher entre vários L's/clientes — "só ali na lateral vai confundir".
+- Fix: extraída a lista de seleção pra um componente novo, `SelecionarLParaCompraModal.tsx` — modal de verdade, mesmo padrão visual do "Buscar Venda de Origem" da Devolução (`DevolucaoItemSearchModal.tsx`), com mais espaço pra Orçamento/L/Cliente/Fornecedor lado a lado numa tabela. `NecessidadeDetailsPanel.tsx` (o card lateral em si) ficou simples: resumo do produto + botão "Selecionar L's pra comprar" que abre o modal. Fluxo de geração de pedido (`ModalGerarCompraItemOrcamento.tsx`) não mudou, só quem abre ele.
+- Publicado Skip 40326 v0.0.67. Testado ao vivo de novo com o mesmo produto 10289: modal abriu com as 4 linhas em tabela espaçosa, selecionei 2 (L02/L05), "Gerar Compra (2)" abriu o modal de pedido com os dados certos; cancelado sem confirmar.
+
 ## Pendências
 
 Nenhuma.

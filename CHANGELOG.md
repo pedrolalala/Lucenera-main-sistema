@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-16 (1)
+
+### Corrigido — SPEC-103: card de seleção por L virou modal (feedback do usuário)
+
+- Usuário testou ao vivo e reportou: o card lateral criado pra selecionar L's ficava apertado demais, confundia.
+- Lista de seleção (Orçamento/L/Cliente/Fornecedor/Pendente) saiu do card lateral (~320px) e virou um modal de verdade, mesmo padrão do "Buscar Venda de Origem" da Devolução. Card lateral agora só tem o resumo do produto e um botão que abre o modal.
+- Publicado Skip 40326 v0.0.67. Testado ao vivo: modal abre com as linhas certas, seleção e geração de pedido funcionando ponta a ponta.
+
 ## 2026-08-15 (16)
 
 ### Adicionado — SPEC-106 (parcial): margem padrão de 50% pra peça sem cadastro

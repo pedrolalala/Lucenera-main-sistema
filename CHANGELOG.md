@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-16 (4)
+
+### Corrigido — Backfill produtos.referencia = produtos.sku
+
+- Usuário pediu pra corrigir o campo `referencia` vazio usando a planilha `Produtos__2026-08-07.xlsx`.
+- Achado: a coluna "Referencia" da planilha é uma cópia do `sku` (4313 de 4351 produtos batendo exatamente) — não é dado novo. Dos 35 casos onde `sku` estava vazio e a planilha tinha valor, 33 colidiam com SKU já usado por outra variante de cor/tamanho do mesmo produto (a planilha não distingue variante) — só 2 eram seguros de importar.
+- Decisão do usuário: em vez de tentar reconciliar essas variantes, espelhar `sku` → `referencia` em todo o catálogo (`UPDATE produtos SET referencia = sku WHERE referencia vazio`), pra que sistemas que leiam a coluna `referencia` diretamente (fora do Cadastro Lucenera, que já usa `sku` via decisão de 11/08) também tenham o dado.
+- Migration `20260816_118_backfill_referencia_a_partir_do_sku` aplicada no Supabase real: 4686 linhas atualizadas, 0 sobrescritas (referencia estava 100% vazia antes). Não muda nenhuma UI.
+
 ## 2026-08-16 (3)
 
 ### Corrigido — Cadastro Lucenera: bug antigo de PecaModal duplicado + card lateral maior

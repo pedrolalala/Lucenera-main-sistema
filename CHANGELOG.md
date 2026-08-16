@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-16 (5)
+
+### Adicionado — SPEC-114: busca + parcela/cliente/vencimento na seleção de boleto (Admin Bancária)
+
+- Reunião Vinícius 14/08/2026: ele confundiu qual parcela (P1/P2/P3) era qual ao vincular NF a boleto, quando os valores eram parecidos.
+- Sem campo de "número de parcela" em `boletos` — derivado no frontend agrupando por `orcamento_id` e ordenando por `vencimento`. Adicionado busca livre (cliente/número) nos dois seletores (form + modal "Vincular a um Boleto"); cada opção agora mostra `P{n}` · cliente · vencimento · valor.
+- **Achado ao testar ao vivo**: bug pré-existente deixava a tela toda em branco (crash) quando um orçamento tinha boleto mas nenhuma NF registrada — corrigido junto.
+- Publicado Skip 36395 v0.0.64. Testado ao vivo com orçamento real de 13 parcelas, busca filtrando corretamente, sem erros.
+
 ## 2026-08-16 (4)
 
 ### Corrigido — Backfill produtos.referencia = produtos.sku

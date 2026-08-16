@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-15 (15)
+
+### Adicionado — SPEC-109: PDF do orçamento — código real, L separado, ordenar por L, 2 modelos
+
+- Reunião Vinícius 14/08/2026: 4 ajustes no PDF gerado pela Edge Function generate-report.
+- Achado: a tabela `orcamento_arquitetos` (múltiplos arquitetos com % de comissão, SPEC-077) existe de verdade em produção — o dump local usado na investigação anterior estava desatualizado e não mostrava essa tabela.
+- Coluna "Código" agora usa o código real do produto (nunca mais o L nem a referência); "L" virou coluna própria; itens ordenados por número do L; nova "Data de Emissão" ao lado da "Data Impressão"; botão "Baixar PDF" virou menu com 2 modelos (cliente / interno com referência); PDF mostra todos os arquitetos quando o orçamento tiver mais de um cadastrado.
+- Publicado Skip 32554 v0.0.345. Testado via chamada direta à API (mesma sessão do navegador) com orçamento real de 4+ itens — os 2 modelos geraram PDF válido com tamanhos diferentes, como esperado.
+
 ## 2026-08-15 (14)
 
 ### Adicionado — SPEC-110: ordem Sinal/Desconto consistente + sinal pré-preenchido por cliente

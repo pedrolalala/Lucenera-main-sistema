@@ -8,12 +8,23 @@ Modelo relacional (grounded em supabase/db/current/01_schema_full.sql):
   chave natural transacoes:   UNIQUE (negociacao_id, cod_itens_duplicata)
 
 A planilha NAO diferencia ISLIGHT/FOCO/MANOELLA (cod_empresa/nm_empresa são
-constantes em todas as linhas = "LUCE NERA"). Duplicatas cujo (cod_duplicata,
-tipo) já existe em negociacoes (criadas por uma empresa real) são só
-sincronizadas normalmente. Duplicatas GENUINAMENTE NOVAS (nunca importadas)
-são criadas sob a empresa "LUCE NERA" (grupo/holding, ver decisão do usuário
-em 2026-07-15) — nunca sob ISLIGHT/FOCO/MANOELLA, que exigiriam um dado que
-não existe nesta planilha.
+constantes em todas as linhas = "LUCE NERA"). "LUCE NERA" NAO é uma 4ª
+empresa — é como o sistema legado Connect identifica a MANOELLA (mapeamento
+permanente, confirmado pelo usuário em 2026-08-17: "luce nera = Manoella",
+porque é assim que está cadastrado no banco de dados do Connect). Não é uma
+decisão de negócio nem uma migração pontual — é fixo, sempre vai ser assim
+enquanto a planilha vier do Connect. Duplicatas cujo (cod_duplicata, tipo)
+já existe em negociacoes (criadas por uma empresa real) são só sincronizadas
+normalmente. Duplicatas GENUINAMENTE NOVAS (nunca importadas) são criadas
+sob a empresa MANOELLA (EMPRESA_LUCE_NERA_ID abaixo) — nunca sob
+ISLIGHT/FOCO, que exigiriam um dado que não existe nesta planilha.
+
+Havia um registro "LUCE NERA" separado em `empresas` (grupo/holding, ver
+decisão de 2026-07-15) usado como placeholder até 2026-08-17; ele foi
+removido/consolidado em algum momento sem passar pelo CHANGELOG e o import
+quebrou com foreign key error (`negociacoes_empresa_id_fkey`) até essa
+correção. NÃO recriar essa empresa "LUCE NERA" separada — o destino correto
+é sempre MANOELLA.
 
 Combinações (cod_duplicata, tipo) AMBÍGUAS (já existem em mais de uma empresa
 real) são puladas e reportadas — não são criadas sob LUCE NERA para não
@@ -46,9 +57,11 @@ from _supabase_client import get_client, SUPABASE_URL  # noqa: E402
 CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-08-17.xlsx"
 CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-08-17.xlsx"
 
-# "LUCE NERA" (holding/grupo) deixou de existir em `empresas` — usuário
-# confirmou 2026-08-17 que duplicatas novas/ambíguas passam a ir para
-# MANOELLA em vez do antigo placeholder de grupo.
+# "LUCE NERA" = MANOELLA. NAO é uma decisão, é um fato permanente: é assim
+# que a empresa está identificada no banco de dados do Connect (sistema
+# legado que gera esta planilha). Confirmado pelo usuário em 2026-08-17.
+# Se esse id mudar de novo (empresa recriada/renomeada), atualizar aqui —
+# mas o mapeamento LUCE NERA->MANOELLA em si NUNCA muda.
 EMPRESA_LUCE_NERA_ID = "9c877812-20e9-452c-bc65-5a542f67ff94"  # MANOELLA
 
 BATCH_SIZE = 200

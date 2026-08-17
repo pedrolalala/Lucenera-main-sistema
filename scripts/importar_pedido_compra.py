@@ -53,7 +53,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from _supabase_client import get_client, SUPABASE_URL  # noqa: E402
 
-PLANILHA_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "PedidoCompra_2026-08-07.xlsx"
+PLANILHA_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "PedidoCompra_2026-08-17.xlsx"
 
 BATCH_SIZE = 200
 

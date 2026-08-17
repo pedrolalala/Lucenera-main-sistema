@@ -43,10 +43,13 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from _supabase_client import get_client, SUPABASE_URL  # noqa: E402
 
-CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-08-07.xlsx"
-CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-08-07.xlsx"
+CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-08-17.xlsx"
+CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-08-17.xlsx"
 
-EMPRESA_LUCE_NERA_ID = "2470fa14-1a00-4952-92e2-7e8cf61f8943"
+# "LUCE NERA" (holding/grupo) deixou de existir em `empresas` — usuário
+# confirmou 2026-08-17 que duplicatas novas/ambíguas passam a ir para
+# MANOELLA em vez do antigo placeholder de grupo.
+EMPRESA_LUCE_NERA_ID = "9c877812-20e9-452c-bc65-5a542f67ff94"  # MANOELLA
 
 BATCH_SIZE = 200
 PAGE_SIZE = 1000

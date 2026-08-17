@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-17 (2)
+
+### Adicionado — SPEC-116: rollout da busca universal nos 6 sistemas restantes
+
+- Depois dos 2 pilotos (Cadastro/CRM, ver entrada anterior), rollout completo no mesmo dia: Orçamentos (Skip 32554), Estoque/Compras (Skip 40326), Logística (Skip 24039), Admin Bancária (Skip 36395), RH (Skip 23919), Hub/TI (Skip 37750) — todos publicados em produção.
+- **Padrão usado**: telas client-side (array já carregado) ganharam `normalize()` (accent-strip) + multi-termo AND; telas server-side ganharam `.or()` encadeado por termo (PostgREST soma como AND entre grupos).
+- **Achados no processo**: (1) `TransactionFilters.tsx`/`transactionService.ts` do checklist original estava em Orçamentos, não em Admin Bancária — corrigido no sistema certo; (2) PostgREST não aceita `.or()` combinando coluna própria com coluna de tabela relacionada (embedded resource) — confirmado direto contra a API real (erro PGRST100); solução é filtrar client-side quando isso for necessário (usado em `PedidosCompra.tsx`); (3) submodule local de Logística tinha uma feature (duplo-clique) commitada mas nunca publicada no Skip — mudança de busca aplicada sem misturar com essa feature pendente.
+- Todos os sistemas passaram no QA automático do Skip antes de publicar. Ainda não testados ao vivo no navegador (só os 2 pilotos foram) — ver Pendências da SPEC-116.
+
 ## 2026-08-17
 
 ### Adicionado — SPEC-116 (pilotos 1 e 2): busca universal multi-coluna estilo Google

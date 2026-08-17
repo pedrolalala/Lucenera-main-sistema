@@ -7,7 +7,7 @@ sistemas_envolvidos:
   - CRM (lucenera-crm-3bd29, Skip 24580) — piloto 2
   - Orçamentos (gestao-financeira-clone-544cb, Skip 32554)
   - Estoque/Compras (compras-lucenera-3o23t98ee, Skip 40326)
-  - Logística (lucenera-logistics-b7cd1, Skip 48801)
+  - Logística (lucenera-logistics-b7cd1, Skip 24039)
   - Admin Bancária/Financeiro (retorno-bancario-bradesco-5392a, Skip 36395)
   - RH (dashboard-rh-lucenera-5fe9c)
   - Hub/TI (central-lucenera-dashboard-1c9ba)
@@ -30,12 +30,12 @@ dependencias:
 - [x] **Piloto 1 (server-side) — Cadastro `Pecas.tsx`**: RPC `buscar_produtos_fuzzy` estendida (migration `20260817_119_spec116_busca_universal_produtos_fuzzy`, aplicada no Supabase real) para multi-termo AND + `descricao_tecnica`; `getProdutosEstoqueFiltradoBatched()` trocado para consumir a RPC. Publicado Skip 36668, testado via psql (não via navegador — ver pendência abaixo).
 - [x] **Piloto 2 (client-side) — CRM `Clientes.tsx`/`Projetos.tsx`**: busca multi-termo normalizada contra todos os campos relevantes da linha. Publicado Skip 24580. `Engenheiros.tsx`/`Arquitetos.tsx`/`Eletricistas.tsx` ficaram fora deste piloto (não abertos nesta rodada) — tratar no rollout do CRM.
 - [x] Validar os 2 pilotos ao vivo no navegador (golden path) — feito 2026-08-17; achou e corrigiu 2 bugs reais só visíveis ao vivo (ver Realizado)
-- [ ] Rollout Orçamentos: `DevolucaoItemSearchModal.tsx`, `BudgetItemCard.tsx` (não usam ainda o padrão fuzzy do `ProductSearchModal.tsx`)
-- [ ] Rollout Estoque/Compras: `EstoqueProdutos.tsx`, `NecessidadeCompra.tsx`, `Cotacoes.tsx`, `PedidosCompra.tsx`, `Marcas.tsx`, `EntradaNotaFiscal.tsx`, `ModalRegistrarCompra.tsx`
-- [ ] Rollout Logística: `SeparacaoPage.tsx`, `PendentesPage.tsx`, `EntregasFinalizadasPage.tsx`
-- [ ] Rollout Admin Bancária/Financeiro: telas restantes além de `NotasFiscais.tsx` (já corrigida na SPEC-114) — `ConsultarDuplicatas.tsx`, `TransactionFilters.tsx`
-- [ ] Rollout RH: `Funcionarios.tsx`, `Avaliacoes.tsx`, `Cargos.tsx`
-- [ ] Rollout Hub/TI: `LogsTab.tsx` e demais telas administrativas com busca
+- [x] Rollout Orçamentos (Skip 32554, v0.0.347): `devolucoesService.ts` (usado por `DevolucaoItemSearchModal.tsx`) — multi-termo AND no nome do produto via `.ilike()` encadeado. `budget-search.ts` (usado por `DraftBudgetsTab.tsx`/`ClientApprovalTab.tsx`/`projectFinancialApprovalService.ts`) — multi-termo + accent-insensitive, e passou a checar `arquiteto.nome` (já existia no tipo, nunca era comparado). `BudgetItemCard.tsx` não tinha busca própria — delega pro `ProductSearchModal.tsx`, que já usa `buscar_produtos_fuzzy` (SPEC-100), já beneficiado pela extensão da SPEC-116 no piloto 1.
+- [x] Rollout Estoque/Compras (Skip 40326, v0.0.69): `estoque-produtos.ts` (EstoqueProdutos.tsx) multi-termo + categoria; `necessidade-compra.ts` (NecessidadeCompra.tsx + Cotacoes.tsx, mesmo service) multi-termo preservando o cuidado com `produto_codigo` integer (sem ilike); `notas-fiscais-compra.ts` multi-termo + sku na busca leve de produto; `pedido-compra.ts` (PedidosCompra.tsx) passa a casar por número OU fornecedor (client-side — PostgREST não aceita OR entre coluna própria e coluna de resource embutido no mesmo `.or()`, confirmado contra a API real). `Marcas.tsx` e `ModalRegistrarCompra.tsx` já usavam `buscar_fornecedores_fuzzy` (SPEC-030) — sem mudança necessária (entidade de campo único, não multi-atributo).
+- [x] Rollout Logística (Skip 24039, v0.0.91): `SeparacaoPage.tsx`, `PendentesPage.tsx`, `EntregasFinalizadasPage.tsx` — multi-termo + accent-insensitive em cliente/obra/endereço/responsável/telefone/motivo. Achado: submodule local tinha uma feature (duplo-clique abre edição, commit `485a5e8`) publicada só no Skip? não — commitada localmente mas não publicada no Skip ainda; escrevi no Skip preservando o comportamento de produção atual (sem o duplo-clique) e reapliquei minhas mudanças em cima do local real (com duplo-clique) separadamente, pra não misturar as duas mudanças num commit só.
+- [x] Rollout Admin Bancária (Skip 36395, v0.0.65): `ConsultarDuplicatas.tsx` — campo "Pessoa" multi-termo + accent-insensitive. Achado: `TransactionFilters.tsx` do checklist original não fica neste sistema — está em Orçamentos (Skip 32554, `src/components/transactions/TransactionFilters.tsx` + `transactionService.ts`), corrigido junto com o rollout de Orçamentos (multi-termo na descrição da transação).
+- [x] Rollout RH (Skip 23919, v0.0.222): `Funcionarios.tsx` multi-termo (nome/cargo/e-mail/CPF/empresa), `Avaliacoes.tsx` multi-termo no nome do funcionário, `Cargos.tsx` multi-termo (título/departamento) — todos accent-insensitive.
+- [x] Rollout Hub/TI (Skip 37750, v0.0.39): `LogsTab.tsx` multi-termo (tabela/operação/observação). `UsersTab.tsx` e demais abas admin não têm campo de busca (listas completas sem filtro) — fora do escopo desta SPEC.
 - [ ] Avaliar Ubiqua e Dashboard Financeiro satélite (ver Pendências) antes de incluir no rollout
 - [ ] Atualizar `AI_DB_CONTEXT.md` de cada sistema alterado que envolver RPC/schema nova
 - [ ] Atualizar `supabase/db/domains/estoque_compras.md` (extensão da RPC `buscar_produtos_fuzzy`) e `CHANGELOG.md`
@@ -150,12 +150,30 @@ Para cada tela migrada:
   2. **Bug de NULL na RPC (lógica de 3 valores do SQL)**: `p.sku ilike '%termo%'` retorna NULL (não `false`) quando `sku` é NULL, e isso quebrava o `NOT EXISTS` do multi-termo — um termo que não casava em nenhum campo era silenciosamente ignorado em vez de reprovar o produto, então "led plafon" trazia produtos sem nenhum "led". Corrigido envolvendo toda coluna nullable com `coalesce(coluna, '')` antes do `ilike` (migration `002_fix_null_propagation_multitermo.sql`, aplicada no Supabase real). Contagem de falsos positivos: 2000 (capped) → 168 resultados reais para "led plafon".
 - Validação final ao vivo: Cadastro (`interlight`→500 sem erro, `led plafon`→168 corretos), CRM Clientes (`vinicius ribeirao` casa cliente com nome+cidade em campos diferentes), CRM Projetos (`sao paulo` sem acento casa "São Paulo" com acento). Sem regressão visível nos golden paths testados.
 
+### 2026-08-17 (rollout completo, mesmo dia)
+
+Rollout dos 6 sistemas restantes concluído no mesmo dia dos pilotos, todos publicados em produção:
+
+- **Orçamentos** (Skip 32554, v0.0.347/v0.0.348): `devolucoesService.ts` (multi-termo no nome do produto), `budget-search.ts` (multi-termo + accent-insensitive na lista de orçamentos, agora também checa arquiteto), `transactionService.ts` (multi-termo na descrição de transações — achado: `TransactionFilters.tsx` do checklist original estava aqui, não em Admin Bancária).
+- **Estoque/Compras** (Skip 40326, v0.0.69): `estoque-produtos.ts`, `necessidade-compra.ts` (preservando o cuidado com `produto_codigo` integer/sem ilike), `notas-fiscais-compra.ts`, `pedido-compra.ts` (busca por número OU fornecedor, resolvida client-side — achado: PostgREST não aceita `.or()` entre coluna própria e coluna de resource embutido, confirmado contra a API real).
+- **Logística** (Skip 24039, v0.0.91): `SeparacaoPage.tsx`, `PendentesPage.tsx`, `EntregasFinalizadasPage.tsx` — achado: submodule local tinha feature não publicada (duplo-clique, commit `485a5e8`), preservada separada da mudança de busca.
+- **Admin Bancária** (Skip 36395, v0.0.65): `ConsultarDuplicatas.tsx` (campo Pessoa).
+- **RH** (Skip 23919, v0.0.222): `Funcionarios.tsx`, `Avaliacoes.tsx`, `Cargos.tsx`.
+- **Hub/TI** (Skip 37750, v0.0.39): `LogsTab.tsx`.
+
+Todos os sistemas passaram no QA automático do Skip (build/lint/test) antes de publicar. Não testado ao vivo no navegador ainda para estes 6 sistemas (só os 2 pilotos foram testados ao vivo) — ver Pendências.
+
+**Padrão técnico usado no rollout**: telas client-side (array já carregado) usaram `normalize()` (accent-strip) + multi-termo AND, mesmo padrão dos pilotos. Telas server-side usaram `.or()` encadeado por termo (mesma coluna) — PostgREST soma automaticamente como AND entre grupos; confirmado empiricamente que isso NÃO funciona quando um dos lados é uma coluna de tabela relacionada (embedded resource) — nesse caso, filtrar client-side é a solução segura.
+
 ## Pendências
 
 - [ ] Testar os 2 pilotos ao vivo no navegador (golden path) — até agora só QA automático do Skip (build/lint/test) e smoke-test via psql direto na RPC, ninguém clicou nas telas publicadas (`cadastro-lucenera-b86fe.goskip.app` / `lucenera-crm-3bd29.goskip.app`) ainda.
 - [ ] Sincronizar `04-Sistemas/lucenera-crm-3bd29 (1)/src/pages/Projetos.tsx` local com o Skip (projectId 24580) — está numa versão anterior à SPEC-043/044 (usa `getProjetos()`/Sheet lateral em vez de `useProjectStore`); a mudança da SPEC-116 nesse arquivo só existe em produção (Skip), não no submodule local. Precisa de uma sincronização completa do arquivo (não incremental), não só desta mudança.
 - [ ] `Engenheiros.tsx`/`Arquitetos.tsx`/`Eletricistas.tsx`/`Fornecedores.tsx` do CRM não entraram no piloto 2 — mesmo padrão de `Clientes.tsx` deve ser aplicado nesses arquivos no rollout do CRM.
+- [ ] Testar ao vivo no navegador os 6 sistemas do rollout (Orçamentos, Estoque/Compras, Logística, Admin Bancária, RH, Hub/TI) — só passaram no QA automático do Skip até aqui, ninguém clicou nas telas publicadas ainda (diferente dos 2 pilotos, que já foram validados ao vivo e tiveram 2 bugs reais corrigidos no processo — é razoável esperar que uma auditoria ao vivo destes 6 também encontre algo).
+- [ ] **Limitação PostgREST descoberta no rollout de Compras**: não dá pra combinar uma coluna da própria tabela com uma coluna de resource embutido (join) dentro do mesmo `.or()` — dá erro de parse (PGRST100), confirmado direto contra a API real. Quando a busca multi-termo precisar cruzar coluna própria + coluna de tabela relacionada (ex.: "número do pedido" + "nome do fornecedor"), a solução é filtrar client-side sobre os dados já carregados (funciona bem pra listas pequenas/bounded, tipo os 300 pedidos de PedidosCompra.tsx) — não tentar `!inner` + `.or()` combinando as duas.
 - [ ] Aplicar a mesma lição do bug de NULL (coalesce antes de ilike em coluna nullable, dentro de qualquer OR-chain usado num filtro multi-termo) em qualquer RPC fuzzy nova do rollout — não é específico de `buscar_produtos_fuzzy`, é um risco genérico do padrão "variante A" sempre que a tabela tiver colunas nullable no meio do OR-chain.
+- [ ] Achado colateral no rollout de Logística: o submodule local (`lucenera-logistics-b7cd1`) tem commit `485a5e8` ("duplo-clique abre edição/ação direto — padrão Cadastro" em Calendário/Separação/Pendências/Usuários) que nunca foi publicado no Skip (projectId 24039) — produção não tem esse comportamento ainda. Fora do escopo desta SPEC; alguém precisa decidir se publica.
 - [ ] Confirmar se Ubiqua entra no escopo desta rodada — está marcado como baixa prioridade desde a consolidação de 24/06/2026 (`03-Projeto/00_INDICE.md`); aplicar o mesmo padrão lá custa esforço sem prioridade confirmada pelo usuário.
 - [ ] Confirmar se o Dashboard Financeiro satélite (`dashboard-lucenera-b02z85wa3`) entra no escopo — ele roda sobre o livro-caixa `transacoes`, desconectado do resto do ecossistema (achado da SPEC-064); melhorar a busca ali não conecta os dados, só melhora a UX de uma fonte isolada.
 - [ ] Confirmar se o dashboard Python (`dashboard/`) precisa de busca universal — os arquivos aparecem como deletados no working tree atual (`git status`), sugerindo descontinuação; se for esse o caso, remover da lista de sistemas afetados desta SPEC.

@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-17 (3)
+
+### Corrigido — SPEC-116: teste ao vivo do rollout completo (8 sistemas) achou 5 bugs reais
+
+- Depois do rollout dos 6 sistemas (entrada anterior), pedido do usuário ("teste todos!!") de validar cada um ao vivo no navegador, não só via QA automático do Skip.
+- **Orçamentos**: aba "Todos" usa `useBudgetStore.ts`, implementação separada de `budget-search.ts` (já corrigida no rollout) — nunca checava `arquiteto`, era de 1 termo e sensível a acento. "ribeiro" (nome de arquiteto visível na tela) retornava 0 antes da correção. Corrigido; publicado Skip 32554 v0.0.349.
+- **Logística**: `EntregasFinalizadasPage.tsx` buscava `recebido_por`, mas a coluna de pessoa realmente exibida na linha é `gestora_equipe` — "marina borgato" retornava 0 antes da correção. Achado colateral ao investigar: `SeparacaoPage.tsx` também não checava `endereco_entrega`/`gestora_equipe`, e `PendentesPage.tsx` não checava `resolved_by` na aba Resolvidas. Publicado Skip 24039 v0.0.92.
+- **Estoque/Compras, Admin Bancária, Hub/TI, RH**: testados ao vivo sem bug novo — confirma que os padrões (client-side normalize+multi-termo / server-side `.or()` encadeado) aplicados no rollout já estavam corretos nesses sistemas.
+- `Avaliacoes.tsx`/`Cargos.tsx` (RH) e `DevolucaoItemSearchModal.tsx` (Orçamentos) não têm dado suficiente em produção pra exercitar a busca ao vivo — mudanças de baixo risco, aceitas por revisão de código.
+- **Pendente**: 2 commits locais (Logística `823d074`, Orçamentos `3a63a23`) ainda não empurrados pro GitHub — `git push` trava no prompt interativo do Git Credential Manager, precisa ser rodado manualmente pelo usuário. Produção (Skip) já está correta em ambos.
+
 ## 2026-08-17 (2)
 
 ### Adicionado — SPEC-116: rollout da busca universal nos 6 sistemas restantes

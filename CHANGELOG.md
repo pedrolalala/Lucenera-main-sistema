@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-17 (4)
+
+### Corrigido — RH: não era possível editar salário de nenhum funcionário
+
+- Usuário reportou erro ao tentar alterar o salário do Pedro: `column "salario_liquido" can only be updated to DEFAULT`.
+- Causa raiz: `funcionarios_financeiro.salario_liquido` é `GENERATED ALWAYS AS (salario_base + salario_por_fora) STORED` — Postgres calcula sozinho e rejeita qualquer valor explícito. Tanto `funcionarios.ts` (`createEmployee`/`updateEmployee`, usado no cadastro) quanto `EmployeeFinance.tsx` (aba "Financeiro/Folha", usado pra lançar a folha do mês) mandavam esse campo no payload de escrita — afetava 100% das tentativas de editar/criar dados financeiros de qualquer funcionário, não só o Pedro.
+- Removido `salario_liquido` dos dois payloads de escrita. O input "Salário Líquido (R$)" em `EmployeeFinance.tsx` foi removido — nunca alimentava nada de fato (a folha usa seu próprio cálculo, `salario_base - descontos + adicionais + salario_por_fora`), só existia pra ser mandado pro payload quebrado; mantido só o "Salário Líquido Calculado" (somente leitura) no resumo.
+- **Achado colateral**: submodule local (`dashboard-rh-lucenera-5fe9c`) já estava com `funcionarios.ts` desatualizado em relação ao Skip — faltava o campo `perfil` (SPEC-064). Sincronizado no mesmo commit.
+- Publicado Skip 23919 v0.0.224. Testado ao vivo: erro de `salario_liquido` não ocorre mais; guard pré-existente de "Empresa não definida" (SPEC-065) segue funcionando normalmente pra funcionários sem empresa cadastrada — não é regressão, é validação intencional.
+
 ## 2026-08-17 (3)
 
 ### Corrigido — SPEC-116: teste ao vivo do rollout completo (8 sistemas) achou 5 bugs reais

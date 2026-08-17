@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-17
+
+### Adicionado — SPEC-116 (pilotos 1 e 2): busca universal multi-coluna estilo Google
+
+- Pedido do usuário: busca full-text multi-coluna, parcial, sem distinção de acento/maiúscula, com múltiplos termos em qualquer ordem, em todo campo de busca do ecossistema.
+- SPEC-116 criada cobrindo os ~10 sistemas; usuário aprovou seguir a recomendação (rollout faseado, começando pelos 2 pilotos abaixo). Ubiqua e Dashboard Financeiro satélite ficaram fora desta rodada (baixa prioridade / dados desconectados).
+- **Piloto 1 — Cadastro (server-side)**: RPC `buscar_produtos_fuzzy` (SPEC-100) estendida — migration `20260817_119_spec116_busca_universal_produtos_fuzzy` — para casar múltiplos termos em qualquer ordem (antes era a frase inteira) e incluir `descricao_tecnica` (antes só nome/sku/referencia/marca/categoria). `Pecas.tsx` (`getProdutosEstoqueFiltradoBatched`) trocou o fallback ilike exato/parcial por uma chamada a essa RPC. Migration aplicada no Supabase real; testado ao vivo via psql: "interlight" (marca) e "led plafon" (2 termos, ordens trocadas) retornam corretamente. Publicado Skip 36668.
+- **Piloto 2 — CRM (client-side)**: `Clientes.tsx` e `Projetos.tsx` — busca por múltiplos termos normalizados (accent-strip) contra todos os campos relevantes da linha (Clientes: nome/empresa/razão social/CPF-CNPJ/e-mail/telefone/endereço/observações; Projetos: código/nome/status/cidade/UF/cliente/arquiteto/engenheiro/responsável), em vez de 1-2 campos fixos com frase inteira. Publicado Skip 24580.
+- **Achado**: submodule local `lucenera-crm-3bd29 (1)/src/pages/Projetos.tsx` estava desatualizado (versão pré-SPEC-043/044, com Sheet lateral e `getProjetos()` em vez de `useProjectStore`) — a mudança foi escrita direto no Skip para não regredir esse refactor mais recente; o submodule local ficou sem essa mudança específica (só `Clientes.tsx` foi sincronizado localmente).
+- Próximos passos (rollout dos demais sistemas) documentados na própria SPEC-116.
+
 ## 2026-08-16 (5)
 
 ### Adicionado — SPEC-114: busca + parcela/cliente/vencimento na seleção de boleto (Admin Bancária)

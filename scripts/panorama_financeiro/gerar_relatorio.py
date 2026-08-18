@@ -554,13 +554,10 @@ def build_html(c, p, sintese, hoje):
 
 def export_pdf(html_path: Path, pdf_path: Path, chrome_path: str, profile_dir: Path):
     profile_dir.mkdir(parents=True, exist_ok=True)
+    pdf_path = pdf_path.resolve()
+    profile_dir = profile_dir.resolve()
     cmd = [
         chrome_path,
-        # "--headless=new" simula o navegador completo e tenta inicializar
-        # servicos de fundo (GCM, sync, etc.) que nao existem no container
-        # de CI - fica tentando de novo e trava o processo inteiro (achado
-        # em CI, 2026-08-18). "--headless" (modo antigo/"shell") e' feito
-        # exatamente pra automacao tipo print-to-pdf, sem essa bagagem.
         "--headless", "--disable-gpu", "--no-sandbox",
         # /dev/shm costuma ser minusculo em runners de CI (GitHub Actions,
         # Docker) - sem essa flag o Chrome trava/crasha silenciosamente
@@ -570,14 +567,34 @@ def export_pdf(html_path: Path, pdf_path: Path, chrome_path: str, profile_dir: P
         "--disable-sync",
         "--disable-default-apps",
         "--disable-extensions",
+        "--disable-breakpad",
+        "--disable-client-side-phishing-detection",
+        "--disable-component-update",
+        "--disable-hang-monitor",
+        "--disable-ipc-flooding-protection",
+        "--disable-popup-blocking",
+        "--disable-prompt-on-repost",
+        "--disable-renderer-backgrounding",
+        "--metrics-recording-only",
         "--no-first-run",
+        "--enable-automation",
+        "--password-store=basic",
+        "--use-mock-keychain",
+        # --headless (mesmo o "antigo") em versoes recentes de Chrome ficou
+        # preso indefinidamente tentando falar com GCM/DBus/NetworkManager
+        # que nao existem no container de CI (achado em CI, 2026-08-18,
+        # apos --disable-dev-shm-usage sozinho nao ter resolvido). Essas
+        # duas flags forcam o Chrome a parar de esperar a pagina "ficar
+        # quieta" e renderizar/imprimir logo, em vez de ficar pendurado.
+        "--run-all-compositor-stages-before-draw",
+        "--virtual-time-budget=15000",
         "--no-pdf-header-footer",
         f"--user-data-dir={profile_dir}",
         f"--print-to-pdf={pdf_path}",
         html_path.resolve().as_uri(),
     ]
     try:
-        subprocess.run(cmd, check=True, capture_output=True, timeout=120)
+        subprocess.run(cmd, check=True, capture_output=True, timeout=90)
     except subprocess.CalledProcessError as exc:
         print(exc.stdout.decode("utf-8", "replace"))
         print(exc.stderr.decode("utf-8", "replace"))

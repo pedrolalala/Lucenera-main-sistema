@@ -85,7 +85,7 @@ def get_db_url():
 
     url = os.environ.get("SUPABASE_DB_URL")
     if url:
-        return url
+        return url.strip()
     env_path = ROOT / ".env"
     if env_path.exists():
         text = env_path.read_text(encoding="utf-8")

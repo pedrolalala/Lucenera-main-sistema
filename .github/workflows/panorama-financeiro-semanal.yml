@@ -29,9 +29,10 @@ jobs:
         id: setup-chrome
         uses: browser-actions/setup-chrome@v1
 
-      - name: Gerar relatorio (HTML + PDF)
+      - name: Gerar relatorio (HTML + PDF) e enviar por e-mail
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           PYTHONIOENCODING: utf-8
         run: |
           set -e
@@ -42,7 +43,8 @@ jobs:
           python scripts/panorama_financeiro/gerar_relatorio.py \
             --out-html "$PASTA/Panorama_Financeiro_Lucenera_${DATA_HOJE}.html" \
             --pdf "$PASTA/Panorama_Financeiro_Lucenera_${DATA_HOJE}.pdf" \
-            --chrome "${{ steps.setup-chrome.outputs.chrome-path }}"
+            --chrome "${{ steps.setup-chrome.outputs.chrome-path }}" \
+            --email-to pedro@lucenera.com.br
 
           cp "$PASTA/Panorama_Financeiro_Lucenera_${DATA_HOJE}.html" "$PASTA/Panorama_Financeiro_Lucenera_latest.html"
           cp "$PASTA/Panorama_Financeiro_Lucenera_${DATA_HOJE}.pdf" "$PASTA/Panorama_Financeiro_Lucenera_latest.pdf"

@@ -12,17 +12,27 @@ poder automatizar 100% via GitHub Actions, sem depender de um agente de IA
 no loop. Ver memoria do projeto "project_panorama_financeiro_pipeline" pro
 historico completo.
 
+Envio de e-mail (opcional, --email-to): reusa o mesmo provedor ja usado nas
+Edge Functions do projeto (Resend, ver supabase/functions/welcome-email) -
+nao introduz um provedor novo. Precisa de RESEND_API_KEY no ambiente. O
+corpo do e-mail e um resumo estatico (sem os graficos em canvas/JS, que nao
+rodam em cliente de e-mail); o HTML interativo completo e o PDF vao como
+anexo.
+
 Uso:
   python scripts/panorama_financeiro/gerar_relatorio.py --out-html out.html
   python scripts/panorama_financeiro/gerar_relatorio.py --out-html out.html --pdf out.pdf --chrome "/path/to/chrome"
+  python scripts/panorama_financeiro/gerar_relatorio.py --out-html out.html --pdf out.pdf --chrome "/path/to/chrome" --email-to pedro@lucenera.com.br
 """
 
 import argparse
+import base64
 import datetime
 import json
 import re
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 import psycopg2
@@ -554,11 +564,78 @@ def export_pdf(html_path: Path, pdf_path: Path, chrome_path: str, profile_dir: P
     subprocess.run(cmd, check=True, capture_output=True, timeout=60)
 
 
+def build_email_body(c, hoje):
+    """Resumo estatico (sem canvas/JS - nao roda em cliente de e-mail).
+    O relatorio interativo completo vai em anexo (HTML + PDF)."""
+    saldo_aberto = c["receber_aberto"] - c["pagar_aberto"]
+    linhas_kpi = [
+        ("Saldo realizado (13 meses)", brl(c["saldo_13m"]), c["saldo_13m"] >= 0),
+        ("Saldo em aberto (a receber − a pagar)", brl(saldo_aberto), saldo_aberto >= 0),
+        ("Despesas vencidas", brl(c["despesa_vencido_total"]), False),
+        ("Estoque valorizado (custo)", brl(c["estoque_resumo"]["valor_custo_total"]), None),
+    ]
+    linhas_html = ""
+    for label, valor, positivo in linhas_kpi:
+        cor = "#1F7A63" if positivo is True else ("#A63A2C" if positivo is False else "#1B2130")
+        linhas_html += (
+            f'<tr><td style="padding:10px 0;color:#5B6472;font-size:13px;">{label}</td>'
+            f'<td style="padding:10px 0;text-align:right;font-family:monospace;font-weight:600;'
+            f'font-size:15px;color:{cor};">{valor}</td></tr>'
+        )
+
+    return f"""
+    <div style="font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;max-width:520px;margin:0 auto;color:#1B2130;">
+      <p style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7A4F12;font-weight:600;margin:0 0 6px;">
+        Relatório interno · Grupo Lucenera
+      </p>
+      <h1 style="font-size:24px;margin:0 0 4px;">Panorama Financeiro</h1>
+      <p style="font-size:13px;color:#5B6472;margin:0 0 20px;">
+        Semana de {hoje.strftime('%d/%m/%Y')} · ISLIGHT · FOCO Iluminação · Manoella
+      </p>
+      <table style="width:100%;border-collapse:collapse;border-top:1px solid #DDE2E8;">
+        {linhas_html}
+      </table>
+      <p style="font-size:13px;color:#5B6472;margin:20px 0 0;">
+        Relatório completo com gráficos em anexo — <strong>HTML</strong> (interativo, abra no navegador)
+        e <strong>PDF</strong> (pronto pra imprimir/encaminhar).
+      </p>
+      <p style="font-size:11px;color:#8993A1;margin:24px 0 0;">
+        Gerado automaticamente toda sexta-feira. Texto por modelo fixo a partir dos dados —
+        conferir com o financeiro antes de decisões críticas.
+      </p>
+    </div>
+    """
+
+
+def enviar_email(to_email: str, subject: str, body_html: str, attachments: list, resend_api_key: str, from_email: str):
+    payload = {
+        "from": from_email,
+        "to": [to_email],
+        "subject": subject,
+        "html": body_html,
+        "attachments": [
+            {"filename": path.name, "content": base64.b64encode(path.read_bytes()).decode("ascii")}
+            for path in attachments
+        ],
+    }
+    req = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {resend_api_key}"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        result = json.loads(resp.read().decode("utf-8"))
+        print(f"E-mail enviado: {result}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out-html", required=True)
     ap.add_argument("--pdf")
     ap.add_argument("--chrome", default=None, help="Caminho do executavel Chrome/Chromium (obrigatorio se --pdf for usado)")
+    ap.add_argument("--email-to", default=None, help="Envia o relatorio (HTML+PDF anexados) para este endereco. Exige RESEND_API_KEY no ambiente e --pdf.")
+    ap.add_argument("--email-from", default="suporte@lucenera.com", help="Remetente (dominio ja verificado no Resend)")
     args = ap.parse_args()
 
     hoje = datetime.date.today()
@@ -575,6 +652,7 @@ def main():
     out_html.write_text(html, encoding="utf-8")
     print(f"HTML gerado: {out_html} ({len(html)} bytes)")
 
+    pdf_path = None
     if args.pdf:
         if not args.chrome:
             raise SystemExit("--pdf exige --chrome <caminho do executavel>")
@@ -583,6 +661,19 @@ def main():
         profile_dir = out_html.parent / ".chrome-profile"
         export_pdf(out_html, pdf_path, args.chrome, profile_dir)
         print(f"PDF gerado: {pdf_path}")
+
+    if args.email_to:
+        import os
+
+        resend_key = os.environ.get("RESEND_API_KEY")
+        if not resend_key:
+            raise SystemExit("--email-to exige RESEND_API_KEY no ambiente")
+        if not pdf_path:
+            raise SystemExit("--email-to exige --pdf (o e-mail vai com HTML e PDF anexados)")
+
+        body = build_email_body(c, hoje)
+        subject = f"Panorama Financeiro Lucenera — {hoje.strftime('%d/%m/%Y')}"
+        enviar_email(args.email_to, subject, body, [out_html, pdf_path], resend_key, args.email_from)
 
 
 if __name__ == "__main__":

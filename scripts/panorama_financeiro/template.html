@@ -1,0 +1,794 @@
+<title>Panorama Financeiro Lucenera</title>
+<style>
+  :root {
+    --bg: #F2F4F7;
+    --surface: #FFFFFF;
+    --surface-2: #E9EDF2;
+    --ink: #1B2130;
+    --ink-soft: #5B6472;
+    --ink-faint: #8993A1;
+    --line: #DDE2E8;
+    --accent: #B4761F;
+    --accent-ink: #7A4F12;
+    --accent-soft: #F4E4C9;
+    --pos: #1F7A63;
+    --pos-soft: #DCEFE9;
+    --neg: #A63A2C;
+    --neg-soft: #F6E1DC;
+    --shadow: 0 1px 2px rgba(27,33,48,0.04), 0 8px 24px -12px rgba(27,33,48,0.12);
+    --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'SF Mono', 'Cascadia Mono', Consolas, 'Roboto Mono', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151C;
+      --surface: #1A1F29;
+      --surface-2: #212734;
+      --ink: #E8EAEE;
+      --ink-soft: #A0A9B6;
+      --ink-faint: #6C7686;
+      --line: #2A3140;
+      --accent: #E0A748;
+      --accent-ink: #F0C784;
+      --accent-soft: rgba(224,167,72,0.14);
+      --pos: #45B092;
+      --pos-soft: rgba(69,176,146,0.14);
+      --neg: #E07A62;
+      --neg-soft: rgba(224,122,98,0.14);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151C;
+    --surface: #1A1F29;
+    --surface-2: #212734;
+    --ink: #E8EAEE;
+    --ink-soft: #A0A9B6;
+    --ink-faint: #6C7686;
+    --line: #2A3140;
+    --accent: #E0A748;
+    --accent-ink: #F0C784;
+    --accent-soft: rgba(224,167,72,0.14);
+    --pos: #45B092;
+    --pos-soft: rgba(69,176,146,0.14);
+    --neg: #E07A62;
+    --neg-soft: rgba(224,122,98,0.14);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.55);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 56px 28px 96px;
+  }
+  a { color: var(--accent-ink); }
+
+  .masthead {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 40px;
+  }
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+  h1.title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.08;
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+  }
+  .meta-row strong { color: var(--ink); font-weight: 600; }
+  .meta-row .dot { color: var(--ink-faint); }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 56px;
+  }
+  @media (max-width: 760px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 18px 16px;
+    box-shadow: var(--shadow);
+  }
+  .kpi .label {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+  }
+  .kpi .value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .kpi .value.pos { color: var(--pos); }
+  .kpi .value.neg { color: var(--neg); }
+  .kpi .sub { font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
+
+  section.block { margin-bottom: 58px; }
+  .eyebrow {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .eyebrow .num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+  .eyebrow .label {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+  h2.section-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 27px;
+    margin: 0 0 18px;
+    letter-spacing: -0.01em;
+  }
+  p.prose {
+    max-width: 68ch;
+    color: var(--ink);
+    margin: 0 0 14px;
+  }
+  p.prose:last-child { margin-bottom: 0; }
+  p.prose .fig { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+  p.prose .pos { color: var(--pos); }
+  p.prose .neg { color: var(--neg); }
+  .note {
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 14px;
+    max-width: 68ch;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px 24px 20px;
+    box-shadow: var(--shadow);
+    margin-top: 18px;
+  }
+  .panel-legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  canvas.chart { width: 100%; display: block; }
+
+  @media print {
+    @page { size: A4; margin: 14mm 12mm; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: var(--bg) !important; }
+    .wrap { max-width: none; padding: 0; }
+    .panel, .kpi, .kpi-grid, .aging-grid, .closing, .two-col { break-inside: avoid; }
+    section.block { break-inside: avoid-page; }
+    .masthead { break-after: avoid; }
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+
+  .prop-row { margin-bottom: 16px; }
+  .prop-row:last-child { margin-bottom: 0; }
+  .prop-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .prop-head .t { font-weight: 600; }
+  .prop-head .v { font-family: var(--font-mono); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .prop-bar {
+    display: flex;
+    height: 22px;
+    border-radius: 5px;
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+  .prop-seg { height: 100%; }
+  .prop-seg.pago { background: var(--pos); }
+  .prop-seg.avencer { background: var(--accent); opacity: 0.55; }
+  .prop-seg.vencido { background: var(--neg); }
+  .prop-key {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+  }
+
+  .aging-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 4px;
+  }
+  @media (max-width: 620px) { .aging-grid { grid-template-columns: repeat(2, 1fr); } }
+  .aging-cell {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 12px 10px;
+  }
+  .aging-cell .rng { font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; }
+  .aging-cell .amt { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 15px; margin-top: 4px; }
+  .aging-cell .qty { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .aging-cell.hot { border-color: var(--neg); background: var(--neg-soft); }
+
+  .tbl-wrap { overflow-x: auto; }
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  table.data th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    font-weight: 600;
+    padding: 0 10px 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.data td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+
+  .closing {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 24px 26px;
+    box-shadow: var(--shadow);
+  }
+  .closing ul { margin: 0; padding-left: 20px; }
+  .closing li { margin-bottom: 10px; }
+  .closing li:last-child { margin-bottom: 0; }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="kicker">Relatório interno · Grupo Lucenera</div>
+    <h1 class="title">Panorama Financeiro</h1>
+    <div class="meta-row">
+      <span><strong>Empresas</strong> ISLIGHT · FOCO Iluminação · Manoella</span>
+      <span class="dot">·</span>
+      <span><strong>Período analisado</strong> @@PERIODO_TEXTO@@</span>
+      <span class="dot">·</span>
+      <span><strong>Gerado em</strong> @@GERADO_EM@@</span>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="label">Saldo realizado · @@MESES_TOTAL@@ meses</div>
+      <div class="value @@KPI_SALDO_CLASS@@">@@KPI_SALDO_13M@@</div>
+      <div class="sub">@@MESES_POSITIVOS@@ de @@MESES_TOTAL@@ meses fechados com saldo positivo</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Saldo em aberto (a receber − a pagar)</div>
+      <div class="value @@KPI_ABERTO_CLASS@@">@@KPI_SALDO_ABERTO@@</div>
+      <div class="sub">@@KPI_RECEBER_ABERTO@@ a receber vs. @@KPI_PAGAR_ABERTO@@ a pagar</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Despesas vencidas</div>
+      <div class="value neg">@@KPI_DESPESA_VENCIDA@@</div>
+      <div class="sub">@@PCT_VENCIDO_ANTIGO@@% tem mais de 1 ano de atraso</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Estoque valorizado (custo)</div>
+      <div class="value">@@KPI_ESTOQUE_CUSTO@@</div>
+      <div class="sub">potencial de venda @@KPI_ESTOQUE_VENDA@@</div>
+    </div>
+  </div>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">01</span><span class="label">Fluxo de Caixa</span></div>
+    <h2 class="section-title">@@TITULO_FLUXO@@</h2>
+    @@PROSE_FLUXO@@
+    <div class="panel">
+      <div class="panel-legend">
+        <span class="legend-item"><span class="swatch" style="background:var(--pos)"></span>Receita</span>
+        <span class="legend-item"><span class="swatch" style="background:var(--neg)"></span>Despesa</span>
+        <span class="legend-item"><span class="swatch" style="background:var(--accent)"></span>Saldo acumulado</span>
+      </div>
+      <canvas class="chart" id="chart-fluxo" height="320"></canvas>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">02</span><span class="label">Contas em Aberto</span></div>
+    <h2 class="section-title">@@TITULO_ABERTO@@</h2>
+    @@PROSE_ABERTO@@
+    <div class="panel">
+      <div class="prop-row">
+        <div class="prop-head"><span class="t">Receita</span><span class="v">@@RECEITA_DUPLICATAS_TOTAL@@ em duplicatas</span></div>
+        <div class="prop-bar">
+          <div class="prop-seg pago" style="width:@@PCT_RECEITA_PAGO@@%"></div>
+          <div class="prop-seg avencer" style="width:@@PCT_RECEITA_AVENCER@@%"></div>
+          <div class="prop-seg vencido" style="width:@@PCT_RECEITA_VENCIDO@@%"></div>
+        </div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-head"><span class="t">Despesa</span><span class="v">@@DESPESA_DUPLICATAS_TOTAL@@ em duplicatas</span></div>
+        <div class="prop-bar">
+          <div class="prop-seg pago" style="width:@@PCT_DESPESA_PAGO@@%"></div>
+          <div class="prop-seg avencer" style="width:@@PCT_DESPESA_AVENCER@@%"></div>
+          <div class="prop-seg vencido" style="width:@@PCT_DESPESA_VENCIDO@@%"></div>
+        </div>
+      </div>
+      <div class="prop-key">
+        <span class="legend-item"><span class="swatch" style="background:var(--pos)"></span>Pago</span>
+        <span class="legend-item"><span class="swatch" style="background:var(--accent);opacity:.55"></span>A vencer</span>
+        <span class="legend-item"><span class="swatch" style="background:var(--neg)"></span>Vencido</span>
+      </div>
+    </div>
+    <p class="prose" style="margin-top:20px;">
+      Detalhe por tempo de atraso das despesas vencidas:
+    </p>
+    <div class="aging-grid">
+      <div class="aging-cell"><div class="rng">Até 30 dias</div><div class="amt">@@AGING_30@@</div><div class="qty">@@AGING_30_QTD@@ títulos</div></div>
+      <div class="aging-cell"><div class="rng">31–90 dias</div><div class="amt">@@AGING_90@@</div><div class="qty">@@AGING_90_QTD@@ títulos</div></div>
+      <div class="aging-cell"><div class="rng">91–365 dias</div><div class="amt">@@AGING_365@@</div><div class="qty">@@AGING_365_QTD@@ títulos</div></div>
+      <div class="aging-cell hot"><div class="rng">Mais de 365 dias</div><div class="amt">@@AGING_MAIS@@</div><div class="qty">@@AGING_MAIS_QTD@@ títulos</div></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">03</span><span class="label">Desempenho por Empresa</span></div>
+    <h2 class="section-title">@@TITULO_EMPRESA@@</h2>
+    @@PROSE_EMPRESA@@
+    <div class="panel">
+      <div class="panel-legend">
+        <span class="legend-item"><span class="swatch" style="background:var(--pos)"></span>Receita</span>
+        <span class="legend-item"><span class="swatch" style="background:var(--neg)"></span>Despesa</span>
+      </div>
+      <canvas class="chart" id="chart-empresa" height="260"></canvas>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">04</span><span class="label">Centros de Receita e Custo</span></div>
+    <h2 class="section-title">@@TITULO_CATEGORIAS@@</h2>
+    @@PROSE_CATEGORIAS@@
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-legend"><span class="legend-item"><span class="swatch" style="background:var(--pos)"></span>Maiores receitas</span></div>
+        <canvas class="chart" id="chart-top-receita" height="260"></canvas>
+      </div>
+      <div class="panel">
+        <div class="panel-legend"><span class="legend-item"><span class="swatch" style="background:var(--neg)"></span>Maiores despesas</span></div>
+        <canvas class="chart" id="chart-top-despesa" height="260"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">05</span><span class="label">Previsão de Caixa</span></div>
+    <h2 class="section-title">@@TITULO_PREVISAO@@</h2>
+    @@PROSE_PREVISAO@@
+    <div class="panel">
+      <div class="panel-legend">
+        <span class="legend-item"><span class="swatch" style="background:var(--pos)"></span>Receita prevista</span>
+        <span class="legend-item"><span class="swatch" style="background:var(--neg)"></span>Despesa prevista</span>
+      </div>
+      <canvas class="chart" id="chart-previsao" height="280"></canvas>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">06</span><span class="label">Estoque</span></div>
+    <h2 class="section-title">@@TITULO_ESTOQUE@@</h2>
+    @@PROSE_ESTOQUE@@
+    <div class="panel">
+      <div class="panel-legend"><span class="legend-item"><span class="swatch" style="background:var(--accent)"></span>Valor em estoque (custo)</span></div>
+      <canvas class="chart" id="chart-estoque" height="320"></canvas>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">07</span><span class="label">Pedidos de Compra</span></div>
+    <h2 class="section-title">@@TITULO_COMPRAS@@</h2>
+    @@PROSE_COMPRAS@@
+    <div class="panel">
+      <div class="panel-legend"><span class="legend-item"><span class="swatch" style="background:var(--accent)"></span>Valor pedido</span></div>
+      <canvas class="chart" id="chart-fornecedores" height="280"></canvas>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">08</span><span class="label">Síntese</span></div>
+    <h2 class="section-title">Pontos de atenção</h2>
+    <div class="closing">
+      <ul>
+        @@SINTESE_ITENS@@
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>Fonte: banco de dados Supabase do ecossistema Lucenera (tabelas <code>transacoes</code>,
+      <code>negociacoes</code>, <code>produtos</code>, <code>pedido_compra</code>), sincronizado do
+      sistema legado Connect. @@TOTAL_TRANSACOES@@ transações · @@TOTAL_NEGOCIACOES@@ negociações analisadas.
+      Gerado automaticamente toda sexta-feira via GitHub Actions.</span>
+    <span>Texto descritivo gerado por modelo fixo a partir dos dados — conferir com o financeiro antes de decisões críticas.</span>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var DATA = __DATA_JSON__;
+
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  function fmtMoneyShort(v) {
+    var abs = Math.abs(v);
+    var s = abs >= 1000000 ? (v / 1000000).toFixed(2).replace('.', ',') + 'M'
+      : abs >= 1000 ? (v / 1000).toFixed(0) + 'k'
+      : v.toFixed(0);
+    return (v < 0 ? '-R$ ' : 'R$ ') + s.replace('-', '');
+  }
+  var MES_ABR = { '01':'jan','02':'fev','03':'mar','04':'abr','05':'mai','06':'jun','07':'jul','08':'ago','09':'set','10':'out','11':'nov','12':'dez' };
+  function mesLabel(m) {
+    var parts = m.split('-');
+    return MES_ABR[parts[1]] + '/' + parts[0].slice(2);
+  }
+
+  function setupCanvas(canvas) {
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    var h = canvas.getAttribute('height') ? parseInt(canvas.getAttribute('height'), 10) : rect.height;
+    canvas.width = Math.max(1, rect.width * dpr);
+    canvas.height = Math.max(1, h * dpr);
+    canvas.style.height = h + 'px';
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    return { ctx: ctx, w: rect.width, h: h };
+  }
+
+  function drawFluxo(canvas, rows, partialKey) {
+    var setup = setupCanvas(canvas), ctx = setup.ctx, W = setup.w, H = setup.h;
+    ctx.clearRect(0, 0, W, H);
+
+    var padL = 64, padR = 46, padT = 16, padB = 34;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+
+    var maxBar = 0, minLine = Infinity, maxLine = -Infinity;
+    rows.forEach(function (r) {
+      maxBar = Math.max(maxBar, r.receita, r.despesa);
+      minLine = Math.min(minLine, r.acumulado, 0);
+      maxLine = Math.max(maxLine, r.acumulado);
+    });
+    var barScale = plotH / (maxBar * 1.08);
+    var lineRange = (maxLine - minLine) || 1;
+    var lineScale = plotH / (lineRange * 1.15);
+
+    var line = cssVar('--line'), inkFaint = cssVar('--ink-faint');
+    var pos = cssVar('--pos'), neg = cssVar('--neg'), accent = cssVar('--accent');
+
+    ctx.strokeStyle = line; ctx.lineWidth = 1;
+    ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle = inkFaint;
+    var gridN = 4;
+    for (var g = 0; g <= gridN; g++) {
+      var val = (maxBar * 1.08) * g / gridN;
+      var y = padT + plotH - val * barScale;
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(fmtMoneyShort(val), padL - 8, y);
+    }
+
+    var n = rows.length;
+    var slot = plotW / n;
+    var barW = Math.min(16, slot * 0.30);
+
+    rows.forEach(function (r, i) {
+      var cx = padL + slot * i + slot / 2;
+      var isPartial = r.mes === partialKey;
+      ctx.globalAlpha = isPartial ? 0.45 : 1;
+
+      var rh = r.receita * barScale;
+      ctx.fillStyle = pos;
+      ctx.fillRect(cx - barW - 2, padT + plotH - rh, barW, rh);
+
+      var dh = r.despesa * barScale;
+      ctx.fillStyle = neg;
+      ctx.fillRect(cx + 2, padT + plotH - dh, barW, dh);
+
+      ctx.globalAlpha = 1;
+
+      ctx.fillStyle = inkFaint;
+      ctx.font = '10.5px ' + getComputedStyle(document.body).fontFamily;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(mesLabel(r.mes) + (isPartial ? '*' : ''), cx, padT + plotH + 10);
+    });
+
+    ctx.beginPath();
+    ctx.strokeStyle = accent; ctx.lineWidth = 2.25;
+    rows.forEach(function (r, i) {
+      var cx = padL + slot * i + slot / 2;
+      var cy = padT + plotH - (r.acumulado - minLine) * lineScale;
+      if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+    });
+    ctx.stroke();
+    rows.forEach(function (r, i) {
+      var cx = padL + slot * i + slot / 2;
+      var cy = padT + plotH - (r.acumulado - minLine) * lineScale;
+      ctx.beginPath(); ctx.arc(cx, cy, 2.6, 0, Math.PI * 2);
+      ctx.fillStyle = accent; ctx.fill();
+    });
+  }
+
+  function drawGrouped(canvas, labels, series) {
+    var setup = setupCanvas(canvas), ctx = setup.ctx, W = setup.w, H = setup.h;
+    ctx.clearRect(0, 0, W, H);
+    var padL = 70, padR = 20, padT = 14, padB = 60;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var maxV = 0;
+    series.forEach(function (s) { s.values.forEach(function (v) { maxV = Math.max(maxV, v); }); });
+    var scale = plotH / (maxV * 1.1 || 1);
+    var line = cssVar('--line'), inkFaint = cssVar('--ink-faint');
+
+    ctx.strokeStyle = line; ctx.lineWidth = 1;
+    ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle = inkFaint;
+    var gridN = 4;
+    for (var g = 0; g <= gridN; g++) {
+      var val = (maxV * 1.1) * g / gridN;
+      var y = padT + plotH - val * scale;
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(fmtMoneyShort(val), padL - 8, y);
+    }
+
+    var n = labels.length, slot = plotW / n;
+    var groupW = slot * 0.62, barW = groupW / series.length;
+
+    labels.forEach(function (lab, i) {
+      var gx = padL + slot * i + (slot - groupW) / 2;
+      series.forEach(function (s, si) {
+        var v = s.values[i];
+        var bh = v * scale;
+        ctx.fillStyle = s.color;
+        ctx.fillRect(gx + si * barW + 1, padT + plotH - bh, barW - 2, bh);
+      });
+      ctx.fillStyle = inkFaint;
+      ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      var cx = padL + slot * i + slot / 2;
+      wrapText(ctx, lab, cx, padT + plotH + 10, slot - 4, 12);
+    });
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    var words = text.split(' '), line = '', lines = [];
+    for (var i = 0; i < words.length; i++) {
+      var test = line ? line + ' ' + words[i] : words[i];
+      if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = words[i]; }
+      else line = test;
+    }
+    lines.push(line);
+    lines = lines.slice(0, 2);
+    lines.forEach(function (l, li) { ctx.fillText(l, x, y + li * lineHeight); });
+  }
+
+  function truncateToWidth(ctx, text, maxWidth) {
+    if (ctx.measureText(text).width <= maxWidth) return text;
+    var lo = 0, hi = text.length;
+    while (lo < hi) {
+      var mid = Math.ceil((lo + hi) / 2);
+      if (ctx.measureText(text.slice(0, mid) + '…').width <= maxWidth) lo = mid;
+      else hi = mid - 1;
+    }
+    return lo > 0 ? text.slice(0, lo) + '…' : '…';
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawHBar(canvas, items, color) {
+    var setup = setupCanvas(canvas), ctx = setup.ctx, W = setup.w, H = setup.h;
+    ctx.clearRect(0, 0, W, H);
+    var labelW = Math.min(190, W * 0.42);
+    var padR = 84, padT = 6, padB = 6;
+    var plotW = W - labelW - padR;
+    var n = items.length;
+    var rowH = (H - padT - padB) / n;
+    var barH = Math.min(20, rowH * 0.6);
+    var maxV = Math.max.apply(null, items.map(function (it) { return it.value; }));
+    var inkSoft = cssVar('--ink-soft'), ink = cssVar('--ink');
+
+    ctx.font = '12px ' + getComputedStyle(document.body).fontFamily;
+    var maxLabelW = labelW - 14;
+    items.forEach(function (it, i) {
+      var cy = padT + rowH * i + rowH / 2;
+      ctx.fillStyle = inkSoft;
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      var label = truncateToWidth(ctx, it.label, maxLabelW);
+      ctx.fillText(label, labelW - 10, cy);
+
+      var bw = (it.value / maxV) * plotW;
+      ctx.fillStyle = color;
+      var r = Math.min(4, barH / 2);
+      roundRect(ctx, labelW, cy - barH / 2, Math.max(bw, 2), barH, r);
+      ctx.fill();
+
+      ctx.fillStyle = ink;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.font = '600 11.5px ' + getComputedStyle(document.body).fontFamily;
+      ctx.fillText(fmtMoneyShort(it.value), labelW + bw + 8, cy);
+      ctx.font = '12px ' + getComputedStyle(document.body).fontFamily;
+    });
+  }
+
+  function drawPrevisao(canvas, rows) {
+    var setup = setupCanvas(canvas), ctx = setup.ctx, W = setup.w, H = setup.h;
+    ctx.clearRect(0, 0, W, H);
+    var padL = 64, padR = 46, padT = 16, padB = 42;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var maxBar = 0;
+    rows.forEach(function (r) { maxBar = Math.max(maxBar, r.receita, r.despesa); });
+    var scale = plotH / (maxBar * 1.1);
+    var line = cssVar('--line'), inkFaint = cssVar('--ink-faint');
+    var pos = cssVar('--pos'), neg = cssVar('--neg');
+
+    ctx.strokeStyle = line; ctx.lineWidth = 1;
+    ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle = inkFaint;
+    for (var g = 0; g <= 4; g++) {
+      var val = (maxBar * 1.1) * g / 4;
+      var y = padT + plotH - val * scale;
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(fmtMoneyShort(val), padL - 8, y);
+    }
+
+    var n = rows.length, slot = plotW / n, barW = Math.min(14, slot * 0.28);
+    var worstSaldo = Math.min.apply(null, rows.map(function (x) { return x.saldo; }));
+    rows.forEach(function (r, i) {
+      var cx = padL + slot * i + slot / 2;
+      var rh = r.receita * scale;
+      ctx.fillStyle = pos;
+      ctx.fillRect(cx - barW - 2, padT + plotH - rh, barW, rh);
+      var dh = r.despesa * scale;
+      var isWorst = r.saldo === worstSaldo;
+      ctx.fillStyle = neg;
+      ctx.fillRect(cx + 2, padT + plotH - dh, barW, dh);
+      if (isWorst) {
+        ctx.strokeStyle = neg; ctx.lineWidth = 1.5;
+        ctx.strokeRect(cx + 2, padT + plotH - dh, barW, dh);
+      }
+
+      ctx.fillStyle = inkFaint;
+      ctx.font = '10px ' + getComputedStyle(document.body).fontFamily;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      var d = r.semana.split('-');
+      ctx.fillText(d[2] + '/' + d[1], cx, padT + plotH + 10);
+    });
+  }
+
+  function renderAll() {
+    drawFluxo(document.getElementById('chart-fluxo'), DATA.fluxo_mensal, DATA.mes_parcial ? DATA.mes_parcial.mes : null);
+
+    drawGrouped(document.getElementById('chart-empresa'),
+      DATA.por_empresa.map(function (e) { return e.empresa; }),
+      [
+        { name: 'Receita', color: cssVar('--pos'), values: DATA.por_empresa.map(function (e) { return e.receita; }) },
+        { name: 'Despesa', color: cssVar('--neg'), values: DATA.por_empresa.map(function (e) { return e.despesa; }) }
+      ]);
+
+    drawHBar(document.getElementById('chart-top-receita'),
+      DATA.top_receita.map(function (c) { return { label: c.categoria, value: c.total }; }),
+      cssVar('--pos'));
+
+    drawHBar(document.getElementById('chart-top-despesa'),
+      DATA.top_despesa.map(function (c) { return { label: c.categoria, value: c.total }; }),
+      cssVar('--neg'));
+
+    drawPrevisao(document.getElementById('chart-previsao'), DATA.previsao_60_dias);
+
+    drawHBar(document.getElementById('chart-estoque'),
+      DATA.estoque_marcas.slice(0, 10).map(function (m) { return { label: m.marca, value: m.valor_custo }; }),
+      cssVar('--accent'));
+
+    drawHBar(document.getElementById('chart-fornecedores'),
+      DATA.pedidos_compra_fornecedores.map(function (f) { return { label: f.fornecedor, value: f.total }; }),
+      cssVar('--accent'));
+  }
+
+  renderAll();
+  var raf;
+  window.addEventListener('resize', function () {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(renderAll);
+  });
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderAll);
+  }
+  new MutationObserver(renderAll).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>

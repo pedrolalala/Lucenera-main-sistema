@@ -556,12 +556,27 @@ def export_pdf(html_path: Path, pdf_path: Path, chrome_path: str, profile_dir: P
     profile_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         chrome_path, "--headless=new", "--disable-gpu", "--no-sandbox",
+        # /dev/shm costuma ser minusculo em runners de CI (GitHub Actions,
+        # Docker) - sem essa flag o Chrome trava/crasha silenciosamente
+        # renderizando paginas com canvas, em vez de dar erro claro.
+        "--disable-dev-shm-usage",
         "--no-pdf-header-footer",
         f"--user-data-dir={profile_dir}",
         f"--print-to-pdf={pdf_path}",
         html_path.resolve().as_uri(),
     ]
-    subprocess.run(cmd, check=True, capture_output=True, timeout=60)
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, timeout=120)
+    except subprocess.CalledProcessError as exc:
+        print(exc.stdout.decode("utf-8", "replace"))
+        print(exc.stderr.decode("utf-8", "replace"))
+        raise
+    except subprocess.TimeoutExpired as exc:
+        if exc.stdout:
+            print(exc.stdout.decode("utf-8", "replace"))
+        if exc.stderr:
+            print(exc.stderr.decode("utf-8", "replace"))
+        raise
 
 
 def build_email_body(c, hoje):

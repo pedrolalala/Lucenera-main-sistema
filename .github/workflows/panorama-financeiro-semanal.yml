@@ -23,11 +23,13 @@ jobs:
           python-version: "3.12"
 
       - name: Instalar dependencias Python
-        run: pip install psycopg2-binary
+        run: pip install psycopg2-binary playwright
 
-      - name: Instalar Chrome
-        id: setup-chrome
-        uses: browser-actions/setup-chrome@v1
+      - name: Instalar Chromium (Playwright, com dependencias de sistema)
+        # --with-deps instala tambem as bibliotecas de sistema que o
+        # Chromium precisa (faltavam no setup-chrome puro, causa provavel
+        # do travamento anterior em CI - achado 2026-08-18).
+        run: playwright install --with-deps chromium
 
       - name: Gerar relatorio (HTML + PDF) e enviar por e-mail
         env:
@@ -43,7 +45,6 @@ jobs:
           python scripts/panorama_financeiro/gerar_relatorio.py \
             --out-html "$PASTA/Panorama_Financeiro_Lucenera_${DATA_HOJE}.html" \
             --pdf "$PASTA/Panorama_Financeiro_Lucenera_${DATA_HOJE}.pdf" \
-            --chrome "${{ steps.setup-chrome.outputs.chrome-path }}" \
             --email-to pedro@lucenera.com.br
 
           cp "$PASTA/Panorama_Financeiro_Lucenera_${DATA_HOJE}.html" "$PASTA/Panorama_Financeiro_Lucenera_latest.html"

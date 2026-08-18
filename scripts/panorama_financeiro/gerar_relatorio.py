@@ -19,10 +19,14 @@ corpo do e-mail e um resumo estatico (sem os graficos em canvas/JS, que nao
 rodam em cliente de e-mail); o HTML interativo completo e o PDF vao como
 anexo.
 
+PDF via Playwright (playwright install chromium --with-deps na 1a vez).
+Use --chrome-channel chrome pra reusar um Google Chrome ja instalado no
+sistema em vez de baixar um Chromium extra (util pra testar local).
+
 Uso:
   python scripts/panorama_financeiro/gerar_relatorio.py --out-html out.html
-  python scripts/panorama_financeiro/gerar_relatorio.py --out-html out.html --pdf out.pdf --chrome "/path/to/chrome"
-  python scripts/panorama_financeiro/gerar_relatorio.py --out-html out.html --pdf out.pdf --chrome "/path/to/chrome" --email-to pedro@lucenera.com.br
+  python scripts/panorama_financeiro/gerar_relatorio.py --out-html out.html --pdf out.pdf
+  python scripts/panorama_financeiro/gerar_relatorio.py --out-html out.html --pdf out.pdf --email-to pedro@lucenera.com.br
 """
 
 import argparse
@@ -30,7 +34,6 @@ import base64
 import datetime
 import json
 import re
-import subprocess
 import sys
 import urllib.request
 from pathlib import Path
@@ -552,59 +555,38 @@ def build_html(c, p, sintese, hoje):
     return tpl
 
 
-def export_pdf(html_path: Path, pdf_path: Path, chrome_path: str, profile_dir: Path):
-    profile_dir.mkdir(parents=True, exist_ok=True)
-    pdf_path = pdf_path.resolve()
-    profile_dir = profile_dir.resolve()
-    cmd = [
-        chrome_path,
-        "--headless", "--disable-gpu", "--no-sandbox",
-        # /dev/shm costuma ser minusculo em runners de CI (GitHub Actions,
-        # Docker) - sem essa flag o Chrome trava/crasha silenciosamente
-        # renderizando paginas com canvas, em vez de dar erro claro.
-        "--disable-dev-shm-usage",
-        "--disable-background-networking",
-        "--disable-sync",
-        "--disable-default-apps",
-        "--disable-extensions",
-        "--disable-breakpad",
-        "--disable-client-side-phishing-detection",
-        "--disable-component-update",
-        "--disable-hang-monitor",
-        "--disable-ipc-flooding-protection",
-        "--disable-popup-blocking",
-        "--disable-prompt-on-repost",
-        "--disable-renderer-backgrounding",
-        "--metrics-recording-only",
-        "--no-first-run",
-        "--enable-automation",
-        "--password-store=basic",
-        "--use-mock-keychain",
-        # --headless (mesmo o "antigo") em versoes recentes de Chrome ficou
-        # preso indefinidamente tentando falar com GCM/DBus/NetworkManager
-        # que nao existem no container de CI (achado em CI, 2026-08-18,
-        # apos --disable-dev-shm-usage sozinho nao ter resolvido). Essas
-        # duas flags forcam o Chrome a parar de esperar a pagina "ficar
-        # quieta" e renderizar/imprimir logo, em vez de ficar pendurado.
-        "--run-all-compositor-stages-before-draw",
-        "--virtual-time-budget=15000",
-        "--no-pdf-header-footer",
-        f"--user-data-dir={profile_dir}",
-        f"--print-to-pdf={pdf_path}",
-        html_path.resolve().as_uri(),
-    ]
-    try:
-        subprocess.run(cmd, check=True, capture_output=True, timeout=90)
-    except subprocess.CalledProcessError as exc:
-        print(exc.stdout.decode("utf-8", "replace"))
-        print(exc.stderr.decode("utf-8", "replace"))
-        raise
-    except subprocess.TimeoutExpired as exc:
-        if exc.stdout:
-            print(exc.stdout.decode("utf-8", "replace"))
-        if exc.stderr:
-            print(exc.stderr.decode("utf-8", "replace"))
-        raise
+def export_pdf(html_path: Path, pdf_path: Path, chrome_channel: str | None = None):
+    """Renderiza o HTML pra PDF via Playwright (Page.printToPDF via CDP).
+
+    Trocado de chamada direta ao binario do Chrome (`chrome --print-to-pdf`)
+    depois de 3 rodadas de flags diferentes travarem indefinidamente em CI
+    (GitHub Actions) tentando falar com GCM/DBus/NetworkManager que nao
+    existem no container - achado em 2026-08-18. O Playwright gerencia o
+    ciclo de vida do browser de um jeito bem mais robusto e testado (usa o
+    comando real do DevTools Protocol, nao a flag de CLI, que e' mais
+    fragil) e ja' resolve as flags de CI sozinho.
+
+    chrome_channel: None usa o Chromium baixado pelo `playwright install`;
+    "chrome" usa um Google Chrome ja instalado no sistema (util pra testar
+    local sem baixar um Chromium extra).
+    """
+    from playwright.sync_api import sync_playwright
+
+    pdf_path.parent.mkdir(parents=True, exist_ok=True)
+    with sync_playwright() as p:
+        browser = p.chromium.launch(channel=chrome_channel)
+        try:
+            page = browser.new_page()
+            page.goto(html_path.resolve().as_uri())
+            page.wait_for_timeout(500)  # garante que os canvas terminaram de desenhar
+            page.pdf(
+                path=str(pdf_path),
+                format="A4",
+                print_background=True,
+                margin={"top": "14mm", "bottom": "14mm", "left": "12mm", "right": "12mm"},
+            )
+        finally:
+            browser.close()
 
 
 def build_email_body(c, hoje):
@@ -676,7 +658,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out-html", required=True)
     ap.add_argument("--pdf")
-    ap.add_argument("--chrome", default=None, help="Caminho do executavel Chrome/Chromium (obrigatorio se --pdf for usado)")
+    ap.add_argument("--chrome-channel", default=None, help="'chrome' pra usar um Google Chrome ja instalado no sistema em vez do Chromium baixado pelo playwright install (util pra testar local)")
     ap.add_argument("--email-to", default=None, help="Envia o relatorio (HTML+PDF anexados) para este endereco. Exige RESEND_API_KEY no ambiente e --pdf.")
     ap.add_argument("--email-from", default="suporte@lucenera.com", help="Remetente (dominio ja verificado no Resend)")
     args = ap.parse_args()
@@ -697,12 +679,8 @@ def main():
 
     pdf_path = None
     if args.pdf:
-        if not args.chrome:
-            raise SystemExit("--pdf exige --chrome <caminho do executavel>")
         pdf_path = Path(args.pdf)
-        pdf_path.parent.mkdir(parents=True, exist_ok=True)
-        profile_dir = out_html.parent / ".chrome-profile"
-        export_pdf(out_html, pdf_path, args.chrome, profile_dir)
+        export_pdf(out_html, pdf_path, args.chrome_channel)
         print(f"PDF gerado: {pdf_path}")
 
     if args.email_to:

@@ -555,11 +555,22 @@ def build_html(c, p, sintese, hoje):
 def export_pdf(html_path: Path, pdf_path: Path, chrome_path: str, profile_dir: Path):
     profile_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
-        chrome_path, "--headless=new", "--disable-gpu", "--no-sandbox",
+        chrome_path,
+        # "--headless=new" simula o navegador completo e tenta inicializar
+        # servicos de fundo (GCM, sync, etc.) que nao existem no container
+        # de CI - fica tentando de novo e trava o processo inteiro (achado
+        # em CI, 2026-08-18). "--headless" (modo antigo/"shell") e' feito
+        # exatamente pra automacao tipo print-to-pdf, sem essa bagagem.
+        "--headless", "--disable-gpu", "--no-sandbox",
         # /dev/shm costuma ser minusculo em runners de CI (GitHub Actions,
         # Docker) - sem essa flag o Chrome trava/crasha silenciosamente
         # renderizando paginas com canvas, em vez de dar erro claro.
         "--disable-dev-shm-usage",
+        "--disable-background-networking",
+        "--disable-sync",
+        "--disable-default-apps",
+        "--disable-extensions",
+        "--no-first-run",
         "--no-pdf-header-footer",
         f"--user-data-dir={profile_dir}",
         f"--print-to-pdf={pdf_path}",

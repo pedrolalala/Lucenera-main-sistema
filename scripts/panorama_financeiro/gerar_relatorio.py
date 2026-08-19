@@ -113,9 +113,12 @@ def run_queries():
     """)
     out["fluxo_mensal_realizado"] = cur.fetchall()
 
-    # "nao pago" = status_pago != 1 (0 = pendente normal, 2 = "Duplicata Gerada"
-    # no Connect - sem dt_pagamento/vl_pago, tambem nao pago). NUNCA usar
-    # status_pago = 0 isolado - ver achado documentado na memoria do projeto.
+    # status_pago: 0=ABERTO, 1=PAGO, 2=CANCELADO (confirmado pelo usuario,
+    # 2026-08-18 - correcao de uma suposicao errada anterior que tratava
+    # status_pago=2 como "nao pago" igual ao 0, contando duplicata
+    # cancelada como divida em aberto). Cancelado nunca deve gerar
+    # despesa/receita nem aparecer como aberto/vencido/a_vencer em lugar
+    # nenhum - excluido aqui na query, nao so tratado como "outro bucket".
     cur.execute("""
         select t.tipo,
                case when t.status_pago = 1 then 'pago'
@@ -123,6 +126,7 @@ def run_queries():
                     else 'a_vencer' end as situacao,
                count(*) as qtd, sum(t.valor) as total
         from transacoes t
+        where t.status_pago != 2
         group by 1, 2 order by 1, 2
     """)
     out["situacao_atual"] = cur.fetchall()
@@ -181,7 +185,7 @@ def run_queries():
     cur.execute("""
         select to_char(date_trunc('week', t.dt_vencimento), 'YYYY-MM-DD') as semana, t.tipo, sum(t.valor) as total
         from transacoes t
-        where t.status_pago != 1
+        where t.status_pago = 0
           and t.dt_vencimento between current_date and (current_date + interval '60 days')
         group by 1, 2 order by 1
     """)
@@ -195,7 +199,7 @@ def run_queries():
                     else '4_mais_365d' end as faixa,
                count(*) as qtd, sum(t.valor) as total
         from transacoes t
-        where t.status_pago != 1 and t.dt_vencimento < current_date
+        where t.status_pago = 0 and t.dt_vencimento < current_date
         group by 1, 2 order by 1, 2
     """)
     out["aging_vencidos"] = cur.fetchall()

@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-24
+
+### Importado — ciclo de sincronização Connect (ContaPagar/ContaReceber, PedidoCompra, Produtos/Estoque)
+
+- Usuário disponibilizou 4 planilhas novas (`ContaPagar_2026-08-24.xlsx`, `ContaReceber_2026-08-24.xlsx`, `PedidoCompra_2026-08-24.xlsx`, `Produtos__2026-08-24.xlsx`) e pediu pra atualizar o banco, lembrando explicitamente do mapeamento permanente LUCE NERA = MANOELLA e para não duplicar dado (só atualizar o que já existe). Mesmo ciclo já rodado antes (07/08, 17/08 etc.) — constantes de caminho atualizadas nos 3 scripts (`importar_contas_pagar_receber.py`, `importar_pedido_compra.py`, `importar_produtos_estoque.py`), `--dry-run` conferido em cada um (números batendo com a execução real) antes da gravação.
+- **ContaPagar/ContaReceber**: 74 negociações novas (empresa MANOELLA, mapeamento LUCE NERA confirmado inalterado), 146 transações novas, 2.947 atualizadas (status/pagamento), 14.040 já sincronizadas, 0 erros. 488 linhas com `(cod_duplicata, tipo)` ambíguo entre empresas puladas por desenho (mesmo padrão de todos os ciclos anteriores).
+- **PedidoCompra**: 9 pedidos novos, 8 atualizados, 41 inalterados, 0 erros. `staging_pedido_compra` recarregada (75 linhas).
+- **Produtos/Estoque**: 750 produtos atualizados (estoque/custo/valor de venda/lucro), 3.602 já sincronizados, 0 erros. 124 `CodProduto` da planilha sem match no banco (produtos ainda não cadastrados, fora do escopo do script — só atualiza existentes).
+- `estoque_itens` sincronizado automaticamente via trigger `fn_sync_estoque_itens_from_produtos`, sem ação manual.
+
 ## 2026-08-17 (5)
 
 ### Importado — ciclo de sincronização Connect (ContaPagar/ContaReceber, PedidoCompra, Produtos/Estoque)

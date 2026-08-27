@@ -108,9 +108,31 @@ status — não confia no client.
   escrever, pra não sobrescrever nada; commit/push feito depois
   (`0ef3b85`).
 
+### 2026-08-13 — correção (achada no teste ao vivo)
+
+- **Bug real**: a nota de "Pendências" original tratava a ausência de
+  `endereco_entrega` na entrega automática como comportamento já esperado
+  — mas a decisão do usuário só cobria `entregador_id` (explicitamente "fica
+  em branco, Logística assume depois"), nunca o endereço. Na prática,
+  `separacoes.endereco_entrega` nunca é preenchido em nenhum ponto do fluxo
+  novo (diferente do fluxo antigo de Logística, onde o próprio usuário
+  digitava esse campo antes de marcar Pronto) — a tela
+  `SeparacaoCardDetails.tsx` mostra literalmente `"N/A"` pro entregador.
+  Achado só via inspeção do banco (nenhuma separação com status `Pronto`
+  ainda existia em produção pra testar ao vivo o fluxo completo).
+- Fix: `finalizar_separacao_parcial_pronta` passou a preencher
+  `endereco_entrega`/`telefone` a partir do cadastro do cliente
+  (`contatos.endereco_entrega`, fallback pro endereço principal) no
+  momento de marcar como Pronto — só quando esses campos ainda estiverem
+  vazios (`COALESCE`, nunca sobrescreve). `entregador_id` continua em
+  branco, como decidido.
+  Migration:
+  `supabase/db/migrations/20260813_106_finalizar_separacao_preenche_endereco/001_finalizar_separacao_preenche_endereco.sql`,
+  aplicada em produção. Smoke-test com UUID inexistente confirmou erro
+  correto sem tocar dado real; lógica de montagem do endereço validada
+  com `SELECT` somente-leitura contra clientes reais.
+
 ## Pendências
 
-Nenhuma. Fica como observação pra Logística: entregas criadas por essa
-integração chegam sem `entregador_id` nem `endereco_entrega` definidos —
-Logística completa na hora de processar, comportamento já esperado pela
-decisão tomada.
+Nenhuma. `entregador_id` continua em branco por decisão do usuário —
+Logística assume/preenche na hora de processar.

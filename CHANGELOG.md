@@ -11,6 +11,105 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Ordenação por coluna adicionada em Peças e Produtos (Cadastro, Skip 36668, v0.0.77) — mesmo padrão de cabeçalhos clicáveis já em produção em Orçamentos → Buscar Produtos. Testado ao vivo.
 - Item de "Fora de Linha" da mesma reunião fica fora desta rodada por decisão do usuário (dado ainda não é exportado pelo Connect).
 
+## 2026-08-27
+
+### Corrigido — PDF do orçamento: dados do cliente no cabeçalho (SPEC-084) e valores de devolução saindo positivos
+
+- SPEC-084 (bloco NOME/ENDEREÇO/CEP/TEL no cabeçalho do cliente, sem CPF) já existia no código do `generate-report` mas nunca tinha sido publicada — deployada direto em produção (`supabase functions deploy`) e verificada num PDF real.
+- Devolução: o sistema já mostrava o valor corretamente negativo, mas o PDF exportava tudo positivo — lógica `signed()` (nega subtotal, total e cada item quando `natureza_operacao = 'devolucao'`, sem alterar o valor armazenado nem o preço unitário) reaplicada e redeployada.
+- Verificado ao vivo com um orçamento de devolução real (ORC-0028), nos dois formatos de PDF (cliente e interno): SubTotal, cada item e Valor Total saem negativos; cabeçalho do cliente sem CPF.
+
+## 2026-08-26 (3)
+
+### Corrigido — RBAC: acesso indevido (Mariane) e falta de permissão de aprovar (Pedro)
+
+- Mariane tinha acesso amplo indevido a sistemas/módulos por um papel legado (`gerente`) coexistindo com o papel novo e mais restrito dela — `hub_sistemas_permitidos` faz UNION entre todos os papeis do usuário, então o papel antigo vazava acesso que o novo não devia dar. Removida a atribuição do papel legado, confirmado que o acesso dela ficou só o pretendido e que não afetou o acesso de Lana (que tem `Necessidade de Compra` por outro papel).
+- Pedro (e por extensão Vinicius/Filippo, que têm o mesmo papel legado `admin`) não conseguia mudar status de pedidos na Central de Solicitações — a ação `aprovar` só tinha sido concedida ao papel `admin_geral`, não ao `admin` legado que eles de fato têm. Corrigido concedendo `aprovar` também ao papel `admin`; testado ao vivo (dropdown de status apareceu e funcionou).
+
+### Adicionado — histórico de SPECs concluídas na Central de Solicitações
+
+- A pedido do usuário ("meu chefe conseguir ver tudo"), importadas as ~85 SPECs já concluídas do repositório como registros na coluna "Concluído" do board da Central de Solicitações, com descrição resumida e amigável (reescrita numa segunda passada depois do usuário pedir "mais simples" na primeira versão, que estava técnica demais).
+
+## 2026-08-26 (2)
+
+### Adicionado — SPEC-121: Central de Solicitações (11º sistema), triagem de bugs/pedidos por IA (Gemini)
+
+- Sistema novo (Skip 53113, `central-de-solicitacoes-cc2ec.goskip.app`), integrado ao Supabase compartilhado e ao `SystemSwitcher` de todos os 10 sistemas existentes sem precisar editar nenhum deles — cadastro de uma linha nova em `public.systems` basta.
+- Toda a equipe pode abrir um pedido (bug ou alteração); uma Edge Function (`classificar_solicitacao`) chama o Gemini (`gemini-3.6-flash`) e classifica automaticamente como estrutural ou pontual, com justificativa — só uma etiqueta informativa, não dispara mais nada sozinha (decisão explícita do usuário: sistema deliberadamente não é "100% automático", é só um lugar pra reportar e estruturar visualmente).
+- Board (kanban por status) com filtros por classificação e tipo. Virar SPEC continua sendo manual — usuário aponta pra um pedido específico e a IA (eu) gera o arquivo a partir da descrição já estruturada, sem precisar reexplicar em texto corrido.
+- RBAC: todo papel (12 no total) ganhou criar+visualizar no sistema novo; `admin_geral` ganhou também aprovar (controla mudança de status no board).
+- **Achado corrigido durante a implementação**: conta `pedrollaghi@gmail.com` (viewer) nunca tinha sido migrada pra `usuario_papeis` — ficava sem nenhum papel, e por isso `hub_pode_executar` negava acesso a QUALQUER sistema pra essa conta, não só a nova. Corrigido inserindo o papel `viewer`.
+- Bloqueio conhecido de `.env` corrompido (linha com chave vazia) voltou a aparecer no deploy da Edge Function via CLI — contornado com o mesmo mv temporário já usado em rodadas anteriores.
+- Modelo Gemini `gemini-2.0-flash` (usado no desenho inicial do prompt) foi descontinuado pela Google durante a implementação — trocado por `gemini-3.6-flash`, testado e confirmado funcionando.
+- Testado ponta a ponta em produção (criar pedido → IA classifica → aparece no board) antes de publicar; pedido de teste removido depois.
+
+## 2026-08-26
+
+### Importado — ciclo de sincronização Connect (ContaPagar/ContaReceber, PedidoCompra, Produtos/Estoque)
+
+- Usuário disponibilizou 4 planilhas novas (`ContaPagar_2026-08-26.xlsx`, `ContaReceber_2026-08-26.xlsx`, `PedidoCompra_2026-08-26.xlsx`, `Produtos__2026-08-26.xlsx`) e pediu pra atualizar o banco. Mesmo ciclo já rodado antes (24/08, 17/08 etc.) — constantes de caminho atualizadas nos 3 scripts (`importar_contas_pagar_receber.py`, `importar_pedido_compra.py`, `importar_produtos_estoque.py`), `--dry-run` conferido em cada um (números batendo com a execução real) antes da gravação.
+- **ContaPagar/ContaReceber**: 70 negociações novas (empresa MANOELLA, mapeamento LUCE NERA confirmado inalterado), 99 transações novas, 2.944 atualizadas (status/pagamento), 14.189 já sincronizadas, 0 erros. 488 linhas com `(cod_duplicata, tipo)` ambíguo entre empresas puladas por desenho (mesmo padrão de todos os ciclos anteriores).
+- **PedidoCompra**: 3 pedidos novos, 7 atualizados, 44 inalterados, 0 erros. `staging_pedido_compra` recarregada (71 linhas).
+- **Produtos/Estoque**: 148 produtos atualizados (estoque/custo/valor de venda/lucro), 4.204 já sincronizados, 0 erros. 128 `CodProduto` da planilha sem match no banco (produtos ainda não cadastrados, fora do escopo do script — só atualiza existentes).
+- `estoque_itens` sincronizado automaticamente via trigger `fn_sync_estoque_itens_from_produtos`, sem ação manual.
+
+## 2026-08-24 (6)
+
+### Corrigido — resumo do projeto em Novo Orçamento mostrava "Arquiteto: Não preenchido" mesmo com arquiteto vinculado no CRM
+
+- Reproduzido ao vivo no navegador (Chrome): criado projeto de teste no CRM com arquiteto (AFONSO ALMEIDA) vinculado via `replace_projeto_arquitetos` (confirmado no banco: `projeto_arquitetos` com percentual 100%) — ao selecionar esse projeto em Novo Orçamento, o quadro-resumo dizia "ARQUITETO: Não preenchido", mas o campo real "Arquiteto / Profissional" do formulário **já vinha preenchido corretamente**. Bug era só de exibição no resumo, não na lógica de preenchimento nem no salvamento.
+- Causa raiz: `handleProjectSelect` (`BudgetFormPage.tsx`) monta o quadro-resumo lendo só `projeto['Nome Arquiteto']` (texto legado, de import antigo do Connect) — projetos criados pelo CRM depois da SPEC-077 (divisão de arquitetos em `projeto_arquitetos`) nunca preenchem esse campo legado, então o resumo sempre mostrava "Não preenchido" mesmo quando o vínculo real existia e era aplicado certo no formulário.
+- Corrigidos os 3 caminhos de preenchimento (`projeto_arquitetos`, `arquiteto_id` singular legado, busca por nome) para sincronizar `arquiteto_nome` do resumo com o(s) arquiteto(s) de fato aplicado(s) ao formulário.
+- Publicado em produção (Orçamentos, Skip 32554, v0.0.357) e reconfirmado ao vivo no navegador após o deploy.
+- Projeto de teste criado durante a investigação: CRM "26.351 — TESTE ARQUITETO AUTOFILL NAO USAR" — pendente de exclusão manual.
+
+## 2026-08-24 (5)
+
+### Adicionado — SPEC-120: menu lateral de navegação entre sistemas (implementado e publicado nos 10 sistemas)
+
+- Barra retrátil fixa no canto direito, presente em todos os sistemas do Hub (Hub + 9 satélites), listando só os sistemas que o usuário logado tem permissão de acessar (`hub_sistemas_permitidos`, mesma fonte já usada pelo Hub) — Ubiqua sempre excluída (fora do escopo desta SPEC) e cada sistema não lista a si mesmo.
+- `useSistemasPermitidos(currentSlug)` (hook) e `SystemSwitcher.tsx` (componente) — versão **autocontida**: resolve o próprio usuário logado via `supabase.auth`, sem depender do formato de `useAuth` de cada um dos 10 repositórios (que variava bastante). Clique reaproveita `redirectWithCode` (SSO, sem login duplicado).
+- **Achado corrigido durante a implementação**: `redirectWithCode` (`cross-system-auth.ts`) já tinha divergido entre sistemas — Orçamentos/Admin Bancária/CRM tinham evoluído pra uma versão melhor (mesma aba por padrão, `sistema_origem` correto por sistema); Hub e os demais 6 satélites ainda tinham `sistema_origem: 'hub'` fixo (errado quando o clique parte de outro sistema) e 5 deles abriam em nova aba. Padronizados os 10 para a versão mais evoluída.
+- **Achado crítico evitado antes de publicar**: o `use-auth.tsx` real do RH no Skip já tinha a checagem `hasAccess`/`hub_pode_executar` (SPEC-069) que o checkout local (git) do submodule não tinha — publicar em cima da edição feita sobre o checkout desatualizado teria apagado essa proteção de acesso em produção. Reconstruída a edição em cima do conteúdo real do Skip antes de publicar.
+- RH ganhou `cross-system-auth.ts` (não existia) e passou a consumir `?sso_code` no bootstrap de autenticação — único sistema do Hub que ainda não era destino SSO válido.
+- Publicado em produção nos 10 sistemas (Hub, Orçamentos, Admin Bancária, CRM, Necessidade de Compra, Logística, Cadastro, RH, Dashboard Financeiro satélite, Separação Parcial) com QA do Skip limpo em todos e autorização explícita do usuário.
+- **Pendente**: teste manual ao vivo do golden path (trocar de sistema pelo menu, chegar autenticado sem login) ainda não foi feito; `AI_DB_CONTEXT.md` de RH e `supabase/db/domains/hub_ti.md` não atualizados nesta rodada.
+
+## 2026-08-24 (4)
+
+### Corrigido — devolução não aparecia como negativo (sistema + PDF) e "Enviar para o Cliente" nunca abria o e-mail com PDF em produção
+
+- **Sinal negativo em devolução**: `orcamentos.valor_total` é sempre salvo positivo no banco (a RPC de aprovação exige `> 0` mesmo para devolução — só ela aplica o sinal negativo ao criar a parcela de crédito). O sistema Orçamentos mostrava esse valor cru (positivo) em todas as telas, mesmo pra devolução, o que confundia — parecia cobrança, não crédito. Criado `getDisplayValorTotal()` em `src/lib/budget-status.ts` (nova, aplica `-Math.abs()` quando `natureza_operacao === 'devolucao'`, exibição apenas, sem alterar o dado salvo) e aplicado em: lista principal, rascunhos, abas de aprovação (cliente/equipe/financeiro), detalhe de orçamentos do projeto, formulário de criação/edição (subtotal, total, subtotal por item) e no PDF gerado (`generate-report`, subtotal por item, subtotal geral, valor total — preço unitário continua positivo, é o preço de referência do produto).
+- **Achado real durante a investigação**: o botão "Enviar para o Cliente" mostrava "orçamento enviado" mas nunca abria o `mailto:` nem baixava o PDF automaticamente. Causa raiz — a feature (SPEC-067, implementada e commitada no git local desde 06/08) **nunca tinha sido publicada no Skip**: a produção rodava uma versão de `BudgetTableRow.tsx` anterior à SPEC-067, sem o import nem a chamada de `sendInitialBudgetPdfAndEmail`; o próprio arquivo `src/lib/envio-inicial-cliente.ts` nem existia no working tree do Skip (confirmado pelo erro de build `Could not load src/lib/envio-inicial-cliente` na primeira tentativa de publicar). Não foi preciso corrigir nenhum código — só sincronizar Skip com o que já estava certo no git local (mesma classe de gap já documentada antes: "SPEC 'Realizado' não prova que está no ar").
+- Publicado em produção: Orçamentos (Skip 32554, v0.0.355) — `gestao-financeira-clone-544cb.goskip.app`.
+- PDF (`generate-report`, mesma correção de sinal + o bloco de observações da SPEC-118, já implementado antes) segue **pendente de deploy** — a Supabase CLI não tem sessão de login válida neste ambiente (401 Unauthorized), precisa de `supabase login` interativo do usuário.
+
+### Adicionado — cadastro de usuário em lote na Central Lucenera (Hub)
+
+- Pedido do usuário: criar várias contas de login de uma vez (ex.: onboarding de vários funcionários), em vez de repetir o dialog "Novo Usuário" um por um.
+- `UsersTab.tsx`: novo botão "Novo Usuário em Lote" ao lado do já existente — textarea com uma linha por pessoa (`Nome, email@dominio.com`), senha e papel de acesso compartilhados por todo o lote, chama a RPC `criar_usuario` (já existente, sem migration) sequencialmente por linha. Falhas parciais (ex.: email já cadastrado) não travam o lote inteiro — toast lista os primeiros 5 erros e a lista é substituída só pelas linhas que falharam, pra corrigir e reenviar.
+- Decisão do usuário: acesso por sistema (`user_system_access`) continua sendo concedido manualmente, um usuário/sistema por vez, na aba "Acesso a Sistemas" já existente — este formulário só cria a conta de login.
+- Publicado em produção: Central Lucenera (Skip 37750, v0.0.40) — `central-lucenera-dashboard-1c9ba.goskip.app`. Testado pelo usuário no preview antes de publicar.
+
+## 2026-08-24 (3)
+
+### Corrigido — snapshot local de `aprovar_orcamento_financeiro` estava desatualizado
+
+- Ao verificar se a devolução do ORC-0028 realmente mexeu no estoque (pedido do usuário), a RPC ao vivo em produção (lida via `pg_get_functiondef` no SQL Editor) confirmou o branch de devolução do SPEC-071 — mas o snapshot local `supabase/db/current/03_functions.sql` mostrava uma versão bem mais antiga da função, **sem nenhum branch de devolução**, tratando todo orçamento como venda (criaria `projeto_itens` positivos e reservaria estoque, nunca chamaria `registrar_devolucao_projeto_item`). Se alguém confiasse nesse snapshot pra entender o comportamento do sistema, chegaria a uma conclusão errada.
+- Snapshot sincronizado com a versão real de produção: inclui o branch `natureza_operacao = 'devolucao'` (SPEC-071), a checagem de permissão via `hub_pode_executar` (SPEC-069, substituiu o check antigo por `usuarios.role`), e o ramo de venda com o modelo de reserva por `estoque_saldos_projeto_item`/`estoque_movimentos_projeto_item` (mais recente que o antigo `estoque_itens.quantidade_reservada` direto).
+- Nenhuma mudança de comportamento em produção — só o arquivo de referência local foi corrigido pra não descrever um comportamento que o banco real não tem mais.
+
+## 2026-08-24 (2)
+
+### Corrigido — regressão SPEC-108 quebrava aprovação de todo orçamento de devolução desde 15/08
+
+- Teste ao vivo do fluxo de devolução (ORC-0028) travou na aprovação financeira: `Orçamento de devolução possui item sem venda de origem vinculada`, mesmo depois de vincular os itens via "Buscar Venda de Origem" e salvar — o vínculo continuava `NULL` no banco.
+- Causa raiz: a migration `20260815_116` (SPEC-108, trava de valor/produto pra admin) reescreveu `replace_orcamento_itens` via `CREATE OR REPLACE FUNCTION` e esqueceu a coluna `projeto_item_origem_id` (SPEC-071, `20260807_089`) — tanto no `INSERT` quanto no `SELECT` que lê o jsonb de entrada. Essa RPC faz DELETE+INSERT de *todos* os itens a cada save, então qualquer orçamento de devolução editado desde 15/08 perdia o vínculo com a venda de origem silenciosamente, sem erro nenhum ao salvar — só na hora de aprovar (ou nunca, se ninguém reparasse).
+- Fix (`supabase/db/migrations/20260824_123_fix_replace_orcamento_itens_origem_id/001_fix_replace_orcamento_itens_origem_id.sql`): mesma função, mesma trava de admin da SPEC-108 preservada, só devolvendo `projeto_item_origem_id` à lista de colunas.
+- **Aplicado direto em produção via SQL Editor do Supabase Dashboard** (não pelo `psql`/CLI de costume) — o host direto do Postgres (`db.<ref>.supabase.co`) só tem registro DNS IPv6 e o ambiente de execução não tem rota IPv6, então a conexão direta falha com "Network is unreachable"/"could not translate host name". A API REST (host sem `db.`) funciona normal via IPv4, mas a SQL Editor via navegador (sessão já autenticada do usuário) foi o caminho viável pra rodar DDL/`CREATE OR REPLACE FUNCTION` desta vez.
+- Verificado ao vivo de ponta a ponta: refeito o vínculo dos 3 itens de ORC-0028 (deletados os 3 itens órfãos, re-adicionados via "Buscar Venda de Origem"), salvo, e reenviado pelo fluxo completo (Aprovar Manualmente → Aprovação da Equipe → Aprovar e Enviar ao Financeiro → Aprovar financeiramente). Aprovação financeira concluída sem erro: 1 parcela + 1 boleto gerados.
+- **Achado colateral confirmado, não é bug**: editar itens de um orçamento em revisão financeira reseta o status pra "Enviado para o Cliente" (trigger existente que reinicia o ciclo de aprovação quando os itens mudam) — exige reaprovação completa do zero, como aconteceu aqui.
+
 ## 2026-08-24
 
 ### Importado — ciclo de sincronização Connect (ContaPagar/ContaReceber, PedidoCompra, Produtos/Estoque)

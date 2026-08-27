@@ -67,6 +67,25 @@ usados no formulário), sem mudar nome de campo, validação nem schema.
   (efeito de lado a lado sem precisar de wrapper novo, só reordenando).
 - Publicado Skip 24580, v0.0.302, QA limpo.
 
+### 2026-08-13 — correção (achada no teste ao vivo)
+
+- **Bug real**: `ClientFormFields.tsx` não é o componente usado pela tela
+  de ver/editar um cliente já existente (`/contatos/clientes/:id`) — essa
+  tela é `ContatoDetail.tsx`, que tem seu próprio array
+  `FIELD_CONFIGS.cliente` hardcoded, independente. A correção de
+  v0.0.302 nunca alcançou a tela real que o Vinícius via na reunião.
+  `ClientFormFields.tsx` continua existindo (usado em outro fluxo de
+  cadastro), mas não é o formulário desta reclamação.
+- Achado só via teste em navegador ao vivo, clicando em "Editar" num
+  cliente real — não seria detectável só por build/lint/QA do Skip.
+- Mesmo reordenamento aplicado em `ContatoDetail.tsx` →
+  `FIELD_CONFIGS.cliente`: `tipo_cliente` movido pra logo após
+  `cpf_cnpj`; `rg` e `inscricao_estadual` ficaram adjacentes.
+- Publicado Skip 24580, v0.0.303, QA limpo. Confirmado visualmente no
+  navegador após hard-reload (Ctrl+Shift+R).
+- Sincronizado no submodule local `lucenera-crm-3bd29` (commit
+  `e5cbd96`, push feito).
+
 ## Pendências
 
 Nenhuma.

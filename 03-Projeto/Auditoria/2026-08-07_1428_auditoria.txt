@@ -1,0 +1,152 @@
+AUDITORIA — 2026-08-07 14:28
+Escopo: sessão de implementação das SPEC-068 (correções no Orçamento) e SPEC-069
+(matriz de permissões por perfil / RBAC).
+
+Commits revisados (diff real lido com git show, não só a mensagem):
+  - 216d345 "feat(SPEC-068, SPEC-069): correcoes de orcamento e matriz de permissoes RBAC" (9 arquivos)
+  - 4fa7b3c "fix(SPEC-069): fecha RLS de produtos (cadastro direto fora do orcamento)" (1 arquivo)
+
+Migrations conferidas direto no Supabase real (todas datadas de 20260806):
+  083_spec068_desconto_tipo_sinal_orcamento
+  084_spec069_rbac_matriz_perfis
+  085_spec069_rls_financeiro_rh
+  086_spec069_rpc_guards_orcamentos
+  087_spec069_rls_produtos
+
+===============================
+O QUE MUDOU
+===============================
+SPEC-068 (Orçamento):
+- Orçamento ganhou um jeito de dar desconto de duas formas: em porcentagem OU em
+  valor fechado em reais (antes só dava em porcentagem). Isso fica guardado em duas
+  colunas novas na tabela de orçamentos.
+- Criado o campo "Sinal": um valor em reais que aparece no documento do orçamento
+  para o cliente, só para informação — não gera cobrança nem parcela financeira.
+- A tela que o cliente usa para aprovar o orçamento (por link) foi atualizada para
+  mostrar esse desconto e esse sinal corretamente.
+- Corrigido de onde vem o nome do "vendedor" que preenche automaticamente o
+  orçamento: antes apontava para uma coluna que não existe mais na tabela de
+  projetos (ficou quebrada desde uma mudança de agosto); agora usa o campo certo,
+  e só preenche automaticamente quando o orçamento é novo (não sobrescreve mais
+  edição de um orçamento já existente).
+- Um projeto (nº 24.200) estava marcado como "arquivado" por engano no banco de
+  dados, o que fazia ele sumir da busca de "Novo Orçamento" — corrigido o dado.
+- Um item da lista de pedidos (nome do cliente aparecendo errado) foi investigado
+  mas a causa não foi encontrada e continua em aberto — isso está registrado
+  no próprio CHANGELOG do projeto, não foi escondido.
+
+SPEC-069 (Matriz de Permissões / RBAC):
+- Criados 6 perfis de acesso reutilizáveis: Administrador Geral, Gestão de RH,
+  Administração Comercial, Compras e Entregas, Equipe de Projetos, Equipe de
+  Entrega — cada um com um nível de acesso diferente (total, editar, editar sem
+  cadastrar, só consultar, ou nenhum acesso) em cada sistema da empresa.
+- Essas 6 pastas de permissão foram atribuídas às pessoas reais: Vinícius
+  (Administrador Geral), Lana (Gestão de RH), Débora (Compras e Entregas),
+  Mariane (Equipe de Projetos) e, depois, Carol (Administração Comercial, com
+  poder de aprovar orçamento).
+- Um perfil antigo chamado "gerente" (que dava acesso total a várias áreas sem
+  filtro nenhum) foi tirado da Lana e da Mariane — ele estava conflitando com
+  as novas regras e dando acesso que elas não deveriam ter.
+- A trava de acesso (chamada RLS, é a regra que o próprio banco de dados aplica,
+  não depende do site funcionar certo) foi ativada de verdade nas telas de
+  Administração Bancária (boletos, notas fiscais, remessas, contas bancárias) e
+  no RH (cadastro de funcionários). Antes dessas mudanças essas tabelas estavam
+  liberadas para "qualquer pessoa logada", mesmo já existindo uma trava mais
+  restrita — a trava restrita não funcionava porque uma regra concorrente,
+  mais aberta, cancelava o efeito dela.
+- A mesma coisa foi corrigida na tabela de Produtos, num commit separado feito
+  logo depois: existia uma trava restrita mas ela era anulada por uma regra
+  aberta concorrente, permitindo cadastrar produto por fora do fluxo de
+  Orçamento. Isso foi fechado.
+- Duas funções internas do sistema (uma que aprova orçamento financeiramente,
+  outra que cadastra produto durante a montagem do orçamento) ganharam checagem
+  de permissão. A de aprovar orçamento não tinha NENHUMA checagem antes — hoje
+  só quem tem a permissão "aprovar" em Orçamentos consegue rodar essa ação.
+- Foi vinculado ao projeto um sistema novo, "Ficha Técnica" (Lucenera-Power-point),
+  mas ele ainda não foi conectado a essa matriz de permissões — é um sistema
+  Python/Flask diferente dos outros, fora do escopo desta sessão.
+
+===============================
+O QUE EU CONFIRMEI QUE FUNCIONA (testado direto no banco real)
+===============================
+- As colunas novas de desconto/sinal existem na tabela de orçamentos e a função
+  que a tela de aprovação do cliente usa já devolve os campos novos
+  (desconto_tipo, valor_sinal, saldo_restante_apos_sinal). Bateu com o esperado.
+
+- Testei a permissão de cada pessoa direto no banco (usando a mesma função que
+  o sistema usa para decidir quem pode ver/fazer o quê) e também simulando o
+  login de cada uma dentro de uma transação de teste (revertida no final, nada
+  foi alterado de verdade):
+  - Vinícius: acesso liberado em Administração Bancária e RH. Bateu.
+  - Mariane: acesso NEGADO em Administração Bancária e RH; consegue EDITAR
+    Orçamentos e Cadastro, mas não consegue CRIAR nesses dois. Bateu.
+  - Lana: acesso liberado só em RH; negado em Administração Bancária,
+    Cadastro e Orçamentos. Bateu.
+  - Carol: consegue criar em Cadastro e em Orçamentos, e consegue aprovar
+    orçamento financeiramente. Bateu.
+  - Vinícius e Carol conseguem cadastrar Produto; Mariane consegue editar
+    Produto mas não consegue cadastrar um novo. Bateu (igual ao que constava
+    no commit).
+
+- Fui além do que a função de permissão diz e testei a trava real do banco
+  (RLS) tentando de fato ler/inserir dados como cada pessoa, dentro de uma
+  transação que desfiz em seguida (nenhum dado foi criado ou apagado):
+  - Como Mariane: tentativa de listar boletos retornou 0 linhas (bloqueada).
+    Tentativa de cadastrar produto novo foi REJEITADA pelo próprio banco com
+    o erro "new row violates row-level security policy" — ou seja, mesmo que
+    algum bug no site deixasse passar, o banco não deixaria a ação acontecer.
+  - Como Vinícius: listar boletos retornou 21 linhas normalmente, e o cadastro
+    de produto de teste foi aceito pelo banco (revertido em seguida). Bateu.
+
+- Confirmei no banco (tabela pg_policies) que as regras antigas "libera tudo
+  para qualquer logado" (que antes anulavam a trava restrita) não existem
+  mais em boletos, notas fiscais, remessas, contas bancárias, funcionários e
+  produtos. Só sobraram as regras novas da SPEC-069 (mais uma regra específica
+  para uso interno do sistema em produtos, que continua correta e intencional).
+
+- Confirmei que o perfil antigo "gerente" foi mesmo removido da Lana e da
+  Mariane — não existe mais essa linha para nenhuma das duas.
+
+- Confirmei a contagem exata de permissões novas: 44 linhas cadastradas para
+  os 6 perfis novos (Administrador Geral 9, Administração Comercial 10,
+  Compras e Entregas 7, Equipe de Entrega 4, Equipe de Projetos 13, Gestão de
+  RH 1) — bate exatamente com o que estava descrito.
+
+- Confirmei que as duas funções internas (aprovar orçamento e cadastrar
+  produto pelo orçamento) realmente têm a checagem de permissão no código
+  que está rodando no banco agora, não só no arquivo da migration.
+
+- Conferi que os dois commits têm exatamente os arquivos que a mensagem
+  descreve (9 no primeiro, 1 no segundo) e que o conteúdo do código bate com
+  o que a mensagem do commit promete.
+
+===============================
+O QUE EU NÃO CONSEGUI CONFIRMAR
+===============================
+- Não consegui confirmar se o sistema de Orçamentos (gestao-financeira-clone-544cb)
+  está de fato publicado em produção com a versão 0.0.303 mencionada no commit,
+  porque o acesso ao Skip (a ferramenta que builda/publica os sistemas) não
+  estava disponível nesta sessão de auditoria. Para confirmar isso manualmente:
+  abrir a URL de produção do sistema de Orçamentos e conferir se os campos de
+  desconto %/R$ e Sinal aparecem na tela, ou checar no painel do Skip se o
+  projectId 32554 está na versão 0.0.303.
+- Também não consegui confirmar visualmente se as telas dos outros sistemas já
+  escondem/mostram botões de acordo com a nova matriz de permissões — isso é
+  trabalho de frontend que, segundo o próprio commit, ainda não foi feito
+  (adoção por sistema continua pendente, é tarefa futura já assumida como tal).
+- Não confirmei o "achado" do item 2.1 da SPEC-068 (nome do cliente aparecendo
+  errado) porque o próprio commit já diz que não foi resolvido nem a causa
+  encontrada — não é algo que eu precisasse re-testar, só registro que
+  continua em aberto.
+
+===============================
+PROBLEMAS ENCONTRADOS
+===============================
+Nenhum problema encontrado nas migrations, no código dos commits ou nos testes
+de permissão. Tudo que consegui testar bateu com o que estava descrito nos
+commits e no CHANGELOG.
+
+Um ponto de atenção (não é erro, é um lembrete operacional): os dois commits
+auditados (216d345 e 4fa7b3c) ainda NÃO foram enviados ao GitHub — o repositório
+local está "ahead 2" em relação a origin/main. Enquanto não houver push, esse
+trabalho existe só nesta máquina.

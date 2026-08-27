@@ -54,13 +54,18 @@ def buscar_nao_quitadas():
             t.descricao,
             t.valor,
             t.dt_emissao,
-            t.dt_vencimento,
-            case when t.dt_vencimento < current_date
-                 then (current_date - t.dt_vencimento)
+            -- 4 linhas em producao (2026-08-19) tem dt_vencimento corrompido
+            -- de import antigo (ex.: ano 206 em vez de 2026, ou a "data
+            -- zero" 1899-12-30 do Excel) - mostrar em branco em vez de
+            -- data/atraso sem sentido, pra nao mandar isso pra fora.
+            case when extract(year from t.dt_vencimento) between 2000 and 2100
+                 then t.dt_vencimento end as dt_vencimento,
+            case when extract(year from t.dt_vencimento) not between 2000 and 2100 then null
+                 when t.dt_vencimento < current_date then (current_date - t.dt_vencimento)
                  else 0 end as dias_atraso,
             n.cod_duplicata,
             t.num_parc,
-            t.total_parc as parcelas_total
+            n.total_parc as parcelas_total
         from transacoes t
         join negociacoes n on n.id = t.negociacao_id
         join empresas e on e.id = n.empresa_id

@@ -1,0 +1,447 @@
+<title>Situação de Contas Não Quitadas</title>
+<style>
+  :root {
+    --bg: #F2F4F7;
+    --surface: #FFFFFF;
+    --surface-2: #E9EDF2;
+    --ink: #1B2130;
+    --ink-soft: #5B6472;
+    --ink-faint: #8993A1;
+    --line: #DDE2E8;
+    --accent: #B4761F;
+    --accent-ink: #7A4F12;
+    --accent-soft: #F4E4C9;
+    --pos: #1F7A63;
+    --pos-soft: #DCEFE9;
+    --neg: #A63A2C;
+    --neg-soft: #F6E1DC;
+    --shadow: 0 1px 2px rgba(27,33,48,0.04), 0 8px 24px -12px rgba(27,33,48,0.12);
+    --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'SF Mono', 'Cascadia Mono', Consolas, 'Roboto Mono', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151C; --surface: #1A1F29; --surface-2: #212734;
+      --ink: #E8EAEE; --ink-soft: #A0A9B6; --ink-faint: #6C7686;
+      --line: #2A3140; --accent: #E0A748; --accent-ink: #F0C784;
+      --accent-soft: rgba(224,167,72,0.14);
+      --pos: #45B092; --pos-soft: rgba(69,176,146,0.14);
+      --neg: #E07A62; --neg-soft: rgba(224,122,98,0.14);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151C; --surface: #1A1F29; --surface-2: #212734;
+    --ink: #E8EAEE; --ink-soft: #A0A9B6; --ink-faint: #6C7686;
+    --line: #2A3140; --accent: #E0A748; --accent-ink: #F0C784;
+    --accent-soft: rgba(224,167,72,0.14);
+    --pos: #45B092; --pos-soft: rgba(69,176,146,0.14);
+    --neg: #E07A62; --neg-soft: rgba(224,122,98,0.14);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.55);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15.5px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 56px 28px 96px; }
+  .masthead { display: flex; flex-direction: column; gap: 14px; padding-bottom: 32px; border-bottom: 1px solid var(--line); margin-bottom: 40px; }
+  .kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-ink); font-weight: 600; }
+  h1.title { font-family: var(--font-display); font-weight: 500; font-size: clamp(30px, 4.5vw, 42px); line-height: 1.1; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 20px; color: var(--ink-soft); font-size: 13.5px; }
+  .meta-row strong { color: var(--ink); font-weight: 600; }
+  .meta-row .dot { color: var(--ink-faint); }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 48px; }
+  @media (max-width: 760px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 18px 16px; box-shadow: var(--shadow); }
+  .kpi .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); margin-bottom: 8px; }
+  .kpi .value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+  .kpi .value.pos { color: var(--pos); } .kpi .value.neg { color: var(--neg); }
+  .kpi .sub { font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
+  section.block { margin-bottom: 54px; }
+  .eyebrow { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+  .eyebrow .num { font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); letter-spacing: 0.04em; }
+  .eyebrow .label { font-family: var(--font-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-ink); font-weight: 600; }
+  h2.section-title { font-family: var(--font-display); font-weight: 500; font-size: 26px; margin: 0 0 16px; letter-spacing: -0.01em; }
+  p.prose { max-width: 70ch; color: var(--ink); margin: 0 0 14px; }
+  p.prose:last-child { margin-bottom: 0; }
+  p.prose .fig { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+  p.prose .pos { color: var(--pos); } p.prose .neg { color: var(--neg); }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px 20px; box-shadow: var(--shadow); margin-top: 18px; }
+  .panel-legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  canvas.chart { width: 100%; display: block; }
+
+  /* Achado destaque */
+  .achado { background: var(--neg-soft); border: 1px solid var(--neg); border-radius: 12px; padding: 24px 26px; box-shadow: var(--shadow); }
+  .achado-antes-depois { display: flex; gap: 28px; align-items: center; margin: 18px 0 6px; flex-wrap: wrap; }
+  .ad-item { text-align: center; }
+  .ad-item .l { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); margin-bottom: 4px; }
+  .ad-item .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 22px; }
+  .ad-item.antes .v { color: var(--neg); text-decoration: line-through; text-decoration-thickness: 2px; opacity: .75; }
+  .ad-item.depois .v { color: var(--pos); }
+  .ad-arrow { font-size: 22px; color: var(--ink-faint); }
+
+  .prop-row { margin-bottom: 16px; } .prop-row:last-child { margin-bottom: 0; }
+  .prop-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .prop-head .t { font-weight: 600; }
+  .prop-head .v { font-family: var(--font-mono); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .prop-bar { display: flex; height: 22px; border-radius: 5px; overflow: hidden; background: var(--surface-2); }
+  .prop-seg { height: 100%; }
+  .prop-seg.avencer { background: var(--accent); opacity: .55; }
+  .prop-seg.vencido { background: var(--neg); }
+  .prop-key { display: flex; gap: 16px; margin-top: 8px; font-size: 11.5px; color: var(--ink-soft); }
+
+  .aging-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 4px; }
+  @media (max-width: 620px) { .aging-grid { grid-template-columns: repeat(2, 1fr); } }
+  .aging-cell { border: 1px solid var(--line); border-radius: 8px; padding: 12px 12px 10px; }
+  .aging-cell .rng { font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .04em; }
+  .aging-cell .amt { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 15px; margin-top: 4px; }
+  .aging-cell .qty { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .aging-cell.hot { border-color: var(--neg); background: var(--neg-soft); }
+
+  .tbl-wrap { overflow-x: auto; }
+  table.data { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.data th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-faint); font-weight: 600; padding: 0 10px 8px; border-bottom: 1px solid var(--line); }
+  table.data td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+
+  .closing { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; padding: 24px 26px; box-shadow: var(--shadow); }
+  .closing ul { margin: 0; padding-left: 20px; } .closing li { margin-bottom: 10px; } .closing li:last-child { margin-bottom: 0; }
+
+  .anexos { display: flex; flex-direction: column; gap: 8px; }
+  .anexo-item { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 13px; background: var(--surface-2); border-radius: 6px; padding: 8px 12px; }
+
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+  @media print {
+    @page { size: A4; margin: 14mm 12mm; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: var(--bg) !important; }
+    .wrap { max-width: none; padding: 0; }
+    .panel, .kpi, .kpi-grid, .aging-grid, .closing, .achado { break-inside: avoid; }
+    section.block { break-inside: avoid-page; }
+    .masthead { break-after: avoid; }
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="kicker">Nota interna · Grupo Lucenera</div>
+    <h1 class="title">Situação de Contas Não Quitadas</h1>
+    <div class="meta-row">
+      <span><strong>Empresas</strong> ISLIGHT · FOCO Iluminação · Manoella</span>
+      <span class="dot">·</span>
+      <span><strong>Base</strong> banco de dados ao vivo</span>
+      <span class="dot">·</span>
+      <span><strong>Gerado em</strong> 19/08/2026</span>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="label">Total a Pagar em aberto</div>
+      <div class="value neg">R$ 7.597.769</div>
+      <div class="sub">1.506 títulos</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Total a Receber em aberto</div>
+      <div class="value">R$ 5.032.310</div>
+      <div class="sub">876 títulos</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Saldo líquido em aberto</div>
+      <div class="value neg">− R$ 2.565.459</div>
+      <div class="sub">a pagar supera a receber</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Vencido real (corrigido)</div>
+      <div class="value neg">R$ 1.891.631</div>
+      <div class="sub">R$ 449k a pagar + R$ 1,44M a receber</div>
+    </div>
+  </div>
+
+  <section class="block">
+    <div class="eyebrow"><span class="label">O que motivou esta nota</span></div>
+    <h2 class="section-title">Duplicata cancelada estava sendo contada como dívida em aberto</h2>
+    <p class="prose">
+      O sistema financeiro usa um código de status por título: <span class="fig">0 = Aberto</span>,
+      <span class="fig">1 = Pago</span>, <span class="fig">2 = Cancelado</span>. Um erro na lógica
+      (tanto no relatório quanto no Dashboard Financeiro de Contas a Pagar/Receber) tratava o código
+      <span class="fig">2</span> como se ainda fosse dívida pendente — uma duplicata cancelada seguia
+      entrando na conta de "vencido", inflando o número real.
+    </p>
+    <div class="achado">
+      <p class="prose" style="margin-bottom:0;">
+        <strong>Maior impacto: despesas vencidas.</strong> Antes da correção, o total de despesas
+        vencidas somava um número quase 21× maior que a realidade.
+      </p>
+      <div class="achado-antes-depois">
+        <div class="ad-item antes"><div class="l">Mostrava antes</div><div class="v">R$ 9.369.169</div></div>
+        <div class="ad-arrow">→</div>
+        <div class="ad-item depois"><div class="l">Valor real</div><div class="v">R$ 449.117</div></div>
+      </div>
+      <p class="prose" style="margin-top:10px; font-size: 13px; color: var(--ink-soft);">
+        R$ 8.920.052 eram cancelamentos sendo contados por engano — não dívida real.
+      </p>
+    </div>
+    <p class="prose" style="margin-top:16px;">
+      Corrigido em três lugares: a fonte de dados do Dashboard Financeiro (view
+      <span class="fig">v_financeiro_realizado</span>, que agora exclui cancelado na origem), o
+      código do Dashboard Financeiro em si, e este relatório. Os números desta nota já refletem a
+      correção — <span class="fig">nenhum título cancelado entra em nenhum total abaixo</span>.
+    </p>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">01</span><span class="label">Situação Atual</span></div>
+    <h2 class="section-title">A vencer vs. vencido, real</h2>
+    <p class="prose">
+      Dos R$ 7,60M a pagar em aberto, <span class="fig">94%</span> ainda não venceu — é fluxo normal
+      de parcelamento futuro, não atraso. O mesmo vale do lado de receber:
+      <span class="fig">71%</span> ainda a vencer.
+    </p>
+    <div class="panel">
+      <div class="prop-row">
+        <div class="prop-head"><span class="t">A Pagar</span><span class="v">R$ 7.597.769 em aberto</span></div>
+        <div class="prop-bar">
+          <div class="prop-seg avencer" style="width:94.1%"></div>
+          <div class="prop-seg vencido" style="width:5.9%"></div>
+        </div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-head"><span class="t">A Receber</span><span class="v">R$ 5.032.310 em aberto</span></div>
+        <div class="prop-bar">
+          <div class="prop-seg avencer" style="width:71.3%"></div>
+          <div class="prop-seg vencido" style="width:28.7%"></div>
+        </div>
+      </div>
+      <div class="prop-key">
+        <span class="legend-item"><span class="swatch" style="background:var(--accent);opacity:.55"></span>A vencer</span>
+        <span class="legend-item"><span class="swatch" style="background:var(--neg)"></span>Vencido</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">02</span><span class="label">Aging do Vencido</span></div>
+    <h2 class="section-title">A Receber vencido é o ponto de atenção real</h2>
+    <p class="prose">
+      Com cancelado fora da conta, o vencido a pagar (R$ 449k) é pequeno e concentrado em até 90 dias
+      — sem backlog antigo. Já o vencido a receber (R$ 1,44M) é maior e tem
+      <span class="fig">R$ 349.805</span> com mais de 90 dias parado — vale priorizar cobrança nesses
+      21+92 títulos mais antigos.
+    </p>
+    <div class="two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="panel">
+        <div class="panel-legend"><span class="legend-item"><span class="swatch" style="background:var(--neg)"></span>A Pagar vencido</span></div>
+        <div class="aging-grid">
+          <div class="aging-cell"><div class="rng">Até 30d</div><div class="amt">R$ 253.174</div><div class="qty">84 títulos</div></div>
+          <div class="aging-cell"><div class="rng">31–90d</div><div class="amt">R$ 15.381</div><div class="qty">9 títulos</div></div>
+          <div class="aging-cell hot"><div class="rng">91–365d</div><div class="amt">R$ 180.561</div><div class="qty">65 títulos</div></div>
+          <div class="aging-cell"><div class="rng">+365d</div><div class="amt">R$ 0</div><div class="qty">0 títulos</div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-legend"><span class="legend-item"><span class="swatch" style="background:var(--neg)"></span>A Receber vencido</span></div>
+        <div class="aging-grid">
+          <div class="aging-cell"><div class="rng">Até 30d</div><div class="amt">R$ 619.477</div><div class="qty">99 títulos</div></div>
+          <div class="aging-cell"><div class="rng">31–90d</div><div class="amt">R$ 472.301</div><div class="qty">162 títulos</div></div>
+          <div class="aging-cell hot"><div class="rng">91–365d</div><div class="amt">R$ 307.873</div><div class="qty">92 títulos</div></div>
+          <div class="aging-cell hot"><div class="rng">+365d</div><div class="amt">R$ 41.933</div><div class="qty">21 títulos</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">03</span><span class="label">Por Empresa</span></div>
+    <h2 class="section-title">Manoella concentra 80% do que está a pagar</h2>
+    <p class="prose">
+      Dos R$ 7,60M a pagar em aberto no grupo, <span class="fig">R$ 6.079.942 (80%)</span> estão sob
+      Manoella. Boa parte disso — <span class="fig">R$ 2.365.000</span>, quase
+      <span class="fig">39%</span> do total da empresa — é um único fornecedor (Clovis Galdiano Cury,
+      parcelado em títulos de R$ 550.000 e R$ 55.000 com vencimentos entre agosto e dezembro/2026).
+      Não é atraso — todos os vencimentos estão no futuro — mas é uma concentração relevante de
+      compromisso futuro num único credor, que vale ter no radar de caixa dos próximos meses.
+    </p>
+    <div class="panel">
+      <div class="panel-legend">
+        <span class="legend-item"><span class="swatch" style="background:var(--pos)"></span>A Receber</span>
+        <span class="legend-item"><span class="swatch" style="background:var(--neg)"></span>A Pagar</span>
+      </div>
+      <canvas class="chart" id="chart-empresa" height="260"></canvas>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="num">04</span><span class="label">Maiores Pendências</span></div>
+    <h2 class="section-title">Os títulos de maior valor em aberto</h2>
+    <div class="two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="panel">
+        <div class="panel-legend"><span class="legend-item"><span class="swatch" style="background:var(--neg)"></span>Maiores a pagar</span></div>
+        <div class="tbl-wrap">
+          <table class="data">
+            <thead><tr><th>Empresa</th><th>Credor</th><th>Vencimento</th><th class="num">Valor</th></tr></thead>
+            <tbody>
+              <tr><td>MANOELLA</td><td>Clovis Galdiano Cury</td><td>05/09/26</td><td class="num">R$ 550.000</td></tr>
+              <tr><td>MANOELLA</td><td>Clovis Galdiano Cury</td><td>05/10/26</td><td class="num">R$ 550.000</td></tr>
+              <tr><td>MANOELLA</td><td>Clovis Galdiano Cury</td><td>05/11/26</td><td class="num">R$ 550.000</td></tr>
+              <tr><td>MANOELLA</td><td>Clovis Galdiano Cury</td><td>05/12/26</td><td class="num">R$ 550.000</td></tr>
+              <tr><td>ISLIGHT</td><td>(sem contato)</td><td>31/12/26</td><td class="num">R$ 113.137</td></tr>
+              <tr><td>MANOELLA</td><td>Clovis Galdiano Cury</td><td>06/09/26</td><td class="num">R$ 55.000</td></tr>
+              <tr><td>MANOELLA</td><td>Clovis Galdiano Cury</td><td>06/10/26</td><td class="num">R$ 55.000</td></tr>
+              <tr><td>MANOELLA</td><td>Clovis Galdiano Cury</td><td>05/08/26 (14d)</td><td class="num">R$ 55.000</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-legend"><span class="legend-item"><span class="swatch" style="background:var(--pos)"></span>Maiores a receber</span></div>
+        <div class="tbl-wrap">
+          <table class="data">
+            <thead><tr><th>Empresa</th><th>Cliente</th><th>Vencimento</th><th class="num">Valor</th></tr></thead>
+            <tbody>
+              <tr><td>MANOELLA</td><td>Clara Artes - Ala Quartos</td><td>15/08/26 (4d)</td><td class="num">R$ 107.548</td></tr>
+              <tr><td>ISLIGHT</td><td>(sem contato)</td><td>15/11/26</td><td class="num">R$ 68.000</td></tr>
+              <tr><td>ISLIGHT</td><td>(sem contato)</td><td>15/12/26</td><td class="num">R$ 68.000</td></tr>
+              <tr><td>ISLIGHT</td><td>(sem contato)</td><td>15/08/26 (4d)</td><td class="num">R$ 68.000</td></tr>
+              <tr><td>ISLIGHT</td><td>(sem contato)</td><td>15/09/26</td><td class="num">R$ 68.000</td></tr>
+              <tr><td>ISLIGHT</td><td>(sem contato)</td><td>15/10/26</td><td class="num">R$ 68.000</td></tr>
+              <tr><td>ISLIGHT</td><td>(sem contato)</td><td>31/12/25 (231d)</td><td class="num">R$ 67.013</td></tr>
+              <tr><td>ISLIGHT</td><td>(sem contato)</td><td>15/08/26 (4d)</td><td class="num">R$ 61.000</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <p class="prose" style="margin-top:12px; font-size: 13px; color: var(--ink-soft);">
+      Parênteses = dias de atraso, quando vencido. Vários registros ISLIGHT aparecem sem contato
+      vinculado no cadastro — vale completar isso pra facilitar a cobrança.
+    </p>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="label">Síntese</span></div>
+    <h2 class="section-title">Pontos de atenção</h2>
+    <div class="closing">
+      <ul>
+        <li><strong>O número real de vencido é bem menor que o que aparecia antes:</strong> R$ 1,89M
+          combinado (R$ 449k a pagar + R$ 1,44M a receber), não os R$ 12,2M que apareciam somando os
+          dois lados com o bug do cancelado incluído.</li>
+        <li><strong>A Receber vencido merece mais atenção que A Pagar vencido:</strong> R$ 1,44M vs
+          R$ 449k, com R$ 350k já passando de 90 dias parado.</li>
+        <li><strong>Concentração de compromisso futuro na Manoella:</strong> R$ 2,37M (quase 39% do
+          que a empresa tem a pagar) está com um único fornecedor, em parcelas até dezembro — sem
+          atraso, mas vale ter no planejamento de caixa.</li>
+        <li><strong>Cadastro incompleto:</strong> vários dos maiores títulos a receber da ISLIGHT não
+          têm contato vinculado — dificulta a cobrança direta.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow"><span class="label">Anexos</span></div>
+    <h2 class="section-title">Planilhas em anexo</h2>
+    <div class="anexos">
+      <div class="anexo-item">📄 ContaPagar_2026-08-17_NAO_QUITADAS_v3.xlsx — 1.506 títulos (Normal + Dev Troca)</div>
+      <div class="anexo-item">📄 ContaReceber_2026-08-17_NAO_QUITADAS.xlsx — 476 títulos (Normal + Dev Troca)</div>
+      <div class="anexo-item">📄 Contas_Nao_Quitadas_2026-08-19.xlsx — versão consolidada, dado mais recente (2.382 títulos)</div>
+    </div>
+    <p class="prose" style="margin-top:12px; font-size: 13px; color: var(--ink-soft);">
+      As duas primeiras seguem o layout de colunas do sistema legado Connect (base de 17/08); a
+      terceira é uma versão simplificada com dado direto do banco em tempo real (19/08) — mais atual,
+      formato mais enxuto.
+    </p>
+  </section>
+
+  <footer>
+    <span>Fonte: banco de dados Supabase do ecossistema Lucenera (tabela <code>transacoes</code>),
+      consultado ao vivo em 19/08/2026. Números excluem status=2 (cancelado) em todos os totais.</span>
+    <span>Conferir com o financeiro antes de decisões críticas de caixa.</span>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function fmtMoneyShort(v) {
+    var abs = Math.abs(v);
+    var s = abs >= 1000000 ? (v / 1000000).toFixed(2).replace('.', ',') + 'M'
+      : abs >= 1000 ? (v / 1000).toFixed(0) + 'k' : v.toFixed(0);
+    return (v < 0 ? '-R$ ' : 'R$ ') + s.replace('-', '');
+  }
+  function setupCanvas(canvas) {
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    var h = canvas.getAttribute('height') ? parseInt(canvas.getAttribute('height'), 10) : rect.height;
+    canvas.width = Math.max(1, rect.width * dpr);
+    canvas.height = Math.max(1, h * dpr);
+    canvas.style.height = h + 'px';
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    return { ctx: ctx, w: rect.width, h: h };
+  }
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    var words = text.split(' '), line = '', lines = [];
+    for (var i = 0; i < words.length; i++) {
+      var test = line ? line + ' ' + words[i] : words[i];
+      if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = words[i]; }
+      else line = test;
+    }
+    lines.push(line);
+    lines.forEach(function (l, li) { ctx.fillText(l, x, y + li * lineHeight); });
+  }
+  function drawGrouped(canvas, labels, series) {
+    var setup = setupCanvas(canvas), ctx = setup.ctx, W = setup.w, H = setup.h;
+    ctx.clearRect(0, 0, W, H);
+    var padL = 70, padR = 20, padT = 14, padB = 34;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var maxV = 0;
+    series.forEach(function (s) { s.values.forEach(function (v) { maxV = Math.max(maxV, v); }); });
+    var scale = plotH / (maxV * 1.1 || 1);
+    var line = cssVar('--line'), inkFaint = cssVar('--ink-faint');
+    ctx.strokeStyle = line; ctx.lineWidth = 1;
+    ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle = inkFaint;
+    for (var g = 0; g <= 4; g++) {
+      var val = (maxV * 1.1) * g / 4;
+      var y = padT + plotH - val * scale;
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(fmtMoneyShort(val), padL - 8, y);
+    }
+    var n = labels.length, slot = plotW / n;
+    var groupW = slot * 0.6, barW = groupW / series.length;
+    labels.forEach(function (lab, i) {
+      var gx = padL + slot * i + (slot - groupW) / 2;
+      series.forEach(function (s, si) {
+        var v = s.values[i];
+        var bh = v * scale;
+        ctx.fillStyle = s.color;
+        ctx.fillRect(gx + si * barW + 1, padT + plotH - bh, barW - 2, bh);
+      });
+      ctx.fillStyle = inkFaint;
+      ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      wrapText(ctx, lab, padL + slot * i + slot / 2, padT + plotH + 10, slot - 4, 12);
+    });
+  }
+  function renderAll() {
+    drawGrouped(document.getElementById('chart-empresa'),
+      ['MANOELLA', 'ISLIGHT', 'FOCO ILUMINAÇÃO'],
+      [
+        { name: 'Receber', color: cssVar('--pos'), values: [1608275.44, 1815741.25, 1608293.40] },
+        { name: 'Pagar', color: cssVar('--neg'), values: [6079942.12, 950265.68, 567561.03] }
+      ]);
+  }
+  renderAll();
+  var raf;
+  window.addEventListener('resize', function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(renderAll); });
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderAll);
+  new MutationObserver(renderAll).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>

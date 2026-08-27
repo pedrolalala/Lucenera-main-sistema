@@ -4537,6 +4537,7 @@ CREATE TABLE public.contatos (
     estado_cobranca text,
     vendedor_padrao_id uuid,
     status_comercial text DEFAULT 'Ativo'::text,
+    ibge_cidade text,
     CONSTRAINT contatos_tipo_pessoa_check CHECK (((tipo_pessoa)::text = ANY ((ARRAY['fisica'::character varying, 'juridica'::character varying])::text[])))
 );
 

@@ -262,6 +262,13 @@ Deno.serve(async (req: Request) => {
 
       let subtotal = 0
 
+      // Devolução gera crédito ao cliente, não cobrança — orcamentos.valor_total
+      // é sempre salvo positivo no banco (a RPC de aprovação exige > 0), então o
+      // sinal negativo é só de exibição aqui no PDF (mesmo critério aplicado no
+      // sistema, ver getDisplayValorTotal em src/lib/budget-status.ts).
+      const isDevolucao = budget.natureza_operacao === 'devolucao'
+      const signed = (v: number) => (isDevolucao ? -Math.abs(v) : v)
+
       const items = (budget.itens || []).sort((a: any, b: any) => {
         return a.id > b.id ? 1 : -1
       })
@@ -297,7 +304,7 @@ Deno.serve(async (req: Request) => {
         const fmtFinalVal = new Intl.NumberFormat('pt-BR', {
           style: 'currency',
           currency: 'BRL',
-        }).format(finalVal)
+        }).format(signed(finalVal))
         page.drawText(fmtPreco, { x: xOffsets[3], y, size: 8, font })
         page.drawText(fmtFinalVal, { x: xOffsets[4], y, size: 8, font })
 
@@ -305,6 +312,73 @@ Deno.serve(async (req: Request) => {
       })
 
       y -= 5
+
+      // SPEC-118: observações do orçamento (ex. instruções de instalação
+      // como "L5 e L6 fixado na laje") -- o campo já vinha do banco
+      // (select '*' acima) mas nunca era desenhado no PDF, então
+      // informação crítica pra produção se perdia entre a venda e quem
+      // fabrica. Bloco com fundo destacado pra "saltar aos olhos", como
+      // pedido na reunião 21/08 -- não confundir com o bloco fixo
+      // "OBSERVAÇÕES: POLÍTICA DE TROCA / DEVOLUÇÃO" mais abaixo, que é
+      // texto padrão do orçamento, não o campo livre do vendedor.
+      if (budget.observacoes && String(budget.observacoes).trim()) {
+        const obsText = String(budget.observacoes).trim()
+        const obsFontSize = 9
+        const obsMaxWidth = width - 100
+
+        const words = obsText.split(/\s+/)
+        const wrappedLines: string[] = []
+        let currentLine = ''
+        for (const word of words) {
+          const testLine = currentLine ? `${currentLine} ${word}` : word
+          if (font.widthOfTextAtSize(testLine, obsFontSize) > obsMaxWidth && currentLine) {
+            wrappedLines.push(currentLine)
+            currentLine = word
+          } else {
+            currentLine = testLine
+          }
+        }
+        if (currentLine) wrappedLines.push(currentLine)
+
+        const boxHeight = 22 + wrappedLines.length * 12
+
+        if (y - boxHeight < 40) {
+          page = pdfDoc.addPage()
+          y = height - 50
+        }
+
+        page.drawRectangle({
+          x: 40,
+          y: y - boxHeight,
+          width: width - 80,
+          height: boxHeight,
+          color: rgb(1, 0.95, 0.8),
+          borderColor: rgb(0.9, 0.55, 0),
+          borderWidth: 1.5,
+        })
+
+        page.drawText('ATENÇÃO - OBSERVAÇÕES DO PEDIDO:', {
+          x: 50,
+          y: y - 15,
+          size: obsFontSize,
+          font: boldFont,
+          color: rgb(0.6, 0.35, 0),
+        })
+
+        let obsY = y - 29
+        wrappedLines.forEach((line) => {
+          page.drawText(line, {
+            x: 50,
+            y: obsY,
+            size: obsFontSize,
+            font,
+            color: rgb(0.2, 0.2, 0.2),
+          })
+          obsY -= 12
+        })
+
+        y -= boxHeight + 15
+      }
 
       const globalDesc = Number(budget.desconto_global || 0)
       const finalTotal = Number(budget.valor_total || subtotal - globalDesc)
@@ -325,7 +399,7 @@ Deno.serve(async (req: Request) => {
       const fmtSubtotal = new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
-      }).format(subtotal)
+      }).format(signed(subtotal))
       const fmtGlobalDesc = new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
@@ -333,7 +407,7 @@ Deno.serve(async (req: Request) => {
       const fmtFinalTotal = new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
-      }).format(finalTotal)
+      }).format(signed(finalTotal))
 
       const rightPadX = width - 56
 

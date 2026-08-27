@@ -1,0 +1,203 @@
+[00:04] Ô Pedro, vamos lá. Vou começar a gravar aqui, tá? É... Que é uma venda real mesmo, tá? Então é o seguinte, a primeira coisa que quero te mostrar é como vem, e aquela questão de observações que a gente pediu para incluir, como nós vamos fazer a comunicação. Por exemplo, nesse orçamento aqui, tá vendo, manda aqui para nós, e aí nesse caso, a gente tem essa informação aqui, tá vendo? L5 e L6 fixado na laje. Isso daqui é importante para a gente poder fazer a produção do produto. Então, se a gente vai automatizar e, na teoria, evitar diminuir a comunicação, tentar fazer algo bem elaborado para que isso seja visível e que não esqueçam de colocar. Então, aqui tem isso e tal. E aqui tem o orçamento. A gente é acostumado a imprimir, mas aqui a gente vai dar uma passada de olho, confirma todas as informações. Nesse caso, veio sem arquiteto, provavelmente não tem RT mesmo. E aqui tem a questão que veio sem arquitetos. Quando vem, a gente já considera que não tem mesmo. A não ser que seja um orçamento muito grande, difícil não ter RT. E aqui veio três vezes no boleto, todo dia 25, subentende-se que a primeira
+
+[01:38] já é agora pro mês 8, tá?
+
+[01:44] Então, beleza. Agora eu vou fazer já a aprovação do orçamento no sistema. Eu vou pegar aqui. A gente vem aqui, orçamento. Eu vou puxar ele aqui. Estou dando o caminho aqui, mas ok, vai ter outro fluxo, mas só para a gente chegar naquela etapa de não emitir a nota direto. Eu vou puxar o orçamento, 717. Ele aparece aqui. Vou abrir ele. Aqui nesse caso eu tenho que botar editar. Confiro a empresa e tal. Aqui eu já tinha falado para a Thais que a venda ia ser na FOCO. Aí eu vou vir aqui em outros. Aqui ela já colocou boleto, três vezes, mas está vendo que o pagamento está 17 do 9? Aqui está errado.
+
+[02:41] Então tem que botar aqui, 25 do 8.
+
+[02:46] Que é o primeiro, 05.08.2026.
+
+[02:50] Beleza?
+
+[02:53] E aqui agora eu vou fechar ele,
+
+[02:55] ó. Fecho e salvo. Beleza.
+
+[03:00] Isso daqui tem uma informação, é um pedido de separação, mas não é esse pedido aqui que a gente manda pro Matheus, tá?
+
+[03:08] Aqui eu fecho.
+
+[03:15] E aí ele vai me dar aqui o arquivo em PDF.
+
+[03:20] Normal.
+
+[03:20] Ó, importante ó. Tá vendo que aqui a gente tá dando andamento no pedido. Aquela questão do modelo A e modelo B que eu te falei ó. Aqui ó, tá vendo ó. ID e código. E depois já vem descrição. O orçamento que a Thaís mandou pra nós, como veio ó.
+
+[03:42] só pra você ver, ó, a diferença.
+
+[03:46] Veio a referência também, entendeu? Então, pra nós, internamente, tem que tramitar esse daqui, que é melhor, tá? Vamos dar sequência aqui.
+
+[04:01] Então, beleza.
+
+[04:02] Agora esse orçamento já sumiu daqui do orçamento. Agora eu vou aprovar o financeiro dele. Aqui nesse caso a gente vem em financeiro, consultar, aprovar orçamentos. Então aqui eu vou selecionar a empresa e vou dar um executar. Ele caiu aqui, tá vendo? Aguardar, aguardando aprovar. Então eu vou dar dois cliques aqui. Aparece aqui para poder fazer mais um check, se quiser. E aqui nós vamos salvar. Ele pergunta se tem antecipação vinculada a tudo.
+
+[04:38] Mas aqui tem que dar um sim,
+
+[04:43] senão ele não vai.
+
+[04:44] Beleza.
+
+[04:45] Aí aqui a gente tem que fazer uns ajustes. Está vendo como está vindo aqui? A gente tem que arrumar. Essa venda é uma venda a prazo. a conta que no caso é na foco e esse primeiro pagamento aqui não é dia 24, é dia 25. 25 do 8 de 2026. Aqui eu vou dar um vezinho e já vai carregar todas as datas aqui. Carregou uma, eu devia ter dado dois vezinhos, desculpa. Então eu vou ter que fazer uma por uma aqui agora.
+
+[05:18] 25 do 9.
+
+[05:22] Eu que cliquei errado. Se eu clico aqui ele já carrega tudo. 25 do 9 e agora 25 do 10.
+
+[05:34] Aí pronto.
+
+[05:38] Ficou confuso pra você? Eu deveria ter ajustado a data aqui e ter dado esse dois vezinho aqui que ele ia carregar tudo. Entendeu? Ou ter ajustado as datas aqui e ele já ia carregar tudo Como eu fiz um por um eu tive que fazer e aí zerou aqui, então eu vou pagar.
+
+[05:55] Esse aqui é o arquivo que a
+
+[05:59] gente manda para o Mateus.
+
+[06:01] Então eu vou salvar aqui.
+
+[06:06] PDF.
+
+[06:09] Então ele gerou aqui o número da venda barra o número do orçamento, a herança. Vou salvar aqui, a gente salva como pedido.
+
+[06:21] 5530. Aí eu fecho aqui.
+
+[06:28] E aqui tem a venda. Então, veja bem, gerou a venda. Não tem a nota ainda, não tem os boletos, mas gerou a venda. Então, eu, a gente, as meninas, acho que a gente não imprime mais. de exemplo então vou só vou imprimir aqui depois a gente pode ver uma forma de ficar salvo alguma coisa assim
+
+[06:52] beleza
+
+[06:59] nesse momento aqui já movimentou estoque já virou financeiro vou te mostrar então eu venho aqui ó comercial venda, venda parcial. Aqui eu já consigo visualizar a venda aqui, a consulta de item.
+
+[07:16] Então, 5,530.
+
+[07:18] Da venda, então, esse produto aqui já reservou, esse produto aqui também já reservou, o restante caiu tudo e entrega futura.
+
+[07:29] Beleza?
+
+[07:31] Caiu tudo e entregue futura.
+
+[07:33] Ok.
+
+[07:37] Vou te mostrar que gerou o financeiro. Essa informação aqui, por exemplo, a Alana e a Carol fazem a venda, certo? E aí elas vão passar uma cópia da venda para a Débora, com essa informação aqui, para que ela possa montar o pedido de produção, que é uma peça de produção nossa. Então, ela já vai passar para ela poder montar o pedido de produção, para o Cláudio já produzir o produto, de acordo com essa informação aqui. Aqui também, gerou o financeiro desse cliente também. Se eu vier aqui, vou consultar. Eu posso botar o número da venda aqui.
+
+[08:20] 5530.
+
+[08:24] Vou dar um executar. Já está aqui.
+
+[08:27] Beleza?
+
+[08:28] Gerou o financeiro tudo certinho. Gerou as necessidades de compras, mas aí é outra coisa, né? Aí isso aqui, o boleto ainda não foi emitido e a gente não tem nota, ele tá em FF, que é uma herança de nomenclatura que a gente usa aqui internamente de quando a gente usava Citel. Agora eu vou emitir a nota. É outra rotina, tá? Porque aqui eu já vou pegar e eu vou fazer tudo para mandar para o cliente. Aí eu venho aqui, ó, em comercial, nesse caso, fiscal. E vou aqui, ó, nota fiscal eletrônica. Beleza?
+
+[09:04] Eu vou colocar a foto aqui e
+
+[09:07] vou colocar o número da venda, 5530. Localizo, tá vendo aqui? Tem o número da venda, o nome do cliente, o valor da venda e o status disso daqui, aguardando gerar. Eu vou dar dois cliques. Ele abre como se fosse um espelho
+
+[09:29] da nota fiscal, certo?
+
+[09:32] A gente dá uma passada de olho, confere se está com todos os CFOP, vamos ver se... mas eu acho que não vai dar nenhum problema aqui. É uma nota simples. Aqui tem, se quiser colocar endereço de entrega e tal, que eu não quero. Aqui tem informações de transportador, endereço, informações do transportador. Se fosse uma mercadoria que já estivesse de saída, por exemplo, indo para o cliente, a gente já colocaria aqui a transportadora, quem que era o responsável por esse frete. a quantidade de volume, a espécie do volume, peso, já preencheria tudo isso daqui, tá? Aqui, pra gente conferir a questão do faturamento, ó, porque isso aqui vai sair na nota, 25 do 8, 25 do 9, 25 do 10, beleza, tudo certinho. Então, o que nós vamos fazer? Eu vou, aqui é essa rotina, né? Eu gero, ó, deu problema, ó. Código do IBGE do município, conteúdo inválido. Qual que é esse problema? Esse problema está lá no cadastro do cliente. No cadastro do cliente, está sem o número do IBGE do município. Então, eu vou sair. Vou no cadastro do cliente.
+
+[11:01] Pessoas, clientes.
+
+[11:06] Vou procurar ele aqui.
+
+[11:08] 1, 6, 2, 3, 4.
+
+[11:12] Está vendo aqui? Código de cidade está em branco.
+
+[11:17] Entendeu?
+
+[11:18] Aí a gente tem que preencher isso daqui. Então, vou pesquisar aqui.
+
+[11:26] IBGE batatais.
+
+[11:30] Código IBGE batatais. É esse daqui.
+
+[11:38] Vamos ver se vai dar certo. Vou colocar ele aqui. Beleza. Aí eu vou salvar. Ok.
+
+[11:53] E vou lá para reinitiar a nota.
+
+[11:56] Comercial, Fiscal, Nota Fiscal Eletrônica. Vou pegar a foto aqui.
+
+[12:05] 5, 5, 30. Como a gente já fez aquela conferência, só vou dar andamento, tá?
+
+[12:15] Gerar. Opa!
+
+[12:19] É o primeiro sinal que anota ok. Agora a gente vai assinar. Essa assinatura é uma assinatura eletrônica. Ela acontece de acordo com o certificado digital. Então, toda empresa tem um certificado digital A1 que está vinculado na Receita Federal, vinculado ao sistema. sem esse certificado digital é impossível emitir nota fiscal, tá? Antigamente usava-se um certificado USB, ficava plugado aqui no computador e só conseguia emitir nota daquele computador onde estava alugado o certificado. Era um certificado de categoria A3. Agora não, agora é um certificado digital de categoria A1. Então, ele vence todo ano, né? Aí ele já consta lá na receita. E aí, não sei como é esse vínculo fiscal, esse certificado está vinculado aqui com o sistema, com a Receita Federal, você faz para poder emitir a nota.
+
+[13:22] Aí é a parte por trás do
+
+[13:24] sistema que a gente não sabe. Assinar. Enviar.
+
+[13:34] Pronto.
+
+[13:37] Aqui eu fiz o processo inteiro, então a gente tem a nota fiscal.
+
+[13:40] Deu tudo certo, graças a Deus.
+
+[13:43] O que a gente vai fazer?
+
+[13:45] Vou salvar essa nota.
+
+[13:46] Esse aqui é o padrão que a gente segue aqui.
+
+[13:52] Vou salvar ela aqui. A gente tem uma pasta.
+
+[14:01] A gente vai salvando essas notas aqui. Nota fiscal emitida da FOCO. Aqui tá todas do mês 8. Só copio... Cliquei aqui só pra pegar a mesma formatação. Eu vou editar aqui. Com o número da nota.
+
+[14:21] E o nome do cliente.
+
+[14:22] Veja bem, o nome do client, veio o nome que tá na razão social. Tá vendo que não tem o código de projeto? Não pode vir com código de projeto. Porque código de projeto na realidade é o nome fantasia, tá?
+
+[14:32] Então aqui eu vou nomear... Maria. de Barros Castro. Vou salvar. Agora aqui, a hora que eu clicar
+
+[14:49] fechar, ele vai me dar as informações se eu quero emitir o boleto. Então vou fechar. Desejo imprimir boletos?
+
+[14:56] Desejo.
+
+[14:58] Aqui tem os três. Caiu em uma rotina de impressão de boletos. Se eu não quisesse fazer isso aqui agora, eu poderia entrar lá depois na rotina e fazer. Então, vou clicar aqui.
+
+[15:10] Imprimir.
+
+[15:13] Gerou os PDFs, certo? Aqui tem três folhas. O boleto 1, o boleto 2 e o boleto 3. Vou salvar, porque eu vou mandar para o cliente. salvar aqui na área de trabalho mesmo,
+
+[15:35] que depois eu já apago. Boleto NF 1483.
+
+[15:48] Beleza, agora eu vou fechar. Deseja gerar remessa? O que eu faço? Essa daqui é a remessa bancária, né? A gente, durante o dia, a gente não fica, toda nota que faz, não fica gerando remessa. A gente deixa pra gerar remessa no outro dia. Perdão, no final do dia, porque aí todas as vendas que aconteceram já geram uma remessa bancária só. Depois eu vou gravar um vídeo só da remessa, tá? Que é a remessa que a gente manda pro banco.
+
+[16:23] Então aqui, vou colocar não. E boa.
+
+[16:28] Pronto. A venda está completa aqui. Agora, qual é o passo? Vou mandar para o Mateus aquela venda. A gente tem um grupo aqui de separações. Eu vou vir aqui.
+
+[16:48] Vou...
+
+[16:52] Carregar esse dispositivo aqui.
+
+[16:59] e aqui o pessoal vai dando um vezinho o pessoal lá do estoque de que recebeu essa venda tá e aí aqui consta o que a venda tudo ele consulta lá vê separação vê o que entrou em reserva dá uma checada faz uma conferência lá e agora como hoje é quinta-feira na semana que vem como a A Débora vai fazer os pedidos de compra dessa venda e de outras mais que tiverem necessidade. A gente não faz compra todo dia, né? A gente faz uma vez por semana, uma vez a cada 10 dias, a não ser que seja algo específico, decorativo e tal. Mas coisas técnicas a gente faz uma vez por semana, basicamente, para poder dar volume. conseguir, de repente, uma negociação melhor com o fornecedor, minimizar custo de frete, etc. O pedido de produção ela já vai pegar e já vai montar e vai mandar para o Cláudio também. Beleza? Vou só finalizar aqui e mandar para o cliente, só para você ver.
+
+[17:59] Então, eu vou fazer um novo e-mail.
+
+[18:03] Eu tenho que pegar o contato do cliente lá, no cadastro dele.
+
+[18:10] Questão do e-mail. 26234. Esse cara aqui. Eu pego o e-mail aqui. Quem vem e cópia aqui?
+
+[18:31] A equipe inteira de quem mandou. No caso, a equipe da Thaís.
+
+[18:36] Então vai a Thaís. Vai o Murilo, a Helena e vai a Trícia.
+
+[18:47] Quem mais vai? No caso, como eu que estou fazendo, eu coloco a Lana e coloco a Carol. Se a Lana estivesse fazendo, ela colocaria eu e a Carol. E assim você vai. Porque quando um não está e o cliente precisa de alguma coisa, todo mundo tem no e-mail. Agora eu vou pegar a nota fiscal, né? Vou pegar esse cara aqui.
+
+[19:16] Vou
+
+[19:27] colocar a nota e vou colocar o boleto.
+
+[19:34] As meninas acho que tem um e-mail padrão, e eu não tenho, porque eu faço pouco isso. Então, eu vou colocar aqui. Nota fiscal. Eu faço só quando elas não estão.
+
+[19:42] Nota fiscal e Dolores. Aqui, tá vendo?
+
+[19:50] Nós estamos mandando para a Maria.
+
+[19:52] Então, eu vou colocar aqui, ó. Maria Bofárnia. Seria anexo. Nota fiscal, e Dolores. Valor confirmar recebimento. Obrigado. E aqui? Opções. Beleza.
+
+[20:22] Vou enviar.
+
+[20:24] E é isso.
+
+[20:26] Entendeu? Então, essa é a questão. Quando a gente finaliza uma venda, não vai para a rotina de emissão de nota direto, né? E aí, essa é uma nota fiscal de venda, no caso, né? Veja se dá para você entender, aí a gente vai ajustando.

@@ -1,0 +1,1231 @@
+[00:13] Eu mexi em muita coisa, eu teria a questão da separação parcial. Então agora dá para voltar, se separar errado. Aí tem aquela questão que você me pediu para conseguir separar uma peça, a quantidade também. De tirar do separado. E aí eu já fiz o link também com o sistema de entrega. Então ele tá tudo interligado já.
+
+[00:48] Corrigiu aquele negócio que eu não tava conseguindo criar um projeto?
+
+[00:52] Aham.
+
+[00:54] Beleza.
+
+[01:15] É isso aí. Ali em cima nos três pontinhos você consegue ver o lucro da venda.
+
+[01:32] Aonde? Aqui?
+
+[01:48] As informações vão estar lá embaixo.
+
+[01:50] Faz uma coisa. Veja se tem como fazer essa configuração, tá? Quando elas colocarem um produto sem cadastro, que nem esse daqui, que aí fez o preço lá pelo simulador, certo? Tentar deixar essa margem a 50%. Porque do jeito que tá aqui, mascara muito. Entendeu?
+
+[02:15] É, eu tinha colocado para só o... Como é um lugar que só o administrador vai ter a possibilidade de mexer, eu coloquei para você conseguir colocar o valor da peça.
+
+[02:28] Não, isso daqui tudo tem que vir já do cadastro, por exemplo.
+
+[02:32] É que a peça não está cadastrada.
+
+[02:34] Exatamente. Qualquer peça... No sistema da Connect, tá? Estou dando um exemplo. Toda peça que elas incluírem no orçamento que não tem cadastro, ela vem com margem de 50. E não de 100.
+
+[02:46] Tá.
+
+[02:47] Entendeu? Porque isso daqui mascara...
+
+[02:50] Não, é que o 100% tá com relação a 0, entendeu?
+
+[02:55] É, então. Por isso que tem que fazer alguma configuração. O 0 tem que representar 50, no caso. Porque senão mascara muito. Porque 50 é uma média. Tá dentro da média. O 100 não existe. Entendeu?
+
+[03:11] É que o 100, aqui nesse caso, coloca mil reais aqui, o valor de custo.
+
+[03:19] Não, mas eu não vou poder ficar mexendo. Entendeu? Eu não vou poder ficar mexendo nisso. Eu vou olhar o orçamento. Vamos supor, se eu pegar um orçamento que tem 10 peças sem cadastro, não vou ter que poder ficar puxando custo por custo para poder avaliar um orçamento com o cliente na frente esperando, entendeu? Por isso que tem que ser considerado sempre quando colocar uma peça sem cadastro ele com que o custo é zero. Digamos assim o porque uma peça com cadastro o custo nunca vai ser zero. Sim mas um produto sem cadastro a porcentagem de lucro ser sempre 50 por cento. Porque 100 por cento tipo se eu pego um. Porque eu às vezes eu pego o orçamento aqui com 10 itens 7 sem cadastro. E aí você fica com 100 por cento e esquece uma margem totalmente errada. 50 por cento tá aí eu vou trabalhar com margem para baixo entendeu. A hora que eu cadastrar nunca eu nunca vou ter uma margem de 50 sempre vai ser um 52 54 56 mas beleza eu tô trabalhando com gordura. É. Só tô achando que isso daqui, essas porcentagens, tá? Tá fazendo o cálculo do sistema mesmo? Do custo que tá cadastrado, o valor unitário que você colocou a mão...
+
+[04:51] Não, tá vindo do sistema.
+
+[04:53] É, então tá errado, tá? Uma lâmpada nunca tem a mesma margem de uma luminária. Alguma coisa tá puxando errado. Não tem como ser 60% aqui. Ou aqui. Tipo, aqui é interlight. A interlight tem uma margem maior que uma lâmpada. E aqui, independente do valor, tá na mesma margem. Na verdade tá tudo com 60%. E com 100%. Essa daqui, por exemplo, tá errado porque existe o custo, tem o cadastro. Essa aqui também existe o custo, tá com custo zero.
+
+[05:34] Não, tem que ver o porquê que essas duas estão sendo... Você entendeu?
+
+[05:38] Deixa eu te mostrar uma coisa, só pra eu te mostrar o que eu tô tentando te explicar, tá?
+
+[05:47] Beleza,
+
+[06:01] então aqui eu tenho embutido de solo e tenho lâmpada. Ótimo. Ó, esse é um embutido de solo. A margem. 59. E aqui, porcentagem de lucro. Beleza, arredondou lá, né? Pra 60. Pode até ser que esteja correto.
+
+[06:17] Eu acho que é isso.
+
+[06:19] Só que ó, a lâmpada. Entendeu? Tá vendo? Nunca vai ter. Deixa eu ver se eu acho um aqui sem cadastro. Poxa. Ah, mas eu posso incluir aqui, depois eu cancelo. Ai, peraí. É... aqui nada. Posso por aqui. Teste, teste. Quantidade 1. Valor 100. Só pra... só pra te mostrar. Informa o que?
+
+[06:49] Produto.
+
+[07:06] Calma aí, aperta de novo pra salvar.
+
+[07:08] Não, mas aqui tem que pôr um código, acho que é 9999. Peraí.
+
+[07:28] Acho que não foi não.
+
+[07:30] Murilo! Vem cá, rapidinho. Como é que é que põe um... insere um produto sem cadastro mesmo? Ah, é zero. Só um zero? Ah, aqui. Não. No código. No código. Mas não precisa buscar, né? Tá.
+
+[08:04] Mas aí você tá mexendo em outro...
+
+[08:07] Não, calma aí, Pedro. Pare. Vem com 50, porque fica mais dentro da realidade. Se vem com 100, isso daqui salta pra 65, 70.
+
+[08:45] Beleza.
+
+[08:46] É mais isso.
+
+[08:47] Perfeito. Entendi.
+
+[08:51] Então aqui é isso. Dá uma checada, né? Eu preferiria que não arredondasse, tá?
+
+[09:00] Tá. Eu vou ajeitar isso também.
+
+[09:03] Porque dependendo da regra, arredonda muito. Entendeu? Tipo, as vezes um 56 arredonda pra 60 e não.
+
+[09:12] Não, mas eu vou colocar que tem que ser o valor exato da conta. Não importa se ficar quebrado.
+
+[09:19] Isso, não importa. Tá, aí deixa eu só ver uma coisa.
+
+[09:26] É
+
+[09:32] o que você tinha me pedido, a quantidade de desconto.
+
+[09:41] Isso aqui não tem como apagar, nem no Delete, nem no Backspace. Não tem como deixar pra apagar no Delete, no Backspace? Eu tô te falando tudo por usabilidade do dia a dia, entendeu? Aí aqui... Total preço de custo... Aqui eu mudo essa nomenclatura para mim como lucro bruto.
+
+[10:16] Veja o lucro total.
+
+[10:18] Exato. Aí o que eu quero depois que eu vou te passar as diretrizes está aqui do lado. Abriu uma outra porque é o seguinte. Talvez isso daqui eu possa estar analisando na frente de um arquiteto aqui nosso. Aqui beleza mas o os outros campos que vão abrir, imposto, RT, comissões, um outro campo para que eu e o Filipe consigam visualizar, entendeu? Para que não fique visível aqui nessa tela, que eu vou te passar as porcentagens.
+
+[10:57] Então mais um campo que vai abrir a partir dessa tela.
+
+[11:01] Isso, porque a partir do que eu defini aqui de desconto, por exemplo, ele me... Eu clico aqui e ele vai me dar o cálculo das outras coisas.
+
+[11:15] Tá bom.
+
+[11:17] Só uma coisa aqui. Deixa eu ver uma coisa, peraí. Trinta mil, né?
+
+[11:26] A data que você tinha me pedido.
+
+[11:30] Só, peraí, é vinte e nove oitocentos e noventa e nove. Ó, não tá batendo, tá? Ó, 30, 243. E aqui... 29, 899.
+
+[11:59] Tá, eu vou fazer a conta e vou ver o porquê que não tá batendo.
+
+[12:04] Beleza. É...
+
+[12:07] Provavelmente... Sinal não... Tá, eu vou ver. É algum bug que tá dando.
+
+[12:22] É, detalhe, tá? Eu bati o olho e falei, eu acho que tem coisa errada aqui. Beleza. Data de emissão. Aqui tá vindo já preenchido? Aqui? Ou a gente que seleciona? Ah, usar padrão 10 dias, tá. Se eu botar aqui assim, por exemplo. Ah, ele já vem 10 dias, beleza. Consigo pôr outro? Beleza. Não sai essa porcentagem não, né? No orçamento impresso, né?
+
+[13:03] Não, acho que não. Depois, mas beleza, a gente pode tirar isso. Por enquanto só a visualização pra gente.
+
+[13:15] Mas acho que eu não tiraria não, tá?
+
+[13:18] Não, se aparecer no orçamento eu consigo tirar facilmente, é isso que eu tô falando.
+
+[13:23] Aqui eu deixaria, vai que eventualmente é isso.
+
+[13:26] Pode trocar o valor, sim.
+
+[13:28] Sei lá, dependendo da situação. Acho que eu não tiraria não. Desde que funcione depois, né, por trás do rolê.
+
+[13:40] Eu já fiz todos os testes com relação a essas coisas e tá funcionando. Relação funcionalidade porcentagem, essas coisas por trás.
+
+[13:52] Tá. Aqui, vamos ver. Aqui você conseguiu mudar a busca?
+
+[13:59] Sim, pode fazer. Ah não, a busca... A busca eu não mexi.
+
+[14:05] Tá. Aqui pra poder digitar interlight, poder digitar tudo.
+
+[14:11] Não, eu vou ter que mexer.
+
+[14:13] Beleza.
+
+[14:14] Mas eu mexi na parte do L.
+
+[14:17] Do L, né?
+
+[14:18] Isso. Você vai ver aí, adicionar o L.
+
+[14:52] 24,9 Aqui, ó, trazer o número também. Aqui, ó. A outra casa decimal.
+
+[15:32] Qual?
+
+[15:34] Aqui, ó. Por exemplo, aqui eu acredito que seja oito zero, né? Mas pode trazer todas as casas.
+
+[15:42] Tá.
+
+[15:42] Vírgula oitenta e tantos.
+
+[15:45] Isso. Que nem aqui, ó.
+
+[15:46] É que quando for um... Aí, ó. Tá vendo? É isso. Quando for uma coisa diferente de zero, ele vai aparecer. Mas eu posso colocar isso. Então no valor unitário da peça aparecer a segunda casa decimal após a vírgula.
+
+[16:04] Exato. Cara... A gente tem que tentar dar uma bloqueada nisso aqui.
+
+[16:15] Do que? De alterar o valor?
+
+[16:46] Tem como deixar bloqueado só pra eu poder alterar os valores aqui? Não o desconto, tá? Aqui ó.
+
+[16:55] Sabe por quê? É isso. Tem muita coisa que você pode fazer... Deixa eu falar. Tem muita coisa que você pode fazer que as pessoas não. Então vamos por, no caso, adicionar produto. Você tá me ouvindo?
+
+[17:13] Tá me ouvindo?
+
+[17:14] Ué? Eu tô mutado faz quanto tempo, gente?
+
+[17:20] Não, eu acho que desde a hora que eu perguntei se podia alterar aqui.
+
+[17:24] É, tem muita coisa que você pode fazer que as pessoas não podem. No caso, adicionar produto não pode. Eu tenho que confirmar se essa opção tá habilitada, mas eu acho que não. Eu acho que não. Então o que as meninas podem fazer é só colocar a porcentagem de desconto. Mas eu já vou deixar.
+
+[17:50] Ah, peraí, Pedro.
+
+[17:52] Relaxa.
+
+[17:55] Só a segunda? Beleza. Ô, o Claudio tá lá hoje? Tá, né? Fala pra ele que eu vou lá, preciso ver umas coisas com ele. Ah, então beleza, Pedro, é deixar só pra eu mexer, tá?
+
+[18:19] Tá.
+
+[18:20] É, tem... Bloqueia até o Filipe, tá?
+
+[18:22] Aqui.
+
+[18:23] Eu vou bloquear.
+
+[18:25] É real.
+
+[18:26] Não, é que o Filipe agora vai começar a mexer no sistema, ele vai querer mexer em tudo.
+
+[18:31] É, fala ó, aqui o Vini pediu pra bloquear, pode falar.
+
+[18:34] Tá. Eu posso colocar essa regra de uma pessoa só mexer.
+
+[18:38] É. Se eventualmente a gente precisar e elas me pedem, eu faço, sabe? O que pode acontecer, Pedro, o que pode acontecer é o seguinte. Vamos supor que elas estão mexendo nesse orçamento, certo? E aí, beleza, surgiu uma necessidade de alterar esse orçamento, esse valor aqui.
+
+[19:01] Sei lá.
+
+[19:03] Acontece de tudo, né? De repente... Tô tentando... pensar que eu consegui fazer essa alteração de repente lá no computador dela sabe mas dentro da senha dela de repente um botão direito alteração e eu coloco alguma senha e eu consigo alterar sabe alguma coisa assim para ela não ter que fechar o orçamento aí eu entro para poder alterar aí ela pega o orçamento de novo e retoma entendeu.
+
+[19:45] Não, eu entendi, mas...
+
+[19:48] É... Ou solicitar uma autorização...
+
+[19:51] Eu acho que essa é a melhor das opções. Tipo, ter um cardzinho que a pessoa solicita alteração de... De... Do custo da peça.
+
+[20:03] É, do valor de venda, né?
+
+[20:05] É. Mas... Colocar um negócio, um botão que a pessoa consegue alterar e já vai literalmente liberar o acesso da pessoa, mesmo que ela coloque uma senha.
+
+[20:18] Tá, então uma solicitação então.
+
+[20:21] É, chega um cardzinho na sua tela e as meninas te mandam uma mensagem no Teams. Atualmente já faz desse jeito.
+
+[20:30] Mas aí eu vou conseguir alterar lá, aí eu altero por esse card ou vou... Não vou conseguir alterar, vou ter que abrir o orçamento na minha senha pra poder fazer.
+
+[20:42] É.
+
+[20:43] Tá, vamos deixar bloqueado por enquanto, vamos ver.
+
+[20:49] A gente pode deixar só o administrador. Porque é uma coisa que não é pra...
+
+[20:52] Não é uma coisa pra ficar acontecendo, entendeu? Mas...
+
+[20:56] A gente pode deixar só o administrador pra fazer isso.
+
+[20:59] Tá.
+
+[21:00] Que aí não fica limitado a você. A gente coloca mais a Lana, no caso seria uma administradora. E...
+
+[21:08] É, só bota a lana.
+
+[21:11] É. Aí se acontecer alguma coisa e você não tiver, a lana consegue dar o...
+
+[21:16] Cheque.
+
+[21:16] Beleza. Eu achei que ficou bom isso aqui. Do jeito que... Melhorar aqui a questão da busca, né?
+
+[21:25] Da busca, sim.
+
+[21:27] Mas isso aqui eu achei que ficou bom. Quantos vão?
+
+[21:31] Ué... Eu não coloquei um limite não, eu acho que você vai abrindo aí, vai abrindo.
+
+[21:37] Beleza.
+
+[21:39] Ele tá podendo colocar...
+
+[21:44] É, isso que eu ia falar, às vezes acontece essas coisas aqui, sabe?
+
+[21:48] Vou limitar só número.
+
+[21:50] Não, não, pode deixar. Às vezes acontece de pôr sala, ou às vezes acontece de pôr isso aqui ó, L1, B, por exemplo.
+
+[22:01] P também, né? De paisagismo.
+
+[22:03] Isso, é. Pode deixar. Tá.
+
+[22:08] Isso aqui.
+
+[22:09] Aí, beleza. Vem aqui. Tum, tum, tum, tum. Beleza, isso aqui eu achei que ficou bem bom, até. Ficou prático. Se tiver a lista que aquela lâmpada vai em vários L's e a quantidade, vai facilitar pra caramba pra fazer esse orçamento aqui.
+
+[22:26] Sim.
+
+[22:28] Beleza, vamos descer aqui. Quantidade de parcela, que beleza. Ou pode... Pode incluir aqui o cheque. Porque eu acho que pro ano que vem vai ser uma realidade, tá?
+
+[22:43] Cheque?
+
+[22:44] Uhum.
+
+[22:45] Ano que vem?
+
+[22:46] Uhum.
+
+[22:47] Tamo retrocedendo?
+
+[22:49] Dinheiro então nem se fala. Vai voltar com tudo.
+
+[22:54] Tá.
+
+[22:54] E não vai ser pouco não.
+
+[22:56] Cheque, vou colocar o cheque. Dinheiro já tá, né?
+
+[22:59] Dinheiro já tem.
+
+[23:01] Eu vou colocar o cheque. Então na forma de pagamento adicionar cheque
+
+[23:05] Vou te pedir outra Permuta É, forma
+
+[23:10] de pagamento adicionar permuta também Isso Vamos deixar porque aí fica registrado que eu
+
+[23:16] tô gravando aqui Isso Dinheiro e cheque meu amigo, escuta que eu tô te falando Tá Vai voltar muito Aí a
+
+[23:24] data de pagamento, ver se você achou
+
+[23:26] legal Aham, beleza Então beleza, fiz aqui, a primeira vai ser aqui Clica fora, né? Demais parcelas... Por padrão, cada parcela vence. É aqui, então não tá calculando, né?
+
+[23:47] Aperta usar padrão, ali embaixo.
+
+[23:51] Ah, tá. Beleza. Ok. Aqui, beleza. O que muda? Valor do frente, tá.
+
+[24:03] Aí o sinal trocou.
+
+[24:10] Não, acho que invertido, né? O sinal em cima e o desconto embaixo. Ah, aqui você tá falando, né? Tá.
+
+[24:17] Eu posso inverter, mas...
+
+[24:19] Não, pode deixar, não tem problema. Aqui não tem problema, não. Aqui depois o ideal é que a hora que tiver o sinal vinculado ele já venha, né? E a pessoa fique... É... Tem que vir sempre zerado, né? Não, sempre zerado não. Se tiver o sinal vinculado ao cliente e ao projeto, ele pode vir preenchido e a pessoa opta por usar ou não. Depende da situação, né?
+
+[24:54] Sim. Desconto.
+
+[25:02] Aí ele pode colocar em reais também. Beleza.
+
+[25:12] Pedro
+
+[25:36] tem que botar aqui nessa visualização. Ah, ficou bom aqui a logo, vi aqui agora. Marina. É, eu não lembro se eu deixei um só aqui. Se eu excluir, eu deixei dois. Se tiver dois, tem que aparecer os dois.
+
+[25:57] Tá.
+
+[25:58] Eu não lembro.
+
+[25:58] Se quiser voltar ali no orçamento pra ver.
+
+[26:02] É aqui, né?
+
+[26:03] Parece que tá só cacau ali na visualização que eu vi. Se quiser colocar um também exportar, não tem problema nenhum. Ah não, tá os dois. Aparecer mais um arquiteto quando tiver dois arquitetos registrados.
+
+[26:22] Aqui que tá errado. O código não tem código. Entendeu? Então tem que pôr aqui o L, a gente pode chamar de ID, que é a identificação. Aí o código tem que vir. Beleza?
+
+[26:41] O código interno?
+
+[26:43] Isso, o código interno. A referência não. Eventualmente, se depois, era bom criar dois modelos de impressão. Porque quando não tem um... Para as meninas mandarem para o cliente, exemplo. Sempre pela Conect, que é mais fácil. Vou pegar um orçamento aqui. É a Narcisa, é a Narcisa?
+
+[27:15] É, é. Caralho, velho.
+
+[27:21] É a própria. O que a gente tem aqui? Tá vendo? Imprimir modelo A e modelo B. Por quê? 7739. O padrão pode deixar assim. Quer tirar um print, mano? Acho que eu te mandei, né?
+
+[28:07] Eu tenho.
+
+[28:10] Então, o que vai mandar para o cliente é sempre esse.
+
+[28:14] Que não tem a referência. Quantidade, unidade, valor da unidade, valor total.
+
+[28:21] Mas internamente rola esse aqui.
+
+[28:24] O modelo B, que é... Que tem a referência. A partir da referência.
+
+[28:30] É, aí ele vai ter o código e a referência.
+
+[28:34] Ah, o código mais a referência.
+
+[28:37] Porque, por exemplo, quando é um produto que não tem cadastro, o código vai vir zero, e a referência... teoricamente já é pra vir preenchida pra evitar a comunicação, entendeu?
+
+[28:49] Sim.
+
+[28:50] Aí as meninas vão pôr aqui, por exemplo, Estela, pra saber que é uma peça da Estela, essa referência pra poder cadastrar.
+
+[28:59] Tá bom.
+
+[29:00] Beleza?
+
+[29:02] É, pra cadastrar onde?
+
+[29:05] Só... Cadastrar o produto pra colocar no orçamento. Que aí vai ter que cadastrar o produto certinho, né, com NCM, com preço de custo, imposto, tudo certinho. E aí as meninas já mandam, já colocam essa informação da referência e da marca no próprio orçamento.
+
+[29:25] Tá.
+
+[29:26] Que aí a gente entra na tabela de preço, vê tudo que precisa fazer, olha os impostos e já cadastra.
+
+[29:32] Beleza.
+
+[29:36] Ah, eu tava vendo outra coisa aqui, né? Então aqui tem dois modelos, o arquiteto. Aqui ficou só o desconto porque a gente não colocou nada de... De...
+
+[29:50] Sinal.
+
+[29:51] De sinal. Aqui ficou 12, 43 total, porque as datas lá. Aqui você mudou, né, também?
+
+[30:07] Uhum. É, as informações o telefone não tá puxando porque o cliente tá sem o telefone.
+
+[30:14] Ah, outra coisa. Aqui tem que ordenar os L.
+
+[30:25] O orçamento saiu bagunçado. Ele fica organizado na coisa e saiu bagunçado.
+
+[30:33] L1 com L1, L2 com L2.
+
+[30:36] Já estava alguma coisa que mudou no código.
+
+[30:49] Cara, sabe o que eu colocaria aqui? A data de emissão do orçamento. Porque aqui tem a data de impressão. Mas colocar a data de emissão. Tipo, o dia que ele foi criado ou editado, sabe? Cara, eu poderia até ter as três datas, nem que seja assim bem... Pequeno
+
+[31:12] aí em cima, data de impressão e data de emissão.
+
+[31:16] É, porque eu poderia chegar aqui e imprimir amanhã, sem ter feito nenhuma coisa, e aí olha aqui, data de emissão. Esse é um problema que a gente tem da Connect, né? Que a data de impressão é a data de impressão e a gente nunca sabe a data de emissão, tem que ficar entrando pra ver. Então poderia ter a data de impressão e a data de emissão.
+
+[31:37] Logo lá embaixo, do mesmo tamanho, com o horário também, se quiser.
+
+[31:41] Acho que não precisa.
+
+[31:42] Pode pôr, mas não... Que aí vai ficar meio padronizado ali, vai ficar do mesmo tamanho, com a mesma informação.
+
+[31:51] Uhum. Acho que aqui ficou bom. Do resto eu acho que tá... Tá ok. Opa, peraí, isso aqui eu não posso fechar. Ah, então eu vou te passar os parâmetros do outro cálculo? Eu vou pegar, vou fazer um exemplo, tá? Aqui.
+
+[32:11] Opa.
+
+[32:12] Que mais? Você tinha me mandado?
+
+[32:18] Não, eu fui mandando o que você tinha me mandado, eu fui confirmando que tava dando certo.
+
+[32:25] Ah tá, então a gente viu tudo.
+
+[32:28] Até onde a gente parou sim, aí depois o que tinha dado problema? Era o orçamento que a gente tinha que aprovar daquela nuances.
+
+[32:38] Aqui não tava dando pra aprovar, né?
+
+[32:41] Aí eu já fiz, entra lá em orçamentos.
+
+[32:45] Aqui você... Ah, isso aqui você não conseguiu, né? Fazer. Pôr os setores na hora que vai selecionar o produto lá dentro do orçamento.
+
+[32:57] Deixa eu ver. Colocar os setores... Isso é na hora de... Eu vou colocar.
+
+[33:38] Na hora de selecionar o produto dentro do orçamento?
+
+[33:42] É, eu vou colocar. Eu vou ter que mudar um pouco da visualização ali do orçamento, de como fica a peça. Mas dá pra colocar sim. Vou colocar no canto inferior direito.
+
+[33:54] Tá.
+
+[33:56] Aí...
+
+[34:02] A gente tinha parado, deixa eu ver certinho aqui. Esse
+
+[34:19] daqui de criar o projeto deu certo? Que eu não consegui criar o projeto?
+
+[34:27] Sim, eu criei vários projetos, inclusive fiz vários testes, se você quiser entrar no CRM aí para ver. Eu já fiz o projeto, fiz o orçamento, aí dei o segmento no orçamento, ficou com um valor cobrado, já está tudo, todas as instâncias, projetos ali.
+
+[34:58] Aqui depois vai vir certo né?
+
+[35:04] Aqui
+
+[35:13] depois a gente tem que...
+
+[35:17] Ele tá buscando o...
+
+[35:19] Buscando todo mundo né? Ah, beleza. Criou, tararim, ok. Aí então, vamos fazer o fechamento lá, né? Vamos ver.
+
+[36:06] Não, o orçamento eu não sei porquê. Aperta na bolinha ali pra dar refresh. Não sei o que aconteceu no seu computador. Depois eu vou limpar esse cachê do seu PC. Esse mesmo. Aí vai em aprovação do cliente, que é onde está. Aprovar manualmente. Eu coloquei voltar para o rascunho também. Coloquei voltar em todas as coisas. Os status.
+
+[36:56] Cara, não tem o que fazer. Não tem. Falei com o Ronaldo, aí lembra que ele conseguiu aqueles dois lá. Foi só.
+
+[37:07] Olha aí.
+
+[37:13] Mas ele tá sem uma peça lá. Tá lá. Ah, então ele sabe que ficou.
+
+[37:24] Não dá, mano.
+
+[37:46] Não cabe. Tá chumbada. Mas é outro nicho. Mas aí vai trocar uma? Não tá uma do lado da outra? Tá, pô. É a que tá dentro de casa. Não dá pra trocar uma não, é muito diferente uma da outra. Não, a peça? Ixi, ele vai ver. E vai dar bosta. Ó... Num... Eu ia falar de pôr uma de 60 graus. Ou uma de 10. É pior, né? Tipo... A de 10 tem 18. A de 60 tem 3. É uma opção. Tô dando opção, né? Ou foi mal.
+
+[38:47] Pode ficar tranquilo, velho. Eu tô acostumado já.
+
+[38:52] Aí aqui, beleza, aprova e envia. Então. Envia para o financeiro. Como é que nós vamos fazer a lógica do negócio?
+
+[39:03] Teoricamente, agora, a revisão financeira é a hora que determina o valor de peça, ver quais peças estão sem cadastro. Agora é a parte do financeiro. O financeiro vai entrar, vai dar uma olhada, vai ter Vai ter as informações, tal, dá o check, coloca tudo, as peças, cadastra. O que eu faria só pra gente continuar? Eu tiraria as peças que não estão cadastradas. Porque aí elas vão bloquear essa continuação. Essas duas aí. Beleza. Aí... pronto.
+
+[39:58] Ah, ele voltou aqui pra aprovação da equipe? Aprovação do cliente? Ah, ele voltou, ó. Tem que entender se quando a gente tirar e inserir a outra peça, se ele vai voltar pra cá. Que ele retrocedeu, entendeu?
+
+[40:17] Eu preciso entender o porquê que ele retrocedeu, mas eu entendi sua dúvida, eu não sei também.
+
+[40:24] Mas eu acho assim se mudar o valor que teoricamente tem que manter o valor. Se der alguma bucha que o valor vamos pôr as meninas passou um orçamento de 40 mil. Um exemplo. E aí sei lá fez uma cagada que virou 38. Sei lá não. Nessa aprovação do financeiro aí aí beleza aí não deixa. Que aí deu alguma. Entendeu. Não avançar errado.
+
+[40:52] Sim.
+
+[40:53] Mas tem um detalhe também. Vamos supor, a hora que a gente for fazer o cadastro do produto, se teve alguma diferencinha de centavos, também vai mudar e vai ajustar no desconto. Então, não sei. Acho que não deveria voltar mesmo não.
+
+[41:10] Tá, tá. Eu acho que isso foi só um erro ele ter voltado. Aprova aí por enquanto, pra gente... É no próximo, não. Próximo.
+
+[41:23] Ah, pera aí, deixa eu ver uma coisa.
+
+[41:26] Ah,
+
+[41:36] eu queria... Deixa eu imprimir um. Imprimir mesmo.
+
+[42:03] Aqui eu
+
+[42:20] quero fazer mais um teste, que pode acontecer. Ele volta tudo de novo.
+
+[42:44] Então,
+
+[42:49] toda vez que a revisão financeira faz alguma alteração, ele volta até a aprovação do cliente. Teoricamente, isso estaria certo se não fosse
+
+[43:01] pelo fato de... Sim, teoricamente, no modo normal, acho que faria sentido.
+
+[43:12] Porque se alterou, o cliente tem que aprovar, mas tudo bem. Vamos seguir a prova aí.
+
+[43:19] É que, por exemplo, alterei a empresa, porque na hora que fechou, as meninas vieram e disseram, qual é a empresa? Aí eu falo na Foco. Aí elas pegou e não mudou. Começou o orçamento na Manoela e veio na Manoela. Aí a gente vai ter que alterar para poder fazer na empresa correta, entendeu? A gente tem que ver como fazer essa comunicação aqui. Vou dar um exemplo. é essa semana mesmo teve um orçamento que eu falei para as meninas falei eu vou fazer a venda na e-flight certo. Aí a Catherine nada contra é só o que aconteceu. A Catherine seguiu o padrão mandou o orçamento no e-mail com as informações no e-mail e no e-mail no corpo do e-mail mesmo ela colocou faturamento pela slide mas o orçamento estava na manuela. porque começou o orçamento na Manoela e não alterou na hora de mandar para a gente entendeu. Sim então precisa entender precisa ainda ter algum tipo de comunicação porque se lá atrás tipo porque às vezes acontece acontece muito assim vamos pôr o cliente veio aqui fechou o orçamento e ela já me pergunta Vini vai fazer com a empresa. Aí eu já decido qual empresa vai ser. E se não mudar e for manter eu já não vou lembrar mais entendeu.
+
+[44:40] O certo, que eu acho, é que quando determinar, colocar na observação.
+
+[44:45] Pode ser. É que aí a gente sempre tem que editar e olhar aqui na observação.
+
+[44:52] Coloca a observação para ver se precisa realmente editar. Às vezes ele abre um campo de observação dentro do sistema.
+
+[44:59] Como você fala?
+
+[45:00] Vai lá embaixo. Coloca a observação.
+
+[45:16] Vou por bem perto da realidade aqui.
+
+[45:18] É, não, perfeito. Vou salvar.
+
+[45:23] Voltou, né? Volta pra cá.
+
+[45:28] Tá, ele não apareceu.
+
+[45:31] Beleza, eu posso colocar... Será que seria interessante colocar aqui? A observação?
+
+[45:38] Aperta duas... clica duas vezes em cima pra ver se ele abre. Ele já abre a edição do orçamento, tá. Eu acho que eu vou colocar que todos que tiverem uma observação, ele fica igual na... Um ponto de exclamação. Não, igual na coisa, na logística, que fica com um cardzinho em volta, laranja. Eu tava pensando em fazer isso.
+
+[46:07] Tá, pode ser, a gente pode tentar.
+
+[46:09] Que aí fica destacado quando tem alguma observação, porque a observação é... porque alguma coisa tem que ser levada em consideração, certo? E aí já deixa desse jeito.
+
+[46:24] É para provar é ali mesmo.
+
+[46:29] Tem que confirmar.
+
+[46:45] Tem que digitar...
+
+[46:46] É, eu copio ali, eu acho mais fácil copiar e digitar pro lado do Approver. Tá. Então não vai errar mesmo.
+
+[47:02] Ele
+
+[47:12] tá ali no... Não, não fecha a porta.
+
+[47:15] Não, não fechei. Aqui, acho que não vai vir ainda, né?
+
+[47:23] É, na realidade, para colocar... Só que vamos lá.
+
+[47:27] Não pode ir para a nota direto, tá? Qual é o caminho nosso aqui? Porque tem muita coisa que não emite a nota de imediato. Tem as pendenga, né? Então, o que ele tem que fazer? Essa aprovação do financeiro, Tem que ser um FF que a gente fala aqui, que é um faturamento futuro. Então, ou seja, a partir do momento que ela gera essa aprovação, pode gerar as parcelas no controle financeiro, não tem problema. Pode gerar as parcelas no controle financeiro já, pode não, deve já, né? Já movimenta o estoque que tem que fazer, tudo, né?
+
+[48:11] Já foi feito isso.
+
+[48:13] Beleza. Aí vai cair em algum outro campo, que é o campo de emissão de nota fiscal.
+
+[48:21] Que tá aqui em cima, entra ali na nota fiscal. Não, é o primeiro. Isso. Aí seleciona o boleto. Aonde? Aqui embaixo, aqui ó, o boleto vinculado. Isso. Aí é o... Tem que ver qual o boleto que é, mas é o 23.
+
+[48:44] A gente tem que pesquisar aqui pela venda ou pelo nome do cliente.
+
+[48:49] É o 23, entrei. 23 é o que?
+
+[48:55] O número? Esse aqui?
+
+[48:58] Eu acho que é. Deixa eu ver.
+
+[49:00] Não, a venda é de 38 mil. Só se for esse orçamento 20 aqui. Só que aqui é uma parcela só.
+
+[49:13] É, a parcela só.
+
+[49:14] É, mas tem três boletos pra gerar no caso.
+
+[49:17] Vão ter três parcelas, o P1, P2 e P3.
+
+[49:22] É, então. Aqui tem que trabalhar.
+
+[49:27] É P3, P1. É isso aí, 12.000. 12.900.
+
+[49:33] E era bom gravar um vídeo fazendo, na real. Eu vou ver se tem alguma venda porque não dá para ficar emitindo nota e cancelando. Eu vou ver se tem alguma venda hoje ou no máximo segunda-feira e eu gravo.
+
+[49:52] Beleza.
+
+[49:53] Tipo vou gravar o processo inteiro do orçamento entendeu a venda inteira desde a aprovação tudo e a emissão da nota para você ver. Vai ficar um vídeo sei lá de uns 10 15 minutos mas vai ter o processo todo. Mas, independente daqui do financeiro, vamos dar uma olhada lá na separação. Isso, teoricamente, já era para ter acontecido, certo?
+
+[50:19] Sim.
+
+[50:19] Então, beleza. Separação parcial. Terras altas...
+
+[50:33] É isso aí. Orçamento 20.
+
+[50:40] Mas... Ainda tem algo errado.
+
+[50:48] Não
+
+[50:54] bate o valor.
+
+[50:57] 38,815.
+
+[51:02] E aqui veio com 20... Ah, aqui é o projeto. Achei que fosse o valor, carai.
+
+[51:14] Obrigada.
+
+[52:05] Ele já vinculou aqui embaixo com o projeto.
+
+[52:10] Ô Pedro, isso daqui também é direito de acesso, né?
+
+[52:15] O editar e excluir do peça e produto, sim.
+
+[52:19] Excluir, cara, eu nem deixaria aqui. Só excluir.
+
+[52:26] Tá.
+
+[52:28] Certo seria o excluir só dentro da edição da peça, né?
+
+[52:32] Isso, exato.
+
+[52:34] Que aí fica muito fácil de apertar isso.
+
+[52:36] Nem o editar também. Qualquer alteração aqui, só dentro do cadastro.
+
+[52:41] Não, mas eu acho que na hora que você apertar em editar ali, ele vai subir para o cadastro.
+
+[52:46] E excluir de jeito maneira.
+
+[52:58] Aqui
+
+[53:07] tem erros, tá?
+
+[53:11] Dentro de peça de produto?
+
+[53:17] É, aqui tem um erro. Quanto nós temos reservado efetivamente desse produto?
+
+[53:24] Três.
+
+[53:25] Beleza. Então aqui não pode estar 5. Entendeu?
+
+[53:32] Mas volta lá. E essa é entrega futura?
+
+[53:38] É entrega futura. A gente tem que tratar da mesma forma. Qual o significado do reserva?
+
+[53:49] É o que foi pedido.
+
+[53:50] Não. Eu tô só te instigando pra você poder entender, tá?
+
+[53:55] O reserva é o que está reservado para um cliente em específico.
+
+[54:01] Ok. E se eu bato o olho aqui?
+
+[54:05] Tá.
+
+[54:07] Entendeu?
+
+[54:08] Mas a entrega futura não necessariamente é uma coisa vinculada ao cliente, só que no nosso caso a gente não tem esse vínculo por conta da... que não tem o vínculo com o sistema, entendeu? Então, teoricamente, era para estar como reservado.
+
+[54:28] Não, mas peraí. Mas aqui não tem nada a ver com coisa da Connect. Aqui era um produto que estava constando 3, beleza. Estava constando 3, a gente fez uma venda de 5. O reservado aqui tem que ser 3. Então, igual tem aqui. Total de 3, total de 3. Poderia ter aqui um total de 10. Está reservado 5 e o disponível 5. Essa conta não fecha entendeu. Então o total é o total. Independente se está disponível ou não entendeu. Independente total é sempre o total é o total que está disponível para a venda e o total que está reservado para o cliente. Esse é um total o reservado é o que está no setor reserva e o disponível é a diferença do reserva para o total. E a questão da venda no caso.
+
+[55:31] Então volta ali na.
+
+[55:39] Cinco
+
+[55:47] é a quantidade da venda. Reserva 3, entrega futura 2. Beleza. Aqui, entrega futura 2 está correto. O reservado não. O reservado são 3. E o total aqui, nesse caso, 3 também. Que é o total que tem.
+
+[56:08] Mas aí o disponível não seria 0?
+
+[56:13] Não. Não, menos 2. Eu tenho 3, vem de 5, menos 2. Vamos pegar um outro produto aqui, vamos ver.
+
+[56:20] Ah, então o reservado está pegando o tanto que vendeu, não a quantidade que está reservada. Então, calma aí, só porque a gente ficou um tempão falando. Peça e produtos no estoque por local está buscando reservado como a quantidade pedida, não como o que está reservado em estoque. Pronto. Beleza.
+
+[56:54] Aqui tá certo.
+
+[56:59] É.
+
+[57:00] Vou ajustar
+
+[57:06] isso. Aparece o fornecedor já.
+
+[57:13] Aí tem como deixar isso, sei lá, diminuir trazer um pouco pra cá, diminuir um pouco e deixar isso um pouco maior, me dá ansiedade ficar vendo isso.
+
+[57:26] Então deixar esse card lateral maior.
+
+[57:34] E aí pode dar uma ajustadinha pra cá.
+
+[57:42] Diminuir o card da descrição. Aí tenta fazer um pedido aí para você já começar a entender como está funcionando.
+
+[58:44] Beleza. Pedro, tem que pôr umas linhas aqui, sabe?
+
+[58:51] Como assim?
+
+[58:52] Ah, tipo... Dá uma bagunçada nas vistas aqui. Ou, sei lá, ou uma linha entre eles, sabe? Tipo, tipo borda. Você entendeu?
+
+[59:10] É, fazer uma tabela mesmo.
+
+[59:12] Tipo uma tabela, é. Que às vezes não precisa nem ser por linha, sabe?
+
+[59:17] Por coluna.
+
+[59:20] Nas colunas e de repente por L, sabe? Tipo L1, L1, bota uma linha. Tipo, não é colocar uma linha, é... Uma demarcação, tá. Isso, aí o L2, porque assim fica...
+
+[59:36] Visível.
+
+[59:38] visivelmente cansado, entendeu? E fica ruim de ir. Quando é pouca coisa assim ainda vai,
+
+[59:44] mas... Tá, vou fazer isso. Aí pra fazer, tem que pedir, tem que colocar a data. Isso vai ser a data de entrega que vai aparecer pro Matheus já no sistema. Aí só uma coisa, que o sistema que você vai ver não é esse que tá dentro da central. Deixa eu mudar um pouquinho isso daqui. De entrega.
+
+[60:22] Esse aqui.
+
+[60:50] Ah, tá. Depois eu dou uma olhada. Vou te mandar uma lista de separação também, modelo, tá?
+
+[60:57] É, ele ficou bem basicão porque eu tava mexendo ontem de madrugada e eu falei, ah, vou me importar mais com a funcionalidade do que com a visualização.
+
+[61:08] E aí pro Matheus dar sequência não vai ser aqui, vai ser lá no...
+
+[61:12] É, já vai ser naquele sistema que ele já tá acostumado a mexer que a gente fez pra ele. Ele vai receber aí dentro Não vai
+
+[61:20] estar aparecendo ainda não, né?
+
+[61:22] Vai.
+
+[61:23] Já vai estar aparecendo?
+
+[61:24] Mas já fez o pedido de separação.
+
+[61:28] Eu falo porque senão vai aparecer com o Matheus lá, vai bugar ele.
+
+[61:36] É, fez a separação já... Não, não, não. Ah, tá. Tá. Entendeu? Não, não, não. Esse aqui é separado do que ele tá vendo lá. Aquele lá é no lovable. Esse aqui é o do... é o do Skip, então não vai interferir em nada.
+
+[61:53] Se não ia bugar ele lá.
+
+[61:54] Ah não, ele ia ficar louco, um monte de coisa aparecendo.
+
+[61:59] Sabe o que eu ia te falar? Tem como aqui, por exemplo, que nem aqui, eu tô na separação parcial, certo? Aqui em cima mostrar que é a separação parcial, igual tá aqui, cadastro, remessa.
+
+[62:16] Ah, tem sim. É que ele vem com esse nome, um incrível projeto do Skip, por padrão já. Vou trocar. Vê se trocou na hora que você apertou esse aparelho.
+
+[62:30] Tem que atualizar, será?
+
+[62:33] Sobe, sobe. Não tô vendo a peça.
+
+[62:37] Aqui, embaixo. Ah, aqui você fala?
+
+[62:40] É.
+
+[62:41] Não, tá no aguardando separado.
+
+[62:42] Deixa eu atualizar. Isso.
+
+[62:52] Não.
+
+[62:52] Agir separado.
+
+[62:54] Mudou aqui o status?
+
+[62:55] Separado. Mas não saiu. Tá. Então tem que sair do agir separado pra separado.
+
+[63:03] Isso.
+
+[63:03] Beleza. Tenta ir.
+
+[63:06] Vamos dar sequência. Vamos fazer a entrega.
+
+[63:08] Na real antes tem que continuar.
+
+[63:12] É aqui né? Finalizar.
+
+[63:15] É.
+
+[63:25] Teoricamente não era aí, mas tudo bem.
+
+[63:28] Por que?
+
+[63:29] Era pra entrar aqui em registrar, aí colocar, adicionar foto. Mas como você já finalizou, eu nem sabia que dava pra fazer por aí.
+
+[63:41] Tinha que colocar o código da obra e tal. Beleza, mas teoricamente, vamos ver, caiu aqui no finalizado, né? Então vamos atualizar aqui.
+
+[64:03] Aí, foi entregue. Só o separado que não tá funcionando. Aí esse negócio do boleto da parcela eu sei que você vai falar e eu vou tirar. Mas ainda não tirei porque ontem como eu tava mexendo um monte de coisa e tava rodando só a parte estrutural, eu falei Deixa a visualização pra depois.
+
+[64:26] Tá. A rotina de devolução você fez ou não?
+
+[64:32] É... devolução... troca?
+
+[64:35] Não, é devolução mesmo. Ou troca, é.
+
+[64:38] Do cadastro, sim? Do orçamento, né? É. Volta lá no orçamento.
+
+[64:45] Tem
+
+[64:52] que dar um refresh, não sei porquê. não foi eu acho que não foi
+
+[66:17] Vou só AKK porque eu não lembro o outro. Aqui não tá funcionando ainda, né? Então, por exemplo, eu tava tentando simular...
+
+[66:54] Não, você vai ter que buscar a origem das peças.
+
+[66:58] Então, onde eu vou?
+
+[66:59] Ali, desce. Vai em buscar venda.
+
+[67:06] Posso buscar o cliente? Tem que ser o número do orçamento?
+
+[67:14] Buscar venda de origem para devolução.
+
+[67:18] Gerou o número de venda, não gerou? Aqui ó, tem que gerar o número de venda também.
+
+[67:24] Ali ó, ORC20.
+
+[67:27] Então, além do orçamento, tem que criar um outro número, o número da venda.
+
+[67:32] Tá.
+
+[67:33] Não vem ainda. Tipo, entendeu? Um orçamento, a partir que gera o financeiro, ele vira uma venda. E dessa venda a gente consegue fazer as pesquisas.
+
+[67:47] Tá.
+
+[67:48] Aqui não vem ainda, tá? Então beleza. Então a parte de devolução tem que mexer.
+
+[67:55] Sim.
+
+[67:56] Aqui não busca.
+
+[67:57] Beleza.
+
+[67:57] Eu só quis fazer, que era o fluxo, eu já ia fazer uma devolução de três aqui pra entender se ia...
+
+[68:02] Se ia funcionar certinho.
+
+[68:04] É. Como essa parte da devolução não tá funcionando, vamos ver, o que você falou pra ver, a questão da compra, né? Onde que é que você... Vou fechar isso aqui.
+
+[68:17] Vai na central.
+
+[68:19] Central...
+
+[68:20] É... necessidade... Aí. Na necessidade de compra, muito das coisas foi eu e a Débora que a gente foi fazendo.
+
+[68:34] E a Débora, né? Isso.
+
+[68:34] 90, 58. Aqui eu preciso mexer... é... mexer com calma aqui. Por produto, por item, de orçamento...
+
+[68:47] É, o 0.20 ali já ficou mais...
+
+[68:49] Isso aqui o que que é?
+
+[68:57] Eu acho que são... É, pra devolver...
+
+[69:03] É, acho que aqui nem... Bom... Tipo, devolução pro fornecedor, cê fala?
+
+[69:11] Acho que é o que você estava tentando fazer agora no orçamento.
+
+[69:16] É não, mas esse coisa nem deveria ter aqui nessa rotina de compra.
+
+[69:20] Sim, tem que ser só a parte de compra mesmo. É, eu não tinha visto que ele tinha...
+
+[69:28] Não, a gente tá vendo mesmo aqui. Deixa eu fazer o pedido, montar um pedido daquele item, mas depois eu preciso... Smilsark.
+
+[69:44] Ok,
+
+[69:50] posso mudar. Posso alterar. Cara, tá, deixa eu ver. Eu acho que tem, tá? Mas gostaria que viesse preenchido.
+
+[70:07] Aqui.
+
+[70:10] Tá.
+
+[70:13] com todos os valores.
+
+[70:15] Isso. ICMSPIST. Por quê? Acho que também está errado.
+
+[70:33] Clica
+
+[70:40] duas vezes em cima.
+
+[70:45] Ah, aqui você mudou, né? A engenharia aqui. Ah, ficou melhor assim. Ó, então vamos lá. Lá tá puxando com as nomenclaturas erradas, tá? Aí, que esquisito. Eu acho que tem imposto essa aqui. Não sei por que que tá sem. Talvez tenha criado. Esquisito. Depois, na hora que for importar, tem que ver certinho. É, porque esse produto eu sei que tem imposto. Tem IPI, tem ST. Não sei, mas ST tenho certeza, porque eu atualizei ST antes de ontem. Então, o que tem que ir pra lá? O preço de custo, o valor da ST, o valor do IPI e outras despesas.
+
+[71:34] Tá.
+
+[71:36] Aí, isso pode ser só uma visibilidade interna. Na hora de gerar o pedido, não precisa. Pode ser só o valor total dos custos indiretos, que é o valor que a gente chama de cálculo do BDI aqui.
+
+[71:52] Tá bom.
+
+[71:53] Tá? Talvez a gente vai ter que falar disso de novo, mas basicamente é isso.
+
+[72:02] Não, eu entendi.
+
+[72:03] Pra que o valor final do pedido seja bem próximo da realidade, porque esse valor final, teoricamente depois ele vai entrar lá no fluxo de caixa como uma previsão de pagamento. Então se ele não vem os dados dos impostos vem só os dados do preço de custo e depois eu tenho mais 40 por cento de imposto. Então sei lá um pedido de 10 mil não é só 10 mil que vou pagar vou pagar 14.
+
+[72:28] Sim.
+
+[72:29] Então o fornecedor pode ter o preço de custo o valor indireto seja de impostos BDI e teu valor lá. Tudo bem esse pedido vai para o fornecedor. Ele nem vai se atentar a isso ele vai olhar o preço de custo do seco do produto a quantidade e tal mas para nós prefeito interno a hora que o fornecedor manda até o orçamento dele com os impostos que alguns têm e outros não tipo explícito eu quero dizer né tem uns que só manda o preço de custo certo e embaixo tem um rodapé IPI de tanto sabe e ST de tanto mas não está ali no negócio mas na nota vai estar E aí já fica fácil de verificar aquele pedido, a hora que a nota chega, se bateu.
+
+[73:18] Tá bom.
+
+[73:19] Também.
+
+[73:23] Aqui
+
+[73:30] automático, né? Número de pedido, referência opcional, gerado automaticamente, se deixado em branco. Aqui é o pedido de compra, no caso, né?
+
+[73:42] É. Todos os códigos eles tem a referência do que é no começo.
+
+[73:49] Pedido de compra. Ah, peraí. Você viu que ele gerou com uma data bugada?
+
+[74:03] Não, vai em...
+
+[74:04] É que eu dei um enter e ele já gerou.
+
+[74:07] Vai em pedidos. Tem como cancelar também, pode ficar tranquilo.
+
+[74:12] Beleza, mas eu consigo abrir ele?
+
+[74:14] Aperta duas vezes em cima. Ele só abre esse campo assim?
+
+[74:18] É.
+
+[74:18] Então vai ter que cancelar.
+
+[74:20] Tá. Aí depois você bota pra editar?
+
+[74:23] É a possibilidade de editar um pedido já efetuado.
+
+[74:27] Sim.
+
+[74:27] Beleza.
+
+[74:27] É. Porque às vezes a gente vai mandar um pedido pro fornecedor e ele vai falar, ô, você não quer arredondar a caixa? Compra mais isso, sabe? Aí a gente vem aqui e edita.
+
+[74:37] Uhum.
+
+[74:38] Vou cancelar e vou colocar a data bugada só pra você ver. Beleza, cancelei. Aquele produto, teoricamente, tem que voltar como necessidade de compra. Foi até bom aqui que a gente fez isso.
+
+[74:50] Sim, ele vai voltar.
+
+[74:52] 90,58.
+
+[74:53] O Filipe já fez o teste algumas vezes. Ele fez o pedido.
+
+[74:58] Aqui, 90,58. Disponível, pendente, beleza. Mas até mudou aqui a tela, não tava aparecendo assim não.
+
+[75:07] O que?
+
+[75:08] Essa tela aqui. Comprar. Peraí, é mudou. Deixa eu entrar de novo. Que agora eu fiquei encucado.
+
+[75:23] Ué, eu não vi, não vi diferença não.
+
+[75:26] Vi, pô.
+
+[75:28] Vamo ver.
+
+[75:32] Vai.
+
+[75:44] Doideira. Comprar?
+
+[75:50] É ou em comprar ou em fechar lote. Por isso que você viu a diferença. Entra em fechar lote. Fechar pedido aqui. O verde.
+
+[75:59] Aqui?
+
+[75:59] É.
+
+[76:01] Não, mas nem era isso. Ah, isso aqui é legal. Sabe onde eu tava? Eu tava aqui pedindo por item. Mas acho que poderia vir aquela informação, hein?
+
+[76:23] Qual?
+
+[76:25] Eu acho que poderia vir igual. Aqui tá bem mais completo que aqui.
+
+[76:32] Então, tirar essa visualização.
+
+[76:34] Qual a diferença?
+
+[76:35] Nenhuma, é só os pedidos que estão com L vinculado. Só que como a gente vai usar todos com L vinculado, não precisa ter isso. Entendeu? Futuramente, né? Pode ser que seja só desse jeito.
+
+[77:03] É porque você vê que é outra tela, diferente, né? Eu acho que deveria vir pré-preenchido já com o fornecedor do cadastro.
+
+[77:17] Tá?
+
+[77:22] Tá. Tem bastante fornecedor que não tá vinculado.
+
+[77:31] Aí a gente vai ter que corrigir, tá? Se não tiver...
+
+[77:33] É, então... Finaliza aí o que você tá mexendo, que eu vou te mostrar. Inclusive, eu já falei com a Deborah, é isso.
+
+[77:40] Tá, vamos lá. Aqui é o seguinte, que eu preciso de informações. Vou fechar.
+
+[77:46] Pode fechar. Eu
+
+[77:56] preciso visualizar aqui... Por onde foi vendido. Eu sei que é na Foco, tá? Mas você não sabe por onde eu compro.
+
+[78:18] Eu acho que isso tem que vir automaticamente. Orçamento feito pela Foco.
+
+[78:25] Mas tem um detalhe. E se esse material foi vendido... Vou dar um exemplo. Eu tenho 50 vendidos na Manuela e 1 vendido na Foco. Eu não vou comprar esse filme pela foco vou acabar comprando tudo pela Manuela. E aí é aqui ó tipo do jeito que você abriu aqui pode ter a informação aqui aonde está vendido. Agora tem um detalhe também que nem na necessidade de compra que a gente tem. Vamos supor vamos pegar outro produto. Bom esse produto aqui ó. Que ele tem várias vezes. que a gente colocou, cadê?
+
+[79:04] O chip.
+
+[79:05] Deixa eu colocar aqui, ó. Chip, chip. A gente colocado ele três vezes, eu acho. Aqui, ó, chip.
+
+[79:10] É. Tá.
+
+[79:13] Chip, plafond.
+
+[79:14] Vamos ver uma coisa aqui, como que ele vem. É porque tem vários cadastros. Aqui, esse aqui. Aqui é o... Cadê o código interno dele?
+
+[79:31] Ali, ó.
+
+[79:32] Esse código, Pedro, bota aqui também, fazendo favor?
+
+[79:35] Tá bom.
+
+[79:36] 8, 2, 3. Então ele é o 8, 2, 3. Aqui ó.
+
+[79:45] Não.
+
+[80:04] Traz o L para cá também nessa visualização trazer o L aqui. E cara tem que ter a opção de clicar aqui para querer comprar.
+
+[80:18] Somente o L individual. Então, necessidade de compra por produto, quando selecionam um produto que ele está dentro de um orçamento, em vários Ls ou vários orçamentos, poder pegar o L por vez, sem ter que entrar na aba de por orçamento. Na realidade, a gente pode retirar essa aba de por item de orçamento.
+
+[80:48] e outra coisa é poder selecionar de outras empresas de outros clientes junto e trazer a empresa que na visualização também a empresa que foi vendida. E deixar mesmo que tenha que eventualmente comprar algo que foi vendido por uma empresa foi vendido por empresa a eventualmente comprar pela empresa B. Não é uma regra, mas pode acontecer algumas exceções.
+
+[81:20] Tá bom.
+
+[81:24] Peraí que eu tô analisando aqui, tá? Aqui muda a nomenclatura só pra reservado ou só pra... Ou reserva, que seja.
+
+[81:39] Aonde? Coberto?
+
+[81:40] É.
+
+[81:41] Coberto. Não faz sentido nenhum trocar... coberto por reservado. Necessidade de compra.
+
+[81:52] Cara, eu traria... Se tiver um pedido de compra feito, vai aparecer aqui em alguma... Em pedidos. Não, aqui, nessa visualização.
+
+[82:09] Que já tenha sido feito?
+
+[82:10] E que não tenha chegado ainda.
+
+[82:13] Clica em cima do produto para abrir o campo lateral aqui. Eu acho que se tiver vai estar aí, mas eu não tenho certeza se tem. Preciso confirmar se tem.
+
+[82:29] Talvez seria interessante ter essa visualização rápida aqui também. É, o tiquezinho aqui vai ser tiquezinho e quantidade, de repente, tá?
+
+[82:50] Que tiquezinho?
+
+[82:52] Por exemplo, se eu ticar... Peraí que eu tô... tô... tô pensando aqui, Pati.
+
+[83:04] Porque
+
+[83:10] eu tinha pedido pra selecionar, certo?
+
+[83:15] Ah, o card igual aqui na lateral esquerda que você seleciona a peça?
+
+[83:22] Isso, sim.
+
+[83:23] Ah, tá, o card de seleção. Um card de seleção por ela em específico.
+
+[83:30] É, por exemplo, vamos supor que aqui tivesse 10 clientes, né?
+
+[83:33] Sim.
+
+[83:34] Por que que acontece isso?
+
+[83:35] Por cliente também.
+
+[83:36] É, aqui é uma peça padrão, mas... Olha nessa... Nisso daqui, ó, não.
+
+[83:47] Ó. Vou
+
+[83:55] dar um exemplo, tá? É... Ah, pode ser isso, Max.
+
+[84:04] Por
+
+[84:12] exemplo, essa é a esteca, ó. que eu te falo, tá vendo? Cliente, vários clientes. Os L, porque isso daqui é sob medida. Então a Débora vem, olha, vai fazer isso aqui, isso aqui, independente de quem for, entendeu? Lógico que vai tentar fazer a empresa dentro da mesma empresa, né? Tá vendo? Aqui vem a empresa que foi vendida, certo?
+
+[84:37] Ah, tá. Se aí é a empresa que foi vendida, no caso é sempre a que foi feito o orçamento.
+
+[84:43] Isso. Vamos falar que foi a venda, vai. Que o financeiro aprovou. Porque lembra que eu te falei... Que pode trocar, tá. Isso, exato. Vamos falar que foi a empresa da venda mesmo.
+
+[84:57] Da venda, é o que saiu da aprovação financeira, do último status do orçamento.
+
+[85:02] Do último status, isso. Enquanto não faz aquele último status, não faz nada no sistema. Não reserva, não pode fazer nada.
+
+[85:11] Sim, ele só fica naquele campo lá de orçamento.
+
+[85:14] Isso, e aí aqui a Débora vem, ó, clica aqui, e aí ela anda pra montar o pedido, entendeu? É mais isso. Tá?
+
+[85:25] Beleza. Ô, limpa o seu cachê, pelo amor de Deus. Vai deixar seu computador mais leve.
+
+[85:36] Você... a gente pode encerrar por aqui? Pra eu poder ir pro estoque?
+
+[85:41] Claro.
+
+[85:42] E aprovar... 10 pedidos de compra, que aí você corrige isso e na segunda-feira eu vou dar uma atenção mais aqui nessa parte.
+
+[85:53] Tá, é bom.
+
+[85:54] Mas segunda-feira a primeira coisa que eu vou fazer é gravar o vídeo de uma venda, o processo dela inteiro, para você entender aquela questão que eu te pedi. Aprovei o orçamento, gera uma venda e depois eu imito a nota. Não vou emitir a nota ali naquele momento. Gerei a venda, gerou um FF. Do FF, que é o número da venda, eu gero a nota fiscal.
+
+[86:20] Tá. Beleza.
+
+[86:22] Tá. Onde que eu limpo?
+
+[86:24] É... Eu te mandei. É Ctrl Shift Del.
+
+[86:28] Aqui?
+
+[86:28] Já?
+
+[86:29] Direto?
+
+[86:29] É. É.
+
+[86:29] Aí dentro. Ctrl Shift Del. Vai abrir um campo. Isso. É...
+
+[86:35] Limpar agora?
+
+[86:37] É. Já foi no excluir dados do cachê?
+
+[86:42] Não. Aqui não achei nada de cachê. Aqui fala arquivos, imagens e cachê. Mas aqui tem histórico de download, histórico de navegação. Ah, aqui não tem problema.
+
+[86:56] É, então pode apagar porque isso aí só pesa seu computador e deixa o navegador mais devagar.
+
+[87:04] E esse navegador nem é o navegador que eu uso.
+
+[87:09] Aí você vai ver que vai dar uma melhorada. Entra no orçamento agora, vamos ver se vai.
+
+[87:15] Deixa eu só fechar tudo, vai.
+
+[87:16] Por via das dúvidas. Mas é pra ir, depois de ter feito isso.
+
+[87:27] É, limpou tudo mesmo.
+
+[87:31] Aí, ó.
+
+[87:38] É.
+
+[87:39] Ficou falando. Não era pra estar dando aquele bug. Então não é isso.
+
+[87:46] É isso, acho que foi bom.
+
+[87:49] Tá fluindo.
+
+[87:52] Sim. Eu vou fazer esse vídeo que vai ser importante.
+
+[87:55] Beleza.
+
+[87:58] Pra entender a rotina da venda, porque nós vamos dar uma brecada ali na emissão de nota, né?
+
+[88:05] É, a emissão de nota, a partir do momento que eu conseguir perceber como que funciona, eu já vou linkar com a API e já vai começar a funcionar.
+
+[88:12] É, mas não sei se vai ser assim não, hein? Cara, a Carol ficou dois dias aqui pra tentar emitir uma nota com o Sérgio. Eu, Pedro, vou ser bem eu acho, tá? A minha parte que mais me preocupa é essa parte fiscal. Porque se tiver qualquer coisa errada, se não tiver muito conhecimento do que tá... Não, tô falando que você não tenha, tá? Não é isso? Se não tiver tudo muito, muito, muito, muito redondo... É dica. Pode haver multa depois entendeu. E eu já falei para o Filipe eu acho que vale a pena pensar na ideia de trazer um emissor de nota. Pronto. Que vai ser mais barato em tempo. Entendeu. Do que ficar desenvolvendo toda essa parte fiscal. De repente trazer um emissor de nota com suporte também já caso precise. porque está mudando tem IBS CBS quase toda cada 15 dias tem uma atualização tem que estar ligado nas normas de emissão de nota da exigência da Receita Federal. O Sérgio tem um não estou defendendo nada nada. Ele tem tipo uma é um departamento só lendo norma mano porque se eu emito qualquer coisa errada de quem que é a responsabilidade dele. Se a gente traz isso e é nossa, tipo, é uma responsabilidade que vai ser complexa.
+
+[89:48] Se for o caso, a gente faz todas as nuances e deixa só essa parte com o sistema de uma outra pessoa, mas aí toda a parte do sistema, assim, já tá...
+
+[90:02] Isso! A gente traz um emissor de nota.
+
+[90:04] É, só o emissor de nota, que aí a partir daquilo ele emite a nota e a gente volta pro sistema.
+
+[90:09] Porque aí a responsabilidade ali de estar dentro dos parâmetros é dele não é nossa. Aí eu acho que faz sentido a gente pesquisar falar com os 4 5 6 que seja entendeu para ver se tem o suporte tudo quando a gente precisar num problema de emissão de nota por exemplo. A gente estava emitindo uma nota fiscal para. Lembro se era dourado de Mato Grosso ou uma outra. Ah! Ó! Ó, te mostro aqui ó, quer ver? Tá compartilhada minha tela ainda?
+
+[90:49] Uhum, tá.
+
+[90:51] Ó, uma vida. Aqui a gente tem um grupo só pra falar de... dessas, dessas bucha, né? De tributo, peraí. Eu vou limpar o cachê desse aqui também. Mas também é WhatsApp, né véi?
+
+[91:21] É não, mas eu sempre limpo o cachê do meu PC, véi. Porque senão eu não conseguiria nem usar meu computador, porque eu tenho que de aula ficar aberto.
+
+[91:29] Se liga. Desde... E com o Sérgio e Marcos, tá? Aqui é o contador.
+
+[91:44] Sim, ele é o meu contador também.
+
+[91:46] É, então. Desde... Aqui. Quarta-feira.
+
+[91:59] Eu acho que é isso, a gente pode pegar um sistema desse até finalizar... A gente pode pegar e em paralelo... Sim, a API. Vai ser uma API, obviamente. Já vai ser tudo automático. Vai jogar pra lá, vai emitir a nota e a gente recebe a nota pronta.
+
+[92:18] Eu vou te falar, porque eu vou ser bem sincero. Acho que não... Se for pra desenvolver essa parte fiscal, não sai esse ano.
+
+[92:28] Ah não, mas aí a gente deixa em paralelo. Eu vou desenvolvendo a parte fiscal em
+
+[92:33] paralelo, porque... Ah, desde que esteja funcionando com essa outra API, né?
+
+[92:37] Sim.
+
+[92:38] Mas eu não sei, cara. Eu acho que não vale a pena. Em termos de tempo e dinheiro, entendeu? Você vai trazer um... Tipo, a sua mão de obra é muito mais cara para tentar melhorar outras coisas do que pagar uma mensalidade para um emissor de nota. que esse emissor de nota não tem influência nenhuma na gestão de tudo isso que você está fazendo. A função dele é única e exclusivamente emitir nota. Eu falo assim não tem sentido a gente pegar essa responsabilidade entendeu. Ficar de olho em todas as normas do governo tudo que essa reforma tributária vai até 2033.
+
+[93:23] É, eu tô estudando também a reforma tributária.
+
+[93:26] Esse mês era pra ter um negócio que já foi prorrogado.
+
+[93:28] Na facul.
+
+[93:30] Esse mês já era pra ter um negócio que foi prorrogado. Mês que vem tem outro negócio que, se esse foi prorrogado, o outro não pode acontecer, na minha cabeça, né? Mas nós estamos no Brasil.
+
+[93:41] Governo é governo, né? Não tem muito o que fazer. A gente mexe só com...
+
+[93:46] Exato, nós estamos no Brasil. Então não sei como vai ser. Mas eu acho que... Não vale a pena.
+
+[93:55] Não, beleza. A gente vai fazendo... Qualquer coisa deixa só essa parte com a API externa e boa. Aí a parte de controle de administração e imposto vai fazer a luteineira.
+
+[94:10] O quê?
+
+[94:10] A parte de administração bancária, imposto, vai ser tudo do nosso, certo?
+
+[94:15] A gente vai pegar um emissor de nota.
+
+[94:18] Só o emissor? Ah, isso aí eu já estava pensando, já era o meu plano já.
+
+[94:22] Um emissor robusto. Tipo, não pegar o mais barato, tem que ser uma empresa boa pra poder dar suporte. E que assuma a responsabilidade de estar tudo dentro das normas, né? Pra poder dar suporte, assim ó, numa bucha dessa de não conseguir emitir a nota, tem que ter o suporte deles, entendeu?
+
+[94:45] Sim.
+
+[94:45] Igual tem do serve, nesse caso. É, bling... Então, pra mim é o mais simples. Ele faz nota de e-commerce, sabe? Não tem tanta burocracia. A gente precisa pegar um emissor que esteja adaptado com simples nacional e lucro presumido, que muda a tributação dentro da nota. Simples nacional não destaca, lucro presumido destaca. Tem grupo fiscal diferente.
+
+[95:21] Então vamos fazer... Vamos começar a pesquisar. É, então aí segunda eu vou pesquisar certinho, vou achar os melhores que tem no mercado e aí a gente faz uma reunião para conversar sobre isso.
+
+[95:35] Isso.
+
+[95:35] Ver quais são os melhores, como que a gente pode integrar.
+
+[95:40] Aí consegue antecipar um pouco até, entendeu? Porque para desenvolver essa parte fiscal, cara, não é só uma API lá no CFA, sabe?
+
+[95:49] Sim. Mas é isso, a partir de agora, parte do sistema em si é literalmente começar a testar, ver o que está faltando, o que está dando de errado e essa parte de nota fiscal, que é o mais difícil.
+
+[96:05] Testar mais um pouco, fazer mais uns dois, três testes e aí de repente a gente pegar mais umas três meninas aqui para testar também.
+
+[96:14] Começar a fazer um paralelo.
+
+[96:15] A parte da usabilidade também, para ver se precisa mudar alguma coisa, porque é como elas que mexem todo dia.
+
+[96:23] Eu concordo, eu acho que tem que ser elas mesmas para decidir algumas coisas. Obviamente que tem coisas que não dá, né?
+
+[96:30] Sim.
+
+[96:31] Só que aí a gente conversa e decide.
+
+[96:33] Mas a parte usual do negócio eu acho que elas têm que falar.
+
+[96:37] Beleza.
+
+[96:38] Então tá.
+
+[96:39] É isso, então. Valeu.
+
+[96:41] Fechou.
+
+[96:41] Valeu, obrigado.
+
+[96:42] Um abraço.
+
+[96:43] Um abraço.
+
+[96:43] Um bom final de semana. Tchau, tchau.
+
+[96:44] Tchau, tchau.
+
+[96:49] Que delícia.

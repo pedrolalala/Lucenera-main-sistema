@@ -1,0 +1,157 @@
+[00:00] Tem isso também. Por isso que tem que fazer uma coisa, fazer pedido. Lá fazer pedido, começa a vir mais informações, né? Pra ela colocar. Escolher qual é a coisa, como chama, né? A empresa. E... E de lá, vamos. Uma vez que selecionou... Aqui nós podemos pegar... Filtrar, selecionar tudo. Bom, tem uma coisa chata que aqui não ver isso não é legal. É, eu acho que tem informação que poderíamos começar a tirar com certeza. Talvez, aqui a série 1 das 2, fornecedor, sabemos quem que é automaticamente, é um fornecedor diferente da coisa, né? Então o fornecedor pode sair. Física que é?
+
+[01:01] A física...
+
+[01:04] É o que tem no estoque, né?
+
+[01:05] Sim.
+
+[01:07] Então, talvez... Mudaria a física pra estoque, né?
+
+[01:11] Tá.
+
+[01:12] Essa parte foi customizada... O Vini customizou junto de você essa parte dessas informações?
+
+[01:18] Não.
+
+[01:18] Não.
+
+[01:20] Tá.
+
+[01:22] É que, assim, as informações que é precisadas. Agora, de ver que tem...
+
+[01:32] é útil.
+
+[01:33] Sim. Para evitar... Então tem a necessidade. Necessidade. Pendente.
+
+[01:39] Pendente seria o que está fora de pedido, é isso?
+
+[01:42] É. Mas se tem a necessidade, está no em necessidade. E está no em necessidade contra. Portanto, acho que também isso aqui é redundante. Vai ser sempre a mesma coisa, né? Porque uma vez que fizemos o pedido, sai da necessidade.
+
+[01:58] Sim.
+
+[02:00] Rebais, solicitações. Não. Então...
+
+[02:08] É, vamos dar pra ele um print de como tá nesse momento.
+
+[02:10] Esse só pode não aparecer.
+
+[02:13] Fornecedor?
+
+[02:14] Sim.
+
+[02:15] Mas... Tá. É que tem algum... Porque o fornecedor
+
+[02:18] vai saber o que é. Automaticamente, na hora de fazer o pedido, vem o fornecedor. Ele não tem problema de ver. Cada pessoa tem que saber que produto é pra pedir.
+
+[02:27] Tá.
+
+[02:29] Depois, automaticamente, na hora de fazer o pedido, Já cria o pedido com o nome do fornecedor, CNPJ, tudo certo. Senão, então, deveria ver CNPJ aqui. Não interessa.
+
+[02:42] Entendeu?
+
+[02:43] Ou a gente pode analisar depois? Quando vocês virem pra cá, ou a gente estiver conversando assim? A questão de... A questão comprometida, eu acho que pra mim não precisa.
+
+[02:55] Não te interessa, né?
+
+[02:57] comprometida.
+
+[02:58] Pra mim é ótimo que a oferecedora marca a referência do item, código.
+
+[03:03] Agora, empresa que comprou, status do pedido, entrega prevista, não deve estar nessa tela, porque ninguém pediu se está em necessidade. Então, não tem o status de pedido e não tem a entrega prevista, porque estamos ainda numa lista de que é necessário pedir. Você pode tirar as três e assim
+
+[03:25] esta fica Então
+
+[03:35] aqui
+
+[03:45] quando você seleciona as peças ele aparece aqui do lado fechar pedido. Aí ele aparece a quantidade de peça do pedido Aí pede o número opcional de referência, a data de previsão de entrega, condições de pagamento. Você tem que selecionar uma peça?
+
+[04:11] Tá bom.
+
+[04:12] Então, comprar. Então vem essa tela, vamos lá ver. Na verdade, essa tela com a lista de compra, né? Deixa eu ver uma coisa só. Como eu posso botar a camisa lá? vai a cagar não é possível gente deixa eu ver aqui é porque é
+
+[04:47] a marca são fornecedores diferentes vai
+
+[05:01] Ah, porque tem uma seleção feita.
+
+[05:06] Aí voltou pra todos de novo.
+
+[05:10] Porque tinha uma seleção feita, agora passou. Ok. Eu sei, senhora. Agora, vamos fazer assim, que não é, né? É chatinho, mas você tem muita coisa, né?
+
+[05:23] É, não, eu vou criar um campo.
+
+[05:26] Agora, se eu quiser comprar, vai comprar tudo ou vai comprar só...
+
+[05:30] Quando são mais de uns itens...
+
+[05:34] Mas você foi em fechar pedido?
+
+[05:37] Em lote, é isso, né?
+
+[05:39] Onde é?
+
+[05:40] Quando você seleciona todos, tem que vir aqui em cima, é fechar pedido em lote.
+
+[05:48] Ah, ok. Então é só a questão de selecionar... Com mais facilidade em todos, ok?
+
+[05:57] Sim.
+
+[05:58] Beleza.
+
+[05:58] Aí colocar a empresa que vai fazer o pedido, que aí não tem, no caso.
+
+[06:04] Vamos ver. Aqui, número do pedido. Número do pedido, ele ia ser gerado automaticamente.
+
+[06:09] É, ok.
+
+[06:12] Você me manda em que número que está?
+
+[06:15] Vamos ver. Data prevista de entrega.
+
+[06:19] É, 22 minutos, aí colocamos. Pois é, entre 4 e 9, 10 e 9.
+
+[06:27] Mas, por exemplo, você está falando de gerente útil, porque você sabe que ele tem essa data. Então, se tem uma direção a B, já deve pôr. Então, vamos dar a opção de preencher, por enquanto, vai ser muito útil.
+
+[06:43] É, que foi justamente... Pode falar.
+
+[06:47] Na medida que vamos pra frente, vamos ter que inseri-los. Aliás, se nesse inserimento poderia virar padrão que ela vai inserindo, não precisa parar pra alimentar, mas ele vem automaticamente alimentado no decorrer do trabalho.
+
+[07:07] Pode deixar padrão, isso...
+
+[07:10] Não, isso não é o que mais importa. Por enquanto tem que funcionar, Pedro. Então, realmente, vamos focar no que tem que funcionar. Então, pode pôr a data prevista. Olha, é legal até que o paisarcial G4. Então, é 28. Beleza. Pum, tá.
+
+[07:27] Eu não entendi ainda onde coloca a empresa.
+
+[07:29] É, aí não tem.
+
+[07:31] Aí eu vou colocar esse campo. A gente só precisa ver o que é mais que precisa adicionar.
+
+[07:37] Tá,
+
+[07:44] deixa eu ver aqui.
+
+[07:46] Tá,
+
+[07:50] então... Vamos fazer essas coisas aqui e depois vamos voltar a verificar e ver se falta alguma outra coisa, se pode ser. Isso aqui não entendi porque está assim, mas...
+
+[08:02] O que?
+
+[08:03] O 9999? 5906 itens, vírgula 0,9999...
+
+[08:13] É, eu vou ter que ver o que está acontecendo para ele ter jogado o número quebrado. Provavelmente é...
+
+[08:19] Mas, sabe, tem coisas que são em metros, talvez. Tem alguma coisa, tem alguma coisa carregada, meio errada. Tem as coisas para limpar um pouquinho, não tem. Tem um sistema nosso, não tem quem cagar nesse tempo, né? Tá, ok. Vai, então é isso. Vai lá. Vamos... Amanhã vamos rever um pouquinho a questão, né?
+
+[08:40] Tá. Aí amanhã eu tô aí, então pode ficar tranquilo.
+
+[08:43] Ah, tu tá aqui amanhã?
+
+[08:45] Sim.
+
+[08:46] Ok. Aqui tem 60 mesmo, o caderno.
+
+[08:48] É, aí a gente vai provar...
+
+[08:51] Eu acho que é o menos desenvolvido, o resto já tem mais cores, por exemplo. Vai, ok, bom. Vou mostrar também a outra história pra Debra aqui. Tá, tchau, tchau.
+
+[09:07] Obrigado, até.

@@ -1,0 +1,169 @@
+[00:07] Projetos. Na lista dos projetos tem os valores, que por enquanto não estão muito utilizados, porque não está puxado, ainda não tem ligação fósfora. Os valores só eu vejo e cada chefe de equipe.
+
+[00:42] Tá.
+
+[00:43] Mas só os dela.
+
+[00:46] Uhum.
+
+[00:47] Ok?
+
+[00:48] Uhum.
+
+[00:50] Então, eu vejo tudo o que estavam fazendo. Você não vai mudar nada pra mim.
+
+[00:55] Sim.
+
+[00:56] É ter que colocar limites para os outros para não ver o valor. Agora essa coisa que... Vamos ver. Ah, sempre. Agora sim. porque, de repente, ainda está afrontando aquele lado, né? Informações, vou deletar as informações. Aliás, uma outra coisa que eu estava pensando, depois eu falei com o ministro, direitinho, você está baixando todas as coisas para alimentar, né?
+
+[03:26] Sim.
+
+[03:28] Aliás... Aliás...
+
+[03:40] Uai, eu não sei se ele vai estar lá.
+
+[03:43] Não, eu quero ver as respostas, etc, vai tudo bem. Mas é isso que eu quero entender bem. Temos que entender bem. Já que você está pedindo esses relatórios, e até produzidos com uma certa cadência, né? Com uma... Sim. Uma roxina. Muito bom. Eu quero entender quais outros... Os relatórios precisamos ainda baixar para poder alimentar esse nosso sistema, né? Para que ele pegue todas as informações. Então, sobre isso, com início, você tem que ver direitinho. A partir da semana que vem, Agora falamos disso, vamos organizar, mas precisamos trabalhar sério em tudo o que precisamos para usar e já usar bem.
+
+[04:45] Sim.
+
+[04:49] Agora, daqui a pouco entra no RNA. Você vê que vamos só replicando, então fazia a visualização Pode vir a si, pode vir a sala, nós que fizermos. E se puder, aquele link, no original, no nosso, ok? Tá. No nosso.
+
+[05:11] Vou fazer.
+
+[05:12] No outro look, você entendeu que talvez não seja tão imediato. Porque a gente tem que criar também uma rotina de como mandamos os e-mails pra poder registrarmos pro projeto, certo?
+
+[05:25] Sim.
+
+[05:30] Se é
+
+[05:44] enviado apenas de um e-mail por equipe?
+
+[05:57] É, que é o endereço de e-mail
+
+[06:15] que joga pra conversa dentro do Teams.
+
+[06:25] Oi? Ah. E aí E aí
+
+[07:39] E aí E
+
+[07:45] aí
+
+[08:16] O
+
+[08:32] que você...
+
+[08:32] O que você... O você... que você... O que você... você...
+
+[08:33] O que você... O que você...
+
+[08:35] O que você...
+
+[08:35] O que você...
+
+[08:36] O que você... O que você... O que você... você...
+
+[08:36] O que você...
+
+[08:37] O que que você... O que você... você... O que você... você... O que você... O que você... O O que você... O O que você... O O que você...
+
+[08:38] O O que você...
+
+[08:38] O O que você...
+
+[08:43] O que você...
+
+[08:45] O que você... Sim.
+
+[09:16] Porque o e-mail tal vai numa praça...
+
+[09:21] Repetidos
+
+[09:34] vai ser comunicações, né? Então, olha, nem o e-mail específico... Ela vai conseguir, parece que é a coisa mais fácil, ou seja, todos os investimentos relativos a um cliente, a um projeto, vão cair dentro do canal Então isso faz que não precisa colocar o truque, mas precisa... Ah, o truque pode até pôr, pra ter um pontinho a mais, pra mandar o e-mail. Você está lá pensando, nossa, preciso mandar um e-mail pra esse cliente.
+
+[10:25] Tá, já é abrindo, né?
+
+[10:27] É bobagem também, não sei. Esses links têm um peso, tem um... Não, né? Sim.
+
+[10:43] Comunicações com o cliente.
+
+[10:50] Com o cliente conversar com a Mari para visualizar
+
+[11:02] Eu vou conversar com a Mari e já vou começar a idealizar essa questão do Teams, porque eu acho que eu vou precisar de uma outra autenticação para buscar. Mas aí eu já falo com o Alan.
+
+[11:15] E aí, Alan. Então, pessoal, do dashboard, na verdade, Dashboard. Talvez esse presidente pode não dar acesso a ninguém. Sumiu.
+
+[11:28] Sim.
+
+[11:28] Por enquanto, né?
+
+[11:30] E lá no, o que eu tava pensando, talvez a gente usar todo o banco de dados que a gente tem,
+
+[11:36] é... Ah, tudo bom? Oi, tudo bom?
+
+[11:41] Sir, muito assim. Tudo bem? Mas tem um povo que me segue, que fala que é muito sério. Eu falo que não sei mais, não sei mais abrir.
+
+[11:52] Eu não acho que eu vou me esviar, não é?
+
+[11:55] Eu sou sua cara. Eu tô... Você vem aqui. Eu sou o que? Eu sou o que? Eu sou o que? Eu sou o que? Eu sou o que? Ah,
+
+[12:27] achei. Estou já desligado.
+
+[12:29] Eu também tinha percebido.
+
+[12:32] Então... Isso aí, entendeu? Dashboard então só para mim por enquanto e...
+
+[12:40] O que eu pensei na apresentação, a única coisa, a gente pode mostrar o nosso sistema e aí no link que tem na central eu vou jogar para o dashboard que a gente fez com os dados mockados. Só para ter a visualização lá no...
+
+[13:05] mostrar nome de cliente, informações de cliente.
+
+[13:10] É, aí o CRM também eu acho que não entraria. Entendeu?
+
+[13:15] Aí o CRM vai ter que mostrar.
+
+[13:19] Então eu vou manter aqui, vou manter as informações mocadas. e tentar fazer... O que eu vou fazer? Vou pedir para a Mari fazer uma duplicação de projeto e aí a gente cria alguns projetos fictícios só para a gente entrar no CRM, no Teams.
+
+[13:41] Entendeu? Tá bom.
+
+[13:46] Tá bom?
+
+[13:47] Talvez o e-mail, né? A pessoa escrever o e-mail, A gente fazemos uns e-mails difíceis, né?
+
+[13:59] Sim.
+
+[14:00] Com critério, porque tem que ser feito pra depois ser reconhecido o que eles tão tratando. E... E... E nada, é toda coisa real que vai ser, né?
+
+[14:21] Como é?
+
+[14:22] Um chá comum, que isso você já imposta.
+
+[14:25] Tá.
+
+[14:26] Ah, eu realmente. Depois, né? Eu acho que vamos conseguir, né? Esse mês que vem.
+
+[14:31] Platar.
+
+[14:33] Uhum. Depois do próximo mês, agora em agosto?
+
+[14:38] É.
+
+[14:39] Tá.
+
+[14:41] Isso seria legal. Chegar... Chegar que eu vou viajar em setembro e tenho isso aqui pra poder... Tenho controle da... já tendo tido um pouquinho de uso. Por exemplo, ontem eu pedi para as meninas. Olha só, isso aqui. Acho que é de lógica. Falei assim, gente, como é que... Vocês venderam uma peça para o cliente e tal. Teve código 2000. Ah, mas o projeto era de 2000. Entendi. Acabou aquele projeto. Ah, mas era uma coisa, uma peça que... Mas agora ele comprou de novo. Pedi, então, é nova compra, foda-se. É,
+
+[15:31] o certo era ser só o cliente, né? Na loja. É o nome do cliente correlacionado com aquele projeto em específico, podendo ter outro projeto e aquele um arquiteto, por exemplo, igual a gente já falou, o nome não deve ser vinculado com todas as informações de forma que era.
+
+[15:55] Agora, você pode puxar o nome e ver quantos projetos ele fez aqui, quantos códigos pertencem a ele, mas o código, eu já falei, o projetor ainda não consegue entender, porque ela não consegue separar a visão que ela tem do sistema atual. Tanto que agora eu posso mostrar essa coisa do Sherpon. E como vão achar a pasta? Com uma facilidade. Então, entendeu? É um pouco triste também. Tem um pouquinho agora ali, já que estou visualizando que está perto de poder consinar 100%. Tem um pouquinho de ansiedade para aumentar, mudar um pouquinho tudo. Eu viajo numa orde, numa... Ninguém sabe onde é, como é que chama? Numa onda, elas me encontram aí...
+
+[16:56] Não, mas isso a gente vai ter que ensinar mesmo, porque é uma coisa que está enraizada. O sistema, todo mundo pensa como o sistema funciona. Foi igual quando eu fui mostrar pra Lana como o sistema de RH funcionava. Ela falou, mas eu faço desse jeito. Eu falei, tudo bem, Lana, mas tem como fazer desse jeito que eu tô te mostrando. Aí depois que ela pegou, ela falou, não, realmente é melhor. Falei, então, é só pra você ter a visualização e conseguir fazer de uma forma mais fácil. Oi? Travou.
+
+[17:42] Calculador da rota.
+
+[17:46] Calculador da rota. Ah.
+
+[17:52] E aí, funciona?
+
+[17:53] Sim. Com a rota no dia.
+
+[18:00] Do sistema.
+
+[18:03] É, se no dia tiver mais de duas ou três entregas, ele faz a rota que é melhor com base da onde sai o estoque. Vixe, tá travando. Calma aí. 

@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-27 (2)
+
+### Corrigido — SPEC-122: busca de peças não eliminava por palavra + ordenação por coluna em Peças e Produtos
+
+- Origem: reunião Mariane+Pedro 27/08/2026 — "cada palavra deve filtrar, ou seja, eliminar opções". Medido antes do fix: buscar "KPF12" ou "dicroica geo10 6w" (a reunião tinha "Geo10", transcrição de fala pra "GU10") retornava 4356 de 4726 produtos ativos na RPC `buscar_produtos_fuzzy` — o fallback `word_similarity > 0.3` deixava passar quase qualquer produto, mesmo sem conter a palavra digitada.
+- RPC corrigida em produção (migration `20260827_125_spec122_busca_elimina_por_palavra`, 2 arquivos): eliminação agora exige substring literal (normalizada por acento/caixa) em vez de similaridade — `KPF12` → 11 resultados, `dicroica gu10 6w` → 7. Um bug de acento (quebrava "lâmpada" com acento) foi achado e corrigido no mesmo dia, ainda dentro desta migration. Testado ao vivo nos dois consumidores da RPC (Orçamentos → Buscar Produtos, Cadastro → Peças e Produtos/"Consultar Produtos"), sem regressão.
+- Ordenação por coluna adicionada em Peças e Produtos (Cadastro, Skip 36668, v0.0.77) — mesmo padrão de cabeçalhos clicáveis já em produção em Orçamentos → Buscar Produtos. Testado ao vivo.
+- Item de "Fora de Linha" da mesma reunião fica fora desta rodada por decisão do usuário (dado ainda não é exportado pelo Connect).
+
 ## 2026-08-24
 
 ### Importado — ciclo de sincronização Connect (ContaPagar/ContaReceber, PedidoCompra, Produtos/Estoque)

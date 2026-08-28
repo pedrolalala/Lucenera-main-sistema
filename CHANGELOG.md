@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-28
+
+### Corrigido — SPEC-123: itens 1-3 da auditoria de performance de carregamento
+
+- Auditoria de código + banco (sem mudar nada ainda) identificou 3 causas raiz da lentidão relatada: telas de alto volume buscando a tabela inteira sem paginação, checagem de permissão duplicada em toda navegação, e zero code-splitting em 9 dos 10 sistemas (índices do banco já estavam bons — não era o problema).
+- **Item 1 (code-splitting por rota)**: aplicado nos 9 sistemas que ainda não tinham (RH já tinha e serviu de referência) — Hub, CRM, Cadastro, Compras, Logística, Admin Bancária, Orçamentos, Dashboard Financeiro, Separação Parcial. `lazy()` + `<Suspense>`, sem mudança de comportamento visível.
+- **Item 2**: `.limit(1000)` adicionado em `Arquitetos.tsx` (CRM) — única tela que buscava a tabela inteira sem nenhum teto.
+- **Item 3 (cache de `usuarios.role`)**: escopo revisado ao vivo — `useSistemasPermitidos.ts` (SPEC-120) é propositalmente autocontido (não depende do formato de `useAuth()` de cada sistema), então em vez de consolidar os hooks, foi criado um cache leve em memória (`src/lib/usuario-role-cache.ts`) compartilhado só onde a mesma query realmente se repetia — CRM e RH. Aplicado nos outros 8 sistemas (exceto Hub) só no `useSistemasPermitidos.ts`, já que os demais `use-auth.tsx` não duplicavam essa query.
+- Todos os 9-10 sistemas passaram no QA automático do Skip (build/lint/test); testado ao vivo em Hub, CRM, Cadastro e Orçamentos sem regressão.
+- Itens 4-6 (paginação real em Clientes/Peças/Projetos) continuam só diagnosticados — exigem SPEC própria antes de implementar (risco maior, mexem em filtros dinâmicos existentes).
+
 ## 2026-08-27 (2)
 
 ### Corrigido — SPEC-122: busca de peças não eliminava por palavra + ordenação por coluna em Peças e Produtos

@@ -278,26 +278,51 @@ fluxo interno não visível ao cliente.
   O usuário decidiu **manter o modelo da SPEC** mesmo assim (ver Decisões aprovadas) — a
   vitrine só mostra produto com `estoque_showroom > 0` + foto; encher isso é curadoria da
   equipe.
-- **Bloqueado até aprovação/curadoria:** aplicar a migration, revisar o CSV, rodar `aplicar`,
-  criar o projeto Skip + env vars + publish. Sem a migration a view não existe e o teste ao
-  vivo não roda.
+### 2026-08-31 (continuação — publicação parcial + tela de curadoria)
+
+- **Migration `20260831_126` APLICADA** no Supabase real (Management API, com autorização):
+  coluna `imagem_showroom_url`, view `vw_showroom_publico`, `GRANT`/`REVOKE` (anon só SELECT),
+  bucket `showroom-lucenera`. Verificado: `anon` lê a view, não lê `produtos`.
+- **Matcher reescrito** (brand-aware + `difflib`): 167 peças, 152 com candidato. Auto-confirma
+  só vencedor claro (score ≥ 0.85, folga ≥ 0.15, sem colisão de código) → 23; revisão manual
+  tirou 4 duvidosos (GLÓRIA/PONTE/BIMBA — nº divergente).
+- **19 peças publicadas na vitrine** via `aplicar --semear-estoque` (upload da foto +
+  `imagem_showroom_url` + `estoque_showroom` = qtd da lista ou 1). Confirmado pela chave anônima:
+  19 linhas em `vw_showroom_publico`, imagens públicas retornam 200.
+- **15 peças não achadas no catálogo** de jeito nenhum (MAY DAY, VITTO, HERACLEUM/Moooi,
+  ECLISSE/Artemide, PH5/Louis Poulsen, KAIRO, abajures Cris Bertolucci, FUNGUI/WENTZ, GALILEO,
+  ACERVO FAS, XL4888) — podem estar com outro nome; quem conhece o catálogo resolve na `/admin`.
+- **Preço:** mudado para `valor_venda` quando > 0, senão **"Sob consulta"** (decisão do usuário
+  nesta rodada). Quantidade 0 → "Disponível".
+- **Tela `/admin` de curadoria** (rota não listada, protegida por PIN) — `src/pages/Admin.tsx`
+  + `src/services/curadoria.ts`. Lista cada peça do PPT não vinculada com a foto + até 3
+  candidatos (botão de 1 clique) + busca livre de produto; "Vincular" grava
+  `imagem_showroom_url`/`estoque_showroom` via RPC; "Desfazer" por peça.
+- **Migration `20260831_127` APLICADA** (com autorização): `showroom_import_pecas` (staging das
+  167 peças, RLS SELECT anon), `showroom_config` (PIN, não legível por anon), RPCs
+  `showroom_vincular_peca` / `showroom_desvincular_peca` / `showroom_buscar_produto`
+  (SECURITY DEFINER, gated por PIN). **PIN ainda é o placeholder `TROCAR-ESTE-PIN`** — o
+  usuário vai definir.
+- `scripts/importar_fotos_showroom.py` ganhou `publicar-import` (sobe as 167 fotos p/
+  `showroom-lucenera/import/` + popula `showroom_import_pecas`). Ignora svg/emf/wmf.
 
 ## Pendências
 
-- [x] ~~P-1~~ resolvida (2026-08-31): preço **sempre** visível = `valor_venda`; `0` quando não
-  cadastrado (sinal para a equipe preencher em Peças/Produtos). Sem "Sob consulta".
+- [x] ~~P-1~~ resolvida (2026-08-31, 2ª versão): preço = `valor_venda` quando > 0, senão
+  **"Sob consulta"**.
 - [ ] **P-2** — Preencher `src/lib/contato.ts` com WhatsApp/telefone/e-mail/endereço/horário
   reais da Lucenera (hoje são placeholders `5516999999999` etc.).
 - [ ] **P-3** — Domínio: `*.goskip.app` ou domínio próprio (ex.: `showroom.lucenera...`).
 - [ ] **P-4** — SEO/indexação: definir se o site deve ser indexável (robots, meta por peça,
   OG image). Hoje `index.html` já tem `<title>`/`description`/`og:*` genéricos.
-- [ ] **P-5** — Confiabilidade e cobertura de `estoque_showroom`: só 266 produtos > 0 hoje, e
-  a maioria são componentes, não as peças do showroom. Sem isso corrigido, a vitrine nasce
-  quase vazia. Definir quem corrige (equipe via Cadastro) e se o import semeia
-  `estoque_showroom` a partir do ODP (flag `--semear-estoque`, ainda não implementada).
-- [ ] **P-6** — Confirmar com quem cuida do banco a abordagem "view sem `security_invoker` +
-  `GRANT TO anon`" (a migration já está escrita assim) vs. Edge Function pública. Aprovar a
-  aplicação da migration (DDL em `produtos`).
+- [ ] **P-5** — Curadoria: **~148 peças** ainda a vincular na tela `/admin` (19 já feitas).
+  As 15 "não achadas" precisam de quem conhece o catálogo. `--semear-estoque` já cuida do
+  `estoque_showroom = 0` (usa qtd da lista, senão 1) tanto no script quanto na RPC.
+- [x] ~~P-6~~ — migration aplicada com a view `SECURITY DEFINER` + `GRANT TO anon` (abordagem
+  confirmada em uso). Edge Function pública fica como alternativa não necessária.
+- [ ] **P-8b** — **Definir o PIN da `/admin`**: `update public.showroom_config set valor =
+  '<pin>' where chave = 'admin_pin';` (hoje `TROCAR-ESTE-PIN`). E, ao terminar a curadoria,
+  `revoke execute` das 3 RPCs `showroom_*` de `anon`.
 - [ ] **P-7** — Criar o projeto Skip para `showroom-qtq8er2dk`, `skip_env_set` das env vars,
   rodar o QA pipeline e publicar. Depois: `git push` no repo do sistema + atualizar o
   ponteiro do submodule + `CHANGELOG.md`.

@@ -218,11 +218,12 @@ def cmd_extrair(args):
                 for i, href in enumerate(s["imagens"]):
                     if href not in names:
                         continue
+                    ext = (Path(href).suffix or ".png").lower()
                     data = zf.read(href)
-                    ext = Path(href).suffix or ".png"
                     dest = slide_dir / f"img_{i:02d}{ext}"
                     dest.write_bytes(data)
-                    if len(data) > maior_sz:
+                    # so raster serve de "principal" (bucket nao aceita svg/emf/wmf)
+                    if ext in (".png", ".jpg", ".jpeg", ".webp") and len(data) > maior_sz:
                         maior, maior_sz = dest, len(data)
                 if maior is not None:
                     principal = out / "imagens" / f"slide_{s['slide']:03d}{maior.suffix}"
@@ -259,30 +260,69 @@ def _norm(s: str) -> str:
     return re.sub(r"[^a-z0-9 ]", " ", s.lower()).strip()
 
 
-_STOP = {"de", "da", "do", "com", "para", "led", "e", "-", "1x", "2x", "3x"}
+_STOP = {
+    "de", "da", "do", "com", "para", "led", "e", "-", "a", "o", "em", "no", "na",
+    "1x", "2x", "3x", "4x", "un", "und", "unid", "pc", "pcs", "pe", "pecas", "peca",
+    "abajur", "arandela", "arand", "pendente", "pend", "luminaria", "lum",
+    "plafon", "plafond", "coluna", "mesa", "piso", "spot", "trilho",
+    "preta", "preto", "branca", "branco", "dourada", "dourado", "cinza",
+    "vermelha", "vermelho", "azul", "verde", "areia", "khaki", "chumbo",
+    "cobre", "bronze", "prata", "prateado", "fosco",
+}
+# marca da peca do PPT -> nome canonico em public.marcas (quando difere)
+_MARCA_ALIASES = {
+    "ole": "OLE", "dimlux": "DIMLUX", "flos": "FLOS", "artemide": "ARTEMIDE",
+    "lumini": "LUMINI", "bella italia": "BELLA ITALIA", "wj": "WJ",
+    "luxion": "LUXION", "la lampe": "LA LAMPE", "moooi": "MOOOI",
+    "lightlight": "LIGHTLIGHT", "iluminar": "ILUMINAR", "dsgnselo": "DSGNSELO",
+}
 
 
 def _marca_do_nome(nome_bruto: str) -> str:
-    partes = re.split(r"\s[-–]\s", nome_bruto)
+    partes = re.split(r"\s[-–—]\s", nome_bruto)
     return partes[-1].strip() if len(partes) > 1 else ""
 
 
-def _candidatos(termo: str, produtos: list[dict], k: int = 3) -> list[tuple[dict, float]]:
-    toks = [t for t in _norm(termo).split() if t and t not in _STOP]
+def _tokens_modelo(nome_limpo: str) -> list[str]:
+    """Tokens distintivos (modelo/familia) do nome da peca, sem stopwords/cor/tipo."""
+    partes = re.split(r"\s[-–—]\s", nome_limpo)
+    base = partes[0] if partes else nome_limpo
+    toks = [t for t in _norm(base).split() if t and t not in _STOP and not t.isdigit()]
+    return toks or [t for t in _norm(base).split() if t and t not in _STOP]
+
+
+def _candidatos(
+    nome_limpo: str,
+    marca_txt: str,
+    produtos: list[dict],
+    marca_ids_por_txt: dict,
+    k: int = 3,
+) -> list[tuple[dict, float]]:
+    import difflib
+
+    toks = _tokens_modelo(nome_limpo)
     if not toks:
         return []
-    primeiro = toks[0]  # token mais distintivo (modelo da peca)
+    alvo = " ".join(toks)
+    primeiro = toks[0]
+    marca_id_alvo = marca_ids_por_txt.get(_norm(marca_txt)) if marca_txt else None
+
     pontuados = []
     for p in produtos:
-        pt = set(p["_n"].split())
-        if not pt:
+        pn = p["_n"]
+        pt = pn.split()
+        # exige que o token de modelo apareca no nome do produto
+        if primeiro not in pt and not any(t in pn for t in toks if len(t) >= 4):
             continue
-        inter = len(set(toks) & pt)
-        if inter == 0:
-            continue
-        sc = inter / len(set(toks) | pt)
+        base_ratio = difflib.SequenceMatcher(None, alvo, pn).ratio()
+        inter = len(set(toks) & set(pt)) / max(len(toks), 1)
+        sc = 0.55 * base_ratio + 0.45 * inter
         if primeiro in pt:
-            sc += 0.5  # bonus forte se o modelo aparece no nome do produto
+            sc += 0.15
+        if marca_id_alvo and p.get("marca_id") == marca_id_alvo:
+            sc += 0.20
+        if (p.get("estoque_showroom") or 0) > 0:
+            sc += 0.05
         pontuados.append((p, round(sc, 3)))
     pontuados.sort(key=lambda x: x[1], reverse=True)
     return pontuados[:k]
@@ -301,7 +341,9 @@ def cmd_match(args):
     while True:
         resp = (
             sb.table("produtos")
-            .select("id,nome,sku,referencia,codigo_produto,estoque_showroom,valor_venda,ativo")
+            .select(
+                "id,nome,sku,referencia,codigo_produto,marca_id,estoque_showroom,valor_venda,ativo"
+            )
             .eq("ativo", True)
             .range(page * 1000, page * 1000 + 999)
             .execute()
@@ -314,6 +356,16 @@ def cmd_match(args):
         p["_n"] = _norm(p["nome"])
     print(f"[match] {len(produtos)} produtos ativos carregados")
 
+    # mapa texto-da-marca -> marca_id (pra desambiguar variantes por marca)
+    marcas = sb.table("marcas").select("id,nome").execute().data or []
+    marca_ids_por_txt: dict[str, str] = {}
+    for m in marcas:
+        marca_ids_por_txt[_norm(m["nome"])] = m["id"]
+    for alias, canon in _MARCA_ALIASES.items():
+        mid = marca_ids_por_txt.get(_norm(canon))
+        if mid:
+            marca_ids_por_txt[alias] = mid
+
     linhas = []
     for s in dados["slides"]:
         nome_limpo = s.get("nome_peca") or ""
@@ -321,7 +373,8 @@ def cmd_match(args):
         if not s.get("imagem_principal"):
             continue  # slides de divisoria de secao nao entram na vitrine
 
-        cands = _candidatos(nome_limpo, produtos)
+        marca_txt = _marca_do_nome(nome_bruto)
+        cands = _candidatos(nome_limpo, marca_txt, produtos, marca_ids_por_txt)
         # RPC fuzzy do proprio sistema como 4a opiniao
         rpc_cod = rpc_nome = ""
         try:
@@ -338,7 +391,7 @@ def cmd_match(args):
             "slide": s["slide"],
             "ppt_nome": nome_bruto,
             "ppt_qtd": s.get("quantidade_ppt") or "",
-            "marca_ppt": _marca_do_nome(nome_bruto),
+            "marca_ppt": marca_txt,
             "observacoes": s.get("observacoes") or "",
             "imagem_principal": s.get("imagem_principal") or "",
         }
@@ -354,19 +407,36 @@ def cmd_match(args):
                 linha[f"cand{i + 1}_sh"] = linha[f"cand{i + 1}_score"] = ""
         linha["fuzzy_rpc_cod"] = rpc_cod
         linha["fuzzy_rpc_nome"] = rpc_nome
-        # >>> coluna que o revisor humano preenche: codigo_produto (inteiro) <<<
-        linha["codigo_confirmado"] = cands[0][0]["codigo_produto"] if cands and cands[0][1] >= 1.3 else ""
+        # 'seguro' = vencedor claro (score alto + folga grande pro 2o). Conservador
+        # de proposito: melhor deixar pro humano do que subir a foto errada.
+        s1 = cands[0][1] if cands else 0.0
+        s2 = cands[1][1] if len(cands) > 1 else 0.0
+        linha["_seguro"] = bool(cands) and s1 >= 0.85 and (s1 - s2) >= 0.15
+        linha["codigo_confirmado"] = ""  # preenchido abaixo (so os seguros e sem colisao)
+        linha["revisado_por_humano"] = ""  # o time marca 'x' quando conferir
         linhas.append(linha)
+
+    # nunca auto-confirmar um codigo que aparece como "seguro" em mais de um slide
+    from collections import Counter
+
+    cont = Counter(x["cand1_cod"] for x in linhas if x["_seguro"] and x["cand1_cod"])
+    for x in linhas:
+        colide = cont[x["cand1_cod"]] > 1
+        if x["_seguro"] and not colide:
+            x["codigo_confirmado"] = x["cand1_cod"]
+        x["auto"] = "auto" if x["codigo_confirmado"] else ("colisao" if colide else "revisar")
+        del x["_seguro"]
 
     csv_path = d / "revisao_showroom.csv"
     with csv_path.open("w", newline="", encoding="utf-8-sig") as f:
         w = csv.DictWriter(f, fieldnames=list(linhas[0].keys()))
         w.writeheader()
         w.writerows(linhas)
-    pre = sum(1 for x in linhas if x["codigo_confirmado"])
+    auto = sum(1 for x in linhas if x["codigo_confirmado"])
     algum = sum(1 for x in linhas if x["cand1_cod"])
-    print(f"[match] {len(linhas)} pecas c/ foto | {algum} com >=1 candidato | {pre} pre-preenchidas -> {csv_path}")
-    print("[match] revise a coluna 'codigo_confirmado' (codigo_produto). Vazio = nao vai pra vitrine.")
+    print(f"[match] {len(linhas)} pecas c/ foto | {algum} com candidato | {auto} auto-confirmadas (seguras)")
+    print(f"[match] -> {csv_path}")
+    print("[match] time revisa a coluna 'codigo_confirmado' nas linhas auto='revisar'/'colisao'.")
 
 
 # ---------------------------------------------------------------------------
@@ -412,13 +482,15 @@ def cmd_aplicar(args):
         pid = prod[0]["id"]
         sh_atual = prod[0]["estoque_showroom"] or 0
 
-        key = f"showroom/{cod_int}{img_path.suffix.lower()}"
+        blob, mime, ext = _preparar_imagem(img_path)
+        key = f"showroom/{cod_int}{ext}"
         url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET}/{key}"
 
         patch: dict = {"imagem_showroom_url": url}
-        qtd_ppt = row.get("ppt_qtd") or ""
-        if args.semear_estoque and sh_atual == 0 and str(qtd_ppt).strip().isdigit() and int(qtd_ppt) > 0:
-            patch["estoque_showroom"] = int(qtd_ppt)
+        qtd_ppt = str(row.get("ppt_qtd") or "").strip()
+        if args.semear_estoque and sh_atual == 0:
+            # quantidade da lista, senao 1 (ha ao menos uma peca fisica no showroom)
+            patch["estoque_showroom"] = int(qtd_ppt) if qtd_ppt.isdigit() and int(qtd_ppt) > 0 else 1
 
         if args.dry_run:
             extra = f" + estoque_showroom={patch['estoque_showroom']}" if "estoque_showroom" in patch else ""
@@ -427,10 +499,7 @@ def cmd_aplicar(args):
             semeados += "estoque_showroom" in patch
             continue
 
-        with img_path.open("rb") as fh:
-            sb.storage.from_(BUCKET).upload(
-                key, fh.read(), {"content-type": _mime(img_path.suffix), "upsert": "true"}
-            )
+        sb.storage.from_(BUCKET).upload(key, blob, {"content-type": mime, "upsert": "true"})
         sb.table("produtos").update(patch).eq("id", pid).execute()
         aplicados += 1
         semeados += "estoque_showroom" in patch
@@ -445,6 +514,118 @@ def _mime(suf: str) -> str:
     return {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}.get(
         suf.lower(), "application/octet-stream"
     )
+
+
+_MAX_LADO = 1600
+_MAX_BYTES = 1_500_000
+
+
+def _preparar_imagem(path: "Path") -> tuple[bytes, str, str]:
+    """Retorna (bytes, mime, ext). Redimensiona/recomprime se estiver grande —
+    tanto pra caber no limite do bucket (5 MB) quanto pra vitrine abrir rapido."""
+    raw = path.read_bytes()
+    suf = path.suffix.lower()
+    if len(raw) <= _MAX_BYTES and suf in (".jpg", ".jpeg", ".png", ".webp"):
+        try:
+            from PIL import Image  # noqa: F401
+
+            im = _abrir(path)
+            if max(im.size) <= _MAX_LADO:
+                return raw, _mime(suf), suf
+        except Exception:  # noqa: BLE001
+            return raw, _mime(suf), suf
+    try:
+        im = _abrir(path)
+    except Exception:  # noqa: BLE001
+        return raw, _mime(suf), suf
+    im.thumbnail((_MAX_LADO, _MAX_LADO))
+    from io import BytesIO
+
+    buf = BytesIO()
+    if im.mode in ("RGBA", "P", "LA"):
+        im = im.convert("RGB")
+    im.save(buf, format="JPEG", quality=85, optimize=True)
+    return buf.getvalue(), "image/jpeg", ".jpg"
+
+
+def _abrir(path: "Path"):
+    from PIL import Image
+
+    im = Image.open(path)
+    im.load()
+    return im
+
+
+# ---------------------------------------------------------------------------
+# PUBLICAR-IMPORT — sobe todas as fotos p/ o bucket e popula showroom_import_pecas
+# (a tela /admin do site le dessa tabela). Requer a migration 127 aplicada.
+# ---------------------------------------------------------------------------
+def cmd_publicar_import(args):
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _supabase_client import get_client, SUPABASE_URL  # type: ignore
+
+    d = Path(args.dir)
+    sb = get_client()
+    dados = json.loads((d / "slides.json").read_text(encoding="utf-8"))
+    cands_por_slide: dict[int, list] = {}
+    vinculado_por_slide: dict[int, int] = {}
+    csv_path = d / "revisao_showroom.csv"
+    if csv_path.exists():
+        for row in csv.DictReader(csv_path.open(encoding="utf-8-sig")):
+            sl = int(row["slide"])
+            cs = []
+            for i in (1, 2, 3):
+                if row.get(f"cand{i}_cod"):
+                    cs.append(
+                        {
+                            "codigo": int(float(row[f"cand{i}_cod"])),
+                            "nome": row[f"cand{i}_nome"],
+                            "score": row.get(f"cand{i}_score") or "",
+                        }
+                    )
+            cands_por_slide[sl] = cs
+            cc = (row.get("codigo_confirmado") or "").strip()
+            if cc.replace(".", "").isdigit():
+                vinculado_por_slide[sl] = int(float(cc))
+
+    n = 0
+    for s in dados["slides"]:
+        img_rel = s.get("imagem_principal") or ""
+        if not img_rel:
+            continue
+        img_path = d / img_rel
+        if not img_path.exists():
+            continue
+        if img_path.suffix.lower() not in (".png", ".jpg", ".jpeg", ".webp"):
+            print(f"  slide {s['slide']}: pulado (formato {img_path.suffix})", file=sys.stderr)
+            continue
+        blob, mime, ext = _preparar_imagem(img_path)
+        key = f"import/slide_{s['slide']:03d}{ext}"
+        url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET}/{key}"
+        if not args.dry_run:
+            try:
+                sb.storage.from_(BUCKET).upload(key, blob, {"content-type": mime, "upsert": "true"})
+            except Exception as e:  # noqa: BLE001
+                print(f"  slide {s['slide']}: upload falhou ({e})", file=sys.stderr)
+                continue
+            reg = {
+                "slide": s["slide"],
+                "nome_ppt": s.get("nome_bruto") or s.get("nome_peca") or f"Slide {s['slide']}",
+                "qtd_ppt": s.get("quantidade_ppt"),
+                "marca_ppt": _marca_do_nome(s.get("nome_bruto") or ""),
+                "observacoes": s.get("observacoes") or None,
+                "imagem_url": url,
+                "candidatos": cands_por_slide.get(s["slide"], []),
+            }
+            vic = vinculado_por_slide.get(s["slide"])
+            if vic:
+                from datetime import datetime, timezone
+
+                reg["codigo_produto_vinculado"] = vic
+                reg["vinculado_em"] = datetime.now(timezone.utc).isoformat()
+            sb.table("showroom_import_pecas").upsert(reg, on_conflict="slide").execute()
+        n += 1
+    print(f"[publicar-import] {n} peça(s) {'simuladas' if args.dry_run else 'no bucket + showroom_import_pecas'}")
 
 
 # ---------------------------------------------------------------------------
@@ -468,9 +649,14 @@ def main():
         "--semear-estoque",
         action="store_true",
         dest="semear_estoque",
-        help="onde estoque_showroom=0, usa a quantidade da lista (ppt_qtd) como valor inicial",
+        help="onde estoque_showroom=0, usa a quantidade da lista (senao 1)",
     )
     pa.set_defaults(func=cmd_aplicar)
+
+    pp = sub.add_parser("publicar-import", help="sobe todas as fotos + popula showroom_import_pecas (tela /admin)")
+    pp.add_argument("--dir", default="scripts/_saida_showroom")
+    pp.add_argument("--dry-run", action="store_true")
+    pp.set_defaults(func=cmd_publicar_import)
 
     args = ap.parse_args()
     args.func(args)

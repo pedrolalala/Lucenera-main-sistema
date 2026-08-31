@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-31 (2)
+
+### Adicionado — SPEC-125: 19 pecas publicadas + tela de curadoria /admin
+
+- **Migrations `20260831_126` e `20260831_127` APLICADAS no Supabase real** (Management API, com autorizacao explicita do usuario por acao). 126: `produtos.imagem_showroom_url` + view anon `vw_showroom_publico` (whitelist, sem `security_invoker`) + bucket publico `showroom-lucenera`. 127: `showroom_import_pecas` (staging das 167 pecas do PPT), `showroom_config` (PIN), RPCs `showroom_vincular_peca`/`showroom_desvincular_peca`/`showroom_buscar_produto` (SECURITY DEFINER, gated por PIN). RLS de `produtos` (SPEC-069/087) intacta.
+- **19 pecas publicadas na vitrine** (`aplicar --semear-estoque`): upload da foto pro bucket + `imagem_showroom_url` + `estoque_showroom` (qtd da lista ou 1). Matcher reescrito brand-aware; auto-confirma so vencedor claro; revisao manual tirou 4 duvidosos.
+- **15 pecas do PPT nao encontradas** no catalogo (MAY DAY, HERACLEUM/Moooi, ECLISSE/Artemide, PH5, abajures Cris Bertolucci, etc.) — resolver na tela `/admin`.
+- **Tela `/admin`** no site (rota nao listada, PIN): lista peca do PPT nao vinculada com foto + candidatos (1 clique) + busca de produto; "Vincular" grava no produto via RPC; "Desfazer" por peca. Preco no site: `valor_venda` quando > 0, senao "Sob consulta".
+- **PIN da /admin ainda e placeholder** `TROCAR-ESTE-PIN` — usuario vai definir via `update showroom_config`. Ao fim da curadoria, `revoke execute` das RPCs `showroom_*` de `anon`.
+- Pendente: ~148 pecas a vincular na `/admin`; criar projeto Skip + env + publish; `git push` do central; preencher `src/lib/contato.ts`.
+
 ## 2026-08-31
 
 ### Adicionado — SPEC-125: site publico do Showroom Lucenera (vitrine de pronta entrega) — implementado, nao publicado

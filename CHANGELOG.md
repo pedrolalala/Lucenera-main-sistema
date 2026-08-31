@@ -2,6 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-31 (3)
+
+### Alterado — SPEC-125: /admin passa a usar usuario + senha
+
+- Migration `20260831_128` aplicada no Supabase real: `showroom_config` agora guarda
+  `admin_user` = `Lucenera` e `admin_pass_hash` (bcrypt de `Lucenera123`, via `extensions.crypt`).
+  Nova RPC `showroom_login(p_user,p_senha)`; `showroom_vincular_peca`/`showroom_desvincular_peca`
+  recriadas com assinatura `(p_user, p_senha, …)`; helper `showroom_cred_ok` revogado de anon.
+  Rodado `NOTIFY pgrst, 'reload schema'`. Login testado ao vivo no /admin.
+- Frontend: `src/pages/Admin.tsx` com form Usuario/Senha (credencial em sessionStorage,
+  validada no submit via `showroom_login`); `src/services/curadoria.ts` passa `{user,senha}`.
+
 ## 2026-08-31 (2)
 
 ### Adicionado — SPEC-125: 19 pecas publicadas + tela de curadoria /admin

@@ -320,9 +320,13 @@ fluxo interno não visível ao cliente.
   `estoque_showroom = 0` (usa qtd da lista, senão 1) tanto no script quanto na RPC.
 - [x] ~~P-6~~ — migration aplicada com a view `SECURITY DEFINER` + `GRANT TO anon` (abordagem
   confirmada em uso). Edge Function pública fica como alternativa não necessária.
-- [ ] **P-8b** — **Definir o PIN da `/admin`**: `update public.showroom_config set valor =
-  '<pin>' where chave = 'admin_pin';` (hoje `TROCAR-ESTE-PIN`). E, ao terminar a curadoria,
-  `revoke execute` das 3 RPCs `showroom_*` de `anon`.
+- [x] ~~P-8b~~ — `/admin` passou a usar **usuário + senha** (migration `20260831_128`):
+  `showroom_config` guarda `admin_user` = `Lucenera` e `admin_pass_hash` = bcrypt de
+  `Lucenera123`. RPC `showroom_login` valida na hora; `showroom_vincular_peca`/`_desvincular_`
+  recriadas com `(p_user, p_senha, …)`. Login testado ao vivo. Trocar senha:
+  `update showroom_config set valor = extensions.crypt('<nova>', extensions.gen_salt('bf'))
+  where chave = 'admin_pass_hash';`. Ao terminar a curadoria: `revoke execute` das RPCs
+  `showroom_*` de `anon` (ver README da migration 128).
 - [ ] **P-7** — Criar o projeto Skip para `showroom-qtq8er2dk`, `skip_env_set` das env vars,
   rodar o QA pipeline e publicar. Depois: `git push` no repo do sistema + atualizar o
   ponteiro do submodule + `CHANGELOG.md`.

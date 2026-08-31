@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-08-31
+
+### Adicionado — SPEC-125: site publico do Showroom Lucenera (vitrine de pronta entrega) — implementado, nao publicado
+
+- **SPEC-125 criada** (`03-Projeto/Planos de Acao/SPECs/SPEC-125_...md`) e **sistema novo implementado** em `04-Sistemas/showroom-qtq8er2dk` (submodule novo do repo `github.com/pedrolalala/showroom-qtq8er2dk`). Site publico, sem login, so leitura: Vitrine (`/`), Detalhe da peca (`/peca/:codigo`), Visite o showroom (`/showroom`), 404. Busca + filtros Marca/Categoria + ordenacao + scroll infinito. Preco = `valor_venda` sempre (R$ 0,00 quando nao cadastrado). Identidade Lucenera (laranja/navy/Inter). `pnpm install` + `tsc` + `oxlint` + `vite build` + `vite preview` limpos.
+- **Migration REDIGIDA, nao aplicada**: `supabase/db/migrations/20260831_126_spec125_showroom_publico/` — `produtos.imagem_showroom_url text`, view `vw_showroom_publico` (whitelist de colunas, sem `security_invoker`), `GRANT SELECT ... TO anon`, bucket de Storage publico `showroom-lucenera`. `produtos` NAO ganha policy `anon` (SPEC-069/087 intactas). Impacto no banco: 1 coluna nullable + 1 view + 1 bucket; nenhuma RPC/RLS/trigger existente alterada.
+- **Script `scripts/importar_fotos_showroom.py`** (extrair/match/aplicar). Le `.odp`/`.pptx`. Rodado no arquivo real `01-Documento/01 - Planilhas/LISTA DECORATIVOS DISPONIVEIS - SHOWROOM.odp` (268 MB, gitignored): 189 slides, 167 com foto; `match` cruzou com 4 726 produtos, ~76 candidatos. CSV de revisao gerado fora do repo.
+- **Pendente (ver SPEC-125 Pendencias):** aprovar+aplicar a migration; revisar o CSV de match; rodar `aplicar`; criar projeto Skip + env vars + publish; preencher contato real; corrigir cobertura de `estoque_showroom` (so 266 produtos > 0 hoje). Nenhum commit/push feito nos repos ainda.
+- Repos que precisam de commit depois da aprovacao: `showroom-qtq8er2dk` (codigo do sistema) e o central (ponteiro do submodule + `.gitmodules` + SPEC + migration + script + CHANGELOG).
+
 ## 2026-08-28
 
 ### Corrigido — SPEC-123: itens 1-3 da auditoria de performance de carregamento

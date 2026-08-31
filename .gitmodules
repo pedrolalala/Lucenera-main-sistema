@@ -34,3 +34,7 @@
 [submodule "04-Sistemas/separacao-parcial"]
 	path = 04-Sistemas/separacao-parcial
 	url = https://github.com/pedrolalala/separacao-parcial.git
+[submodule "04-Sistemas/showroom-qtq8er2dk"]
+	path = 04-Sistemas/showroom-qtq8er2dk
+	url = https://github.com/pedrolalala/showroom-qtq8er2dk.git
+	ignore = untracked

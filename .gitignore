@@ -29,6 +29,13 @@ supabase/.temp/
 *.mov
 *.avi
 
+# Apresentações pesadas de referência (ex.: lista de fotos do showroom, ~268MB)
+*.odp
+*.pptx
+
+# Saída local do import de fotos do showroom (SPEC-125): imagens extraídas + CSV
+scripts/_saida_showroom/
+
 
 __pycache__/
 *.pyc

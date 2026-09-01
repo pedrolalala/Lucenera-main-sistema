@@ -40,15 +40,26 @@ referencias:
 - [x] `Estoque.tsx` — "Planilha — produtos" no fim da aba (Código, Produto, Marca, Estoque total, Disponível, Showroom, Custo/Venda un., Custo/Venda disp., Custo total, MKP), respeitando o filtro de marca
 - [x] `src/lib/utils.ts` — helper `formatarData` (ISO → dd/mm/aaaa)
 - [x] `oxlint` + `tsc --noEmit` + `vite build` limpos
-- [ ] Teste no navegador com o intervalo 01/02 → 28/02 por pagamento (Fluxo/Receber/Pagar) + export CSV
-- [ ] Publicar no Skip 41135
+- [x] Publicado no Skip 41135 — versão **0.0.32** (`c5a8441`, 2026-09-01), QA (setup/static/build/integrations/test) tudo verde
+- [ ] Teste no navegador em produção com o intervalo 01/02 → 28/02 por pagamento (Fluxo/Receber/Pagar) + export CSV
 
-### Escopo 2 — Confiabilidade: separar dado de teste (BLOQUEADO — decisão de abordagem)
+### Escopo 2 — Confiabilidade: reverter orçamentos de teste + separar dado de teste
+
+**2A — Reverter os orçamentos de teste — FEITO 01/09/2026**
+
+Critério (usuário): todo orçamento criado dentro do sistema e aprovado é teste; o resto vem do import das planilhas. Medido: só existiam **22 orçamentos** (19 `'Orçamento Aprovado'` + 3 rascunho).
+
+- [x] Script `scripts/reverter_orcamentos_teste.py` (dry-run padrão, `--aplicar` grava). Replica os passos do RPC `cancelar_orcamento` (que não roda aqui porque o status é `'Orçamento Aprovado'`, não `'aprovado'`) + a parte de separação/logística que o RPC não cobre. Cancela, não apaga.
+- [x] Aplicado: **19 orçamentos → cancelado** (+ 19 em `historico_status_orcamentos`); 36 boletos → cancelado (incl. 1 "Pago", 9 "Remessa Enviada"); 41 parcelas → cancelada (incl. 5 "paga"); 40 `projeto_itens.validado` → false; 32 `estoque_saldos_projeto_item` → cancelado + 30 movimentos 'cancelamento'; 13 linhas de `estoque_itens.quantidade_reservada` liberadas (64 un.); 18 `separacao_itens` estornados; 11 separações → Cancelado; 2 entregas → Cancelado; 6 `entregas_pendentes` removidas. 3 rascunhos intactos.
+- [x] Achado: a CHECK `orcamentos_data_inicio_pagamento_check` (NOT VALID) rejeita qualquer UPDATE quando `data_inicio_pagamento` < hoje — resolvido zerando `data_inicio_pagamento` junto no cancelamento (inócuo num orçamento de teste cancelado).
+- [x] Boletos NÃO têm FK para `negociacoes`/`transacoes` — a "relação bancária" desses orçamentos é a própria tabela `boletos`, já coberta. O Dashboard financeiro lê `transacoes` (import do Connect), não boletos.
+- [x] Conferido pós-reversão: 0 orçamento aprovado, todos boletos/parcelas/saldos cancelados, `vw_necessidade_compra` 232→230 linhas / Gasto Futuro R$811k→R$802k.
+
+**2B — Marca de origem (evita recontaminar) — BLOQUEADO, decisão de abordagem**
 
 - [ ] Definir mecanismo de marca de origem (`connect` | `sistema` | `teste`) em `transacoes` / `negociacoes`
 - [ ] `v_financeiro_realizado` expõe a origem
 - [ ] Dashboard: filtro/switch "Somente Connect" (default ligado) em todas as telas
-- [ ] Card de aviso quando o filtro está desligado ("inclui lançamentos de teste do sistema")
 
 ### Escopo 3 — Classificação `natureza` na view (migration REDIGIDA, aguarda Vinícius + apply)
 
@@ -113,6 +124,9 @@ que torna possível provar qual KPI está certo.
   intervalo); o intervalo passa a filtrar "Previsto por vencimento" e as listas.
 - Pedido de Compra continua fora do Dashboard (só Produtos, Contas a Receber,
   Contas a Pagar, Caixa e — novo — Receita de Serviço).
+- Aba **Estoque não recebe filtro por data** (decisão do usuário, 01/09): é foto
+  do momento, `v_estoque_produtos` não tem dimensão temporal e não há tabela de
+  histórico de estoque. O `<PeriodFilter>` fica só nas 3 abas financeiras.
 - Aprovar orçamento **não** conta como realizado (só a baixa em Adm. Bancária) —
   comportamento atual está correto; o problema é a parcela em aberto de teste
   inflando o acumulado (Escopo 2).
@@ -212,7 +226,8 @@ despesa_operacional ← qualquer outra despesa
   - E7: cards "Em Aberto (Pagar/Receber)" com legenda "Total acumulado — não muda com o filtro"; `vw_necessidade_compra` verificada (232 linhas, ~R$ 811 mil — o card está OK).
 - **Escopo 3**: migration `20260901_129_spec126_natureza_por_codigo_connect/001_natureza_allowlist.sql` **redigida** (allowlist de `codigo_connect` no lugar do `ILIKE '%FILIPPO%'`). **Não aplicada** — aguarda Vinícius confirmar ESCOLA / CLUBE MAIS VIAGENS.
 - QA local: `tsc` · `oxlint` · `vite build` ok.
-- **Não publicado no Skip.** Commit local feito nos dois repos (submódulo + central) sem push.
+- **PUBLICADO no Skip 41135** (2026-09-01, 13:00 UTC): descoberto que a tela não mudava porque o Skip tem árvore própria (não lê do submódulo git — ver [[feedback_skip_deploy_separate_tree]]). Conferido que o Skip estava em sincronia com o submódulo antes de sobrescrever; escritos os 10 arquivos via `skip_file_write`; `apply_changes` (QA setup/static/build/integrations/test tudo verde) → versão **0.0.32** / `c5a8441`; `publish` → produção `dashboard-empresa-40d7d.goskip.app`.
+- Commits git locais (sem push): submódulo `d79d704`, central `f2df5f0` — conteúdo bate com o Skip 0.0.32.
 - Continuam bloqueados: E2 (marca de origem — mexe no import da Connect), E4 (Receita de Serviço — feature nova, vira SPEC própria), custo fixo do Ponto de Equilíbrio (Filippo).
 
 ## Pendências

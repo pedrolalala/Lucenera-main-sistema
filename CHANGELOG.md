@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-01 (2)
+
+### Revertido — SPEC-126 Escopo 2A: 19 orçamentos de teste cancelados no Supabase real
+
+- Critério do usuário: todo orçamento criado dentro do sistema novo e aprovado é teste (o resto vem do import das planilhas do Connect). Só existiam 22 orçamentos no total — 19 `status='Orçamento Aprovado'` + 3 rascunho.
+- Novo `scripts/reverter_orcamentos_teste.py` (dry-run padrão, `--aplicar` grava). O RPC `cancelar_orcamento` não resolvia sozinho: ele só roda a reversão quando `status='aprovado'` literal, e aqui é `'Orçamento Aprovado'`. O script replica os passos do RPC + separação/logística. **Cancela, não apaga** (preserva histórico).
+- Aplicado em produção: **19 orçamentos → cancelado** (+19 em `historico_status_orcamentos`); 36 boletos → cancelado (incl. 1 "Pago" + 9 "Remessa Enviada"); 41 `projeto_parcelas` → cancelada (incl. 5 "paga"); 40 `projeto_itens.validado` → false; 32 `estoque_saldos_projeto_item` → cancelado + 30 movimentos 'cancelamento'; 13 reservas de `estoque_itens` liberadas (64 un.); 18 `separacao_itens` estornados; 11 separações → Cancelado; 2 entregas → Cancelado; 6 `entregas_pendentes` removidas. 3 rascunhos intactos.
+- Achado: a CHECK `orcamentos_data_inicio_pagamento_check` (NOT VALID, migration 20260814_108) rejeita qualquer UPDATE quando `data_inicio_pagamento` já passou — contornado zerando o campo junto no cancelamento (inócuo num orçamento de teste). 2 orçamentos com data nula/futura foram cancelados na 1ª passada antes de bater na constraint; os outros 17 na 2ª.
+- Boletos não têm FK para `negociacoes`/`transacoes`; a "relação bancária" desses orçamentos é a tabela `boletos` (coberta). Dashboard financeiro lê `transacoes` (import), não boletos.
+- Pós-reversão: 0 orçamento aprovado no sistema, `vw_necessidade_compra` 232→230 linhas / Gasto Futuro R$811k→R$802k.
+
 ## 2026-09-01
 
 ### Adicionado — SPEC-126: Escopos 5, 6, 7 (parcial) implementados + migration do Escopo 3 redigida
@@ -10,7 +21,8 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - **Escopo 6 (Investimento)** — `cash-flow.ts`: `filterByDescGrupo` + `distinctGrupos` (auto-descobre os grupos). `ContasPagarFoco.tsx`: Select "Grupo" no cabeçalho que filtra KPIs, gráficos e a planilha do fim da aba — pega "INVESTIMENTO" sem hardcode.
 - **Escopo 7** — cards "Em Aberto (Pagar/Receber)" ganharam legenda visível "Total acumulado — não muda com o filtro de período". Verificado no Supabase real que `vw_necessidade_compra` está populada (232 produtos, card ~R$ 811 mil): o "não tá pegando" do Vinícius é na tela de Compras / no Excel dele, não no dashboard.
 - **Escopo 3 — migration redigida, NÃO aplicada**: `supabase/db/migrations/20260901_129_spec126_natureza_por_codigo_connect/001_natureza_allowlist.sql`. Troca o `CASE` de `natureza` em `v_financeiro_realizado` (`ILIKE '%FILIPPO%'/'%MANOELLA%'` → allowlist de 9 `codigo_connect` de retirada/lucro distribuído). Com isso `ESCOLA` (~R$92k) e `CLUBE MAIS VIAGENS` (~R$50k) deixam de contar como lucro. Aguarda Vinícius confirmar o balde dessas contas antes do apply.
-- QA local do submódulo: `tsc --noEmit`, `oxlint src`, `vite build` limpos. **Não publicado no Skip.**
+- QA local do submódulo: `tsc --noEmit`, `oxlint src`, `vite build` limpos.
+- **PUBLICADO no Skip 41135 (2026-09-01)**: a tela não tinha mudado porque o Skip tem árvore de arquivos própria, não lê do submódulo git. Conferido que o Skip estava em sincronia; escritos os 10 arquivos; `apply_changes` (QA setup/static/build/integrations/test tudo verde) → versão **0.0.32** (`c5a8441`); `publish` → `dashboard-empresa-40d7d.goskip.app`. Commits git (submódulo `d79d704`, central `f2df5f0`) batem com o Skip.
 - Continuam bloqueados: Escopo 2 (marca de origem — toca no import da Connect), Escopo 4 (Receita de Serviço / Representação — feature nova, vira SPEC própria), lista de "custo fixo" do Ponto de Equilíbrio (Filippo).
 
 ## 2026-08-31 (5)

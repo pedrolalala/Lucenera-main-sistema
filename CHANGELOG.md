@@ -2,6 +2,38 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-01
+
+### Adicionado — SPEC-126: Escopos 5, 6, 7 (parcial) implementados + migration do Escopo 3 redigida
+
+- **Escopo 5 (Estoque)** — `dashboard-lucenera-b02z85wa3`: cards "De Cliente / Reservado (Custo)" e "(Venda)" + "Showroom (Venda)" na tela de Estoque, com aviso de que "Disponível" já inclui o Showroom. `computeKpisEstoque` + helper `reservadoQtd` (`max(0, estoque_total + estoque_showroom − estoque_disponivel)`) — cálculo client-side, sem migration; a `v_estoque_produtos` só precisará mudar se quiserem a view como fonte de verdade.
+- **Escopo 6 (Investimento)** — `cash-flow.ts`: `filterByDescGrupo` + `distinctGrupos` (auto-descobre os grupos). `ContasPagarFoco.tsx`: Select "Grupo" no cabeçalho que filtra KPIs, gráficos e a planilha do fim da aba — pega "INVESTIMENTO" sem hardcode.
+- **Escopo 7** — cards "Em Aberto (Pagar/Receber)" ganharam legenda visível "Total acumulado — não muda com o filtro de período". Verificado no Supabase real que `vw_necessidade_compra` está populada (232 produtos, card ~R$ 811 mil): o "não tá pegando" do Vinícius é na tela de Compras / no Excel dele, não no dashboard.
+- **Escopo 3 — migration redigida, NÃO aplicada**: `supabase/db/migrations/20260901_129_spec126_natureza_por_codigo_connect/001_natureza_allowlist.sql`. Troca o `CASE` de `natureza` em `v_financeiro_realizado` (`ILIKE '%FILIPPO%'/'%MANOELLA%'` → allowlist de 9 `codigo_connect` de retirada/lucro distribuído). Com isso `ESCOLA` (~R$92k) e `CLUBE MAIS VIAGENS` (~R$50k) deixam de contar como lucro. Aguarda Vinícius confirmar o balde dessas contas antes do apply.
+- QA local do submódulo: `tsc --noEmit`, `oxlint src`, `vite build` limpos. **Não publicado no Skip.**
+- Continuam bloqueados: Escopo 2 (marca de origem — toca no import da Connect), Escopo 4 (Receita de Serviço / Representação — feature nova, vira SPEC própria), lista de "custo fixo" do Ponto de Equilíbrio (Filippo).
+
+## 2026-08-31 (5)
+
+### Adicionado — SPEC-126: Dashboard Financeiro 100% (reunião Vinícius 31/08) — Escopo 1 (Filtro por Data) implementado
+
+- **SPEC-126 criada** (`03-Projeto/Planos de Ação/SPECs/SPEC-126_...md`), guarda-chuva das duas reuniões de 31/08 sobre Contas a Receber/Pagar. Escopos: (1) filtro por data — LIBERADO e feito; (2) separar dado de teste; (3) classificação `natureza` na view; (4) receita de serviço/representação; (5) bloco "De Cliente/Reservado" no Estoque; (6) recorte "Investimento"; (7) ajustes menores. Escopos 2–7 dependem de decisão do Vinícius.
+- **Escopo 1 — Filtro por Data** implementado no submódulo `dashboard-lucenera-b02z85wa3` (local; **não publicado no Skip, não commitado no submódulo**). Substitui os Selects Ano/Mês por intervalo livre De/Até + toggle "por data de pagamento / por vencimento" + presets. `cash-flow.ts`: `filterFinanceiro` passa a receber `Periodo { de, ate, campo }`; novos `rangePreset`/`periodoAnterior`; `distinctAnos`/`MESES` removidos. Novo `src/components/PeriodFilter.tsx` (Popover + Calendar range + ToggleGroup). "Em Aberto (Pagar/Receber)" continua sendo total acumulado; "Previsto por vencimento" passa a respeitar o intervalo pela coluna de vencimento.
+- **"Planilha no fim de cada aba"** — `PlanilhaTabela.tsx` (tabela genérica ordenável + export CSV `;`/BOM do conjunto filtrado inteiro, render limitado a 500 linhas) + `colunasFinanceiro.ts`. Adicionada em Fluxo de Caixa, Recebimentos, Pagamentos (com `cod_duplicata` como chave de conferência linha a linha com o Connect) e Estoque. `FinanceiroRow`/`COLUNAS` ganham `id`, `dt_emissao`, `cod_duplicata`; helper `formatarData` em `lib/utils.ts`.
+- Achado durante a análise (dados reais do Supabase): as contas `DESP. OPERAC. FILIPPO/MANOELLA` já classificam certo como `despesa_operacional`. O problema de `natureza` é o `ILIKE '%FILIPPO%'/'%MANOELLA%'` varrer `ESCOLA` (R$91k) e `CLUBE MAIS VIAGENS` (R$49k) para `distribuicao_lucro`. Tratado no Escopo 3, depende de confirmação do Vinícius conta a conta.
+- QA local do submódulo: `tsc --noEmit`, `oxlint src` e `vite build` limpos.
+- Repositórios que precisam receber commit depois: submódulo `dashboard-lucenera-b02z85wa3` (código do Escopo 1) e o central (SPEC-126 + este CHANGELOG + ponteiro do submódulo após publicar).
+
+## 2026-08-31 (4)
+
+### Importado — ciclo de sincronização Connect (ContaPagar/ContaReceber, PedidoCompra, Produtos/Estoque)
+
+- Usuário disponibilizou 4 planilhas novas (`ContaPagar_2026-08-31.xlsx`, `ContaReceber_2026-08-31.xlsx`, `PedidoCompra_2026-08-31.xlsx`, `Produtos__2026-08-31.xlsx`) e pediu pra atualizar o banco. Mesmo ciclo já rodado antes (26/08, 24/08, 17/08 etc.) — constantes de caminho atualizadas nos 3 scripts (`importar_contas_pagar_receber.py`, `importar_pedido_compra.py`, `importar_produtos_estoque.py`), `--dry-run` conferido em cada um (números batendo com a execução real) antes da gravação.
+- **ContaPagar/ContaReceber**: 36 negociações novas (empresa MANOELLA, mapeamento LUCE NERA confirmado inalterado), 92 transações novas, 2.977 atualizadas (status/pagamento), 14.254 já sincronizadas, 0 erros. 488 linhas com `(cod_duplicata, tipo)` ambíguo entre empresas puladas por desenho (mesmo padrão de todos os ciclos anteriores).
+- **PedidoCompra**: 14 pedidos novos, 8 atualizados, 42 inalterados, 0 erros. `staging_pedido_compra` recarregada (81 linhas).
+- **Produtos/Estoque**: 202 produtos atualizados (estoque/custo/valor de venda/lucro), 4.150 já sincronizados, 0 erros. 130 `CodProduto` da planilha sem match no banco (produtos ainda não cadastrados, fora do escopo do script — só atualiza existentes).
+- `estoque_itens` sincronizado automaticamente via trigger `fn_sync_estoque_itens_from_produtos`, sem ação manual.
+
 ## 2026-08-31 (3)
 
 ### Alterado — SPEC-125: /admin passa a usar usuario + senha

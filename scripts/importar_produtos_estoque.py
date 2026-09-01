@@ -39,16 +39,33 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from _supabase_client import get_client, SUPABASE_URL  # noqa: E402
 
-PLANILHA_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "Produtos__2026-08-26.xlsx"
+PLANILHA_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "Produtos__2026-08-31.xlsx"
 
 BATCH_SIZE = 200
 PAGE_SIZE = 1000
 
 
 def to_numeric_br(series: pd.Series) -> pd.Series:
-    """Converte string podendo estar em formato BR (vírgula) ou já numérico (ponto)."""
-    cleaned = series.astype(str).str.strip().str.replace(",", ".", regex=False)
-    return pd.to_numeric(cleaned, errors="coerce")
+    """Converte string em formato BR ("1.409,76") ou US ("3709.9") para float.
+
+    Bug corrigido em 2026-09-01: a versão antiga fazia `.replace(",", ".")` sem
+    tirar o separador de milhar, então "1.409,76" virava "1.409.76" -> NaN -> 0.
+    Na planilha Produtos o `CustoTotal` vem em BR com milhar e o `ValorVenda`
+    em US — resultado: todo produto com custo >= R$ 1.000 ficou com
+    `custo_total = 0` no banco (e o Dashboard de Estoque / Necessidade de
+    Compra subestimados). Agora: se tem vírgula é BR (tira '.', troca ',' por
+    '.'); senão assume que já é número.
+    """
+
+    def _parse(v: object) -> object:
+        s = str(v).strip()
+        if s in ("", "nan", "NaN", "None", "NaT"):
+            return None
+        if "," in s:
+            s = s.replace(".", "").replace(",", ".")
+        return s
+
+    return pd.to_numeric(series.map(_parse), errors="coerce")
 
 
 def carregar_planilha(path: Path) -> pd.DataFrame:

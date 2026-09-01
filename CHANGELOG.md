@@ -4,6 +4,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-01 (3)
 
+### Corrigido — bug de parsing no import de Produtos: ~700 produtos com `custo_total = 0`
+
+- `scripts/importar_produtos_estoque.py` — `to_numeric_br` fazia `.replace(",", ".")` sem tirar o separador de milhar. Na planilha `Produtos__*.xlsx` a coluna `CustoTotal` vem em formato BR ("1.409,76") e o `ValorVenda` em US ("3709.9"), então **todo produto com custo ≥ R$ 1.000 virava "1.409.76" → NaN → 0**. `valor_venda` (sem milhar) importava certo, por isso passou despercebido.
+- Fix: se a string tem vírgula é BR (remove '.', troca ',' por '.'); senão assume número já formatado. Só afeta o import de Produtos — os imports de ContaPagar/Receber/PedidoCompra leem números nativos do Excel (`dtype=float64`), sem parsing de string.
+- Reimportado: **746 produtos atualizados**, dos quais **695 estavam com `custo_total = 0`**. **Valor de Estoque (Custo)** no banco: R$ 3.960.743 → **R$ 4.273.243** (+R$ 312.500) — bate com o "~R$ 4 mi" que o Vinícius citou na reunião. Corrige também Custo Disponível / Custo em Déficit / MKP no Dashboard de Estoque.
+- `estoque_itens` sincronizado pelo trigger.
+
 ### Corrigido — Cadastro Lucenera: campo "Preço Custo" em branco ao editar peça/produto
 
 - `PecaForm.tsx` (`src/components/forms/`): produtos que vêm só do import do Connect não têm `produtos.preco_custo` nem `preco_venda` populados — o custo real fica em `custo_total` e a venda em `valor_venda` (o `importar_produtos_estoque.py` não mexe nesses dois de propósito, pra não disparar o trigger `fn_atualizar_preco_venda`). Sem fallback, o campo "Preço Custo (R$)" abria **em branco** na edição, enquanto a venda aparecia (a venda já tinha `valor_venda || preco_venda`).

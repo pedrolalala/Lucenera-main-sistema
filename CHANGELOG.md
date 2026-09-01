@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-01 (3)
+
+### Corrigido — Cadastro Lucenera: campo "Preço Custo" em branco ao editar peça/produto
+
+- `PecaForm.tsx` (`src/components/forms/`): produtos que vêm só do import do Connect não têm `produtos.preco_custo` nem `preco_venda` populados — o custo real fica em `custo_total` e a venda em `valor_venda` (o `importar_produtos_estoque.py` não mexe nesses dois de propósito, pra não disparar o trigger `fn_atualizar_preco_venda`). Sem fallback, o campo "Preço Custo (R$)" abria **em branco** na edição, enquanto a venda aparecia (a venda já tinha `valor_venda || preco_venda`).
+- Fix: no `form.reset()` da edição, `preco_custo` passa a usar `preco_custo || custo_total || 0` e `preco_venda` passa a usar `preco_venda || valor_venda || 0` — mesmo padrão do `valor_venda`. Para produtos com percentuais de frete/ST/IPI zerados (caso dos importados) não há dupla contagem: o "Custo Total Calc." recalcula igual ao `preco_custo` seed.
+- Publicado no Skip 36668 — versão **0.0.80** (`bd5cb48`), QA tudo verde. Submódulo `cadastro-lucenera-b86fe` no git está desatualizado em relação ao Skip (trabalho de SPEC-120 em aberto lá) — sync do git pendente.
+
 ## 2026-09-01 (2)
 
 ### Revertido — SPEC-126 Escopo 2A: 19 orçamentos de teste cancelados no Supabase real

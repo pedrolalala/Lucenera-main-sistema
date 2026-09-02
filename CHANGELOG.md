@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-02 (3)
+
+### Corrigido — 1.158 parcelas "órfãs" (despesa/lucro/imposto marcados como receita) canceladas: Dashboard agora bate 100% com a planilha
+
+- Investigando o resíduo de +R$ 730 da conferência fev→ago: `dup 1916`/`1915` tinham parcelas de **TARIFA BANCARIA** e `dup 1628` de **DARE-ICMS** dentro de negociações `tipo='receita'` — o Dashboard somava como receita recebida.
+- Escala real: **1.210 parcelas** cujo `cod_itens_duplicata` não está no export atual, mas a duplicata está (parcela substituída/removida no Connect). 1.157 marcadas como pagas, ~R$ 4 mi, quase todas **despesa em negociação de receita**: `COMPRAS - REVENDA` (873, R$ 3,0 mi), `INDUSTRIALIZAÇÃO` (95), `RETIRADA DE LUCRO FILIPPO` (22, R$ 435k), `DARE-ICMS` (24), `RT` (41), etc. Só 2 linhas de `VENDAS A VISTA` (R$ 11 mil). Resquício de imports antigos.
+- Fix: `importar_contas_pagar_receber.py` ganha um passo — para cada duplicata que está no export, **cancela (`status_pago = 2`) as parcelas cujo `cod_itens_duplicata` não está no export**. A planilha é a fonte de verdade. Aplicado: **1.158 parcelas canceladas**, 0 erros.
+- Resultado: **conferência fev→ago bate R$ 0,00 em todos os meses** (receita E despesa). **Em Aberto a Pagar e a Receber batem exato com a planilha** (R$ 5.487.019,90 / R$ 3.104.418,35). Receita realizada total no Dashboard: R$ 27,33 mi → **R$ 25,25 mi** (−R$ 2,08 mi de órfãs); Despesa realizada: −R$ 415k.
+
 ## 2026-09-02 (2)
 
 ### Corrigido — import parava de descartar as ~488 duplicatas "ambíguas": R$ 1,35 mi de receita voltou

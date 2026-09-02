@@ -370,10 +370,37 @@ def processar(dry_run: bool) -> None:
         else:
             inalteradas += 1
 
+    # Parcelas órfãs: a duplicata ESTÁ no export atual, mas o cod_itens_duplicata
+    # não — ou seja, aquela parcela foi substituída/removida no Connect. Achado
+    # em 02/09/2026: ~1.200 dessas, quase todas DESPESA (COMPRAS-REVENDA, RT,
+    # RETIRADA DE LUCRO, ICMS, tarifa bancária) coladas em negociações
+    # `tipo='receita'` de imports antigos, inflando a Receita Realizada em ~R$ 4 mi.
+    # A planilha é a fonte de verdade -> cancelar (status_pago = 2).
+    neg_cd_map = {
+        n["id"]: (n["cod_duplicata"], n["tipo"])
+        for n in neg.to_dict("records")
+        if n["cod_duplicata"] is not None
+    }
+    planilha_item_keys = {
+        (int(r["cod_duplicata"]), r["tipo"], int(r["cod_itens_duplicata"]))
+        for r in planilha.to_dict("records")
+    }
+    planilha_dup_keys = {(int(r["cod_duplicata"]), r["tipo"]) for r in planilha.to_dict("records")}
+    orfas_a_cancelar = []
+    for r in trans.to_dict("records"):
+        cdt = neg_cd_map.get(r["negociacao_id"])
+        if not cdt or cdt[0] is None or r["cod_itens_duplicata"] is None:
+            continue
+        dup_key = (int(cdt[0]), cdt[1])
+        item_key = (int(cdt[0]), cdt[1], int(r["cod_itens_duplicata"]))
+        if dup_key in planilha_dup_keys and item_key not in planilha_item_keys and r["status_pago"] != 2:
+            orfas_a_cancelar.append(r["id"])
+
     print("\n=== RESUMO ===")
     print(f"Negociacoes novas (empresa LUCE NERA): {len(novas_negociacoes)}")
     print(f"Transações novas a inserir:        {len(novas_transacoes)}")
     print(f"Transações a atualizar (status):   {len(atualizacoes)}")
+    print(f"Parcelas órfãs a CANCELAR (item fora do export): {len(orfas_a_cancelar)}")
     print(f"Transações já sincronizadas (nada a fazer): {inalteradas}")
     print(f"Linhas sem negociação (não roteadas): {len(sem_negociacao)}")
 
@@ -425,6 +452,17 @@ def processar(dry_run: bool) -> None:
             print(f"  ERRO ao atualizar id={rec['id']}: {exc}")
             total_erro2 += 1
     print(f"Update concluído: {total_ok2} ok, {total_erro2} erros.")
+
+    total_ok3, total_erro3 = 0, 0
+    for i in range(0, len(orfas_a_cancelar), BATCH_SIZE):
+        lote = orfas_a_cancelar[i : i + BATCH_SIZE]
+        try:
+            client.table("transacoes").update({"status_pago": 2}).in_("id", lote).execute()
+            total_ok3 += len(lote)
+        except Exception as exc:
+            print(f"  ERRO ao cancelar orfas lote {i}: {exc}")
+            total_erro3 += len(lote)
+    print(f"Cancelamento de orfas concluido: {total_ok3} ok, {total_erro3} erros.")
 
 
 def main():

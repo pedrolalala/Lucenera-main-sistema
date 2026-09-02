@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-02 (2)
+
+### Corrigido — import parava de descartar as ~488 duplicatas "ambíguas": R$ 1,35 mi de receita voltou
+
+- Feedback do usuário (conferência da planilha do Sérgio): as duplicatas que o import pulava por estarem em >1 empresa são **recebimentos reais** — parcelas de datas diferentes do mesmo cliente, ou empresa trocada para acordo de RT com arquiteto. **Não pode sair da soma.**
+- Medido: as **402 combinações `(cod_duplicata, tipo)` ambíguas são TODAS receita**, e em **todas** a negociação mais antiga (a que a view `v_financeiro_realizado` usa via `rn=1`) é **MANOELLA** (lote LUCE NERA de 2026-05-07).
+- Fix: `importar_contas_pagar_receber.py` deixa de pular e **roteia essas linhas para a negociação MANOELLA/preferida**. Reimportado: **488 transações novas inseridas**, 0 erros.
+- Resultado da conferência fev→ago depois disso: **despesa bate exato todos os meses**; **receita bate a menos de R$ 730 no total** (fev +R$ 329,81 na `dup 1916`, mar +R$ 399,73 — 0,009%). Receita realizada total no Dashboard: R$ 25,98 mi → **R$ 27,33 mi**. Em Aberto a Pagar continua exato (R$ 5,49 mi); Em Aberto a Receber R$ 3,11 mi (+R$ 5,4 mil, os 19 abertos ambíguos).
+- Pendência menor: `dup 1916` (fev, +R$ 329,81) — conferir linha a linha.
+
 ## 2026-09-02
 
 ### Corrigido — Em Aberto / fluxo futuro do Dashboard inflado ~R$ 2 mi: import não atualizava `vl_parcela`

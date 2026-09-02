@@ -167,21 +167,38 @@ def processar(dry_run: bool) -> None:
             client.table("stg_duplicatas_vigentes").insert(registros_stg[i : i + BATCH_SIZE]).execute()
 
     print("Buscando negociacoes existentes…")
-    neg = buscar_paginado(client, "negociacoes", "id,empresa_id,cod_duplicata,tipo")
+    neg = buscar_paginado(client, "negociacoes", "id,empresa_id,cod_duplicata,tipo,created_at")
     neg["cod_duplicata"] = pd.to_numeric(neg["cod_duplicata"], errors="coerce").astype("Int64")
     print(f"  {len(neg)} negociacoes no banco")
 
     # Verifica se (cod_duplicata, tipo) é uma chave suficiente (sem ambiguidade de empresa)
     dup_key_counts = neg.groupby(["cod_duplicata", "tipo"]).size()
     ambiguous_keys = dup_key_counts[dup_key_counts > 1]
-    if len(ambiguous_keys) > 0:
-        print(
-            f"  AVISO: {len(ambiguous_keys)} combinações (cod_duplicata,tipo) têm mais de uma "
-            f"negociacao (empresas diferentes) — essas serão tratadas como AMBÍGUAS e puladas."
-        )
     neg_unicas = neg[~neg.set_index(["cod_duplicata", "tipo"]).index.isin(ambiguous_keys.index)]
     neg_map = neg_unicas.set_index(["cod_duplicata", "tipo"])["id"].to_dict()
     ambiguous_set = set(ambiguous_keys.index)
+
+    # Chaves ambíguas: a mesma (cod_duplicata, tipo) existe em >1 empresa.
+    # Antes eram PULADAS — errado: são recebimentos REAIS (uma parcela vence no
+    # início do mês e outra no fim, o cliente pagou as duas; ou a empresa foi
+    # trocada para um acordo de RT com arquiteto). Não pode sair da soma.
+    # Confirmado (02/09/2026): as 402 chaves ambíguas são TODAS receita e em
+    # todas a negociação mais antiga é MANOELLA (lote LUCE NERA). Rotear a
+    # linha para essa negociação MANOELLA — que também é a `negociacao_preferida`
+    # (rn=1 por created_at) que a view v_financeiro_realizado usa, então o valor
+    # passa a aparecer no Dashboard sem duplicar.
+    neg_ambigua_map = {}
+    if len(ambiguous_keys):
+        neg_amb = neg[neg.set_index(["cod_duplicata", "tipo"]).index.isin(ambiguous_keys.index)]
+        for (cd, tp), g in neg_amb.groupby(["cod_duplicata", "tipo"]):
+            man = g[g["empresa_id"] == EMPRESA_LUCE_NERA_ID]
+            neg_ambigua_map[(cd, tp)] = (
+                man.iloc[0]["id"] if len(man) else g.sort_values("created_at").iloc[0]["id"]
+            )
+        print(
+            f"  {len(ambiguous_keys)} combinações (cod_duplicata,tipo) em >1 empresa — roteadas "
+            f"para a negociação MANOELLA/preferida (antes eram puladas)."
+        )
 
     print("Buscando plano_de_contas (codigo_connect -> id)...")
     pc = buscar_paginado(client, "plano_de_contas", "id,codigo_connect")
@@ -276,7 +293,7 @@ def processar(dry_run: bool) -> None:
 
     for row in planilha.to_dict("records"):
         chave_neg = (row["cod_duplicata"], row["tipo"])
-        negociacao_id = neg_map.get(chave_neg)
+        negociacao_id = neg_map.get(chave_neg) or neg_ambigua_map.get(chave_neg)
 
         if negociacao_id is None:
             sem_negociacao.append(row)
@@ -358,11 +375,11 @@ def processar(dry_run: bool) -> None:
     print(f"Transações novas a inserir:        {len(novas_transacoes)}")
     print(f"Transações a atualizar (status):   {len(atualizacoes)}")
     print(f"Transações já sincronizadas (nada a fazer): {inalteradas}")
-    print(f"Linhas AMBÍGUAS puladas (cod_duplicata,tipo em >1 empresa): {len(sem_negociacao)}")
+    print(f"Linhas sem negociação (não roteadas): {len(sem_negociacao)}")
 
     if sem_negociacao:
         codes = sorted({(r["cod_duplicata"], r["tipo"]) for r in sem_negociacao})
-        print(f"  Exemplos de (cod_duplicata, tipo) ambíguos: {codes[:15]}")
+        print(f"  Exemplos de (cod_duplicata, tipo): {codes[:15]}")
 
     if dry_run:
         print("\n=== DRY-RUN: nada foi gravado ===")

@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-02 (4)
+
+### Registrado + testado — padrão do ciclo de sincronização Connect
+
+- `scripts/AGENTS.md` ganhou a seção **"Ciclo de sincronizacao Connect"** com as invariantes que os scripts precisam manter para o Dashboard bater com a planilha: `to_numeric_br` trata BR+US; o import de Contas sincroniza `vl_parcela`/`dt_vencimento`/`dt_emissao` em linha existente; duplicata ambígua vai para MANOELLA (não é pulada); parcela órfã (item fora do export) é cancelada; `LUCE NERA = MANOELLA`. Critério de sucesso: conferência receita/despesa realizadas por `dt_pagamento` e "Em Aberto" por `dt_vencimento` = R$ 0,00.
+- **Ciclo 02/09 rodado** com as 4 planilhas `_2026-09-02.xlsx`: Produtos 107 updates; PedidoCompra 80 staging + 9 updates; ContaPagar/Receber 2987 updates de status, **0 parcelas órfãs novas a cancelar** e 0 sem negociação (as correções anteriores seguraram). Constantes de caminho bumpadas nos 3 scripts.
+
 ## 2026-09-02 (3)
 
 ### Corrigido — 1.158 parcelas "órfãs" (despesa/lucro/imposto marcados como receita) canceladas: Dashboard agora bate 100% com a planilha

@@ -54,8 +54,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from _supabase_client import get_client, SUPABASE_URL  # noqa: E402
 
-CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-08-31.xlsx"
-CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-08-31.xlsx"
+CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-09-02.xlsx"
+CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-09-02.xlsx"
 
 # "LUCE NERA" = MANOELLA. NAO é uma decisão, é um fato permanente: é assim
 # que a empresa está identificada no banco de dados do Connect (sistema

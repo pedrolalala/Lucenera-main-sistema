@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-02
+
+### Corrigido — Em Aberto / fluxo futuro do Dashboard inflado ~R$ 2 mi: import não atualizava `vl_parcela`
+
+- Conferência da planilha ContaPagar/ContaReceber (fev→ago) contra `v_financeiro_realizado`: **despesa realizada bate exato em todos os meses**; **receita realizada R$ 129,8 mil abaixo** (duplicatas ambíguas `ISLIGHT/FOCO + MANOELLA` que o import descarta — decisão pendente); **"Em Aberto (Pagar)" R$ 2.022.644 acima da planilha**, todo concentrado em set–dez/2026.
+- Causa: `importar_contas_pagar_receber.py` só sincronizava `status_pago`/`vl_pago`/`dt_pagamento`/`vl_desconto`/`vl_juros` em linha existente — **nunca `vl_parcela` nem `dt_vencimento`**. Duplicata renegociada/corrigida no Connect mantinha o valor antigo em `transacoes`. **`dup 6836`** (4 parcelas em aberto, R$ 550.000 → R$ 55.000 cada — um zero a mais corrigido no Connect) sozinha respondia por R$ 1,98 mi dos R$ 2 mi.
+- Fix: o import passa a comparar e atualizar também `vl_parcela`, `dt_vencimento`, `dt_emissao`, `vl_frete`, `vl_ipi`. Reimportado: **3168 updates** (216 corrigem `vl_parcela`, 91 `dt_vencimento`), 0 erros.
+- Resultado: fluxo futuro A Pagar (VENCIDO + set/out/nov/dez/2026 + jan/2027) **bate 100%** com a planilha. "Em Aberto (Pagar)" no Dashboard: R$ 7,51 mi → **R$ 5,49 mi**. A Receber ainda −R$ 49 mil = as duplicatas ambíguas.
+
 ## 2026-09-01 (3)
 
 ### Corrigido — bug de parsing no import de Produtos: ~700 produtos com `custo_total = 0`

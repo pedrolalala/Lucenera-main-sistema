@@ -54,8 +54,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from _supabase_client import get_client, SUPABASE_URL  # noqa: E402
 
-CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-08-26.xlsx"
-CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-08-26.xlsx"
+CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-08-31.xlsx"
+CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-08-31.xlsx"
 
 # "LUCE NERA" = MANOELLA. NAO é uma decisão, é um fato permanente: é assim
 # que a empresa está identificada no banco de dados do Connect (sistema
@@ -259,7 +259,8 @@ def processar(dry_run: bool) -> None:
     trans = buscar_paginado(
         client,
         "transacoes",
-        "id,negociacao_id,cod_itens_duplicata,status_pago,vl_pago,dt_pagamento,vl_desconto,vl_juros",
+        "id,negociacao_id,cod_itens_duplicata,status_pago,vl_pago,dt_pagamento,vl_desconto,vl_juros,"
+        "vl_parcela,dt_vencimento,dt_emissao,vl_frete,vl_ipi",
     )
     print(f"  {len(trans)} transacoes no banco\n")
     trans_map = {
@@ -312,12 +313,26 @@ def processar(dry_run: bool) -> None:
             continue
 
         novo_dt_pagamento = to_date_str(row["dt_pagamento"])
+        novo_dt_vencimento = to_date_str(row["dt_vencimento"])
+        novo_dt_emissao = to_date_str(row["dt_emissao"])
+        # Achado em 02/09/2026: o update só sincronizava status/pagamento e
+        # deixava `vl_parcela`/`dt_vencimento`/`dt_emissao` travados no valor do
+        # 1º insert. Quando uma duplicata era renegociada/corrigida no Connect
+        # (ex.: dup 6836, R$ 550.000 -> R$ 55.000 — um zero a mais), o
+        # `transacoes.vl_parcela` ficava errado e o "fluxo futuro" (Em Aberto
+        # por vencimento) do Dashboard inflava — ~R$ 2 mi só nessa duplicata.
+        # Agora esses campos também entram na comparação e no update.
         mudou = (
             existente["status_pago"] != row["status_pago"]
             or round(float(existente["vl_pago"] or 0), 2) != round(float(row["vl_pago"]), 2)
             or (existente["dt_pagamento"] or None) != (novo_dt_pagamento or None)
             or round(float(existente["vl_desconto"] or 0), 2) != round(float(row["vl_desconto"]), 2)
             or round(float(existente["vl_juros"] or 0), 2) != round(float(row["vl_juros"]), 2)
+            or round(float(existente["vl_parcela"] or 0), 2) != round(float(row["vl_parcela"]), 2)
+            or (existente.get("dt_vencimento") or None) != (novo_dt_vencimento or None)
+            or (existente.get("dt_emissao") or None) != (novo_dt_emissao or None)
+            or round(float(existente["vl_frete"] or 0), 2) != round(float(row["vl_frete"]), 2)
+            or round(float(existente["vl_ipi"] or 0), 2) != round(float(row["vl_ipi"]), 2)
         )
         if mudou:
             atualizacoes.append(
@@ -328,6 +343,11 @@ def processar(dry_run: bool) -> None:
                     "dt_pagamento": novo_dt_pagamento,
                     "vl_desconto": float(row["vl_desconto"]),
                     "vl_juros": float(row["vl_juros"]),
+                    "vl_parcela": float(row["vl_parcela"]),
+                    "dt_vencimento": novo_dt_vencimento,
+                    "dt_emissao": novo_dt_emissao,
+                    "vl_frete": float(row["vl_frete"]),
+                    "vl_ipi": float(row["vl_ipi"]),
                 }
             )
         else:
@@ -376,6 +396,11 @@ def processar(dry_run: bool) -> None:
                     "dt_pagamento": rec["dt_pagamento"],
                     "vl_desconto": rec["vl_desconto"],
                     "vl_juros": rec["vl_juros"],
+                    "vl_parcela": rec["vl_parcela"],
+                    "dt_vencimento": rec["dt_vencimento"],
+                    "dt_emissao": rec["dt_emissao"],
+                    "vl_frete": rec["vl_frete"],
+                    "vl_ipi": rec["vl_ipi"],
                 }
             ).eq("id", rec["id"]).execute()
             total_ok2 += 1

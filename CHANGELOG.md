@@ -2,6 +2,19 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-02 (5)
+
+### Adicionado — Dashboard: aba "Fluxo Futuro (Projeção)" (SPEC-126 Escopo 8)
+
+- Pedido do usuário: ver dentro do próprio Dashboard os **dados futuros** (o que ainda entra e o que ainda sai), para o chefe e o Vinícius, "com a planilha e o que vai gastar, quais os grupos".
+- `04-Sistemas/dashboard-lucenera-b02z85wa3`: nova rota `/fluxo-futuro` + item no menu Financeiro. Consome só `v_financeiro_realizado` (parcelas `status_pago = 0`), agrupa por mês de `dt_vencimento`.
+- Mostra: 4 KPIs (A Receber / A Pagar / Saldo Projetado / Vencido líquido); gráfico barras A Receber × A Pagar por mês + linha do saldo acumulado; tabela **mês a mês** (A Receber · A Pagar · Saldo do mês · Saldo acumulado); tabela **"o que vai gastar — por grupo"** (Grupo · Sub-grupo · Parcelas · Total · % do total); e a **planilha** de cada parcela em aberto (com coluna Grupo, que as outras abas não têm) + export CSV. Filtros: Horizonte (6/12/24 meses/Tudo), Perfil (Ribeirão/SP), "Incluir vencidos".
+- `cash-flow.ts`: `janelaFuturo`, `computeFluxoFuturoPorMes`, `computeGastoFuturoPorGrupo`, `computeTotaisFluxoFuturo` (append; não alteram as funções existentes).
+- **Publicado no Skip 41135** — versão **0.0.33** / `d319d45`, QA (setup/static/build/integrations/test) tudo verde. Números batem com a planilha `_2026-09-02.xlsx`: A Pagar R$ 5.479.292,14 / A Receber R$ 3.104.418,35 por vencimento.
+- **v0.0.34 / `4b99af0`** — cross-filter por mês: clicar numa barra do gráfico (ou numa linha da tabela mês a mês) filtra os KPIs, o "o que vai gastar por grupo" e a planilha por aquele mês (ex.: só setembro), com chip para limpar.
+- **v0.0.35 / `5846bdc`** — o gráfico também reage: com um mês aberto ele troca para "Composição de \<mês\> por grupo" (barras A Receber × A Pagar por grupo); clicar num grupo desce mais um nível e filtra tudo por mês + grupo. Chips "Mês" e "Grupo" para voltar.
+- Submódulo git `dashboard-lucenera-b02z85wa3` **não** sincronizado (checkout local está várias SPECs atrás da produção do Skip) — a aba está no ar só pelo Skip; re-sync do submódulo fica como manutenção à parte.
+
 ## 2026-09-02 (4)
 
 ### Registrado + testado — padrão do ciclo de sincronização Connect

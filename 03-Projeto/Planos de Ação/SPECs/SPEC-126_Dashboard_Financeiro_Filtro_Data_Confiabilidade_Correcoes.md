@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-126 — Dashboard Financeiro 100%: Filtro por Data, Confiabilidade e Correções da Reunião 31/08"
 status: pendente
-data_ultima_modificacao: 2026-08-31
+data_ultima_modificacao: 2026-09-02
 sistemas_envolvidos:
   - Dashboard Financeiro — 04-Sistemas/dashboard-lucenera-b02z85wa3 (Skip projeto 41135, host dashboard-empresa-40d7d.goskip.app)
   - Administração Bancária — 04-Sistemas/"gestao-financeira-clone-544cb (1)" (Escopo 4, Receita de Serviço)
@@ -93,6 +93,18 @@ Critério (usuário): todo orçamento criado dentro do sistema e aprovado é tes
 - [x] `vw_necessidade_compra` verificada no Supabase real: 232 produtos com `pendente`/`preco_custo`, card mostraria ~R$ 811 mil — está pegando; a divergência do Vinícius é na tela de Compras / no Excel dele, não no card
 - [ ] "Receita por Apropriação" — a planilha do fim da aba já lista todas as apropriações; avaliar se ainda vale expandir a rosca além do top-10
 - [ ] Definir com o Filippo a lista de sub-grupos que contam como "custo fixo" no Ponto de Equilíbrio
+
+### Escopo 8 — Aba "Fluxo Futuro (Projeção)" — FEITO 2026-09-02
+
+Pedido do usuário: "criar no Dash dentro do dash a visualização dos dados futuros para o chefe e o Vinícius verem", com "a planilha com os dados e com o que vai gastar, quais os grupos".
+
+- [x] `src/services/cash-flow.ts` — `janelaFuturo(meses)`, `computeFluxoFuturoPorMes` (Em Aberto por mês de `dt_vencimento`, balde "Vencido" primeiro, saldo do mês + saldo acumulado a partir de zero), `computeGastoFuturoPorGrupo` (despesa em aberto por grupo+sub-grupo), `computeTotaisFluxoFuturo` (a receber/a pagar/saldo + recorte vencido). Reusam `aberto()` e `valorAberto()` (`vl_parcela − vl_desconto`) — mesma conta do "Em Aberto" das outras abas.
+- [x] `src/pages/FluxoFuturo.tsx` (novo) — 4 KPIs (A Receber / A Pagar / Saldo Projetado / Vencido líquido), gráfico `ComposedChart` (barras Receber verde × Pagar vermelho + linha Saldo acumulado), tabela "Projeção mês a mês" (Mês · A Receber · A Pagar · Saldo do mês · Saldo acumulado + total), tabela "O que vai gastar — por grupo" (Grupo · Sub-grupo · Parcelas · Total · % do total + total), e `<PlanilhaTabela>` com cada parcela em aberto (colunas incluem **Grupo**, que as planilhas das outras abas não têm). Filtros: Horizonte (6/12/24 meses/Tudo, default Tudo), Perfil (Ribeirão/SP), switch "Incluir vencidos" (default ligado).
+- [x] `src/App.tsx` — rota `/fluxo-futuro` (lazy). `src/components/app-sidebar.tsx` — item "Fluxo Futuro (Projeção)" no grupo Financeiro, após "Agenda de Pagamentos".
+- [x] Publicado no Skip 41135 — versão **0.0.33** (`d319d45`, 2026-09-02), QA (setup/static/build/integrations/test) tudo verde.
+- [x] Números conferidos contra a planilha `_2026-09-02.xlsx` no ciclo de import: A Pagar em aberto R$ 5.479.292,14 e A Receber R$ 3.104.418,35, batendo mês a mês por vencimento (Vencido + Set/2026 em diante).
+- [x] **Cross-filter por mês (v0.0.34, `4b99af0`, 2026-09-02):** clicar numa barra do gráfico (ou numa linha da tabela "Projeção mês a mês") seleciona aquele mês e filtra os 4 KPIs, a tabela "o que vai gastar — por grupo" e a planilha do fim da aba. `FilterChip` "Mês: …" no cabeçalho para limpar. Helper `baldeVencimento(dt)` (`'vencido'` | `'AAAA-MM'`) extraído em `cash-flow.ts` e reusado no agregador e no filtro de clique.
+- [x] **Drill de 2 níveis no gráfico (v0.0.35, `5846bdc`, 2026-09-02):** com um mês selecionado o próprio gráfico troca de "por mês" para **"Composição de \<mês\> — por grupo"** (barras horizontais A Receber × A Pagar por `desc_grupo`). Clicar numa barra de grupo desce o nível 2 (`grupoSelecionado`) e filtra KPIs + tabela + planilha por mês **e** grupo; chip "Grupo: …". A tabela "o que vai gastar" também é clicável por linha. Helper novo `computeAbertoPorGrupo` em `cash-flow.ts`. A linha do saldo acumulado só existe na visão por mês (horizonte inteiro, não muda com clique).
 
 ### Passos manuais do usuário
 
@@ -229,6 +241,15 @@ despesa_operacional ← qualquer outra despesa
 - **PUBLICADO no Skip 41135** (2026-09-01, 13:00 UTC): descoberto que a tela não mudava porque o Skip tem árvore própria (não lê do submódulo git — ver [[feedback_skip_deploy_separate_tree]]). Conferido que o Skip estava em sincronia com o submódulo antes de sobrescrever; escritos os 10 arquivos via `skip_file_write`; `apply_changes` (QA setup/static/build/integrations/test tudo verde) → versão **0.0.32** / `c5a8441`; `publish` → produção `dashboard-empresa-40d7d.goskip.app`.
 - Commits git locais (sem push): submódulo `d79d704`, central `f2df5f0` — conteúdo bate com o Skip 0.0.32.
 - Continuam bloqueados: E2 (marca de origem — mexe no import da Connect), E4 (Receita de Serviço — feature nova, vira SPEC própria), custo fixo do Ponto de Equilíbrio (Filippo).
+
+### 2026-09-02
+
+- **Escopo 8 — aba "Fluxo Futuro (Projeção)"** implementada e **PUBLICADA no Skip 41135** (versão **0.0.33** / `d319d45`, QA setup/static/build/integrations/test tudo verde).
+  - `cash-flow.ts`: `janelaFuturo`, `computeFluxoFuturoPorMes`, `computeGastoFuturoPorGrupo`, `computeTotaisFluxoFuturo` (append no fim do arquivo, não mexem nas funções existentes).
+  - `pages/FluxoFuturo.tsx` novo; rota `/fluxo-futuro` e item no menu lateral (grupo Financeiro).
+  - Mostra: Em Aberto por mês de vencimento (Receber × Pagar × saldo acumulado), tabela mês a mês, "o que vai gastar por grupo" (grupo + sub-grupo + % + parcelas), e a planilha de cada parcela em aberto com a coluna Grupo.
+  - Bate com a planilha `_2026-09-02.xlsx`: A Pagar R$ 5.479.292,14 / A Receber R$ 3.104.418,35, mês a mês por vencimento.
+- **Submódulo `dashboard-lucenera-b02z85wa3` NÃO sincronizado** — o checkout local (`main` em `d79d704`) está várias SPECs atrás da produção do Skip (não tem code-splitting/SPEC-123, nem a página `/transacoes`/SPEC-064, nem SPEC-125). Escrever a aba nova só no submódulo local não a colocaria no ar e criaria conflito. A aba está no ar pelo Skip; o re-sync completo submódulo↔Skip continua como pendência de manutenção separada (ver [[feedback_skip_local_pode_ter_menos_que_producao]]).
 
 ## Pendências
 

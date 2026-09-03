@@ -206,4 +206,25 @@ aproximados até lá.
 
 ### 2026-09-03
 
-- SPEC criada a partir da transcrição da reunião 03/09 (Reunião 01). Custos fixos de maio levantados e enviados ao Vinícius (R$ 330.902,76; 85% folha). Nenhuma alteração de código ainda.
+- SPEC criada a partir da transcrição da reunião 03/09 (Reunião 01). Custos fixos de maio levantados e enviados ao Vinícius (R$ 330.902,76; 85% folha).
+
+- **Escopos 1, 1B, 1C, 3, 4 e 5 implementados e publicados no Skip 41135** (submódulo git segue atrás da produção — feature está no ar pelo Skip):
+
+  **E1 / E1B / E1C — Estoque (v0.0.37, `6bf3bc4`)**
+  - `Estoque.tsx`: removidos os cards `Valor de Estoque (Custo)`, `Valor de Estoque (Venda)`, `Venda em Déficit`, `Showroom (Custo)`, `Showroom (Venda)` e `Marcas no filtro`. Ficam 3 principais em cima (`Custo Disponível`, `Custo em Déficit (a comprar)`, `Venda Disponível`) e 2 secundários (`De Cliente / Reservado` Custo/Venda) sob o rótulo "Comprometido com projeto de cliente (base do seguro)". Contagem de produtos/marcas foi para a linha de subtítulo. Gráfico "Showroom por Marca" saiu.
+  - `Showroom.tsx` (novo) + rota `/showroom` + item no menu Operações: lista das peças com `estoque_showroom > 0`, cards `Showroom (Custo/Venda)` + contagem, gráfico "Showroom por Marca (Custo) top 12", planilha + CSV.
+  - `MarcaMultiSelect.tsx` (novo): Popover + Command com busca e checkboxes. `estoque.ts` ganhou `filterByMarcas(rows, string[])` e `apenasShowroom(rows)`. Estoque e Showroom usam multi-seleção; clique em barra/pizza/linha adiciona/remove a marca.
+
+  **E3 — Investimento (v0.0.38, `fcf7a51`)**
+  - `Index.tsx`: bloco "Investimento (no período)" **dentro** do card "Custo Operacional: Fixo × Variável", abaixo do gráfico — sem card no topo, sem gráfico. `cash-flow.ts` ganhou `computeInvestimentoRealizado` (despesa realizada com `desc_grupo` casando `/investimento/i`).
+
+  **E4 — filtro de mês + calendário (v0.0.38, `fcf7a51`)**
+  - `MesSelect.tsx` (novo) adicionado a `Index`, `ContasReceberFoco`, `ContasPagarFoco` — escolher um mês preenche o intervalo De/Até daquele mês (fica ao lado do `<PeriodFilter>`). `cash-flow.ts`: `mesesPresentes`, `intervaloDoMes`, `rotuloMesAaaaMm`, `mesDoPeriodo`.
+  - `PeriodFilter.tsx`: corrigido o bug do `<Calendar mode="range">` — no 1º clique `ate` não copia mais o `de` (era o que "fechava" o range e obrigava os dois cliques no dia 1º); popover fecha quando o intervalo tem os dois extremos.
+
+  **E5 — 31/12 / Pendências (v0.0.39, `271a253`)**
+  - `cash-flow.ts`: `ehPendencia3112(dt)` (vencimento em 12-31 de qualquer ano) + `computePendencias3112PorAno`.
+  - `Pendencias3112.tsx` (novo) + rota `/pendencias-31-12` + item no menu Financeiro: KPIs A Receber / A Pagar / Saldo, tabela por ano, planilha + CSV.
+  - `FluxoFuturo.tsx`: `abertas` agora **exclui** `ehPendencia3112` do gráfico / KPIs / tabela mês a mês / pizza / planilha; aviso no topo com a contagem e o total movidos para a aba. Novo filtro **"Vencimento De / Até"** (dois `input[type=date]`, aceita data no passado) que, quando preenchido, sobrepõe o Horizonte e o "Incluir vencidos".
+
+- **Pendente:** E2 (classificação fixo/variável do Ponto de Equilíbrio — Filippo/Vinícius) e E6 (data de baixa de cheque/RT — Connect, provável SPEC própria). Confirmar a lógica de 31/12 do Fluxo de Caixa com o Pedro. Limpeza da equipe (Carol/Sérgio/Vinícius) para os números baterem.

@@ -4,6 +4,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-03
 
+### Implementado — SPEC-127 Escopos 1/1B/1C/3/4/5 (Dashboard, reunião Vinícius 03/09)
+
+- **Estoque (v0.0.37 / `6bf3bc4`):** removidos os cards "Valor de Estoque (Custo/Venda)", "Venda em Déficit", "Showroom (Custo/Venda)" e "Marcas no filtro". Ficam os 3 principais (Custo Disponível, Custo em Déficit a comprar, Venda Disponível) + 2 de "De Cliente / Reservado". Nova aba **/showroom** (menu Operações) com as peças do showroom + cards + gráfico + planilha. Filtro de marca agora é **múltiplo** (novo `MarcaMultiSelect`, `filterByMarcas`).
+- **Investimento (v0.0.38 / `fcf7a51`):** bloco "Investimento (no período)" abaixo do gráfico Fixo × Variável no Fluxo de Caixa — sem card no topo, sem gráfico. Novo `computeInvestimentoRealizado`.
+- **Filtro de mês (v0.0.38):** `MesSelect` novo em Fluxo de Caixa / Recebimentos / Pagamentos (escolher o mês preenche o intervalo De/Até). Corrigido o bug do calendário range no `PeriodFilter` (o 1º clique não "fecha" mais o intervalo; popover fecha ao completar).
+- **31/12 / Pendências (v0.0.39 / `271a253`):** nova aba **/pendencias-31-12** (menu Financeiro) listando os títulos em aberto com vencimento em 31/12 de qualquer ano, por ano + planilha. O **Fluxo Futuro passa a excluir** esses títulos de tudo (gráfico/KPI/tabela/pizza/planilha), com aviso no topo. Novo filtro "Vencimento De/Até" no Fluxo Futuro, aceitando data retroativa.
+- Pendente: E2 (classificação fixo/variável do Ponto de Equilíbrio — Filippo/Vinícius) e E6 (cheque/RT — Connect).
+
 ### Planejado — SPEC-127: ajustes do Dashboard da reunião Vinícius 03/09
 
 - Criada `03-Projeto/Planos de Ação/SPECs/SPEC-127_Dashboard_Reuniao_03_09_Cards_Estoque_Ponto_Equilibrio_Pendencias_31_12.md` a partir da transcrição da Reunião 01.

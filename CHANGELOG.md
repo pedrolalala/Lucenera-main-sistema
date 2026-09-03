@@ -4,6 +4,12 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-03
 
+### Planejado — SPEC-127: ajustes do Dashboard da reunião Vinícius 03/09
+
+- Criada `03-Projeto/Planos de Ação/SPECs/SPEC-127_Dashboard_Reuniao_03_09_Cards_Estoque_Ponto_Equilibrio_Pendencias_31_12.md` a partir da transcrição da Reunião 01.
+- Escopos: (1) enxugar cards do Estoque — remover "Valor de Estoque (Custo/Venda)" e "Venda em Déficit", reordenar os 3 principais; (1B) aba `/showroom` própria; (1C) filtro de marca múltiplo; (2) revisar classificação fixo/variável do Ponto de Equilíbrio — BLOQUEADO em Filippo/Vinícius; (3) Investimento destacado abaixo do gráfico fixo×variável, sem card; (4) Select de mês nas telas financeiras + bug do calendário range; (5) aba "31-12 / Pendências" + Fluxo Futuro excluindo `dt_vencimento = 31/12` + filtro De/Até retroativo; (6) proposta de data de baixa estimada (+6 meses) para cheque/RT.
+- **Ressalva Estoque** documentada: os cortes de card são layout, não corrigem a causa (peça vendida-não-entregue conta em "estoque geral" e "reserva" no Connect); Estoque só reconcilia após limpeza no Connect + SPEC-126 Escopo 5. Nenhuma linha de código ainda.
+
 ### Corrigido + adicionado — Fluxo Futuro: filtro por mês, pizza das despesas, drill do grupo consertado (SPEC-126 E8)
 
 - **Bug reportado pelo chefe:** ao clicar numa despesa (barra de grupo ou linha da tabela) a planilha "buscava do lugar errado" — vinha receita junto ("VENDAS A PRAZO" sob "ADMINISTRATIVAS") e todos os sub-grupos do grupo em vez de só o clicado. Causa: o recorte de grupo filtrava só por `desc_grupo` e não filtrava `tipo`. Corrigido: o drill de grupo/sub-grupo agora é **sempre `tipo = 'despesa'`** e respeita `desc_sub_grupo`. Os 4 KPIs voltaram a ser fixos no nível do mês.

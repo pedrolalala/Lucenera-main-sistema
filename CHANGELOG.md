@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-03
+
+### Corrigido + adicionado — Fluxo Futuro: filtro por mês, pizza das despesas, drill do grupo consertado (SPEC-126 E8)
+
+- **Bug reportado pelo chefe:** ao clicar numa despesa (barra de grupo ou linha da tabela) a planilha "buscava do lugar errado" — vinha receita junto ("VENDAS A PRAZO" sob "ADMINISTRATIVAS") e todos os sub-grupos do grupo em vez de só o clicado. Causa: o recorte de grupo filtrava só por `desc_grupo` e não filtrava `tipo`. Corrigido: o drill de grupo/sub-grupo agora é **sempre `tipo = 'despesa'`** e respeita `desc_sub_grupo`. Os 4 KPIs voltaram a ser fixos no nível do mês.
+- **Filtro "Mês" (Select)** no cabeçalho, além do clique no gráfico — lista "Vencido", set/2026, out/2026, … Compartilha estado com o gráfico e a tabela mês a mês.
+- **Gráfico de pizza "Repartição das despesas em aberto"** (pedido do chefe): rosca da despesa em aberto por grupo (top-8 + "Outros") com legenda e % ao lado; clicar numa fatia abre o grupo nos sub-grupos. A barra "Composição por grupo" da v0.0.35 (que mostrava receita junto) saiu.
+- Helper `computeDespesaAbertoPorDimensao` em `cash-flow.ts`. Publicado no Skip **v0.0.36 / `32990c4`**, QA verde.
+
 ## 2026-09-02 (5)
 
 ### Adicionado — Dashboard: aba "Fluxo Futuro (Projeção)" (SPEC-126 Escopo 8)

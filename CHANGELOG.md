@@ -2,6 +2,42 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-10
+
+### Publicado — SPEC-129: Memória Lucenera integrada ao ecossistema + Central
+
+- Criada `03-Projeto/Planos de Ação/SPECs/SPEC-129_Integrar_Memoria_Lucenera_Ecossistema_Central.md`. Pedido do usuário: trazer o sistema de memória institucional do Filippo (`github.com/filippogiorgibrasil/memoria-lucenera`) pra dentro do ecossistema e registrar na Central, com login único.
+- **Banco (produção, autorizado):** o núcleo `supabase.sql` do Filippo já tinha sido aplicado pelo usuário (schema isolado `memoria`, 12 tabelas + RLS, bucket privado `lucenera-memory-files`). Nesta sessão: `ALTER ROLE authenticator SET pgrst.db_schemas = 'public, graphql_public, memoria'` + `NOTIFY pgrst` (schema exposto à API; `anon` segue barrado por design do Filippo, `authenticated` lê sob RLS — verificado). `INSERT` em `public.systems` (`slug='memoria'`, `visivel_no_hub=true`, link `https://memoria-lucenera-2e074.goskip.app/`, id `9463d897-…`). Migrations consolidadas (sem edição de regra) em `supabase/db/migrations/20260909_130_memoria_lucenera_schema/` — scripts 02–04 (organização/ingestão) **não aplicados** (fase 2). Removido o placeholder vazio `supabase/db/migrations/Filippo amarzenamento banco de dados/SQL`.
+- **App / Skip (projectId 57204 → `memoria-lucenera-2e074.goskip.app`):** o app do Filippo é site estático sem build; o projeto Skip é scaffold React/Vite. Estratégia **A** (passthrough): `index.html` da raiz = casca React vazia (`#root`; `App.tsx`/`Index.tsx`/`Layout.tsx` renderizam `null`) + markup e scripts do app do Filippo. App em `public/app/` (`app.js`, `supabase-adapter.js`, `memory-organization-core.js`, `long-document-core.js`, `styles.css`) — conferidos byte a byte contra o fonte + `node --check`. `MEMORIA_CONFIG` inline com `%VITE_SUPABASE_URL%` / `%VITE_SUPABASE_PUBLISHABLE_KEY%` (substituição do Vite no build — sem chave commitada; env vars setadas no Skip). `.oxfmtrc.json` passou a ignorar `public/`. `vite.config.ts` é read-only no MCP do Skip.
+- **SSO:** `public/app/sso.js` novo — consome `?sso_code=` da Central, troca em `exchange-cross-system-code` (mesmo projeto Supabase; **sem allowlist de destino no Hub → nenhuma mudança no Hub**), aplica a sessão e recarrega sem o parâmetro. Sem `sso_code`, é inerte (login e-mail/senha e demo seguem).
+- **Fase 2 (adiada):** `memory-organization.js`, `document-ingestion.js`, `book-ingestion.js` + item "Organização da Memória" do menu — dependem das migrations 02–04 e das 4 Edge Functions, que serão adaptadas de **OpenAI para Gemini** (`GEMINI_API_KEY`; decisão do usuário por custo).
+- QA do Skip verde (setup/static/build/integrations/test). **Publicado em produção** — versão 0.0.7 `e270d8e`. Preview e produção servem `/` + `/app/*` (HTTP 200), config substituída.
+- **Impacto no banco:** `authenticator.pgrst.db_schemas` (config), `public.systems` (+1 linha). Nada em `public` alterado. `memoria` continua isolado.
+- **Repos a receber commit:** central (SPEC-129, CHANGELOG, migration 130, docs). Submodule `04-Sistemas/memoria-lucenera` **ainda não registrado** — o GitHub `pedrolalala/memoria-lucenera` só tem o scaffold; o Skip não sincroniza a árvore pro Git sozinho (pendência).
+- **Pendências:** publicar as migrations 02–04 + Edge Functions Gemini; teste ao vivo do SSO pelo Hub; registrar o submodule; `memoria` nos Exposed schemas do painel (durabilidade); acesso restrito/whitelist da IA aos dados operacionais de `public` (fase futura).
+
+## 2026-09-08
+
+### Rodado — Ciclo de sincronização Connect (planilhas `_2026-09-08.xlsx`)
+
+- Constantes de caminho bumpadas nos 3 scripts (`importar_contas_pagar_receber.py`, `importar_pedido_compra.py`, `importar_produtos_estoque.py`) para `_2026-09-08.xlsx`, `--dry-run` conferido, depois gravação real. Todos os 3 imports com 0 erros: **Produtos** 234 atualizados (153 `CodProduto` sem match, mesmo padrão de sempre); **PedidoCompra** 15 pedidos novos + 10 atualizados (138→153 no banco); **ContaPagar/ContaReceber** 112 transações novas, 2.987 atualizadas, 43 parcelas órfãs canceladas, 48 negociações novas (empresa LUCE NERA), 402 combinações ambíguas roteadas para MANOELLA/preferida.
+- **Conferência pós-import (contra a tabela crua `transacoes`)**: "Em Aberto A Pagar" bate **exato** com a planilha (R$ 5.235.961,85 nos dois lados). "Em Aberto A Receber" **não bate**: banco R$ 4.872.264,13 × planilha R$ 3.192.121,93 — diferença de **R$ 1.680.142,20**.
+- **Investigação corrigiu 2 hipóteses erradas antes de achar a causa real**: (1) exemplos de duplicatas "duplicadas" (`dup 6840` etc.) eram na verdade colisão de número entre `tipo='despesa'` e `tipo='receita'` (não é bug — `cod_duplicata` não é único entre pagar/receber no Connect); (2) a view `v_financeiro_realizado` (o que o Dashboard mostra) **nunca esteve errada** — ela já exclui qualquer `(cod_duplicata,tipo)` ausente do export atual via `JOIN stg_duplicatas_vigentes`, confirmada batendo exato mesmo com a tabela crua desalinhada.
+- **Causa real**: 420 `transacoes` (136 `cod_duplicata`, todas receita, quase todas `ISLIGHT`/`FOCO ILUMINACAO`) estavam abertas na tabela **crua** mas a duplicata inteira não aparece em nenhuma forma na planilha atual (nem aberta, nem paga — 109 das 136 já venceram há muito). A view escondia isso, mas `ContasEmAberto.tsx` (`retorno-bancario-bradesco-5392a`, SPEC-117) lê `transacoes` direto e mostraria o valor errado.
+- **Bug pego em dry-run antes de gravar**: o primeiro rascunho do fix cancelava também 26 transações já **pagas** (R$ 156.989,14) de negociações duplicadas — corrigido para só cancelar `status_pago=0` antes de rodar de verdade.
+- **Decisão do usuário (sem exceção: "a planilha é o real")**: `importar_contas_pagar_receber.py` ganhou a regra `duplicata_ausente_a_cancelar` — duplicata inteira ausente do export atual e ainda aberta no banco → cancelada (`status_pago=2`). Aplicado: **420 canceladas, 0 erros**. Depois disso, tabela crua e view batem exatas com a planilha nos dois lados. Também adicionada (sem impacto hoje, mas útil pra ciclos futuros) a regra `neg_ambigua_perdedora_ids`: quando `(cod_duplicata,tipo)` tem 2+ negociações no banco, cancela as em aberto da negociação "perdedora" (não-preferida).
+
+## 2026-09-04
+
+### Adicionado (QA verde, não publicado) — SPEC-128: Fluxo Futuro desmembrado em Contas a Pagar / Pedidos de Compra / Previsões
+
+- Criada `03-Projeto/Planos de Ação/SPECs/SPEC-128_Dashboard_Fluxo_Futuro_Desmembrar_Pedidos_Compra_Previsoes.md`. Pedido do usuário: desmembrar o bloco único "A Pagar" da aba Fluxo Futuro em 3 fontes — **Contas a Pagar** (`transacoes`, sem mudança), **Pedidos de Compra** (`pedidos_compra`/`pedido_compra_parcelas`, app interno de Compras) e **Previsões** (`pedido_compra`/`staging_pedido_compra`, export Connect "PedidoCompra" — corrigido pelo usuário após o 1º rascunho, que assumia errado que era `pedidos_compra` sem parcela).
+- **Achado — dedup determinística (P-03):** 51 dos 138 pedidos do export Connect já tinham sido recriados manualmente dentro de `pedidos_compra` como `numero = 'PC-LEGADO-<codigo_pedido>'` (achado original da SPEC-039, 22/07); excluídos de "Previsões" por chave exata para não duplicar com "Pedidos de Compra".
+- **Achado técnico:** `pedidos_compra`/`pedido_compra_parcelas` não existem no `src/lib/supabase/types.ts` gerado do Dashboard — resolvido com cast local, documentado em `AI_DB_CONTEXT.md` novo (esse sistema não tinha nenhum ainda).
+- `04-Sistemas/dashboard-lucenera-b02z85wa3`: `src/services/pedidos-compra-futuro.ts` (novo), `src/components/colunasPedidosCompra.ts` (novo), `src/pages/FluxoFuturo.tsx` (2 KPIs novos + banner de aviso de sobreposição + 2 tabelas `<PlanilhaTabela>` novas). **Publicado no Skip 41135 até o QA** — versão **0.0.40** / `70754b9`, setup/static/build/integrations/test tudo verde. **Não publicado em produção** — aguardando confirmação do usuário.
+- Simplificação deliberada: os 2 blocos novos não entraram no `ComposedChart` existente (sem suíte de teste visual neste projeto, risco avaliado como desnecessário numa tela de diretoria) — ficaram como cards/tabelas à parte, sem herdar Horizonte/"Incluir vencidos"/cross-filter por mês. Registrado como pendência para decisão futura.
+- Conferência contra o Supabase real: Pedidos de Compra em Aberto = 45 parcelas / R$ 142.078,19; Previsões = 87 pedidos elegíveis (138 − 51 legado) / R$ 827.886,04.
+
 ## 2026-09-03
 
 ### Implementado — SPEC-127 Escopos 1/1B/1C/3/4/5 (Dashboard, reunião Vinícius 03/09)

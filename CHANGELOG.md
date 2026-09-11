@@ -4,6 +4,20 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-11
 
+### Campo Código do Projeto em todos os formulários — SPEC-134 (Memória Lucenera)
+
+- Pedido do usuário: marcar qualquer memória (entidade, conhecimento, experiência, decisão, projeto, fonte, captura, upload, memória por voz) com o código de um projeto operacional Lucenera (ex.: `26.181`), para facilitar a busca depois.
+- Coluna `project_code text` (texto livre, sem FK) adicionada em 7 tabelas do schema `memoria` + índice parcial cada — migration `20260911_134_memoria_lucenera_project_code` aplicada no Supabase real.
+- Campo adicionado nos 6 formulários genéricos, na captura rápida, no upload de arquivo e na revisão de memória por voz (`public/app/app.js` + `public/app/supabase-adapter.js`, Skip projectId 57204), exibido também na tela de detalhe. Busca global já é full-text sobre o registro inteiro, então o código já fica pesquisável sem filtro dedicado novo.
+- QA do Skip verde, publicado em produção (`memoria-lucenera-2e074.goskip.app`, v0.0.8 / `cc8afcf`). Sem teste manual ao vivo no navegador (login/SSO segue como pendência aberta desde a SPEC-129).
+
+### Implementado Estado (lookup) — SPEC-130, achado que pode ser a causa real da automação não disparar
+
+- Usuário reportou que a automação de criação de grupo/pasta nunca disparou em nenhum dos 3 testes. Investigação: os 3 (`7151`/`7152`/`7154`) tinham Estado vazio — a lista mostra "Informações necessárias" pra campo obrigatório vazio. Teoria de "nome do responsável muito longo" descartada com evidência (teste com nome curto também falhou).
+- Achada a lista "Estados" no site SharePoint (28 itens). Criado `sharepoint_estado_map` (migration `014`, seed com os 27 IDs reais). RPC `aplicar_pull_sharepoint` ganhou `p_estado` (`015`, DROP+CREATE por mudar assinatura). Push e pull resolvem `EstadoLookupId` nos dois sentidos. Trigger de push passou a disparar também só com mudança de `estado` (`016`).
+- **Teste completo** (`26.286`/item `7157`): nível, status ("Proposta Sinal") e estado ("SP") todos preenchidos — push sem erro, conferido via Graph. Primeiro teste com informação completa, aguardando confirmação se o grupo foi criado.
+- Pendência nova: `sharepoint_status_map` só tem 3 de ~17 valores — status fora do mapa ainda não é enviado, pode continuar bloqueando a automação em outros projetos.
+
 ### Fix Data Entrada + seed parcial de Status — SPEC-130
 
 - **Bug achado pelo usuário**: `data_entrada` ficava sempre em branco depois de sincronizar — o código do pull/backfill mandava `NULL` sempre, desatualizado em relação à SPEC (que já confirmava ser dado real, não automático). Corrigido em `sharepoint-projetos-pull/index.ts` + `backfill_sharepoint_projetos.py`, function redeployada, backfill reprocessado: **4.087 de 4.087 projetos com Data Entrada preenchida**.

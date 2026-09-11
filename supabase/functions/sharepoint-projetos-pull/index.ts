@@ -104,6 +104,11 @@ Deno.serve(async (req: Request) => {
       (statusMapRows ?? []).map((r: any) => [String(r.sharepoint_valor).trim(), r.projeto_status]),
     )
 
+    const { data: estadoMapRows } = await supabase.from('sharepoint_estado_map').select('*')
+    const mapaEstadoReverso = new Map(
+      (estadoMapRows ?? []).map((r: any) => [String(r.sharepoint_item_id), r.estado]),
+    )
+
     // --- delta: continua de onde parou, ou começa do zero ---
     const { data: estadoDelta } = await supabase
       .from('sharepoint_sync_state')
@@ -126,7 +131,7 @@ Deno.serve(async (req: Request) => {
         if (item['@removed']) continue // exclusão nunca propaga (decisão da SPEC-130)
         resumo.processados++
         try {
-          await processarItem(supabase, item, mapaContatos, mapaUsuarios, mapaStatusReverso, resumo)
+          await processarItem(supabase, item, mapaContatos, mapaUsuarios, mapaStatusReverso, mapaEstadoReverso, resumo)
         } catch (err: any) {
           resumo.erros++
           await supabase.from('sharepoint_sync_log').insert({
@@ -174,6 +179,7 @@ async function processarItem(
   mapaContatos: Map<string, string>,
   mapaUsuarios: Map<string, string>,
   mapaStatusReverso: Map<string, string>,
+  mapaEstadoReverso: Map<string, string>,
   resumo: Record<string, number>,
 ) {
   const fields = item.fields ?? {}
@@ -197,9 +203,12 @@ async function processarItem(
   // é a data de entrada de verdade (amostra real da lista), mas o código ficou desatualizado
   // mandando NULL sempre. Corrigido aqui.
   const dataEntrada = extrairData(fields.field_6)
+  // Estado é lookup (EstadoLookupId = id numérico do item na lista "Estados", não texto).
+  const estadoLookupId = fields.EstadoLookupId != null ? String(fields.EstadoLookupId) : null
+  const estado = estadoLookupId ? mapaEstadoReverso.get(estadoLookupId) ?? null : null
 
   const syncHash = await sha256(
-    JSON.stringify({ nome, codigo, responsavelNome, cidade, arquivado, dataEntrada, nivel, status, arquitetoId, responsavelObraId }),
+    JSON.stringify({ nome, codigo, responsavelNome, cidade, arquivado, dataEntrada, nivel, status, arquitetoId, responsavelObraId, estado }),
   )
 
   // Busca em duas consultas separadas (nunca concatenar `codigo` — vindo do SharePoint, texto
@@ -210,7 +219,7 @@ async function processarItem(
   {
     const { data } = await supabase
       .from('projetos')
-      .select('id, nome, codigo, responsavel_nome, cidade, arquivado, data_entrada, status, arquiteto_id, responsavel_obra_id')
+      .select('id, nome, codigo, responsavel_nome, cidade, arquivado, data_entrada, status, arquiteto_id, responsavel_obra_id, estado')
       .eq('sharepoint_item_id', sharepointItemId)
       .maybeSingle()
     existente = data
@@ -218,7 +227,7 @@ async function processarItem(
   if (!existente && codigo) {
     const { data } = await supabase
       .from('projetos')
-      .select('id, nome, codigo, responsavel_nome, cidade, arquivado, data_entrada, status, arquiteto_id, responsavel_obra_id')
+      .select('id, nome, codigo, responsavel_nome, cidade, arquivado, data_entrada, status, arquiteto_id, responsavel_obra_id, estado')
       .eq('codigo', codigo)
       .is('sharepoint_item_id', null)
       .maybeSingle()
@@ -243,7 +252,8 @@ async function processarItem(
       (existente.data_entrada ?? null) === (dataEntrada ?? existente.data_entrada) &&
       (existente.status ?? null) === (status ?? existente.status) &&
       (existente.arquiteto_id ?? null) === (arquitetoId ?? existente.arquiteto_id) &&
-      (existente.responsavel_obra_id ?? null) === (responsavelObraId ?? existente.responsavel_obra_id)
+      (existente.responsavel_obra_id ?? null) === (responsavelObraId ?? existente.responsavel_obra_id) &&
+      (existente.estado ?? null) === (estado ?? existente.estado)
 
     if (igual) {
       resumo.ignorados++
@@ -263,6 +273,7 @@ async function processarItem(
     p_status: status,
     p_arquiteto_id: arquitetoId,
     p_responsavel_obra_id: responsavelObraId,
+    p_estado: estado,
     p_sync_hash: syncHash,
   })
   if (rpcError) throw new Error(`aplicar_pull_sharepoint falhou: ${rpcError.message}`)

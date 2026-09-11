@@ -59,7 +59,7 @@ Deno.serve(async (req: Request) => {
     const { data: projeto, error: projetoError } = await supabase
       .from('projetos')
       .select(
-        `id, nome, codigo, responsavel_nome, cidade, arquivado, nivel_estrategico, status,
+        `id, nome, codigo, responsavel_nome, cidade, arquivado, nivel_estrategico, status, estado,
          sharepoint_item_id, last_sync_source,
          arquiteto:contatos!projetos_arquiteto_id_fkey(nome),
          responsavel_obra:usuarios!projetos_responsavel_obra_id_fkey(nome)`,
@@ -98,6 +98,19 @@ Deno.serve(async (req: Request) => {
       statusSharepoint = statusMap?.sharepoint_valor ?? null
     }
 
+    // Estado é campo de lookup no SharePoint (EstadoLookupId) — precisa do ID do item na
+    // lista "Estados", não da sigla (achado 2026-09-11: sem isso a automação de criação de
+    // grupo/pasta não dispara). Ver sharepoint_estado_map.
+    let estadoLookupId: string | null = null
+    if (projeto.estado) {
+      const { data: estadoMap } = await supabase
+        .from('sharepoint_estado_map')
+        .select('sharepoint_item_id')
+        .eq('estado', String(projeto.estado).trim().toUpperCase())
+        .maybeSingle()
+      estadoLookupId = estadoMap?.sharepoint_item_id ?? null
+    }
+
     const fields: Record<string, unknown> = {
       Title: projeto.nome,
       field_0: codigo,
@@ -112,6 +125,9 @@ Deno.serve(async (req: Request) => {
     }
     if (statusSharepoint) {
       fields.field_10 = statusSharepoint
+    }
+    if (estadoLookupId) {
+      fields.EstadoLookupId = Number(estadoLookupId)
     }
 
     // --- Microsoft Graph ---

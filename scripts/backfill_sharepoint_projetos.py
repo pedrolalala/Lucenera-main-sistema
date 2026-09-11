@@ -132,7 +132,7 @@ def sync_hash(payload: dict) -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
-def processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso, dry_run, contadores):
+def processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso, mapa_estado_reverso, dry_run, contadores):
     fields = item.get("fields") or {}
     sharepoint_item_id = str(item["id"])
 
@@ -150,6 +150,8 @@ def processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso,
     nome_resp_obra = valor_ou_nulo(fields.get("Respons_x00e1_veldaObra"))
     arquiteto_id = mapa_contatos.get(nome_arquiteto.lower()) if nome_arquiteto else None
     responsavel_obra_id = mapa_usuarios.get(nome_resp_obra.lower()) if nome_resp_obra else None
+    estado_lookup_id = fields.get("EstadoLookupId")
+    estado = mapa_estado_reverso.get(str(estado_lookup_id)) if estado_lookup_id is not None else None
 
     payload_hash = sync_hash(
         {
@@ -163,6 +165,7 @@ def processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso,
             "status": status,
             "arquiteto_id": arquiteto_id,
             "responsavel_obra_id": responsavel_obra_id,
+            "estado": estado,
         }
     )
 
@@ -192,12 +195,12 @@ def processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso,
             p_sharepoint_item_id => %s, p_nome => %s, p_codigo => %s,
             p_responsavel_nome => %s, p_cidade => %s, p_arquivado => %s,
             p_data_entrada => %s, p_nivel_estrategico => %s, p_status => %s,
-            p_arquiteto_id => %s, p_responsavel_obra_id => %s, p_sync_hash => %s
+            p_arquiteto_id => %s, p_responsavel_obra_id => %s, p_estado => %s, p_sync_hash => %s
         )
         """,
         (
             sharepoint_item_id, nome, codigo, responsavel_nome, cidade, arquivado,
-            data_entrada, nivel, status, arquiteto_id, responsavel_obra_id, payload_hash,
+            data_entrada, nivel, status, arquiteto_id, responsavel_obra_id, estado, payload_hash,
         ),
     )
     projeto_id, acao = cur.fetchone()
@@ -252,6 +255,8 @@ def main():
     mapa_usuarios = {nome.strip().lower(): id_ for id_, nome in cur.fetchall() if nome}
     cur.execute("select projeto_status, sharepoint_valor from public.sharepoint_status_map")
     mapa_status_reverso = {valor.strip(): status for status, valor in cur.fetchall()}
+    cur.execute("select estado, sharepoint_item_id from public.sharepoint_estado_map")
+    mapa_estado_reverso = {str(item_id): estado for estado, item_id in cur.fetchall()}
 
     contadores = {"criados": 0, "atualizados": 0, "criaria": 0, "atualizaria": 0, "erros": 0}
 
@@ -282,7 +287,7 @@ def main():
             if item.get("@removed"):
                 continue
             try:
-                processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso, args.dry_run, contadores)
+                processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso, mapa_estado_reverso, args.dry_run, contadores)
             except (psycopg2.OperationalError, psycopg2.InterfaceError) as exc:
                 print(f"Conexão com o banco caiu no item {item.get('id')} ({exc}). Reconectando...")
                 try:
@@ -291,7 +296,7 @@ def main():
                     pass
                 conn, cur = connect(db_url)
                 try:
-                    processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso, args.dry_run, contadores)
+                    processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso, mapa_estado_reverso, args.dry_run, contadores)
                 except Exception as exc2:  # noqa: BLE001
                     contadores["erros"] += 1
                     print(f"Erro no item {item.get('id')} mesmo após reconectar: {exc2}")

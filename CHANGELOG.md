@@ -4,6 +4,52 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-11
 
+### Backfill rodado + pipeline homologado ponta a ponta — SPEC-130 funcional em produção
+
+- `scripts/backfill_sharepoint_projetos.py` criado e rodado: 3.975 itens da lista processados via `/items/delta` (fora do limite de 5s do `pg_net`, mesma RPC do pull incremental). **306 projetos criados, 3.669 atualizados, 0 erros.** Faixa `26.181`–`26.267` foi de 1 para 85 projetos; `projetos` foi de 3.781 para 4.087. `deltaLink` inicial salvo — cron incremental reativado.
+- 1ª tentativa de rodar de verdade foi morta pelo SO por pouca memória aos ~2.311 itens (sem dano, RPC idempotente); script ganhou reconexão automática de banco (a 1ª tentativa de dry-run já tinha caído por "server closed the connection" no meio do crawl).
+- **Achado extra pós-backfill**: mesmo o pull incremental (0 itens a processar) estourava os mesmos 5s do `pg_net` — corrigido aumentando `timeout_milliseconds` (`013_aumentar_timeout_pg_net.sql`: 20s push / 60s pull; seguro, `pg_net` é assíncrono). Confirmado ao vivo: tick seguinte voltou `200, processados:0, timed_out:false`.
+- **Pipeline homologado ponta a ponta**: push automático (com anti-duplicação) e pull automático incremental confirmados funcionando ao vivo, cron limpo. SPEC-130 passou de "não iniciado" para "pendente" (funcional, faltam pendências menores: de-para de status do Vinícius, RLS das tabelas de log, doc `AI_DB_CONTEXT.md`/`domains/crm.md`, commit no Git).
+- **Nada disso está commitado no Git ainda** — todo o trabalho de hoje (SPECs, 13 arquivos de migration, 2 Edge Functions, script de backfill, `.env` limpo) existe só no disco local.
+
+### Revisado e corrigido — SPEC-130: revisor achou 2 críticos, corrigidos e reployados; SharePoint vira fonte de verdade temporária
+
+- Rodado o `revisor` na migration + 2 Edge Functions já aplicadas/deployadas. Relatório: `03-Projeto/Auditoria/2026-09-11_auditoria_spec130_sharepoint_projetos_sync.md`.
+- **🔴 Corrigido — duplicação no push**: antes de criar item novo, busca por `codigo` na lista primeiro (não se repete), evitando duplicar quando uma tentativa anterior grava no Graph mas falha antes de confirmar no banco. Testado ao vivo: zerei o `sharepoint_item_id` do projeto de teste de propósito e editei de novo — reencontrou o item `7152`, não criou um novo.
+- **🔴 Corrigido — filtro do pull com risco de injeção**: `.or()` com string concatenada (`codigo` vindo livre do SharePoint) trocado por duas consultas `.eq()` parametrizadas.
+- **🟡 Corrigido — `disparar_pull_sharepoint()` sem REVOKE/GRANT** (`012_fix_grant_disparar_pull.sql`), alinhado com as outras 3 funções da migration.
+- **Decisão do usuário**: pra resolver a duplicação por outro ângulo e simplificar, **SharePoint passa a ser fonte de verdade temporária** para todos os campos sincronizados — removida a lógica de conflito por `updated_at` do pull (já marcada como frágil pelo revisor, pois a coluna é tocada por outros sistemas também). É reversível/temporário: detecção de conflito de verdade volta numa fase futura de duas vias simultâneas.
+- Achados 🟡/🔵 restantes do revisor (RLS sem policy nas tabelas novas, retry com backoff ausente, `gerar_codigo_projeto()` sem proteção contra código legado fora do padrão, doc `relationships.md` desatualizada) ficaram registrados como pendência, não corrigidos ainda.
+- **Impacto no banco**: migration `012` aplicada (revoke/grant). Nenhuma coluna/tabela nova.
+
+### Aplicado e testado ao vivo — SPEC-130: push automático Projetos → SharePoint funcionando; pull pausado por achado de escala
+
+- Migration `20260911_132_sharepoint_projetos_sync_2via/` **aplicada no Supabase real** (10 arquivos + `011` de correção); as 2 Edge Functions (`sharepoint-projetos-push`, `sharepoint-projetos-pull`) **deployadas**; 3 secrets criados no Vault (`sharepoint_sync_secret`, `sharepoint_push_url`, `sharepoint_pull_url`) + `SHAREPOINT_SYNC_SECRET` nos secrets das functions.
+- **Fix pós-deploy**: Edge Functions do Supabase exigem `Authorization` (JWT) por padrão da plataforma, além da autenticação própria — `pg_net` recebia 401 antes de chegar no código da function. Corrigido mandando `Authorization: Bearer <anon key>` junto (anon key não é segredo, só satisfaz a plataforma; `x-sync-secret` continua sendo a proteção real). Anon key guardado no Vault (`supabase_anon_key`).
+- **Teste real, com sucesso**: criado/editado o projeto "teste" (`26.268`, responsável Mariane) direto no banco → trigger disparou sozinha → item `7152` criado na lista "Organização Projetos" → log confirmou `action=create, resultado=ok`. Push automático funcionando de ponta a ponta.
+- **Achado crítico de escala no pull**: a lista tem **3.781 itens**. A 1ª execução (sem `deltaLink`) precisa varrer tudo — estourou o timeout padrão do `pg_net` (5s). **Cron do pull pausado** (`cron.alter_job(active => false)`) até o script de backfill (Item 9, ainda não escrito) rodar em lotes e estabelecer o `deltaLink` inicial — reativar o cron antes disso repetiria a varredura pesada a cada 5 min.
+- **Impacto no banco (produção, real)**: 5 colunas novas + 4 tabelas novas em `public`, 2 extensões habilitadas pela 1ª vez neste projeto (`pg_net`, `pg_cron`), 1 cron job criado (pausado), 4 funções novas (`gerar_codigo_projeto`, `confirmar_push_sharepoint`, `aplicar_pull_sharepoint`, `disparar_pull_sharepoint`) + 2 triggers em `projetos`. 1 projeto de teste real criado (`26.268` "teste") e 1 item real na lista SharePoint (`7152`) — ambos marcados pra limpar depois de confirmado.
+- **Pendências antes de reativar o pull**: escrever o script de backfill em lotes, seed do de-para de status (Vinícius), atualizar `AI_DB_CONTEXT.md`/`domains/crm.md`, rodar o `revisor`.
+
+### Rascunho — SPEC-130: migration + as 2 Edge Functions definitivas da sync SharePoint (nada aplicado)
+
+- Escritos os 10 arquivos da migration `supabase/db/migrations/20260911_132_sharepoint_projetos_sync_2via/` e as functions `supabase/functions/sharepoint-projetos-push/index.ts` + `supabase/functions/sharepoint-projetos-pull/index.ts`. **Nada aplicado no Supabase real, nenhuma function deployada.**
+- Achado que mudou o design: `pg_net`/`pg_cron` não estavam habilitados neste projeto. Anti-eco trocado de "hash comparado entre PL/pgSQL e Deno" (frágil entre linguagens) para uma trigger BEFORE que garante `last_sync_source` sempre correto — mais simples e mais robusto, mesmo comportamento externo prometido ao usuário.
+- Correção de schema encontrada: `responsavel_obra_id` referencia `usuarios`, não `contatos` (SPEC-130 tinha isso errado desde a versão original).
+- Segredos (URL das functions + `x-sync-secret`) ficam no Supabase Vault, nunca em `.sql` versionado — pipeline fica inerte até alguém criar os 2 secrets manualmente.
+- Pendências antes de ir ao ar: habilitar `pg_net`/`pg_cron`, criar os secrets do Vault, deploy das 2 functions, seed do de-para de status (Vinícius), script de backfill (Item 9, ainda não escrito), homologação real da query `delta` do pull (nunca testada ao vivo), e revisão do `revisor` antes de aplicar (extensão de banco + RPCs `security definer`).
+
+### Testado — SPEC-130/131: conectividade real da sync SharePoint confirmada (com incidente de secret)
+
+- App "Lucenera CRM" registrada no Azure/Entra ID (`Sites.Selected`, admin consent, escrita concedida só ao site `LUCENERAPROJETOS345`) — fecha o Item 3 da SPEC-131.
+- Criada function temporária `supabase/functions/sharepoint-teste-conexao/index.ts` (fora do escopo definitivo da SPEC-130, só para validar a permissão nova antes de construir o pipeline completo) e deployada no projeto Supabase `vcvcwzmbiftcawncibke` com `supabase functions deploy --use-api` (CLI autenticado via `SUPABASE_ACCESS_TOKEN` do `.env`, sem uso de `supabase login` interativo — não funciona neste ambiente sem TTY).
+- **Teste real: sucesso.** `POST` criou o item `7151` na lista "Organização Projetos" (**201**), `lastModifiedBy.application.displayName = "Lucenera CRM"` confirmando a escrita pela app nova. `field_9 = "Mariane"` confirma o campo de responsável/vendedor.
+- **Achado que corrige a SPEC-047/130:** `field_6` (suposto "Data de Entrada") veio preenchido sozinho pelo SharePoint com a data/hora da criação, sem envio no payload — indício de campo automático de sistema, não editável. SPEC-130 atualizada para não mapear `data_entrada` nele sem confirmação do Alan.
+- **Incidente de segurança:** o `.env` central tinha os 3 nomes `SHAREPOINT_TENANT_ID/CLIENT_ID/CLIENT_SECRET` duplicados (uma integração de Ficha Técnica e o CRM reusando os mesmos nomes) e uma linha corrompida (`""=<secret>`) que quebrava o parser do `supabase functions deploy`. Ao diagnosticar isso, um comando de depuração **imprimiu por engano o valor completo do client secret** nesta conversa. Secret tratado como comprometido; rotação combinada com o usuário mas **ainda pendente** — registrada como bloqueio de segurança na SPEC-131.
+- **Repos a receber commit:** central (SPEC-130, SPEC-131, function de teste, CHANGELOG). `.env` não é commitado (correto, mas segue com a duplicação/linha corrompida a limpar — pendência registrada).
+- **Pendências abertas:** rotacionar o secret; renomear as chaves `SHAREPOINT_*` no `.env` pra separar Ficha Técnica de CRM; confirmar se a automação de pasta/Teams disparou pro item de teste `7151`; apagar o item de teste e a function temporária; nomes internos reais das colunas da lista (Alan).
+- **Complemento (mesmo dia):** usuário passou os nomes de exibição de todas as colunas + 3 linhas de exemplo reais da lista. Fechou o mapa de campos de negócio da SPEC-130 (faltava só confirmação formal do Alan, não bloqueia mais). Achados: formato de código confirmado `AA.NNN`; campo vazio usa o caractere literal `.` (não string vazia); "Tipo de Item" é Content Type de sistema (`"Item"` sempre); **"Caminho" não é o link da pasta por projeto** (é o path da própria lista, igual em todo item) — reabre a pergunta de onde mora o link que a SPEC-046 lia.
+
 ### Concluída — SPEC-132: campos fiscais da planilha Produtos (export Connect) + incidente de preço corrigido
 
 - Criada `03-Projeto/Planos de Ação/SPECs/SPEC-132_Campos_Fiscais_Planilha_Produtos_Connect.md`. O export "Estoque" do Connect passou de ~16 para 36 colunas, com campos fiscais (`icmsST`, `ipi`, `frete`, `ncm`, `cest`, 4 pares `GrupoFiscal*`) e a coluna de custo unitário renomeada `CustoTotal` → `vlCustoTotal`.

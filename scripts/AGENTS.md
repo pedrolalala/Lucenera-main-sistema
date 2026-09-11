@@ -28,9 +28,35 @@ Dashboard contra a planilha.
 uma corrigiu um bug real de divergencia planilha x Dashboard):
 
 - **`to_numeric_br` (Produtos)** trata os DOIS formatos: BR com milhar
-  (`"1.409,76"`) e US (`"3709.9"`). Na planilha Produtos o `CustoTotal` vem em
+  (`"1.409,76"`) e US (`"3709.9"`). Na planilha Produtos o custo unitário vem em
   BR e o `ValorVenda` em US. Nunca voltar ao `.replace(",", ".")` simples
   (zerava `custo_total` de todo produto >= R$ 1.000).
+
+- **Coluna do custo unitário mudou de nome no export de 2026-09-10**: era
+  `CustoTotal`, virou `vlCustoTotal` (mesmo dado, mesmo formato BR). O script já
+  lê `vlCustoTotal`. Se um export futuro voltar a `CustoTotal`, o script quebra
+  com KeyError — checar o nome da coluna antes de rodar.
+
+- **`ncm` / `cest` (Produtos)** são sincronizados desde 2026-09-10 (SPEC-132
+  Fase A). São TEXTO — `cest` tem zero à esquerda (`"0900100"`), nunca converter
+  para número. Regra: só grava quando a planilha traz valor; planilha vazia
+  **não apaga** ncm/cest que já exista no banco (o export Connect pode estar
+  incompleto). Backfill inicial: ~4.344 ncm, ~1.099 cest.
+
+- **Campos fiscais (SPEC-132 Fase B, 2026-09-10)** — o import de Produtos sincroniza:
+  `icmsST→porc_st`, `ipi→ipi_entrada`, `despesas→porc_despesas`, `desconto→porc_desconto`,
+  `frete→porc_frete`, `GrupoFiscalNContribuinte→grupo_fiscal_nao_contribuinte`,
+  `GrupoFiscalRevenda→grupo_fiscal_revenda` (2 colunas de texto, migration 131). Formato US
+  (sem milhar). `close_enough` é **NaN-safe** — `pandas.to_dict` transforma NULL de coluna
+  numérica em NaN e `NaN or 0 == NaN`; sem o guard, todo campo nulo parecia "≠ 0" e o script
+  gravava 0 em tudo.
+- **Preço NÃO muda.** `ipi_entrada`/`porc_despesas`/`porc_desconto` estão no `UPDATE OF` do
+  trigger `trg_atualizar_preco_venda`. O script grava o campo fiscal e **logo em seguida
+  regrava `preco_venda`** com o valor de antes (não está no `UPDATE OF` → não redispara), e
+  no fim faz um passe de verificação/reparo re-lendo `preco_venda` dos produtos afetados.
+  O trigger **não** é alterado nem desligado. `icms_entrada` **não** é escrito (evita a
+  divergência form × trigger: o `PecaForm` usa `porc_st` como "% ST", o trigger usa
+  `icms_entrada`). `custo_total`/`valor_venda` seguem vindo da Connect.
 
 - **`importar_contas_pagar_receber.py` sincroniza tambem `vl_parcela`,
   `dt_vencimento`, `dt_emissao`, `vl_frete`, `vl_ipi`** em linha existente

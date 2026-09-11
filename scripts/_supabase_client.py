@@ -20,6 +20,7 @@ load_dotenv(dotenv_path=_ROOT / ".env", override=True)
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL", "")
 
 
 @lru_cache(maxsize=1)

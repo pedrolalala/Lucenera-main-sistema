@@ -2,7 +2,36 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-11
+
+### Concluída — SPEC-132: campos fiscais da planilha Produtos (export Connect) + incidente de preço corrigido
+
+- Criada `03-Projeto/Planos de Ação/SPECs/SPEC-132_Campos_Fiscais_Planilha_Produtos_Connect.md`. O export "Estoque" do Connect passou de ~16 para 36 colunas, com campos fiscais (`icmsST`, `ipi`, `frete`, `ncm`, `cest`, 4 pares `GrupoFiscal*`) e a coluna de custo unitário renomeada `CustoTotal` → `vlCustoTotal`.
+- **Fase A** (`importar_produtos_estoque.py`): conserto do rename + sincronização de `ncm`/`cest` (colunas já existiam, quase vazias) — backfill de 372→4.715 (`ncm`) e 2→1.099 (`cest`). Sem risco de preço.
+- **Fase B** (decisão do Filippo/Pedro, sem recalcular `preco_venda`): sincroniza `icmsST→porc_st`, `ipi→ipi_entrada`, `despesas→porc_despesas`, `desconto→porc_desconto`, `frete→porc_frete`, mais 2 colunas novas `grupo_fiscal_nao_contribuinte`/`grupo_fiscal_revenda` (migration `20260910_131_spec132_grupo_fiscal`).
+- **Incidente e correção:** a 1ª execução tentou "grava o campo fiscal, deixa o trigger recalcular, regrava `preco_venda` de volta" — falhou porque `produtos` tem um 2º trigger de preço não documentado (`trg_calculo_preco_venda`, sem filtro de coluna, dispara em qualquer update) além do já conhecido `trg_atualizar_preco_venda`. A própria regravação redisparava o 2º trigger. **~2.120 produtos ficaram com `preco_venda` inflado (5–15%)** até o reparo: script one-off restaurou de um snapshot pré-run com os 2 triggers desligados numa transação — verificado 0 divergências.
+- **Fix definitivo:** `importar_produtos_estoque.py` reescrito — a gravação real roda numa transação única via `psycopg2`/`SUPABASE_DB_URL` com os 2 triggers de preço desligados do início ao fim; sem mais grava-e-devolve. Testado com gravação real (51 produtos do ciclo normal), `preco_venda` idêntico antes/depois.
+- **Impacto no banco:** migration `20260910_131` (2 colunas novas em `produtos`, sem DDL em trigger/função); dados fiscais preenchidos em ~2.900–4.400 produtos conforme o campo; `preco_venda` inalterado (conferido).
+- **Repos a receber commit:** central (SPEC-132, migration, `scripts/importar_produtos_estoque.py`, `scripts/_supabase_client.py`, `scripts/AGENTS.md`, CHANGELOG).
+
 ## 2026-09-10
+
+### Criada (não iniciada) — SPEC-130: Sincronização em duas vias Projetos ⇄ Lista SharePoint
+
+- Criada `03-Projeto/Planos de Ação/SPECs/SPEC-130_Sincronizacao_Duas_Vias_Projetos_Sistema_SharePoint.md`. Pedido do usuário (conversa com Alan/M365): criar projeto no sistema e refletir automaticamente na lista "Organização Projetos" do SharePoint (`site LUCENERAPROJETOS345`) — e vice-versa. Substitui e amplia a SPEC-047 (que era pull diário de mão única, nunca implementada).
+- **Direção fechada com o usuário: duas vias (opção C).** Sistema → SharePoint em tempo quase real (trigger no `projetos` → Edge Function `sharepoint-projetos-push` via `pg_net`). SharePoint → sistema por `GET /items/delta` no `pg_cron` (proposto 5 min), Edge Function `sharepoint-projetos-pull` substituindo a `sync-sharepoint` atual.
+- **Decisões aprovadas:** código do projeto passa a nascer só no sistema (RPC `gerar_codigo_projeto()`; SharePoint para de gerar, com data de virada); criação permitida nos dois lados amarrada por `sharepoint_item_id`; exclusão nunca propaga (só o flag `arquivado`); anti-eco por `sync_hash` + `last_sync_source`; conflito = *last-write-wins* de item **inteiro** com todo conflito registrado em `sharepoint_sync_log` (log de quem alterou dos dois lados — usuário do CRM e `lastModifiedBy` do SharePoint); status sincroniza via tabela de de-para `sharepoint_status_map`; arquiteto/responsável de obra só vinculam de volta com match exato em `contatos` (sem fuzzy).
+- **Migration (rascunho, não aplicada)** — pasta proposta `supabase/db/migrations/20260910_131_sharepoint_projetos_sync_2via/`: colunas de controle em `projetos` (`sharepoint_item_id`, `sync_hash`, `last_synced_at`, `last_sync_source`, `last_synced_by`) + tabelas `sharepoint_sync_log`, `sharepoint_status_map` (sem seed), `sharepoint_sync_state` (deltaLink/cache) + RPC de código + trigger de push.
+- **Impacto no banco:** nenhum ainda (SPEC não iniciada). Quando implementada: `projetos` (+5 colunas) e 3 tabelas de apoio; sem mudança destrutiva.
+- **Repos a receber commit:** central (SPEC-130 + CHANGELOG). Implementação futura no CRM (Skip projectId 24580) + Supabase.
+- **Bloqueios (terceiros):** Alan — elevar app do Graph para `Sites.Selected` + admin consent, confirmar que a automação de pasta/Teams dispara em criação app-only, enviar nomes internos das colunas da lista. Vinícius — preencher o de-para de status e a data de virada do código.
+- **Escopo de acesso (reforçado pelo usuário):** a integração terá permissão só para a lista "Organização Projetos" do site `LUCENERAPROJETOS345` — nada mais no SharePoint/M365 pode ser alterado; `Sites.ReadWrite.All` descartado.
+
+### Criada (não iniciada) — SPEC-131: Mudanças no SharePoint/M365 e virada operacional da sync de projetos
+
+- Criada `03-Projeto/Planos de Ação/SPECs/SPEC-131_Mudancas_SharePoint_M365_e_Virada_Operacional_Sync_Projetos.md`, companheira da SPEC-130. Separa a parte de ambiente e processo (Azure AD, remoção do controle de código da lista, validação dos fluxos de automação, comunicação com a equipe, plano de freeze/virada e rollback) da parte técnica (SPEC-130). A SPEC-130 não entra em produção antes dos itens da SPEC-131 estarem concluídos.
+- Não toca banco. Quase todos os itens são executados por Alan (M365/Azure AD) e Vinícius (processo/equipe), com evidência anexada na própria SPEC.
+- Nota técnica registrada: `Sites.Selected` concede acesso no nível de site, não de lista — a restrição "só a planilha 'Organização Projetos'" é garantida pelo código da Edge Function (um `list-id` fixo), não pela permissão do Graph.
 
 ### Publicado — SPEC-129: Memória Lucenera integrada ao ecossistema + Central
 

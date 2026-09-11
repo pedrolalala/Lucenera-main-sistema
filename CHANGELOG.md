@@ -11,6 +11,12 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Campo adicionado nos 6 formulários genéricos, na captura rápida, no upload de arquivo e na revisão de memória por voz (`public/app/app.js` + `public/app/supabase-adapter.js`, Skip projectId 57204), exibido também na tela de detalhe. Busca global já é full-text sobre o registro inteiro, então o código já fica pesquisável sem filtro dedicado novo.
 - QA do Skip verde, publicado em produção (`memoria-lucenera-2e074.goskip.app`, v0.0.8 / `cc8afcf`). Sem teste manual ao vivo no navegador (login/SSO segue como pendência aberta desde a SPEC-129).
 
+### Confirmado: Estado era o bloqueio da automação — de-para de status expandido pros 17 valores
+
+- **Usuário confirmou**: o grupo/pasta foi criado no teste `26.286`/item `7157` — Estado era mesmo o bloqueio real da automação de criação de grupo.
+- Expandido `sharepoint_status_map` pros 17 valores do enum `projeto_status` (identity mapping — mesmo texto dos dois lados), não só os 3 confirmados manualmente. Resincronizados os 2 testes anteriores (`26.268`/`7152`, `26.285`/`7154`) com `estado='SP'` — ambos gravaram sem erro, confirmado via Graph (`field_10="Estudo Inicial"`, `EstadoLookupId=1`). Aguardando confirmação se o grupo foi criado pros dois também.
+- Só 2 dos 17 valores do mapa foram confirmados por escrita real bem-sucedida; os outros 15 são presunção (mesmo texto) não testada — se algum não for uma opção de Choice válida no SharePoint, o push daquele projeto específico falha e fica visível em `sharepoint_sync_log`, sem afetar os demais.
+
 ### Implementado Estado (lookup) — SPEC-130, achado que pode ser a causa real da automação não disparar
 
 - Usuário reportou que a automação de criação de grupo/pasta nunca disparou em nenhum dos 3 testes. Investigação: os 3 (`7151`/`7152`/`7154`) tinham Estado vazio — a lista mostra "Informações necessárias" pra campo obrigatório vazio. Teoria de "nome do responsável muito longo" descartada com evidência (teste com nome curto também falhou).

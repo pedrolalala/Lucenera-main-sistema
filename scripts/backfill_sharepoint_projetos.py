@@ -120,6 +120,14 @@ def extrair_nivel(v):
     return m.group(0) if m else None
 
 
+def extrair_data(v):
+    """field_6 (Data Entrada) vem do Graph em ISO 8601 (ex. '2026-07-24T07:00:00Z');
+    os 10 primeiros caracteres já são a data. Fix 2026-09-11: ficou hardcoded como None
+    (achado do usuário) — a SPEC-130 já tinha confirmado que é a data de entrada real."""
+    s = valor_ou_nulo(v)
+    return s[:10] if s else None
+
+
 def sync_hash(payload: dict) -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
@@ -135,6 +143,7 @@ def processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso,
     arquivado_raw = fields.get("Arquivado")
     arquivado = arquivado_raw if isinstance(arquivado_raw, bool) else None
     nivel = extrair_nivel(fields.get("N_x00ed_velEstrat_x00e9_gico"))
+    data_entrada = extrair_data(fields.get("field_6"))
     status_sp = valor_ou_nulo(fields.get("field_10"))
     status = mapa_status_reverso.get(status_sp) if status_sp else None
     nome_arquiteto = valor_ou_nulo(fields.get("field_2"))
@@ -149,6 +158,7 @@ def processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso,
             "responsavel_nome": responsavel_nome,
             "cidade": cidade,
             "arquivado": arquivado,
+            "data_entrada": data_entrada,
             "nivel": nivel,
             "status": status,
             "arquiteto_id": arquiteto_id,
@@ -181,13 +191,13 @@ def processar_item(cur, item, mapa_contatos, mapa_usuarios, mapa_status_reverso,
         select * from public.aplicar_pull_sharepoint(
             p_sharepoint_item_id => %s, p_nome => %s, p_codigo => %s,
             p_responsavel_nome => %s, p_cidade => %s, p_arquivado => %s,
-            p_data_entrada => null, p_nivel_estrategico => %s, p_status => %s,
+            p_data_entrada => %s, p_nivel_estrategico => %s, p_status => %s,
             p_arquiteto_id => %s, p_responsavel_obra_id => %s, p_sync_hash => %s
         )
         """,
         (
             sharepoint_item_id, nome, codigo, responsavel_nome, cidade, arquivado,
-            nivel, status, arquiteto_id, responsavel_obra_id, payload_hash,
+            data_entrada, nivel, status, arquiteto_id, responsavel_obra_id, payload_hash,
         ),
     )
     projeto_id, acao = cur.fetchone()

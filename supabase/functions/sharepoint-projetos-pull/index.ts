@@ -33,6 +33,13 @@ function extrairNivel(v: unknown): string | null {
   return m ? m[0] : null
 }
 
+function extrairData(v: unknown): string | null {
+  const s = valorOuNulo(v)
+  if (!s) return null
+  const d = new Date(s)
+  return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10)
+}
+
 async function sha256(texto: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto))
   return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('')
@@ -186,11 +193,13 @@ async function processarItem(
   const responsavelObraId = nomeResponsavelObra
     ? mapaUsuarios.get(nomeResponsavelObra.toLowerCase()) ?? null
     : null
-  // Data Entrada (field_6): NÃO aplicada no pull ainda — pendente confirmar se é editável
-  // de fato ou só o timestamp de criação do item (SPEC-130/131, achado 2026-09-11).
+  // Data Entrada (field_6): fix 2026-09-11 — a SPEC-130 já tinha sido corrigida confirmando que
+  // é a data de entrada de verdade (amostra real da lista), mas o código ficou desatualizado
+  // mandando NULL sempre. Corrigido aqui.
+  const dataEntrada = extrairData(fields.field_6)
 
   const syncHash = await sha256(
-    JSON.stringify({ nome, codigo, responsavelNome, cidade, arquivado, nivel, status, arquitetoId, responsavelObraId }),
+    JSON.stringify({ nome, codigo, responsavelNome, cidade, arquivado, dataEntrada, nivel, status, arquitetoId, responsavelObraId }),
   )
 
   // Busca em duas consultas separadas (nunca concatenar `codigo` — vindo do SharePoint, texto
@@ -201,7 +210,7 @@ async function processarItem(
   {
     const { data } = await supabase
       .from('projetos')
-      .select('id, nome, codigo, responsavel_nome, cidade, arquivado, status, arquiteto_id, responsavel_obra_id')
+      .select('id, nome, codigo, responsavel_nome, cidade, arquivado, data_entrada, status, arquiteto_id, responsavel_obra_id')
       .eq('sharepoint_item_id', sharepointItemId)
       .maybeSingle()
     existente = data
@@ -209,7 +218,7 @@ async function processarItem(
   if (!existente && codigo) {
     const { data } = await supabase
       .from('projetos')
-      .select('id, nome, codigo, responsavel_nome, cidade, arquivado, status, arquiteto_id, responsavel_obra_id')
+      .select('id, nome, codigo, responsavel_nome, cidade, arquivado, data_entrada, status, arquiteto_id, responsavel_obra_id')
       .eq('codigo', codigo)
       .is('sharepoint_item_id', null)
       .maybeSingle()
@@ -231,6 +240,7 @@ async function processarItem(
       (existente.responsavel_nome ?? null) === responsavelNome &&
       (existente.cidade ?? null) === cidade &&
       (existente.arquivado ?? null) === (arquivado ?? existente.arquivado) &&
+      (existente.data_entrada ?? null) === (dataEntrada ?? existente.data_entrada) &&
       (existente.status ?? null) === (status ?? existente.status) &&
       (existente.arquiteto_id ?? null) === (arquitetoId ?? existente.arquiteto_id) &&
       (existente.responsavel_obra_id ?? null) === (responsavelObraId ?? existente.responsavel_obra_id)
@@ -248,7 +258,7 @@ async function processarItem(
     p_responsavel_nome: responsavelNome,
     p_cidade: cidade,
     p_arquivado: arquivado,
-    p_data_entrada: null,
+    p_data_entrada: dataEntrada,
     p_nivel_estrategico: nivel,
     p_status: status,
     p_arquiteto_id: arquitetoId,

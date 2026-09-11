@@ -4,6 +4,12 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-11
 
+### Fix Data Entrada + seed parcial de Status — SPEC-130
+
+- **Bug achado pelo usuário**: `data_entrada` ficava sempre em branco depois de sincronizar — o código do pull/backfill mandava `NULL` sempre, desatualizado em relação à SPEC (que já confirmava ser dado real, não automático). Corrigido em `sharepoint-projetos-pull/index.ts` + `backfill_sharepoint_projetos.py`, function redeployada, backfill reprocessado: **4.087 de 4.087 projetos com Data Entrada preenchida**.
+- **Seed parcial de status (decisão do usuário)**: `sharepoint_status_map` recebeu os 3 valores que já batem exatamente (`Proposta Sinal`, `Elaboração Orçamento`, `Contrato de Projeto`). Reprocessado: 602 + 211 + 11 projetos passaram a sincronizar esses status, sem tocar em status pré-existente de outra origem. Resto da tabela segue como pendência do Vinícius.
+- Nenhuma mudança de schema além dos dados; nenhuma coluna nova.
+
 ### Backfill rodado + pipeline homologado ponta a ponta — SPEC-130 funcional em produção
 
 - `scripts/backfill_sharepoint_projetos.py` criado e rodado: 3.975 itens da lista processados via `/items/delta` (fora do limite de 5s do `pg_net`, mesma RPC do pull incremental). **306 projetos criados, 3.669 atualizados, 0 erros.** Faixa `26.181`–`26.267` foi de 1 para 85 projetos; `projetos` foi de 3.781 para 4.087. `deltaLink` inicial salvo — cron incremental reativado.

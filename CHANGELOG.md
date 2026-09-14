@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-14 (6)
+
+### SPEC-143: "Dar Baixa" vira ação nova, separada de "Separar" — PUBLICADO
+
+- Correção sobre a revisão do Prompt 7 (SPEC-138) do mesmo dia: o usuário mandou referência visual detalhada de uma tela do Connect legado mostrando que "Parcial" (quem pediu) e "Baixa" (quem fez a entrega/retirada) são dois registros distintos, com divisória visual entre eles — não a mesma ação que "Separar", como tinha sido assumido antes.
+- Nova tabela `separacao_baixas` (1 por parcial): Código (sequência própria), Funcionário (quem confirma a baixa, pode ser diferente de quem separou), Responsável Retirou (texto livre) e Data Baixa (com hora).
+- Achado colateral (não corrigido, reportado): a feature "Registrar Entrega" já existente na Logística (`RegistrarEntregaPage.tsx`) parece ter um bug de assinatura entre a página e o hook `useFinalizarEntrega` — por isso não foi reaproveitada.
+- Migration `20260914_143_separacao_baixas` aplicada em produção (testada com dry-run antes). Publicado: `https://separacao-parcial-dff01.goskip.app` (Skip 48801 v0.0.34, QA verde). Detalhe completo em SPEC-143.
+
 ## 2026-09-14 (5)
 
 ### SPEC-133 revisada: card de Aprovação Financeira volta a ser somente leitura — PUBLICADO

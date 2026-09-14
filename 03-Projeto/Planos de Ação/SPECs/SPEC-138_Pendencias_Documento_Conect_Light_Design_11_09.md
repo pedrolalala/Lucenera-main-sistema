@@ -149,6 +149,10 @@ A decisão default original desta SPEC (ocultar boletos até a 1ª baixa, mas ma
 
 Publicado em produção: `https://separacao-parcial-dff01.goskip.app` (Skip `48801` v0.0.31, QA verde) — sem dependência de migration (mudança 100% frontend).
 
+## Correção do item 2 acima (2026-09-14, mesmo dia, poucas horas depois) — ver SPEC-143
+
+O item 2 desta revisão ("dar baixa = mesma ação de Separar") foi **corrigido**: o usuário mandou uma referência visual muito mais detalhada mostrando que "Parcial" (quem pediu) e "Baixa" (quem fez a entrega/retirada) são **dois registros distintos**, tipicamente feitos por pessoas diferentes, com uma divisória visual entre eles. "Dar Baixa" virou uma ação nova e separada, com sua própria tabela (`separacao_baixas`) e diálogo — ver **SPEC-143** para o detalhe completo. O item 3 acima (Responsável Retirou = mesmo dado do Funcionário) também foi corrigido: agora é um campo genuinamente distinto, digitado na hora de dar a baixa.
+
 ## Observações finais
 
 - Os Prompts 1, 2, 3 e 3A **não precisam de nenhum código novo** — já estão prontos em SPEC-135 e SPEC-136. O único bloqueio para eles chegarem à produção é aplicar as duas migrations pendentes no Supabase real (comandos já documentados em cada SPEC). Recomenda-se resolver isso antes ou em paralelo à implementação dos itens 4-7 desta SPEC, já que é trabalho zero de código, só uma ação operacional represada há 2 dias.

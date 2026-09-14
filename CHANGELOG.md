@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-14 (7)
+
+### SPEC-143 REVERTIDO: "Dar Baixa" removido da Separação — já existe na Logística
+
+- Poucas mensagens depois de publicar a SPEC-143 (item (6) abaixo), o usuário corrigiu: "o Dar baixa é o Registro de entrega que está em lucenera-logistica! não precisa desse dar baixa aqui Só a opção de separar!!" — o "Dar Baixa" construído era uma duplicação de uma tela que já existe (`RegistrarEntregaPage.tsx` na Logística).
+- Revertido em `separacao-parcial`: `SeparacaoParcialPage.tsx` e `separacaoParcialService.ts` voltaram ao estado anterior à SPEC-143 (sem card de baixa, sem `registrarBaixaSeparacao`). "Parciais desta venda" voltou a ser tabela simples (Parcial/Funcionário/Data/Status/Estornar).
+- Tabela `separacao_baixas` (migration 20260914_143) **não foi dropada** — segue existindo no Supabase, agora inerte, aguardando decisão do usuário sobre removê-la ou não.
+- QA verde, publicado (Skip 48801 v0.0.37, `https://separacao-parcial-dff01.goskip.app`). O achado de bug em `RegistrarEntregaPage.tsx`/`useFinalizarEntrega.ts` (nomes de campo incompatíveis) fica mais relevante agora que esse é de fato o fluxo real de "Dar Baixa" — recomendado abrir SPEC própria para investigar. Detalhe completo em SPEC-143.
+
 ## 2026-09-14 (6)
 
 ### SPEC-143: "Dar Baixa" vira ação nova, separada de "Separar" — PUBLICADO

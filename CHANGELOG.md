@@ -2,6 +2,29 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-14
+
+### Prompts 4, 5, 6 e 7 do documento "Conect" Light Design 11/09 — SPEC-138 (Separação Parcial)
+
+- Origem: `01-Documento/01 - Planilhas/LUCENERA — LIGHT DESIGN DEPARTAMENTO DE E.V..docx`, 7 "prompts" de melhoria elaborados em 11/09/2026. Os Prompts 1, 2, 3 e 3A já haviam virado SPEC-135/SPEC-136 no mesmo dia; esta entrega cobre os 4 que ainda não tinham SPEC nenhuma.
+- **Prompt 5** (layout/rolagem horizontal): coluna de ação "Trocar" fixa (`sticky right-0`) e truncate em `Referência`/`Local (L)` na tabela de itens da venda.
+- **Prompt 6** (lista de separação): impressão (`imprimirListaSeparacao`) ganhou coluna "Local (L)" (mesmo dado da coluna "Classificação" em tela, `projeto_itens.l_fixo`), coluna de marcação em branco por item, totalizador de itens/peças no rodapé e campo de observações.
+- **Prompt 7** (boletos antes da hora): bloco "Boletos desta venda" só aparece depois de alguma baixa registrada — decisão default tomada nesta entrega (1ª separação parcial confirmada, não só entrega 100%), já que o documento de origem não fechava esse gatilho.
+- **Prompt 4** (contraste): números de orçamento/venda/código de item/produto (busca de vendas, tabela de itens, Log de Trocas) passaram para cor escura (`#333333`), semibold e leve `letter-spacing`.
+- Publicado em produção: `https://separacao-parcial-dff01.goskip.app` (Skip `48801`, versão `0.0.30`, QA setup/staticAnalysis/build/integrations/test 100% verde).
+- Pendências: Prompt 4 não teve nenhuma outra tela identificada além de Separação (o documento não especifica o sistema); Prompts 1/2/3/3A seguem bloqueados pela aplicação das migrations da SPEC-135/SPEC-136 no Supabase real, que continua pendente.
+
+## 2026-09-13
+
+### Peças Ubiqua sem foto na vitrine do Showroom — SPEC-137
+
+- Pedido do usuário: peças da marca Ubiqua já marcadas como pronta-entrega na planilha (`produtos.estoque_showroom > 0`) não apareciam na vitrine pública do Showroom, mesmo já tendo fotos cadastradas no site/catálogo Ubiqua.
+- Causa raiz: `vw_showroom_publico` exige `imagem_showroom_url` preenchido; a curadoria de fotos da SPEC-125 só cobriu a lista de decorativos Lucenera, nunca as peças Ubiqua. O catálogo Ubiqua (`revenda_ubiqua`, tabela isolada do sistema `catalogo-pecas-ubiqua-e6fa0`) já tinha foto pronta para 33 das 34 peças Ubiqua marcadas como showroom.
+- Migration `20260913_137_showroom_fotos_ubiqua` — backfill único de `produtos.imagem_showroom_url` a partir de `revenda_ubiqua.imagem_catalogo_url`, casando por `referencia`. Aplicada no Supabase real: **33 linhas afetadas**. Vitrine foi de 29 para 62 peças.
+- Decisão do usuário: `produtos` continua a única fonte de verdade do estoque do showroom; `revenda_ubiqua` só emprestou a foto, sem sincronização automática nova entre os dois sistemas.
+- Conferido ao vivo no site publicado (`tela-showroom-522b1.goskip.app`): 31 das 33 peças Ubiqua aparecem com foto, nome, preço e quantidade corretos.
+- Pendências: 1 peça Ubiqua (`370106-IS`) sem correspondência no catálogo, precisa de foto cadastrada manualmente via `/admin` do showroom; 2 peças (`339101`, `339104`) com foto quebrada na origem — `revenda_ubiqua.imagem_catalogo_url` aponta pra arquivo que não existe mais no bucket `revenda-ubiqua-images` (achado pré-existente do catálogo Ubiqua, não causado por esta SPEC).
+
 ## 2026-09-11
 
 ### Campo Código do Projeto em todos os formulários — SPEC-134 (Memória Lucenera)

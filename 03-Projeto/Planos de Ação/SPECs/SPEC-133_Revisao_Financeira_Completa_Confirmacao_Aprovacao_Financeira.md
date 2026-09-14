@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-133 — Revisão Financeira Completa na Confirmação de Aprovação Financeira"
-status: aprovado, aguardando implementação
-data_ultima_modificacao: 2026-09-11
+status: "código pronto (Skip 32554 v0.0.361, QA verde) — NÃO PUBLICADO, depende da migration da RPC (ver 'Como aplicar')"
+data_ultima_modificacao: 2026-09-14
 sistemas_envolvidos:
   - Orçamentos
 ---
@@ -161,7 +161,18 @@ aprovar_orcamento_financeiro(
 
 ## Pendências
 
-- [ ] Confirmar por introspecção direta do Supabase real que `orcamentos.desconto_tipo` e `orcamentos.valor_sinal` existem com esses nomes/tipos, e reextrair `supabase/db/current/` para o domínio Orçamentos antes de implementar.
-- [ ] Implementar a mudança de RPC (`p_valores_parcelas`) e de frontend (`FinancialApprovalDialog.tsx`) conforme decisões acima.
 - [ ] Homologar visualmente com quem aprova financeiramente.
 - [ ] Decidir separadamente (fora desta SPEC) se os arquivos órfãos (`ProjectFinancialReviewDialog.tsx` e afins) devem ser removidos numa limpeza técnica futura.
+- [ ] **Aplicar a migration da RPC no Supabase real** (ver "Como aplicar") — sem isso, publicar o frontend quebra a aprovação financeira pra todo mundo (a chamada nova exige o parâmetro `p_valores_parcelas` que só existe na função depois da migration).
+
+## Como aplicar (2026-09-14)
+
+```
+psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "supabase/db/migrations/20260914_141_spec133_valores_parcela_customizados/001_p_valores_parcelas.sql"
+```
+
+Testada com dry-run (`BEGIN; ...; ROLLBACK;`) e com uma chamada de fumaça no formato de 1 argumento (`p_orcamento_id => '...'`, como o PostgREST chama hoje) antes de aplicar de verdade — confirmado que continua aceitando a chamada antiga.
+
+**Achado importante durante a implementação**: como o novo parâmetro muda a assinatura da função (`(uuid)` → `(uuid, numeric[])`), um simples `CREATE OR REPLACE FUNCTION` criaria uma SEGUNDA função (overload) em vez de substituir — o PostgREST ficaria ambíguo em qualquer chamada que não passe o 2º parâmetro. A migration faz `DROP FUNCTION aprovar_orcamento_financeiro(uuid)` antes de recriar. Isso também apaga os grants de `EXECUTE` que a função tinha (`anon`, `authenticated`, `service_role`, confirmados via `pg_proc.proacl` antes de aplicar) — a migration já re-concede esses grants depois do `CREATE`.
+
+**Ordem de publicação obrigatória**: aplicar esta migration **antes** de publicar o Skip `32554` v0.0.361 (ou qualquer versão posterior) em produção — o frontend já commitado (`398921b`) sempre chama a RPC com os dois parâmetros; sem a migration aplicada, PostgREST rejeitaria a chamada e a aprovação financeira pararia de funcionar inteiramente até a migration rodar.

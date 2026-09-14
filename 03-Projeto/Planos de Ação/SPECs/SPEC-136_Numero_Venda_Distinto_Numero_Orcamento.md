@@ -63,6 +63,10 @@ Hoje, em qualquer lugar do ecossistema que mostra um orçamento já aprovado (a 
 - **Orçamentos** (`useBudgetStore.ts`): `Budget.numero_venda` e `ApprovalResult.numero_venda` adicionados à tipagem (o `select('*')` já traz a coluna nova automaticamente, sem mudar a query).
 - **Orçamentos** (`FinanceResultModal.tsx`): modal exibido logo após a aprovação financeira agora mostra "Venda: VENDA-0001" junto com o número do orçamento.
 
+## Backfill de orçamentos aprovados antes da migration (2026-09-14)
+
+Pedido do usuário: orçamentos que já estavam em "Orçamento Aprovado" antes desta migration rodar não tinham `numero_venda` (só é gerado no momento da aprovação, não retroativo). Consulta direta no banco confirmou o que o usuário já esperava: **`ORC-0032` era o único caso** (`status = 'Orçamento Aprovado'`, `numero_venda IS NULL`, `natureza_operacao = 'venda'`). Migration `supabase/db/migrations/20260914_142_backfill_numero_venda_orc0032/001_backfill_numero_venda.sql` — genérica (cobre qualquer orçamento nessa mesma condição, não só o ORC-0032 nominalmente), mesma lógica de sequência global `VENDA-000N` da RPC. Testada com dry-run antes de aplicar. **Aplicada com sucesso em produção**: `ORC-0032` agora tem `numero_venda = VENDA-0001`.
+
 ## Pendências (fora do escopo implementado agora)
 
 - [ ] Mostrar `numero_venda` em mais lugares do próprio sistema de Orçamentos (ex.: `BudgetTableRow.tsx`, `FinancialApprovalRow.tsx`) — não implementado nesta rodada por não haver um slot óbvio de UI pra isso sem redesenhar a linha da tabela; avaliar com o usuário onde encaixar.

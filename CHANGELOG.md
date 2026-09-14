@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-14 (3)
+
+### Backfill de numero_venda para ORC-0032
+
+- Pedido do usuário: orçamentos já aprovados antes da migration da SPEC-136 ficaram sem `numero_venda` (só gerado no momento da aprovação). Confirmado por query direta que `ORC-0032` era o único caso.
+- Migration `20260914_142_backfill_numero_venda_orc0032` aplicada em produção — `ORC-0032` agora tem `numero_venda = VENDA-0001`. Detalhe em SPEC-136.
+
 ## 2026-09-14 (2)
 
 ### Teste ao vivo da Aprovação Financeira revela SPEC-135 nunca publicada no Skip

@@ -26,7 +26,9 @@ Este arquivo dá a visão completa das automações ligadas ao Supabase:
 | `chat-agent` | ativa | Encaminha chat/agente para webhook externo. |
 | `welcome-email` | ativa | E-mail de boas-vindas. |
 | `generate-report` | ativa | Relatórios/exportações. |
-| `sync-sharepoint` | ativa | Integração SharePoint/OneDrive/Microsoft. |
+| `sync-sharepoint` | **removida (2026-09-14)** | Descontinuada pela SPEC-130 — lia "Organização Projetos" **e** "Tabelas de Preços"; substituída por `sharepoint-projetos-push`/`sharepoint-projetos-pull`, que só tocam "Organização Projetos". Botão manual removido de `Sync.tsx` (Dashboard, Skip 41135). |
+| `sharepoint-projetos-push` | ativa | SPEC-130 — push sistema→SharePoint (só lista "Organização Projetos"), disparada por trigger em `projetos`. |
+| `sharepoint-projetos-pull` | ativa | SPEC-130 — pull SharePoint→sistema (só lista "Organização Projetos"), agendada via pg_cron a cada 5 min. |
 | `sync-teams` | ativa | Integração/simulação Microsoft Teams. |
 | `enviar-confirmacao-email` | ativa | Confirmação por e-mail de orçamento; revisar envio real. |
 | `parse-budget-pdf` | ativa | Leitura/processamento inicial de PDF de orçamento. |

@@ -106,6 +106,12 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Campo adicionado nos 6 formulários genéricos, na captura rápida, no upload de arquivo e na revisão de memória por voz (`public/app/app.js` + `public/app/supabase-adapter.js`, Skip projectId 57204), exibido também na tela de detalhe. Busca global já é full-text sobre o registro inteiro, então o código já fica pesquisável sem filtro dedicado novo.
 - QA do Skip verde, publicado em produção (`memoria-lucenera-2e074.goskip.app`, v0.0.8 / `cc8afcf`). Sem teste manual ao vivo no navegador (login/SSO segue como pendência aberta desde a SPEC-129).
 
+### Desativada a function legada sync-sharepoint (tocava outra lista) — SPEC-130
+
+- Usuário perguntou explicitamente se a automação toca alguma lista além de "Organização Projetos". Resposta honesta: a automação NOVA (push/pull), sim, só toca essa lista (auditado no código: `LIST_DISPLAY_NAME` fixo, Estado resolvido contra tabela própria, nunca lê "Estados" ao vivo em produção). Mas a function **antiga** `sync-sharepoint` (de antes desta SPEC) continuava **ativa** e lia "Tabelas de Preços" também, acionável manualmente por um botão em `Sync.tsx` (Dashboard Financeiro, Skip `projectId 41135`).
+- Por decisão do usuário: **function apagada do Supabase**; **botão removido de `Sync.tsx`** (Skip aplicado + publicado, produção `dashboard-empresa-40d7d.goskip.app`, versão `0.0.43`/`a24ebab`, QA verde); pasta local `supabase/functions/sync-sharepoint/` removida do repo central; `AUTOMATION_INVENTORY.md` atualizado.
+- Resultado: agora nenhuma automação do ecossistema toca outra lista do SharePoint além de "Organização Projetos".
+
 ### Investigação dos 6 órfãos antigos + documentação estrutural da trava — SPEC-130
 
 - Usuário pediu pra investigar os 6 projetos antigos sem vínculo e confirmar que nada foi alterado indevidamente na lista real, com destaque pra durabilidade da trava (nova sessão sem contexto desta conversa precisa saber que ela existe).

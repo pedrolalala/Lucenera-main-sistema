@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-14 (5)
+
+### SPEC-133 revisada: card de Aprovação Financeira volta a ser somente leitura — PUBLICADO
+
+- Instrução do usuário (com referência visual) revogou a edição de parcela adicionada mais cedo hoje na mesma SPEC-133: a confirmação de Aprovação Financeira não pode ter nenhum campo editável. Ajustes de valor/vencimento de parcela passam a ser feitos antes, na tela de condições de pagamento do próprio orçamento.
+- `FinancialApprovalDialog.tsx` voltou a ser somente leitura (removidos os inputs editáveis por parcela); `approveBudgetFinancial` voltou ao contrato original da RPC (só `p_orcamento_id`).
+- Consequência importante: a migration `20260914_141` (parâmetro `p_valores_parcelas` na RPC) **ficou sem uso** — não precisa ser aplicada. Fica documentada como histórico técnico na SPEC-133, mas marcada como abandonada.
+- Publicado em produção: `https://gestao-financeira-clone-544cb.goskip.app` (Skip 32554 v0.0.363, QA verde) — sem nenhuma dependência de migration agora.
+- Migration `20260914_140` (fix de nome da Marina + cadastro do Filippo Giorgi, pro filtro de Vendedores da SPEC-140) continua pendente e é a única que falta rodar.
+
 ## 2026-09-14 (4)
 
 ### Revisão do Prompt 7 (SPEC-138) — Boletos removido, área de baixa reformulada

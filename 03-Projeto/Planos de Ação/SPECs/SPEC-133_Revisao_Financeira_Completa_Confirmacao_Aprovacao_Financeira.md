@@ -1,10 +1,12 @@
 ---
 titulo: "SPEC-133 — Revisão Financeira Completa na Confirmação de Aprovação Financeira"
-status: "código pronto (Skip 32554 v0.0.361, QA verde) — NÃO PUBLICADO, depende da migration da RPC (ver 'Como aplicar')"
+status: "PUBLICADO em produção (Skip 32554 v0.0.363) — card somente leitura, sem edição de parcela"
 data_ultima_modificacao: 2026-09-14
 sistemas_envolvidos:
   - Orçamentos
 ---
+
+> **Revisão 2026-09-14 (instrução do usuário, com referência visual)**: a edição de valor de parcela dentro deste diálogo foi **revogada**. O card é agora somente leitura — qualquer ajuste financeiro (valor de entrada, vencimento) é feito antes, na tela de condições de pagamento do orçamento (`BudgetFormPage`), não nesta etapa de confirmação. Como consequência, a migration da RPC (`p_valores_parcelas`) **não é mais necessária** — `approveBudgetFinancial` voltou ao contrato original (só `p_orcamento_id`). O checklist abaixo é o histórico da implementação original (com edição); ver "Revisão — somente leitura" mais abaixo para o estado final.
 
 # SPEC-133 — Revisão Financeira Completa na Confirmação de Aprovação Financeira
 
@@ -131,24 +133,15 @@ aprovar_orcamento_financeiro(
 - Nenhum dado duplicado introduzido — bruto/desconto/líquido continuam sendo cálculo, não coluna nova.
 - Padrão de acesso a dados do sistema (Zustand + `supabase.from`/`supabase.rpc` direto nos componentes/store) deve ser mantido — o novo cálculo deve ser um helper puro, não uma camada de serviço nova.
 
-## Critérios de aceite
+## Critérios de aceite (revisados — somente leitura)
 
-- [ ] O `FinancialApprovalDialog` mostra: Valor Bruto, Valor de Desconto (R$), Valor Líquido, Valor de Sinal (se houver), Número de Parcelas, Valor de cada parcela (editável), Data de vencimento prevista de cada parcela, Forma de Pagamento.
-- [ ] Editar o valor de uma parcela não recalcula as demais e não valida contra `valor_total` (só valida `> 0`).
-- [ ] Confirmar aprovação com valores de parcela editados grava exatamente esses valores em `projeto_parcelas.valor` (checado via SELECT).
-- [ ] Confirmar aprovação sem editar nenhum valor mantém o comportamento atual (divisão igual, última parcela absorve o resto) — checar que a chamada com `p_valores_parcelas = null` não regride.
-- [ ] Editar valor/data de parcela nesta tela não altera `orcamentos.status` para fora de `Aprovação Financeira` antes da confirmação, nem reabre o ciclo de aprovação do cliente.
-- [ ] Nenhuma mudança quebra os critérios já fechados da SPEC-016/017 (fila por `orcamento_id`, aprovação idempotente, reserva de estoque intacta, guard de permissão).
-- [ ] `pnpm run lint` e `pnpm run build` passam no sistema de Orçamentos.
-- [ ] Teste ao vivo: criar orçamento sintético, abrir a confirmação, editar valor de uma parcela, aprovar, e validar via SELECT em `projeto_parcelas`/`boletos`/`estoque_saldos_projeto_item` que os efeitos são os esperados; excluir os dados de teste ao final.
+- [x] O `FinancialApprovalDialog` mostra: Valor Bruto, Valor de Desconto (R$), Valor Líquido, Valor de Sinal (se houver), Número de Parcelas, Valor de cada parcela, Data de vencimento prevista de cada parcela, Forma de Pagamento — **tudo somente leitura**, nenhum campo editável.
+- [x] Confirmar aprovação chama `aprovar_orcamento_financeiro(p_orcamento_id)` sem nenhum parâmetro extra — comportamento idêntico ao de antes desta SPEC (divisão igual, última parcela absorve o resto).
+- [x] Nenhuma mudança quebra os critérios já fechados da SPEC-016/017 (fila por `orcamento_id`, aprovação idempotente, reserva de estoque intacta, guard de permissão) — não toca a RPC.
+- [x] `pnpm run tsc`/`vite build` passam no sistema de Orçamentos.
+- [ ] Teste ao vivo: abrir a confirmação de um orçamento real em "Aprovação Financeira" e conferir que o resumo bate com os dados do orçamento, sem nenhum campo clicável/editável.
 
-## Testes obrigatórios
-
-- Orçamento com 1 parcela: resumo mostra bruto/desconto/líquido corretos e uma única parcela com data prevista = hoje + `prazo_pagamento_dias[0]`.
-- Orçamento com N parcelas: editar o valor da 1ª (entrada) para um valor maior, confirmar, e checar que `projeto_parcelas` grava os valores exatos digitados (inclusive a soma divergindo de `valor_total`).
-- Confirmar sem editar nenhuma parcela: comportamento idêntico ao atual (regressão).
-- Usuário sem permissão de aprovar não consegue nem ver os inputs de edição de valor (mesma regra de permissão já existente para o botão de aprovar).
-- Tentar confirmar com uma parcela com valor `0` ou negativo: bloqueado no frontend e also rejeitado pela RPC.
+~~## Testes obrigatórios~~ (obsoleto — testes de edição de parcela não se aplicam mais; ver critérios acima)
 
 ## Realizado
 
@@ -163,16 +156,21 @@ aprovar_orcamento_financeiro(
 
 - [ ] Homologar visualmente com quem aprova financeiramente.
 - [ ] Decidir separadamente (fora desta SPEC) se os arquivos órfãos (`ProjectFinancialReviewDialog.tsx` e afins) devem ser removidos numa limpeza técnica futura.
-- [ ] **Aplicar a migration da RPC no Supabase real** (ver "Como aplicar") — sem isso, publicar o frontend quebra a aprovação financeira pra todo mundo (a chamada nova exige o parâmetro `p_valores_parcelas` que só existe na função depois da migration).
 
-## Como aplicar (2026-09-14)
+## Migration da RPC (`20260914_141`) — ABANDONADA, não aplicar
 
-```
-psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "supabase/db/migrations/20260914_141_spec133_valores_parcela_customizados/001_p_valores_parcelas.sql"
-```
+A migration `supabase/db/migrations/20260914_141_spec133_valores_parcela_customizados/001_p_valores_parcelas.sql` foi escrita, testada (dry-run + smoke-test de chamada no formato antigo) e chegou a ser publicada por uma versão intermediária do frontend — mas a revisão de 2026-09-14 (usuário pediu card somente leitura) **eliminou a necessidade dela**: sem edição de parcela, não há nada pra mandar num parâmetro `p_valores_parcelas`. O arquivo fica no repositório como histórico técnico (inclusive o achado sobre `DROP FUNCTION` + overload + re-grant, que pode ser útil se uma SPEC futura reabrir esse caminho), mas **não deve ser aplicado** — a RPC real em produção continua com a assinatura original de 1 argumento, e é isso que o frontend publicado (Skip `32554` v0.0.363) espera.
 
-Testada com dry-run (`BEGIN; ...; ROLLBACK;`) e com uma chamada de fumaça no formato de 1 argumento (`p_orcamento_id => '...'`, como o PostgREST chama hoje) antes de aplicar de verdade — confirmado que continua aceitando a chamada antiga.
+## Revisão — somente leitura (2026-09-14)
 
-**Achado importante durante a implementação**: como o novo parâmetro muda a assinatura da função (`(uuid)` → `(uuid, numeric[])`), um simples `CREATE OR REPLACE FUNCTION` criaria uma SEGUNDA função (overload) em vez de substituir — o PostgREST ficaria ambíguo em qualquer chamada que não passe o 2º parâmetro. A migration faz `DROP FUNCTION aprovar_orcamento_financeiro(uuid)` antes de recriar. Isso também apaga os grants de `EXECUTE` que a função tinha (`anon`, `authenticated`, `service_role`, confirmados via `pg_proc.proacl` antes de aplicar) — a migration já re-concede esses grants depois do `CREATE`.
+Instrução do usuário, com referência visual (2 imagens: card atual / card desejado): a confirmação de Aprovação Financeira é a etapa final — **não pode ter nenhum campo editável**. Qualquer ajuste em valor de parcela, vencimento etc. é feito antes, na tela de condições de pagamento do próprio orçamento (`BudgetFormPage`), não nesta confirmação.
 
-**Ordem de publicação obrigatória**: aplicar esta migration **antes** de publicar o Skip `32554` v0.0.361 (ou qualquer versão posterior) em produção — o frontend já commitado (`398921b`) sempre chama a RPC com os dois parâmetros; sem a migration aplicada, PostgREST rejeitaria a chamada e a aprovação financeira pararia de funcionar inteiramente até a migration rodar.
+Mudanças em relação à versão anterior (com edição, nunca publicada):
+- `FinancialApprovalDialog.tsx`: removidos os `Input` editáveis por parcela, o estado `parcelaValores`, a validação `parcelasValidas`/`parcelasForamEditadas` e o aviso de "valor editável". Cada parcela agora é uma linha somente leitura (número, data de vencimento, valor), com uma nota explícita "Somente leitura — para ajustar valor de parcela ou vencimento, edite o orçamento antes de aprovar."
+- `onConfirm` volta a ser `() => Promise<void>` (sem parâmetro).
+- `approveBudgetFinancial` (`budgetApprovalService.ts`) volta ao contrato original: só `p_orcamento_id`, sem `p_valores_parcelas`.
+- `handleFinancialApproval` (`BudgetFormPage.tsx`) e `handleConfirmApproval` (`FinancialApprovalTab.tsx`) voltam a ser `async () => {...}`, sem parâmetro.
+
+Todos os outros campos do resumo (Valor Bruto, Sinal, Desconto, Valor Líquido, Frete, Valor Total, Forma de Pagamento, datas de vencimento previstas) continuam exatamente como implementados — só deixaram de ser editáveis.
+
+**Publicado em produção**: `https://gestao-financeira-clone-544cb.goskip.app` (Skip `32554` v0.0.363, QA 100% verde) — sem nenhuma dependência de migration, já que a chamada da RPC voltou ao formato original que a produção já suporta.

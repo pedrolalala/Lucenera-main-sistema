@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-136 — Número da venda, distinto do número do orçamento"
-status: implementado no código, aguardando aplicação no Supabase real
-data_ultima_modificacao: 2026-09-11
+status: "APLICADO em produção (2026-09-14)"
+data_ultima_modificacao: 2026-09-14
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — schema `orcamentos`, RPC `aprovar_orcamento_financeiro`
   - Separação (separacao-parcial) — `SeparacaoParcialPage.tsx`, `separacaoParcialService.ts`
@@ -22,7 +22,7 @@ dependencias:
 - [x] Atualizar `useBudgetStore.ts` (`Budget`, `ApprovalResult`) e `FinanceResultModal.tsx` (mostra o número da venda no resultado da aprovação).
 - [x] Escrever migration em `supabase/db/migrations/20260911_136_orcamento_numero_venda/` e copiar para o submodule.
 - [x] Atualizar `AI_DB_CONTEXT.md` do sistema de Orçamentos.
-- [ ] **Aplicar a migration no Supabase real** — mesma restrição da SPEC-135 (classificador de modo automático bloqueia `CREATE OR REPLACE FUNCTION` em produção); rodar manualmente.
+- [x] **Aplicar a migration no Supabase real** — aplicada em 2026-09-14 pelo usuário (comando `psql` rodado via `!` no chat), após dry-run (`BEGIN; ...; ROLLBACK;`) confirmando sucesso sem erros. Confirmado via `information_schema.columns` que `orcamentos.numero_venda` e `vw_estoque_saldos_projeto_item.venda_numero` existem, e via `pg_get_functiondef` que `aprovar_orcamento_financeiro` tem `v_numero_venda`.
 - [ ] Rodar `pnpm run lint`/`pnpm run build` nos dois sistemas após aplicar (typecheck e lint locais já rodados e limpos nesta sessão).
 - [ ] Teste ao vivo: aprovar um orçamento novo e conferir que aparece `numero_venda` no resultado e na Separação; abrir a Separação de um orçamento aprovado ANTES desta SPEC e confirmar que mostra "Venda: —" sem quebrar nada.
 - [ ] Decidir e implementar, em SPEC futura, os itens ainda pendentes de propagação (ver "Pendências").
@@ -92,12 +92,15 @@ Hoje, em qualquer lugar do ecossistema que mostra um orçamento já aprovado (a 
 
 - **Bug encontrado antes de aplicar** (verificação prévia, não em produção): a migration original inseria `o.numero_venda AS venda_numero` no MEIO da lista de colunas de `vw_estoque_saldos_projeto_item` (entre `orcamento_numero` e `q_venda`). `CREATE OR REPLACE VIEW` no Postgres só aceita colunas novas no final da lista — a migration original teria falhado com `cannot change name of view column` ao ser aplicada. Corrigido nos dois arquivos (`supabase/db/migrations/20260911_136_.../001_numero_venda.sql` e a cópia em `04-Sistemas/gestao-financeira-clone-544cb (1)/supabase/migrations/`): `venda_numero` movida pro final da lista de colunas. Nenhum nome/posição de coluna existente muda; `separacaoParcialService.ts` já seleciona por nome (`venda_numero`), não por posição — zero impacto no frontend.
 - Verificação prévia via `pg_get_functiondef` direto no Supabase real: `aprovar_orcamento_financeiro` e `replace_orcamento_itens` ao vivo batem byte a byte com a versão "antes do fix" assumida pela SPEC-135/136 (única diferença é exatamente o bloco que a migration pretende adicionar) — confirma que nada mudou nesses dois domínios desde 11/09, seguro aplicar. Confirmado também que `orcamentos.numero_venda` ainda não existe em produção.
-- **Tentativa de aplicar a migration corrigida foi bloqueada pelo classificador de modo automático do Claude Code** (ação "Production Deploy") — precisa ser rodada manualmente pelo usuário. Comando pronto abaixo.
+- **Tentativa de aplicar a migration corrigida foi bloqueada pelo classificador de modo automático do Claude Code** (ação "Production Deploy") — testada com dry-run (`BEGIN; ...; ROLLBACK;`, sem erros) e depois rodada de verdade pelo usuário via `!` no chat. **APLICADA com sucesso.**
+- **Correção do texto acima** ("não precisa rodar a 135 separadamente"): isso valia só pra função `aprovar_orcamento_financeiro` (bloqueio de peça sem cadastro) — essa parte é de fato superset. Mas a SPEC-135 tem uma SEGUNDA função, `replace_orcamento_itens` (o fix do "reset falso-positivo", Prompt 1 do documento), que esta migration **nunca tocava**. Só percebi isso depois de aplicar e conferir cada função separadamente no banco real. Corrigido com uma migration extra: `supabase/db/migrations/20260914_139_fix_replace_orcamento_itens_pos_136/001_replace_orcamento_itens_no_op.sql`, aplicando só `replace_orcamento_itens` sem tocar `aprovar_orcamento_financeiro` (reaplicar a versão da 135 nela reverteria `numero_venda`). Também testada com dry-run e aplicada com sucesso pelo usuário.
+- Confirmado em produção via `information_schema.columns` (`orcamentos.numero_venda`, `vw_estoque_saldos_projeto_item.venda_numero`) e `pg_get_functiondef` (`aprovar_orcamento_financeiro` com `v_numero_venda`; `replace_orcamento_itens` com `v_itens_iguais`) — as duas funções e a coluna/view estão corretas em produção.
 
-## Como aplicar (atualizado 2026-09-14, com o fix do bug de coluna)
+## Como aplicar (histórico — já aplicado em 2026-09-14)
 
 ```
 psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "supabase/db/migrations/20260911_136_orcamento_numero_venda/001_numero_venda.sql"
+psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "supabase/db/migrations/20260914_139_fix_replace_orcamento_itens_pos_136/001_replace_orcamento_itens_no_op.sql"
 ```
 
-Esta migration já é superset da SPEC-135 (inclui o bloqueio de peça sem cadastro) — não precisa rodar a migration da 135 separadamente. Arquivo já está dentro de `BEGIN;`/`COMMIT;` e termina com `NOTIFY pgrst, 'reload schema';`.
+As duas já foram rodadas com sucesso — comando deixado aqui só como referência histórica/rollback de contexto, não é mais uma pendência.

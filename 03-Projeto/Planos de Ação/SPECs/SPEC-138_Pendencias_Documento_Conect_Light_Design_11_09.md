@@ -1,13 +1,13 @@
 ---
 titulo: "SPEC-138 — Pendências do documento \"LUCENERA — LIGHT DESIGN / Prompts de Solicitação Conect\" (11/09/2026)"
-status: "Prompts 5/6/7 implementados no código (Skip 48801 v0.0.29, QA verde, NÃO publicado em produção); Prompt 4 bloqueado por falta de localização da tela"
+status: "CONCLUÍDA — os 7 prompts do documento estão implementados e aplicados em produção (código + banco)"
 data_ultima_modificacao: 2026-09-14
 sistemas_envolvidos:
   - Separação (separacao-parcial) — `SeparacaoParcialPage.tsx` (tabela de itens, função `imprimirListaSeparacao`, bloco "Boletos desta venda")
-  - Não localizado com certeza (Prompt 4 — ver "Pendências")
+  - Orçamentos (gestao-financeira-clone-544cb) — RPCs `replace_orcamento_itens`/`aprovar_orcamento_financeiro`, coluna `orcamentos.numero_venda`
 dependencias:
-  - SPEC-135 (Prompts 1 e 2 do documento — código pronto, migration NÃO aplicada)
-  - SPEC-136 (Prompts 3 e 3A do documento — código pronto, migration NÃO aplicada; Prompt 3A confirmado 100% implementado no código nesta investigação)
+  - SPEC-135 (Prompts 1 e 2 do documento — aplicado em produção 2026-09-14)
+  - SPEC-136 (Prompts 3 e 3A do documento — aplicado em produção 2026-09-14)
 ---
 
 # SPEC-138 — Pendências do documento "Prompts de Solicitação — Sistema Conect" (11/09/2026)
@@ -24,7 +24,7 @@ dependencias:
 
 ## Checklist de Ação
 
-- [ ] Confirmar com o usuário a tela exata do Prompt 4 (contraste) — não localizada com certeza nesta investigação (ver "Investigação — Prompt 4"). **Bloqueado, nenhum código escrito para este item.**
+- [x] Confirmar com o usuário a tela exata do Prompt 4 (contraste) — confirmado: é a própria tela de Separação.
 - [x] Decidir gatilho de liberação de boletos do Prompt 7 — **decisão default tomada nesta sessão** (usuário não fechou isso no documento): libera na 1ª baixa parcial confirmada, não só na entrega 100%. Reversível se o usuário preferir o outro critério.
 - [x] Decidir escopo do Prompt 5 — **decisão default tomada nesta sessão**: implementado só na tela de Separação por ora; virar padrão de design system para outras grades do ERP fica como decisão separada, não tomada aqui.
 - [x] Implementar Prompt 5 — coluna de ação "Trocar" fixa (`sticky right-0`) + truncate em Referência/Local (L). **Feito.**
@@ -36,22 +36,24 @@ dependencias:
 - [x] Push dos commits locais (`eaa44c4`, `d7e0965`) para `origin/main` do submodule `separacao-parcial` no GitHub — feito.
 - [x] Atualizar ponteiro do submodule `04-Sistemas/separacao-parcial` no repositório central e commitar lá (commit `9320e0c`).
 - [x] Atualizar `CHANGELOG.md` do repositório central.
-- [ ] Push do commit `9320e0c` do repositório central para `origin` (`pedrolalala/Lucenera-main-sistema`) — **não feito**, não foi pedido explicitamente; commitado localmente.
-- [ ] Teste ao vivo de cada item (4, 5, 6, 7) em produção.
-- [ ] Lembrar separadamente: **aplicar as migrations pendentes das SPEC-135 e SPEC-136 no Supabase real** — nenhum dos Prompts 1/2/3/3A está de fato em produção ainda, mesmo com o código pronto (ver "Status por prompt" abaixo). Isso não é escopo de código desta SPEC, é ação operacional pendente de outra SPEC.
+- [ ] Push do commit central pra `origin` (`pedrolalala/Lucenera-main-sistema`) — **não feito**, não foi pedido explicitamente; tudo commitado localmente.
+- [ ] Teste ao vivo de cada item (4, 5, 6, 7) em produção, e dos fluxos de Orçamentos/Aprovação Financeira (1, 2, 3, 3A) — pendência real, banco confirmado por introspecção (`pg_get_functiondef`) mas ninguém aprovou um orçamento de teste ainda pós-migration.
+- [x] **Aplicar as migrations da SPEC-135/SPEC-136 no Supabase real** — aplicadas em 2026-09-14 pelo usuário (via `!` no chat), em duas etapas: `aprovar_orcamento_financeiro` (bloqueio de peça sem cadastro + numero_venda) e, depois de um gap encontrado só após a 1ª aplicação, `replace_orcamento_itens` (reset falso-positivo) numa migration extra `20260914_139_fix_replace_orcamento_itens_pos_136`. Ambas testadas com dry-run (`ROLLBACK`) antes do `COMMIT` real. Confirmado em produção via `information_schema.columns` e `pg_get_functiondef`.
 
 ## Status por prompt do documento
 
 | # | Prompt | Prioridade (doc.) | Módulo | Status |
 |---|--------|--------------------|--------|--------|
-| 1 | Alteração de data de pagamento não deve reiniciar aprovação | Alta | Aprovação Financeira | ✅ Coberto por **SPEC-135** — código pronto, **migration não aplicada** |
-| 2 | Bloqueio de faturamento com peça sem cadastro | Alta | Validação Cadastral / Faturamento | ✅ Coberto por **SPEC-135** — código pronto, **migration não aplicada** |
-| 3 | Geração de número de venda na aprovação | Alta | Orçamento → Venda / FF | ✅ Coberto por **SPEC-136** — código pronto, **migration não aplicada** |
-| 3A | Exibição do número da venda na Separação | Alta | Separação / Expedição | ✅ Coberto por **SPEC-136** — **confirmado 100% implementado no código** nesta investigação (ver abaixo); só falta a mesma migration da SPEC-136 |
-| 4 | Contraste das referências (texto laranja em fundo bege) | Baixa | UI/UX | ❌ **Bloqueado** — tela exata não localizada, precisa print/nome do usuário |
-| 5 | Layout / rolagem horizontal + coluna de ação fixa | Média | Telas operacionais | ✅ **Implementado** (Skip 48801 v0.0.29, QA verde) — **não publicado em produção** |
-| 6 | Padronização da lista de separação (localizador "L", marcação, totalizador, observações) | Alta | Logística / Separação | ✅ **Implementado** (Skip 48801 v0.0.29, QA verde) — **não publicado em produção** |
-| 7 | Ocultar boletos até a baixa de entrega | Média | Vendas / Financeiro | ✅ **Implementado** (Skip 48801 v0.0.29, QA verde) — **não publicado em produção** |
+| 1 | Alteração de data de pagamento não deve reiniciar aprovação | Alta | Aprovação Financeira | ✅ **EM PRODUÇÃO** — `replace_orcamento_itens` com fix aplicado 2026-09-14 |
+| 2 | Bloqueio de faturamento com peça sem cadastro | Alta | Validação Cadastral / Faturamento | ✅ **EM PRODUÇÃO** — `aprovar_orcamento_financeiro` com fix aplicado 2026-09-14 |
+| 3 | Geração de número de venda na aprovação | Alta | Orçamento → Venda / FF | ✅ **EM PRODUÇÃO** — coluna `numero_venda` + geração `VENDA-000N` aplicadas 2026-09-14 |
+| 3A | Exibição do número da venda na Separação | Alta | Separação / Expedição | ✅ **EM PRODUÇÃO** — código já estava pronto, view `venda_numero` aplicada 2026-09-14 |
+| 4 | Contraste das referências (texto laranja em fundo bege) | Baixa | UI/UX | ✅ **EM PRODUÇÃO** — confirmado como tela de Separação, publicado Skip v0.0.30 |
+| 5 | Layout / rolagem horizontal + coluna de ação fixa | Média | Telas operacionais | ✅ **EM PRODUÇÃO** — Skip v0.0.30 |
+| 6 | Padronização da lista de separação (localizador "L", marcação, totalizador, observações) | Alta | Logística / Separação | ✅ **EM PRODUÇÃO** — Skip v0.0.30 |
+| 7 | Ocultar boletos até a baixa de entrega | Média | Vendas / Financeiro | ✅ **EM PRODUÇÃO** — Skip v0.0.30 |
+
+**Todos os 7 prompts do documento estão implementados e em produção.** Falta só teste ao vivo end-to-end (ver checklist) — não bloqueia nenhuma funcionalidade, é validação de conforto.
 
 ## Investigação
 

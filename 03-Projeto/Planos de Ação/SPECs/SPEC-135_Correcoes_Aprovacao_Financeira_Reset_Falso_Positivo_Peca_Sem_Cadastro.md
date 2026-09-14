@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-135 — Aprovação Financeira: reset falso-positivo do ciclo de aprovação + bloqueio de peça sem cadastro"
-status: implementado no código, aguardando aplicação no Supabase real
-data_ultima_modificacao: 2026-09-11
+status: "APLICADO em produção (2026-09-14) — código e migration"
+data_ultima_modificacao: 2026-09-14
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — `FinancialApprovalDialog.tsx`, RPCs `replace_orcamento_itens` e `aprovar_orcamento_financeiro`
 dependencias:
@@ -22,7 +22,7 @@ dependencias:
 - [x] Corrigir `FinancialApprovalDialog.tsx`: aviso proativo + bloqueio de UI quando há item sem cadastro; parar de engolir silenciosamente o erro da RPC no `catch`.
 - [x] Escrever migration em `supabase/db/migrations/20260911_135_orcamento_aprovacao_financeira_fixes/` e copiar para `04-Sistemas/gestao-financeira-clone-544cb (1)/supabase/migrations/`.
 - [x] Atualizar `AI_DB_CONTEXT.md` do sistema (inclusive corrigir a documentação desatualizada sobre `financeiro_editar_orcamento` estar em uso).
-- [ ] **Aplicar a migration no Supabase real** — bloqueada pelo classificador de modo automático do Claude Code (ação de "Modify Shared Resources"); precisa ser rodada manualmente pelo usuário ou aprovada explicitamente. Comando pronto na seção "Como aplicar" abaixo.
+- [x] **Aplicar a migration no Supabase real** — aplicada em 2026-09-14 em duas partes: `aprovar_orcamento_financeiro` (bloqueio de peça sem cadastro) via migration da SPEC-136 (superset); `replace_orcamento_itens` (no-op de itens iguais) via `supabase/db/migrations/20260914_139_fix_replace_orcamento_itens_pos_136/001_replace_orcamento_itens_no_op.sql` (a 136 nunca tocava essa função — achado só depois de aplicar a 136, ver nota abaixo). Ambas testadas com dry-run (transação com `ROLLBACK`) antes do `COMMIT` real; confirmado via `pg_get_functiondef` que as duas funções em produção têm os fixes.
 - [ ] Rodar `pnpm run lint`/`pnpm run build` no sistema de Orçamentos após aplicar.
 - [ ] Testar ao vivo: editar só forma de pagamento/data num orçamento em "Aprovação Financeira" e confirmar que NÃO volta para "Enviado ao Cliente"; tentar aprovar um orçamento com item sem cadastro e confirmar que é bloqueado com mensagem clara.
 
@@ -127,6 +127,6 @@ O arquivo já está dentro de `BEGIN;`/`COMMIT;` e termina com `NOTIFY pgrst, 'r
 - [ ] `pnpm run lint`/`pnpm run build` após aplicar.
 - [ ] Teste ao vivo dos dois cenários (edição de campo não-item; aprovação com peça sem cadastro).
 
-## Nota (2026-09-14)
+## Nota (2026-09-14) — aplicação real, em 2 partes
 
-A migration da **SPEC-136** (`20260911_136_orcamento_numero_venda/001_numero_venda.sql`) é superset desta — já inclui o bloqueio de peça sem cadastro desta SPEC. Aplicar a da 136 é suficiente para as duas; não precisa rodar esta separadamente. Verificação prévia via `pg_get_functiondef` direto no Supabase real (2026-09-14) confirmou que `aprovar_orcamento_financeiro` e `replace_orcamento_itens` ao vivo ainda batem byte a byte com a versão "antes do fix" — nada mudou desde 11/09, migration segue segura de aplicar. Tentativa de aplicar foi bloqueada pelo classificador de modo automático ("Production Deploy"); ver comando pronto na SPEC-136.
+A migration da **SPEC-136** (`20260911_136_orcamento_numero_venda/001_numero_venda.sql`) é superset desta **só na função `aprovar_orcamento_financeiro`** (bloqueio de peça sem cadastro + numero_venda) — foi aplicada primeiro. **Achado só depois de aplicar**: a 136 nunca tocava `replace_orcamento_itens` (o fix #1 desta SPEC, o "reset falso-positivo"), então esse fix ficou pendente mesmo com a 136 já em produção. Corrigido com uma migration extra, `supabase/db/migrations/20260914_139_fix_replace_orcamento_itens_pos_136/001_replace_orcamento_itens_no_op.sql` — aplica só `replace_orcamento_itens`, sem tocar `aprovar_orcamento_financeiro` (reaplicar a versão original da 135 nela teria revertido o `numero_venda` recém-aplicado). As duas migrations foram testadas com dry-run (`BEGIN; ...; ROLLBACK;`) contra o Supabase real antes do `COMMIT` de verdade — ambas aplicadas com sucesso em 2026-09-14, confirmadas via `pg_get_functiondef`.

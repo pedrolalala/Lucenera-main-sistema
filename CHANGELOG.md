@@ -12,7 +12,15 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - **Prompt 7** (boletos antes da hora): bloco "Boletos desta venda" só aparece depois de alguma baixa registrada — decisão default tomada nesta entrega (1ª separação parcial confirmada, não só entrega 100%), já que o documento de origem não fechava esse gatilho.
 - **Prompt 4** (contraste): números de orçamento/venda/código de item/produto (busca de vendas, tabela de itens, Log de Trocas) passaram para cor escura (`#333333`), semibold e leve `letter-spacing`.
 - Publicado em produção: `https://separacao-parcial-dff01.goskip.app` (Skip `48801`, versão `0.0.30`, QA setup/staticAnalysis/build/integrations/test 100% verde).
-- Pendências: Prompt 4 não teve nenhuma outra tela identificada além de Separação (o documento não especifica o sistema); Prompts 1/2/3/3A seguem bloqueados pela aplicação das migrations da SPEC-135/SPEC-136 no Supabase real, que continua pendente.
+
+### Migrations SPEC-135/SPEC-136 aplicadas em produção — Prompts 1, 2, 3 e 3A concluídos
+
+- As duas migrations represadas desde 11/09 (`aprovar_orcamento_financeiro` com bloqueio de peça sem cadastro + `numero_venda`; `replace_orcamento_itens` com o fix do "reset falso-positivo" do ciclo de aprovação) foram aplicadas no Supabase real em 2026-09-14, rodadas manualmente pelo usuário via `psql` (ação bloqueada para execução automática pelo classificador de modo automático do Claude Code — "Production Deploy").
+- **Bug encontrado e corrigido antes de aplicar**: a migration da SPEC-136 inseria a coluna nova `venda_numero` no meio da lista de colunas de `vw_estoque_saldos_projeto_item`; `CREATE OR REPLACE VIEW` no Postgres só aceita coluna nova no final da lista — teria falhado. Corrigida nos 2 arquivos (repo central + submodule) antes de qualquer tentativa de aplicação.
+- **Gap encontrado só depois de aplicar a migration da SPEC-136**: ela reescreve `aprovar_orcamento_financeiro` (Prompts 2 e 3) mas nunca tocava `replace_orcamento_itens` (Prompt 1) — apesar de o texto da SPEC dizer que era "superset" da 135. Corrigido com uma migration adicional, `supabase/db/migrations/20260914_139_fix_replace_orcamento_itens_pos_136/`, aplicando só essa função (sem reaplicar a versão antiga de `aprovar_orcamento_financeiro`, que teria revertido `numero_venda`).
+- Cada migration foi testada primeiro com dry-run (`BEGIN; ...; ROLLBACK;` contra o Supabase real) antes do `COMMIT` de verdade — nenhum erro em nenhuma das duas.
+- Confirmado em produção via `information_schema.columns` e `pg_get_functiondef`: `orcamentos.numero_venda`, `vw_estoque_saldos_projeto_item.venda_numero`, bloqueio de peça sem cadastro e no-op de itens iguais — todos presentes.
+- **Com isso, os 7 prompts do documento "LUCENERA — LIGHT DESIGN" (11/09/2026) estão implementados e em produção.** Falta só teste ao vivo end-to-end de cada fluxo (não bloqueia nada, é validação de conforto).
 
 ## 2026-09-13
 

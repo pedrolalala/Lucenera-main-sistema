@@ -30,13 +30,14 @@ dependencias:
 - [x] Implementar Prompt 5 — coluna de ação "Trocar" fixa (`sticky right-0`) + truncate em Referência/Local (L). **Feito.**
 - [x] Implementar Prompt 6 — impressão ganhou coluna "Local (L)", marcação em branco por item, totalizador de itens/peças e campo de observações. **Feito.**
 - [x] Implementar Prompt 7 — "Boletos desta venda" só aparece após `houveBaixaRegistrada`. **Feito.**
-- [ ] Implementar Prompt 4 — depois de identificada a tela exata.
-- [x] Rodar QA do Skip 48801 (`skip_project_apply_changes`) — setup/staticAnalysis/build/integrations/test todos verdes, versão **0.0.29**.
-- [ ] **Publicar em produção** (`skip_project_publish` 48801) — não feito ainda, aguardando confirmação do usuário (ver "Como publicar").
-- [ ] Push do commit local (`eaa44c4`, submodule `separacao-parcial`) para `origin/main` no GitHub — não feito ainda, aguardando confirmação do usuário.
-- [ ] Atualizar ponteiro do submodule `04-Sistemas/separacao-parcial` no repositório central e commitar lá, depois do push acima.
-- [ ] Atualizar `CHANGELOG.md` do repositório central.
-- [ ] Teste ao vivo de cada item (5, 6, 7) depois de publicado.
+- [x] Implementar Prompt 4 — usuário confirmou que é a própria tela de Separação; referências de orçamento/venda/código passaram a `#333333` + semibold + `tracking-wide`. **Feito.**
+- [x] Rodar QA do Skip 48801 (`skip_project_apply_changes`) — setup/staticAnalysis/build/integrations/test todos verdes nas duas rodadas (v0.0.29 e v0.0.30).
+- [x] **Publicar em produção** (`skip_project_publish` 48801) — usuário confirmou; publicado em `https://separacao-parcial-dff01.goskip.app` (versão `0.0.30`, ref `7d7f34d`).
+- [x] Push dos commits locais (`eaa44c4`, `d7e0965`) para `origin/main` do submodule `separacao-parcial` no GitHub — feito.
+- [x] Atualizar ponteiro do submodule `04-Sistemas/separacao-parcial` no repositório central e commitar lá (commit `9320e0c`).
+- [x] Atualizar `CHANGELOG.md` do repositório central.
+- [ ] Push do commit `9320e0c` do repositório central para `origin` (`pedrolalala/Lucenera-main-sistema`) — **não feito**, não foi pedido explicitamente; commitado localmente.
+- [ ] Teste ao vivo de cada item (4, 5, 6, 7) em produção.
 - [ ] Lembrar separadamente: **aplicar as migrations pendentes das SPEC-135 e SPEC-136 no Supabase real** — nenhum dos Prompts 1/2/3/3A está de fato em produção ainda, mesmo com o código pronto (ver "Status por prompt" abaixo). Isso não é escopo de código desta SPEC, é ação operacional pendente de outra SPEC.
 
 ## Status por prompt do documento

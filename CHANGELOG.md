@@ -106,6 +106,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Campo adicionado nos 6 formulários genéricos, na captura rápida, no upload de arquivo e na revisão de memória por voz (`public/app/app.js` + `public/app/supabase-adapter.js`, Skip projectId 57204), exibido também na tela de detalhe. Busca global já é full-text sobre o registro inteiro, então o código já fica pesquisável sem filtro dedicado novo.
 - QA do Skip verde, publicado em produção (`memoria-lucenera-2e074.goskip.app`, v0.0.8 / `cc8afcf`). Sem teste manual ao vivo no navegador (login/SSO segue como pendência aberta desde a SPEC-129).
 
+### Fix de lixo legado (cidade/estado) achado por comparação campo a campo — SPEC-130
+
+- Usuário reportou "CRM não bate com a planilha". Comparação campo a campo (não feita antes — o sync anterior só confirmava gravação, não igualdade final) achou lixo **pré-existente** (não introduzido por esta SPEC): `cidade` com literal `.`/`None` em 108 projetos, `estado` com literal `No` em 693 projetos (resto de "None" cortado em 2 caracteres). O `COALESCE` das RPCs protegia esse lixo de ser limpo (planilha vinha com o campo genuinamente vazio).
+- Limpeza direta: `cidade`→NULL onde era `.`/`None` (108), `estado`→NULL onde era `No` (693).
+- **Reconferido campo a campo: 3.735 de 3.736 projetos batendo 100%** com a planilha. O único restante (`26.1109`) é proteção funcionando por design (SharePoint zerou Estado/Status depois do backfill inicial; sistema manteve o valor antigo em vez de apagar).
+- **Impacto no banco:** 801 UPDATEs de limpeza de dado (nenhuma coluna/schema nova).
+
 ### Reconciliação via planilha + limpeza de testes — SPEC-130 (2026-09-14)
 
 - Usuário forneceu `01-Documento/01 - Planilhas/Planilha de projetos.xlsx` (export local, 3.748 linhas, sem ID de item). Criada RPC `aplicar_planilha_projetos` (migration `017`, casa só por `codigo`) + `scripts/sincronizar_planilha_projetos.py`. Resultado: **3.736 atualizados, 0 criados, 0 erros** — confirma que o cron incremental já vinha mantendo tudo sincronizado sozinho nos últimos 3 dias.

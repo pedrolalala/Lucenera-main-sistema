@@ -126,3 +126,7 @@ O arquivo já está dentro de `BEGIN;`/`COMMIT;` e termina com `NOTIFY pgrst, 'r
 - [ ] Rodar a migration no Supabase real (comando na seção "Como aplicar").
 - [ ] `pnpm run lint`/`pnpm run build` após aplicar.
 - [ ] Teste ao vivo dos dois cenários (edição de campo não-item; aprovação com peça sem cadastro).
+
+## Nota (2026-09-14)
+
+A migration da **SPEC-136** (`20260911_136_orcamento_numero_venda/001_numero_venda.sql`) é superset desta — já inclui o bloqueio de peça sem cadastro desta SPEC. Aplicar a da 136 é suficiente para as duas; não precisa rodar esta separadamente. Verificação prévia via `pg_get_functiondef` direto no Supabase real (2026-09-14) confirmou que `aprovar_orcamento_financeiro` e `replace_orcamento_itens` ao vivo ainda batem byte a byte com a versão "antes do fix" — nada mudou desde 11/09, migration segue segura de aplicar. Tentativa de aplicar foi bloqueada pelo classificador de modo automático ("Production Deploy"); ver comando pronto na SPEC-136.

@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-14 (2)
+
+### Teste ao vivo da Aprovação Financeira revela SPEC-135 nunca publicada no Skip
+
+- Usuário testou ao vivo criar um orçamento com peça sem cadastro e tentar aprovar financeiramente: o bloqueio funcionou (banco), mas nenhum aviso explicando o motivo apareceu na tela.
+- Causa raiz: o frontend do Skip (produção, `gestao-financeira-clone-544cb`, projeto `32554`) rodava uma versão de `FinancialApprovalDialog.tsx` **anterior à SPEC-135 inteira** — sem o banner de "peça sem cadastro" nem tratamento de erro (o `catch` engolia tudo silenciosamente). O código da SPEC-135 só existia no git local, nunca tinha sido publicado.
+- Corrigido e publicado: `FinancialApprovalDialog.tsx` completo (banner + agora também um Card vermelho persistente com a mensagem de erro, substituindo o toast que era fácil de perder).
+- Achado adicional (investigação, não reportado pelo usuário): `budgetToEdit.itens` só carrega uma vez ao abrir a página — item sem cadastro adicionado na mesma sessão de edição podia escapar do banner. Corrigido: busca os itens direto do banco antes de abrir o diálogo de aprovação (`BudgetFormPage.tsx`, `FinancialApprovalTab.tsx`).
+- Pedido do usuário: editar só os campos de "Pagamento e Totais" (forma de pagamento, parcelas, frete, perfil, desconto, sinal, observações) — já negociados com o cliente antes da aprovação financeira — não deve nem avisar sobre reiniciar o ciclo de aprovação do cliente, já que esses campos nunca tocam os itens do orçamento. Corrigido: novo comparador `itensRealmenteMudaram()` só dispara o aviso/reset quando os itens de fato mudam.
+- Publicado em produção: `https://gestao-financeira-clone-544cb.goskip.app` (Skip `32554`, versão `0.0.360`, QA 100% verde). Detalhe completo em SPEC-135.
+
 ## 2026-09-14
 
 ### Prompts 4, 5, 6 e 7 do documento "Conect" Light Design 11/09 — SPEC-138 (Separação Parcial)

@@ -106,6 +106,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Campo adicionado nos 6 formulários genéricos, na captura rápida, no upload de arquivo e na revisão de memória por voz (`public/app/app.js` + `public/app/supabase-adapter.js`, Skip projectId 57204), exibido também na tela de detalhe. Busca global já é full-text sobre o registro inteiro, então o código já fica pesquisável sem filtro dedicado novo.
 - QA do Skip verde, publicado em produção (`memoria-lucenera-2e074.goskip.app`, v0.0.8 / `cc8afcf`). Sem teste manual ao vivo no navegador (login/SSO segue como pendência aberta desde a SPEC-129).
 
+### Resolvidas as 3 duplicatas restantes por busca fuzzy — só 26.1109 fica pendente
+
+- Usuário questionou por que 3 dos 12 casos não tinham duplicata encontrada. Busca fuzzy (não só texto exato) achou os 3, com diferença de grafia: `26.273` MARIA VANTINI → **MARINA VANTINI**/`24.456`; `26.280` EDUARDO MASSOLI - AP → **EDUARDO MASSOLI - APTO CIDADE DE VANCOUVER**/`25.420`; `26.282` FACHADA CASA COR 2026 → **FACHADA CASACOR 2026** (sem espaço)/`26.180`. Confirmados os 3 códigos no sistema, 0 dependência, **apagados** (com reconfirmação do usuário — o DELETE foi bloqueado uma vez pelo classificador automático).
+- **Único caso genuinamente pendente: `26.1109` (Vinicius Bortolin)** — sem duplicata em lugar nenhum, nem exata nem fuzzy. Não apagado, pode ser projeto real. Aguardando o time.
+- **Achado técnico**: `field_0` (Codigo) é texto simples com `enforceUniqueValues: true` (não lookup, não calculado) — confirmado via `GET /lists/{id}/columns`. Explica por que o time precisa esvaziar o código do item duplicado antes de atribuir o mesmo valor ao corrigido. O endpoint `/versions` do Graph se mostrou **não confiável** pra reconstituir histórico de coluna customizada nesta lista — não usar pra esse tipo de auditoria no futuro.
+- **Impacto no banco:** 3 DELETEs. Nenhuma mudança de schema.
+
 ### Achadas e removidas 9 duplicatas com código apagado no SharePoint — SPEC-130
 
 - Usuário apontou de novo "CRM não bate com a planilha", citando `26.273`-`283` e `26.1109`/`26.1110`. Investigação achou 2 coisas: (1) a comparação "banco→planilha" anterior tinha 354 "órfãos", mas a maioria era falso positivo — a planilha fornecida é um recorte incompleto da lista real, não um espelho total (confirmado ao vivo via Graph); (2) 12 casos REAIS de itens que continuam existindo no SharePoint mas com o código (`field_0`) esvaziado pelo time — mesmo padrão do vazamento `26.284` anterior (item criado sem código, SharePoint autonumera errado, time cria a versão corrigida e limpa o código da errada em vez de excluir).

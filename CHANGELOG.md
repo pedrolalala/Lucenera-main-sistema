@@ -106,6 +106,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Campo adicionado nos 6 formulários genéricos, na captura rápida, no upload de arquivo e na revisão de memória por voz (`public/app/app.js` + `public/app/supabase-adapter.js`, Skip projectId 57204), exibido também na tela de detalhe. Busca global já é full-text sobre o registro inteiro, então o código já fica pesquisável sem filtro dedicado novo.
 - QA do Skip verde, publicado em produção (`memoria-lucenera-2e074.goskip.app`, v0.0.8 / `cc8afcf`). Sem teste manual ao vivo no navegador (login/SSO segue como pendência aberta desde a SPEC-129).
 
+### Reconciliação via planilha + limpeza de testes — SPEC-130 (2026-09-14)
+
+- Usuário forneceu `01-Documento/01 - Planilhas/Planilha de projetos.xlsx` (export local, 3.748 linhas, sem ID de item). Criada RPC `aplicar_planilha_projetos` (migration `017`, casa só por `codigo`) + `scripts/sincronizar_planilha_projetos.py`. Resultado: **3.736 atualizados, 0 criados, 0 erros** — confirma que o cron incremental já vinha mantendo tudo sincronizado sozinho nos últimos 3 dias.
+- **Limpeza de testes**: apagados `26.268`/`7152`, `26.285`/`7154`, `26.286`/`7157` (banco + lista real via Graph DELETE), e a function temporária `sharepoint-teste-conexao` (Supabase + arquivo local).
+- **Achado durante a limpeza**: o item `7151` (1º teste de conectividade) nunca mandava `field_0` — o SharePoint atribuiu um código real sozinho (`26.284`), que o pull trouxe pro banco como projeto de verdade com nome literal de teste. Apagado dos dois lados. Não é bug do push definitivo (sempre manda `field_0`), só da function de teste crua já removida.
+- **Achado não resolvido, não é nosso**: `26.230`/"TESTE" (item `7112`, bem mais antigo que qualquer teste desta SPEC) — não mexido, decisão do usuário se apaga.
+- **Impacto no banco**: 3.736 UPDATEs de reconciliação + 4 DELETEs de limpeza (`26.268`, `26.284`, `26.285`, `26.286`). Nenhuma mudança de schema.
+
 ### Confirmado: Estado era o bloqueio da automação — de-para de status expandido pros 17 valores
 
 - **Usuário confirmou**: o grupo/pasta foi criado no teste `26.286`/item `7157` — Estado era mesmo o bloqueio real da automação de criação de grupo.

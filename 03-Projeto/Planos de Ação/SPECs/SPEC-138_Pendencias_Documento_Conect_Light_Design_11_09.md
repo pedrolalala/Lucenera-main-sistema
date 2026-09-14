@@ -25,7 +25,7 @@ dependencias:
 ## Checklist de Ação
 
 - [x] Confirmar com o usuário a tela exata do Prompt 4 (contraste) — confirmado: é a própria tela de Separação.
-- [x] Decidir gatilho de liberação de boletos do Prompt 7 — **decisão default tomada nesta sessão** (usuário não fechou isso no documento): libera na 1ª baixa parcial confirmada, não só na entrega 100%. Reversível se o usuário preferir o outro critério.
+- [x] ~~Decidir gatilho de liberação de boletos do Prompt 7~~ — **revisado 2026-09-14**: instrução explícita do usuário revogou a decisão default. Boletos/informação financeira foram **removidos por completo** desta tela (não só ocultados por gatilho) — ver seção "Revisão do Prompt 7" abaixo.
 - [x] Decidir escopo do Prompt 5 — **decisão default tomada nesta sessão**: implementado só na tela de Separação por ora; virar padrão de design system para outras grades do ERP fica como decisão separada, não tomada aqui.
 - [x] Implementar Prompt 5 — coluna de ação "Trocar" fixa (`sticky right-0`) + truncate em Referência/Local (L). **Feito.**
 - [x] Implementar Prompt 6 — impressão ganhou coluna "Local (L)", marcação em branco por item, totalizador de itens/peças e campo de observações. **Feito.**
@@ -126,17 +126,28 @@ Sem escopo de implementação até a tela ser confirmada.
 
 - **Prompt 4**: qual sistema/tela apresenta o texto laranja sobre fundo bege? (print ou nome da página)
 - **Prompt 6**: confirmar que a marcação por item é só visual/impressa (não precisa virar campo no banco) — assunção de baixo risco desta SPEC, fácil de reverter se o usuário quiser persistir a conferência.
-- **Prompt 7**: gatilho de liberação dos boletos — primeira baixa parcial ou só na baixa 100%? (o documento explicitamente deixa isso em aberto)
+- ~~**Prompt 7**: gatilho de liberação dos boletos~~ — resolvido 2026-09-14 (ver "Revisão do Prompt 7").
 - **Prompt 5**: implementar só nesta tela agora, ou abrir SPEC própria de design system para aplicar o mesmo padrão a outras grades do ERP (Orçamentos, Compras, CRM, etc.)?
 
 ## Critérios de aceite
 
 - [ ] Prompt 5: a tabela de itens da venda em Separação não exige rolagem horizontal em resolução de desktop comum (≥1366px); o botão "Trocar" continua acessível sem precisar rolar.
 - [ ] Prompt 6: a lista impressa de separação mostra o localizador "L" (mesmo dado da coluna "Classificação" em tela), tem espaço de marcação por item, totalizador de itens/peças no rodapé e campo de observações.
-- [ ] Prompt 7: o bloco "Boletos desta venda" não aparece antes do gatilho de baixa decidido com o usuário; volta a aparecer normalmente depois.
+- [x] Prompt 7 (revisado): "Boletos desta venda" removido por completo da tela; "Parciais desta venda" (área de baixa) só aparece depois da 1ª baixa, com colunas Código/Data Baixa/Funcionário/Responsável Retirou.
 - [ ] Prompt 4: implementado conforme a tela identificada (cor do texto ~`#333333` ou similar, peso semibold, leve `letter-spacing`, mantendo o fundo).
 - [ ] `pnpm run lint`/`pnpm run build` passam no(s) sistema(s) tocados.
 - [ ] Teste ao vivo de cada um dos 4 itens.
+
+## Revisão do Prompt 7 (2026-09-14, instrução explícita do usuário)
+
+A decisão default original desta SPEC (ocultar boletos até a 1ª baixa, mas mantê-los depois) foi **substituída** por uma instrução mais estrita do usuário, com referência visual (2 imagens: estado atual marcado para remoção / estado desejado):
+
+1. **"Boletos desta venda" removido por completo** — não é mais um gate condicional, o bloco inteiro (JSX, estado `boletos`, chamada a `buscarBoletosPorOrcamento`, ícone `Receipt`) foi deletado de `SeparacaoParcialPage.tsx`. Nenhuma informação financeira (boleto, valor, parcela, vencimento) aparece mais nesta tela, em nenhuma condição.
+2. **"Parciais desta venda" (a área de baixa) fica totalmente oculta** até a 1ª baixa acontecer — não mostra mais a mensagem de estado vazio "Nenhuma separação parcial registrada", simplesmente não renderiza o card. Confirmado com o usuário: "dar baixa na lista de entrega/parcial" é a mesma ação que já existia (clicar "Separar", que insere uma linha em `parciais`) — não foi criado nenhum fluxo/ação novo.
+3. **Colunas da área de baixa, quando aparece**: Código, Data Baixa, Funcionário, Responsável Retirou (+ Status e ação Estornar, mantidos por não serem informação financeira). Confirmado com o usuário que "Responsável Retirou" não é um dado novo — reusa o mesmo valor de "Funcionário" (não existe, em nenhuma tabela do banco, um campo distinto para quem retirou fisicamente); não foi criada nenhuma coluna nova no banco.
+4. Removidas as colunas "Itens" (contagem) que existiam antes — não fazia parte da lista de 4 campos pedida.
+
+Publicado em produção: `https://separacao-parcial-dff01.goskip.app` (Skip `48801` v0.0.31, QA verde) — sem dependência de migration (mudança 100% frontend).
 
 ## Observações finais
 

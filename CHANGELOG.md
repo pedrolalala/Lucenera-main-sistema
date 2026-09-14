@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-14 (4)
+
+### Revisão do Prompt 7 (SPEC-138) — Boletos removido, área de baixa reformulada
+
+- Instrução explícita do usuário (com referência visual) revogou a decisão default anterior: "Boletos desta venda" foi **removido por completo** da tela de Separação (nenhuma informação financeira, em nenhuma condição) — antes só ficava oculto até a 1ª baixa.
+- "Parciais desta venda" (a área de baixa) agora fica totalmente oculta até a 1ª baixa acontecer (mesma ação de "Separar" já existente, sem fluxo novo) e, quando aparece, mostra só Código, Data Baixa, Funcionário e Responsável Retirou (confirmado com o usuário: reusa o dado de Funcionário, sem coluna nova no banco).
+- Publicado em produção: `https://separacao-parcial-dff01.goskip.app` (Skip 48801 v0.0.31, QA verde, sem dependência de migration). Detalhe completo em SPEC-138.
+
 ## 2026-09-14 (3)
 
 ### Backfill de numero_venda para ORC-0032

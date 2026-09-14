@@ -109,7 +109,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 ### Resolvidas as 3 duplicatas restantes por busca fuzzy — só 26.1109 fica pendente
 
 - Usuário questionou por que 3 dos 12 casos não tinham duplicata encontrada. Busca fuzzy (não só texto exato) achou os 3, com diferença de grafia: `26.273` MARIA VANTINI → **MARINA VANTINI**/`24.456`; `26.280` EDUARDO MASSOLI - AP → **EDUARDO MASSOLI - APTO CIDADE DE VANCOUVER**/`25.420`; `26.282` FACHADA CASA COR 2026 → **FACHADA CASACOR 2026** (sem espaço)/`26.180`. Confirmados os 3 códigos no sistema, 0 dependência, **apagados** (com reconfirmação do usuário — o DELETE foi bloqueado uma vez pelo classificador automático).
-- **Único caso genuinamente pendente: `26.1109` (Vinicius Bortolin)** — sem duplicata em lugar nenhum, nem exata nem fuzzy. Não apagado, pode ser projeto real. Aguardando o time.
+- **`26.1109` (Vinicius Bortolin) identificado**: usuário confirmou que é o Vinícius da administração — o "projeto" é teste mesmo. Achado: tem 1 orçamento vinculado com status "Orçamento Aprovado", R$ 16.271,40 (FK `ON DELETE SET NULL` — apagar o projeto deixaria o orçamento órfão). **Decisão explícita do usuário: não apagar nada** — mantido como está.
 - **Achado técnico**: `field_0` (Codigo) é texto simples com `enforceUniqueValues: true` (não lookup, não calculado) — confirmado via `GET /lists/{id}/columns`. Explica por que o time precisa esvaziar o código do item duplicado antes de atribuir o mesmo valor ao corrigido. O endpoint `/versions` do Graph se mostrou **não confiável** pra reconstituir histórico de coluna customizada nesta lista — não usar pra esse tipo de auditoria no futuro.
 - **Impacto no banco:** 3 DELETEs. Nenhuma mudança de schema.
 

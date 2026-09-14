@@ -43,6 +43,7 @@ Triggers relacionadas:
 - `public.projetos.trg_proteger_fechamento`
 - `public.projetos.trg_sync_responsavel_nome`
 - `public.projetos.update_projetos_updated_at`
+- `public.projetos.trg_projetos_stamp_sync_meta` (BEFORE) e `public.projetos.trg_projetos_sharepoint_push` (AFTER) — ver seção "SPEC-130" abaixo, **leia antes de rodar qualquer UPDATE em massa em `projetos`**.
 
 Edge Functions relacionadas:
 
@@ -79,6 +80,16 @@ Duas mudanças de modelagem no cadastro de projeto:
 - Responsável e ao menos 1 arquiteto passam a ser obrigatórios na criação de projeto (`salvar-projeto` Edge Function e `ProjectDetail.tsx`), diferente do comportamento anterior (ambos opcionais — 1430/3702 projetos não tinham arquiteto).
 - Escopo confirmado com o usuário: só Arquiteto ganha percentual/múltiplos; Engenheiro (`responsavel_obra_id`) e Responsável continuam vínculo único, sem divisão.
 - Mesmo padrão replicado em Orçamentos (`orcamento_arquitetos` + `replace_orcamento_arquitetos`, sem campo Responsável — esse sistema não tem esse conceito). `vw_comissao_mensal` não depende de `arquiteto_id`, confirmado antes da mudança — trocar a cardinalidade desse campo não afeta comissão.
+
+## SPEC-130 — Sincronização em duas vias com a lista SharePoint "Organização Projetos" (2026-09-11)
+
+`projetos` tem uma trigger `AFTER INSERT OR UPDATE` (`trg_projetos_sharepoint_push`, function `trg_projetos_sharepoint_push_fn()`) que manda cada criação/edição relevante pra uma lista real do SharePoint via Microsoft Graph (Edge Functions `sharepoint-projetos-push`/`sharepoint-projetos-pull`, migrations em `supabase/db/migrations/20260911_132_sharepoint_projetos_sync_2via/`). Documentação completa: SPEC-130 e SPEC-131 em `03-Projeto/Planos de Ação/SPECs/`.
+
+**⚠️ ANTES DE RODAR QUALQUER `UPDATE` EM MASSA EM `projetos`** (correção de dado, migração, script de limpeza): essa trigger dispara **uma chamada real pro Graph por linha afetada**. Um `UPDATE` em centenas/milhares de linhas de uma vez gera centenas/milhares de chamadas simultâneas — já aconteceu (2026-09-14) de um `UPDATE` de limpeza em 801 linhas floodar o Graph (throttling, ~430 erros). Pra qualquer correção em massa: ou (a) rode por um script com ritmo controlado/paginado (ver `scripts/backfill_sharepoint_projetos.py` como modelo), ou (b) desabilite a trigger antes e reabilite depois (`ALTER TABLE projetos DISABLE/ENABLE TRIGGER trg_projetos_sharepoint_push`).
+
+**⚠️ Guarda de segurança existente, não remover sem entender por quê**: a function só dispara push quando `codigo` bate com o formato real de projeto (`^\d{2}\.\d+$`, ex. `26.267`). Isso é **proposital** — `projetos` também guarda registros internos que não são projeto de cliente (ex. `codigo` tipo `COM-1`..`COM-15` "Projeto Comissão N", `PRJ-TESTE`), e sem essa guarda esses registros quase viraram itens reais na lista de produção do SharePoint durante o incidente citado acima. Se um dia esses registros internos saírem de `projetos` para uma tabela própria, essa guarda pode ser reavaliada — até lá, ela é a única proteção contra isso.
+
+Outras tabelas/RPCs relacionadas: `sharepoint_sync_log` (auditoria de cada push/pull), `sharepoint_status_map`, `sharepoint_estado_map`, `sharepoint_sync_state`, `gerar_codigo_projeto()`, `confirmar_push_sharepoint()`, `aplicar_pull_sharepoint()`, `aplicar_planilha_projetos()`.
 
 ## Ação a ser realizada
 

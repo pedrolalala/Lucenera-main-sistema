@@ -106,6 +106,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Campo adicionado nos 6 formulários genéricos, na captura rápida, no upload de arquivo e na revisão de memória por voz (`public/app/app.js` + `public/app/supabase-adapter.js`, Skip projectId 57204), exibido também na tela de detalhe. Busca global já é full-text sobre o registro inteiro, então o código já fica pesquisável sem filtro dedicado novo.
 - QA do Skip verde, publicado em produção (`memoria-lucenera-2e074.goskip.app`, v0.0.8 / `cc8afcf`). Sem teste manual ao vivo no navegador (login/SSO segue como pendência aberta desde a SPEC-129).
 
+### Investigação dos 6 órfãos antigos + documentação estrutural da trava — SPEC-130
+
+- Usuário pediu pra investigar os 6 projetos antigos sem vínculo e confirmar que nada foi alterado indevidamente na lista real, com destaque pra durabilidade da trava (nova sessão sem contexto desta conversa precisa saber que ela existe).
+- `20.265` (CAROL E MATHEUS) era duplicata por troca de dígito — real é `20.065`, já no sistema; **apagado**. Os outros 5 (`15.255`, `24.391`, `24.399`, `24.404`, `24.474`) têm status "Obra Finalizada" e não existem mais em lugar nenhum da lista ativa — projetos concluídos há meses (maio/2026), removidos pelo time depois de finalizados, bem antes desta SPEC. Comportamento correto (exclusão nunca propaga), **mantidos como estão**.
+- **Auditoria ao vivo confirmou**: nenhum registro interno (`COM-N`, `PRJ-TESTE`) foi criado na lista real durante o incidente de hoje; itens mais recentes da lista são todos projetos reais. Guarda de código (`018`) confirmada genuinamente ativa no banco via `pg_get_functiondef` (não só no arquivo de migration).
+- **`supabase/db/domains/crm.md` atualizado** (arquivo que qualquer sessão é instruída a ler antes de mexer em `projetos`, por regra do `AGENTS.md`) — nova seção "SPEC-130" documenta a trigger de push, o risco de `UPDATE` em massa, e por que a guarda de formato de código existe. Torna a proteção legível por uma sessão futura sem depender do histórico deste chat.
+- **Impacto no banco**: 1 DELETE (`20.265`). Nenhuma mudança de schema.
+
 ### Checagem completa de saúde da sincronização — achado sério de robustez corrigido
 
 - Usuário pediu uma checagem geral de "está tudo certo" entre SharePoint e CRM. Achados:

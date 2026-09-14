@@ -106,6 +106,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Campo adicionado nos 6 formulários genéricos, na captura rápida, no upload de arquivo e na revisão de memória por voz (`public/app/app.js` + `public/app/supabase-adapter.js`, Skip projectId 57204), exibido também na tela de detalhe. Busca global já é full-text sobre o registro inteiro, então o código já fica pesquisável sem filtro dedicado novo.
 - QA do Skip verde, publicado em produção (`memoria-lucenera-2e074.goskip.app`, v0.0.8 / `cc8afcf`). Sem teste manual ao vivo no navegador (login/SSO segue como pendência aberta desde a SPEC-129).
 
+### Achadas e removidas 9 duplicatas com código apagado no SharePoint — SPEC-130
+
+- Usuário apontou de novo "CRM não bate com a planilha", citando `26.273`-`283` e `26.1109`/`26.1110`. Investigação achou 2 coisas: (1) a comparação "banco→planilha" anterior tinha 354 "órfãos", mas a maioria era falso positivo — a planilha fornecida é um recorte incompleto da lista real, não um espelho total (confirmado ao vivo via Graph); (2) 12 casos REAIS de itens que continuam existindo no SharePoint mas com o código (`field_0`) esvaziado pelo time — mesmo padrão do vazamento `26.284` anterior (item criado sem código, SharePoint autonumera errado, time cria a versão corrigida e limpa o código da errada em vez de excluir).
+- Busca ao vivo por Title exato confirmou **9 de 12 como duplicata com a versão corrigida já existindo no sistema**: `26.274`→`25.048`, `26.275`→`25.061`, `26.276`→`25.086`, `26.277`→`25.134`, `26.278`→`25.252`, `26.279`→`25.279`, `26.281`→`26.169`, `26.283`→`26.231`, `26.1110`→`26.269`. **Apagados do banco** (dado real preservado sob o código correto).
+- **3 sem duplicata confirmada, mantidos**: `26.273`, `26.280`, `26.282` (mais `26.1109`, que ainda nem foi corrigido do lado deles). Ficam pendentes de confirmação com o time.
+- **Impacto no banco:** 9 DELETEs. Nenhuma mudança de schema.
+
 ### Fix de lixo legado (cidade/estado) achado por comparação campo a campo — SPEC-130
 
 - Usuário reportou "CRM não bate com a planilha". Comparação campo a campo (não feita antes — o sync anterior só confirmava gravação, não igualdade final) achou lixo **pré-existente** (não introduzido por esta SPEC): `cidade` com literal `.`/`None` em 108 projetos, `estado` com literal `No` em 693 projetos (resto de "None" cortado em 2 caracteres). O `COALESCE` das RPCs protegia esse lixo de ser limpo (planilha vinha com o campo genuinamente vazio).

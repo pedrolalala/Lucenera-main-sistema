@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-14 (8)
+
+### Verificação ao vivo do "Registrar Entrega" (Logística) + fix de payload + achado crítico (foto)
+
+- Pedido do usuário: confirmar se o "Registrar Entrega" da Logística (fluxo real de "Dar Baixa", ver item (7)) funciona, com teste ao vivo.
+- Bug confirmado e corrigido em `lucenera-logistics-b7cd1`: `RegistrarEntregaPage.tsx` mandava um payload com nomes de campo errados pro hook `useFinalizarEntrega` — a entrega ficava sem `separacao_id`/`cliente`/`codigo_obra`/`endereco`/`recebido_por`, a separação nunca era marcada `finalizado`, mas o toast avisava sucesso (falso positivo). Também corrigido: a data real da entrega (campo editável na tela) era ignorada, sempre gravava "agora". Publicado Skip 24039 v0.0.97.
+- **Achado novo, não corrigido, mais grave**: `PhotoUploader.tsx` é um componente vazio — botão "Adicionar Foto" sem nenhuma ação, sem `<input type="file">`. Como foto é obrigatória pra habilitar "Finalizar Entrega", essa tela nunca funcionou de fato em produção, mesmo antes do bug de payload. Precisa de decisão: implementar upload de verdade (Storage) ou repensar o fluxo.
+- Achado adicional: a busca por código de obra só aceita formato antigo de 5-6 dígitos; todo projeto criado hoje usa formato `26.xxxx`, então nenhuma obra real é localizável por código — só por `LUC-NNNN`, que separações vindas de Separação Parcial nunca recebem.
+- Teste ao vivo confirmou que o **mecanismo em si funciona**: usando o caminho alternativo (`SeparacaoPage` → "Finalizar", que não exige foto), uma separação de teste foi finalizada e apareceu corretamente em "Entregas Finalizadas" com todos os campos certos. Dados de teste apagados depois. Detalhe completo em SPEC-143.
+
 ## 2026-09-14 (7)
 
 ### SPEC-143 REVERTIDO: "Dar Baixa" removido da Separação — já existe na Logística

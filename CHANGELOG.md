@@ -106,6 +106,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Campo adicionado nos 6 formulários genéricos, na captura rápida, no upload de arquivo e na revisão de memória por voz (`public/app/app.js` + `public/app/supabase-adapter.js`, Skip projectId 57204), exibido também na tela de detalhe. Busca global já é full-text sobre o registro inteiro, então o código já fica pesquisável sem filtro dedicado novo.
 - QA do Skip verde, publicado em produção (`memoria-lucenera-2e074.goskip.app`, v0.0.8 / `cc8afcf`). Sem teste manual ao vivo no navegador (login/SSO segue como pendência aberta desde a SPEC-129).
 
+### Checagem completa de saúde da sincronização — achado sério de robustez corrigido
+
+- Usuário pediu uma checagem geral de "está tudo certo" entre SharePoint e CRM. Achados:
+- **Cron do pull**: saudável, 24 execuções sem erro nas últimas 2h.
+- **🔴 Achado sério, corrigido**: as limpezas em massa de `cidade`/`estado` do mesmo dia dispararam push pra ~800 projetos quase simultaneamente (via `UPDATE` cru, sem passar por RPC com ritmo controlado) — Microsoft Graph limitou (throttling) e 432 pushes falharam. Nenhum dano real aconteceu (0 criações efetivamente ocorreram), mas por **sorte**: entre os afetados estavam registros internos que não são projeto de cliente (`COM-1`...`COM-15` "Projeto Comissão N", `PRJ-TESTE`), que quase viraram itens de verdade na lista real do SharePoint. **Corrigido**: nova guarda na trigger de push (migration `018`) — só dispara push quando `codigo` bate com o formato real (`^\d{2}\.\d+$`).
+- **Comparação completa ao vivo** (direto no Graph, não planilha — 20 páginas, 3.963 itens reais): **0 itens sem correspondência no banco**; nome/responsável/cidade/nível **100% batendo**. 7 divergências de status achadas e corrigidas (sincronizados antes do mapa de 17 valores ficar completo mais cedo no mesmo dia, nunca reprocessados depois). Restam 6 projetos antigos (maio/2026, anteriores a esta SPEC) sem vínculo — não é erro desta sincronização, baixa prioridade.
+- **Impacto no banco**: migration `018` (fix de trigger) + 7 UPDATEs de correção de status. Nenhuma mudança de schema.
+
 ### Resolvidas as 3 duplicatas restantes por busca fuzzy — só 26.1109 fica pendente
 
 - Usuário questionou por que 3 dos 12 casos não tinham duplicata encontrada. Busca fuzzy (não só texto exato) achou os 3, com diferença de grafia: `26.273` MARIA VANTINI → **MARINA VANTINI**/`24.456`; `26.280` EDUARDO MASSOLI - AP → **EDUARDO MASSOLI - APTO CIDADE DE VANCOUVER**/`25.420`; `26.282` FACHADA CASA COR 2026 → **FACHADA CASACOR 2026** (sem espaço)/`26.180`. Confirmados os 3 códigos no sistema, 0 dependência, **apagados** (com reconfirmação do usuário — o DELETE foi bloqueado uma vez pelo classificador automático).

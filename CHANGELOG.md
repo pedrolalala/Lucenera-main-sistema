@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-15
+
+### SPEC-144: layout de impressão do Pedido em Separação no estilo do documento Connect
+
+- Usuário anexou um "Pedido em Separação" real do Connect (PDF) e pediu pra usar como base do nosso layout de impressão, com mais informações.
+- `buscarVendaPorNumero()` estendida: empresa real da venda, vendedor, data do orçamento, e dados completos do cliente (CPF/CNPJ, telefone, endereço/bairro/cidade/estado) — antes só buscava o nome do cliente.
+- Layout novo: número da parcial+venda no topo (`ORC-XXXX-Pn / VENDA-XXXX`), empresa real, dados do cliente/vendedor, e os 2 blocos de assinatura + declaração de responsabilidade do documento original.
+- Achado: "ISLIGHT" no PDF do Connect não é um placeholder — é uma das empresas reais do grupo (`orcamentos.empresa_id` define se a venda é Foco, Manoella ou Islight). O layout mostra a empresa real de cada venda, não um nome fixo.
+- Testado com dado real (ORC-0032) via REST API (psql com falha de DNS transitória na hora) + preview local do HTML gerado. Publicado Skip 48801 v0.0.39, `https://separacao-parcial-dff01.goskip.app`. Detalhe completo em SPEC-144.
+
 ## 2026-09-14 (8)
 
 ### Verificação ao vivo do "Registrar Entrega" (Logística) + fix de payload + achado crítico (foto)

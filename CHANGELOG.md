@@ -2,6 +2,15 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-15 (2)
+
+### SPEC-145: enquadramento dos cards (fim da rolagem lateral) em Separação Parcial e Projetos (CRM)
+
+- Usuário reportou dois cards que exigiam rolagem horizontal pra ver todo o conteúdo: a tabela de itens da venda (Separação Parcial) e a tabela principal de Projetos (CRM) — confirmado ao vivo, colando a estrutura real de colunas de cada tela.
+- Fix: colunas de texto (Descrição/Referência/Local na Separação; Projeto/Responsável/Eng.-Arquiteto/Cidade no CRM) perderam `truncate`/largura fixa e passaram a quebrar linha, crescendo pra ocupar o espaço livre; colunas numéricas/curtas ficaram compactas (`whitespace-nowrap` + padding menor); removido o teto de largura (`max-w-[1400px]`) dos containers principais das duas telas.
+- **Achado de drift**: `skip_file_read` mostrou que `Projetos.tsx`/`Layout.tsx` do CRM no Skip já tinham divergido do submodule local (rótulos abreviados "Entrada"/"Fechamento"/"UF", layout `table-auto` mais compacto) — o fix foi aplicado via `skip_file_patch` direto na versão real do Skip, e o submodule local foi sincronizado depois pra bater com o que está no ar.
+- Publicado nos dois: `separacao-parcial-dff01.goskip.app` (v0.0.40) e `lucenera-crm-3bd29.goskip.app` (v0.0.313) — confirmado ao vivo via `curl` no bundle JS de produção. Detalhe completo em SPEC-145.
+
 ## 2026-09-15
 
 ### SPEC-144: layout de impressão do Pedido em Separação no estilo do documento Connect

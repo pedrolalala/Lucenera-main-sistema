@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-15 (3)
+
+### SPEC-146: campo Perfil (Ribeirão/São Paulo) movido para o topo do orçamento
+
+- Usuário pediu pra mover o campo "Perfil" de "Pagamento e Totais" (fim do formulário) pra "Informações Gerais", ao lado de "Empresa" (início do formulário) — só reposicionamento, mesma lógica/opções.
+- **Achado**: o submodule local (`gestao-financeira-clone-544cb (1)`) tinha ~17 arquivos com mudanças não commitadas alheias a esta SPEC (mesmo `BudgetFormPage.tsx`), provável trabalho em andamento de outra sessão. O fix não foi commitado em cima disso — aplicado direto no Skip via `skip_file_patch` (confirmado antes, por `skip_file_read`, que o trecho relevante batia com a versão limpa do git).
+- Publicado: `gestao-financeira-clone-544cb.goskip.app` (v0.0.366) — confirmado ao vivo no bundle de produção. Submodule local segue com o diff alheio não investigado, pendência anotada na SPEC-146. Detalhe completo em SPEC-146.
+
 ## 2026-09-15 (2)
 
 ### SPEC-145: enquadramento dos cards (fim da rolagem lateral) em Separação Parcial e Projetos (CRM)

@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-15 (4)
+
+### SPEC-148: Showroom /admin — fotos do estoque (upload direto) + peça composta (1 foto, N produtos)
+
+- Duas capacidades novas na tela `/admin` do showroom (`showroom-qtq8er2dk`), na mesma sessão/credencial já existente: **(A)** aba nova "Fotos do estoque" pra subir/trocar a foto de um produto já em estoque direto por upload de arquivo, sem depender do PowerPoint importado; **(B)** "peça composta" — 1 produto principal guarda a foto/nome e N produtos membros contribuem valor e limitam a disponibilidade de um "conjunto" exibido como 1 card só na vitrine (ex.: base + haste + cúpula), acionável a partir de qualquer produto principal nas duas abas de `/admin`.
+- Migration (rascunho, **não aplicada**): `supabase/db/migrations/20260915_148_showroom_fotos_estoque/001_fotos_estoque.sql` (tabela `showroom_upload_grants`, função `showroom_upload_permitido`, 3 policies de `storage.objects` restritas a liberação temporária via RPC — Opção B de controle de acesso, confirmada por Pedro — RPCs `showroom_liberar_upload_produto`/`showroom_confirmar_foto_produto`) e `002_peca_composta.sql` (tabela `showroom_grupo_itens` com índice único de 1-conjunto-por-produto, RPCs `showroom_definir_composicao`/`showroom_obter_composicao`, recriação de `showroom_listar_produtos_estoque`/`showroom_buscar_produto` com as 2 colunas novas de composição, redesenho de `vw_showroom_publico` em 2 ramos — avulsa/conjunto — preservando o contrato de 9 colunas desde a SPEC-125).
+- Frontend: `Admin.tsx` virou 2 abas (Tabs shadcn/ui); novo service `src/services/curadoriaEstoque.ts` (fluxo completo de upload: liberar → `supabase.storage.upload` → `getPublicUrl` → confirmar → remover arquivo antigo só depois de confirmado); `src/services/curadoria.ts` estendido com `obterComposicao`/`definirComposicao`; novo `src/components/showroom-admin/ComposicaoConjuntoModal.tsx` compartilhado pelas 2 abas; `Thumb`/`PPTTab`/`FotosEstoqueTab` extraídos como componentes próprios.
+- Criado `04-Sistemas/showroom-qtq8er2dk/supabase/AI_DB_CONTEXT.md` (gap desde a SPEC-125, não existia) e atualizado `supabase/db/domains/cadastros.md`.
+- Build (`vite build`) e `tsc --noEmit` sem erro; `oxlint` limpo. **Migration NÃO aplicada no Supabase real** — fica pendente de autorização do usuário, junto com o teste ao vivo do fluxo de upload e da montagem de um conjunto de teste. Detalhe completo em SPEC-148.
+
 ## 2026-09-15 (3)
 
 ### SPEC-146: campo Perfil (Ribeirão/São Paulo) movido para o topo do orçamento

@@ -86,6 +86,24 @@ Triggers relacionadas:
 
 - Coluna já existia como `text` livre; ganhou `CHECK` restringindo a `simples_nacional | regime_normal` (migration `20260804_070_spec052_regime_apuracao_fixo`), aplicada no Supabase real depois de confirmar que nenhum dos 3.861 contatos tinha valor preenchido. Opções confirmadas pelo usuário — **não** são as 3 opções (Simples Nacional/Lucro Presumido/Lucro Real) do código morto em `cadastro-lucenera-b86fe/src/components/modals/ClienteModal.tsx`; esse componente ficou desatualizado, não usar como referência.
 
+## Showroom: fotos do estoque + peça composta (SPEC-148, rascunho — não aplicado)
+
+- Duas tabelas novas exclusivas do sistema Showroom (`showroom-qtq8er2dk`), sem relação com o
+  restante do domínio de Cadastros além de referenciarem `produtos.codigo_produto`:
+  `showroom_upload_grants` (liberação temporária de upload direto de foto, TTL 15 min) e
+  `showroom_grupo_itens` (peça composta: N produtos de estoque exibidos como 1 "peça" na
+  vitrine, com 1 produto principal guardando foto/nome e produtos membros contribuindo valor
+  e limitando disponibilidade). Nenhuma delas duplica `nome`/`valor_venda`/`estoque_showroom`
+  — tudo é lido ao vivo de `produtos` nas views/RPCs.
+- `vw_showroom_publico` (migration 126, redesenhada na 148) ganha 2 ramos: peça avulsa e
+  conjunto (soma de valor, mínimo de "conjuntos completos" de estoque). Contrato de colunas
+  preservado desde a SPEC-125.
+- Regra confirmada por Pedro (2026-09-15): um produto só pode ser membro de 1 conjunto por vez
+  (índice único `showroom_grupo_itens_membro_unico`); membro inativo dentro de um conjunto
+  ativo zera a disponibilidade do conjunto inteiro.
+- Ver `04-Sistemas/showroom-qtq8er2dk/supabase/AI_DB_CONTEXT.md` para o detalhamento completo
+  de tabelas/RPCs/Storage deste domínio (arquivo novo, criado pela SPEC-148).
+
 ## Ação a ser realizada
 
 Quando consolidar o schema, preservar a distinção entre `empresas` como empresas do grupo Lucenera e `contatos.empresa_id` como empresa/PJ vinculada a um contato. Depois, registrar nas telas e integrações esse significado para evitar conciliação incorreta. No frontend da SPEC-018/SPEC-053, reaproveitar `public.criar_produto_orcamento(p_payload jsonb)`, manter validações cadastrais de produto (`sku`, marca, categoria e fornecedor — `codigo_produto` agora é gerado por sequence, não mais validado a partir do payload) e impedir que a criação pelo Orçamentos escreva dados operacionais de estoque/compras.

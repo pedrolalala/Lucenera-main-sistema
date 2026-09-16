@@ -1,0 +1,209 @@
+[00:00] me bagunça a cabeça. Quando tem representação, quando a gente faz venda direta, a gente ganha uma comissão. Então vamos supor, a empresa ganha uma comissão. Então, por exemplo, vendeu Lumine e tem arquiteto externo. Vamos supor que vendeu Lumine para Cacau. A Cacau vai ganhar 10% da Lumine. A Lumine paga para Cacau e a Lumine vai pagar 20% para luthieneira. Beleza? Sim. Ok, então vou fazer conta de padaria aqui só para ficar fácil. Vendeu R$100 mil para Lumine, a luthieneira empresa recebe R$20 mil, R$10 mil a Cacau, só que quem paga Cacau é a Lumine. Então foi, morreu, entrou R$20 mil na empresa, certo? Tem a comissão das meninas, que essa comissão das meninas é diferente da comissão quando elas vendem Exemplo, quando a equipe aqui da Marina, da Thaírine, tem 7% dividido. Então Marina tem uma porcentagem, um exemplo, Marina tem tipo 5,5%, as outras 3 têm meio, certo? Isso na venda normal, tudo. Quando é na representação, essa comissão é diferente, é 14%. E divide como quer. Na verdade, divide hoje 11 Marina, 1, 1 e 1, entendeu? É uma comissão maior. Se eu coloco isso dentro do sistema, vai fazer cálculo de comissão errado, entendeu? Porque uma coisa não tem nada a ver com a outra. Aí não tá entrando lá esse valor. Que que eu faço? Quando fecha o mês, quando fecha o ano, eu passo todos esses valores para contabilidade, para contabilidade lançar. Então quero fazer essa, essa, fazer esse serviço, tipo, o departamento de serviços, só que ele vai entrar também no valor do resultado, o que entra, entendeu? Aí eu tenho aqui, ó, por exemplo, eu tenho a planilha.
+
+[02:05] Então o que tá no sistema nunca é a realidade?
+
+[02:09] Não é que nunca é, é só o que a gente vende efetivamente, é porque não é um volume alto, entendeu? Então eu passo no final do mês para o Marcos botar na contabilidade. Por exemplo, é isso aqui, pegar aqui, quase não vou pegar Agosto, por exemplo, entrou 18, entendeu? Esses 18 não tá somado aqui, tem que fazer somar.
+
+[02:51] Então a gente cria, então somaria na receita total mais 18 aqui, isso, e sai e aumentaria uma porcentagem.
+
+[02:59] Não, mas aí a despesa a gente lança. A comissão tá lançada no sistema quando paga, no momento que paga. Porque olha aqui, ó, o rolo que eu falo, só o rolo assim, né? Ó, tem que fazer, eu tiro o imposto, isso já é combinado com todo mundo, eu tiro o imposto da nota fiscal que eu emito para poder receber e aplico a comissão. Aqui nesse caso até, ó, esse cliente aqui é um cliente de sinal que ele precisou de nota fiscal para garantir. Não, não, é sinal só de projeto, tipo serviço. Isso é o sinal, que geralmente a gente não emite a nota de sinal porque esse valor vai ser descontado na venda lá. Só que esse, por ser empresa, precisou da nota. Aí tá vendo, entrou aqui. Por que que entrou aqui? Porque eu preciso descontar o imposto dessa nota fiscal de serviço. E aí aqui entra a comissão. Entendeu? Então isso daqui a gente precisa trazer para cá também. Vamos ver aqui, mas a gente pode pensar com calma para não zoar o rolê. Isso eu passo para o Marcos, eu passo na verdade cada 6 meses, eu passo para ele porque como é um volume teoricamente baixo Aqui, ó, ele vai me dar todos os KPIs, todas as informações com base no dashboard para a gente começar a entender. Então é criar o campo de recebimento de serviço, entendeu?
+
+[04:39] Que isso vai ser uma vez só para eu entender aqui, para a gente começar a falar a mesma língua. Aqui dentro na central ele vai ter uma parte só para colocar isso ou já vai Tá embutido em algum lugar?
+
+[04:53] Não, só para isso, só para isso.
+
+[04:54] Então no caso aqui, tipo, mais um, mais um campo aqui que é só para embutir, é alimentar a parte financeira dessa coisa de serviço na administração bancária.
+
+[05:07] Não faz sentido não, porque aí aqui, aí eu não vai aparecer. Eu acho, sei lá, eu vou registrar a parcela só. Porque aqui eu consigo, olha aqui, por exemplo, ali a gente até cria os campos, eu consigo colocar tudo isso daqui, por exemplo, isso aqui é uma nota da Lumine, tá vendo? Então eu emiti uma nota de R$16.000, não recebi ainda, só que o que tem? Eu quero colocar essas informações, por que não entra lá na Connect? Porque aqui foi uma venda da Carolina, uma venda do Marcos, uma venda do Roberto, só que cada um fez uma coisa, na mesma nota da Lumine Eu tenho comissão para Thaírine, para Thaís, para Maria.
+
+[05:53] Até eu fiquei um pouco confuso, mesmo entendendo tudo que tá acontecendo, mas é isso. Beleza, vamos fazer funcionar isso aqui. Contas a pagar, contas.
+
+[06:07] Mas é que nem, ó, por exemplo, esse ano vai, querendo ou não, entrou, vai entrar até agora 200 Entendeu? Para efeito de fluxo no dia a dia não é uma coisa que, nossa, vai fazer uma diferença, porque entra tipo pouquinho por mês, mas contabilmente é mandado para o Marcos lançar lá depois. Por quê? Por que que não entra lá na Connect, por exemplo? Porque o sistema, a comissão é diferente, tipo, ele não ia conseguir fazer essa descontar o imposto e tal. De repente essa, não sei como nós vamos fazer aí, né, fazer isso, mas o rolê de cálculo de comissão é totalmente diferente, que depende também de como foi, né.
+
+[06:55] A comissão vai variar conforme o arquiteto estando, não estando.
+
+[07:00] Tem, exato, porque, por exemplo, na Lumine, se não tem arquiteto externo envolvido, aí a gente ganha 30, não ganha 20. Mas isso só vai entrar quando a Lumine mandar para emitir a nota, entendeu? Não adianta colocar antes. Ah, fez a venda hoje, aí ela só vai mandar a nota no mês que vem. Aí ela mandou a nota, assim que a gente emitiu a nota, aí a gente implanta no Naquele coisa de serviços lá, você pode colocar projetos, lançamento de projeto e representação, alguma coisa assim.
+
+[07:43] Que aí, a partir dessa, desse lançamento, você consegue colocar a porcentagem. Não, porcentagem já vai estar estipulado. Consegue colocar quanto que foi a venda e ele vai fazer o cálculo da porcentagem para cada pessoa.
+
+[07:55] Isso. E entrar no, a partir de De comissão e na coisa do recebimento da receita, do recebimento do fluxo de caixa no bancário.
+
+[08:12] Aqui, ó, pensando aqui, atualmente a gente tem um controle, mas ele fica no RH. Mas não, ele tá com essas informações, mas muito por cima do que você me falou. Aqui, ó, quantidade de cada um, porcentagem.
+
+[08:38] Então isso daí a gente ainda não pegou para ver, né? Não, já não, tipo, para testar, você tá calculando tudo.
+
+[08:45] E calculando, tá, quando ele tem todo o fluxo aí, que isso aqui é o que foi feito esse mês quando a gente foi mexendo.
+
+[08:53] Mas ele não lança esse valor no financeiro automático, não.
+
+[09:05] Já sei o que que tá dando a diferença de valor. Tipo, essa mini diferença que a gente viu é dos orçamentos que a gente fez teste, mas sem baixar não pode. Como assim?
+
+[09:19] Tipo, você acha que tá pegando já, mas sem baixar?
+
+[09:22] Quando ele é aprovado, ele já faz todo o processo.
+
+[09:26] Não, mas você falou, mas não foi realizado, aprovado não pode realizar, dá como recebido o simples fato de aprovar o orçamento.
+
+[09:37] Ele só dá como recebido quando finaliza em administração.
+
+[09:42] É, não pode. Que a gente não fez nenhuma baixa ainda do financeiro, não testou isso.
+
+[09:51] Que aí ele teria que vir para cá, nota fiscal, contas a receber, contas a pagar, escolher no mundo.
+
+[10:09] Ou daqui a pouco, Carol, pode ser muito urgente? Não, aguenta aí, senão a gente perde raciocínio aqui.
+
+[10:19] Vou ter que ver depois se já tá fazendo, mas eles não deram baixa mesmo. Porque eles ficam todos abertos aqui, ó. Isso aqui tá como aberto, entendeu? Parcela 1 deu baixa. Ele só, eu só dei baixa nesses daqui, ó, estão aparecendo aqui porque foi teste, né?
+
+[12:45] E agora, Pedro, nesse primeiro momento, sabe o que eu acho? Tudo que fizer no sistema aqui que a gente tá testando não pode vir nesse relatório financeiro aqui.
+
+[13:03] E eu entendo, o problema é a gente conseguir fazer isso, porque teoricamente o sistema ele já tá tão um nível avançado que todos os processos já estão mapeados, entendeu?
+
+[13:15] Então não vai poder ter confiabilidade nisso enquanto não tiver rodando 100%, porque qualquer teste que fizer vai ser somado ali. Porque, por exemplo, da parte financeira, a gente nem— eu nem— eu ia começar a fazer um teste hoje que eu quero fazer. Eu ia fazer a venda, tal, fazer o recebimento sem nota, tudo sem nota, fazer uma entrada, fazer tudo, entendeu? Agora, se ele for somar, aí vai azedar. Vai.
+
+[13:41] Por isso que, vamos supor, o que eu acho que é o certo, a gente— eu vou excluir todas as coisas que a gente fez de teste. Eu tenho registrado aqui tudo que tá aqui, ó. Todos esses daqui são testes. Tudo que tiver com link até o final, até aqui, ó, até a separação, tudo que tiver essa sincronização, eu consigo entender que foi feito dentro do sistema. E tudo que foi feito dentro do sistema, aqui, ó, tá vendo esses testes aqui? São todas coisas que mexeram em estoque, só que na realidade foi tudo coisa que a gente foi fazendo para realmente testar a funcionalidade. Então eu consigo voltar atrás, e aí eu vou voltar atrás de tudo e a gente começa do zero. Aí Vamos supor, fez uma venda agora, entrou hoje, dá para a gente seguir essa venda, entendeu? Fazer mutuamente junto do sistema e da Connect desse que a gente tá fazendo. E aí ele tem que bater todas as informações.
+
+[14:47] Agora aqui, por exemplo, a gente conferir isso daqui, por exemplo, maio. Maio isso aqui não tava rodando, certo? Não. Julho tava?
+
+[14:55] Julho sim, a gente já tava começando a fazer os testes.
+
+[14:58] Então Para ver, porque se junho não tava, e isso daqui tá vindo única e exclusivamente do coisa do Sérgio, teoricamente teria que bater, certo? Eu puxaria, nunca muda. Claro que muda. Só mudou agora, mas acho difícil ter 3 meses idênticos. Agora mudou, mas vamos pegar maio aqui. Quero pegar maio só para junho, né?
+
+[15:49] Você falou junho, eu pegaria fevereiro. Joga lá para cima porque a gente não tem a possibilidade de ter tido alguma coisa.
+
+[15:57] Aí a gente confere. Vou pegar aqui, ó.
+
+[16:00] Eu te mandei os KPIs, todas as informações. Tudo que tiver aí são as informações de onde tá vindo.
+
+[16:11] Vamos fazer aqui pelo meu sistema. Isso daqui, vamos— você tá aqui a semana toda?
+
+[16:17] Até amanhã.
+
+[16:19] Vamos marcar para a gente estruturar isso, que aí a gente já pega 2026.
+
+[16:25] Já pode marcar tipo quarta-feira, não tem problema, a gente faz online, que aí a gente já traz as informações, tudo, pode jogar, já colocar aí, tá? Porque aí não tem problema, eu não preciso estar aqui realmente, a gente pode fazer tudo.
+
+[16:41] Vamos marcar já. Amanhã também eu tenho entrevista, vai ter coisa aqui. Mas enfim, ó, vamos lá. Que mês nós pegamos?
+
+[16:52] É maio, junho?
+
+[16:54] Não, fevereiro.
+
+[16:56] Ó, então vamos lá.
+
+[16:59] Sistema, teoricamente tem que pegar só o da planilha do certo, correto? 1, 2, 26, 28, 27, 28 ou 29? 28.
+
+[17:23] Peguei o pior mês para fazer isso.
+
+[17:27] Recebido, tá pago. Data de pagamento, pago em, recebido em fevereiro, 1.165. Tem 28 mil de diferença aqui para menos. Vamos ver o pago. 3 milhões e 241. 1.138.000. Se isso tá fora, teoricamente tem que ter somado, né?
+
+[18:15] Por isso que ele tem que somar esses dois, como eles têm que somar.
+
+[18:19] Só que esse resultado é isso menos isso, ou isso menos isso, porque era para isso tava dentro, só que como ficava confuso, porque ele fala assim, ah, entrou 1,100, eu peguei 100, tipo, peguei 10% aqui. É 138,429,88. Vamos somar, né, para ver se 103,176,55, 1,241. Esse bate, esse bateu. O recebimento não bateu. Eu acho que eu sei o que que é o recebimento. Você quer ver? Eu acho que é isso aqui, ó.
+
+[19:11] Que a folha—
+
+[19:12] não, não é a folha não. Eu acho que é isso aqui, ó. Vencimento, vamos pegar avaliamento só para ver uma coisa aqui. O que pode ser, eu não sei se ele tá pegando esse filtro de pago, pagamento dentro de fevereiro, porque se alguém adiantou ou atrasou, talvez ele não esteja entrando. Por exemplo, esse cara adiantou, ó, o vencimento era 30/03, mas ele pagou 26/02. Se o filtro tá vencimento 01/02 a 28/02, ele não entra. Vamos ver se tem mais.
+
+[20:19] Então tem que ser o pagamento.
+
+[20:21] Vamos fazer um, vamos pegar aqui para ver se vai ter mais.
+
+[20:24] Então, como é, deixa eu só ver aqui.
+
+[20:27] Pagamento com relação, ah não, mas aqui veio zero. Ó, pera aí, aqui não entrou nada. Veio pagamento zero. Vamos ver se tem algum aqui. Aqui provavelmente foi algum acordo, alguma coisa. Vamos ver se teve aqui nada. Aqui teve, ó, Renato. Esse cara aqui vencia 20/03 e ele pagou em 24/02. R$6.352,22. Mas aqui já vai passar, né? 16/03 e pagamento 24/02, não deu 60 mil de diferença. Então já não pode ser, tá vendo? Ela tá dando 165 e aqui tá dando 1, tipo, já não, já caiu por terra isso.
+
+[21:28] Então calma aí, volta ali na receita realizada. Receita realizada é o valor pago onde tipo igual a receita e status pago, status pago, e data do pagamento, né, também não data do vencimento. Então tem que ser a data do pagamento. E aí a despesa é valor pago, onde a despesa paga é a natureza diferente de distribuição de lucro.
+
+[22:06] E é a mesma coisa, é data de pagamento também, data de pagamento.
+
+[22:08] Aí A distribuição de lucro, é o valor pago, onde a natureza igual a distribuição de lucro, necessidade de lucro, cara, tem outro negócio que você pôr aí, vezes o preço de compra.
+
+[22:28] A distribuição de lucro tem outra coisa, deixa eu ver se tem aqui. Receita realizada, isso aqui tá pegando bem, ponto de equilíbrio que você me perguntou, é receita realizada menos o custo fixo Fixo, vende-se, é que aí a gente tem que determinar o que é custo fixo.
+
+[22:48] Vende-se receita maior ou igual ao custo fixo. Custo fixo igual ao valor pago, despesa operacional com tipo de custo igual a fixo. Aí o gráfico de rosca, o valor pago por tipo de custo. Saldo acumulado, resultado diário por dia de data pagamento, receita menos a despesa operacional, saldo soma do ocorrido.
+
+[23:25] Só uma coisa, então aqui deu 103. Deixa eu ver o que que ele tá pegando. Nem aqui deu. Nessa apropriação deu, talvez tenha mais apropriações, talvez não, né?
+
+[23:41] Certeza.
+
+[23:42] Então tá pegando o lucro distribuído, tá pegando a despesa operacional. Vou te explicar isso aqui, tá? Que a gente tem que deixar redondo.
+
+[24:02] Aí tem uns pagamentos relacionado a carro, um negócio assim, né?
+
+[24:06] É, tem que ver tudo que tá relacionado a eles. Vou te explicar só para você entender. Quando é isso aqui, ó? Porque a gente— deixa eu ver se ainda— não sei se vai ter. Antes a gente lançava tudo aqui, ó. Aqui antes era retirada de lucro Filipe, retirada de lucro Manuel. Mudou o ano, né? Nós mudamos, começou a lançar o que é mensal como lucro distribuído, que é isso aqui, certo? Fixo. Então tem lá o fixo, tudo que for fora, porque é o seguinte, agora limitou. Então você pode, a retirada que pode ser feita é de R$50 por mês. Para não pagar imposto. Então até 50 vai ser colocado aqui.
+
+[25:01] O que que a gente tá fazendo?
+
+[25:02] No começo tava fazendo 50 Felipe, 50 Manoel. Agora já tá fazendo 50 Felipe e 20 Manoel só. Tudo que a gente paga deles a gente não lança aqui, que aqui é o mensal, é o que, é o que bate todo mês. Agora, tudo que a gente paga sem ser esse mensal, ele tá entrando aqui na despesa. Eu criei isso aqui porque combinei com contabilidade, porque fica fácil dele identificar lá: despesa operacional Filipe, despesa operacional Manuela. Então os 4 planos de contas tem que considerar aqui. Tá, entendeu?
+
+[25:48] Tem que adicionar mais algumas outras informações aí. E tem, sempre vai ser dessa forma: despesa operacional Felipe, despesa operacional Manoel.
+
+[26:00] Sempre.
+
+[26:01] Então não vai ter outro que a gente precisa se preocupar.
+
+[26:03] Só se amanhã depois tiver, porque a foco tá no nome do Pietro, mas o Pietro não pega nada, entendeu?
+
+[26:09] Não, beleza.
+
+[26:10] Mas aí eu vou te dar um exemplo. Por exemplo, cliente aqui que nem o Felipe eu paguei R$50 mil de um terreno que eles compraram no cheque nosso. Despesa operacional. O Marcos que se vira lá depois para fazer isso numa parede assim, entendeu? Aí ele faz lá e resolve, mas vai sair 50 conto que tipo não é da empresa, é deles. Então não é como lucro mensal, mas é como uma despesa deles.
+
+[26:38] No final das contas, eu tenho que passar para eles, depois passar para outro lugar, e ia pagar imposto duas vezes.
+
+[26:43] Então aí faz assim, entendeu?
+
+[26:47] Tá, aqui já deu uma clareada, eu consegui entender. Só que eu preciso pegar e a gente bater todas as informações, porque aparentemente tudo que a gente já conversou, a 0, 1, pago, cancelado, aparentemente certo. Preciso ver a questão do vencimento e pago, né? Pagamento é pagamento, a coluna certa tem que buscar de pagamento.
+
+[27:13] Eu vou não sei se aí importar. Vou mandar esse print aqui, tipo esquece né? Você pode até usar. Filtra esse aqui ó.
+
+[27:26] Pago pagamento.
+
+[27:27] É pago pagamento.
+
+[27:33] Beleza.
+
+[27:33] Ah aqui ó, vou filtrar esse aqui ó.
+
+[27:35] Você já Para entrar lá no coisa do operacional manuel. Então vou aqui e se eu for tentar escrever isso aí com a mão, fica uma semana.
+
+[27:56] Tenta pôr data para a gente fazer uma conferência melhor.
+
+[28:00] Então colocar uma data, poderia data Diária, né? Diária, para a gente conseguir ver o que que, qual que foi aquela despesa, em que data foi, tá?
+
+[28:10] E outra coisa que era bom pôr é a questão do investimento.
+
+[28:14] Investimento?
+
+[28:15] Como assim?
+
+[28:17] Que é o investimento de—
+
+[28:24] ah, mas aí ele não vai estar na apropriação, vai estar aqui, ó.
+
+[28:29] Tá na descrição, no grupo que tá entrando como investimento.
+
+[28:45] Tá vendo? Tem bastante coisa, olha só. Aí era bom, olha só, você pega o grupo investimento, então por exemplo vai entrar, vai mostrar aqui para nós. Isso aqui seria muito importante. Vai ter aqui investimento, beleza?
+
+[29:04] Um filtro que você pode colocar.
+
+[29:06] Em vez do que tá aparecendo aqui, vai ter investimento. O Filipe pode clicar e ver o que que tá sendo de investimento.
+
+[29:15] Então, e aí abrir aqui embaixo uma planilha com os investimentos.
+
+[29:19] Exato. Porque, por exemplo, o que que eu olho que eu gastei, que eu coloquei de investimento em fevereiro pelo grupo? Mas o que é cada um? Vamos ver se vai aparecer aqui, ó. Publicidade. Esse aqui veio investimento, investimento. Aqui, ó, apropriação. Você vai ver, ó, não subgrupo. Aqui, ó, compra de veículo, publicidade, consórcio, tal. O clube mais mensal a gente conta como um investimento, que é para poder manter o arquiteto, tal.
+
+[29:47] É o clube mais autossuficiente.
+
+[29:49] É compra de veículo também, porque aqui, o que que foi? Sei lá, aqui foi 915, deve ter sido alguma coisa. Aí aqui algum outro pagamento e aqui outro pagamento. Cadê? Tem outro aqui, né?
+
+[30:02] 266.
+
+[30:04] Cadê? Aqui não, 8.000 aqui, né? Total da nota, que é o valor do— é aqui, tipo, depois puxa. 915 deve ter sido, sei lá, ou foi Ah, isso aqui é do carro do Felipe. Ah, isso aqui é a mensalidade do carro dele, é o financiamento do carro dele, tá vendo? Tô vendo aqui pelo fornecedor agora. E a Fiorino que eu comprei é a Sical. Então R$915 acho que foi o kit, foi, deve ter sido o documento. R$60 mil foi o que eu dei de entrada. R$1.000 foi o kit de câmera e alarme, alguma coisa assim. Isso daqui, ó, é o que eu pago do carro dele, entendeu?
+
+[30:57] Aí ele consegue, ele não teria que entrar como distribuição?
+
+[31:01] Poderia, mas ele vendo isso, tipo, mas se eu coloco uma distribuição, tipo, tá no nome da empresa o carro, entendeu? Então o nome da empresa, teoricamente, é um bem da empresa. Amanhã ou depois, deu o ganho da empresa. Então por isso que entra aqui.
+
+[31:25] Complexo, hein? Eu vou fazer o seguinte, conforme tudo que a gente conversou hoje, a gente abateu um monte de ponto aqui da, com base no teste. Eu vou reestruturar o teste e amanhã a gente faz esse mesmo teste que a gente fez batendo os valores com o mês de fevereiro. Se tiver tudo certo, quer dizer que a partir de julho, se tiver com valor sem coerência, foi as coisas que a gente fez no sistema.
+
+[31:57] Que até curioso, é sempre bom entender.

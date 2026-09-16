@@ -1,0 +1,61 @@
+[00:00] Eu entro aqui, basicamente criou um novo projeto, e aí você tá tentando pegar do projeto antigo que você tinha criado e puxar para esse novo. Aí você tá vindo aqui em trocar.
+
+[00:24] O que que tá acontecendo? Ele tá mostrando que tem disponível 29 nesse Tipo, tem que mudar a lógica. Vamos fazer diferente, quer ver? Vem aqui. Vamos pôr, se aqui fosse trocar. Aqui, ó, aqui tá falando, ó, que tem 5 disponível para troca. Tipo, ele tá mostrando que nessa venda, ó, tá mostrando assim, ó, você tem 5 para pegar emprestado.
+
+[00:50] Que é o daqui.
+
+[00:51] Que é o daí. E lá na outra tá mostrando que tem 29.
+
+[00:55] Que deve ser do estoque total.
+
+[00:58] Não, que é daquela venda. Destino selecionado. Então aqui é o seguinte, então tá, deixa eu entender. Quando eu estou numa venda e eu clico para trocar, é a origem. Se eu coloco e eu vou dar o destino, tem que inverter essa lógica.
+
+[01:28] Então é do destino para origem.
+
+[01:33] Isso, entendeu? Então aqui, se eu pegar 5 agora aqui, provavelmente vai dar certo, mas tem que ser ao contrário, porque pensa, eu tenho que estar onde eu tô precisando para ver.
+
+[01:52] Essa sempre vai pedir a partir da necessidade.
+
+[01:57] Então se eu vou aonde tem Mas eu não sei para onde vai. E tem a questão do L também, então vou clicar lá naquele L específico que eu preciso para poder— vamos ver se vai aqui.
+
+[02:10] Aqui foi, é isso mesmo. Então no caso você tá, só para contextualizar com nomenclatura, você tá com Vinícius Bortolin, sobe um pouco ali qual que é o código do projeto, é 26.1109. E você tá querendo buscar do projeto, vai lá em cima, do projeto Mariane de Moraes Ribeiro 15150.
+
+[02:45] É, na verdade o que eu queria era trazer do Vinícius para Mariane, tá certo? Aí quando você, só que tem que fazer o seguinte, quando for buscar, eu tenho que entrar na venda que eu quero atender naquele momento. Então eu vou, eu entro naquela venda que eu quero atender naquele momento, e aí vai ter lá vários Ls, né? E aí eu vou clicar no L específico, no produto que eu quero, e vou solicitar a troca de algum cliente que existe. Do jeito que tá hoje, é Para dar certo eu tenho que ir na venda que tem o produto, que já tá separado, já tá separado. Aí aqui, vamos lá, aqui tipo deu certo e não deu.
+
+[03:33] O certo é, na teoria, eu entrar aí na Mariane, puxar de alça, na hora que eu apertar trocar aparecer todos que tem a peça específica para eu poder pegar em reserva. Isso. E aí poder puxar, ah, eu quero puxar do Vinícius Bortolini Para dentro desse que eu tô, desse projeto que eu tô, da Mariane.
+
+[03:59] Isso, tá, tá. Aí aqui, ó, só aproveitando, deu certo, mas não deu, né? Aqui, por exemplo, aqui saiu, ó, ele foi para entrega futura. É aqui, beleza. Quantidade foi transferida, apareceu aqui que foi transferido e veio 5 para entrega futura e saiu da reserva. Beleza. A gente clica aqui.
+
+[04:24] Eu acho que é estornado ali embaixo.
+
+[04:26] Aqui não tem nada, sem reserva, 5 enviado, ver para estornar, tá? Mas aqui não aparece nada porque aqui é a lista de entrega que eu fiz de teste. Você deve ter feito uma também aqui, tá? Aqui deu certo, aqui, certo? Na venda que eu precisava atender não deu. Por exemplo, permanece os 5 na entrega futura. Então aqui no caso teria que ter preenchido com 34 aqui no reserva, teria que ter aumentado os 5 que você puxou lá. É, teria que ter aumentado 5 no reserva para ficar tudo atendido e a entrega futura zerado.
+
+[05:16] Que isso é questão de estoque para ele aparecer.
+
+[05:21] Aí, pronto.
+
+[05:22] Aí eu acho que agora você consegue.
+
+[05:25] Consegue o quê?
+
+[05:26] Puxar, fazer a troca daqui para lá, né?
+
+[05:33] Ao contrário de novo. Então vamos supor essa situação: se eu quero atender aqui, tipo, tá vendo? Eu não consigo pegar daqui Eu só conto daqui.
+
+[05:48] Não, mas você fez o seguinte, você tirou daqui, certo, que ele tava aqui, e deixou e voltou para o estoque.
+
+[05:57] Não voltei para o estoque, eu destinei para outra, para outro cliente sem selecionar o cliente.
+
+[06:06] No final das contas, ele foi para outro lugar, ficou em aberto.
+
+[06:11] Não, ele selecionou o cliente, mostrou que era para ele. É, agora, por exemplo, ó, o que eu tô tentando te falar é a lógica. Pensa bem, ó, tô tentando ver como te falar. Eu tenho que atender, por exemplo, aqui é mais fácil assim, ó, eu entrar na venda que eu preciso atender e selecionar para puxar de alguém do que eu entrar em uma venda que tem, te dá para depois puxar. É tipo, aqui eu tenho que jogar para alguém, porque aqui, por exemplo, vamos supor, eu tenho que tentar pegar, vamos supor, às vezes eu poderia, vamos supor, preciso atender essa venda aqui, tudo que tá na entrega futura. Então eu viria aqui, pegava de alguém, a esse daqui, ah, não tem daqui à frente, mas tem de outro. Então pega aqui, entendeu? Tipo assim, o trocar, você vê que o trocar ele tá somente aonde tem reserva. Na verdade teria que ser o trocar aonde tem entrega futura, porque aí eu venho aqui, olha, eu preciso atender 5 aros desse cliente. Aí eu clico aqui e aí eu vou escolher de quem pegar. Aqui eu tô pegando desse e eu vou escolher para quem mandar. É que no caso eu só tenho eu, né? Então aqui, ó, tô pegando desse daqui. Aí tá falando, ó, esse é o da Mari. É, eu entrei na venda da Mari. Então o que que fala quando eu clico aqui? Fala que nessa venda tem 34 disponíveis, disponível para pegar. Aí essa é a minha venda, não fala quanto tem na entrega futura, entendeu? Porque tem que ser ao contrário.
+
+[08:02] Entendi.
+
+[08:03] Então aqui, tipo, não tem quanto tem na entrega. Eu olhando aqui, eu tô cego, eu não sei quanto que eu tenho para transferir para o Vinícius. Não tem essa informação. A informação que tem é que reservada é zero, e é mesmo, tá certo isso. Mas tipo, não tem a informação quanto eu tenho que transferir para ele.
+
+[08:25] Então tem que aparecer a entrega futura aí também?
+
+[08:28] Não, tem que fazer ao contrário. Tipo assim, eu vou na venda que precisa ser atendida. Não, eu vou embora e tava queimada. Eu vou na venda que eu preciso atender e aí lá eu vou selecionar, eu seleciono de quem eu quero pegar e não vou na venda que tem para quem, entendeu? Ao contrário. Eu acho que fica mais fácil.
+
+[08:57] Não, sim, faz mais sentido ser desse jeito. Beleza. E

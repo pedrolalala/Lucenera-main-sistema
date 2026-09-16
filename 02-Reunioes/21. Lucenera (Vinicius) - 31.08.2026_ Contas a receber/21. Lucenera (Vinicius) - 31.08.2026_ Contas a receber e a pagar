@@ -1,0 +1,291 @@
+[00:00] faturado, e aí consegue assinar digitalmente, entendeu?
+
+[00:05] Aí é produtos, né?
+
+[00:08] Produtos. Quer me mandar? Eu faço aqui porque eu não sei. Eu vou puxar da Floss.
+
+[00:21] É isso também, é bom você dar uma olhada como baixa porque Ele já tá atualizando, aí vai ficar certinho.
+
+[00:43] Ó, a documentação que a moça lá, a contadora lá da, a mãe do Lomandô, a Receita recusou, viu? Da casa do Goiá Park. Já mandei para eles, não sei não. Vamos ver o que que vai dar. Eu pedi para o Marcos consultar lá no portal, falou, Vinícius, só foi recusada. Já mandei para Rose da Mêndola, já eles têm que resolver. Essa é de hoje já, né? Vamos lá, tá por marca, né? Beleza.
+
+[01:21] E vamos falar tudo, as colunas, essas coisas, para a gente conseguir determinar onde custa.
+
+[01:28] Que são esses custos?
+
+[01:30] SKU é a quantidade de produto, 33 produtos, teoricamente 33 produtos cadastrados nessa linha. Já pode até ver se bate as informações. Deu 34, né, meu?
+
+[01:48] É porque você pegou a coluna, não, linha, né?
+
+[01:55] 34 e 37 para 86.
+
+[01:59] Tá, agora vamos fazer aqui então só o que tem disponível. Vamos tirar isso. Opa, deu ao contrário. Só tem esse banheiro. Deixa eu colocar mais dois filtros aqui.
+
+[02:29] Então, vamos lá.
+
+[02:34] Já vamos lá embaixo agora, tá?
+
+[02:49] Esse aqui não tem na planilha, tá? Vou fazer ele na mão, que é o valor de venda total, né?
+
+[03:04] É bom Vai explicando qual que é o—
+
+[03:07] é, aqui eu só filtrei, ó, que eu vou pegar, vou pegar o valor disponível, certo? Sim, o valor disponível não, a quantidade disponível, tudo que tá acima de zero. Isso, vou só filtrar a fórmula aqui. Então custo, vou pegar só o disponível aqui, que é tiro zero. Aqui eu vou fazer a multiplicação do custo total vezes O disponível.
+
+[03:34] Eu não estou entendendo, tem só um item em showroom.
+
+[03:37] Ah, mas não tem problema, é o que tá, só tem no showroom, não tem no estoque lá.
+
+[03:44] Não, mas aqui não tem um item, não é possível.
+
+[03:47] Não, só um item desse item que é desse aqui, ó. Todos esses daqui tá no setor showroom, ó. Ah, desculpa. Todos esses, ó, estão no setor showroom. Entendeu? Esse, a Tátia Bíblia, show ruim. Beleza. Aí aqui custo, aqui tá dando 88 mil de custo. Ah não, pera aí, tem um que tá vezes 2. Não, tá certo, deu 88.339 de custo.
+
+[04:26] E aqui tá 61, né? E aqui não dá para ver a lista, né? Seria interessante ver a lista também.
+
+[04:33] E aí eu vou pegar a venda vezes a quantidade disponível. Aí, 217, 232. Mas esse aqui também deve fazer parte, mas ele faz, ó, porque ele tá no— eu tô pegando essa coluna. Que é estoque disponível. Ele tá no setor estoque total, entendeu? Isso aqui é só o setor. Tudo que tá no estoque total e no showroom, ele consta como disponível.
+
+[05:08] Então tem que entender essa diferença onde está. Mas não, você contou 34 ali, mas na verdade esses não são 34?
+
+[05:16] É, eu puxei. Vamos ver agora. Agora floss disponível deu 15, né? Tem 33 SKU, mas só 15 tem estoque. É, então com marca Floss tá dando essa diferença.
+
+[05:35] R$210, tem que ir lá ver a planilha nossa, o que está apontado, confrontar as duas planilhas.
+
+[05:44] Agora, tipo, esse R$731, que nem esse R$731, bate com o custo de uma peça aqui, ó, que é a lampadinha.
+
+[05:55] Pegou um item, mas que deveria ser o valor de estoque?
+
+[06:01] Valor de estoque entre parênteses, o que que tá escrito?
+
+[06:03] Valor de estoque, custo, custo disponível. Valor de estoque, venda, venda disponível.
+
+[06:10] Isso aqui ele tem que ser a soma total.
+
+[06:13] Filipe, aqui faz sentido. Será que você quis trazer a informação de o que tem de cliente e o que não é de cliente, o que é disponível? Pode ser que seja, talvez é isso que esteja bugando.
+
+[06:29] É, eu acho que é porque aqui temos mais valor a venda que ali.
+
+[06:34] Tudo bem? Aqui então a gente poderia deixar de cliente em amarelo da banda de cá e de cá disponível. Aí que que fica? Custo de cliente Custo de produto cliente, venda, não, custo de produto da gente, só que lá tem que entrar com imposto e tudo, né?
+
+[06:59] É, então o custo total já engloba imposto, tudo, e valor de venda para cliente. Isso, custo disponível, valor de venda disponível, são os mesmos itens, os dois caras. Quanto custa e quanto é a venda.
+
+[07:20] Deixa eu ver um negócio aqui.
+
+[07:21] No caso da venda aqui, nesse areal, eu acho, o cliente deveria puxar teoricamente, ou não vai acontecer?
+
+[07:35] Difícil também, porque aqui é ok, eu te entendi, aqui vai ser uma coisa tão mínima, só para ver Ah, temos tanto, temos o quê.
+
+[07:47] Então ele já diga quanto tempo já no estoque, é R$10.000 mais, R$10.000 menos, não muda.
+
+[07:53] Então não acho que vale a pena complicar, porque realmente o valor que ele vai dar aqui é o valor de venda de cadastro, não vai considerar o desconto que o cliente teve, nada. A gente vai saber que é isso aqui. Para mim, realmente, para efeito de o que me importa mesmo É o valor de custo que eu tenho de cliente no estoque. Se der uma merda, fogo, por exemplo, é o que me importa mesmo.
+
+[08:23] Ó, atualizou aqui.
+
+[08:24] Eu não lembro se em caso de inseguro paga valor de custo, de custo do negócio.
+
+[08:33] O resultado diminuiu, o custo, a despesa operacional aumentou.
+
+[08:41] É, precisa ver aí, né? Tem que ver da onde tá pegando. Igual aqui, que às vezes tá pegando alguma coisa.
+
+[08:49] Não, mas o fluxo realizado aqui, ele aparentemente tá tudo certo. Vai, aperta o fluxo ali. É, deixa eu—
+
+[09:22] qual é a planilha que você, a última planilha que você tá usando para eu conferir?
+
+[09:26] Essa aí, que é, me passa novamente.
+
+[09:29] Vamos tentar usar as ferramentas. São duas planilhas para conferir. Se é muito curta, a gente é uma delas, se não, nada a ver.
+
+[09:40] Uma praia, tá?
+
+[09:41] E se a partir de lá se te acelera o trabalho, deixa eu olhar certinho aqui. Isso mudou quando agora?
+
+[09:50] Mudou 200 mil negativo.
+
+[09:53] É, mudou agora, foi porque eu atualizei a planilha.
+
+[09:59] Isso aqui nós estamos com certeza no sistema já, se é verdade que o fluxo de agosto foi extra.
+
+[10:09] É que aí é filtrado o fluxo de agosto com base no que foi até agora.
+
+[10:17] Ah, só se a Lana lançou aí já o que eu paguei da Ubíqua.
+
+[10:24] Só foi isso.
+
+[10:28] Que aí é ruim, né? Não poderia vir negativo, né? Entendeu? É sim e não, né?
+
+[10:36] Não, isso é, deve ser no futuro, porque se não foi ainda, se não saiu, não.
+
+[10:40] Não, porque eu paguei a mercadoria, né? R$170 eu paguei. Então agora eu vou pagar mais R$170 para nacionalizar, porque eu não tinha sido lançado ainda.
+
+[10:48] Ah, não, tem que trazer. É lógico.
+
+[10:50] Não, porque a gente tava vendo se como ia lançar. Vamos ver, realizado, né? Que é pago por pagamento. 28/06 a 31/08. É de hoje já?
+
+[11:13] É, 31 é de hoje. Só que ele emitiu ontem, essa é a questão, a única coisa.
+
+[11:22] Ah tá, ó, eu recebi, cadê? Entrou 941. Vê se tem aí o recebimento, vamos ver se já bate. Já não bate, tá vendo? Entrou 941 aqui, tá vendo que entrou 780. Entendeu? Por isso que eu falo, deixa eu conferir.
+
+[11:45] Vamos ver o pago.
+
+[11:46] Pagar, pagamento.
+
+[11:51] Tem que ter uma planilha que você carrega, a planilha, o relatório que ele puxa daqui é fazer, que esse relatório, do jeito que eu puxo aqui, é quase.
+
+[12:06] E aqui realmente, aqui tem pago.
+
+[12:10] 1.240.000, que dá até mais. Filtra o dia 30 em vez de 31, porque ele emitiu ontem, e se tiver alguma coisa que foi feito hoje não vai registrar.
+
+[12:36] Aqui manteve o a pagar, 1 milhão menos 40. Vamos ver o a receber, 916. É a mesma coisa.
+
+[12:52] Como é? Então, confrontar as duas planilhas, você consegue fazer um exportar? Exporta, confronta, se bate Então tem a informação da planilha que essa aqui é correta, tem alguma coisa na tramitação que não vai, vai ter que conferir a planilha dentro do Supabase onde estão essas coisas.
+
+[13:14] Essa aqui ela vem bem mais simples do que aquela que o Sérgio coisa lá, entendeu? Aqui vai pegar só essa data aqui, só esse rolê aqui.
+
+[13:23] É, mas já faz isso aí, a gente filtra, já tá aquela 41 pagamento.
+
+[13:29] Cupom é até dia 30/08.
+
+[13:32] É que foi, ele emitiu ontem de qualquer forma, que a planilha que eu te mandei, que eu te mandei, que aí eu preciso entender que foi de hoje. Eu vi aqui no código.
+
+[13:59] Mas a floss tá lançada. Vou ver se a Lana lançou a ubíqua. Esse mês teve os custos primeiros tudo de São Paulo também, todo o aluguel. O Cassiano acho que vai abrir empresa, Felipe. Ele me pediu o número do IPTU, ele vai abrir lá. Você já alinhou com ele?
+
+[14:31] Não, já tava no trampo lá e me deixei.
+
+[14:36] Pera aí, faltou um filtro aqui.
+
+[14:45] Não, que eu precisava começar a minha chave. Mexe com a tensão, começar a ficar, perder a mão, começar a pagar mais obrigada. Vender estoque, esse é o detalhe, é o estoque. O dinheiro tá lá, te falo, tem que ter sensibilidade. Uma hora que você tá lá para fechar, tem que dar para entender quanto mais vai, porque senão, gente, tem que fazer girar.
+
+[15:38] Tem muita grana no estoque.
+
+[15:46] É, o valor de estoque de custo tá dando aqui 4 e de venda 10.
+
+[15:55] Estoque disponível ou de cliente, ou da total, estoque disponível 1,3. Não, não pode, tá errado.
+
+[16:08] De venda, 4,8.
+
+[16:12] Tá muito, tá até a margem tá muito tipo 1,3 para 4, 1 milhão tem pouco estoque, 2%, tá dando quase, quase 3 de margem, quase 3,0. 1,3 milhão para 4,8 milhões.
+
+[16:31] Não, pera, 1,3 milhão de custo, 4,8 milhões de vendas. Isso é Os dois números não batem, não bate. Então não é 4,80, ele dá 10.
+
+[16:45] O 10 lá você tá falando que é o total, então aqui é o total.
+
+[16:52] Isso é para você visualizar, ai, quanto que eu tenho que botar no seguro do estoque?
+
+[16:58] Isso aqui não, nunca é o valor de venda, é sempre o valor de custo. Então é isso aqui, mas eu acho que esse número não tá certo. Tem que puxar a moto para fazer o cálculo na planilha. Ó, quer ver? Vou fazer aqui na minha planilha, ó, mas só para a gente tentar ver aqui mais ou menos.
+
+[17:17] Para a gente começar do zero, tem que ter certeza que estamos importando, está corretamente sendo pegar só o disponível.
+
+[17:29] Oi, é o ar-condicionado lá de baixo. Você sabe qual é o disjuntor para desligar lá?
+
+[17:32] Porque não tá funcionando.
+
+[17:33] A gente tá tentando lá embaixo. Eu acho que tá lá no salão do Marquinho. Vou descer lá. Não, porque não tá funcionando pela automação. Mas o quê? O ar-condicionado?
+
+[17:50] Mas com controle funciona?
+
+[17:54] Ah, mas tá funcionando com o controle. Eu já dou uma olhada. Disponível. Vou filtrar só o disponível. Eu vou até tirar isso aqui para depois verificar se não tá pegando negativo e subtraindo. Confirmar que tá pegando só os disponíveis. Número é foda, mano, qualquer coisinha.
+
+[18:52] Nossa, como é arcaico o Excel.
+
+[18:58] Ah, posso pegar aqui, na verdade, ó, filtrar números maior ou igual, maior ou igual a 1, porque se eu colocar 0 vai vir no 0 também. Vamos dar uma passada para ver se vamos pintar essa. Então, para determinar disponível, para determinar o estoque, o estoque que tem de para vender, né?
+
+[19:34] Então é o que tá acima de 1, qualquer um para cima, né? Qualquer um ali.
+
+[19:40] Estoque disponível, disponível, coluna disponível. Aí só tô checando aqui, ó, você tá pegando só os positivos, né? Não pode vir nada negativo, senão ele vai subtrair. Aí depois eu vou desfazer o filtro para ver se não tá pegando nada negativo subtraindo, entendeu? Mas vou deixar já o cálculo. Então é isso, aqui é o custo total que já vem com imposto, né? Só vamos pegar se esse custo total aqui tá vindo certo, fazer uma conferência aqui, ó, porque esse produto é o custo total menos o valor de venda. Não, não, esse produto aqui é o 12391. Custo total R$98,28. R$98,28, tá certo. E a venda de R$94. Só uma conferência, né? Então beleza, certinho. No sistema não tá vindo o BDI, né, que é o que a gente pediu. O que a gente vai fazer? Disponível vezes custo. E aqui nós vamos fazer venda vezes disponível.
+
+[21:12] Então, valor total, venda vezes disponível, valor de venda.
+
+[21:23] Beleza. Agora, antes de puxar a soma, eu vou tirar esse filtro aqui só para ver se não tá pegando negativo. Beleza, não tá pegando nada de zero, tá vendo? E não tá pegando nada de negativo, que é o que impacta no resultado, né? Senão vai subtrair. Custo total disponível, só o que tem disponível para venda. Então aqui tá dando 20 milhas, não, milhão.
+
+[22:38] Tá doido?
+
+[22:39] Não, vai dar 1 milhão. Milhão e novecentos.
+
+[22:47] Tá louco?
+
+[22:49] É que eu tava vendo assim.
+
+[22:50] Aí aqui vai dar um cinco, quatro e pouco.
+
+[22:56] Cinco.
+
+[22:57] Entendeu?
+
+[22:58] Tá.
+
+[23:00] Um um novecentos e noventa e dois, duzentos e quarenta e oito e quarenta e um.
+
+[23:05] Tá.
+
+[23:06] Aqui nada com disso, nada com nada.
+
+[23:10] 800, 200, um negócio, produto com maior déficit a comprar, MKP máximo.
+
+[23:32] MKT é o valor de markup, né?
+
+[23:40] Dá para fazer aqui. Cadê Afonso? O que que tá faltando? Filtrar pela fósforo, a gente tentar fazer aquela, entender aqui.
+
+[24:13] Nossa, eu tô achando que isso aqui tem 300 disso aqui no site.
+
+[24:17] O que aconteceu aqui?
+
+[24:20] Como que bate o olho em muita coisa?
+
+[24:36] Entra na Flows aí rapidinho, a gente não tem ideia do que tá acontecendo.
+
+[24:50] Tá, você quer que filtre a Flora, né?
+
+[25:08] Pode ser, poderia ser pelo sistema.
+
+[25:13] Não, mas pelo sistema não vai dar a soma. Custo 88.339 e venda 217. Tá certo, a venda tá certa, valor de venda disponível tá correto. É desse item, né, dessa marca, né? Então eu posso salvar essa planilha do jeito que ela tá aqui, ó, com cálculo e tudo.
+
+[26:10] Salva ela e me manda, que aí eu vou importar aqui, vou tentar descobrir o porquê que tá essa diferença. Agora o que a gente tem que entender é o fluxo de—
+
+[26:20] me passa do—
+
+[26:22] você me passou as 4, todas as informações aí que eu tenho para introduzir aqui dentro, tá? Mas deixa, tá, produto, pedido de compra. Pedido de compra não entra aqui, tá? Não entrou, não entra aqui. Contas a receber, contas a pagar.
+
+[26:40] Isso aqui, essas duas aqui, caixa, contas a pagar, contas a receber. Tá, mas aí esse dado que já mudou, né, tava 300, já mudou para 250.
+
+[27:01] Ele não tinha terminado. Agora que terminou, começou a pagar. Ele tinha adicionado em cima. Pedir desconto.
+
+[27:16] Cadê, velho?
+
+[27:18] Perdi receita. Receita tava 913 que você tinha falado?
+
+[27:24] 40 e pouco. Te mandei a planilha de produto, consoma. Que essa que eu fiz agora, agora que nem isso daí, eu preciso nem— deixa eu atualizar.
+
+[28:02] Aperta o F5 só.
+
+[28:09] Já mudou de novo, tava 270.
+
+[28:13] Como assim? Não, 252.
+
+[28:16] Tava 300, aí aquela hora eu falei, uai, mudou de novo, foi para agora, tá 252. Isso aqui é realizado, não pode mexer mais.
+
+[28:26] Eu preciso ver, tipo, aí isso daqui não, agora não vai mexer porque ele finalizou aqui de importar.
+
+[28:32] E aí aqui então isso daqui tá em cima do resultado da receita e dessas duas planilhas aqui, essas duas receber contas a pagar. Vou analisar com calma aqui. Que é do Sérgio.
+
+[28:54] Sim, isso aí sai do sistema, é a informação que tá vindo de lá, e eu não altero nada na coluna, na quantidade.
+
+[29:06] Eu só introduzo algum filtro, né?
+
+[29:09] Só introduzo ela para dentro do sistema, tipo, eu pego e replico ela para dentro.
+
+[29:13] Talvez algum filtro, tá? Preciso ver com calma, tem que ser de manhã.
+
+[29:19] Então aí aqui de repente, ponto de equilíbrio foi uma coisa que o Felipe tinha me pedido para ele conseguir ver o que que tá acontecendo.
+
+[29:34] Necessidade de compra, gasto futuro, isso aqui é bom também. A gente só precisa ver se tá certo porque Lá não tá pegando, né? A gente já consegue até puxar aqui.
+
+[29:42] Então é isso, quer que puxa? Vamos começar a testar.
+
+[29:46] Deixa eu já fazer esse cálculo aqui, ó, em cima dessa planilha, né? Então vou falar, vou fazer aqui, é problema que vai entrar do time, ele nem sempre é, mas beleza, vamos partir desse emprego por aqui, vai.
+
+[30:01] Como o sistema entenderia, é necessidade de revisão de compra, pode ser?
+
+[30:06] Pode, revisão de compra, que tem que entrar um. Aí aqui então a gente tem que fazer diferente, tem que filtrar menor ou igual.
+
+[30:33] Isso.
+
+[30:33] Aí nós vamos fazer isso aqui.
+
+[30:59] 8, 8, 8, 2, 3, 2, 4, que é o total desse número aqui, 8, 8, alguma coisa. Não tá entrando. Foi a conta mais simples, né? Você fez a quantidade negativa vezes a quantidade negativa. Tá, então precisa rever essa questão de fluxo de caixa, quantidade de, da necessidade de novo então planilha que tava sem.

@@ -36,6 +36,15 @@ e o aviso do `INSTALACAO-LUCENERA.md` do repo.
 Triggers: `touch_updated_at`, `archive_version` (versiona antes de alterar),
 `keep_original_transcription`.
 
+**SPEC-134 (aplicada):** `project_code text` (texto livre, sem FK) em `entities`,
+`knowledge_items`, `experiences`, `decisions`, `projects`, `sources`,
+`inbox_items` + índice parcial por tabela (`where project_code is not null`).
+Preenchido em todos os formulários de adicionar/editar informação do app (Skip
+57204), inclusive captura rápida, upload de arquivo e revisão de memória por
+voz — permite marcar qualquer registro com o código de um projeto operacional
+Lucenera (ex.: `26.181`) para achar depois. Não confundir com `projects` (tipo
+de registro interno da própria Memória Lucenera).
+
 ## Tabelas (fase 2 — NÃO aplicadas)
 
 - `memory-organization.sql` → `memory_organization_rules` / `_feedback` /

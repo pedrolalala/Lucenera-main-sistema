@@ -161,6 +161,10 @@ Ao reportar um "Card" grande demais cobrindo informações da Separação Parcia
 
 Causa real, confirmada com o usuário: o card de busca de venda e a tabela de itens (coluna "Trocar", `sticky right-0`) esticavam até a borda direita da tela, ficando embaixo do próprio `SystemSwitcher` — não era o menu que estava errado, era o conteúdo da página que não reservava espaço pra ele. Corrigido em `SeparacaoParcialPage.tsx` (não neste componente): `pr-16 sm:pr-20` no `<main>`, reservando espaço fixo do tamanho do menu sem alterar fonte/conteúdo. Commit `3c1403f`, Skip 48801 v0.0.44.
 
+**Mesmo problema, mesmo dia, no CRM** — usuário reportou o conteúdo esticando até embaixo do menu também no CRM (`lucenera-crm-3bd29`). Como este sistema tem um único `<main>` compartilhado por todas as rotas em `Layout.tsx` (via `<Outlet />`), o ajuste (`pr-16 md:pr-20 lg:pr-24`) foi feito uma vez só e cobre todas as telas do CRM de uma vez — não precisou editar página por página como em Separação Parcial. Commit `1b6fc5b`, Skip 24580 v0.0.314.
+
+**Provável que o mesmo ajuste seja necessário nos outros 8 sistemas** que ainda não têm o `SystemSwitcher` commitado no git local (ver achado de git-sync acima) — ao sincronizar cada um, verificar se o `<main>`/wrapper de layout também precisa do `pr-*` extra antes de considerar aquele sistema resolvido.
+
 ## Pendências
 
 - [x] Confirmar o `projectId` real do Skip para `separacao-parcial` — **confirmado via `skip_project_list` (org 11458) em 2026-08-24: `48801`**, nome do projeto "Separação Parcial". Bate com a menção do CHANGELOG.

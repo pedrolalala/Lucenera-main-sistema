@@ -2,7 +2,7 @@
 
 **Data:** 2026-08-12
 **Sistema:** Orçamentos (`gestao-financeira-clone-544cb`, Skip projectId `32554`) + 1 arquivo no Cadastro (`cadastro-lucenera-b86fe`)
-**Status:** Investigação concluída, implementação em andamento — **Skip MCP desconectado**, então o fluxo desta rodada é: editar local → verificar local (tsc/oxlint/build) → aguardar reconexão do Skip → sincronizar (`skip_file_read` antes de escrever, QA, publish) → só então commit/push do submodule, seguindo o protocolo já estabelecido no projeto.
+**Status:** Concluído — os 4 bugs estão publicados em produção (Skip 32554), confirmado em 2026-09-16 comparando `skip_file_read` de `ProjectCreateModal.tsx`/`ProjetoFormDialog.tsx`/`use-options.ts`/`BudgetFormPage.tsx`/`generate-report/index.ts` contra o checkout local: Bug 1 (`"Residencial"` nos 2 sistemas + 2 linhas no banco), Bug 2 (`setClientes` otimista), Bug 3 (bloco `empresaSelecionadaPerfil`), Bug 4 (`valorAposSinal`/linha "Sinal:" no PDF) — todos presentes. Commit local nunca tinha sido feito apesar de já publicado: comitado e pushado em `3f7a16d` (gestao-financeira-clone) e já existia como ancestral em `db7f99a`→origin (cadastro-lucenera-b86fe).
 
 ## Contexto
 

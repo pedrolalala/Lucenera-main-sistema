@@ -2,7 +2,7 @@
 
 **Data:** 2026-08-12
 **Sistema:** Orçamentos (`gestao-financeira-clone-544cb`, Skip projectId `32554`)
-**Status:** Implementado, aguardando publicação no Skip
+**Status:** Concluído — confirmado publicado em produção (Skip 32554) em 2026-09-16 via `skip_file_read` de `ProductSearchModal.tsx` (marcadores `ProductSelectionEntry`/`validarEntries`/painel inline de `LQuantityRepeater` presentes e idênticos ao local, que já estava commitado no git).
 
 ## Contexto e conflito com a SPEC-079
 

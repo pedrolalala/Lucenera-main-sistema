@@ -2,7 +2,7 @@
 
 **Data:** 2026-08-12
 **Sistema:** Orçamentos (`gestao-financeira-clone-544cb`, Skip projectId `32554`)
-**Status:** Investigação concluída, implementação em andamento — **Skip MCP ainda desconectado** (mesma situação da SPEC-078): editar local → verificar local → publicar quando o Skip reconectar.
+**Status:** Concluído — `LQuantityRepeater.tsx`/`MultiLAddDialog.tsx` existem e estão commitados (`7e58f63`), botão "Adicionar Item" removido. Confirmado publicado no Skip 32554 em 2026-09-16 (mesmo commit `3f7a16d` que fechou a sincronização git×Skip da SPEC-078, já que ambas foram implementadas juntas). Houve 1 rodada de fix pós-teste-ao-vivo (`a1fe428`: L custom_id vazio, subgrupo Tipo vazio, painel Responsável Sistema) — já incorporada.
 
 ## Contexto
 

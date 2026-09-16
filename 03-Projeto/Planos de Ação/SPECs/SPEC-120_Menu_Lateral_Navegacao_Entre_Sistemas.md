@@ -155,11 +155,9 @@ Nos 5 sistemas com a variante "nova aba", `redirectWithCode` nunca era chamado p
 - QA do Skip (`skip_project_apply_changes`) limpo nos 10 antes de publicar; publicado em produção nos 10 (`skip_project_publish`) com autorização explícita do usuário.
 - `AI_DB_CONTEXT.md` de RH e `supabase/db/domains/hub_ti.md` **não atualizados nesta rodada** — ficam como pendência (ver abaixo).
 
-## Achado de UX corrigido (2026-09-16)
+## Mal-entendido registrado (2026-09-16)
 
-Usuário reportou ao vivo: em Separação Parcial, o `SystemSwitcher` (posição original `fixed right-0 top-1/2 -translate-y-1/2`) ficava sobreposto à coluna "Trocar" (também `sticky right-0` na tabela, ver SPEC-098/149) e a outras informações da tela quando expandido. Corrigido em `separacao-parcial`: painel movido pro canto inferior direito (`fixed right-4 bottom-4`, `max-h-[70vh] overflow-y-auto`) — cresce a partir do canto, nunca cobre o meio da página. Publicado (Skip 48801, v0.0.42) e commitado (`c9407ca`).
-
-**Mesmo risco de design provavelmente existe nos outros 9 sistemas** (mesmo componente replicado, mesma posição original) — não corrigido neles ainda porque não foi reportado lá. Se aparecer o mesmo problema em outro sistema, aplicar o mesmo ajuste de posição.
+Ao reportar um "Card" grande demais cobrindo informações da Separação Parcial, interpretei errado como sendo o `SystemSwitcher` e mudei a posição dele (canto direito centralizado → canto inferior direito). **Usuário corrigiu**: o pedido nunca foi sobre o menu lateral — era sobre diminuir um card próprio da tela de Separação Parcial (ainda não identificado nesta SPEC; ver SPEC-149/SeparacaoParcialPage.tsx ou pedido original do usuário). Reposicionamento do `SystemSwitcher` **revertido** (`db22604`, Skip 48801 v0.0.43) — o componente está de volta à posição original desta SPEC. O card real que precisa diminuir é tratado fora desta SPEC.
 
 ## Pendências
 

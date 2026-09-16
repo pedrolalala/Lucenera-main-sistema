@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-149 — Trocar peça reservada: inverter lógica origem/destino (pedir a partir de quem precisa)"
-status: não iniciado
+status: pendente
 data_ultima_modificacao: 2026-09-15
 sistemas_envolvidos:
   - Separação Parcial (04-Sistemas/separacao-parcial)
@@ -17,17 +17,19 @@ Reunião gravada em 2026-09-15: `02-Reunioes/23. Lucenera (Vinicius) - 15.09.202
 
 ## Checklist de Ação
 
-- [ ] Trocar a origem do clique: o botão "Trocar" passa a aparecer na linha do item com `q_entrega_futura > 0` (quem precisa da peça), não mais em `q_reserva > 0` (quem já tem a peça)
-- [ ] Inverter os papéis no modal: o item da venda atual (onde o usuário clicou "Trocar") vira **destino** (`p_destino_projeto_item_id`); o item escolhido na lista "Reservado por Cliente/Projeto" vira **origem** (`p_origem_projeto_item_id`) — RPC `trocar_reserva_projetista` e a função `aprovar_transferencia_estoque` já têm essa semântica correta no banco (origem perde reserva e ganha entrega futura; destino perde entrega futura e ganha reserva), o bug está só no mapeamento feito pelo frontend
-- [ ] Trocar a validação de quantidade: hoje compara com `trocaAlvo.q_reserva` (item atual/futuro destino); passa a comparar com a reserva do item selecionado na lista (futuro origem, hoje `trocaDestino.qReserva`)
-- [ ] Mostrar no cabeçalho do modal a quantidade que falta para esta venda (`q_entrega_futura` do item atual), não a reserva do item atual — hoje o texto "Reserva disponível para troca" mostra o número errado para esse fluxo e não existe nenhum indicador de "quanto preciso pegar"
-- [ ] Ajustar `max` do campo Quantidade para o limite correto (reserva de quem está cedendo a peça)
-- [ ] Renomear variáveis/props do componente (`trocaAlvo` → item que precisa / destino; `trocaDestino` → item escolhido na lista / origem) o suficiente para não confundir manutenção futura, sem exigir reescrita ampla
-- [ ] Revisar `getReservasOutrosProjetos`: continua correta como fonte da lista (traz outros projetos com a mesma peça), só muda o papel que ela representa no fluxo
+- [x] Trocar a origem do clique: o botão "Trocar" passa a aparecer na linha do item com `q_entrega_futura > 0` (quem precisa da peça), não mais em `q_reserva > 0` (quem já tem a peça)
+- [x] Inverter os papéis no modal: o item da venda atual (onde o usuário clicou "Trocar") vira **destino** (`p_destino_projeto_item_id`); o item escolhido na lista "Reservado por Cliente/Projeto" vira **origem** (`p_origem_projeto_item_id`) — RPC `trocar_reserva_projetista` e a função `aprovar_transferencia_estoque` já têm essa semântica correta no banco (origem perde reserva e ganha entrega futura; destino perde entrega futura e ganha reserva), o bug estava só no mapeamento feito pelo frontend
+- [x] Trocar a validação de quantidade: antes comparava com `trocaAlvo.q_reserva` (item atual/futuro destino); agora compara com a reserva do item selecionado na lista (origem, `trocaOrigemEscolhida.qReserva`)
+- [x] Mostrar no cabeçalho do modal a quantidade que falta para esta venda (`q_entrega_futura` do item atual), não a reserva do item atual — texto trocado para "Falta atender nesta venda: N"
+- [x] Ajustar `max` do campo Quantidade para o limite correto (reserva de quem está cedendo a peça, `trocaOrigemEscolhida.qReserva`)
+- [x] Renomear variáveis/props do componente (`trocaAlvo` → `trocaVendaAtual`, sempre destino; `trocaDestino` → `trocaOrigemEscolhida`, sempre origem) — feito em todo o componente (estado, handlers, JSX)
+- [x] Revisar `getReservasOutrosProjetos`: confirmado que continua correta como fonte da lista (traz outros projetos com a mesma peça); não foi alterada, só o papel que ela representa no fluxo
 
 ### Passos manuais do usuário
 
 - [ ] Testar ao vivo com um caso real (ex.: puxar peça reservada de um projeto para outro que está com saldo em "Entrega futura") depois do fix publicado, confirmando que o saldo final bate: origem perde reserva, destino zera (ou reduz) a entrega futura e ganha reserva
+- [ ] Publicar a nova versão no Skip do sistema Separação Parcial (o build/typecheck local passou, mas nada foi publicado)
+- [ ] Reproduzir o cenário exato da reunião (projeto 26.1109 → 15150) e conferir "Log de Trocas" após o teste
 
 ## Objetivo
 
@@ -100,6 +102,28 @@ Sem mudança — continua restrito a quem `pode_trocar_reserva()` retorna `true`
 - Reproduzir o cenário exato da reunião: puxar peça do projeto 26.1109 (Vinícius Bortolin) para o projeto 15150 (Mariane de Moraes Ribeiro), conferindo saldo final nas duas pontas (reserva/entrega futura) antes e depois.
 - Conferir que o botão "Trocar" não aparece mais em item que só tem `q_reserva` (sem `q_entrega_futura` pendente).
 - Conferir Log de Trocas após o teste (origem/destino corretos).
+
+## Realizado
+
+**2026-09-15** — Implementado por agente `implementador`, escopo restrito a `04-Sistemas/separacao-parcial/src/pages/SeparacaoParcialPage.tsx` (único arquivo alterado; não tocado nenhum arquivo do trabalho não relacionado já sujo no submódulo — `src/App.tsx`, `src/lib/cross-system-auth.ts`, `src/components/SystemSwitcher.tsx`, `src/hooks/useSistemasPermitidos.ts`).
+
+Mudanças:
+- Botão "Trocar" na linha da tabela agora exige `item.q_entrega_futura > 0` (antes `item.q_reserva > 0`).
+- Estado renomeado: `trocaAlvo` → `trocaVendaAtual` (item clicado, sempre **destino**); `trocaDestino` → `trocaOrigemEscolhida` (item escolhido na lista "Reservado por Cliente/Projeto", sempre **origem**).
+- `handleConfirmarTroca` agora chama `trocarReserva({ origemProjetoItemId: trocaOrigemEscolhida.projetoItemId, destinoProjetoItemId: trocaVendaAtual.projeto_item_id, ... })` — antes estava invertido.
+- Validação de quantidade máxima agora compara com `trocaOrigemEscolhida.qReserva` (reserva de quem cede), não mais com a reserva do item clicado.
+- Cabeçalho do modal trocado de "Reserva disponível para troca" (`trocaAlvo.q_reserva`) para "Falta atender nesta venda" (`trocaVendaAtual.q_entrega_futura`).
+- `max` do campo Quantidade ajustado para `trocaOrigemEscolhida.qReserva`.
+- `getReservasOutrosProjetos` não foi alterada (segue correta como fonte da lista); só mudou o papel do resultado no fluxo (de "destino" para "origem").
+- Nenhuma mudança de banco/RPC/schema, conforme já confirmado na SPEC.
+
+Verificação:
+- `npx tsc --noEmit` — sem erros.
+- `npx oxlint src/pages/SeparacaoParcialPage.tsx` — 1 warning pré-existente e não relacionado (`numeroVenda` declarado e não usado, linha 237, já existia antes desta mudança).
+- Build (`vite build`) não executado nesta rodada; typecheck + lint específico do arquivo alterado passaram limpos.
+- Nenhum commit feito — fica a cargo do usuário revisar e commitar separadamente do resto do submódulo (que já tem mudanças não relacionadas pendentes).
+
+Pendente (usuário): testar ao vivo o golden path (puxar peça reservada de um projeto — ex. 26.1109 — para outro com saldo em "Entrega futura" — ex. 15150), conferir saldo final nas duas pontas e o "Log de Trocas", publicar no Skip, e rodar o agente `revisor` antes de qualquer commit.
 
 ## Pendências
 

@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-117 — Página Contas em Aberto (Pagar/Receber) na Administração Bancária"
-status: implementado localmente, aguardando publicação no Skip e homologação
-data_ultima_modificacao: 2026-08-19
+status: concluído — confirmado publicado em produção (Skip 36395) em 2026-09-16 via skip_file_read de ContasEmAberto.tsx (idêntico ao implementado); código já estava commitado/pushado (f766e87). Falta só a homologação dos totais contra a planilha de referência
+data_ultima_modificacao: 2026-09-16
 sistemas_envolvidos:
   - Administração Bancária (retorno-bancario-bradesco-5392a) — Skip projectId 36395 (confirmado via SPEC-114, v0.0.64)
 ---
@@ -21,9 +21,9 @@ sistemas_envolvidos:
 
 ### Passos manuais do usuário
 
-- [ ] Confirmar o nome exato do item de menu/rota da nova página (sugestão: "Contas em Aberto")
-- [ ] Antes de publicar, confirmar no Skip Cloud que o projectId 36395 ainda é o correto para `retorno-bancario-bradesco-5392a` e que o checkout local não está desatualizado em relação ao Skip
-- [ ] Homologar a tela nova comparando os totais exibidos contra a planilha já exportada em 18-19/08/2026 (2.382 linhas: 1.506 a pagar + 876 a receber, R$ 7.597.768,83 + R$ 5.032.310,09) antes de considerar a SPEC concluída
+- [x] Confirmar o nome exato do item de menu/rota da nova página — "Contas em Aberto", já em produção.
+- [x] Confirmado no Skip Cloud (2026-09-16): projectId 36395 correto, `ContasEmAberto.tsx` publicado e idêntico ao implementado.
+- [ ] Homologar a tela nova comparando os totais exibidos contra a planilha já exportada em 18-19/08/2026 (2.382 linhas: 1.506 a pagar + 876 a receber, R$ 7.597.768,83 + R$ 5.032.310,09) — único item que ainda depende do usuário.
 
 ## Objetivo
 

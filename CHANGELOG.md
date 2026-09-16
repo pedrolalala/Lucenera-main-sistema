@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-16
+
+### SPEC-125 (pendência residual): Showroom registrado na Central Lucenera
+
+- `public.systems` ganhou a linha do Showroom (migration `20260916_125_showroom_registro_hub`,
+  aplicada no Supabase real): `slug=showroom`, link pra `/admin` (curadoria — fotos do estoque +
+  composição, SPEC-125/148/149), `visivel_no_hub=true`, `display_order=12`.
+- Decisão do usuário: aponta pra ferramenta interna (`/admin`), não pra vitrine pública — mesmo
+  padrão dos demais cards da Central. Só o admin vê o card por enquanto (sem `papel_permissoes`
+  ainda); nenhuma mudança de código no Hub, `Dashboard.tsx` já lê a tabela dinamicamente.
+
 ## 2026-09-15 (5)
 
 ### SPEC-147 + SPEC-150: catálogo Ubiqua unificado por referência e por família de produto — publicado

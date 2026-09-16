@@ -34,7 +34,7 @@ dependencias:
 - [x] Bucket `showroom-lucenera` (público, 5 MB, jpeg/png/webp) + policy `showroom_lucenera_public_read` (SELECT p/ anon+authenticated)
 - [x] `produtos` RLS (SPEC-069/087) **intacta** — `GET /rest/v1/produtos` com `anon` continua `200 []`
 - [ ] Atualizar `supabase/db/domains/*` (produtos/estoque) com a coluna e a view novas
-- [ ] (Opcional) linha em `public.systems` com `visivel_no_hub = false` só para inventário
+- [x] Linha em `public.systems` criada (2026-09-16, migration `20260916_125_showroom_registro_hub`) — decisão final diferente da original: `visivel_no_hub = true` (não `false`), link apontando pra `/admin` (curadoria), aparece no Dashboard da Central só pra admin por enquanto (sem entrada em `papel_permissoes` ainda)
 
 ### Sistema novo — Showroom Lucenera (`04-Sistemas/showroom-qtq8er2dk`) — IMPLEMENTADO, não publicado
 
@@ -207,8 +207,10 @@ O site **não lê o PowerPoint** — só `imagem_showroom_url` + `estoque_showro
   - Bucket de Storage público novo `showroom-lucenera` (leitura `anon`, ~5 MB,
     `image/jpeg|jpg|png|webp`) — replicar
     `catalogo-pecas-ubiqua-e6fa0/supabase/migrations/20260525140000_create_storage_and_policies.sql`.
-- Registro no Hub: opcional, linha em `public.systems` com `visivel_no_hub = false` só para
-  inventário. Não precisa de RBAC/`papel_permissoes` (site público).
+- Registro no Hub: **feito em 2026-09-16** (migration `20260916_125_showroom_registro_hub`) —
+  decisão final foi diferente da prevista aqui: `visivel_no_hub = true` (não `false`), linha
+  aponta pra `/admin` (ferramenta interna de curadoria, não o site público), sem `papel_permissoes`
+  ainda (só admin vê, via bypass em `Dashboard.tsx`).
 
 ### 6. Considerações de usabilidade para o cliente final
 

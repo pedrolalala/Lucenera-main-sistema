@@ -155,9 +155,11 @@ Nos 5 sistemas com a variante "nova aba", `redirectWithCode` nunca era chamado p
 - QA do Skip (`skip_project_apply_changes`) limpo nos 10 antes de publicar; publicado em produção nos 10 (`skip_project_publish`) com autorização explícita do usuário.
 - `AI_DB_CONTEXT.md` de RH e `supabase/db/domains/hub_ti.md` **não atualizados nesta rodada** — ficam como pendência (ver abaixo).
 
-## Mal-entendido registrado (2026-09-16)
+## Mal-entendido registrado e corrigido (2026-09-16)
 
-Ao reportar um "Card" grande demais cobrindo informações da Separação Parcial, interpretei errado como sendo o `SystemSwitcher` e mudei a posição dele (canto direito centralizado → canto inferior direito). **Usuário corrigiu**: o pedido nunca foi sobre o menu lateral — era sobre diminuir um card próprio da tela de Separação Parcial (ainda não identificado nesta SPEC; ver SPEC-149/SeparacaoParcialPage.tsx ou pedido original do usuário). Reposicionamento do `SystemSwitcher` **revertido** (`db22604`, Skip 48801 v0.0.43) — o componente está de volta à posição original desta SPEC. O card real que precisa diminuir é tratado fora desta SPEC.
+Ao reportar um "Card" grande demais cobrindo informações da Separação Parcial, interpretei errado como sendo o `SystemSwitcher` e mudei a posição dele (canto direito centralizado → canto inferior direito). **Usuário corrigiu**: o pedido nunca foi sobre o menu lateral. Reposicionamento do `SystemSwitcher` **revertido** (`db22604`, Skip 48801 v0.0.43) — componente de volta à posição original desta SPEC (`fixed right-0 top-1/2 -translate-y-1/2`).
+
+Causa real, confirmada com o usuário: o card de busca de venda e a tabela de itens (coluna "Trocar", `sticky right-0`) esticavam até a borda direita da tela, ficando embaixo do próprio `SystemSwitcher` — não era o menu que estava errado, era o conteúdo da página que não reservava espaço pra ele. Corrigido em `SeparacaoParcialPage.tsx` (não neste componente): `pr-16 sm:pr-20` no `<main>`, reservando espaço fixo do tamanho do menu sem alterar fonte/conteúdo. Commit `3c1403f`, Skip 48801 v0.0.44.
 
 ## Pendências
 

@@ -27,8 +27,10 @@ Reunião gravada em 2026-09-15: `02-Reunioes/23. Lucenera (Vinicius) - 15.09.202
 
 ### Passos manuais do usuário
 
-- [ ] Testar ao vivo com um caso real (ex.: puxar peça reservada de um projeto para outro que está com saldo em "Entrega futura") depois do fix publicado, confirmando que o saldo final bate: origem perde reserva, destino zera (ou reduz) a entrega futura e ganha reserva
-- [ ] Publicar a nova versão no Skip do sistema Separação Parcial (o build/typecheck local passou, mas nada foi publicado)
+- [x] Publicar a nova versão no Skip do sistema Separação Parcial — **publicado em 2026-09-16**,
+      projeto Skip `48801` ("Separação Parcial"), QA 100% ok, versão `0.0.41` (`3658eb2`):
+      https://separacao-parcial-dff01.goskip.app
+- [ ] Testar ao vivo com um caso real (ex.: puxar peça reservada de um projeto para outro que está com saldo em "Entrega futura"), confirmando que o saldo final bate: origem perde reserva, destino zera (ou reduz) a entrega futura e ganha reserva
 - [ ] Reproduzir o cenário exato da reunião (projeto 26.1109 → 15150) e conferir "Log de Trocas" após o teste
 
 ## Objetivo

@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-125 — Site do Showroom Lucenera (vitrine de pronta entrega)"
-status: pendente
-data_ultima_modificacao: 2026-08-31
+status: concluído — site em produção (login admin confirmado ativo desde a SPEC-125/128; SPECs posteriores 127/134/137/144-150 dependem dele funcionando); checklist residual (contato.ts real, domínio, SEO, curadoria completa) não foi revisto item a item nesta correção
+data_ultima_modificacao: 2026-09-16
 sistemas_envolvidos:
   - Sistema novo "Showroom Lucenera" (a criar — nome/repositório é passo manual do usuário)
   - Supabase (banco central) — nova coluna em `produtos`, nova view pública, bucket de Storage público
@@ -318,6 +318,11 @@ fluxo interno não visível ao cliente.
 - [ ] **P-5** — Curadoria: **~148 peças** ainda a vincular na tela `/admin` (19 já feitas).
   As 15 "não achadas" precisam de quem conhece o catálogo. `--semear-estoque` já cuida do
   `estoque_showroom = 0` (usa qtd da lista, senão 1) tanto no script quanto na RPC.
+- [x] ~~Correção de status~~ (2026-09-16): `status` do frontmatter estava desatualizado
+  ("pendente") desde 31/08 — o site já está em produção há semanas (login `/admin` testado ao
+  vivo nesta sessão, SPECs 127/134/137/144-150 já constroem sobre ele). Corrigido para
+  "concluído"; os itens residuais acima (P-2 a P-5) continuam válidos como pendências próprias,
+  não como bloqueio de "site no ar". Achado durante levantamento geral de SPECs abertas.
 - [x] ~~P-6~~ — migration aplicada com a view `SECURITY DEFINER` + `GRANT TO anon` (abordagem
   confirmada em uso). Edge Function pública fica como alternativa não necessária.
 - [x] ~~P-8b~~ — `/admin` passou a usar **usuário + senha** (migration `20260831_128`):

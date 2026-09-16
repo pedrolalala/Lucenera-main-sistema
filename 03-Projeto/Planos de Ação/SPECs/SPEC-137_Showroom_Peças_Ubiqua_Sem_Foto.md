@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-137 — Showroom: peças Ubiqua marcadas como pronta-entrega não aparecem por falta de foto"
-status: pendente
-data_ultima_modificacao: 2026-09-13
+status: concluído — migration aplicada no Supabase real (33 produtos), conferido ao vivo no site publicado (31/33 com foto; 2 pendências residuais documentadas abaixo)
+data_ultima_modificacao: 2026-09-16
 sistemas_envolvidos:
   - Supabase (banco)
   - Showroom (showroom-qtq8er2dk)
@@ -128,3 +128,4 @@ Sem mudança. Migration roda com privilégio de dono do schema (como qualquer mi
 - [ ] Peças `339101` (cód. 12539) e `339104` (cód. 12541) — foto quebrada na origem (`revenda_ubiqua.imagem_catalogo_url` aponta pra objeto inexistente no bucket `revenda-ubiqua-images`, 404). Precisa re-upload da foto certa no catálogo Ubiqua (fora do escopo desta SPEC) e depois reaplicar o backfill só para essas 2 linhas.
 - [ ] Peça `370106-IS` (cód. 13024, "IS-STONE...VERMELHO", 1 unidade em estoque_showroom) não tem correspondência em `revenda_ubiqua` — precisa de foto cadastrada manualmente via `/admin` do showroom, fora do escopo do backfill automático.
 - [ ] As 27 peças do catálogo Ubiqua com estoque em `revenda_ubiqua` mas ainda não marcadas como showroom em `produtos` ficaram fora do escopo por decisão do usuário — decisão de negócio (o que está fisicamente disponível no showroom) pendente caso a equipe queira expandir a vitrine no futuro.
+- [x] ~~Correção de status~~ (2026-09-16): `status` do frontmatter estava desatualizado ("pendente") desde 13/09, apesar da migration já confirmada aplicada e verificada ao vivo na mesma sessão — corrigido para "concluído". Achado durante levantamento geral de SPECs abertas.

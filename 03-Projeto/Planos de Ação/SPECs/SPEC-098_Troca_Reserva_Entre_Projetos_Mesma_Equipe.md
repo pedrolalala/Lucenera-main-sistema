@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-098 — Troca de peça em Reserva entre projetos (Projetistas/Gerente/Admin)"
-status: pendente
-data_ultima_modificacao: 2026-08-14
+status: implementado e publicado em produção (Skip 48801, v0.0.24) — testado ao vivo; restam 2 itens residuais (consolidar checagem de perfil na RPC de aprovação + atualizar docs de domínio)
+data_ultima_modificacao: 2026-09-16
 sistemas_envolvidos:
   - Separação Parcial (separacao-parcial, Skip 48801)
   - Supabase (banco central) — reaproveita `transferencias_estoque`/RPCs da SPEC-011, guard novo em `aprovar_transferencia_estoque`
@@ -141,3 +141,4 @@ Só chama `solicitar_transferencia_estoque(...)` e, na sequência, `aprovar_tran
 - [ ] **P-3**: Decidir se `cancelar_transferencia_estoque` deve ganhar uma ação na UI (ex.: desfazer uma troca feita por engano) — hoje só cancela enquanto `status = 'solicitada'`, e o fluxo desta SPEC já nasce `'aprovada'` (imediato), então cancelar não serviria para desfazer uma troca já efetivada; desfazer exigiria uma nova troca no sentido contrário. Não bloqueia a implementação, é decisão de UX.
 - [ ] **P-4**: Se a lista de Projetistas/gerentes mudar no futuro (contratação, promoção, mudança de cargo), o acesso muda automaticamente junto (o guard lê `cargo`/`role` ao vivo, não uma lista fixa) — sem ação necessária, só registrado aqui para não surpreender ninguém.
 - [x] ~~P-5~~ resolvida: dado de teste de 2026-08-14 revertido (troca reversa + limpeza de auditoria + exclusão do projeto de teste), sem resíduo em produção.
+- [x] ~~P-6~~ resolvida (2026-09-16): `status` do frontmatter estava desatualizado ("pendente") desde 14/08 — corrigido para refletir que a feature está implementada, publicada e em uso (a SPEC-149, do mesmo dia, parte do fato de que a ação "Trocar" desta SPEC já está em produção e sendo usada pelo Vinícius). Achado durante levantamento geral de SPECs abertas.

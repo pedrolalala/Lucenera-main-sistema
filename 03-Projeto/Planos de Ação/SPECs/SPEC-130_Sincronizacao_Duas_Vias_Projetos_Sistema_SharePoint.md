@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-130 — Sincronização em Duas Vias: Projetos do Sistema ⇄ Lista SharePoint 'Organização Projetos'"
-status: pendente
-data_ultima_modificacao: 2026-09-11
+status: pipeline em produção — cron rodando sozinho desde 2026-09-11 (checagem de saúde completa em 2026-09-14: 3.963/3.963 itens batendo, 0 divergências); confirmação humana da automação de pasta/Teams ainda pendente
+data_ultima_modificacao: 2026-09-16
 sistemas_envolvidos:
   - CRM (lucenera-crm, Skip projectId 24580)
   - Supabase (Edge Functions + migration + pg_cron)
@@ -259,6 +259,7 @@ Nenhuma implementação do pipeline definitivo ainda. Esta SPEC registra o desen
 - [x] **Auditoria de segurança pós-incidente (2026-09-14)**: confirmado ao vivo via Graph que nenhum registro interno (`COM-N`, `PRJ-TESTE`) foi criado na lista real durante o flood de push do mesmo dia — busca por título não achou nada, e os itens mais recentes da lista são todos projetos reais. Confirmado também que a guarda de código (`018`) está genuinamente ativa no banco agora (`pg_get_functiondef`), não só escrita no arquivo de migration.
 - [x] **Function legada `sync-sharepoint` desativada e removida (2026-09-14)**: usuário perguntou se a automação toca alguma lista além de "Organização Projetos" — a resposta honesta era não pra automação nova, mas a function antiga `sync-sharepoint` (de antes desta SPEC) continuava **ativa** e também lia "Tabelas de Preços", acionável manualmente por um botão em `Sync.tsx` (Dashboard Financeiro, Skip `projectId 41135`, `dashboard-empresa-40d7d.goskip.app`). Por decisão do usuário: function apagada do Supabase, botão removido de `Sync.tsx` (Skip aplicado + publicado, versão `0.0.43`/`a24ebab`), pasta local `supabase/functions/sync-sharepoint/` removida do repo central. Agora **nenhuma automação do ecossistema toca outra lista além de "Organização Projetos"**.
 - [x] **Documentação estrutural atualizada (2026-09-14)**: `supabase/db/domains/crm.md` — que qualquer sessão/agente é instruído a ler antes de mexer em `projetos` (regra do `AGENTS.md`) — ganhou uma seção "SPEC-130" com aviso explícito sobre a trigger de push, o risco de `UPDATE` em massa, e por que a guarda de formato de código existe e não deve ser removida sem entender o motivo. Isso torna a proteção legível por uma sessão futura sem contexto desta conversa, não só pelo histórico de chat.
+- [x] ~~Correção de status~~ (2026-09-16): `status` do frontmatter estava desatualizado ("pendente") desde 11/09, apesar de toda a evidência acima já mostrar pipeline rodando e saudável há dias — corrigido para refletir o estado real. Achado durante levantamento geral de SPECs abertas.
 - [ ] **Nova pendência (2026-09-14)**: qualquer correção de dado em massa futura (muitas linhas de uma vez) deve passar por um script com ritmo controlado (tipo `backfill_sharepoint_projetos.py`), nunca `UPDATE` cru direto — risco de floodar o Graph (já aconteceu uma vez, sem dano, mas por sorte).
 - [x] Apagados os 3 projetos de teste (`26.268`, `26.285`, `26.286`) e os itens correspondentes (`7152`, `7154`, `7157`) na lista real (2026-09-14).
 - [ ] Convenção de campo vazio = caractere literal `.` (não string vazia) — implementar transformação nos dois sentidos.

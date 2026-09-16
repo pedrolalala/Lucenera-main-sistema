@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-120 — Menu Lateral de Navegação Entre Sistemas (Switcher Global)"
-status: concluído
-data_ultima_modificacao: 2026-08-24 (implementado e publicado nos 10 sistemas)
+status: concluído (feature em produção, publicada via Skip nos 10 sistemas) — ACHADO 2026-09-16: os arquivos locais (git) de 8 dos 9 satélites nunca foram commitados/pushados, criando um gap entre o histórico de código e o que está de fato publicado; ver Pendências
+data_ultima_modificacao: 2026-09-16
 sistemas_envolvidos:
   - Hub / Central (central-lucenera-dashboard-1c9ba, Skip 37750)
   - Orçamentos (gestao-financeira-clone-544cb (1), Skip 32554)
@@ -174,3 +174,4 @@ Nos 5 sistemas com a variante "nova aba", `redirectWithCode` nunca era chamado p
 | Separação Parcial | **nenhum** — não tem `Layout.tsx`/`layout/`; só `src/App.tsx`. Precisa confirmar durante a implementação onde as rotas autenticadas são montadas nesse app (mais simples/recente que os demais). |
 
 - [ ] Avaliar separadamente (fora desta SPEC) se o gap de enforcement descrito na SPEC-063 (a maioria dos sistemas satélite só verifica sessão válida, não permissão granular, para bloquear URL direta) deve ser fechado em conjunto — esta SPEC não resolve isso, só decide o que aparece no menu.
+- [ ] **Achado (2026-09-16)**: o `git status` local de `cadastro-lucenera-b86fe`, `central-lucenera-dashboard-1c9ba`, `compras-lucenera-3o23t98ee`, `dashboard-lucenera-b02z85wa3`, `lucenera-logistics-b7cd1`, `retorno-bancario-bradesco-5392a`, `dashboard-rh-lucenera-5fe9c` e `separacao-parcial` mostra `App.tsx`/`cross-system-auth.ts` modificados e `SystemSwitcher.tsx`/`useSistemasPermitidos.ts` como arquivos novos, **nenhum commitado** — todos com `mtime` de 2026-08-24, a mesma data desta SPEC. Isso é consistente com o padrão já conhecido do projeto ([[feedback_skip_deploy_separate_tree]]): a publicação em produção (linha 155 do "Realizado") foi feita direto na working tree do Skip, e o checkout local nunca foi sincronizado/commitado de volta para o git depois. **Não é evidência de que a feature esteja quebrada em produção** — é uma lacuna de controle de versão. Recomenda-se, antes de considerar esta SPEC 100% encerrada: (1) ler cada arquivo via `skip_file_read` e comparar com o checkout local (confirmar que são idênticos ou reconciliar diferenças); (2) commitar e pushar nos 8 sistemas; (3) atualizar o ponteiro do submódulo no repo central. Ver [[feedback_rollout_pendente_8_sistemas_nao_tocar]] (memória de sessão).

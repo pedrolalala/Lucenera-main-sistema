@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-099 — Estorno granular de separação + link real Ag.Separar→Separado→Entregue"
-status: pendente
-data_ultima_modificacao: 2026-08-14
+status: implementado e publicado em produção (Skip 48801, v0.0.25) — testado ao vivo; falta só atualizar documentação de domínio
+data_ultima_modificacao: 2026-09-16
 sistemas_envolvidos:
   - Separação Parcial (separacao-parcial, Skip 48801)
   - Logística (lucenera-logistics-b7cd1) — inicialmente sem mudança de código prevista, mas o teste ao vivo achou que o status 'Pronto' nunca aparecia nas telas do Matheus; fix aplicado nos filtros de `useSeparacoes.ts`/`useCalendarData.ts` (ver Realizado, continuação)
@@ -123,3 +123,4 @@ Valida: item existe, `p_quantidade > 0`, `p_quantidade <= (quantidade - quantida
 
 - [ ] **P-1**: Se uma venda tiver mais de uma separação parcial em aberto (`'Pendente'`) e só a última virar `'Pronto'` (por ser a que zerou a reserva), as separações anteriores da mesma venda não têm seu próprio `'Pronto'` disparado — os itens delas só migram pra `q_separado` se/quando algo mudar o status delas individualmente. Não resolvido nesta SPEC (limitação herdada da SPEC-089); documentar e avaliar se vira SPEC própria depois que houver caso real.
 - [ ] **P-2**: `nosso_numero` (`boletos`) — Vinícius decidiu remover o campo (reunião 11/08) mas não definiu o substituto. É a chave que `processar_retorno_bancario` (SPEC-008) usa pra casar o retorno do banco com o boleto certo (tem `UNIQUE constraint`). Decisão que falta é de negócio: qual vai ser a nova chave de conciliação (ex.: `boletos.id`, outro número sequencial, ou manter algo no formato que o Bradesco exige no arquivo de remessa)? Sem essa resposta, remover o campo quebra a baixa automática de boletos. Bug relacionado já identificado e não corrigido de propósito: `aprovar_orcamento_financeiro` gera `nosso_numero` com prefixo duplicado ("ORC-ORC0022-P1") em 14 boletos, todos ainda `pendente_registro` — consertar o formato de um campo que vai ser removido seria trabalho descartável.
+- [x] ~~P-3~~ resolvida (2026-09-16): `status` do frontmatter estava desatualizado ("pendente") desde 14/08 — corrigido para refletir que o estorno granular já está implementado, publicado e em uso (memória de sessão registra "3 rounds de bugs pós-publish", confirmando uso real em produção). Achado durante levantamento geral de SPECs abertas.

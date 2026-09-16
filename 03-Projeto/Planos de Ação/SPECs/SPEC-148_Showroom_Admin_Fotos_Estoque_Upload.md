@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-148 — Showroom /admin: fotos do estoque (fluxo inverso do PPT) + peça composta (1 foto, N produtos)"
-status: implementado (migration em rascunho, aguardando aplicação)
+status: implementado + migration aplicada + publicado no Skip (aguardando teste ao vivo end-to-end)
 data_ultima_modificacao: 2026-09-15
 sistemas_envolvidos:
   - Showroom (showroom-qtq8er2dk)
@@ -82,8 +82,12 @@ dependencias:
       conjunto por vez; (2) membro inativo dentro de um conjunto ativo zera a disponibilidade do
       conjunto inteiro (conjunto some da vitrine); (3) campo "quantidade" por membro já fica
       disponível na UI desde o dia 1.
-- [ ] Rodar a migration no Supabase real, com autorização explícita (mesmo fluxo das migrations
-      126/127/128/137).
+- [x] Rodar a migration no Supabase real — **aplicada em 2026-09-15/16** (dry-run com `rollback`
+      antes do `commit` real, depois aplicação de `001_fotos_estoque.sql` e `002_peca_composta.sql`
+      via Supabase Management API — `psql` direto instável de novo, mesmo contorno já usado na
+      SPEC-144). Verificado no banco real: `showroom_upload_grants`, `showroom_grupo_itens` e as 7
+      funções `showroom_*` existem; `vw_showroom_publico` mantém exatamente as 9 colunas do
+      contrato desde a SPEC-125.
 - [ ] Testar ao vivo: (a) subir foto em 1 produto sem foto e trocar foto em 1 produto que já
       tinha, conferindo que o arquivo antigo em `produtos/` some do bucket e que arquivos em
       `import/` não são tocados; (b) montar 1 conjunto de teste com 2–3 produtos e conferir na
@@ -91,6 +95,22 @@ dependencias:
       estoque de 1 membro do conjunto de teste e confirmar que o card some da vitrine.
 - [ ] Confirmar se vale a pena, nesta SPEC ou numa futura, regenerar `supabase/db/current/`
       (achado: está desatualizado desde a SPEC-125).
+
+### Publicado no Skip
+
+- [x] Escrito na working tree do projeto Skip "Showroom Lucenera" (`projectId 54698`) em
+      2026-09-16, sem drift em relação à base local (`Admin.tsx`/`curadoria.ts` conferidos
+      idênticos antes da escrita). `skip_project_apply_changes` (modo `production`) com QA
+      pipeline 100% `ok` (setup/staticAnalysis/build/integrations/test), versão `0.0.14`
+      (`2450c3b`). `skip_project_publish` publicado em produção:
+      https://tela-showroom-522b1.goskip.app/admin.
+- [x] **Ajuste pós-teste ao vivo (2026-09-16)**: Pedro pediu pra trocar o campo `sku` (text)
+      pelo `codigo_legado` (int) — é o identificador que o time reconhece na tela. Migration
+      `003_codigo_legado_no_lugar_do_sku.sql` (recria `showroom_listar_produtos_estoque`,
+      `showroom_buscar_produto`, `showroom_obter_composicao` trocando a coluna retornada/campo
+      pesquisado) aplicada no Supabase real (dry-run + commit real, mesmo fluxo). Frontend
+      (`ProdutoEstoque`, `MembroComposicao`, `FotosEstoqueTab`, `ComposicaoConjuntoModal`,
+      `PPTTab`) atualizado e republicado no Skip: versão `0.0.15` (`5c23871`).
 
 ## Objetivo
 

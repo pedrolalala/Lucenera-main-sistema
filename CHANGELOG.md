@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-15 (5)
+
+### SPEC-147 + SPEC-150: catálogo Ubiqua unificado por referência e por família de produto — publicado
+
+- **SPEC-147** (a partir da reunião "23. Lucenera (Vinicius) - 15.09.2026_ Ubiqua"): `groupCatalogItems()` (`catalogo-pecas-ubiqua-e6fa0/src/hooks/use-parts.ts`) agrupa por **referência normalizada** em vez de descrição+preço — mesma peça vendida pela Manoella e pela Islight vira 1 card só, com estoque somado. V2 continua separado (código de referência diferente). Peça sem sufixo `-IS`, sem estoque e sem irmã `-IS` some da vitrine (11 hoje). Quando o preço diverge entre as duas empresas (3 pares), usa o **menor valor**. Novo campo "preço sugerido" (`vl_venda_produto`) exibido em `PartCard.tsx`/`ProductDetail.tsx`/`PartDetailSheet.tsx` — confirmado por cruzamento de dados que é cópia estática de `produtos.valor_venda` (tabela central), sem sync automático.
+- **SPEC-150** (extensão pedida ao vivo pelo usuário no mesmo dia): cores diferentes da mesma peça física tinham cada uma sua própria referência numérica (ex.: BLOK cimento=`100161`, mármore branco=`100162`), então a unificação por referência da SPEC-147 sozinha não as juntava. Nova função `extractFamilyIdentity()` extrai o nome+forma do produto (ex.: "TORUS DESK", "FLORA MINI") cortando a descrição na primeira palavra de um conjunto fixo (`LUMINARIA`/`LUM`/`LED`/`BATERIA`); vira a chave de agrupamento principal, com `_V2` quando a referência indica variante V2. Cai de volta pro agrupamento por referência quando a descrição não tem nenhuma dessas palavras (acessórios genéricos como cabo/carregador). Resultado: 87 linhas reais → 28 grupos (era 63 só com a SPEC-147).
+- **Correção de dado pontual** (não é migration): `revenda_ubiqua.vl_venda_produto` das 4 peças BLOK V2 estava nulo (BLOK V2 nunca foi cadastrado na tabela central `produtos`); atualizado via `UPDATE` direto pro preço do BLOK mais caro (R$1.788,24), decisão do usuário.
+- Testado ao vivo (SPEC-147, browser) e validado por script contra os dados reais do Supabase (SPEC-150, sem teste visual — extensão Chrome instável na sessão). Revisado pelo agente `revisor` nas duas rodadas; um achado de "encoding corrompido" na segunda rodada foi investigado e descartado como falso positivo (verificado por `codePointAt`).
+- **Publicado**: `catalogo-pecas-ubiqua-e6fa0.goskip.app` v0.0.88 (commit `0842d77` no submodule, push feito pro GitHub).
+- Pendências: confirmação do Vinicius sobre a divergência real de R$109,36 na referência `332109`; planilha do Sérgio pra filtro de produto ativo/inativo (fora do escopo).
+
 ## 2026-09-15 (4)
 
 ### SPEC-148: Showroom /admin — fotos do estoque (upload direto) + peça composta (1 foto, N produtos)

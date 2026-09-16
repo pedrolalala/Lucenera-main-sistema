@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-147 — Catálogo Ubiqua: unificar estoque por referência entre empresas, remover peças órfãs e exibir preço sugerido"
-status: em andamento
+status: concluído
 data_ultima_modificacao: 2026-09-15
 sistemas_envolvidos:
   - Catálogo Ubiqua (catalogo-pecas-ubiqua-e6fa0)
@@ -156,7 +156,7 @@ Sem mudança — vitrine pública e área logada continuam com as mesmas regras 
 
 **Verificação de build/lint** (`04-Sistemas/catalogo-pecas-ubiqua-e6fa0`): `npm run build` (vite build) passou sem erros; `npm run lint` (oxlint) não aponta nenhum problema nos 4 arquivos alterados (avisos pré-existentes em outros arquivos não tocados por esta SPEC continuam). `npm run format:check` (oxfmt) reporta divergência em ~105 dos 108 arquivos do projeto, incluindo os 4 alterados — confirmado que essa divergência já existia **antes** desta mudança (`git stash` + `format:check` na baseline reproduz o mesmo número), ou seja, é drift pré-existente de configuração/versão do oxfmt no ambiente, não introduzido por esta implementação. Não rodei `oxfmt` sem `--check` para não reformatar o repositório inteiro fora do escopo desta SPEC.
 
-**Working tree do submodule**: alterações feitas, não commitadas (só implementação, sem commit/push, conforme instrução).
+**Commitado e publicado (2026-09-15)**: commit `f58681f` no submodule, push feito pro GitHub, publicado no Skip junto com a SPEC-150 (v0.0.88, `catalogo-pecas-ubiqua-e6fa0.goskip.app`).
 
 **Teste ao vivo (2026-09-15, `npm run dev` + Chrome, vitrine real com dados de produção):**
 

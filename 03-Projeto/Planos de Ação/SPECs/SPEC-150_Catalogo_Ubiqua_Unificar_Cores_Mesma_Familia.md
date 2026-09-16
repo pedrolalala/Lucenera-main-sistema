@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-150 — Catálogo Ubiqua: unificar cores da mesma peça num só card (família de produto)"
-status: em andamento
+status: concluído
 data_ultima_modificacao: 2026-09-15
 sistemas_envolvidos:
   - Catálogo Ubiqua (catalogo-pecas-ubiqua-e6fa0)
@@ -101,7 +101,8 @@ Nenhuma mudança de schema. Um `UPDATE` de dados foi aplicado em `revenda_ubiqua
 - `groupCatalogItems()`: chave de agrupamento agora prioriza a identidade de família extraída da descrição (com sufixo `_V2` quando a referência indica variante V2); cai pra referência normalizada (comportamento SPEC-147) quando a descrição não tem palavra de fronteira reconhecível.
 - Validado via script Node contra os dados reais do Supabase (87 linhas → 28 grupos), conferido caso a caso contra os riscos identificados (Torus Desk vs Piso vs Glass vs Fly, Flora vs Flora Mini, V2 vs normal) — todos corretos.
 - **Correção de dado** (não é código): `UPDATE` em `revenda_ubiqua.vl_venda_produto = 1788.24` pras 4 linhas do BLOK V2 (`100161-V2-IS` a `100164-V2-IS`), que estavam nulas — decisão do usuário de usar o preço do BLOK mais caro (mármore) já que o BLOK V2 nunca foi cadastrado na tabela central `produtos` (só existe lá o BLOK sem V2).
-- **Não testado ao vivo no navegador** nesta sessão — extensão Claude in Chrome ficou desconectada/instável; validação foi só via script contra o banco real (ver tabela acima) e leitura de código. Recomendo teste visual antes de publicar.
+- **Não testado ao vivo no navegador** nesta sessão — extensão Claude in Chrome ficou desconectada/instável; validação foi só via script contra o banco real (ver tabela acima) e leitura de código.
+- **Commitado e publicado (2026-09-15)**: commit `c3b10ed` (+ `0842d77` doc) no submodule, push feito pro GitHub, publicado no Skip junto com a SPEC-147 (v0.0.88, `catalogo-pecas-ubiqua-e6fa0.goskip.app`), a pedido explícito do usuário, mesmo sem o teste visual ao vivo.
 
 ## Pendências
 

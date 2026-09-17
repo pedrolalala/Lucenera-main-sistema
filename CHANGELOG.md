@@ -30,6 +30,19 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Migrations **redigidas, não aplicadas no Supabase real** — aplicação e teste ao vivo (golden path)
   ficam como passo manual do usuário. Ver SPEC-152 para detalhes/pendências.
 
+## 2026-09-17 (6)
+
+### SPEC-153: espelho da nota fiscal + publicado no Skip
+
+- Pedido do usuário: o botão "Emitir Nota Fiscal" agora abre primeiro um espelho/pré-visualização
+  da nota cheia (mesmo processo manual descrito na reunião — "tirar um espelho da nota fiscal cheia"
+  e marcar o que já saiu), listando notas já emitidas e todos os itens da venda, com os já cobertos
+  esmaecidos/riscados. Só depois o botão "Continuar para emissão" abre o formulário de preenchimento.
+- **Publicado**: `pagina-de-vendas-9549c.goskip.app` (projectId 59346), v0.0.8 (`22c6c77`), QA 100%
+  verde. Achado: este projeto Skip sincroniza automaticamente a partir de pushes no GitHub (diferente
+  do fluxo manual usado nos outros 10 sistemas) — os commits chegaram a ser auto-mesclados/publicados
+  pelo próprio Skip antes da confirmação manual.
+
 ## 2026-09-17 (5)
 
 ### SPEC-153: migrations aplicadas no Supabase real

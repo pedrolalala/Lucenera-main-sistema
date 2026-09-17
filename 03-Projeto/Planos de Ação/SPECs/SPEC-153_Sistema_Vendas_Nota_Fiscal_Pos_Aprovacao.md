@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-153 — Sistema de Vendas + Nota Fiscal pós-aprovação (sistema novo, incl. nota parcial multi-pagador)"
-status: implementado e aplicado no banco real (aguardando publicação do código no Skip)
+status: implementado, aplicado no banco real e publicado (Skip 59346 v0.0.8)
 data_ultima_modificacao: 2026-09-17
 sistemas_envolvidos:
   - Vendas (sistema novo — repositório/submodule `04-Sistemas/vendas-lucenera` já existem; código da tela "Vendas" implementado)
@@ -26,6 +26,7 @@ dependencias:
 - [x] RPC `public.registrar_nota_fiscal_parcial(...)` — redigida no mesmo arquivo de migration, transacional (trava `orcamento_itens` envolvidos, valida cobertura, insere `notas_fiscais`+`notas_fiscais_itens`). **Aplicada e confirmada** (`pg_proc` tem 1 linha).
 - [x] Sistema novo lista `orcamentos WHERE status = 'Orçamento Aprovado' AND natureza_operacao = 'venda'` — implementado em `04-Sistemas/vendas-lucenera/src/pages/Vendas.tsx` (join `contatos`/`projetos`/`orcamento_itens`/`notas_fiscais`+`notas_fiscais_itens`), colunas `numero_venda`, `numero`, cliente, projeto, valor, status de nota (`Sem itens`/`Nota pendente`/`Nota parcial`/`Nota completa`, derivado — sem flag redundante).
 - [x] Tela "Emitir Nota Fiscal" (modal em `Vendas.tsx`) — calcula disponível por item (`quantidade - SUM(quantidade_faturada)` já registrado), permite quantidade parcial por item, pagador em 3 modos (cliente da venda / outro contato cadastrado com busca em `contatos` / nome livre), chama `registrar_nota_fiscal_parcial` com a assinatura exata da migration. Não chama nenhuma API fiscal externa (SPEC-154 é escopo separado).
+- [x] **(2026-09-17, pedido do usuário)** O botão "Emitir Nota Fiscal" abre primeiro um **espelho/pré-visualização da nota cheia** (mesmo processo manual descrito na reunião — "tirar um espelho da nota fiscal cheia" e marcar o que já saiu): lista as notas já emitidas para a venda e todos os itens do orçamento, esmaecendo/riscando os que já estão 100% cobertos. Só depois de revisar isso o botão "Continuar para emissão" abre o formulário de preenchimento (que já existia). Bloqueia continuar se não sobrar nenhum item disponível.
 - [x] "Ver Boletos" — botão de navegação (`redirectWithCode` pro sistema `financeiro`, rota `/boletos?orcamento_id=...`), sem gerar boleto novo.
 - [x] `FinanceResultModal.tsx` (Orçamentos) — botões "Abrir Nota Fiscal"/"Abrir Boletos" substituídos por um único "Ver na tela de Vendas" (`redirectWithCode`, `VENDAS_URL = https://pagina-de-vendas-9549c.goskip.app`, sistema `vendas`).
 - [x] `AI_DB_CONTEXT.md` de Administração Bancária atualizado (nota fiscal fora do escopo, tabela/colunas novas documentadas) + `AI_DB_CONTEXT.md`/`DB_CHANGE_REQUEST_TEMPLATE.md` novos criados em `04-Sistemas/vendas-lucenera/supabase/`.
@@ -40,7 +41,7 @@ dependencias:
 ### Sistema novo "Vendas" — infraestrutura
 
 - [x] Repositório GitHub (`pedrolalala/Vendas-Lucenera`) e submodule `04-Sistemas/vendas-lucenera` já existiam (sessão anterior). SSO implementado nesta sessão: `src/lib/cross-system-auth.ts` (`sistema_origem: 'vendas'`), `src/hooks/use-auth.tsx` (`consumeCodeFromUrl('vendas')`, `hub_pode_executar(..., 'vendas', ...)`), `src/components/SystemSwitcher.tsx`/`src/hooks/useSistemasPermitidos.ts` copiados sem alteração de lógica, `Layout.tsx` com `<SystemSwitcher currentSlug="vendas" />` e `pr-16 sm:pr-20` no `<main>`. Placeholders do template (`Clientes.tsx`, `Relatorios.tsx`, `Configuracoes.tsx`, `Dashboard.tsx`, `Index.tsx`) removidos; `App.tsx` só tem `/login` e `/vendas`.
-- [ ] **Projeto Skip ainda não publicado com este código** — a URL `https://pagina-de-vendas-9549c.goskip.app` existe (scaffold Skip padrão), mas o código implementado nesta sessão (SSO + tela real) ainda não foi enviado pra lá (ver Passos manuais).
+- [x] **(2026-09-17) Publicado no Skip** — `pagina-de-vendas-9549c.goskip.app`, projectId 59346, v0.0.8 (`22c6c77`), QA 100% verde. O projeto sincroniza automaticamente do GitHub (achado: commits no repo `Vendas-Lucenera` disparam auto-build/publish via um merge commit assinado pelo próprio usuário — diferente do fluxo manual `skip_file_write`/`apply_changes`/`publish` usado nos outros sistemas).
 - [x] **(2026-09-17) Registro em `public.systems` (`slug='vendas'`) aplicado** — confirmado por SELECT: `Vendas | https://pagina-de-vendas-9549c.goskip.app | visivel=true`.
 - [x] **(2026-09-17) RBAC inicial aplicado** — `papel_permissoes` tem linha (`acao=NULL`) pra `admin` e `admin_geral` no sistema `vendas`, confirmado por SELECT.
 

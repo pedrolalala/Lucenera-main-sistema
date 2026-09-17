@@ -2,6 +2,31 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-17
+
+### SPEC-152 + SPEC-153 (criadas, não implementadas): reunião "novo sistema de vendas" (16/09)
+
+- A partir da reunião "24. Lucenera (Vinicius) - 16.09.2026_novo sistema de vendas", duas SPECs novas
+  em `03-Projeto/Planos de Ação/SPECs/`, ambas com status "não iniciado":
+- **SPEC-152** — melhorias no Orçamento: cadastrar cliente sem fechar "Criar Projeto", Responsável
+  de Obra restrito a engenheiros, novas formas de pagamento "Carteira" e "Permuta" (com contrapartida
+  automática em Contas a Pagar), 2 bugs de UI no plano de pagamento, parcelas com valor customizável
+  por parcela (hoje só divide igualmente), PDF do orçamento trocando "X dias" por data+valor real de
+  cada parcela.
+- **SPEC-153** — sistema de Vendas + Nota Fiscal: nova tela "Vendas" dentro da Administração
+  Bancária (layout copiado de lá), removendo emissão de nota/boleto do modal de aprovação do
+  orçamento, nota fiscal parcial com pagador diferente do titular (schema com `notas_fiscais_itens`
+  pra controlar o que já foi faturado por venda), boleto sem nota permitido como exceção.
+- **Achados da investigação (mudam o escopo do que foi discutido na reunião)**: `orcamentos.numero_venda`
+  já está implementado e visível na UI (SPEC-136, 14/09) — só precisa confirmação ao vivo; **não existe
+  nenhuma integração fiscal automática (API/SEFAZ) em nenhum sistema do repositório** — a tela de Notas
+  Fiscais hoje é 100% manual, contradizendo a descrição da reunião de um retorno automático de API —
+  vira pendência bloqueante da SPEC-153; o bug de "cliente sem cadastro trava criar projeto" existe no
+  Orçamentos mas não foi encontrado no CRM (já tem "Novo Cliente" sem fechar o form).
+- Ambas as SPECs têm pendências de decisão de negócio explícitas (semântica da "Carteira", schema de
+  parcelas customizadas, categoria financeira da permuta, nomenclatura final do módulo de Vendas,
+  provedor de nota fiscal) — nenhuma implementação foi iniciada.
+
 ## 2026-09-16
 
 ### SPEC-125 (pendência residual): Showroom registrado na Central Lucenera

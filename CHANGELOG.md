@@ -30,6 +30,27 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Migrations **redigidas, não aplicadas no Supabase real** — aplicação e teste ao vivo (golden path)
   ficam como passo manual do usuário. Ver SPEC-152 para detalhes/pendências.
 
+## 2026-09-17 (2)
+
+### SPEC-152: implementada, migrations aplicadas no banco real e publicada no Skip
+
+- Código implementado (`implementador`) e revisado (`revisor`, sem achado crítico), commitado em 3 repos:
+  Orçamentos (`68c0a50`, depois `77fcd3c` de sincronização), Administração Bancária (`96e4aae`), central (`8b312e9`).
+- **Migrations aplicadas de verdade no Supabase** (`supabase/db/migrations/20260917_152_melhorias_orcamento/`,
+  5 arquivos, dry-run + aplicação real em sequência): enum `pagamento_forma` ganha `carteira`;
+  `orcamentos.plano_parcelas` (jsonb); `projeto_parcelas.permuta_fornecedor_id`; categoria
+  `PERMUTA/CONTRAPARTIDA` no plano de contas; `aprovar_orcamento_financeiro` reescrita pra usar
+  `plano_parcelas` quando presente, com fallback idêntico ao legado quando ausente.
+- **Correção de um achado errado do implementador**: `'permuta'` já existia no enum real antes desta
+  SPEC (SPEC-107 foi aplicada corretamente) — confirmado no dry-run direto contra o banco.
+- **Achado de dado real**: `ORC-0035` (rascunho, R$4.201,73) já tinha `forma_pagamento='permuta'` sem
+  fornecedor associado — vai precisar ser reaberto e completado antes de aprovar, depois desta SPEC.
+- **Publicado**: `gestao-financeira-clone-544cb` (Skip 32554), v0.0.368 (`1ed6376`), QA 100% verde.
+  Publicar exigiu um **merge de 3 vias** em `BudgetFormPage.tsx` — o Skip já tinha o campo "Perfil"
+  reposicionado pro topo (SPEC-146), mudança nunca sincronizada de volta pro git local; o merge
+  preservou essa posição e não regrediu nada. O git local foi sincronizado de volta com o publicado
+  logo em seguida, fechando esse gap.
+
 ## 2026-09-17
 
 ### SPEC-152 + SPEC-153 (criadas, não implementadas): reunião "novo sistema de vendas" (16/09)

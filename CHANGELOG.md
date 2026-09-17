@@ -30,6 +30,26 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Migrations **redigidas, não aplicadas no Supabase real** — aplicação e teste ao vivo (golden path)
   ficam como passo manual do usuário. Ver SPEC-152 para detalhes/pendências.
 
+## 2026-09-17 (3)
+
+### SPEC-153 reescrita + SPEC-154 (nova): Vendas vira sistema separado, provedor de nota fiscal é Focus NFe
+
+- Usuário decidiu, depois do rascunho inicial da SPEC-153: (1) "Vendas" é um **sistema novo e
+  independente**, não uma aba dentro da Administração Bancária; (2) o provedor de emissão de nota
+  fiscal é a **Focus NFe** (`doc.focusnfe.com.br`).
+- **SPEC-153** reescrita: sistema Vendas novo (banco/contrato de dados only — criação do repositório
+  GitHub e do projeto Skip é passo manual do usuário), nota fiscal parcial multi-pagador
+  (`notas_fiscais_itens`), remoção da tela `NotasFiscais.tsx` de Administração Bancária (citação
+  direta da reunião), Contas a Pagar/Receber/Duplicatas/Boletos/Remessa/Retorno continuam lá.
+- **SPEC-154** (nova): integração técnica real com Focus NFe — Edge Functions `emitir-nota-fiscal` e
+  `focus-nfe-webhook`, autenticação HTTP Basic (token como usuário, senha vazia), ambientes de
+  homologação/produção. Achados: `produtos.ncm` **já existe** (SPEC-132, não é gap); CFOP não existe
+  e precisa de validação com contador antes de emissão real; `empresas` não tem código de município
+  IBGE (exigido pela Focus NFe); múltiplas empresas emissoras (Foco/Manoella/Islight) vão precisar de
+  tokens Focus NFe separados, guardados em Supabase Secrets (nunca em tabela).
+- Nenhuma implementação iniciada — aguardando criação da infraestrutura do sistema Vendas (repo +
+  projeto Skip) e decisões pendentes (CFOP, política de pagador sem CPF/CNPJ, conta Focus NFe).
+
 ## 2026-09-17 (2)
 
 ### SPEC-152: implementada, migrations aplicadas no banco real e publicada no Skip

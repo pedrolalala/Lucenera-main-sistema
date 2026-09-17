@@ -38,3 +38,9 @@
 	path = 04-Sistemas/showroom-qtq8er2dk
 	url = https://github.com/pedrolalala/showroom-qtq8er2dk.git
 	ignore = untracked
+[submodule "04-Sistemas/memoria-lucenera"]
+	path = 04-Sistemas/memoria-lucenera
+	url = https://github.com/pedrolalala/memoria-lucenera.git
+[submodule "04-Sistemas/vendas-lucenera"]
+	path = 04-Sistemas/vendas-lucenera
+	url = https://github.com/pedrolalala/Vendas-Lucenera.git

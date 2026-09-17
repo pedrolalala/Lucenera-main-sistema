@@ -30,6 +30,28 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Migrations **redigidas, não aplicadas no Supabase real** — aplicação e teste ao vivo (golden path)
   ficam como passo manual do usuário. Ver SPEC-152 para detalhes/pendências.
 
+## 2026-09-17 (4)
+
+### SPEC-153: sistema Vendas implementado (código; migrations ainda não aplicadas)
+
+- Usuário criou a infraestrutura (repo `github.com/pedrolalala/Vendas-Lucenera` + projeto Skip
+  59346 "Página de Vendas"). Sistema transformado do scaffold padrão pro sistema real: SSO
+  (`cross-system-auth.ts`, `use-auth.tsx`, `SystemSwitcher`) copiado do padrão dos sistemas-irmãos;
+  `src/pages/Vendas.tsx` lista orçamentos aprovados com status de nota fiscal derivado; modal
+  "Emitir Nota Fiscal" com seleção de quantidade parcial por item e 3 modos de pagador (cliente da
+  venda / outro contato / nome livre), chamando a RPC `registrar_nota_fiscal_parcial`. Sem nenhuma
+  chamada a API fiscal externa (isso é SPEC-154, separada).
+- 3 migrations redigidas em `supabase/db/migrations/20260917_153_notas_fiscais_parcial_multipagador/`
+  (`notas_fiscais.cliente_id`/`nome_destinatario` + tabela `notas_fiscais_itens` + RPC transacional;
+  registro em `public.systems`; permissão admin/admin_geral) — **ainda não aplicadas no Supabase
+  real**. Achado importante: `hub_pode_executar` não tem bypass de admin embutido — sem a 3ª
+  migration, a RPC nova negaria acesso a todo mundo, inclusive admin.
+- Administração Bancária perde a tela/rota `/notas-fiscais` (citação direta da reunião). Orçamentos:
+  `FinanceResultModal.tsx` troca os botões de NF/boleto por um único "Ver na tela de Vendas".
+- Revisado pelo `revisor`: sem achado crítico. Commits feitos SELETIVAMENTE em Admin Bancária e
+  Orçamentos, excluindo o rollout pendente do SystemSwitcher (SPEC-120) e trabalho antigo de
+  duplicatas que seguem soltos nas working trees desses 2 sistemas (não tocados por esta SPEC).
+
 ## 2026-09-17 (3)
 
 ### SPEC-153 reescrita + SPEC-154 (nova): Vendas vira sistema separado, provedor de nota fiscal é Focus NFe

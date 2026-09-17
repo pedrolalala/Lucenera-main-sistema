@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-152 — Melhorias no fluxo de Orçamento (reunião Vinícius 16/09)"
-status: não iniciado
+status: implementado (aguardando aplicação de migration + testes manuais)
 data_ultima_modificacao: 2026-09-17
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb)
@@ -14,32 +14,33 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] `ProjectCreateModal.tsx` (Orçamentos): permitir cadastrar um cliente novo sem fechar o fluxo de "Criar Projeto" — adicionar ação "Novo Cliente" no campo Cliente (reaproveitando `ClientCreateModal.tsx`, já existente desde a SPEC-061), no mesmo padrão já usado em `lucenera-crm-3bd29 (1)/src/pages/ProjectNew.tsx` (Popover + Command + item "Novo Cliente" abrindo modal empilhado).
-- [ ] `ProjectCreateModal.tsx` (Orçamentos): campo "Responsável Obra" (`responsavel_obra_id`) passa a listar apenas contatos com `contato_tipos.tipo = 'engenheiro'`, em vez de todos os `contatos`. Campo "Arquiteto" (`arquiteto_id`) é mantido como está — a reunião concluiu por manter os dois campos, distintos por papel, não eliminar um deles.
-- [ ] Adicionar `'carteira'` ao enum `public.pagamento_forma` (`ALTER TYPE ... ADD VALUE`) e ao seletor de forma de pagamento em `BudgetFormPage.tsx`. Comportamento na aprovação (`aprovar_orcamento_financeiro`): quando a forma de pagamento é `carteira`, a parcela correspondente **não gera boleto** (fica em aberto, sem cobrança formal). *(Pendência de regra de negócio — ver seção Pendências: se ainda assim deve gerar `projeto_parcelas` para controle interno de saldo, ou ficar totalmente fora do sistema de parcelas.)*
-- [ ] Adicionar `'permuta'` ao enum `public.pagamento_forma` (o rótulo `'Permuta'` já existe em `FORMA_PAGAMENTO_LABELS`/`budget-financial-summary.ts`, mas sem valor de enum correspondente no banco — hoje selecionar essa opção falharia).
-- [ ] Corrigir bug: campo "Quantidade de Parcelas" (`BudgetFormPage.tsx`, `parcelas` — schema `z.coerce.number()`) não permite apagar o valor anterior ao editar (fica "cravado"); ajustar para aceitar estado local vazio/temporário antes da coerção final.
-- [ ] Corrigir bug: ao editar campos do plano de pagamento (quantidade de parcelas, datas), a tela não reflete a mudança até salvar — investigar sincronismo entre estado local do formulário e o estado pós-`updateBudget`.
-- [ ] Nova granularidade de parcelas: permitir valor **customizado por parcela** (hoje o sistema só divide `valor_total`/N igualmente — `budget-financial-summary.ts`, `calcularResumoFinanceiro`). Decisão de schema proposta (duas opções, escolher antes de implementar — ver "Definição da SPEC"):
-  - **Opção A** (array paralelo, mínima): `orcamentos.valores_parcelas_customizados numeric(12,2)[]` nullable, alinhado por índice a `prazo_pagamento_dias`; quando nulo, mantém divisão igual (comportamento atual).
-  - **Opção B** (mais robusta, mas maior escopo): unificar em `orcamentos.plano_parcelas jsonb` (array de `{numero, dias_offset, valor, forma_pagamento, permuta_fornecedor_id}`), substituindo gradualmente `prazo_pagamento_dias` e abrindo caminho natural para a permuta por parcela (item abaixo) sem precisar de mais um array paralelo.
-- [ ] UI em `BudgetFormPage.tsx`: exibir campo de valor editável por parcela (pré-preenchido com a divisão igual), validando ao vivo que a soma bate com o valor a pagar (`valorAposSinal`/`valor_total`, já calculado em `budget-financial-summary.ts`); bloquear salvar/enviar se a soma não bater.
-- [ ] `aprovar_orcamento_financeiro`: usar os valores customizados por parcela (se presentes) em vez da divisão igual ao gerar `projeto_parcelas`.
-- [ ] Suporte a parcela paga por **permuta**: quando uma parcela tem `forma_pagamento = 'permuta'`, a aprovação deve (a) marcar a parcela como recebida sem gerar `boletos`, e (b) lançar automaticamente uma obrigação de contrapartida (Contas a Pagar) para o fornecedor da permuta, no domínio Financeiro/Administração Bancária. Requer:
-  - Nova coluna `projeto_parcelas.permuta_fornecedor_id uuid REFERENCES contatos(id)` nullable (obrigatória quando `forma_pagamento = 'permuta'`).
-  - Uma forma de rastrear a obrigação gerada no Financeiro até a venda de origem (hoje `negociacoes`/`transacoes` não têm nenhum vínculo com `orcamentos` — precisa de uma coluna nova, ex. `negociacoes.orcamento_id_origem uuid REFERENCES orcamentos(id)` nullable, seguindo o mesmo padrão já usado em `boletos.orcamento_id`).
-  - Qual `plano_de_contas`/`categorias_financeiras` usar para essa despesa de contrapartida é decisão de negócio — deixado em Pendências.
-- [ ] PDF do orçamento (`supabase/functions/generate-report/index.ts`, `reportType === 'orcamento'`): parar de mostrar "condição de pagamento" como contagem de dias (`orcamentos.condicoes_pagamento`, hoje gerado em `BudgetFormPage.tsx:1287` como `(prazoPagamentoDias ?? []).join('/')`, ex. "14/44/75"). Substituir por uma pequena tabela de parcelas com **data de vencimento absoluta + valor** de cada uma (a mesma estrutura que `budget-financial-summary.ts`/`calcularResumoFinanceiro` já calcula como `ParcelaPrevista[]`) — igual um boleto: 30/09 — R$X, 30/10 — R$Y, 30/11 — R$Z.
-- [ ] Atualizar `AI_DB_CONTEXT.md` de Orçamentos: a seção "SPEC-019" descreve reset do ciclo de aprovação por edição de `valor_total`/`forma_pagamento`/etc. como se estivesse ativo, mas a investigação da SPEC-135 (mais recente, checada direto no banco real) já confirmou que o único mecanismo de reset em produção hoje é o trigger em `orcamento_itens` — a doc ficou contraditória dentro do próprio arquivo e deve ser corrigida/anotada como superada.
+- [x] `ProjectCreateModal.tsx` (Orçamentos): permitir cadastrar um cliente novo sem fechar o fluxo de "Criar Projeto" — adicionar ação "Novo Cliente" no campo Cliente (reaproveitando `ClientCreateModal.tsx`, já existente desde a SPEC-061). **Implementado com o padrão real já usado no próprio `BudgetFormPage.tsx`** (botão "+" ao lado do `SearchableSelect`, não Popover+Command como no CRM) — mais consistente com o resto deste app, que não usa Command/Popover pra isso em nenhum outro lugar.
+- [x] `ProjectCreateModal.tsx` (Orçamentos): campo "Responsável Obra" (`responsavel_obra_id`) passa a listar apenas contatos com `contato_tipos.tipo = 'engenheiro'`, em vez de todos os `contatos`. Campo "Arquiteto" (`arquiteto_id`) é mantido como está. Verificado CRM (`ProjectNew.tsx`/`ProjectDetail.tsx`) — já filtrava corretamente (via `contatos.tipo`, coluna singular), sem necessidade de mudança lá.
+- [x] Adicionar `'carteira'` ao enum `public.pagamento_forma` (`ALTER TYPE ... ADD VALUE`) e ao seletor de forma de pagamento em `BudgetFormPage.tsx`. Comportamento na aprovação (`aprovar_orcamento_financeiro`): quando a forma de pagamento é `carteira`, gera `projeto_parcelas` normalmente, só **não gera boleto** (decisão do usuário, 2026-09-17). Migration redigida, **não aplicada**.
+- [x] Adicionar `'permuta'` ao enum `public.pagamento_forma` — **achado**: já havia uma migration da SPEC-107 (`20260815_115`) pra isso, marcada "concluído", mas a investigação desta SPEC (via `src/lib/supabase/types.ts`, gerado do banco) confirmou que o valor não está no enum real hoje — suspeita de "Skip drift"/migration nunca aplicada de fato. Migration desta SPEC usa `ADD VALUE IF NOT EXISTS` (idempotente, seguro mesmo que já exista).
+- [x] Corrigir bug: campo "Quantidade de Parcelas" (`BudgetFormPage.tsx`, `parcelas`) não permite apagar o valor anterior ao editar (fica "cravado"). Corrigido trocando `z.coerce.number()` puro por `z.preprocess(...)` (aceita string vazia em trânsito, normaliza só no submit/blur) + input não força mais parse a cada tecla.
+- [x] Corrigir bug: ao editar campos do plano de pagamento, a tela não reflete a mudança até salvar. **Investigado**: não foi encontrado nenhum componente lendo de um snapshot antigo (`budget` carregado) em vez de `form.watch(...)` — a hipótese original da SPEC não bateu com o código real encontrado. O novo bloco "Plano de Parcelas" (itens abaixo) já nasce 100% orientado a `form.watch()`/efeito reativo, então esse sintoma não deveria mais se repetir de qualquer forma; falta confirmação do usuário ao vivo se o sintoma relatado na reunião ainda ocorre em algum outro ponto específico não coberto aqui.
+- [x] Nova granularidade de parcelas: permitir valor **customizado por parcela**. **Decisão (2026-09-17): Opção B** — `orcamentos.plano_parcelas jsonb` (array de `{numero, dias_offset, valor, forma_pagamento, permuta_fornecedor_id}`), substituindo gradualmente `prazo_pagamento_dias` (mantida em paralelo, não removida). Migration redigida, **não aplicada**.
+- [x] UI em `BudgetFormPage.tsx`: novo bloco "Plano de Parcelas" com valor/forma de pagamento/fornecedor de permuta editáveis por parcela (pré-preenchido com a divisão igual até o usuário editar manualmente), validando ao vivo (banner verde/vermelho) que a soma bate com `valor_total`; bloqueia submit (toast de erro) se não bater.
+- [x] `aprovar_orcamento_financeiro`: reescrita para usar `orcamentos.plano_parcelas` (quando presente) em vez da divisão igual, nos dois ramos (venda e devolução) — com validação de segurança no próprio backend (soma exata, fornecedor de permuta válido). Assinatura mantida `(uuid)` — o parâmetro `p_valores_parcelas` da migration abandonada da SPEC-133 (`20260914_141`) nunca foi aplicado em produção e não foi usado.
+- [x] Suporte a parcela paga por **permuta**: parcela nasce com `status = 'paga'`, sem boleto; a aprovação lança automaticamente uma obrigação de Contas a Pagar pro fornecedor. Decisões de implementação, confirmadas contra o schema real antes de nomear qualquer coisa nova (AGENTS.md):
+  - Nova coluna `projeto_parcelas.permuta_fornecedor_id uuid REFERENCES contatos(id)` nullable — feito.
+  - **Sem FK nova em `negociacoes`/`transacoes`** (a SPEC cogitou `negociacoes.orcamento_id_origem` só como exemplo) — em vez disso, reaproveitado o padrão manual já existente de "Cadastrar Duplicatas" (SPEC-073, `retorno-bancario-bradesco-5392a`): um `boletos` com `tipo_operacao = 'CP'` + `apropriacao_id`, rastreado por `boletos.orcamento_id` (já existente, é o link primário do financeiro — não precisa de coluna nova). `negociacoes`/`transacoes` é o universo legado de import do Connect (`cod_duplicata` obrigatório, sem equivalente natural aqui), não o lugar certo pra um lançamento novo gerado pelo sistema.
+  - Categoria nova em `plano_de_contas`: `'PERMUTA/CONTRAPARTIDA'` (nível 3/Apropriação, `codigo_connect = 90000035`, `parent_id` = "Com Vendas", `tipo = 'despesa'`) — decisão do usuário (2026-09-17), seguindo o mesmo padrão da reconciliação de 11/08 (`20260811_096`).
+- [x] PDF do orçamento (`supabase/functions/generate-report/index.ts`, `reportType === 'orcamento'`): parou de mostrar "condição de pagamento" como contagem de dias — agora desenha uma tabela de parcelas com número, data de vencimento absoluta (`data_inicio_pagamento` + `dias_offset`) e valor, reaproveitando `plano_parcelas` quando presente (senão cai na divisão igual, mesma lógica de `calcularResumoFinanceiro`, duplicada localmente porque a Edge Function roda isolada em Deno).
+- [x] Atualizado `AI_DB_CONTEXT.md` de Orçamentos: a seção "SPEC-019" foi corrigida/anotada como superada pela SPEC-135 — o reset por campo de pagamento nunca foi o mecanismo real em produção, só o trigger em `orcamento_itens`. Documentadas todas as mudanças novas desta SPEC (enum, `plano_parcelas`, `permuta_fornecedor_id`) no mesmo arquivo e no `AI_DB_CONTEXT.md` de Administração Bancária (`retorno-bancario-bradesco-5392a`), além de `supabase/db/domains/orcamentos.md` e `financeiro.md`.
 
 ### Passos manuais do usuário
 
-- [ ] Confirmar, ao vivo no Skip publicado (não só no código local — risco conhecido de "Skip drift"), que a regra "pagamento/total não reinicia aprovação do cliente, só item reinicia" está de fato assim hoje (a investigação de código aponta que sim, mas o usuário testou ao vivo na reunião e não fechou o teste).
-- [ ] Decidir a regra de negócio da forma de pagamento "Carteira" (ver Pendências).
-- [ ] Decidir o `plano_de_contas`/categoria financeira usados no lançamento automático de contrapartida da permuta.
-- [ ] Escolher Opção A ou B para o schema de parcelas customizadas (ver Checklist).
-- [ ] Aplicar as migrations (`ALTER TYPE ... ADD VALUE` não pode rodar dentro de uma transação com outros comandos no mesmo `BEGIN`, atenção ao aplicar).
+- [ ] **Aplicar as migrations em `supabase/db/migrations/20260917_152_melhorias_orcamento/`, nesta ordem, com dry-run/`ROLLBACK` antes do `COMMIT` real**:
+  1. `001_enum_carteira_e_permuta.sql` — `ALTER TYPE ... ADD VALUE`, precisa ser aplicado e **confirmado (commitado)** isoladamente antes dos demais (não pode estar na mesma transação de nenhum DDL/DML que já use os valores novos).
+  2. `002_orcamentos_plano_parcelas.sql`, `003_projeto_parcelas_permuta_fornecedor.sql`, `004_plano_de_contas_permuta_contrapartida.sql` — podem rodar juntos ou em sequência, depois do 001.
+  3. `005_aprovar_orcamento_financeiro_plano_parcelas.sql` — por último (usa os enums/colunas anteriores).
+- [ ] Reextrair `src/lib/supabase/types.ts` (Orçamentos e Administração Bancária) depois de aplicar, e reextrair `supabase/db/current/` no repositório central — o snapshot central já estava desatualizado antes desta SPEC (2026-07-07).
+- [ ] Testar ao vivo (golden path) depois de aplicado: (1) criar orçamento com "Novo Cliente" dentro de "Criar Projeto"; (2) conferir que "Responsável Obra" só lista engenheiros; (3) criar parcela com forma "Carteira" e confirmar que não gera boleto; (4) criar parcela "Permuta" com fornecedor e confirmar que aprova sem boleto pro cliente e cria uma linha nova em Contas a Pagar (`retorno-bancario-bradesco-5392a`, `ConsultarDuplicatas.tsx`/`Boletos.tsx`, categoria "Permuta/Contrapartida"); (5) editar valor por parcela no "Plano de Parcelas" e confirmar que a soma trava o salvamento se não bater; (6) gerar o PDF do orçamento e conferir a tabela de parcelas.
+- [ ] Confirmar, ao vivo no Skip publicado (não só no código local — risco conhecido de "Skip drift"), que a regra "pagamento/total não reinicia aprovação do cliente, só item reinicia" está de fato assim hoje.
 - [ ] Homologar visualmente o novo PDF do orçamento com Vinícius (ele reagiu especificamente ao "14 dias de quando?" — validar que a tabela de parcelas resolve a confusão).
+- [ ] Publicar no Skip (build local já passou `oxlint`/`vite build` sem erros novos — ver "Realizado").
 
 ## Objetivo
 
@@ -52,6 +53,9 @@ Consolidar as melhorias e correções pontuais no sistema de Orçamentos discuti
 - "Sinal" continua sendo um conceito diferente de "parcela 1 customizada" — o sinal é abatido antes da divisão em parcelas e não muda de comportamento nesta SPEC; a novidade é permitir editar o valor de cada parcela gerada depois do sinal/desconto/frete já aplicados.
 - Regra de negócio "não emitir nota fiscal nem boleto direto na aprovação do orçamento" pertence à SPEC-153, não a esta.
 - A impressão do orçamento (PDF) deve sempre dizer "Orçamento", nunca "Venda" — investigação confirmou que o gerador atual (`generate-report`) já respeita isso; não é necessário mudar esse rótulo, só o formato de condição de pagamento.
+- **(2026-09-17, decisão do usuário)** Forma de pagamento "Carteira": gera `projeto_parcelas` normalmente, só não gera `boletos` — aparece em relatórios de saldo em aberto/pendências.
+- **(2026-09-17, decisão do usuário)** Contrapartida de Permuta: cria categoria nova no plano de contas do Financeiro, "Permuta/Contrapartida", usada em todo lançamento automático desse tipo.
+- **(2026-09-17, decisão do usuário)** Parcelas customizadas: Opção B — `orcamentos.plano_parcelas jsonb` (array de `{numero, dias_offset, valor, forma_pagamento, permuta_fornecedor_id}`), substituindo gradualmente `prazo_pagamento_dias`.
 
 ## Definição da SPEC
 
@@ -69,7 +73,7 @@ Consolidar as melhorias e correções pontuais no sistema de Orçamentos discuti
 ### 3. Forma de pagamento "Carteira"
 
 - Hoje não existe (nem como valor de enum, nem como opção de UI, nem como rótulo morto). Enum real (`src/lib/supabase/types.ts`, gerado do banco): `pix | cartao | boleto | transferencia | cheque | dinheiro`.
-- Adicionar `'carteira'` ao enum e à UI. Semântica pedida pelo usuário: "fica em aberto, sem gerar cobrança" — mas não ficou claro se isso significa (a) ainda criar `projeto_parcelas` (só sem `boletos`), útil para acompanhar saldo em aberto, ou (b) não criar registro financeiro nenhum, só uma anotação no orçamento. **Deixado como pendência de decisão de negócio.**
+- Adicionar `'carteira'` ao enum e à UI. **Decidido (2026-09-17)**: ainda cria `projeto_parcelas` normalmente, só não gera `boletos` — aparece em relatórios de saldo em aberto/pendências.
 
 ### 4. Bugs de UI no plano de pagamento
 
@@ -78,15 +82,14 @@ Consolidar as melhorias e correções pontuais no sistema de Orçamentos discuti
 
 ### 5. Parcelas com valor customizado
 
-- Ver Checklist para as duas opções de schema (A: array paralelo `valores_parcelas_customizados`; B: `plano_parcelas jsonb` unificado).
-- Recomendo a Opção B tecnicamente (evita um terceiro array paralelo quando entra a Permuta por parcela), mas é uma decisão de arquitetura do usuário/implementador — ambas são tecnicamente viáveis e não violam nenhuma invariante do ecossistema.
+- **Decidido (2026-09-17): Opção B** — `orcamentos.plano_parcelas jsonb`, array de `{numero, dias_offset, valor, forma_pagamento, permuta_fornecedor_id}`, substituindo gradualmente `prazo_pagamento_dias`. Evita um terceiro array paralelo quando entra a Permuta por parcela.
 - Regra dura, conforme pedido do usuário: soma das parcelas deve ser **exatamente** igual ao valor a pagar (`valor_total`, já líquido de sinal/desconto/frete) — bloquear salvamento/aprovação se não bater, nunca arredondar silenciosamente sobre o usuário.
 
 ### 6. Permuta com contrapartida automática
 
 - Caso de uso real, não hipotético (ex. "Rod Parrilha", "Florença" citados na reunião).
 - Fluxo: parcela marcada `forma_pagamento = 'permuta'` + `permuta_fornecedor_id` (fornecedor real, `contatos.tipo = 'fornecedor'`) → na aprovação financeira, a parcela nasce com `status = 'paga'`/sem boleto, e o sistema cria uma obrigação de Contas a Pagar espelhada no Financeiro (mesmo valor, fornecedor da permuta) — cruza para o domínio Financeiro (`transacoes`/`negociacoes`), que precisa de uma FK nova de rastreio (`orcamento_id_origem`) para não ficar uma obrigação financeira "solta" sem origem.
-- Categoria/plano de contas da despesa de contrapartida: decisão de negócio, não decidida aqui.
+- Categoria/plano de contas da despesa de contrapartida: **decidido (2026-09-17)** — categoria nova "Permuta/Contrapartida" no plano de contas do Financeiro.
 
 ### 7. PDF do orçamento — datas e valores reais
 
@@ -104,13 +107,28 @@ Consolidar as melhorias e correções pontuais no sistema de Orçamentos discuti
 
 ## Realizado
 
-_(nada implementado ainda — SPEC recém-criada)_
+### 2026-09-17 — Implementação (agente implementador)
+
+- **Frontend (`gestao-financeira-clone-544cb`)**:
+  - `ProjectCreateModal.tsx`: ação "Novo Cliente" (modal empilhado) + filtro de engenheiros em "Responsável Obra" (`contato_tipos`).
+  - `BudgetFormPage.tsx`: fix do bug de "Quantidade de Parcelas" cravada (`z.preprocess`); campo de parcelas liberado pra qualquer forma de pagamento exceto pix/dinheiro; novo bloco "Plano de Parcelas" (valor/forma de pagamento/fornecedor de permuta por parcela, com sincronismo reativo via `form.watch` e validação de soma ao vivo); enum `pagamento_forma` com `'carteira'` na UI.
+  - `budget-financial-summary.ts`: `FORMA_PAGAMENTO_LABELS.carteira`; `calcularResumoFinanceiro`/`ParcelaPrevista` passam a usar `plano_parcelas` quando presente.
+  - `useBudgetStore.ts`: tipo `Budget.plano_parcelas` adicionado (query `select('*')` já traz a coluna automaticamente quando existir no banco).
+  - `supabase/functions/generate-report/index.ts`: tabela de parcelas (número, vencimento absoluto, valor) no lugar da contagem de dias — `calcularParcelasPdf`, duplicada localmente (Edge Function isolada, Deno).
+  - Verificação: `oxlint src` → 0 erros (15 warnings pré-existentes, nenhum novo); `vite build` → sucesso; `tsc --noEmit` **não é utilizável neste repositório** — `tsconfig.app.json` tem `ignoreDeprecations: "6.0"`, inválido pra qualquer versão do TypeScript instalada (pré-existente, não introduzido por esta SPEC); rodando com essa linha removida (só para diagnóstico, sem commitar a mudança), o número de erros é **idêntico antes e depois desta SPEC (184)** — confirma que nenhum erro novo foi introduzido (o repo já tem uma incompatibilidade sistêmica de versão entre `@hookform/resolvers`/`zod` que afeta virtualmente todo `FormField` do arquivo, preexistente).
+- **Banco** (`supabase/db/migrations/20260917_152_melhorias_orcamento/`, 5 arquivos — **redigidos, não aplicados no Supabase real**):
+  - `001_enum_carteira_e_permuta.sql`, `002_orcamentos_plano_parcelas.sql`, `003_projeto_parcelas_permuta_fornecedor.sql`, `004_plano_de_contas_permuta_contrapartida.sql`, `005_aprovar_orcamento_financeiro_plano_parcelas.sql`.
+- **Docs**: `AI_DB_CONTEXT.md` de Orçamentos (seção SPEC-019 corrigida + seção SPEC-152 nova) e de Administração Bancária; `supabase/db/domains/orcamentos.md` e `financeiro.md`; `CHANGELOG.md`.
+- **Achado durante a implementação**: a migration `20260815_115_spec107_forma_pagamento_permuta` (SPEC-107) está marcada "concluído" e diz ter sido "aplicada isolada no Supabase real (confirmado)", mas `src/lib/supabase/types.ts` (gerado do banco) não tinha `'permuta'` no enum — suspeita de "Skip drift"/regressão, não investigada a fundo (fora do escopo desta SPEC além de reconfirmar via `ADD VALUE IF NOT EXISTS`, idempotente). Vale um follow-up.
+- **Decisão de implementação, documentada por já ter confirmado contra o schema real (AGENTS.md)**: a contrapartida de permuta **não** criou a FK `negociacoes.orcamento_id_origem` que a SPEC cogitou como exemplo — em vez disso reaproveita o padrão manual já existente de `boletos.tipo_operacao = 'CP'` (SPEC-073), rastreado por `boletos.orcamento_id` (já existente). Ver Checklist para o raciocínio completo.
+- **Não fechado nesta implementação**: "Bug 2" (tela não reflete edição do plano de pagamento) — investigado, não foi encontrado o componente com o bug hipotetizado pela SPEC; o novo "Plano de Parcelas" já nasce reativo, mas não há confirmação de que o sintoma original relatado na reunião estava exatamente aí.
 
 ## Pendências
 
-- [ ] Decidir a semântica exata da forma de pagamento "Carteira": ainda cria `projeto_parcelas` (só sem boleto) para controle de saldo em aberto, ou fica inteiramente fora do sistema de parcelas/boletos?
-- [ ] Escolher Opção A (array paralelo `valores_parcelas_customizados`) ou Opção B (`plano_parcelas jsonb` unificado) para o schema de parcelas customizadas.
-- [ ] Decidir `plano_de_contas`/`categorias_financeiras` para o lançamento automático de Contas a Pagar da contrapartida de permuta.
+- [ ] Aplicar as migrations no Supabase real (ver "Passos manuais do usuário").
+- [ ] Testar ao vivo (golden path completo) depois de aplicado — nada disto foi testado contra o banco real ainda.
 - [ ] Confirmar ao vivo (Skip publicado) se a regra "pagamento/total não reinicia aprovação do cliente" está mesmo assim hoje em produção — a investigação de código aponta que sim (SPEC-135), mas o teste do usuário na reunião não fechou essa confirmação de forma inequívoca.
 - [ ] Confirmar se o bug de "cliente sem cadastro trava criar projeto" também existe em alguma tela do CRM além de `ProjectNew.tsx` (que já parece resolvido) — usuário precisa apontar a tela exata, se for outra.
-- [ ] `supabase/db/current/` está desatualizado (snapshot de 2026-07-07) — recomendo reextração antes de implementar esta SPEC, para confirmar nomes/enums exatos no banco real (não só no `AI_DB_CONTEXT.md`/código local).
+- [ ] Investigar por que a migration da SPEC-107 (`'permuta'` no enum) não parece ter sido de fato aplicada apesar de registrada "concluído" (achado desta SPEC, ver "Realizado").
+- [ ] Homologar visualmente o novo PDF do orçamento com Vinícius.
+- [ ] Rodar o agente `revisor` antes de qualquer commit.

@@ -2,6 +2,34 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-17 (implementação)
+
+### SPEC-152 implementada: melhorias no fluxo de Orçamento
+
+- Sistema Orçamentos (`gestao-financeira-clone-544cb`): `ProjectCreateModal.tsx` ganhou ação
+  "Novo Cliente" (modal empilhado, mesmo padrão do Cliente do orçamento/CRM) e passou a filtrar
+  "Responsável Obra" por `contato_tipos.tipo = 'engenheiro'` (Arquiteto continua sem filtro).
+- `BudgetFormPage.tsx`: novo bloco "Plano de Parcelas" (valor/forma de pagamento/fornecedor de
+  permuta editáveis por parcela, com validação ao vivo de que a soma bate com o valor a pagar),
+  fix do bug de não conseguir apagar "Quantidade de Parcelas" (`z.preprocess` em vez de
+  `z.coerce.number()` puro), campo de parcelas liberado pra qualquer forma de pagamento exceto
+  pix/dinheiro (antes só boleto/cartão).
+- Banco (`supabase/db/migrations/20260917_152_melhorias_orcamento/`): enum `pagamento_forma` ganha
+  `'carteira'` e reconfirma `'permuta'` (suspeita de "Skip drift" na SPEC-107 — migration registrada
+  "concluído" mas valor ausente do banco real); `orcamentos.plano_parcelas` (jsonb, Opção B decidida
+  pelo usuário); `projeto_parcelas.permuta_fornecedor_id`; categoria nova
+  `plano_de_contas.nome = 'PERMUTA/CONTRAPARTIDA'`; `aprovar_orcamento_financeiro` reescrita pra usar
+  `plano_parcelas` quando presente, pular boleto de carteira/permuta e lançar contrapartida automática
+  de Contas a Pagar (reaproveitando o padrão manual `boletos.tipo_operacao = 'CP'` da SPEC-073, sem FK
+  nova em `negociacoes`/`transacoes`).
+- PDF do orçamento (`supabase/functions/generate-report/index.ts`): troca "condições de pagamento"
+  (contagem de dias) por tabela de parcelas com vencimento absoluto + valor.
+- `AI_DB_CONTEXT.md` de Orçamentos e Administração Bancária atualizados; seção "SPEC-019" do primeiro
+  corrigida (reset por campo de pagamento nunca foi o mecanismo real, só o trigger em `orcamento_itens`
+  — SPEC-135).
+- Migrations **redigidas, não aplicadas no Supabase real** — aplicação e teste ao vivo (golden path)
+  ficam como passo manual do usuário. Ver SPEC-152 para detalhes/pendências.
+
 ## 2026-09-17
 
 ### SPEC-152 + SPEC-153 (criadas, não implementadas): reunião "novo sistema de vendas" (16/09)

@@ -70,6 +70,10 @@ Regra importante para boletos:
 - o projeto deve ser derivado por `boletos.orcamento_id -> orcamentos.id -> orcamentos.projeto_id`;
 - `boletos.projeto_id` foi removido para evitar redundância e divergência entre boleto e orçamento.
 
+### SPEC-152 (2026-09-17) — Contrapartida automática de permuta
+
+Quando uma parcela do orçamento é paga por permuta (`projeto_parcelas.forma_pagamento = 'permuta'`, com `projeto_parcelas.permuta_fornecedor_id` obrigatório), `aprovar_orcamento_financeiro` gera automaticamente uma obrigação de Contas a Pagar reaproveitando o padrão manual já existente de "Cadastrar Duplicatas" (SPEC-073): um `boletos` com `tipo_operacao = 'CP'` + `apropriacao_id` (categoria `plano_de_contas.nome = 'PERMUTA/CONTRAPARTIDA'`), rastreado pela mesma `boletos.orcamento_id` — sem FK nova. `'carteira'` e `'permuta'` também não geram o boleto normal de cobrança ao cliente (só `projeto_parcelas`, sem `boletos` do tipo padrão).
+
 ## Ação a ser realizada
 
 Consolidar tabelas e funções relacionadas a `boletos`, `notas_fiscais`, `projeto_parcelas`, retorno/remessa bancária e storage. Garantir que novas consultas do financeiro filtrem por `orcamento_id` e mostrem projeto/cliente por join.

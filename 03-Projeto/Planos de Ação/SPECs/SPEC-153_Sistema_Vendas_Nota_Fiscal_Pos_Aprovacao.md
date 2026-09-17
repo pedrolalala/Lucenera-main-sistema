@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-153 — Sistema de Vendas + Nota Fiscal pós-aprovação (sistema novo, incl. nota parcial multi-pagador)"
-status: implementado (migration + RBAC ainda não aplicados no Supabase real)
+status: implementado e aplicado no banco real (aguardando publicação do código no Skip)
 data_ultima_modificacao: 2026-09-17
 sistemas_envolvidos:
   - Vendas (sistema novo — repositório/submodule `04-Sistemas/vendas-lucenera` já existem; código da tela "Vendas" implementado)
@@ -22,8 +22,8 @@ dependencias:
 
 ### Sistema novo "Vendas" — banco e contrato de dados (o que o implementador constrói depois que a infra existir)
 
-- [x] Migration nova (`supabase/db/migrations/20260917_153_notas_fiscais_parcial_multipagador/`) — arquivo `.sql` redigido e revisado (`notas_fiscais.cliente_id`/`nome_destinatario`, tabela `notas_fiscais_itens`, RLS). **Ainda não aplicada no Supabase real** — passo manual do usuário.
-- [x] RPC `public.registrar_nota_fiscal_parcial(...)` — redigida no mesmo arquivo de migration, transacional (trava `orcamento_itens` envolvidos, valida cobertura, insere `notas_fiscais`+`notas_fiscais_itens`). **Ainda não aplicada.**
+- [x] Migration nova (`supabase/db/migrations/20260917_153_notas_fiscais_parcial_multipagador/`) — arquivo `.sql` redigido, revisado e **aplicado no Supabase real em 2026-09-17** (dry-run combinado + aplicação real das 3 migrations em sequência, verificado por SELECT: `notas_fiscais.cliente_id`/`nome_destinatario`, tabela `notas_fiscais_itens`, RLS).
+- [x] RPC `public.registrar_nota_fiscal_parcial(...)` — redigida no mesmo arquivo de migration, transacional (trava `orcamento_itens` envolvidos, valida cobertura, insere `notas_fiscais`+`notas_fiscais_itens`). **Aplicada e confirmada** (`pg_proc` tem 1 linha).
 - [x] Sistema novo lista `orcamentos WHERE status = 'Orçamento Aprovado' AND natureza_operacao = 'venda'` — implementado em `04-Sistemas/vendas-lucenera/src/pages/Vendas.tsx` (join `contatos`/`projetos`/`orcamento_itens`/`notas_fiscais`+`notas_fiscais_itens`), colunas `numero_venda`, `numero`, cliente, projeto, valor, status de nota (`Sem itens`/`Nota pendente`/`Nota parcial`/`Nota completa`, derivado — sem flag redundante).
 - [x] Tela "Emitir Nota Fiscal" (modal em `Vendas.tsx`) — calcula disponível por item (`quantidade - SUM(quantidade_faturada)` já registrado), permite quantidade parcial por item, pagador em 3 modos (cliente da venda / outro contato cadastrado com busca em `contatos` / nome livre), chama `registrar_nota_fiscal_parcial` com a assinatura exata da migration. Não chama nenhuma API fiscal externa (SPEC-154 é escopo separado).
 - [x] "Ver Boletos" — botão de navegação (`redirectWithCode` pro sistema `financeiro`, rota `/boletos?orcamento_id=...`), sem gerar boleto novo.
@@ -40,9 +40,9 @@ dependencias:
 ### Sistema novo "Vendas" — infraestrutura
 
 - [x] Repositório GitHub (`pedrolalala/Vendas-Lucenera`) e submodule `04-Sistemas/vendas-lucenera` já existiam (sessão anterior). SSO implementado nesta sessão: `src/lib/cross-system-auth.ts` (`sistema_origem: 'vendas'`), `src/hooks/use-auth.tsx` (`consumeCodeFromUrl('vendas')`, `hub_pode_executar(..., 'vendas', ...)`), `src/components/SystemSwitcher.tsx`/`src/hooks/useSistemasPermitidos.ts` copiados sem alteração de lógica, `Layout.tsx` com `<SystemSwitcher currentSlug="vendas" />` e `pr-16 sm:pr-20` no `<main>`. Placeholders do template (`Clientes.tsx`, `Relatorios.tsx`, `Configuracoes.tsx`, `Dashboard.tsx`, `Index.tsx`) removidos; `App.tsx` só tem `/login` e `/vendas`.
-- [ ] **Projeto Skip ainda não criado/publicado de fato** — a URL `https://pagina-de-vendas-9549c.goskip.app` já estava confirmada com o usuário e foi usada no código, mas ninguém confirmou nesta sessão que o deploy Skip real reflete este código (ver Passos manuais).
-- [ ] Registro em `public.systems` (`slug='vendas'`) — migration `002_registro_vendas_no_hub.sql` redigida, **não aplicada**.
-- [ ] RBAC inicial (`papel_permissoes` admin/admin_geral) — migration `003_permissao_admin_sistema_vendas.sql` redigida, **não aplicada**. Sem ela, `registrar_nota_fiscal_parcial` nega todo usuário não-service_role, inclusive admin.
+- [ ] **Projeto Skip ainda não publicado com este código** — a URL `https://pagina-de-vendas-9549c.goskip.app` existe (scaffold Skip padrão), mas o código implementado nesta sessão (SSO + tela real) ainda não foi enviado pra lá (ver Passos manuais).
+- [x] **(2026-09-17) Registro em `public.systems` (`slug='vendas'`) aplicado** — confirmado por SELECT: `Vendas | https://pagina-de-vendas-9549c.goskip.app | visivel=true`.
+- [x] **(2026-09-17) RBAC inicial aplicado** — `papel_permissoes` tem linha (`acao=NULL`) pra `admin` e `admin_geral` no sistema `vendas`, confirmado por SELECT.
 
 ### Passos manuais do usuário
 
@@ -50,7 +50,7 @@ dependencias:
 - [ ] **Confirmar que o projeto Skip do sistema Vendas está de fato publicado** em `https://pagina-de-vendas-9549c.goskip.app` com o código implementado nesta sessão (`skip_file_write`/`apply_changes`/`publish` — ver lição `feedback_skip_deploy_separate_tree`), e que `VITE_SUPABASE_URL`/`VITE_SUPABASE_PUBLISHABLE_KEY` estão configuradas lá (o `.env` local usado para build/lint já tem os valores reais).
 - [x] ~~Registrar o submodule~~ — já registrado.
 - [x] ~~Preencher `VENDAS_URL` real em `FinanceResultModal.tsx`~~ — feito nesta sessão.
-- [ ] **Aplicar as 3 migrations desta SPEC**, nesta ordem: `001_notas_fiscais_itens_e_rpc.sql`, `002_registro_vendas_no_hub.sql`, `003_permissao_admin_sistema_vendas.sql` (a 003 depende da 002 já aplicada). Sem isso, o sistema Vendas não aparece no Hub, a RPC nega todo mundo, e as colunas/tabela novas não existem.
+- [x] ~~Aplicar as 3 migrations desta SPEC~~ — feito 2026-09-17, verificado.
 - [ ] **Confirmar com o usuário**: quando remover fisicamente `NotasFiscais.tsx` de Admin Bancária (hoje só foi tirado do roteamento, arquivo continua no disco), checar ao vivo que não há nota fiscal real cadastrada que dependa daquela tela (contagem de 23/06/2026 apontava 0).
 - [ ] Definir RBAC final (Carol completo em Vendas; Lana só Remessa/Retorno em Admin Bancária) via Hub — depende de migrar Administração Bancária (e o novo sistema Vendas) para `hub_pode_executar` (SPEC-069), que ainda não aconteceu em nenhum dos dois.
 - [ ] **Testar o golden path ao vivo** (ver "Realizado" abaixo) depois das migrations aplicadas e do Skip publicado.

@@ -30,6 +30,20 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Migrations **redigidas, não aplicadas no Supabase real** — aplicação e teste ao vivo (golden path)
   ficam como passo manual do usuário. Ver SPEC-152 para detalhes/pendências.
 
+## 2026-09-17 (5)
+
+### SPEC-153: migrations aplicadas no Supabase real
+
+- As 3 migrations de `supabase/db/migrations/20260917_153_notas_fiscais_parcial_multipagador/` foram
+  aplicadas de verdade (dry-run combinado + aplicação real em sequência, tudo verificado por SELECT):
+  `notas_fiscais.cliente_id`/`nome_destinatario`, tabela `notas_fiscais_itens`, RPC
+  `registrar_nota_fiscal_parcial`, registro do sistema "Vendas" em `public.systems` (visível no Hub),
+  e permissão `admin`/`admin_geral` em `papel_permissoes` (sem ela, a RPC negaria acesso a todo
+  mundo, inclusive admin — `hub_pode_executar` não tem bypass embutido para essa role).
+- **Falta só publicar o código no Skip** (`pagina-de-vendas-9549c.goskip.app` ainda está com o
+  scaffold antigo, o código real já commitado no GitHub ainda não foi enviado pra lá) para o sistema
+  ficar utilizável de ponta a ponta.
+
 ## 2026-09-17 (4)
 
 ### SPEC-153: sistema Vendas implementado (código; migrations ainda não aplicadas)

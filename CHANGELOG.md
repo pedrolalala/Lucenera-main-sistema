@@ -30,6 +30,25 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Migrations **redigidas, não aplicadas no Supabase real** — aplicação e teste ao vivo (golden path)
   ficam como passo manual do usuário. Ver SPEC-152 para detalhes/pendências.
 
+## 2026-09-17 (7)
+
+### SPEC-153: espelho da nota fiscal vira DANFE de verdade (código de barras + dados fiscais reais)
+
+- Pedido do usuário: o espelho deveria "parecer de verdade a estrutura de uma nota fiscal real, com
+  código de barras e os campos necessários já completados" — refeito como um DANFE visual completo
+  (`DanfePreview.tsx`): selo "ESPELHO — SEM VALOR FISCAL", cabeçalho com identificação/N°/série,
+  código de barras Code128 renderizado de verdade (`jsbarcode`, primeiro uso no ecossistema) a partir
+  de uma chave de acesso placeholder de 44 dígitos (formato real, dígito verificador mod-11 correto,
+  nunca transmitida à SEFAZ), Emitente com dados reais da empresa do orçamento, Destinatário com
+  dados reais do cliente, Cálculo do Imposto, e tabela de itens com NCM/CST (`produtos`, SPEC-132) e
+  CFOP (mesma heurística provisória já usada em `FiscalSummaryDialog.tsx` de Orçamentos).
+- Revisado (`revisor`, sem achado crítico) e **publicado**: `pagina-de-vendas-9549c.goskip.app`,
+  v0.0.11 (`154fa4b`), QA 100% verde. Corrigido no processo um bug real: `@supabase/supabase-js`
+  duplicado em `package.json` (2 versões) depois de um merge automático do Skip.
+- Achado de infra: o sync automático do Skip a partir do GitHub não pegou os arquivos novos a tempo
+  (2 tentativas) — publicado via escrita direta na working tree do Skip, mesmo fluxo manual usado
+  nos outros 9 sistemas.
+
 ## 2026-09-17 (6)
 
 ### SPEC-153: espelho da nota fiscal + publicado no Skip

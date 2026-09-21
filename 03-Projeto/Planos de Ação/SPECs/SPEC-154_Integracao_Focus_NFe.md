@@ -1,113 +1,139 @@
 ---
 titulo: "SPEC-154 — Integração Focus NFe (emissão real de Nota Fiscal a partir do sistema Vendas)"
-status: não iniciado
-data_ultima_modificacao: 2026-09-17
+status: especificação fechada, pronta para implementar
+data_ultima_modificacao: 2026-09-21
 sistemas_envolvidos:
-  - Vendas (sistema novo, ver SPEC-153) — consumidor da integração
-  - Supabase (Edge Functions novas + colunas em `notas_fiscais`/`notas_fiscais_itens`/`produtos`)
-  - Cadastro (cadastro-lucenera-b86fe) — dono do cadastro de `produtos`, possível responsável por preencher CFOP/NCM
+  - Vendas (vendas-lucenera) — dono da emissão, do espelho e das pendências de rejeição
+  - Financeiro / Administração Bancária (retorno-bancario-bradesco-5392a) — só consumidor de leitura do status da nota (sem mudança de código neste escopo)
 dependencias:
-  - SPEC-153 (cria `notas_fiscais_itens`, `notas_fiscais.cliente_id`/`nome_destinatario` — esta SPEC só adiciona colunas em cima dessa base)
-  - SPEC-132 (campos fiscais de produtos — `ncm`, `cst`, `cest`, `tipo_fiscal`, `icms_entrada`, `ipi_entrada`, `porc_st` já existem e são reaproveitados aqui, não recriados)
+  - SPEC-153 (sistema Vendas + `notas_fiscais.cliente_id`/`nome_destinatario` + tabela `notas_fiscais_itens` + espelho DANFE — já implementada, aplicada e publicada; esta SPEC estende o mesmo `notas_fiscais` em vez de recriar)
+  - SPEC-132 (campos fiscais de produtos — `ncm`, `cst`, `cest`, `tipo_fiscal`, `porc_st` já existem, reaproveitados aqui)
 ---
 
 # SPEC-154 — Integração Focus NFe (emissão real de Nota Fiscal a partir do sistema Vendas)
 
-> Origem: mesma reunião da SPEC-153 ([31:36]-[34:53] — *"vai abrir já naquela API lá o negócio de nota"*, *"a CFAZ ia dar o retorno que a nota fiscal foi emitida"*) + decisão do usuário, tomada depois do rascunho original desta SPEC, de usar **Focus NFe** (`https://doc.focusnfe.com.br`) como provedor. Isto substitui a pendência antiga "decidir ferramenta/API de emissão de nota fiscal" registrada em `supabase/docs/ai_context_global.md` (linha 46) e `supabase/db/domains/financeiro.md`.
+> Origem: reunião "24. Lucenera (Vinicius) - 16.09.2026_novo sistema de vendas" (decisão de usar Focus NFe) + briefing técnico completo do usuário em 2026-09-21, que fecha a política de integração (fluxo assíncrono, webhook com retry, modelo de erros/pendências) — substitui as pendências em aberto da v1 desta SPEC (CFOP, IBGE, multi-empresa continuam pendências separadas, ver seção própria).
 
 ## Checklist de Ação
 
-### Banco
+### Banco (`supabase/db/migrations/YYYYMMDD_154_focus_nfe_integracao/`)
 
-- [ ] Migration (`supabase/db/migrations/20260917_154_focus_nfe_integracao/`), em cima da base criada pela SPEC-153:
-  - `notas_fiscais.ambiente text NOT NULL DEFAULT 'homologacao' CHECK (ambiente IN ('homologacao','producao'))`.
-  - `notas_fiscais.focus_nfe_ref text` — referência única gerada pelo NOSSO sistema (ex. o próprio `id` da nota em texto, ou `numero_venda || '-N' || sequencial`), usada para consultar/cancelar depois na API. `UNIQUE` quando não nulo.
-  - `notas_fiscais.status_emissao text NOT NULL DEFAULT 'nao_emitida' CHECK (status_emissao IN ('nao_emitida','processando_autorizacao','autorizado','erro_autorizacao','cancelado'))`.
-  - `notas_fiscais.chave_nfe text` — chave de acesso de 44 dígitos, preenchida quando `status_emissao = 'autorizado'`.
-  - `notas_fiscais.caminho_xml text` — URL do XML retornado pela Focus NFe (o DANFE/PDF reaproveita a coluna já existente `notas_fiscais.arquivo_url`, sem duplicar).
-  - `notas_fiscais.mensagem_erro text` — populada quando `status_emissao = 'erro_autorizacao'` (payload de erro da Focus NFe, `erros[{campo,mensagem}]` serializado).
-  - `notas_fiscais.atualizado_via_webhook_em timestamptz` — última vez que o webhook atualizou o status.
-  - **Não** cria `numero`/`serie`/`valor`/`data_emissao` novos — `notas_fiscais` já tem `numero_nf`, `serie`, `valor`, `data_emissao`; a resposta da Focus NFe passa a preencher essas colunas existentes em vez de duplicá-las.
-  - `notas_fiscais_itens.cfop_aplicado text NOT NULL` (default vazio até implementar, ou `NOT NULL` só depois do backfill) — snapshot do CFOP realmente enviado à SEFAZ para aquele item nessa nota específica. É um dado de auditoria fiscal legítimo (não é duplicação indevida): o CFOP "sugerido" pode mudar de regra no futuro, mas o que foi de fato declarado numa nota já emitida não pode.
-  - `produtos.cfop_padrao text` nullable — valor de pré-preenchimento editável por nota/item na tela de emissão (ver "Gap de CFOP" abaixo). **Não** cria coluna de NCM nova — `produtos.ncm` já existe (SPEC-132).
-- [ ] Não propor nenhuma tabela de "token por empresa" no banco relacional — tokens Focus NFe são segredo, devem viver em Supabase Secrets (Edge Function env), nunca em coluna de tabela. Ver "Gap de múltiplas empresas emissoras" abaixo.
+Estende `public.notas_fiscais` (já existe, colunas reais confirmadas: `id, numero_nf, serie, data_emissao, valor, arquivo_url, fornecedor, arquiteto, boleto_id, orcamento_id, tipo_operacao, perfil, cliente_id, nome_destinatario` + `notas_fiscais_itens` da SPEC-153) — **não recria nada**, só adiciona:
 
-### Edge Functions novas
+- [ ] `notas_fiscais.ambiente text NOT NULL DEFAULT 'homologacao' CHECK (ambiente IN ('homologacao','producao'))`.
+- [ ] `notas_fiscais.ref text` — referência única e **imutável** da tentativa atual na Focus NFe (formato `VENDA-{numero_venda}-N{tentativa}`, ex. `VENDA-0032-N1`). `UNIQUE` quando não nulo. Reemissão após erro = nova `ref` (nunca reenviar a mesma ref com payload diferente — regra 5.2/5 do briefing).
+- [ ] `notas_fiscais.status_emissao text NOT NULL DEFAULT 'nao_emitida' CHECK (status_emissao IN ('nao_emitida','processando_autorizacao','autorizado','erro_autorizacao','cancelado'))`.
+- [ ] `notas_fiscais.status_sefaz text` — código cStat cru da SEFAZ (ex. `'100'`, `'532'`), armazenado sempre, mesmo quando o código não estiver na lista conhecida (regra 5.1 do briefing: nunca inventar, sempre guardar o que veio).
+- [ ] `notas_fiscais.mensagem_sefaz text` — texto oficial da Focus/SEFAZ, fonte da verdade para exibição.
+- [ ] `notas_fiscais.chave_nfe text` — chave de acesso real de 44 dígitos, só quando `status_emissao='autorizado'`.
+- [ ] `notas_fiscais.caminho_xml text` — URL do XML retornado pela Focus (`arquivo_url`, já existente, passa a guardar o caminho do DANFE/PDF autorizado — sem duplicar coluna).
+- [ ] `notas_fiscais.payload_enviado jsonb` — snapshot do JSON de fato enviado no `POST /nfe`, para auditoria/reemissão.
+- [ ] `notas_fiscais.tentativa_atual integer NOT NULL DEFAULT 1`.
+- [ ] `notas_fiscais.ultima_consulta_em timestamptz` — usado pelo job de fallback (R3) pra saber quais notas em `processando_autorizacao` já estão "velhas" o suficiente pra consultar de novo.
+- [ ] Nova tabela `public.notas_fiscais_erros` (histórico completo, uma linha por tentativa que voltou com problema — nunca sobrescrita, regra 4/8 do briefing):
+  - `id uuid PK default gen_random_uuid()`
+  - `nota_fiscal_id uuid NOT NULL REFERENCES notas_fiscais(id)`
+  - `ref text NOT NULL`
+  - `numero_tentativa integer NOT NULL`
+  - `status_sefaz text`
+  - `mensagem_sefaz text`
+  - `erro_codigo text`
+  - `erro_campo text` — nome do campo do JSON que causou o erro, quando a API informar (pré-validação 400/422)
+  - `resposta_bruta jsonb NOT NULL` — payload cru completo da resposta de erro, sempre preservado
+  - `data_hora timestamptz NOT NULL DEFAULT now()`
+  - `resolvido boolean NOT NULL DEFAULT false`
+  - `data_resolucao timestamptz`
+  - RLS: mesmo padrão permissivo já usado em `notas_fiscais_itens` (SPEC-153) — controle de acesso real via `hub_pode_executar` dentro das Edge Functions/RPCs, não RLS granular por linha.
+- [ ] RPC ou lógica na Edge Function pra criar a próxima tentativa: ao reemitir, `tentativa_atual += 1`, nova `ref`, mantém o histórico anterior em `notas_fiscais_erros` intocado (nunca apagar/sobrescrever, regra 8).
 
-- [ ] `emitir-nota-fiscal` (chamada pelo frontend de Vendas, autenticada): recebe `nota_fiscal_id` (já criado como rascunho pela RPC da SPEC-153, com itens e pagador definidos), monta o payload Focus NFe a partir de:
-  - Emitente: `orcamentos.empresa_id → empresas` (CNPJ, nome, endereço, IE, `regime_tributario` — já existem; falta `codigo_municipio` IBGE, ver gap abaixo).
-  - Destinatário: `notas_fiscais.cliente_id → contatos` (ou `nome_destinatario` texto livre quando não há cadastro — nesse caso a Focus NFe pode exigir um CPF/CNPJ mínimo; se o pagador realmente não tiver documento, a nota não pode ser uma NFe fiscalmente válida para SEFAZ — **decisão do usuário necessária, não decidida aqui**: bloquear emissão real sem CPF/CNPJ do pagador, ou permitir e registrar como "nota interna" sem valor fiscal, replicando o "espelho" manual que ele descreveu na reunião).
-  - Itens: `notas_fiscais_itens → orcamento_itens → produtos`, usando `produtos.ncm` (já existe) e `cfop_aplicado` calculado (ver abaixo).
-  - `POST /v2/nfe?ref=<focus_nfe_ref>` via HTTP Basic Auth (token como usuário, senha vazia), ambiente definido por `notas_fiscais.ambiente` (URL base `homologacao.focusnfe.com.br` ou `api.focusnfe.com.br`, sempre com prefixo `/v2`).
-  - Trata resposta síncrona (HTTP 201, `status: autorizado`) atualizando `notas_fiscais` direto; trata resposta assíncrona (HTTP 202, `processando_autorizacao`) deixando o status pendente até o webhook confirmar.
-  - Trata erro HTTP 422 (`erros[{campo,mensagem}]`) gravando em `mensagem_erro` e `status_emissao = 'erro_autorizacao'`, sem derrubar a UI.
-- [ ] `focus-nfe-webhook` (endpoint público, sem autenticação Supabase — validar pelo `focus_nfe_ref` presente no corpo): recebe atualização de status da Focus NFe, localiza a nota por `focus_nfe_ref`, atualiza `status_emissao`, `chave_nfe`, `numero_nf`, `serie`, `caminho_xml`, `arquivo_url` (DANFE), `atualizado_via_webhook_em`. Focus NFe não documenta assinatura HMAC no material levantado — validar contra `https://doc.focusnfe.com.br/reference/webhooks` antes de implementar; na ausência de assinatura, validar pelo menos que o `ref` recebido corresponde a uma nota em `status_emissao = 'processando_autorizacao'` antes de aceitar a atualização.
-- [ ] Ambas as functions seguem a regra já documentada em `supabase/functions/README.md` ("toca o mundo externo → Edge Function", nunca chamar API externa direto do frontend, pra não expor o token no browser).
+### Edge Functions novas (`04-Sistemas/vendas-lucenera/supabase/functions/`)
 
-### Gap de CFOP (não decido a regra completa sozinho)
+- [ ] **`emitir-nota-fiscal`** (chamada autenticada pelo frontend de Vendas): recebe `nota_fiscal_id` (já criado como rascunho pela RPC `registrar_nota_fiscal_parcial` da SPEC-153, com itens e pagador já definidos). Monta o payload NF-e 4.00 a partir dos MESMOS dados já usados no espelho DANFE (`DanfePreview.tsx`/`danfe.ts` da SPEC-153) — **fonte única de montagem do payload** (regra R1 do briefing: o espelho e o payload real nunca podem divergir):
+  - Emitente: `orcamentos.empresa_id → empresas` (CNPJ, IE, endereço, regime tributário).
+  - Destinatário: `notas_fiscais.cliente_id → contatos` ou `nome_destinatario` (texto livre).
+  - Itens: `notas_fiscais_itens → orcamento_itens → produtos` (NCM/CST reais; CFOP pela heurística provisória já existente — ver "Gap de CFOP" abaixo, não resolvido nesta SPEC).
+  - `ref = 'VENDA-' + numero_venda + '-N' + tentativa_atual`.
+  - `POST {ambiente}/nfe?ref={ref}` via HTTP Basic (token do secret, senha vazia).
+  - **Trata os 5 casos da política (seção 2.2 do briefing)**:
+    - `201` (síncrono, autorizado ou erro já resolvido): grava direto — se autorizado, `chave_nfe`/`numero_nf`/`serie`/`caminho_xml`/`arquivo_url`; se erro, insere linha em `notas_fiscais_erros` e marca `status_emissao='erro_autorizacao'`.
+    - `202` (`processando_autorizacao`): grava o status pendente, `ultima_consulta_em = now()`; resultado final só chega por webhook ou pelo job de fallback (R3).
+    - `400`/`422` (pré-validação, nota nunca chega na SEFAZ): insere em `notas_fiscais_erros` com `erro_campo`/`erro_codigo`/`mensagem` de cada item de `erros[]`; **não incrementa tentativa** (não houve envio real à SEFAZ, o usuário só precisa corrigir e reenviar com a mesma tentativa — decisão de implementação, documentar no código).
+    - `401`/`403`: erro de configuração (token/CNPJ não habilitado) — não é erro da venda, avisar o usuário de forma diferente (mensagem de configuração, não de rejeição fiscal).
+    - `429`: backoff exponencial (regra 7 do briefing) — reagenda a chamada, não falha direto pro usuário.
+    - `5xx`/timeout: retry limitado com log estruturado (regra 5.2/5), sem duplicar a `ref`.
+  - Sempre grava `payload_enviado` (o JSON de fato mandado) antes de enviar.
+- [ ] **`focus-nfe-webhook`** (endpoint público, sem sessão Supabase — identifica a nota pelo `ref` no corpo): recebe o POST da Focus a cada mudança de status. **Idempotente** (regra 3/5.3 do briefing: a Focus reenvia em 1min/30min/1h/3h/24h se não receber 2xx) — faz `UPDATE ... WHERE ref = $1` (upsert por ref, nunca duplica), sempre responde `2xx` mesmo em reprocessamento do mesmo evento. Se o status recebido for `erro_autorizacao`, insere (não substitui) uma linha em `notas_fiscais_erros`. Valida o cabeçalho de autenticação do hook (`authorization`/`authorization_header`, configurados na criação do hook — secret próprio, nunca hardcoded).
+- [ ] **`verificar-notas-pendentes`** (job de fallback — chamado por `pg_cron`, extensão **já habilitada** no projeto, confirmado via `pg_extension`, junto com `pg_net`): roda periodicamente (proposta: a cada 15 min), busca `notas_fiscais WHERE status_emissao = 'processando_autorizacao' AND (ultima_consulta_em IS NULL OR ultima_consulta_em < now() - interval '10 minutes')`, chama `GET /nfe/{ref}` pra cada uma, atualiza como o webhook faria. É rede de segurança pro caso do webhook falhar/atrasar além do último retry da Focus (24h).
+- [ ] Registrar o gatilho de webhook na Focus NFe na primeira vez (`POST /hooks`, `{cnpj, event: 'nfe', url: <url da Edge Function>, authorization, authorization_header}`) — **passo manual do usuário** depois que a Edge Function estiver deployada (a URL só existe depois do deploy), ver Passos manuais.
 
-- **Estado atual**: `FiscalSummaryDialog.tsx` (Orçamentos) já calcula um CFOP simplificado (`5405` se `produtos.porc_st > 0`, senão `5102`) — cobre só operação dentro do estado (SP→SP), não trata interestadual (6xxx) nem finalidades especiais (garantia, devolução, permuta — já tratadas como natureza de operação distinta em `orcamentos.natureza_operacao`/SPEC-071/152).
-- **Proposta desta SPEC**: calcular um CFOP sugerido na Edge Function `emitir-nota-fiscal`, comparando UF do emitente (`empresas.estado`) com UF do destinatário (`contatos.estado`/`estado_comercial`) para decidir prefixo `5` (dentro do estado) ou `6` (fora do estado), combinado com `produtos.porc_st` para o sufixo — e **sempre deixar editável por item na tela de emissão** antes de confirmar (o próprio usuário descreveu esse ajuste manual como parte do fluxo real: *"aqui, por exemplo, a gente poderia fazer tipo alguma alteração que precisasse fazer... na hora da nota mesmo"*, [33:22]).
-- **Pendência explícita**: a tabela completa de CFOP (intra/interestadual × ST/não-ST × consumidor final × finalidade) precisa ser validada por quem cuida da parte fiscal (contador da Lucenera/Vinícius) antes de qualquer emissão em ambiente de produção real. Usar exclusivamente ambiente de homologação Focus NFe até essa validação acontecer.
-- `produtos.cfop_padrao` (coluna nova) serve como override fixo opcional por produto, para os casos em que a regra automática não se aplica (decisão de quem cadastra o produto — provavelmente Débora, já responsável pelo cadastro de produtos segundo a reunião, mas **não decidido aqui**).
+### Frontend (`04-Sistemas/vendas-lucenera`)
 
-### Gap de endereço fiscal do emitente (IBGE)
+- [ ] Modal "Emitir Nota Fiscal" (`Vendas.tsx`): depois de `registrar_nota_fiscal_parcial` criar o rascunho da nota (fluxo já existente da SPEC-153, itens + pagador), adicionar um passo/botão **"Confirmar e Emitir via Focus NFe"** que chama a Edge Function `emitir-nota-fiscal`. O espelho (`DanfePreview.tsx`) já mostrado antes desse passo passa a ser explicitamente a tela de confirmação (R1) — nenhuma duplicação de lógica de montagem de payload entre o espelho e a Edge Function (o espelho lê os mesmos dados; a Edge Function é quem de fato serializa pro formato Focus).
+- [ ] Depois de emitir, mostrar o status em tempo real: "Processando autorização..." (202), "Autorizado" com link pro XML/DANFE (201/webhook confirmando), ou "Erro" com a `mensagem_sefaz` completa e um botão "Corrigir e reemitir" (abre o formulário de novo, nova tentativa).
+- [ ] Tela/aba nova **"Pendências de Nota Fiscal"**: lista `notas_fiscais_erros WHERE resolvido = false`, agrupado por nota, com histórico de tentativas anteriores visível (nunca escondido). Ação "Marcar como resolvido" fica implícita quando uma nova tentativa da mesma nota é autorizada (a Edge Function marca as pendências anteriores daquela `nota_fiscal_id` como `resolvido=true, data_resolucao=now()` ao gravar sucesso).
+- [ ] Exibir o status mínimo da nota (pendente/processando/autorizado/erro/cancelado) na listagem principal de Vendas (`statusNota`, já existe — estender pra refletir `status_emissao` real em vez de só "tem nota"/"não tem nota").
 
-- `empresas` não tem coluna de código de município IBGE, exigido pela Focus NFe no endereço do emitente. `contatos.ibge_cidade` existe (achado no schema), mas não há coluna equivalente em `empresas`. Migration desta SPEC deve incluir `empresas.codigo_municipio_ibge text` nullable, a ser preenchido manualmente pelo usuário para cada empresa emissora antes da primeira emissão real.
+### Integração com outros módulos (R5)
 
-### Gap de múltiplas empresas emissoras
+- [ ] **Sem mudança de código na Administração Bancária nesta SPEC** — só deixar `notas_fiscais.status_emissao` legível (já é, é uma coluna normal na tabela compartilhada) para quando fizer sentido ela consultar se a nota foi autorizada antes de liberar algo. Não decidido nem necessário agora.
 
-- `orcamentos.empresa_id` pode apontar para mais de uma empresa do grupo (Foco/Manoella/Islight, conforme achado da SPEC-144). Cada CNPJ emissor real normalmente precisa de cadastro e token próprios na Focus NFe. Esta SPEC não define ainda como mapear `empresa_id → qual secret de token usar` — proposta: um secret por empresa nomeado de forma previsível (ex. `FOCUS_NFE_TOKEN_<slug_empresa>_HOMOLOGACAO`), resolvido na Edge Function a partir de `empresas.codigo` ou `empresas.cnpj`. **Decisão final de nomenclatura/estrutura fica para quando o usuário tiver as contas Focus NFe criadas** (ver Passos manuais).
+### Gap de CFOP (não decido a regra completa sozinho — herdado da v1 desta SPEC)
 
-### Ambiente
+- Mesma heurística provisória já em produção desde a SPEC-153 (`cfopHeuristico` em `danfe.ts`, `porc_st > 0 ? '5405' : '5102'`) — só intra-estado, sem tratar interestadual. **Continua sendo a pendência mais crítica antes de emitir em produção real**: precisa de validação com contador/Vinícius. Até lá, toda emissão desta SPEC roda em `ambiente = 'homologacao'`.
 
-- Toda emissão desta SPEC roda em **homologação Focus NFe** (`notas_fiscais.ambiente = 'homologacao'`, documentos sem validade fiscal) até o usuário confirmar explicitamente a virada para produção — a mudança é uma troca de secret/config, não de código.
+### Gap de endereço fiscal do emitente (IBGE) — herdado da v1
+
+- `empresas` não tem `codigo_municipio_ibge`. Migration desta SPEC inclui `empresas.codigo_municipio_ibge text` nullable — preenchimento manual do usuário antes da primeira emissão real.
+
+### Gap de múltiplas empresas emissoras — herdado da v1
+
+- Cada empresa emissora real (Foco/Manoella/Islight) precisa de token próprio na Focus NFe. Proposta mantida: secret por empresa (`FOCUS_NFE_TOKEN_<slug_empresa>_<AMBIENTE>`), resolvido na Edge Function a partir de `empresas.codigo`/`cnpj`. Estrutura final depende de quantas contas o usuário efetivamente criar (ver Passos manuais).
 
 ### Passos manuais do usuário
 
-- [ ] **Criar conta Focus NFe**, obter token de homologação (e de produção quando for a hora).
-- [ ] **Cadastrar o(s) CNPJ(s) das empresas emissoras** (Foco/Manoella/Islight, conforme aplicável) no painel Focus NFe; providenciar certificado digital A1 se exigido pelo provedor para emissão real.
-- [ ] **Configurar os secrets no Supabase** (`supabase secrets set FOCUS_NFE_TOKEN_...`) — nunca commitar token em código ou `.env` versionado.
-- [ ] **Registrar a URL do webhook** (`POST /v2/webhooks` no painel Focus NFe) apontando para a Edge Function `focus-nfe-webhook`, depois que ela estiver deployada (URL só existe depois do deploy).
-- [ ] **Preencher `empresas.codigo_municipio_ibge`** para cada empresa emissora, depois da migration aplicada.
-- [ ] **Validar com contador/Vinícius a tabela de CFOP** antes de emitir a primeira nota real (mesmo em homologação, o objetivo é já simular o CFOP correto).
-- [ ] **Decidir a política de pagador sem CPF/CNPJ** em nota parcial (bloquear emissão real ou manter como "nota interna"/espelho, replicando o processo manual atual) — ver Checklist, Edge Function `emitir-nota-fiscal`.
+- [ ] **Criar conta(s) Focus NFe** e obter token(s) de homologação (produção só depois de validar CFOP).
+- [ ] **Configurar secrets no Supabase** (`FOCUS_NFE_TOKEN_...`) — nunca em código/`.env` versionado.
 - [ ] Aplicar as migrations desta SPEC.
-- [ ] Testar emissão ponta a ponta em homologação com um orçamento de teste antes de liberar para uso real.
+- [ ] **Deploy das 3 Edge Functions** (`emitir-nota-fiscal`, `focus-nfe-webhook`, `verificar-notas-pendentes`).
+- [ ] **Registrar o webhook na Focus NFe** (`POST /hooks`) apontando pra URL real da Edge Function, só depois do deploy.
+- [ ] **Agendar `verificar-notas-pendentes` via `pg_cron`** (migration própria, `cron.schedule(...)`, chama a Edge Function via `pg_net`).
+- [ ] **Preencher `empresas.codigo_municipio_ibge`** pra cada empresa emissora.
+- [ ] **Validar a tabela de CFOP com contador/Vinícius** antes de qualquer emissão em produção real.
+- [ ] **Decidir a política de pagador sem CPF/CNPJ** em nota parcial (bloquear emissão real vs. manter como nota interna/espelho) — decisão de negócio, não decidida nesta SPEC.
+- [ ] Testar emissão ponta a ponta em homologação com uma venda de teste antes de liberar uso real.
 
 ## Objetivo
 
-Substituir a pendência crônica "decidir ferramenta/API de emissão de nota fiscal" por uma integração real com Focus NFe, acionada a partir do sistema Vendas (SPEC-153): montar o payload fiscal a partir de dados já existentes no banco (empresa emitente, cliente/pagador, itens do orçamento), emitir via Edge Function (nunca do frontend, para não expor o token), tratar resposta síncrona/assíncrona e atualizar o status da nota via webhook.
+Substituir a pendência crônica "decidir ferramenta/API de emissão de nota fiscal" por uma integração real e completa com Focus NFe: emissão assíncrona com tratamento de todos os status possíveis (síncrono, processando, pré-validação, rejeição), webhook idempotente com fallback por polling, e um registro de pendências/erros com histórico completo por tentativa — nunca perdendo rastreabilidade de uma rejeição.
 
 ## Decisões aprovadas
 
-- Provedor escolhido: **Focus NFe** (decisão do usuário, comunicada fora da reunião gravada, registrada nesta reescrita).
-- Ambiente de homologação até confirmação explícita de virada para produção.
-- Emissão sempre via Edge Function (nunca token exposto no frontend) — consistente com a regra já documentada em `supabase/functions/README.md`.
-- `produtos.ncm` já é a fonte correta de NCM (SPEC-132) — não recriar essa coluna.
-
-## Definição da SPEC
-
-Ver Checklist — já inclui o desenho completo (schema, Edge Functions, gaps de CFOP/IBGE/multi-empresa).
+- Provedor: **Focus NFe**, API v2, NF-e modelo 4.00.
+- Ambiente de homologação até confirmação explícita de virada para produção (bloqueado também pela validação de CFOP, que é regra fiscal sensível).
+- Emissão sempre via Edge Function — token nunca exposto no frontend.
+- `ref` é única e imutável por tentativa; reemissão = nova `ref`, histórico anterior nunca apagado.
+- Webhook deve ser idempotente (a Focus reenvia em 1min/30min/1h/3h/24h se não receber 2xx).
+- Nenhum código/mensagem de rejeição é inventado — tudo vem literalmente da resposta da API e é armazenado, mesmo quando o código não é reconhecido.
+- Job de fallback (polling) usa `pg_cron`/`pg_net`, já habilitados no projeto — não precisa de infraestrutura externa nova.
+- Administração Bancária não é alterada nesta SPEC (R5) — só fica com a leitura de status disponível pra uso futuro.
 
 ## Análise de ecossistema (obrigatória)
 
-- **Depende de `orcamentos`, `contatos`, `produtos`, `orcamento_itens`, `boletos`?** Sim — `orcamentos.empresa_id` (emitente), `contatos` (destinatário), `produtos.ncm`/`cfop_padrao` (itens), `orcamento_itens`/`notas_fiscais_itens` (granularidade fiscal). Não depende de `boletos` diretamente (nota e boleto são independentes, conforme regra "boleto sem nota é permitido").
-- **Afeta CRM, Orçamentos, Financeiro, Cadastro, Estoque/Compras, Logística, RH, Hub/TI?** Vendas (principal), Cadastro (possível responsável por `produtos.cfop_padrao`, mesma pessoa que já cuida de NCM/CST via SPEC-132 — provavelmente Débora, não confirmado).
-- **Dado duplicado que deveria ser derivado?** `notas_fiscais_itens.cfop_aplicado` é intencionalmente um snapshot, não uma duplicação indevida — é o registro fiscal do que foi de fato declarado, que não pode mudar retroativamente mesmo que a regra de cálculo mude depois.
-- **Migration antiga que contradiz o snapshot central?** Mesma observação da SPEC-153 — `supabase/db/current/` desatualizado, mas os campos fiscais de `produtos` (SPEC-132) já existem e batem com o que esta SPEC reaproveita.
-- **Exige atualizar `AI_DB_CONTEXT.md`?** Sim — do sistema Vendas (assim que existir) e do domínio `supabase/db/domains/financeiro.md` (a pendência "decidir API de emissão de nota fiscal" deixa de existir, referenciar esta SPEC).
-- **Padrão de acesso a dados**: Edge Functions novas seguem o padrão já estabelecido (`generate-report`, `process-remittance`) — lógica de integração externa isolada em Deno, nunca no frontend.
+- **Depende de** `orcamentos` (empresa emitente), `contatos` (destinatário), `produtos` (NCM/CST/CFOP), `notas_fiscais`/`notas_fiscais_itens` (SPEC-153, estendidas aqui) e `empresas` (nova coluna IBGE).
+- **Afeta**: Vendas (principal — nova tela de pendências, novo fluxo de emissão), Financeiro/Administração Bancária (nenhuma mudança de código, só leitura futura opcional).
+- **Dado duplicado que deveria ser derivado?** `payload_enviado`/`resposta_bruta` são snapshots intencionais (auditoria/rastreabilidade fiscal), não duplicação indevida — o que foi de fato enviado/recebido numa tentativa específica não pode mudar retroativamente mesmo que a lógica de montagem do payload mude depois.
+- **Migration antiga que contradiz o snapshot central?** Mesma observação já registrada nas SPECs 152/153 — `supabase/db/current/` está desatualizado; as colunas reais de `notas_fiscais` usadas aqui foram confirmadas direto no banco (não pelo snapshot desatualizado).
+- **Exige atualizar `AI_DB_CONTEXT.md`?** Sim — do sistema Vendas (novas tabelas/colunas, novas Edge Functions, novo job `pg_cron`).
+- **Padrão de acesso a dados**: Edge Functions seguem o padrão já estabelecido no ecossistema (`generate-report`, etc.) — lógica de integração externa isolada em Deno, nunca no frontend. Chamada de banco por `pg_cron`/`pg_net` é um padrão novo neste ecossistema (nenhum outro sistema usa job agendado no Postgres ainda) — documentar isso no `AI_DB_CONTEXT.md` como precedente.
 
 ## Realizado
 
-_(nada implementado — SPEC nova)_
+_(nada implementado ainda — SPEC fechada, pronta pra implementar)_
 
 ## Pendências
 
-- [ ] Tabela completa de CFOP (intra/interestadual, ST, finalidade) precisa validação de quem cuida da parte fiscal antes de emissão real — não decidido pelo planner por ser regra de negócio/fiscal sensível.
-- [ ] Política de pagador sem CPF/CNPJ em nota parcial (bloquear emissão real vs. manter como nota interna/espelho) — decisão do usuário.
-- [ ] Estrutura de múltiplos tokens Focus NFe por empresa emissora — desenho proposto, não fechado; depende de quantas empresas o usuário vai efetivamente cadastrar na Focus NFe.
-- [ ] Confirmar assinatura/validação do webhook Focus NFe contra a documentação oficial antes de implementar (`https://doc.focusnfe.com.br/reference/webhooks`) — não bloqueante para o desenho, mas necessário antes do código.
-- [ ] Quem preenche `produtos.cfop_padrao` por produto — provavelmente Débora (mesma pessoa da SPEC-132), não confirmado.
-- [ ] Confirmar cobertura real de preenchimento de `produtos.ncm` (percentual de produtos com valor não nulo) antes de assumir que o cadastro fiscal está pronto para emissão em massa — verificação manual (SELECT de conferência), não posso rodar isso como planner.
+- [ ] Tabela completa de CFOP (intra/interestadual, ST, finalidade) — validação com contador/Vinícius antes de emissão real.
+- [ ] Política de pagador sem CPF/CNPJ em nota parcial.
+- [ ] Estrutura final de múltiplos tokens Focus NFe por empresa emissora (depende de quantas contas o usuário criar).
+- [ ] Confirmar `empresas.codigo_municipio_ibge` preenchido antes da primeira emissão real.
+- [ ] Confirmar cobertura real de `produtos.ncm` (percentual de produtos com valor preenchido) — verificação manual, não posso rodar como planner/implementador sem acesso amplo de leitura.

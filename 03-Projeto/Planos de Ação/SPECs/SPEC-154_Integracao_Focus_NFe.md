@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-154 — Integração Focus NFe (emissão real de Nota Fiscal a partir do sistema Vendas)"
-status: implementada em código (banco + Edge Functions + frontend); pendente de passos manuais (migrations, secrets, deploy, publicação Skip, teste ao vivo)
+status: implementada e deployada (migrations 001-003 aplicadas no banco real, 3 Edge Functions deployadas via Supabase CLI, frontend publicado no Skip 59346 v0.0.12) — modo "simulação sem conta Focus NFe": fluxo completo até "Confirmar e Emitir" funciona, chamada real à Focus retorna erro de configuração controlado (sem FOCUS_NFE_TOKEN ainda). Pendente: criar conta Focus NFe, secrets, migration 004 (pg_cron), teste ponta a ponta em homologação
 data_ultima_modificacao: 2026-09-21
 sistemas_envolvidos:
   - Vendas (vendas-lucenera) — dono da emissão, do espelho e das pendências de rejeição
@@ -175,18 +175,22 @@ Substituir a pendência crônica "decidir ferramenta/API de emissão de nota fis
 - Decisões de implementação registradas nesta SPEC (ver seções "Decisão: ..." acima no Checklist): não criar coluna `caminho_xml` separada (reusa `arquivo_url`); dados cadastrais do emitente não entram no payload de emissão (só `cnpj_emitente`, resto fica cadastrado na conta Focus); token único `FOCUS_NFE_TOKEN` em vez de um por empresa; defaults documentados para PIS/COFINS CST, ICMS origem, presença do comprador, modalidade de frete e indicador de IE do destinatário (campos que `produtos`/`orcamentos` ainda não modelam); `verificar-notas-pendentes` autenticado por secret próprio (`FOCUS_NFE_CRON_SECRET`) em vez da service role key, para não expor esse segredo mais sensível dentro do SQL do `pg_cron`.
 - Pré-validação interna implementada em `emitir-nota-fiscal`/`_shared/montar-payload-nfe.ts`: bloqueia a emissão (sem chamar a Focus) quando falta `empresas.codigo_municipio_ibge`, CNPJ do emitente, CPF/CNPJ do destinatário, ou NCM/CST de algum item — nunca envia payload incompleto/inventado.
 
-### Passos manuais pendentes (nenhum executado por mim, por regra)
+### Passos manuais pendentes
 
-- Aplicar as 4 migrations no Supabase real (nesta ordem: 001, 002, 003, 004 — a 004 só depois do deploy das Edge Functions e da criação do secret do Vault).
+**Feito em 2026-09-21 (segunda etapa, "simulação sem conta Focus NFe" — usuário confirmou que pode aplicar/deployar antes de criar a conta)**:
+- [x] Migrations 001 (`notas_fiscais` ganha `ambiente`/`ref`/`status_emissao`/etc.), 002 (`notas_fiscais_erros`) e 003 (`empresas.codigo_municipio_ibge`) aplicadas no Supabase real (dry-run com ROLLBACK antes, depois COMMIT real — confirmado via `information_schema.columns`/`to_regclass`).
+- [x] As 3 Edge Functions deployadas de verdade no projeto Supabase real (`vcvcwzmbiftcawncibke`) via `supabase functions deploy --use-api` (bundling server-side, sem precisar de Docker) — o pipeline de QA do Skip tentou fazer isso sozinho e pulou ("Supabase redeploy/migrate skipped: connection could not be resolved"), então foi feito direto pelo Supabase CLI. Confirmado no ar: `emitir-nota-fiscal` responde 401 sem header de auth (esperado), `focus-nfe-webhook`/`verificar-notas-pendentes` respondem 500 "não configurado" sem o secret certo (esperado, `verify_jwt=false` funcionando).
+- [x] Frontend (Vendas.tsx + PendenciasNotaFiscal.tsx + Layout.tsx com o 2º link de nav + `lib/focus-nfe.ts`) publicado no Skip (projeto 59346, v0.0.12) — escrito direto via `skip_file_write` (mesmo motivo de sempre: auto-sync do Skip não pega arquivo novo de forma confiável).
+- Efeito prático agora: dá pra abrir o espelho de uma venda, registrar o rascunho e clicar em "Confirmar e Emitir via Focus NFe" — a Edge Function roda de ponta a ponta no banco real, mas como `FOCUS_NFE_TOKEN` não está configurado ainda, ela para em `resolverConfigFocus`/`FocusConfigError` e devolve `{tipo: 'configuracao'}`, que o frontend já mostra como "Problema de configuração — não é a venda". Não há mock/simulação de uma autorização "de verdade" — isso exige no mínimo uma conta Focus NFe de homologação (gratuita, separada da produção).
+
+**Ainda pendente (dependem de decisão/conta do usuário)**:
 - Criar conta(s) Focus NFe e obter token(s) de homologação.
 - Configurar os secrets nas Edge Functions: `FOCUS_NFE_TOKEN`, `FOCUS_NFE_AMBIENTE`, `FOCUS_NFE_WEBHOOK_SECRET`, `FOCUS_NFE_CRON_SECRET`.
-- Deploy das 3 Edge Functions.
-- Registrar o webhook na Focus NFe (`POST /hooks`) apontando pra URL real, só depois do deploy.
-- Criar o secret no Vault do Postgres (mesmo valor de `FOCUS_NFE_CRON_SECRET`) e então aplicar a migration 004 com `<PROJECT_REF>`/`<VAULT_SECRET_NOME>` substituídos.
+- Registrar o webhook na Focus NFe (`POST /hooks`) apontando pra URL real (`{SUPABASE_URL}/functions/v1/focus-nfe-webhook`), só depois de `FOCUS_NFE_WEBHOOK_SECRET` estar configurado.
+- Criar o secret no Vault do Postgres (mesmo valor de `FOCUS_NFE_CRON_SECRET`) e então aplicar a migration 004 (pg_cron/pg_net) com `<PROJECT_REF>`/`<VAULT_SECRET_NOME>` substituídos — não aplicada ainda, de propósito (o próprio arquivo exige a Edge Function já no ar, o que agora já é verdade, e o secret do Vault, que ainda não existe).
 - Preencher `empresas.codigo_municipio_ibge` por empresa emissora.
 - Validar a tabela de CFOP com contador/Vinícius antes de qualquer emissão em produção real.
-- Publicar o frontend novo no Skip (sistema Vendas) — feito nesta etapa só em código, não publicado.
-- Testar manualmente no navegador, depois de aplicar as migrations/secrets/deploy acima (golden path que eu não consigo confirmar sozinho):
+- Testar manualmente no navegador, depois de criar a conta Focus NFe e configurar os secrets acima (golden path que eu não consigo confirmar sozinho):
   - Emitir uma nota fiscal completa: "Emitir Nota Fiscal" → preview → form → "Registrar Nota Fiscal (rascunho)" → "Confirmar e Emitir via Focus NFe" → conferir que aparece "Processando autorização..." ou "Autorizado" (depende do tempo de resposta real da Focus em homologação).
   - Forçar um caso de pré-validação interna (ex. produto sem NCM) e conferir que a lista de bloqueantes aparece certa, e que "Corrigir e tentar novamente" volta pro formulário.
   - Conferir que a tela "Pendências de Nota Fiscal" (`/pendencias-nota-fiscal`) lista o erro acima, e que "Ver venda" abre o espelho da venda certa.

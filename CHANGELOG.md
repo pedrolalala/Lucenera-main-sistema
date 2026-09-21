@@ -2,6 +2,34 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-21 (3)
+
+### SPEC-154: migrations aplicadas + Edge Functions deployadas + frontend publicado ("simulação sem conta Focus NFe")
+
+- Usuário perguntou se dava pra aplicar/deployar o código da SPEC-154 antes de criar a conta Focus NFe,
+  só pra ter "um momento de simulação". Resposta: sim para migrations+deploy (são independentes da
+  conta), mas uma simulação de autorização de verdade exige no mínimo uma conta de homologação (gratuita)
+  — sem nenhuma conta, o fluxo vai até a Edge Function real e para com um erro de configuração tratado.
+- Migrations 001 (`notas_fiscais` ganha `ambiente`/`ref`/`status_emissao`/`status_sefaz`/`mensagem_sefaz`/
+  `chave_nfe`/`payload_enviado`/`tentativa_atual`/`ultima_consulta_em`), 002 (`notas_fiscais_erros`) e 003
+  (`empresas.codigo_municipio_ibge`) aplicadas no Supabase real (dry-run com ROLLBACK antes de cada uma).
+  Migration 004 (`pg_cron`/`pg_net`) fica pendente de propósito — exige a Edge Function já deployada (ok
+  agora) e um secret no Vault do Postgres que ainda não existe.
+- As 3 Edge Functions (`emitir-nota-fiscal`, `focus-nfe-webhook`, `verificar-notas-pendentes`) deployadas
+  no projeto Supabase real via `supabase functions deploy --use-api` (bundling server-side, sem Docker).
+  Achado: o pipeline de QA do Skip tentou fazer esse deploy sozinho e pulou silenciosamente
+  ("Supabase redeploy/migrate skipped: connection could not be resolved") — sem checar isso à parte, as
+  functions ficariam "publicadas" no Skip mas ausentes no Supabase de verdade. Confirmado no ar via curl
+  direto (401/500 esperados, sem secrets configurados).
+- Frontend (Vendas.tsx com o 3º passo de emissão, PendenciasNotaFiscal.tsx, Layout.tsx, lib/focus-nfe.ts)
+  publicado no Skip (projeto 59346, v0.0.12) via `skip_file_write` direto (auto-sync do Skip não pega
+  arquivo novo de forma confiável nesse sistema, mesmo problema já documentado na SPEC-153).
+- Estado atual: dá pra testar o fluxo completo (espelho → registrar rascunho → "Confirmar e Emitir via
+  Focus NFe") em produção real — a Edge Function roda contra o banco real e responde
+  `{tipo: 'configuracao'}` (sem token Focus configurado), que o frontend mostra como aviso de
+  configuração, não como erro da venda. Ver SPEC-154 para a lista do que falta (conta Focus, secrets,
+  migration 004, teste de homologação).
+
 ## 2026-09-17 (implementação)
 
 ### SPEC-152 implementada: melhorias no fluxo de Orçamento

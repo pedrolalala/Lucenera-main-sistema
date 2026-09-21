@@ -30,6 +30,22 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Migrations **redigidas, não aplicadas no Supabase real** — aplicação e teste ao vivo (golden path)
   ficam como passo manual do usuário. Ver SPEC-152 para detalhes/pendências.
 
+## 2026-09-21 (2)
+
+### SPEC-154: frontend da emissão real implementado (modal + tela de pendências)
+
+- Modal "Emitir Nota Fiscal" ganhou o 3º passo de emissão real (chama `emitir-nota-fiscal`, trata os
+  6 formatos de resultado); tela nova "Pendências de Nota Fiscal"; status em tempo real na listagem.
+- Revisado (`revisor`, 2 avisos reais corrigidos antes do commit): (1) rascunho de nota
+  rejeitado/abandonado ficava preso pra sempre contando como "já faturado" (a RPC sempre insere nota
+  nova) — corrigido com cancelamento automático do rascunho nos 3 pontos de saída do fluxo; (2) erro
+  do Supabase não verificado no refetch pós-emissão, mesmo padrão já corrigido no backend.
+- **⚠️ Risco ativo**: este sistema (`vendas-lucenera`) sincroniza automaticamente do GitHub pro Skip.
+  O frontend novo já depende de colunas (`status_emissao`, `ref`, etc.) que só existem depois das
+  migrations desta SPEC serem aplicadas — se o auto-sync publicar antes disso, a tela de Vendas
+  (hoje funcionando em produção) quebra. Aplicar as migrations o quanto antes — no momento deste
+  commit o Skip ainda estava na versão anterior (v0.0.11), sem ter sincronizado o frontend novo.
+
 ## 2026-09-21
 
 ### SPEC-154: backend da integração Focus NFe implementado (banco + Edge Functions, não aplicado/deployado)

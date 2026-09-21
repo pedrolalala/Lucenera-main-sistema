@@ -30,6 +30,29 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Migrations **redigidas, não aplicadas no Supabase real** — aplicação e teste ao vivo (golden path)
   ficam como passo manual do usuário. Ver SPEC-152 para detalhes/pendências.
 
+## 2026-09-21
+
+### SPEC-154: backend da integração Focus NFe implementado (banco + Edge Functions, não aplicado/deployado)
+
+- Usuário fechou a especificação técnica completa (fluxo assíncrono 201/202/400/422/401/403/429/5xx,
+  webhook idempotente com retry da Focus, modelo de erros com histórico por tentativa). SPEC-154
+  reescrita com essa política e implementada nesta sessão:
+- **Banco** (`supabase/db/migrations/20260921_154_focus_nfe_integracao/`, 4 migrations, não aplicadas):
+  estende `notas_fiscais` (`ambiente`, `ref`, `status_emissao`, `status_sefaz`, `mensagem_sefaz`,
+  `chave_nfe`, `payload_enviado`, `tentativa_atual`, `ultima_consulta_em`), tabela nova
+  `notas_fiscais_erros` (histórico completo, nunca sobrescrito), `empresas.codigo_municipio_ibge`,
+  e agendamento do job de fallback via `pg_cron`/`pg_net` (já habilitados no projeto).
+- **Edge Functions** (`vendas-lucenera/supabase/functions/`, não deployadas): `emitir-nota-fiscal`
+  (monta o payload NF-e 4.00 a partir dos mesmos dados do espelho DANFE, trata todos os casos de
+  resposta da política), `focus-nfe-webhook` (idempotente por `ref`), `verificar-notas-pendentes`
+  (polling de fallback). Heurística de CFOP compartilhada byte-a-byte com o frontend.
+- Revisado (`revisor`, sem achado crítico) — 2 avisos corrigidos antes do commit: erros do Supabase
+  não verificados em vários pontos de `emitir-nota-fiscal` (o mais sensível: a emissão agora aborta
+  se não conseguir gravar `payload_enviado` antes de chamar a Focus, em vez de transmitir sem
+  auditoria). `deno check` confirmado limpo nos 3 entrypoints.
+- **Frontend ainda não implementado** (modal de emissão real, tela de pendências) — próxima etapa.
+  Gaps de CFOP/pagador sem CPF-CNPJ/multi-empresa continuam pendências de negócio em aberto.
+
 ## 2026-09-17 (7)
 
 ### SPEC-153: espelho da nota fiscal vira DANFE de verdade (código de barras + dados fiscais reais)

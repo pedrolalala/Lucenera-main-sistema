@@ -132,6 +132,22 @@ achado crítico. 1 aviso real corrigido antes do commit — o campo "Desconto ne
 silenciosamente; >100 mostrava total negativo na prévia até a RPC rejeitar). Corrigido clampando
 `descontoNum` em `[0, 100]` num único lugar, usado tanto na prévia quanto no valor enviado.
 
+**⚠️ Achado sério logo após aplicar no banco real (2026-09-21)**: `CREATE OR REPLACE FUNCTION
+criar_pedido_compra_lote(...)` com 2 parâmetros novos no final da assinatura **não substituiu** a função
+original — Postgres considera a lista de tipos de parâmetro parte da identidade da função, então uma
+assinatura diferente (mesmo só com parâmetros novos `DEFAULT NULL` no final) cria uma SEGUNDA função
+sobrecarregada em vez de substituir. Ficaram 2 versões (8 e 10 argumentos) coexistindo. Toda chamada
+nomeada com só os 8 parâmetros originais (exatamente como `ModalPedidoLote.tsx`, Fluxo A, **já em
+produção**, sempre chamou) virou ambígua: `ERROR 42725: function ... is not unique`. Ou seja, a migration
+quebrou a criação de pedido de compra em produção por alguns minutos, entre a aplicação e a correção.
+Reproduzido com uma chamada de teste antes de escrever o fix (mesma disciplina do Bug 1). Corrigido com
+migration extra `20260921_155b_fix_overload_criar_pedido_compra_lote/001_drop_overload_antiga.sql` (`DROP
+FUNCTION` da assinatura de 8 argumentos) — aplicada em seguida, também confirmada por teste direto.
+**Lição pra qualquer migration futura que adicione parâmetro a uma function já em uso**: `CREATE OR
+REPLACE FUNCTION` com assinatura nova SEMPRE precisa vir acompanhado de um `DROP FUNCTION` explícito da
+assinatura antiga no mesmo arquivo, e o dry-run precisa testar uma chamada real no formato exato que os
+callers existentes usam (não só confirmar que o `CREATE OR REPLACE` em si não deu erro de sintaxe).
+
 ## PRIORIDADE 4 — Fluxo de aprovação de pedido de compra (nova regra de negócio)
 
 > Fluxo desenhado pelo Vinícius — **alinhar o desenho com ele pessoalmente antes de fechar o design final**,

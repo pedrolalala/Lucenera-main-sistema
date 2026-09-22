@@ -1,10 +1,10 @@
 ---
 titulo: "SPEC-156 — Controle de Produção e Controle de Garantia (2 sistemas novos, separados do Compras)"
-status: "Módulo 1 (Produção) implementado, aplicado no Supabase real e publicado como sistema próprio. Módulo 2 (Garantia) só com repositório/projeto Skip criados, sem código ainda — pendências de negócio em aberto."
+status: "CONCLUÍDA — Módulo 1 (Produção) e Módulo 2 (Garantia) implementados, aplicados no Supabase real e publicados como sistemas próprios separados do Compras."
 data_ultima_modificacao: 2026-09-22
 sistemas_envolvidos:
   - Controle de Produção (04-Sistemas/controle-de-producao, github.com/pedrolalala/Controle-de-producao, Skip projectId 60535)
-  - Controle de Garantia (04-Sistemas/controle-de-garantia, github.com/pedrolalala/controle-de-garantia, Skip projectId 60545) — repositório e projeto Skip criados, sem implementação ainda
+  - Controle de Garantia (04-Sistemas/controle-de-garantia, github.com/pedrolalala/controle-de-garantia, Skip projectId 60545) — implementado, aplicado e publicado
   - Supabase (banco central)
 ---
 
@@ -19,38 +19,41 @@ sistemas_envolvidos:
 - [x] Migration `producao_pedidos` + `producao_pedido_handoffs` (ver seção Módulo 1) — redigida em `supabase/db/migrations/20260922_157_producao_pedidos/001_producao_pedidos.sql` e **aplicada no Supabase real em 22/09/2026** (dry-run com ROLLBACK antes do COMMIT real)
 - [x] Bucket de Storage `producao_pedidos` (PDF do pedido + PDF do desenho, leitura pública / escrita `authenticated` — confirmado com o usuário, mesmo padrão do bucket `notas_fiscais_compra`) — aplicado
 - [x] RLS de `producao_pedidos` / `producao_pedido_handoffs` — aplicada (leitura ampla + escrita ampla para `authenticated`, sem regra de dono, conforme decidido na SPEC)
-- [ ] Migration `garantia_protocolos` (+ enum `garantia_protocolo_status`) + `garantia_itens` (ver seção Módulo 2) — **fora do escopo desta execução** (Módulo 2 não implementado: pendências de regra de negócio em aberto)
-- [ ] RLS de `garantia_protocolos` / `garantia_itens` — fora do escopo desta execução (Módulo 2)
-- [ ] (Opcional, decisão pendente) tabela `garantia_fornecedor_responsavel` (mapeamento fornecedor → usuário padrão) — fora do escopo desta execução (Módulo 2)
-- [ ] Atualizar `supabase/db/domains/estoque_compras.md` com os dois módulos novos — não feito nesta execução (o item cobre os dois módulos juntos; melhor fazer numa mão só quando o Módulo 2 também estiver implementado, para não documentar pela metade)
-- [ ] Atualizar `supabase/docs/relationships.md` se novas FKs relevantes forem criadas (`producao_pedidos.empresa_id -> empresas.id`, `garantia_itens.fornecedor_id/cliente_id/produto_id/orcamento_id -> contatos/produtos/orcamentos`) — não feito nesta execução, mesmo motivo acima
-- [ ] Reextrair `supabase/db/current/` após aplicar as migrations — depende da aplicação real da migration (passo manual do usuário)
+- [x] Migration `garantia_protocolos` (+ enum `garantia_protocolo_status`) + `garantia_itens` (ver seção Módulo 2) — redigida em `supabase/db/migrations/20260922_158_garantia/001_garantia.sql` e **aplicada no Supabase real em 22/09/2026** (dry-run com ROLLBACK antes do COMMIT real)
+- [x] RLS de `garantia_protocolos` / `garantia_itens` — aplicada (leitura + escrita amplas para `authenticated`, sem allowlist por usuário — ver "Decisões do usuário" no Módulo 2)
+- [x] Função `garantia_resolver_data_venda(p_cliente_id, p_produto_id)` (`SECURITY DEFINER`, cascata nota_fiscal → orçamento → vendas legado → manual) e `garantia_buscar_produtos(p_search)` (`SECURITY DEFINER`, contorna RLS de `produtos` restrita a papéis do Hub) — redigidas em `002_garantia_buscar_produtos.sql`, aplicadas e testadas com dados reais (ver "Realizado")
+- [x] ~~(Opcional, decisão pendente) tabela `garantia_fornecedor_responsavel`~~ — decidido não criar (ver Pendências)
+- [x] Bucket de Storage `garantia_anexos` (leitura pública / escrita `authenticated`, mesmo padrão dos outros buckets) — criado na migration, ainda sem uso no frontend nesta fase (anexos ficaram como pendência de escopo)
+- [ ] Atualizar `supabase/db/domains/estoque_compras.md` — **não atualizado**: nenhum dos dois módulos ficou dentro de Estoque/Compras (correção de arquitetura), então esse domínio não é mais o lugar certo pra documentar isso; fica como pendência de onde documentar os sistemas novos
+- [ ] Atualizar `supabase/docs/relationships.md` com as novas FKs (`producao_pedidos.empresa_id`, `garantia_itens.fornecedor_id/cliente_id/produto_id/orcamento_id`, `garantia_protocolos.fornecedor_id`) — não feito nesta execução
+- [ ] Reextrair `supabase/db/current/` — não feito nesta rodada (ver nota já registrada nos Passos manuais)
 
 ### Frontend
 
 - [x] Sistema `04-Sistemas/controle-de-producao` (Skip projectId 60535) bootstrapado do zero: login simples via Supabase Auth (`hooks/use-auth.tsx`, sem `hub_pode_executar` — sistema ainda não registrado no Hub), `ProtectedRoute`, `AppHeader` com link de volta pra Central — implementado em 22/09/2026
 - [x] `services/producao.ts` + `pages/Producao.tsx` + `components/producao/` (modal novo pedido, upload de PDF, board/lista por status, tela de handoff) migrados sem alteração de lógica — implementado em 22/09/2026
 - [x] Removido de dentro de `04-Sistemas/compras-lucenera-3o23t98ee` (rota `/producao`, item de nav, `services/producao.ts`, `pages/Producao.tsx`, `components/producao/`) depois de confirmado funcionando no sistema novo — 22/09/2026
-- [x] `04-Sistemas/controle-de-garantia` (Skip projectId 60545) criado como submodule + repositório, conectado ao Supabase central pelo usuário — **sem código ainda**, aguardando pendências de negócio do Módulo 2 serem resolvidas
-- [ ] `services/garantia.ts` + `pages/Garantia.tsx` + `components/garantia/` dentro de `controle-de-garantia` (formulário de item de garantia, agrupamento em protocolo, painel de status do protocolo, painel de adiantamentos pendentes de devolução) — fora do escopo desta execução (Módulo 2)
-- [ ] Login/`ProtectedRoute`/`AppHeader` do `controle-de-garantia` (mesmo padrão simples do `controle-de-producao`) — fora do escopo desta execução (Módulo 2)
-- [ ] Avaliar se `04-Sistemas/controle-de-producao/supabase/AI_DB_CONTEXT.md` e `04-Sistemas/controle-de-garantia/supabase/AI_DB_CONTEXT.md` devem ser criados — não feito nesta execução
+- [x] Sistema `04-Sistemas/controle-de-garantia` (Skip projectId 60545) bootstrapado do zero: mesmo padrão de login simples/`ProtectedRoute`/`AppHeader` do `controle-de-producao` — implementado em 22/09/2026
+- [x] `services/garantia.ts` + `pages/Garantia.tsx` (3 abas: aguardando protocolo / protocolos / adiantamentos pendentes) + `components/garantia/` (`ModalNovoItemGarantia`, `ModalAbrirProtocolo`, `ModalAtualizarProtocolo`, `PainelAdiantamentosPendentes`) — implementado em 22/09/2026
+- [x] Testado ponta a ponta com usuário `authenticated` real (não só service role): busca de produto via RPC, criar item, ler item, abrir protocolo, agrupar item no protocolo, avançar status, resolver data de venda — tudo funcionando, dados de teste limpos depois (ver "Realizado")
 
 ### Passos manuais do usuário
 
 - [x] ~~Confirmar a nomenclatura exata da "terceira aba"~~ — resolvido em 22/09/2026 lendo a planilha real `01-Documento/01 - Planilhas/CONTROLE DE PRODUÇÃO (1).xlsx`: é `CORTES (GAP - SLOT - VISTA)`.
-- [ ] Confirmar se Cláudio, João, Manoel, Antônio, Leandro, Alexandre e Matheus têm (ou vão ganhar) login em `usuarios`/Supabase Auth — define se os campos de responsável/handoff são FK (`usuarios.id`, dropdown) ou texto livre
-- [ ] Definir quem pode escrever em qual protocolo de garantia (todo mundo, ou só quem "responde" pelo fornecedor daquele protocolo) — regra de permissão, não decidida nesta SPEC
-- [ ] Definir a fonte de verdade da "data de venda" por peça na Garantia quando não houver `notas_fiscais` (pré-Focus NFe) — usar `orcamentos`/`projeto_itens`, `vendas` (legado Connect) ou preenchimento manual
+- [ ] Confirmar se Cláudio, João, Manoel, Antônio, Leandro, Alexandre e **Vitória** têm (ou vão ganhar) login em `usuarios`/Supabase Auth — **achado 22/09/2026: Vitória não tem cadastro hoje** (só Débora). Enquanto isso, campos de responsável ficam "melhor esforço" (texto livre + FK nullable), sem RLS travando por usuário específico.
+- [x] ~~Definir quem pode escrever em qual protocolo de garantia~~ — **Resolvido em 22/09/2026 pelo usuário**: todo `authenticated` pode escrever (sem allowlist de RLS); "todos abrem item, só Vitória/Débora tocam protocolo" é reforçado só na UI.
+- [x] ~~Definir a fonte de verdade da "data de venda"~~ — **Resolvido em 22/09/2026 pelo usuário**: cascata nota_fiscal → orçamento → vendas legado → manual (usuário pediu "todas essas possibilidades"), via função `garantia_resolver_data_venda`.
 - [x] ~~Aplicar a migration `20260922_157_producao_pedidos` no Supabase real~~ — aplicada em 22/09/2026 (dry-run + COMMIT real via psql), confirmada com `\d` nas duas tabelas e no bucket.
-- [ ] Reextrair `supabase/db/current/` (snapshot completo do schema) — não feito nesta rodada; o projeto não reextrai a cada migration (ver `00_manifest.md`, última reextração completa é de 07/07/2026), fica pendente igual outras SPECs recentes. Fazer junto do Módulo 2 ou numa rodada de manutenção própria.
-- [ ] Atualizar `supabase/db/domains/estoque_compras.md` e `supabase/docs/relationships.md` — mesmo motivo acima, pendente
-- [ ] Homologar com Vitória/Débora/João o fluxo real de um pedido de produção ponta a ponta (upload dos 2 PDFs, atualização de status, marcar pronto, handoff com dupla assinatura) antes de descontinuar a planilha Excel — código está no ar em produção, mas ninguém testou ao vivo com dado real ainda
-- [ ] Homologar com Vitória/Débora um protocolo de garantia real (ex.: Interlight) antes de descontinuar a planilha/processo manual de garantia — só relevante quando o Módulo 2 for implementado
-- [x] ~~Rodar o agente `revisor` antes de qualquer commit~~ — feito em 22/09/2026, sem achados críticos (1 aviso sobre o bucket público, confirmado com o usuário como aceitável)
+- [x] ~~Aplicar a migration `20260922_158_garantia` no Supabase real~~ — aplicada em 22/09/2026 (2 arquivos: tabelas+RLS, depois a função `garantia_buscar_produtos` que só ficou necessária ao construir o frontend), confirmada com `\d` e com testes funcionais reais das duas RPCs.
+- [ ] Reextrair `supabase/db/current/` (snapshot completo do schema) — não feito nesta rodada; o projeto não reextrai a cada migration (ver `00_manifest.md`, última reextração completa é de 07/07/2026), fica pendente igual outras SPECs recentes.
+- [ ] Atualizar `supabase/db/domains/estoque_compras.md` e `supabase/docs/relationships.md` — pendente; ver nota no Checklist sobre `estoque_compras.md` não ser mais o lugar certo pra documentar isso.
+- [ ] Homologar com Vitória/Débora/João o fluxo real de um pedido de produção ponta a ponta (upload dos 2 PDFs, atualização de status, marcar pronto, handoff com dupla assinatura) antes de descontinuar a planilha Excel — código está no ar em produção, testado tecnicamente ponta a ponta (script automatizado), mas ninguém da operação testou ao vivo ainda
+- [ ] Homologar com Vitória/Débora um protocolo de garantia real (ex.: Interlight) antes de descontinuar a planilha/processo manual de garantia — código está no ar em produção, testado tecnicamente ponta a ponta, mas ninguém da operação testou ao vivo ainda
+- [x] ~~Rodar o agente `revisor` antes de qualquer commit~~ — feito em 22/09/2026 pro Módulo 1, sem achados críticos (1 aviso sobre o bucket público, confirmado com o usuário como aceitável). **Pendente rodar de novo cobrindo o Módulo 2 e a correção de arquitetura** (ver Checklist).
 - [x] ~~Correção de arquitetura: mover Produção pra sistema próprio~~ — usuário corrigiu em 22/09/2026, depois do Módulo 1 já publicado dentro do Compras: os dois sistemas deveriam ser separados. Usuário criou os repositórios GitHub (`Controle-de-producao`, `controle-de-garantia`) e os projetos Skip, e conectou ambos ao Supabase central. Registrados como submodules novos em `04-Sistemas/`.
 - [x] ~~Publicar `controle-de-producao` como sistema próprio~~ — bootstrap completo (login simples, service/página/componentes migrados) commitado+pushado no submodule (`7be80f6`) e publicado no Skip em 22/09/2026 (v0.0.5, `https://pagina-em-branco-e9c45.goskip.app`). QA pipeline do Skip (setup/lint/build/integrations/test) `ok` em todos os estágios; build e lint locais confirmados também (`npm run build`/`npm run lint` sem erros).
 - [x] ~~Remover Produção de dentro do `compras-lucenera-3o23t98ee`~~ — rota, nav e os 6 arquivos (`services/producao.ts`, `pages/Producao.tsx`, `components/producao/*`) removidos da working tree do Skip (v0.0.77) e do submodule local (`363bab7`), ambos publicados/pushados em 22/09/2026. Lint/build locais confirmados sem erros novos (só os 4 warnings pré-existentes, incluindo o `SystemSwitcher` não usado já documentado como pendência separada do rollout SPEC-120).
+- [x] ~~Implementar e publicar `controle-de-garantia`~~ — bootstrap completo + Módulo 2 implementados em 22/09/2026, commitado (`5ba18b0`, depois de um merge com commits que o próprio Skip já tinha auto-empurrado pro GitHub ao conectar o Supabase — ver "Realizado") e publicado (v0.0.6, `https://pagina-em-branco-b044c.goskip.app`). Testado ponta a ponta com usuário `authenticated` real via script.
 
 ## Objetivo
 
@@ -181,6 +184,13 @@ Não existe mais planilha confiável ("nem tem planilha mais" — Vinícius, 16/
 
 Responsáveis por fornecedor citados: Vitória cuida da maioria; Débora cuida de Interlight e Iluminar.
 
+#### Decisões do usuário (22/09/2026, resolvendo as pendências)
+
+1. **Quem pode escrever o quê**: qualquer usuário autenticado pode abrir um `garantia_itens` ("todos podem pedir uma garantia, pois todos conversam com clientes"). O processo formal com o fornecedor (`garantia_protocolos` — abrir, avançar status, fechar) é conduzido por Vitória e Débora. **Achado ao implementar**: só a Débora tem conta em `usuarios` (`debora@lucenera.com.br`) — a Vitória não tem nenhum cadastro em `usuarios` hoje (confirmado via `SELECT ... FROM usuarios`, 11 contas ativas, nenhuma bate com "Vitória" em nenhuma variação). Restringir a escrita em `garantia_protocolos` por RLS a um allowlist de `usuario_id` travaria a própria Vitória. Decisão: **sem bloqueio rígido no banco** — mesmo padrão "melhor esforço" já usado no handoff do Módulo 1 (`responsavel_nome` texto livre obrigatório + `responsavel_id` FK nullable, resolvido automaticamente quando o nome bate com um usuário real). Fica pendente apertar isso com RLS de verdade quando/se a Vitória ganhar login.
+2. **Origem da data de venda**: usar todas as três fontes, em cascata — nota fiscal (Focus NFe, mais confiável) → orçamento aprovado → venda legada da Connect (`vendas`) → preenchimento manual se nada for encontrado. **Achado ao implementar**: a tabela `notas_fiscais` tem RLS restrita a quem tem o papel `financeiro` no Hub (`hub_pode_executar(..., 'financeiro', ..., 'visualizar')`) — ninguém do Garantia teria esse papel. Solução: função `garantia_resolver_data_venda(p_cliente_id, p_produto_id)` `SECURITY DEFINER` que faz a busca com privilégio elevado e devolve só a data + a origem (nunca valores financeiros), chamável por qualquer `authenticated`.
+3. **Prazo de garantia**: não vira tabela de configuração — fica editável por item, no momento de abrir o `garantia_itens`, com um campo indicando se aquele prazo é da peça específica ou do padrão do fornecedor (`prazo_garantia_referencia`).
+4. Cobrança de adiantamento pendente: usuário não respondeu explicitamente — mantido como painel manual de conferência (lista de itens com `adiantamento = true` e `peca_antiga_devolvida_em IS NULL`), sem notificação automática. Se quiser automação depois, é aditivo.
+
 #### Tabelas novas (`public`, banco central)
 
 ```sql
@@ -194,47 +204,52 @@ CREATE TYPE public.garantia_protocolo_status AS ENUM (
 );
 
 garantia_protocolos
-  id             uuid PK default gen_random_uuid()
-  fornecedor_id  uuid NOT NULL REFERENCES contatos(id)   -- contatos.tipo = 'fornecedor'
-  responsavel_id uuid REFERENCES usuarios(id)             -- Vitória ou Débora, conforme fornecedor
-  status         public.garantia_protocolo_status NOT NULL DEFAULT 'em_contato_fornecedor'
-  desfecho       text CHECK (desfecho IN ('peca_nova','conserto','nao_acatado'))  -- só quando finalizado
-  observacao     text
-  created_at     timestamptz NOT NULL DEFAULT now()
-  updated_at     timestamptz NOT NULL DEFAULT now()
+  id                uuid PK default gen_random_uuid()
+  fornecedor_id     uuid NOT NULL REFERENCES contatos(id)   -- contatos.tipo = 'fornecedor'
+  responsavel_id    uuid REFERENCES usuarios(id)             -- nullable, "melhor esforço" (ver decisão 1)
+  responsavel_nome  text NOT NULL                            -- texto livre, normalmente Vitória ou Débora
+  status            public.garantia_protocolo_status NOT NULL DEFAULT 'em_contato_fornecedor'
+  desfecho          text CHECK (desfecho IN ('peca_nova','conserto','nao_acatado'))  -- só quando finalizado
+  observacao        text
+  created_by        uuid REFERENCES usuarios(id)
+  created_at        timestamptz NOT NULL DEFAULT now()
+  updated_at        timestamptz NOT NULL DEFAULT now()
 
 garantia_itens
-  id                        uuid PK default gen_random_uuid()
-  fornecedor_id             uuid NOT NULL REFERENCES contatos(id)
-  produto_id                uuid REFERENCES produtos(id)          -- nullable, peça sem cadastro
-  produto_descricao_livre   text                                   -- fallback quando produto_id é NULL
-  cliente_id                uuid REFERENCES contatos(id)          -- nullable
-  orcamento_id              uuid REFERENCES orcamentos(id)        -- nullable, opcional/informativo
-  data_venda_referencia     date                                   -- snapshot usado no cálculo do prazo
-  prazo_garantia_anos       numeric                                -- snapshot do prazo aplicável (pendência: origem)
-  motivo                    text NOT NULL                          -- 'queimou' | 'sobrecarga_mau_uso' | 'envio_errado' | 'producao_errada' | 'outro'
-  atendimento               text NOT NULL CHECK (atendimento IN ('imediato','analise_fornecedor'))
-  adiantamento              boolean NOT NULL DEFAULT false
-  peca_antiga_devolvida_em  date                                   -- fecha a pendência do adiantamento
-  garantia_protocolo_id     uuid REFERENCES garantia_protocolos(id) -- nullable até ser agrupado no "bloco"
-  quantidade                numeric NOT NULL DEFAULT 1
-  observacao                text
-  created_by                uuid REFERENCES usuarios(id)
-  created_at                timestamptz NOT NULL DEFAULT now()
-  updated_at                timestamptz NOT NULL DEFAULT now()
+  id                         uuid PK default gen_random_uuid()
+  fornecedor_id              uuid NOT NULL REFERENCES contatos(id)
+  produto_id                 uuid REFERENCES produtos(id)          -- nullable, peça sem cadastro
+  produto_descricao_livre    text                                   -- fallback quando produto_id é NULL
+  cliente_id                 uuid REFERENCES contatos(id)          -- nullable
+  cliente_nome               text                                   -- fallback texto livre
+  orcamento_id               uuid REFERENCES orcamentos(id)        -- nullable, opcional/informativo
+  data_venda_referencia      date
+  data_venda_origem          text CHECK (data_venda_origem IN ('nota_fiscal','orcamento','vendas_legado','manual'))
+  prazo_garantia_anos        numeric
+  prazo_garantia_referencia  text CHECK (prazo_garantia_referencia IN ('peca','fornecedor'))
+  motivo                     text NOT NULL CHECK (motivo IN ('queimou','sobrecarga_mau_uso','envio_errado','producao_errada','outro'))
+  atendimento                text NOT NULL CHECK (atendimento IN ('imediato','analise_fornecedor'))
+  adiantamento               boolean NOT NULL DEFAULT false
+  peca_antiga_devolvida_em   date                                   -- fecha a pendência do adiantamento
+  garantia_protocolo_id      uuid REFERENCES garantia_protocolos(id) -- nullable até ser agrupado no "bloco"
+  quantidade                 numeric NOT NULL DEFAULT 1
+  observacao                 text
+  created_by                 uuid REFERENCES usuarios(id)
+  created_at                 timestamptz NOT NULL DEFAULT now()
+  updated_at                 timestamptz NOT NULL DEFAULT now()
 ```
 
-Opcional (pendência, ver abaixo): `garantia_fornecedor_responsavel(fornecedor_id uuid REFERENCES contatos(id), usuario_id uuid REFERENCES usuarios(id))` como sugestão de responsável padrão por fornecedor (Vitória/Débora), sem forçar regra de permissão de escrita.
+Função `garantia_resolver_data_venda(p_cliente_id uuid, p_produto_id uuid) RETURNS TABLE(data_venda date, origem text)`, `SECURITY DEFINER`, cascata: `notas_fiscais` (via `notas_fiscais_itens` → `orcamento_itens` → `orcamentos`, `status_emissao = 'autorizado'`, MAX(`data_emissao`), origem `'nota_fiscal'`) → `orcamentos`/`orcamento_itens` aprovados (`aprovado_cliente_em`, origem `'orcamento'`) → `vendas` legado (match por `produto_id` + `nome_cliente` ILIKE, MAX(`data_emissao`), origem `'vendas_legado'`) → `NULL` (UI cai pra preenchimento manual, origem `'manual'`).
 
-RLS: leitura ampla para `authenticated` (o objetivo declarado é "todo mundo pode ver como tá os processos de garantia"). Escrita: pendência — Vinícius não definiu se é restrita a quem "responde" pelo fornecedor.
+RLS: leitura ampla para `authenticated` em ambas as tabelas. Escrita (INSERT/UPDATE) ampla para `authenticated` em ambas — sem allowlist por `usuario_id` (ver decisão 1 acima); a distinção "todos abrem item, só Vitória/Débora tocam protocolo" é reforçada na UI, não no banco.
 
 #### Fluxo de tela (alto nível)
 
-1. Peça com defeito chega → cria-se um `garantia_itens` com fornecedor, produto (ou descrição livre), cliente, motivo, se foi atendimento imediato ou foi para análise, se é adiantamento.
+1. Peça com defeito chega → qualquer usuário cria um `garantia_itens` com fornecedor, produto (ou descrição livre), cliente (ou nome livre), motivo, atendimento imediato ou análise, adiantamento ou não, prazo de garantia (valor + se é da peça ou do fornecedor). Botão "Buscar data de venda" chama a função `garantia_resolver_data_venda`; se nada for encontrado, o campo fica livre pra preenchimento manual.
 2. Itens sem `garantia_protocolo_id` ficam numa lista "aguardando abrir protocolo" (o "canto cheio de coisas pra pedir garantia").
 3. Quando há volume suficiente por fornecedor, Vitória/Débora agrupam os itens em um `garantia_protocolos` novo (preenchendo `garantia_protocolo_id` nos itens) e avançam o `status` do protocolo pelos 6 estados fixos.
 4. Ao finalizar, registra-se `desfecho` (peça nova / conserto / não acatado).
-5. Itens com `adiantamento = true` e `peca_antiga_devolvida_em IS NULL` aparecem num painel de pendências para cobrança periódica.
+5. Itens com `adiantamento = true` e `peca_antiga_devolvida_em IS NULL` aparecem num painel de pendências para cobrança manual periódica.
 
 #### Critérios de aceite
 
@@ -247,7 +262,7 @@ RLS: leitura ampla para `authenticated` (o objetivo declarado é "todo mundo pod
 
 ## Realizado
 
-**22/09/2026 — Módulo 1 (Controle de Produção) implementado.** Módulo 2 (Controle de Garantia) **não** foi implementado nesta execução — continua com pendências de regra de negócio em aberto (permissão de escrita por fornecedor, origem da data de venda pré-Focus-NFe), listadas na seção "Pendências".
+**22/09/2026 — Módulo 1 (Controle de Produção) implementado.** Módulo 2 (Controle de Garantia) implementado depois, no mesmo dia, depois do usuário resolver as pendências de negócio (ver mais abaixo).
 
 Banco (repo central, `supabase/db/migrations/20260922_157_producao_pedidos/001_producao_pedidos.sql`) — **redigida e aplicada no Supabase real em 22/09/2026** (dry-run com ROLLBACK antes do COMMIT real, confirmada com `\d` nas duas tabelas e no bucket):
 - Tabela `producao_pedidos` (campos exatamente como especificados na seção Módulo 1, `tipo_peca` CHECK `lineas_steccas|peca_avulsa|corte`, `empresa_id` FK real para `empresas`, `status` texto livre sem CHECK).
@@ -278,7 +293,28 @@ Migração do Módulo 1 executada na sequência:
 - Verificação: `skip_project_apply_changes` (QA completo: setup/staticAnalysis/build/integrations/test, todos `ok`) + `skip_project_publish` publicaram em `https://pagina-em-branco-e9c45.goskip.app`. Localmente, `npm run lint` e `npm run build` também passaram sem erros no submodule. Commitado e pushado (`7be80f6`).
 - Depois de confirmado que o sistema novo builda e publica limpo, o Módulo 1 foi **removido** de dentro do `compras-lucenera-3o23t98ee`: rota `/producao`, item de nav "Produção" e os 6 arquivos (`services/producao.ts`, `pages/Producao.tsx`, `components/producao/*`) apagados tanto da working tree do Skip (`skip_file_delete` + `skip_project_apply_changes` + `skip_project_publish`, v0.0.77, mesma URL `https://pagina-em-branco-cdd79.goskip.app`) quanto do submodule local (commitado e pushado, `363bab7`). `App.tsx`/`AppNav.tsx` do Compras voltaram ao estado anterior à SPEC-156 nos dois lugares. Lint/build locais confirmados sem erros novos.
 - **As tabelas `producao_pedidos`/`producao_pedido_handoffs` no Supabase central não mudaram de lugar** — só o frontend migrou de projeto. Nenhuma nova migration foi necessária para a correção.
-- `controle-de-garantia` (Skip 60545) só teve o submodule/repositório registrados e a conexão ao Supabase feita pelo usuário — **nenhum código escrito**, aguardando as pendências de negócio do Módulo 2 (permissão de escrita por fornecedor, origem da data de venda pré-Focus-NFe, listadas abaixo) serem resolvidas antes de implementar.
+**22/09/2026 (mesmo dia) — Módulo 2 (Controle de Garantia) implementado**, depois do usuário responder as 3 pendências de negócio (ver "Decisões do usuário" na seção Módulo 2). Dois achados de banco durante a implementação, ambos documentados na migration e no schema:
+- **`vendas` (legado Connect) tem `produto_id`/`descricao_produto` 0% preenchidos** (263/263 linhas sem produto) — a cascata de resolução de data de venda foi escrita corretamente contra essas colunas, mas na prática hoje sempre cai pro tier de `orçamento` ou pro manual, porque não tem dado de produto pra casar na tabela legada. Não é bug da função, é lacuna do dado de origem.
+- **`notas_fiscais` e `produtos` têm RLS restrita a papéis do Hub** (`financeiro` e `cadastro`/`orcamentos`/`necessidade-de-compra`, respectivamente) que o `controle-de-garantia` não tem — resolvido com 2 funções `SECURITY DEFINER` (`garantia_resolver_data_venda`, `garantia_buscar_produtos`) que devolvem só o necessário (data+origem; nome/sku/referência), nunca dado financeiro.
+
+Banco (`supabase/db/migrations/20260922_158_garantia/`), aplicado no Supabase real (dry-run + COMMIT via psql):
+- `001_garantia.sql`: tipo `garantia_protocolo_status` (6 estados), tabelas `garantia_protocolos`/`garantia_itens` (schema completo na seção Módulo 1), função `garantia_resolver_data_venda`, bucket `garantia_anexos`.
+- `002_garantia_buscar_produtos.sql`: função `garantia_buscar_produtos` — só ficou necessária ao escrever o frontend e descobrir a RLS de `produtos`, por isso é um arquivo separado (achado durante a implementação, não previsto na SPEC original).
+- Testado com dados reais antes de aplicar: `garantia_resolver_data_venda` com um par cliente/produto real que tem orçamento aprovado (achou a data certa, origem `orcamento`) e com UUIDs aleatórios (retornou vazio, como esperado).
+
+Frontend `04-Sistemas/controle-de-garantia` (Skip projectId 60545):
+- Bootstrap idêntico ao `controle-de-producao` (login simples, `ProtectedRoute`, `AppHeader`), adaptado pro tema "Garantia".
+- `src/services/garantia.ts`: fornecedores/clientes/produtos (busca), resolução de data de venda, CRUD de itens e protocolos, marcar peça devolvida.
+- `src/pages/Garantia.tsx`: 3 abas — itens aguardando protocolo, protocolos abertos, adiantamentos pendentes.
+- `src/components/garantia/ModalNovoItemGarantia.tsx`: formulário completo (fornecedor, cliente com busca+fallback texto livre, produto com busca+fallback texto livre, botão "buscar data de venda automaticamente", prazo de garantia + campo "peça ou fornecedor", motivo, atendimento, adiantamento, quantidade, observação) — qualquer usuário autenticado pode usar.
+- `src/components/garantia/ModalAbrirProtocolo.tsx`: seleciona fornecedor, lista itens sem protocolo daquele fornecedor com checkbox, campo de responsável (texto livre + sugestão via `<datalist>` de usuários reais).
+- `src/components/garantia/ModalAtualizarProtocolo.tsx`: avança status pelos 6 estados fixos; exige `desfecho` quando o status vira "finalizado".
+- `src/components/garantia/PainelAdiantamentosPendentes.tsx`: lista itens com `adiantamento=true` e `peca_antiga_devolvida_em IS NULL`, botão de marcar devolvida com data.
+- Verificação: `skip_project_apply_changes` (QA completo `ok`) + `skip_project_publish`, publicado em `https://pagina-em-branco-b044c.goskip.app` (v0.0.6). `npm run lint`/`npm run build` locais sem erros.
+- **Testado ponta a ponta com usuário `authenticated` real** (script Python criando um usuário de teste de verdade, logando, e exercitando a API exatamente como o frontend faria — não só via service role): busca de produto via RPC (bypassando a RLS real de `produtos`), criar item, ler item (RLS select), abrir protocolo (RLS insert), agrupar item no protocolo (RLS update), avançar status do protocolo, chamar a resolução de data de venda. Tudo funcionou; usuário e dados de teste apagados depois, sem deixar rastro em produção.
+- **Achado no git**: ao tentar dar push no submodule `controle-de-garantia`, o remote tinha commits que eu não tinha localmente (`git push` rejeitado por "fetch first"). Investigado antes de forçar qualquer coisa: eram commits que o próprio **Skip empurrou automaticamente pro GitHub** quando o usuário conectou o Supabase pela UI (antes de eu clonar), com o `types.ts` completo de verdade (gerado do schema real) e o `.env`/`client.ts`. `git diff --stat` confirmou que era só isso, sem sobreposição com meu trabalho — fiz `git merge` normal, resolvendo os 3 conflitos (`package.json`: mantive minha versão; `client.ts`/`types.ts`: usei os reais do Skip no lugar dos meus stubs), rodei lint/build de novo pra confirmar, e então dei push (`5ba18b0`). Nenhum trabalho foi perdido nem sobrescrito às cegas.
+
+Nenhum campo de `garantia_itens`/`garantia_protocolos` referencia `projeto_itens`/`estoque_itens`/`separacoes` obrigatoriamente — confirma o desacoplamento pedido pelo Vinícius (`orcamento_id` é sempre opcional/informativo).
 
 **Lição registrada em memória** ([[feedback_confirmar_sistema_novo_vs_modulo_com_usuario]]): decisão de "vira módulo de sistema existente" vs "vira sistema novo separado" é do usuário, não deveria ter sido decidida e implementada sem confirmação explícita — mesmo com justificativa técnica sólida (ver seção superada acima).
 
@@ -286,12 +322,14 @@ Migração do Módulo 1 executada na sequência:
 
 - [x] ~~Confirmar a nomenclatura exata da terceira aba~~ — **Resolvido em 22/09/2026** lendo a planilha real (`01-Documento/01 - Planilhas/CONTROLE DE PRODUÇÃO (1).xlsx`): a 3ª aba é `CORTES (GAP - SLOT - VISTA)`. `producao_pedidos.tipo_peca` vira `'lineas_steccas' | 'peca_avulsa' | 'corte'`.
 - [x] ~~Definir se a lista de status é enum fixo ou configurável~~ — **Resolvido em 22/09/2026**: planilha real mostra dado sujo (`PRONTO`/`Pronto`/`PRONTA`, mais `CANCELADO`/`EXCLUÍDO`/`ENTRADA PARCIAL` soltos) → `status text` livre sem CHECK, com dropdown de sugestões na UI (ver Módulo 1).
-- [ ] Confirmar se Cláudio, João, Manoel, Antônio, Leandro, Alexandre e Matheus têm ou vão ganhar login em `usuarios`/Supabase Auth — define se `entregue_por_usuario_id`/`recebido_por_usuario_id` (Produção, handoff) e `created_by`/`responsavel_id` (Garantia) podem ser FK obrigatória com dropdown, ou precisam continuar aceitando texto livre.
-- [ ] Definir regra de permissão de escrita em `garantia_itens`/`garantia_protocolos`: qualquer usuário do sistema pode criar/editar qualquer item, ou só quem "responde" pelo fornecedor daquele protocolo (Vitória/Débora)? Não decidido nesta SPEC por ser regra de controle de acesso.
-- [ ] Definir a origem confiável de `data_venda_referencia`/`prazo_garantia_anos` em `garantia_itens` quando a venda for anterior à integração Focus NFe (21/09/2026) e não houver `notas_fiscais` correspondente — usar `orcamentos`/`projeto_itens`, a tabela legada `vendas` (import Connect) ou preenchimento manual pela pessoa que abre o item.
-- [ ] Definir se `prazo_garantia_anos` por fornecedor deve virar uma tabela de configuração (ex.: `garantia_fornecedor_prazo(fornecedor_id, anos)`) ou continuar como campo manual preenchido item a item — Vinícius deu exemplos (Interlight=5, outros=1 ou 2) mas não definiu uma tabela de prazos por fornecedor.
-- [ ] Decidir se cobrança de "adiantamento pendente de devolução" (hoje feita "semanalmente" de forma manual pelo Vinícius) deve virar notificação automática (e-mail/WhatsApp) nesta fase ou permanecer como painel/lista de conferência manual.
+- [ ] Confirmar se Cláudio, João, Manoel, Antônio, Leandro, Alexandre e **Vitória** têm ou vão ganhar login em `usuarios`/Supabase Auth — **achado em 22/09/2026: Vitória não tem cadastro hoje** (só Débora, `debora@lucenera.com.br`). Enquanto isso não for resolvido, `entregue_por_usuario_id`/`recebido_por_usuario_id` (Produção) e `responsavel_id` (Garantia) continuam "melhor esforço" (texto livre + FK nullable), sem RLS travando por usuário específico.
+- [x] ~~Definir regra de permissão de escrita em `garantia_itens`/`garantia_protocolos`~~ — **Resolvido em 22/09/2026**: todo `authenticated` pode escrever nas duas tabelas (sem allowlist de RLS, ver "Decisões do usuário" no Módulo 2); a distinção "todos abrem item, só Vitória/Débora tocam protocolo" é só de UI, não de banco — justamente porque a Vitória não tem login pra travar por RLS ainda.
+- [x] ~~Definir a origem confiável de `data_venda_referencia`~~ — **Resolvido em 22/09/2026**: cascata nota_fiscal → orçamento → vendas legado → manual, via função `garantia_resolver_data_venda` (`SECURITY DEFINER`, porque `notas_fiscais` tem RLS restrita ao papel financeiro).
+- [x] ~~Definir se `prazo_garantia_anos` vira tabela de configuração~~ — **Resolvido em 22/09/2026**: não, fica editável por item (`prazo_garantia_anos` + `prazo_garantia_referencia` indicando se é da peça ou do fornecedor).
+- [ ] Decidir se cobrança de "adiantamento pendente de devolução" deve virar notificação automática (e-mail/WhatsApp) — usuário não respondeu essa parte especificamente; implementado como painel manual de conferência por padrão (aditivo depois, se quiser automatizar).
 - [ ] Decidir se anexos (nota fiscal do fornecedor, fotos da peça com defeito) entram nesta fase do Controle de Garantia — não foram pedidos explicitamente por Vinícius, mas a existência do status "nota fiscal emitida" sugere que pode haver documento a anexar.
-- [ ] Confirmar se `garantia_fornecedor_responsavel` (mapeamento fornecedor → Vitória/Débora) deve existir como tabela, ou se é suficiente atribuir `responsavel_id` manualmente a cada protocolo sem um "padrão" pré-configurado.
+- [x] ~~Confirmar se `garantia_fornecedor_responsavel` deve existir como tabela~~ — **Resolvido em 22/09/2026**: não, `responsavel_nome` é preenchido por protocolo, sem tabela de mapeamento fornecedor→responsável padrão.
 - [ ] Avaliar, junto do usuário, se `04-Sistemas/controle-de-producao/supabase/AI_DB_CONTEXT.md` e `04-Sistemas/controle-de-garantia/supabase/AI_DB_CONTEXT.md` devem ser criados agora, ou se isso fica para uma SPEC de higienização futura dos dois submodules novos.
 - [ ] Decidir se/quando registrar `controle-de-producao` e `controle-de-garantia` na tabela `systems` do Hub (com `papel_permissoes` explícita) para entrarem no SSO/SystemSwitcher como os outros 10 sistemas, ou se ficam com login próprio simples indefinidamente — hoje nenhum dos dois tem checagem de permissão granular, só "está logado ou não".
+- [ ] Bucket `garantia_anexos` foi criado na migration mas o frontend não usa upload ainda (decisão de anexos ficou em aberto, item acima) — se a resposta for "sim, usar anexos", falta só o componente de upload, o bucket já existe.
+- [ ] `vendas` (legado Connect) está com `produto_id`/`descricao_produto` 0% preenchidos (263/263 linhas) — se algum dia esse dado for backfillado, a cascata de `garantia_resolver_data_venda` passa a encontrar mais casos automaticamente sem precisar mudar a função; por ora essa fonte não contribui com nada na prática.

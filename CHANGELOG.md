@@ -50,6 +50,30 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   usuário, não deveria ter sido implementada sem confirmação explícita, mesmo com justificativa técnica
   sólida. Ver `feedback_confirmar_sistema_novo_vs_modulo_com_usuario` na memória do projeto.
 
+### SPEC-156 Módulo 2 implementado e publicado (mesmo dia): Controle de Garantia
+
+- Usuário respondeu as 3 pendências de negócio: (1) qualquer usuário pode abrir um item de garantia,
+  só Vitória/Débora conduzem o processo formal com o fornecedor — sem trava de RLS por usuário porque a
+  Vitória não tem cadastro em `usuarios` (achado ao consultar o banco); (2) data de venda resolvida em
+  cascata nota fiscal → orçamento → venda legada (Connect) → manual; (3) prazo de garantia editável por
+  item, com campo indicando se é da peça específica ou do padrão do fornecedor.
+- Banco: `supabase/db/migrations/20260922_158_garantia/` criou `garantia_protocolos`/`garantia_itens`
+  (6 status fixos de protocolo), bucket `garantia_anexos`, e duas funções `SECURITY DEFINER`
+  (`garantia_resolver_data_venda`, `garantia_buscar_produtos`) — necessárias porque `notas_fiscais` e
+  `produtos` têm RLS restrita a papéis do Hub que este sistema novo não tem. Achado: a tabela legada
+  `vendas` está com `produto_id`/`descricao_produto` 0% preenchidos (263/263 linhas), então esse
+  fallback da cascata não encontra nada na prática hoje.
+- Frontend `04-Sistemas/controle-de-garantia` (Skip projectId 60545): login simples (mesmo padrão do
+  `controle-de-producao`), 3 abas (itens aguardando protocolo, protocolos, adiantamentos pendentes),
+  formulário completo de item com busca de cliente/produto e resolução automática de data de venda.
+  Publicado (`https://pagina-em-branco-b044c.goskip.app`, v0.0.6).
+- Testado ponta a ponta com um usuário `authenticated` real (script criando conta de teste, logando,
+  exercitando toda a API como o app faria, depois apagando tudo) — confirmado funcionando, RLS incluída.
+- Achado de git: ao dar push no submodule, o remote já tinha commits que o próprio Skip empurrou
+  sozinho pro GitHub quando o usuário conectou o Supabase (antes do clone) — investigado via
+  `git diff --stat` (sem sobreposição real com o trabalho feito), resolvido com merge normal preferindo
+  o `types.ts`/`client.ts` reais do Skip no lugar dos stubs locais.
+
 ## 2026-09-21 (3)
 
 ### SPEC-154: migrations aplicadas + Edge Functions deployadas + frontend publicado ("simulação sem conta Focus NFe")

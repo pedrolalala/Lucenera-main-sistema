@@ -44,3 +44,9 @@
 [submodule "04-Sistemas/vendas-lucenera"]
 	path = 04-Sistemas/vendas-lucenera
 	url = https://github.com/pedrolalala/Vendas-Lucenera.git
+[submodule "04-Sistemas/controle-de-producao"]
+	path = 04-Sistemas/controle-de-producao
+	url = https://github.com/pedrolalala/Controle-de-producao.git
+[submodule "04-Sistemas/controle-de-garantia"]
+	path = 04-Sistemas/controle-de-garantia
+	url = https://github.com/pedrolalala/controle-de-garantia.git

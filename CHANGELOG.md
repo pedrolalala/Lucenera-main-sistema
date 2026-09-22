@@ -30,6 +30,26 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   regra de negócio em aberto (permissão de escrita por fornecedor, origem da data de venda pré-Focus
   NFe). Ver `03-Projeto/Planos de Ação/SPECs/SPEC-156_Controle_Producao_e_Garantia.md`.
 
+### SPEC-156 correção de arquitetura (mesmo dia): Produção e Garantia viram sistemas próprios
+
+- Usuário corrigiu, logo depois do item acima: os dois sistemas deveriam ser separados do Compras, não
+  módulos dele. Criou os repositórios GitHub `pedrolalala/Controle-de-producao` e
+  `pedrolalala/controle-de-garantia`, os projetos Skip (60535 e 60545) e conectou ambos ao mesmo
+  Supabase central. Registrados como submodules novos: `04-Sistemas/controle-de-producao` e
+  `04-Sistemas/controle-de-garantia`.
+- `controle-de-producao` bootstrapado do zero (login simples via Supabase Auth, sem `hub_pode_executar`
+  — sistema ainda não registrado no Hub) e o Módulo 1 (service/página/4 componentes) migrado sem
+  alteração de lógica. Publicado (`https://pagina-em-branco-e9c45.goskip.app`, v0.0.5) e commitado
+  (`7be80f6`). Tabelas `producao_pedidos`/`producao_pedido_handoffs` no Supabase central não mudaram de
+  lugar — só o frontend migrou de projeto.
+- Módulo 1 removido de dentro do `compras-lucenera-3o23t98ee` (Skip v0.0.77, commit `363bab7`) depois
+  de confirmado funcionando no sistema novo.
+- `controle-de-garantia` só com repositório/projeto Skip criados e Supabase conectado — sem código
+  ainda, aguardando as mesmas pendências de negócio do Módulo 2.
+- Lição registrada em memória: decisão "módulo de sistema existente" vs "sistema novo separado" é do
+  usuário, não deveria ter sido implementada sem confirmação explícita, mesmo com justificativa técnica
+  sólida. Ver `feedback_confirmar_sistema_novo_vs_modulo_com_usuario` na memória do projeto.
+
 ## 2026-09-21 (3)
 
 ### SPEC-154: migrations aplicadas + Edge Functions deployadas + frontend publicado ("simulação sem conta Focus NFe")

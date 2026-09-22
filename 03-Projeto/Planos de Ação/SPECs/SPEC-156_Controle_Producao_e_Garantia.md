@@ -1,9 +1,10 @@
 ---
-titulo: "SPEC-156 — Controle de Produção e Controle de Garantia (módulos novos em Estoque/Compras)"
-status: "em andamento — Módulo 1 implementado, aplicado no Supabase real e publicado no Skip; Módulo 2 não iniciado"
+titulo: "SPEC-156 — Controle de Produção e Controle de Garantia (2 sistemas novos, separados do Compras)"
+status: "Módulo 1 (Produção) implementado, aplicado no Supabase real e publicado como sistema próprio. Módulo 2 (Garantia) só com repositório/projeto Skip criados, sem código ainda — pendências de negócio em aberto."
 data_ultima_modificacao: 2026-09-22
 sistemas_envolvidos:
-  - Estoque/Compras (compras-lucenera-3o23t98ee)
+  - Controle de Produção (04-Sistemas/controle-de-producao, github.com/pedrolalala/Controle-de-producao, Skip projectId 60535)
+  - Controle de Garantia (04-Sistemas/controle-de-garantia, github.com/pedrolalala/controle-de-garantia, Skip projectId 60545) — repositório e projeto Skip criados, sem implementação ainda
   - Supabase (banco central)
 ---
 
@@ -25,13 +26,15 @@ sistemas_envolvidos:
 - [ ] Atualizar `supabase/docs/relationships.md` se novas FKs relevantes forem criadas (`producao_pedidos.empresa_id -> empresas.id`, `garantia_itens.fornecedor_id/cliente_id/produto_id/orcamento_id -> contatos/produtos/orcamentos`) — não feito nesta execução, mesmo motivo acima
 - [ ] Reextrair `supabase/db/current/` após aplicar as migrations — depende da aplicação real da migration (passo manual do usuário)
 
-### Frontend (`04-Sistemas/compras-lucenera-3o23t98ee`)
+### Frontend
 
-- [x] `services/producao.ts` + `pages/Producao.tsx` + `components/producao/` (modal novo pedido, upload de PDF, board/lista por status, tela de handoff) — implementado em 22/09/2026
-- [x] Item de navegação "Produção" em `src/components/AppNav.tsx` — implementado em 22/09/2026
-- [ ] `services/garantia.ts` + `pages/Garantia.tsx` + `components/garantia/` (formulário de item de garantia, agrupamento em protocolo, painel de status do protocolo, painel de adiantamentos pendentes de devolução) — fora do escopo desta execução (Módulo 2)
-- [ ] Item de navegação "Garantia" em `src/components/AppNav.tsx` — fora do escopo desta execução (Módulo 2)
-- [ ] Avaliar se `04-Sistemas/compras-lucenera-3o23t98ee/supabase/AI_DB_CONTEXT.md` deve ser criado (não existe hoje neste submodule) e, se sim, documentar os dois módulos nele — não feito nesta execução, mesmo motivo do item de `estoque_compras.md` acima
+- [x] Sistema `04-Sistemas/controle-de-producao` (Skip projectId 60535) bootstrapado do zero: login simples via Supabase Auth (`hooks/use-auth.tsx`, sem `hub_pode_executar` — sistema ainda não registrado no Hub), `ProtectedRoute`, `AppHeader` com link de volta pra Central — implementado em 22/09/2026
+- [x] `services/producao.ts` + `pages/Producao.tsx` + `components/producao/` (modal novo pedido, upload de PDF, board/lista por status, tela de handoff) migrados sem alteração de lógica — implementado em 22/09/2026
+- [x] Removido de dentro de `04-Sistemas/compras-lucenera-3o23t98ee` (rota `/producao`, item de nav, `services/producao.ts`, `pages/Producao.tsx`, `components/producao/`) depois de confirmado funcionando no sistema novo — 22/09/2026
+- [x] `04-Sistemas/controle-de-garantia` (Skip projectId 60545) criado como submodule + repositório, conectado ao Supabase central pelo usuário — **sem código ainda**, aguardando pendências de negócio do Módulo 2 serem resolvidas
+- [ ] `services/garantia.ts` + `pages/Garantia.tsx` + `components/garantia/` dentro de `controle-de-garantia` (formulário de item de garantia, agrupamento em protocolo, painel de status do protocolo, painel de adiantamentos pendentes de devolução) — fora do escopo desta execução (Módulo 2)
+- [ ] Login/`ProtectedRoute`/`AppHeader` do `controle-de-garantia` (mesmo padrão simples do `controle-de-producao`) — fora do escopo desta execução (Módulo 2)
+- [ ] Avaliar se `04-Sistemas/controle-de-producao/supabase/AI_DB_CONTEXT.md` e `04-Sistemas/controle-de-garantia/supabase/AI_DB_CONTEXT.md` devem ser criados — não feito nesta execução
 
 ### Passos manuais do usuário
 
@@ -45,27 +48,29 @@ sistemas_envolvidos:
 - [ ] Homologar com Vitória/Débora/João o fluxo real de um pedido de produção ponta a ponta (upload dos 2 PDFs, atualização de status, marcar pronto, handoff com dupla assinatura) antes de descontinuar a planilha Excel — código está no ar em produção, mas ninguém testou ao vivo com dado real ainda
 - [ ] Homologar com Vitória/Débora um protocolo de garantia real (ex.: Interlight) antes de descontinuar a planilha/processo manual de garantia — só relevante quando o Módulo 2 for implementado
 - [x] ~~Rodar o agente `revisor` antes de qualquer commit~~ — feito em 22/09/2026, sem achados críticos (1 aviso sobre o bucket público, confirmado com o usuário como aceitável)
-- [x] ~~Publicar a versão nova do `compras-lucenera-3o23t98ee` no Skip~~ — commitado+pushado no submodule (`cae8341`) e publicado na working tree real do Skip em 22/09/2026 (v0.0.76, `https://pagina-em-branco-cdd79.goskip.app`). Achado: `App.tsx`/`AppNav.tsx` locais estavam desatualizados em relação ao Skip (lazy-loading, `ProtectedRoute`, `SystemSwitcher` do rollout SPEC-120 já aplicados direto na working tree) — a rota/nav nova foi enxertada no padrão real do Skip, não sobrescrita pela versão local.
+- [x] ~~Correção de arquitetura: mover Produção pra sistema próprio~~ — usuário corrigiu em 22/09/2026, depois do Módulo 1 já publicado dentro do Compras: os dois sistemas deveriam ser separados. Usuário criou os repositórios GitHub (`Controle-de-producao`, `controle-de-garantia`) e os projetos Skip, e conectou ambos ao Supabase central. Registrados como submodules novos em `04-Sistemas/`.
+- [x] ~~Publicar `controle-de-producao` como sistema próprio~~ — bootstrap completo (login simples, service/página/componentes migrados) commitado+pushado no submodule (`7be80f6`) e publicado no Skip em 22/09/2026 (v0.0.5, `https://pagina-em-branco-e9c45.goskip.app`). QA pipeline do Skip (setup/lint/build/integrations/test) `ok` em todos os estágios; build e lint locais confirmados também (`npm run build`/`npm run lint` sem erros).
+- [x] ~~Remover Produção de dentro do `compras-lucenera-3o23t98ee`~~ — rota, nav e os 6 arquivos (`services/producao.ts`, `pages/Producao.tsx`, `components/producao/*`) removidos da working tree do Skip (v0.0.77) e do submodule local (`363bab7`), ambos publicados/pushados em 22/09/2026. Lint/build locais confirmados sem erros novos (só os 4 warnings pré-existentes, incluindo o `SystemSwitcher` não usado já documentado como pendência separada do rollout SPEC-120).
 
 ## Objetivo
 
 Hoje dois processos operacionais da Lucenera rodam em planilha Excel manual (Controle de Produção) ou não têm mais nem planilha confiável (Controle de Garantia — "nem tem planilha mais"), gerando fricção de comunicação (ligações para saber status), risco de "bucha" de responsabilidade (quem entregou/recebeu uma peça) e falta de rastreabilidade (peças acumuladas esperando abertura de garantia com fornecedor).
 
-Esta SPEC cria dois módulos novos, **funcionalmente independentes entre si e sem vínculo com orçamento/venda/projeto nesta fase** (decisão explícita do Vinícius: "não vai ter vínculo nenhum com a venda... não vai ter vínculo com nada"), dentro do sistema Estoque/Compras já existente:
+Esta SPEC cria dois sistemas novos, **funcionalmente independentes entre si, do Estoque/Compras, e sem vínculo com orçamento/venda/projeto nesta fase** (decisão explícita do Vinícius: "não vai ter vínculo nenhum com a venda... não vai ter vínculo com nada"):
 
 1. **Controle de Produção** — réplica digital da planilha de pedidos de produção interna (peças "linha e esteca" cortadas sob demanda + "peças avulsas"), com gestão de status em tempo real visível por todos, e registro de handoff com dupla assinatura (quem entrega / quem recebe).
 2. **Controle de Garantia** — substitui a planilha manual do Matheus por um controle de protocolos de garantia por fornecedor, com status de acompanhamento, tratamento de "adiantamento de garantia" (peça nova entregue antes da devolução da defeituosa) e desfecho (peça nova / conserto / não acatado).
 
 ## Decisões aprovadas
 
-- Ambos os módulos entram como páginas novas dentro do sistema Estoque/Compras (`compras-lucenera-3o23t98ee`), não como sistemas novos em `04-Sistemas/` — ver justificativa na seção "Por que módulo, não sistema novo" abaixo.
+- **Correção de 22/09/2026 (usuário, depois de já publicado o Módulo 1 como módulo do Compras): os dois sistemas são separados do Compras, cada um com seu próprio sistema em `04-Sistemas/`/projeto Skip** — Controle de Produção e Controle de Garantia NÃO ficam dentro de `compras-lucenera-3o23t98ee`. A seção "Por que módulo, não sistema novo" abaixo é a justificativa antiga (equivocada) que motivou a primeira implementação; mantida só como histórico, não como decisão vigente. Plano de correção: criar os dois sistemas novos, migrar o código de Produção (já funcionando) para o sistema novo dele, depois remover a página/rota/nav de dentro do `compras-lucenera-3o23t98ee` (as tabelas no Supabase central não mudam de lugar, só o frontend).
 - Controle de Produção nesta fase é **só** réplica da planilha + gestão de status + handoff com dupla assinatura. **Fora de escopo explicitamente adiado por Vinícius**: ficha técnica de matéria-prima (BOM) por peça, baixa automática de insumos ao gerar pedido de produção, cálculo de custo agregado por matéria-prima, "estoque em produção" separado do estoque pronto, vínculo do pedido de produção com orçamento/necessidade de compra/separação.
 - Controle de Garantia nesta fase não tem vínculo obrigatório com `projeto_itens`/reserva de estoque/separação — é um controle de protocolo e status, standalone, podendo referenciar orçamento/cliente/produto apenas de forma informativa/opcional.
 - O prazo de garantia é contado a partir da **data de venda ao cliente**, não da data de compra do fornecedor (usar a nota fiscal de venda mais recente quando houver mais de uma).
 - Vínculo com "Hélio" (sistema/processo legado citado na reunião) foi explicitamente descartado pelo Vinícius ("nem precisa mais, é uma coisa que a gente pode eliminar") — não incluir esse campo.
 - Nenhuma alteração em tabelas do fluxo financeiro/orçamento (`boletos`, `projeto_parcelas`, `aprovar_orcamento_financeiro`) é necessária para esta SPEC.
 
-## Por que módulo, não sistema novo
+## Por que módulo, não sistema novo (SUPERADA — ver "Decisões aprovadas" acima, correção de 22/09/2026)
 
 - `03-Projeto/Escopos/05_ESCOPO_ESTOQUE_COMPRAS.md`, SPEC-EST-15, já define Garantia/troca/devolução como parte do domínio de Estoque/Compras — criar um sistema separado contradiria essa decisão já registrada.
 - `04-Sistemas/compras-lucenera-3o23t98ee` já tem página dedicada para a Débora (`pages/PainelDebora.tsx`, em produção) — Débora e Vitória (as duas pessoas mais citadas nos dois novos processos) já são usuárias reais desse sistema, com login e acesso via `hub_pode_executar(p_system_slug: 'necessidade-de-compra', ...)`.
@@ -244,7 +249,7 @@ RLS: leitura ampla para `authenticated` (o objetivo declarado é "todo mundo pod
 
 **22/09/2026 — Módulo 1 (Controle de Produção) implementado.** Módulo 2 (Controle de Garantia) **não** foi implementado nesta execução — continua com pendências de regra de negócio em aberto (permissão de escrita por fornecedor, origem da data de venda pré-Focus-NFe), listadas na seção "Pendências".
 
-Banco (repo central, `supabase/db/migrations/20260922_157_producao_pedidos/001_producao_pedidos.sql`) — **redigida, não aplicada no Supabase real**:
+Banco (repo central, `supabase/db/migrations/20260922_157_producao_pedidos/001_producao_pedidos.sql`) — **redigida e aplicada no Supabase real em 22/09/2026** (dry-run com ROLLBACK antes do COMMIT real, confirmada com `\d` nas duas tabelas e no bucket):
 - Tabela `producao_pedidos` (campos exatamente como especificados na seção Módulo 1, `tipo_peca` CHECK `lineas_steccas|peca_avulsa|corte`, `empresa_id` FK real para `empresas`, `status` texto livre sem CHECK).
 - Tabela `producao_pedido_handoffs` (dupla assinatura, `entregue_por_nome`/`recebido_por_nome` NOT NULL, `*_usuario_id` nullable).
 - Índices em `tipo_peca`, `status`, `empresa_id`, `data_pedido`.
@@ -266,6 +271,17 @@ Verificação feita: `npm run lint` (oxlint) e `npm run build` (vite build) roda
 
 Nenhum campo de `producao_pedidos`/`producao_pedido_handoffs` referencia `orcamentos`, `projeto_itens` ou `estoque_itens` — confirma o desacoplamento pedido pelo Vinícius (critério de aceite da SPEC).
 
+**22/09/2026 (mesmo dia) — correção de arquitetura: migração para sistema próprio.** Depois do Módulo 1 já publicado dentro do `compras-lucenera-3o23t98ee`, o usuário corrigiu: os dois sistemas deveriam ser separados do Compras, não módulos dele (ver "Decisões aprovadas"). O usuário criou os repositórios GitHub `pedrolalala/Controle-de-producao` e `pedrolalala/controle-de-garantia`, os projetos Skip correspondentes (60535 e 60545) e conectou ambos ao mesmo Supabase central (`vcvcwzmbiftcawncibke`, confirmado batendo com o projeto real). Registrados como submodules novos em `04-Sistemas/controle-de-producao` e `04-Sistemas/controle-de-garantia`.
+
+Migração do Módulo 1 executada na sequência:
+- `controle-de-producao` (Skip 60535) bootstrapado do zero a partir do template em branco: `hooks/use-auth.tsx` (login simples por e-mail/senha no mesmo Supabase Auth central, **sem** `hub_pode_executar` — o sistema ainda não está registrado na tabela `systems` do Hub, então checagem de permissão granular não é possível hoje), `components/ProtectedRoute.tsx`, `components/AppHeader.tsx` (link de volta pra Central), `App.tsx`/`pages/Login.tsx` novos. `services/producao.ts`, `pages/Producao.tsx` e os 4 componentes de `components/producao/` foram migrados **sem alteração de lógica** (só o container da página perdeu o offset de altura fixo que existia por causa do tab-nav do Compras). `package.json` ganhou `@supabase/supabase-js` (Skip já tinha adicionado na working tree ao conectar o Supabase; local precisou do mesmo `npm install` pra buildar). `src/lib/supabase/types.ts` local é um stub minimalista (não o `Database` completo gerado pelo Skip, que passa de 256KB) — sem efeito em runtime porque todo acesso às tabelas novas já usa `(supabase as any)`.
+- Verificação: `skip_project_apply_changes` (QA completo: setup/staticAnalysis/build/integrations/test, todos `ok`) + `skip_project_publish` publicaram em `https://pagina-em-branco-e9c45.goskip.app`. Localmente, `npm run lint` e `npm run build` também passaram sem erros no submodule. Commitado e pushado (`7be80f6`).
+- Depois de confirmado que o sistema novo builda e publica limpo, o Módulo 1 foi **removido** de dentro do `compras-lucenera-3o23t98ee`: rota `/producao`, item de nav "Produção" e os 6 arquivos (`services/producao.ts`, `pages/Producao.tsx`, `components/producao/*`) apagados tanto da working tree do Skip (`skip_file_delete` + `skip_project_apply_changes` + `skip_project_publish`, v0.0.77, mesma URL `https://pagina-em-branco-cdd79.goskip.app`) quanto do submodule local (commitado e pushado, `363bab7`). `App.tsx`/`AppNav.tsx` do Compras voltaram ao estado anterior à SPEC-156 nos dois lugares. Lint/build locais confirmados sem erros novos.
+- **As tabelas `producao_pedidos`/`producao_pedido_handoffs` no Supabase central não mudaram de lugar** — só o frontend migrou de projeto. Nenhuma nova migration foi necessária para a correção.
+- `controle-de-garantia` (Skip 60545) só teve o submodule/repositório registrados e a conexão ao Supabase feita pelo usuário — **nenhum código escrito**, aguardando as pendências de negócio do Módulo 2 (permissão de escrita por fornecedor, origem da data de venda pré-Focus-NFe, listadas abaixo) serem resolvidas antes de implementar.
+
+**Lição registrada em memória** ([[feedback_confirmar_sistema_novo_vs_modulo_com_usuario]]): decisão de "vira módulo de sistema existente" vs "vira sistema novo separado" é do usuário, não deveria ter sido decidida e implementada sem confirmação explícita — mesmo com justificativa técnica sólida (ver seção superada acima).
+
 ## Pendências
 
 - [x] ~~Confirmar a nomenclatura exata da terceira aba~~ — **Resolvido em 22/09/2026** lendo a planilha real (`01-Documento/01 - Planilhas/CONTROLE DE PRODUÇÃO (1).xlsx`): a 3ª aba é `CORTES (GAP - SLOT - VISTA)`. `producao_pedidos.tipo_peca` vira `'lineas_steccas' | 'peca_avulsa' | 'corte'`.
@@ -277,4 +293,5 @@ Nenhum campo de `producao_pedidos`/`producao_pedido_handoffs` referencia `orcame
 - [ ] Decidir se cobrança de "adiantamento pendente de devolução" (hoje feita "semanalmente" de forma manual pelo Vinícius) deve virar notificação automática (e-mail/WhatsApp) nesta fase ou permanecer como painel/lista de conferência manual.
 - [ ] Decidir se anexos (nota fiscal do fornecedor, fotos da peça com defeito) entram nesta fase do Controle de Garantia — não foram pedidos explicitamente por Vinícius, mas a existência do status "nota fiscal emitida" sugere que pode haver documento a anexar.
 - [ ] Confirmar se `garantia_fornecedor_responsavel` (mapeamento fornecedor → Vitória/Débora) deve existir como tabela, ou se é suficiente atribuir `responsavel_id` manualmente a cada protocolo sem um "padrão" pré-configurado.
-- [ ] Avaliar, junto do usuário, se `04-Sistemas/compras-lucenera-3o23t98ee/supabase/AI_DB_CONTEXT.md` deve ser criado agora (não existe hoje) já cobrindo os dois módulos novos, ou se isso fica para uma SPEC de higienização futura do submodule.
+- [ ] Avaliar, junto do usuário, se `04-Sistemas/controle-de-producao/supabase/AI_DB_CONTEXT.md` e `04-Sistemas/controle-de-garantia/supabase/AI_DB_CONTEXT.md` devem ser criados agora, ou se isso fica para uma SPEC de higienização futura dos dois submodules novos.
+- [ ] Decidir se/quando registrar `controle-de-producao` e `controle-de-garantia` na tabela `systems` do Hub (com `papel_permissoes` explícita) para entrarem no SSO/SystemSwitcher como os outros 10 sistemas, ou se ficam com login próprio simples indefinidamente — hoje nenhum dos dois tem checagem de permissão granular, só "está logado ou não".

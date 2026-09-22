@@ -26,9 +26,18 @@ quebrou com foreign key error (`negociacoes_empresa_id_fkey`) até essa
 correção. NÃO recriar essa empresa "LUCE NERA" separada — o destino correto
 é sempre MANOELLA.
 
-Combinações (cod_duplicata, tipo) AMBÍGUAS (já existem em mais de uma empresa
-real) são puladas e reportadas — não são criadas sob LUCE NERA para não
-arriscar duplicar uma negociação que já pertence a uma das 3 empresas reais.
+Combinações (cod_duplicata, tipo) AMBÍGUAS (já existem em mais de uma
+negociação — outra empresa, ou duas negociações na mesma empresa) são
+roteadas para UMA preferida (MANOELLA, senão a mais antiga por created_at —
+ver `neg_ambigua_map`). A(s) negociação(ões) perdedora(s) da ambiguidade têm
+suas transações ABERTAS canceladas (`status_pago=2`) — ver
+`neg_ambigua_perdedora_ids`/`perdedoras_a_cancelar`. Decisão do usuário
+(08/09/2026), sem exceção: **a planilha é a fonte de verdade** — se ela só
+reconhece 1 negociação por duplicata, o banco não pode ter 2 "abertas" ao
+mesmo tempo, mesmo que uma view (`v_financeiro_realizado`) já filtre isso
+via `rn=1`. Outros consumidores de `transacoes` sem passar pela view (ex.:
+`ContasEmAberto.tsx` em `retorno-bancario-bradesco-5392a`, SPEC-117) leem a
+tabela crua e mostrariam o valor duplicado sem essa limpeza.
 
 Resolução de negociacoes novas:
   plano_contas_id  ← plano_de_contas.codigo_connect = cod_apropriacao
@@ -54,8 +63,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from _supabase_client import get_client, SUPABASE_URL  # noqa: E402
 
-CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-09-02.xlsx"
-CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-09-02.xlsx"
+CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-09-21.xlsx"
+CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-09-21.xlsx"
 
 # "LUCE NERA" = MANOELLA. NAO é uma decisão, é um fato permanente: é assim
 # que a empresa está identificada no banco de dados do Connect (sistema
@@ -200,9 +209,45 @@ def processar(dry_run: bool) -> None:
             f"para a negociação MANOELLA/preferida (antes eram puladas)."
         )
 
+    # Negociacoes "perdedoras" da ambiguidade: quando (cod_duplicata, tipo)
+    # existe em mais de uma negociacao — mesma empresa ou nao —, so uma e a
+    # "preferida" (MANOELLA, ou a mais antiga por created_at) e so ela recebe
+    # as linhas da planilha (neg_ambigua_map acima); e a mesma que
+    # v_financeiro_realizado usa via rn=1, entao o Dashboard NAO mostra a
+    # duplicidade. Mas a(s) negociacao(oes) perdedora(s) continuam com
+    # transacoes ABERTAS na tabela crua — o item-level orphan check abaixo
+    # nao pega isso, porque o cod_itens_duplicata delas aparece sim na
+    # planilha (so que sob a negociacao preferida, nao sob elas). Achado
+    # real 08/09/2026: 136 cod_duplicata duplicados (ex.: ISLIGHT/FOCO
+    # ILUMINACAO + MANOELLA, ou 2 negociacoes na mesma empresa), R$ 1,68 mi
+    # em "Em Aberto" que nao existe na planilha. Decisao do usuario
+    # (08/09/2026): a planilha e a fonte de verdade, sem excecao — cancelar
+    # (status_pago=2) tudo que estiver aberto nas negociacoes perdedoras,
+    # nao so confiar que toda tela vai usar v_financeiro_realizado (a tela
+    # "Contas em Aberto" do sistema retorno-bancario-bradesco-5392a le
+    # `transacoes` direto, sem a view, e mostraria o valor errado).
+    neg_ambigua_perdedora_ids = set()
+    if len(ambiguous_keys):
+        for (cd, tp), g in neg_amb.groupby(["cod_duplicata", "tipo"]):
+            preferida_id = neg_ambigua_map[(cd, tp)]
+            neg_ambigua_perdedora_ids.update(nid for nid in g["id"] if nid != preferida_id)
+
     print("Buscando plano_de_contas (codigo_connect -> id)...")
     pc = buscar_paginado(client, "plano_de_contas", "id,codigo_connect")
     pc_map = pc.set_index("codigo_connect")["id"].to_dict()
+
+    # Achado 2026-09-21: a Connect reemitiu "DESP. OPERAC. FILIPPO" com um
+    # cod_apropriacao NOVO (10000007, dentro de um cod_sub_grupo=9999006
+    # "OPERAC. FILIPPO" que não existe no nosso plano_de_contas), mas a
+    # categoria já existe de verdade sob o código antigo (90000014, dentro
+    # de Despesas > Operacional/9999005) -- mesmo nome, sem histórico na
+    # negociação nenhuma ainda usando o código novo. Redireciona pra não
+    # criar uma categoria duplicada com o mesmo nome (decisão do usuário,
+    # 2026-09-22: mapear pra categoria já existente).
+    PC_ALIAS_CODIGO_CONNECT = {10000007: 90000014}
+    for codigo_novo, codigo_existente in PC_ALIAS_CODIGO_CONNECT.items():
+        if codigo_existente in pc_map:
+            pc_map[codigo_novo] = pc_map[codigo_existente]
 
     print("Buscando funcionarios (nm_connect -> id)...")
     func = buscar_paginado(client, "funcionarios", "id,nm_connect")
@@ -386,14 +431,48 @@ def processar(dry_run: bool) -> None:
         for r in planilha.to_dict("records")
     }
     planilha_dup_keys = {(int(r["cod_duplicata"]), r["tipo"]) for r in planilha.to_dict("records")}
+
+    # Duplicata INTEIRA ausente do export atual (não só um item) — a
+    # planilha simplesmente não reconhece mais essa cod_duplicata+tipo.
+    # Achado real 08/09/2026: 136 cod_duplicata de RECEITA (quase todas
+    # ISLIGHT/FOCO ILUMINACAO — empresas legadas, nunca recebem duplicata
+    # nova desde que a resolução de ambíguas passou a rotear tudo para
+    # MANOELLA) somando R$ 1,68 mi em "Em Aberto" que não existe em nenhuma
+    # forma na planilha (nem aberta, nem paga — 109 das 136 já venceram há
+    # muito tempo). A view `v_financeiro_realizado` já EXCLUI esses casos
+    # (join com `stg_duplicatas_vigentes`), então o Dashboard principal não
+    # mostra o erro — mas quem lê `transacoes` direto sem passar pela view
+    # (ex.: `ContasEmAberto.tsx` em `retorno-bancario-bradesco-5392a`,
+    # SPEC-117) mostraria o valor errado. Decisão do usuário (08/09/2026),
+    # sem exceção: a planilha é a fonte de verdade — cancelar também esses
+    # (só os ABERTOS; não mexe em histórico já pago, que é uma pergunta
+    # diferente sobre receita realizada, não decidida aqui).
     orfas_a_cancelar = []
+    perdedoras_a_cancelar = []
+    duplicata_ausente_a_cancelar = []
     for r in trans.to_dict("records"):
+        if r["status_pago"] == 2:
+            continue
+        if r["negociacao_id"] in neg_ambigua_perdedora_ids:
+            # so cancela quem esta ABERTO (0). Ja pago (1) e' historico real
+            # de pagamento -- nao vira cancelado so porque a negociacao
+            # perdeu a ambiguidade (diferente do orfao de item abaixo, que
+            # tambem cobre pago=1 porque ali o item nem deveria existir).
+            if r["status_pago"] == 0:
+                perdedoras_a_cancelar.append(r["id"])
+            continue
         cdt = neg_cd_map.get(r["negociacao_id"])
-        if not cdt or cdt[0] is None or r["cod_itens_duplicata"] is None:
+        if not cdt or cdt[0] is None:
             continue
         dup_key = (int(cdt[0]), cdt[1])
+        if dup_key not in planilha_dup_keys:
+            if r["status_pago"] == 0:
+                duplicata_ausente_a_cancelar.append(r["id"])
+            continue
+        if r["cod_itens_duplicata"] is None:
+            continue
         item_key = (int(cdt[0]), cdt[1], int(r["cod_itens_duplicata"]))
-        if dup_key in planilha_dup_keys and item_key not in planilha_item_keys and r["status_pago"] != 2:
+        if item_key not in planilha_item_keys:
             orfas_a_cancelar.append(r["id"])
 
     print("\n=== RESUMO ===")
@@ -401,6 +480,8 @@ def processar(dry_run: bool) -> None:
     print(f"Transações novas a inserir:        {len(novas_transacoes)}")
     print(f"Transações a atualizar (status):   {len(atualizacoes)}")
     print(f"Parcelas órfãs a CANCELAR (item fora do export): {len(orfas_a_cancelar)}")
+    print(f"Transações em negociação DUPLICADA a CANCELAR (perdedora da ambiguidade): {len(perdedoras_a_cancelar)}")
+    print(f"Transações ABERTAS a CANCELAR (duplicata inteira ausente do export): {len(duplicata_ausente_a_cancelar)}")
     print(f"Transações já sincronizadas (nada a fazer): {inalteradas}")
     print(f"Linhas sem negociação (não roteadas): {len(sem_negociacao)}")
 
@@ -463,6 +544,28 @@ def processar(dry_run: bool) -> None:
             print(f"  ERRO ao cancelar orfas lote {i}: {exc}")
             total_erro3 += len(lote)
     print(f"Cancelamento de orfas concluido: {total_ok3} ok, {total_erro3} erros.")
+
+    total_ok4, total_erro4 = 0, 0
+    for i in range(0, len(perdedoras_a_cancelar), BATCH_SIZE):
+        lote = perdedoras_a_cancelar[i : i + BATCH_SIZE]
+        try:
+            client.table("transacoes").update({"status_pago": 2}).in_("id", lote).execute()
+            total_ok4 += len(lote)
+        except Exception as exc:
+            print(f"  ERRO ao cancelar negociação duplicada lote {i}: {exc}")
+            total_erro4 += len(lote)
+    print(f"Cancelamento de negociação duplicada (perdedora) concluido: {total_ok4} ok, {total_erro4} erros.")
+
+    total_ok5, total_erro5 = 0, 0
+    for i in range(0, len(duplicata_ausente_a_cancelar), BATCH_SIZE):
+        lote = duplicata_ausente_a_cancelar[i : i + BATCH_SIZE]
+        try:
+            client.table("transacoes").update({"status_pago": 2}).in_("id", lote).execute()
+            total_ok5 += len(lote)
+        except Exception as exc:
+            print(f"  ERRO ao cancelar duplicata ausente lote {i}: {exc}")
+            total_erro5 += len(lote)
+    print(f"Cancelamento de duplicata ausente do export concluido: {total_ok5} ok, {total_erro5} erros.")
 
 
 def main():

@@ -190,6 +190,17 @@ Espelha a mudança de modelagem feita no CRM (ver `crm.md`): nova tabela `orcame
 - `ProjectCreateModal.tsx` (usado só dentro do fluxo "Criar Projeto" de `BudgetFormPage.tsx`, este sistema não tem uma tela própria de Projetos): campo Cliente ganhou ação "Novo Cliente" (mesmo padrão do Cliente do orçamento); `responsavel_obra_id` passou a listar só `contato_tipos.tipo = 'engenheiro'` (antes listava todos os `contatos`). CRM (`projetos.md`/`crm.md`) já filtrava corretamente antes desta SPEC, via `contatos.tipo` (coluna singular) em vez do join — comportamento equivalente na prática, verificado sem necessidade de mudança lá.
 - Migration: `supabase/db/migrations/20260917_152_melhorias_orcamento/` (repositório central).
 
+## SPEC-156 — Recálculo automático de parcelas + permuta aceita cliente (2026-09-21)
+
+- `projeto_parcelas.permuta_fornecedor_id` (mesma coluna, não renomeada) passa a aceitar `contatos.tipo IN
+  ('fornecedor', 'cliente')` em vez de só `'fornecedor'` — às vezes a contraparte da permuta é o próprio
+  cliente oferecendo produto/serviço em troca. Validado em `aprovar_orcamento_financeiro(uuid)` (assinatura
+  inalterada, só a condição de `tipo` mudou).
+- `BudgetFormPage.tsx`: editar o valor de uma parcela do Plano de Parcelas agora redistribui
+  automaticamente o restante entre as demais parcelas (antes, editar uma travava o array inteiro e exigia
+  digitar todas manualmente pra soma bater).
+- Migration: `supabase/db/migrations/20260921_156_permuta_fornecedor_ou_cliente/` (repositório central).
+
 ## Diretriz ativa
 
 Manter uma função/RPC transacional única para aprovação financeira por `orcamento_id`. O contrato oficial (SPEC-051, sobre a base da SPEC-016/SPEC-031) é `rascunho -> enviado_cliente -> Aprovação da Equipe -> Aprovação Financeira -> Orçamento Aprovado`; a transição `rascunho -> enviado_cliente` é sempre manual, via `enviar_orcamento_para_cliente`. O frontend deve listar/editar orçamentos nessa fila e só disparar efeitos financeiros após confirmação final do financeiro.

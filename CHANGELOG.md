@@ -2,6 +2,34 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-22
+
+### SPEC-156 Módulo 1 implementado e publicado: Controle de Produção
+
+- Novo módulo dentro do sistema Estoque/Compras (`compras-lucenera-3o23t98ee`, Skip projectId 40326),
+  não um sistema novo — réplica digital da planilha real `01-Documento/01 - Planilhas/CONTROLE DE
+  PRODUÇÃO (1).xlsx` (3 abas: LINEAS E STECCAS, PEÇAS AVULSAS, CORTES (GAP - SLOT - VISTA)), com
+  gestão de status em tempo real e handoff com dupla assinatura (quem entrega / quem recebe),
+  resolvendo a "bucha" de responsabilidade descrita pelo Vinícius na reunião de 16/09/2026.
+- Banco: migration `supabase/db/migrations/20260922_157_producao_pedidos/001_producao_pedidos.sql`
+  criou `producao_pedidos`/`producao_pedido_handoffs` + bucket de Storage `producao_pedidos` (leitura
+  pública, escrita `authenticated` — mesmo padrão do bucket `notas_fiscais_compra` já em produção).
+  Aplicada no Supabase real (dry-run com ROLLBACK antes do COMMIT real). `empresa_id` é FK real para
+  `empresas` (os 5 valores reais da coluna EMPRESA da planilha batem com `empresas.nome`). `status` é
+  texto livre sem CHECK — a planilha real tem dado sujo (PRONTO/Pronto/PRONTA + CANCELADO/EXCLUÍDO/
+  ENTRADA PARCIAL).
+- Frontend: `services/producao.ts`, `pages/Producao.tsx`, 4 componentes em `components/producao/`,
+  item de navegação "Produção" — commitado e pushado no submodule local
+  (`github.com/pedrolalala/compras-lucenera-3o23t98ee`, commit `cae8341`) **e** publicado direto na
+  working tree do Skip (`skip_file_write` + `skip_project_apply_changes` + `skip_project_publish`,
+  v0.0.76). Achado: `App.tsx`/`AppNav.tsx` locais estavam desatualizados em relação ao Skip (que já
+  tinha lazy-loading por rota, `ProtectedRoute` e `SystemSwitcher` do rollout SPEC-120 aplicados
+  direto na working tree) — a rota/nav nova foi enxertada no padrão real do Skip, não sobrescrita pela
+  versão local mais simples. Ver [[feedback_skip_deploy_separate_tree]].
+- Módulo 2 (Controle de Garantia) da SPEC-156 **não** implementado nesta rodada — tem pendências de
+  regra de negócio em aberto (permissão de escrita por fornecedor, origem da data de venda pré-Focus
+  NFe). Ver `03-Projeto/Planos de Ação/SPECs/SPEC-156_Controle_Producao_e_Garantia.md`.
+
 ## 2026-09-21 (3)
 
 ### SPEC-154: migrations aplicadas + Edge Functions deployadas + frontend publicado ("simulação sem conta Focus NFe")

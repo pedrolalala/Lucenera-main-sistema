@@ -25,8 +25,10 @@ Achado durante o teste ao vivo da SPEC-159 (2026-09-23): o Catálogo Ubiqua não
 
 ### Passos manuais do usuário
 
-- [ ] Conferir no painel do Supabase (Authentication → URL Configuration → Redirect URLs) se `https://catalogo-pecas-ubiqua-e6fa0.goskip.app/redefinir-senha` está na allowlist de redirect URLs do projeto — se não estiver, o link do e-mail pode ser rejeitado ou cair na URL padrão. Sem isso o fluxo não funciona em produção mesmo com o código correto.
-- [ ] Testar ao vivo: solicitar recuperação com um e-mail real, abrir o link recebido, redefinir a senha, logar com a nova senha.
+- [x] Conferir redirect URL allowlist do Supabase — verificado via Management API (`GET /v1/projects/{ref}/config/auth`, campo `uri_allow_list`): `https://catalogo-pecas-ubiqua-e6fa0.goskip.app/**` já está cadastrado (wildcard cobre `/redefinir-senha`). Nada a fazer aqui.
+- [x] Publicado no Skip — `0.0.90` (`b7f3400`), produção: https://catalogo-pecas-ubiqua-e6fa0.goskip.app
+- [x] Testado em produção (2026-09-23), parcialmente ao vivo: guard de `/redefinir-senha` sem sessão → redireciona corretamente para `/esqueci-senha` com toast "Link inválido ou expirado"; formulário de `/esqueci-senha` → `resetPasswordForEmail` chamado com sucesso (sem erro), tela de confirmação genérica exibida, e-mail de recuperação real disparado para a conta do usuário (pedrollaghi@gmail.com) — pendente só a etapa final de abrir o link recebido e confirmar a troca (o agente não tem acesso à caixa de entrada do usuário)
+- [ ] Usuário: abrir o e-mail de recuperação recebido, confirmar que o link leva para `/redefinir-senha` (não para o catálogo) e concluir a troca de senha, para fechar o teste ponta a ponta
 
 ## Objetivo
 

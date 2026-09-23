@@ -1,11 +1,12 @@
 ---
 titulo: "SPEC-158 — Correções e pendências da reunião de 22/09/2026 (revisão geral do sistema com Vinícius)"
-status: CONCLUÍDA (exceto pendências abaixo). P1 (exceto P1.3), P2 (exceto P2.3/P2.5), P3.1 implementados,
-  revisados, migrations aplicadas em produção, commitados e PUBLICADOS no Skip (Orçamentos v0.0.372,
-  Cadastro v0.0.84); P1.4 (desconto por item no Gerenciamento) achado durante teste do P1.2 na mesma
-  reunião, implementado/revisado/publicado junto; P1.3/P2.3/P2.5 aguardando decisão; P3.2-P3.4 já estavam
-  resolvidos no Cadastro real (achado ao investigar); P4-P7 aguardando decisão/alinhamento (P7 já feita
-  fora desta SPEC, confirmado pelo usuário)
+status: CONCLUÍDA (exceto pendências abaixo). P1 (exceto P1.3), P2 (exceto P2.5), P3.1 implementados,
+  revisados, migrations aplicadas em produção e commitados; PUBLICADOS no Skip (Orçamentos v0.0.372,
+  Cadastro v0.0.84), exceto P2.3 (digitador), implementado/revisado/aplicado depois da última publicação —
+  aguardando publicação; P1.4 (desconto por item no Gerenciamento) achado durante teste do P1.2 na mesma
+  reunião, implementado/revisado/publicado junto; P1.3/P2.5 aguardando decisão do usuário; P3.2-P3.4 já
+  estavam resolvidos no Cadastro real (achado ao investigar); P4-P7 aguardando decisão/alinhamento (P7 já
+  feita fora desta SPEC, confirmado pelo usuário)
 data_ultima_modificacao: 2026-09-23
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — P1, P2
@@ -191,11 +192,18 @@ deve ficar mínimo:
 registrar **quem digitou** o orçamento — que pode ser outra pessoa da equipe (ex.: vendedora Thairine como
 vendedor, mas quem digitou foi a Adriana).
 
-- [ ] Capturar automaticamente **do login** (decisão explícita: *"é direto do login, que é o seu melhor,
+- [x] Capturar automaticamente **do login** (decisão explícita: *"é direto do login, que é o seu melhor,
       porque senão aqui qualquer um pode pôr qualquer um"*) — não é campo editável.
-- [ ] Exibir no layout do orçamento enviado ao cliente para aprovação.
-- [ ] Impacto de banco: provável coluna nova em `orcamentos` (ex.: `digitado_por` → `usuarios.id`). Confirmar
-      antes de implementar.
+- [x] Exibir no layout do orçamento enviado ao cliente para aprovação.
+- [x] Impacto de banco: coluna nova `orcamentos.digitado_por uuid REFERENCES usuarios(id) ON DELETE SET NULL`
+      (migration `20260923_158c_digitador_orcamento`, aplicada em produção). Referencia `usuarios(id)`, não
+      `auth.users(id)` direto (diferente de `enviado_cliente_por`) — permite embed direto do PostgREST pra
+      resolver o nome, mesmo padrão de `vendedor:funcionarios!orcamentos_vendedor_id_fkey(nome)`.
+- [x] Capturado sempre em `addBudget()` (`useBudgetStore.ts`), incondicional (não depende do status
+      inicial) — nunca faz parte do form nem do payload de `updateBudget`, fisicamente impossível editar
+      pela UI. Exibido na Edge Function `generate-report` (PDF do orçamento), terceira coluna na mesma
+      linha de Vendedor/Arquiteto Externo, só quando preenchido (orçamentos antigos ficam sem, sem
+      backfill). Aguardando revisão do `revisor` antes de commitar/publicar.
 
 ### P2.4 — Botão "Salvar" também no rodapé
 
@@ -213,6 +221,7 @@ padrão sistema"*. Hoje esse texto aparece esmaecido (`text-muted-foreground`).
       mostrar?... Tá dentro da central aqui..." e só então o comentário sobre "peças e produtos,
       referência"), então não dá pra afirmar com segurança se é sobre uma tela do Orçamentos ou do Vendas.
       Aguardando o usuário indicar a tela exata antes de implementar.
+
 
 ---
 
@@ -383,7 +392,7 @@ Decisão tomada na reunião:
 - **Migration antiga contradiz o snapshot?** P1.1 corrige uma regra da SPEC-019 que a SPEC-135 já havia
   ajustado parcialmente; a migration nova precisa citar as duas.
 - **Exige atualizar `AI_DB_CONTEXT.md`?** Sim, no Orçamentos (P1.1 muda regra de transição de status; P2.3
-  adiciona coluna).
+  adiciona coluna) — [x] feito.
 
 ## Critérios de aceite
 
@@ -396,7 +405,9 @@ Decisão tomada na reunião:
 ## Pendências conhecidas
 
 - P1.3 (margem "padronizada") — bloqueado aguardando esclarecimento; **não** executar UPDATE em massa.
-- P2.3 (digitador) — definir nome/estrutura da coluna antes de implementar.
+- P2.3 (digitador) — **concluído** (2026-09-23): coluna `orcamentos.digitado_por` aplicada em produção,
+  captura automática no login, exibida no PDF do orçamento. Revisado (achado corrigido: truncagem do nome
+  do(s) arquiteto(s) no PDF pra não colidir visualmente com a nova coluna). Falta só publicar no Skip.
 - P2.5 (cor preta referência) — tela exata ambígua (Orçamentos ou Vendas), aguardando o usuário confirmar.
 - P4/P5 — dependem da conta Focus NFe, que ainda não existe.
 - P6 — investigação, sem causa raiz confirmada ainda.

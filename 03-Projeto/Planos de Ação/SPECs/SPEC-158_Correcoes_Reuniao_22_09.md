@@ -1,12 +1,11 @@
 ---
 titulo: "SPEC-158 — Correções e pendências da reunião de 22/09/2026 (revisão geral do sistema com Vinícius)"
 status: CONCLUÍDA (exceto P1.3 e P4-P7 abaixo). P1 (exceto P1.3), P2, P3.1 implementados, revisados,
-  migrations aplicadas em produção e commitados; PUBLICADOS no Skip: Orçamentos v0.0.373, Cadastro v0.0.84
-  (exceto P2.5, implementado/revisado depois da última publicação do Cadastro — aguardando publicação);
+  migrations aplicadas em produção, commitados e PUBLICADOS no Skip: Orçamentos v0.0.373, Cadastro v0.0.85;
   P1.4 (desconto por item no Gerenciamento), P2.3 (digitador) e P2.5 (cor preta em Peças) achados/decididos
-  depois dos itens originais da reunião, todos implementados e revisados; P1.3 bloqueado aguardando
-  esclarecimento do usuário; P3.2-P3.4 já estavam resolvidos no Cadastro real (achado ao investigar); P4-P7
-  aguardando decisão/alinhamento (P7 já feita fora desta SPEC, confirmado pelo usuário)
+  depois dos itens originais da reunião, todos implementados, revisados e publicados; P1.3 bloqueado
+  aguardando esclarecimento do usuário; P3.2-P3.4 já estavam resolvidos no Cadastro real (achado ao
+  investigar); P4-P7 aguardando decisão/alinhamento (P7 já feita fora desta SPEC, confirmado pelo usuário)
 data_ultima_modificacao: 2026-09-23
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — P1, P2
@@ -225,7 +224,7 @@ padrão sistema"*. Hoje esse texto aparece esmaecido (`text-muted-foreground`).
       laranja e o código tá com uma cor meio cinza"). Trocados os dois para `text-slate-900` (mesmo padrão
       já usado pelo nome da peça no mesmo arquivo), mantendo o resto do visual (fundo da badge, fonte
       pequena — usuário disse explicitamente que pode ficar "descartado" visualmente, só o texto precisa
-      ser preto/legível). Revisado pelo `revisor`, sem achado.
+      ser preto/legível). Revisado pelo `revisor`, sem achado. Publicado no Skip (Cadastro v0.0.85).
 
 
 ---
@@ -420,7 +419,7 @@ Decisão tomada na reunião:
 - P2.5 (cor preta referência) — **concluído** (2026-09-23): usuário confirmou a tela ("sistema de consultar
   produtos" = listagem de Peças do Cadastro), causa raiz real diferente da hipótese original (`text-slate-500`
   no código, `text-primary` laranja na referência, não `text-muted-foreground`). Corrigido pra
-  `text-slate-900` nos dois, revisado sem achado. Falta só publicar no Skip (Cadastro).
+  `text-slate-900` nos dois, revisado sem achado, publicado no Skip (Cadastro v0.0.85).
 - P4/P5 — dependem da conta Focus NFe, que ainda não existe.
 - P6 — investigação, sem causa raiz confirmada ainda.
 - **Concluído (2026-09-23)**: migrations `20260923_158_fix_reset_aprovacao_financeira` e

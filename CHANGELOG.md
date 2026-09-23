@@ -43,8 +43,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   `text-slate-900` (quase preto), mesmo padrão já usado pelo nome da peça na mesma tela.
 - Publicado no Skip: Orçamentos (gestao-financeira-clone-544cb.goskip.app, v0.0.373, inclui a Edge
   Function `generate-report` — confirmado via Management API, não só pelo QA do Skip) e Cadastro
-  (cadastro-lucenera-b86fe.goskip.app, v0.0.84). P2.5 aguardando publicação (implementado após a última
-  publicação do Cadastro).
+  (cadastro-lucenera-b86fe.goskip.app, v0.0.85).
 - SPEC: `03-Projeto/Planos de Ação/SPECs/SPEC-158_Correcoes_Reuniao_22_09.md`.
 
 ## 2026-09-22

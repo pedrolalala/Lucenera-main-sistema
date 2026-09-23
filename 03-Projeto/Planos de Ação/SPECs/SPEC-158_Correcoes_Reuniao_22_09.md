@@ -1,11 +1,12 @@
 ---
 titulo: "SPEC-158 — Correções e pendências da reunião de 22/09/2026 (revisão geral do sistema com Vinícius)"
-status: CONCLUÍDA (exceto pendências abaixo). P1 (exceto P1.3), P2 (exceto P2.5), P3.1 implementados,
-  revisados, migrations aplicadas em produção, commitados e PUBLICADOS no Skip (Orçamentos v0.0.373,
-  Cadastro v0.0.84); P1.4 (desconto por item no Gerenciamento) e P2.3 (digitador) achados/implementados
-  depois do P1.2/P2 originais, na mesma reunião ou logo depois, revisados e publicados junto; P1.3/P2.5
-  aguardando decisão do usuário; P3.2-P3.4 já estavam resolvidos no Cadastro real (achado ao investigar);
-  P4-P7 aguardando decisão/alinhamento (P7 já feita fora desta SPEC, confirmado pelo usuário)
+status: CONCLUÍDA (exceto P1.3 e P4-P7 abaixo). P1 (exceto P1.3), P2, P3.1 implementados, revisados,
+  migrations aplicadas em produção e commitados; PUBLICADOS no Skip: Orçamentos v0.0.373, Cadastro v0.0.84
+  (exceto P2.5, implementado/revisado depois da última publicação do Cadastro — aguardando publicação);
+  P1.4 (desconto por item no Gerenciamento), P2.3 (digitador) e P2.5 (cor preta em Peças) achados/decididos
+  depois dos itens originais da reunião, todos implementados e revisados; P1.3 bloqueado aguardando
+  esclarecimento do usuário; P3.2-P3.4 já estavam resolvidos no Cadastro real (achado ao investigar); P4-P7
+  aguardando decisão/alinhamento (P7 já feita fora desta SPEC, confirmado pelo usuário)
 data_ultima_modificacao: 2026-09-23
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — P1, P2
@@ -215,11 +216,16 @@ vendedor, mas quem digitou foi a Adriana).
 [28:05]-[28:12] *"Peças e produtos, referência, ter a cor preta, deixar tudo preto mesmo. Como se fosse um
 padrão sistema"*. Hoje esse texto aparece esmaecido (`text-muted-foreground`).
 
-- [ ] **Não implementado — tela exata ambígua.** A fala ocorre bem na transição do Orçamento pro sistema de
-      Vendas ([26:54]-[28:28]: "Tem outras coisas... Eu fiz a vendas também... Vendas, você quer me
-      mostrar?... Tá dentro da central aqui..." e só então o comentário sobre "peças e produtos,
-      referência"), então não dá pra afirmar com segurança se é sobre uma tela do Orçamentos ou do Vendas.
-      Aguardando o usuário indicar a tela exata antes de implementar.
+- [x] **Concluído (2026-09-23).** Usuário confirmou a tela exata: "sistema de consultar produtos" — a
+      listagem de Peças do Cadastro (`04-Sistemas/cadastro-lucenera-b86fe/src/pages/Pecas.tsx`), não
+      Orçamentos nem Vendas como eu tinha suposto pela transcrição. Causa raiz real, diferente da hipótese
+      original ("`text-muted-foreground`"): "Código" usava `text-slate-500` (cinza) e a badge de
+      "Referência" usava `text-primary` (laranja Lucenera, `--primary: 37 90% 51%` neste sistema —
+      confirmado em `main.css`), batendo exatamente com a descrição do usuário ("referência tá numa cor
+      laranja e o código tá com uma cor meio cinza"). Trocados os dois para `text-slate-900` (mesmo padrão
+      já usado pelo nome da peça no mesmo arquivo), mantendo o resto do visual (fundo da badge, fonte
+      pequena — usuário disse explicitamente que pode ficar "descartado" visualmente, só o texto precisa
+      ser preto/legível). Revisado pelo `revisor`, sem achado.
 
 
 ---
@@ -411,7 +417,10 @@ Decisão tomada na reunião:
   contém `orcamentos_digitado_por_fkey` e o label "Digitador"; `updated_at` bate exato com o horário do
   publish). Não basta o "QA ok" do Skip pra confirmar Edge Function no ar — ver
   [[project_spec154_backend_focus_nfe_2026_09_21]].
-- P2.5 (cor preta referência) — tela exata ambígua (Orçamentos ou Vendas), aguardando o usuário confirmar.
+- P2.5 (cor preta referência) — **concluído** (2026-09-23): usuário confirmou a tela ("sistema de consultar
+  produtos" = listagem de Peças do Cadastro), causa raiz real diferente da hipótese original (`text-slate-500`
+  no código, `text-primary` laranja na referência, não `text-muted-foreground`). Corrigido pra
+  `text-slate-900` nos dois, revisado sem achado. Falta só publicar no Skip (Cadastro).
 - P4/P5 — dependem da conta Focus NFe, que ainda não existe.
 - P6 — investigação, sem causa raiz confirmada ainda.
 - **Concluído (2026-09-23)**: migrations `20260923_158_fix_reset_aprovacao_financeira` e

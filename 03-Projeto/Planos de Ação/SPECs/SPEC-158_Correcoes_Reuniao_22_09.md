@@ -1,9 +1,10 @@
 ---
 titulo: "SPEC-158 — Correções e pendências da reunião de 22/09/2026 (revisão geral do sistema com Vinícius)"
-status: P1 (exceto P1.3), P2 (exceto P2.3/P2.5), P3.1 implementados, revisados, migrations aplicadas em
-  produção e commitados; aguardando publicação no Skip; P1.3/P2.3/P2.5 aguardando decisão; P3.2-P3.4 já
-  estavam resolvidos no Cadastro real (achado ao investigar); P4-P7 aguardando decisão/alinhamento (P7 já
-  feita fora desta SPEC, confirmado pelo usuário)
+status: CONCLUÍDA (exceto pendências abaixo). P1 (exceto P1.3), P2 (exceto P2.3/P2.5), P3.1 implementados,
+  revisados, migrations aplicadas em produção, commitados e PUBLICADOS no Skip (Orçamentos v0.0.371,
+  Cadastro v0.0.84); P1.3/P2.3/P2.5 aguardando decisão; P3.2-P3.4 já estavam resolvidos no Cadastro real
+  (achado ao investigar); P4-P7 aguardando decisão/alinhamento (P7 já feita fora desta SPEC, confirmado
+  pelo usuário)
 data_ultima_modificacao: 2026-09-23
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — P1, P2
@@ -378,6 +379,26 @@ Decisão tomada na reunião:
 - P2.5 (cor preta referência) — tela exata ambígua (Orçamentos ou Vendas), aguardando o usuário confirmar.
 - P4/P5 — dependem da conta Focus NFe, que ainda não existe.
 - P6 — investigação, sem causa raiz confirmada ainda.
-- **Publicação pendente**: migrations `20260923_158_fix_reset_aprovacao_financeira` e
-  `20260923_158b_item_sem_cadastro_simplificado` já aplicadas e confirmadas em produção (2026-09-23).
-  Frontend (P1.2, P2.1, P2.2, P2.4, P3.1) já commitado — falta publicar no Skip (Orçamentos e Cadastro).
+- **Concluído (2026-09-23)**: migrations `20260923_158_fix_reset_aprovacao_financeira` e
+  `20260923_158b_item_sem_cadastro_simplificado` aplicadas e confirmadas em produção. Frontend (P1.2, P2.1,
+  P2.2, P2.4, P3.1) commitado nos 3 repositórios (git) e publicado no Skip — Orçamentos
+  (gestao-financeira-clone-544cb.goskip.app, v0.0.371) e Cadastro (cadastro-lucenera-b86fe.goskip.app,
+  v0.0.84).
+- **Achado durante o merge (Cadastro)**: o git local do submódulo `cadastro-lucenera-b86fe` estava ~30
+  commits atrás do que já estava publicado no Skip (SPEC-120 SystemSwitcher, SPEC-116 busca fuzzy,
+  SPEC-115, SPEC-101, vários fixes de layout — nunca puxados pro git local). Mesclado sem perda: conflito em
+  `PecaForm.tsx` resolvido preservando o fix mais novo (setTimeout no setValue de marca/categoria) junto com
+  o botão Copiar. Havia também, na working tree local (não commitados), arquivos soltos do rollout
+  SystemSwitcher (`Layout.tsx`, `cross-system-auth.ts`, `Login.tsx`, `SystemSwitcher.tsx`,
+  `useSistemasPermitidos.ts`, `Pecas.tsx`, `PecaDetailsPanel.tsx`, `produtos.ts` — este último com um fix da
+  SPEC-151 de estoque de showroom) — per orientação já registrada de não commitar esse rollout sem perguntar
+  ao usuário, foram colocados em `git stash` (`SPEC-158: rollout SystemSwitcher pendente...`) em vez de
+  descartados ou commitados. Precisa decisão do usuário: commitar, descartar ou revisar antes.
+- **Achado na publicação (Orçamentos)**: `skip_project_apply_changes` reportou `ok: false` na etapa
+  "integrations" — mas os 3 erros são de migrations antigas (jun/jul/2026, sem relação com SPEC-158)
+  falhando ao serem replayadas do zero pelo QA do Skip contra um schema que já mudou desde então (coluna
+  `projeto_id`/função `recusar_orcamento_cliente_publico`/constraint `orcamentos_data_inicio_pagamento_check`
+  — desalinhamento pré-existente entre o histórico de migrations rastreado pelo Skip e o schema real, que é
+  gerenciado direto via Management API, fora do Skip). Build e testes passaram normalmente; publicado mesmo
+  assim. Vale investigar/alinhar esse histórico do Skip em algum momento, mas não bloqueia nem foi causado
+  por esta SPEC.

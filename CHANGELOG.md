@@ -38,9 +38,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   automaticamente do login na criação, nunca editável pela UI — distinto do vendedor (lista fixa de 5
   pessoas, SPEC-140). Exibido no PDF do orçamento (Edge Function `generate-report`), ao lado de Vendedor e
   Arquiteto Externo.
-- Publicado no Skip: Orçamentos (gestao-financeira-clone-544cb.goskip.app, v0.0.372) e Cadastro
-  (cadastro-lucenera-b86fe.goskip.app, v0.0.84). P2.3 aguardando publicação (implementado após a última
-  publicação do Orçamentos).
+- Publicado no Skip: Orçamentos (gestao-financeira-clone-544cb.goskip.app, v0.0.373, inclui a Edge
+  Function `generate-report` — confirmado via Management API, não só pelo QA do Skip) e Cadastro
+  (cadastro-lucenera-b86fe.goskip.app, v0.0.84).
 - SPEC: `03-Projeto/Planos de Ação/SPECs/SPEC-158_Correcoes_Reuniao_22_09.md`.
 
 ## 2026-09-22

@@ -1,12 +1,11 @@
 ---
 titulo: "SPEC-158 — Correções e pendências da reunião de 22/09/2026 (revisão geral do sistema com Vinícius)"
 status: CONCLUÍDA (exceto pendências abaixo). P1 (exceto P1.3), P2 (exceto P2.5), P3.1 implementados,
-  revisados, migrations aplicadas em produção e commitados; PUBLICADOS no Skip (Orçamentos v0.0.372,
-  Cadastro v0.0.84), exceto P2.3 (digitador), implementado/revisado/aplicado depois da última publicação —
-  aguardando publicação; P1.4 (desconto por item no Gerenciamento) achado durante teste do P1.2 na mesma
-  reunião, implementado/revisado/publicado junto; P1.3/P2.5 aguardando decisão do usuário; P3.2-P3.4 já
-  estavam resolvidos no Cadastro real (achado ao investigar); P4-P7 aguardando decisão/alinhamento (P7 já
-  feita fora desta SPEC, confirmado pelo usuário)
+  revisados, migrations aplicadas em produção, commitados e PUBLICADOS no Skip (Orçamentos v0.0.373,
+  Cadastro v0.0.84); P1.4 (desconto por item no Gerenciamento) e P2.3 (digitador) achados/implementados
+  depois do P1.2/P2 originais, na mesma reunião ou logo depois, revisados e publicados junto; P1.3/P2.5
+  aguardando decisão do usuário; P3.2-P3.4 já estavam resolvidos no Cadastro real (achado ao investigar);
+  P4-P7 aguardando decisão/alinhamento (P7 já feita fora desta SPEC, confirmado pelo usuário)
 data_ultima_modificacao: 2026-09-23
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — P1, P2
@@ -407,7 +406,11 @@ Decisão tomada na reunião:
 - P1.3 (margem "padronizada") — bloqueado aguardando esclarecimento; **não** executar UPDATE em massa.
 - P2.3 (digitador) — **concluído** (2026-09-23): coluna `orcamentos.digitado_por` aplicada em produção,
   captura automática no login, exibida no PDF do orçamento. Revisado (achado corrigido: truncagem do nome
-  do(s) arquiteto(s) no PDF pra não colidir visualmente com a nova coluna). Falta só publicar no Skip.
+  do(s) arquiteto(s) no PDF pra não colidir visualmente com a nova coluna). Publicado no Skip (Orçamentos
+  v0.0.373) — inclui a Edge Function `generate-report`, confirmada via Management API (body deployado
+  contém `orcamentos_digitado_por_fkey` e o label "Digitador"; `updated_at` bate exato com o horário do
+  publish). Não basta o "QA ok" do Skip pra confirmar Edge Function no ar — ver
+  [[project_spec154_backend_focus_nfe_2026_09_21]].
 - P2.5 (cor preta referência) — tela exata ambígua (Orçamentos ou Vendas), aguardando o usuário confirmar.
 - P4/P5 — dependem da conta Focus NFe, que ainda não existe.
 - P6 — investigação, sem causa raiz confirmada ainda.

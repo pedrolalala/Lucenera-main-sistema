@@ -1,10 +1,11 @@
 ---
 titulo: "SPEC-158 — Correções e pendências da reunião de 22/09/2026 (revisão geral do sistema com Vinícius)"
 status: CONCLUÍDA (exceto pendências abaixo). P1 (exceto P1.3), P2 (exceto P2.3/P2.5), P3.1 implementados,
-  revisados, migrations aplicadas em produção, commitados e PUBLICADOS no Skip (Orçamentos v0.0.371,
-  Cadastro v0.0.84); P1.3/P2.3/P2.5 aguardando decisão; P3.2-P3.4 já estavam resolvidos no Cadastro real
-  (achado ao investigar); P4-P7 aguardando decisão/alinhamento (P7 já feita fora desta SPEC, confirmado
-  pelo usuário)
+  revisados, migrations aplicadas em produção, commitados e PUBLICADOS no Skip (Orçamentos v0.0.372,
+  Cadastro v0.0.84); P1.4 (desconto por item no Gerenciamento) achado durante teste do P1.2 na mesma
+  reunião, implementado/revisado/publicado junto; P1.3/P2.3/P2.5 aguardando decisão; P3.2-P3.4 já estavam
+  resolvidos no Cadastro real (achado ao investigar); P4-P7 aguardando decisão/alinhamento (P7 já feita
+  fora desta SPEC, confirmado pelo usuário)
 data_ultima_modificacao: 2026-09-23
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — P1, P2
@@ -97,6 +98,26 @@ ordem usada no restante do orçamento.
       (`quantidade * preco_unitario * (1 - desconto/100)`). Revisado pelo `revisor`, sem achado crítico
       (uma divergência menor e pré-existente foi identificada no seed do % inicial do desconto global em
       R$ quando há sinal > 0 — baixo impacto, não bloqueia).
+
+### P1.4 — Campo de desconto por item, sem opção de preencher dentro do Gerenciamento
+
+**Sintoma ([24:31])**, achado ao testar o P1.2 na mesma reunião: *"É, tem ali, mas não tem como preencher,
+né? Aqui aí não deixa, nem aqui não tem opção aqui de colocar o desconto, nem aqui embaixo, nada. Não tem
+opção, tem ali, mas não tem opção, só tem o campo."*
+
+**Causa raiz confirmada**: a tabela do `GerenciamentoDialog.tsx` não tinha (e nunca teve) nenhuma coluna
+editável de desconto **por item** — só existia o campo "Desconto simulado (%)" GLOBAL no topo do painel
+(esse sempre funcionou, tem `onChange` normal) e o campo de custo manual, editável só pra itens avulsos.
+Não era um bug de `readOnly`/`disabled` num input existente — o campo simplesmente não existia nessa tela.
+
+- [x] Nova coluna "Desc. item (%)" na tabela do Gerenciamento, editável (min 0, max 100, mesmo padrão de
+      `BudgetItemCard.tsx`). Grava DE VERDADE no campo real do orçamento (`itens.{index}.desconto`, via
+      `form.setValue` — não é uma simulação local como o desconto global ou o custo manual). `index` é a
+      posição no array (mesmo contrato já usado por `BudgetItemCard`/`EditableItemCard` via
+      `useFieldArray`), confirmado pelo revisor que não há reordenação entre `fields` e
+      `form.watch('itens')` que pudesse desalinhar o índice. Edição propaga em tempo real pra linha do item
+      fora do painel (mesma árvore de estado do react-hook-form), sem sincronização manual necessária.
+      Revisado pelo `revisor`, sem achado crítico. Publicado no Skip (v0.0.372).
 
 ### P1.3 — "Margem padronizada em 50%" — ⚠️ PRECISA DE ESCLARECIMENTO, NÃO CORRIGIR ÀS CEGAS
 

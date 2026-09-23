@@ -29,7 +29,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   ("dificilmente vamos criar um produto do zero").
 - Migrations aplicadas em produção: `supabase/db/migrations/20260923_158_fix_reset_aprovacao_financeira/`,
   `supabase/db/migrations/20260923_158b_item_sem_cadastro_simplificado/`.
-- Publicado no Skip: Orçamentos (gestao-financeira-clone-544cb.goskip.app, v0.0.371) e Cadastro
+- **Orçamentos** — P1.4 (achado durante o teste do P1.2, mesma reunião): painel "Gerenciamento" não tinha
+  nenhum campo pra editar o desconto de um item específico ("tem ali, mas não tem opção aqui de colocar o
+  desconto"). Nova coluna "Desc. item (%)" editável, grava direto em `itens.{index}.desconto` (campo real
+  do orçamento, propaga em tempo real pra linha do item).
+- Publicado no Skip: Orçamentos (gestao-financeira-clone-544cb.goskip.app, v0.0.372) e Cadastro
   (cadastro-lucenera-b86fe.goskip.app, v0.0.84).
 - SPEC: `03-Projeto/Planos de Ação/SPECs/SPEC-158_Correcoes_Reuniao_22_09.md`.
 

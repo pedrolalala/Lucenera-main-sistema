@@ -1,11 +1,13 @@
 ---
 titulo: "SPEC-158 — Correções e pendências da reunião de 22/09/2026 (revisão geral do sistema com Vinícius)"
-status: CONCLUÍDA (exceto P1.3 e P4-P7 abaixo). P1 (exceto P1.3), P2, P3.1 implementados, revisados,
-  migrations aplicadas em produção, commitados e PUBLICADOS no Skip: Orçamentos v0.0.373, Cadastro v0.0.85;
-  P1.4 (desconto por item no Gerenciamento), P2.3 (digitador) e P2.5 (cor preta em Peças) achados/decididos
-  depois dos itens originais da reunião, todos implementados, revisados e publicados; P1.3 bloqueado
-  aguardando esclarecimento do usuário; P3.2-P3.4 já estavam resolvidos no Cadastro real (achado ao
-  investigar); P4-P7 aguardando decisão/alinhamento (P7 já feita fora desta SPEC, confirmado pelo usuário)
+status: CONCLUÍDA (exceto P4-P7 abaixo, que dependem de decisão/contas externas). P1, P2, P3.1
+  implementados, revisados, migrations aplicadas em produção, commitados e PUBLICADOS no Skip: Orçamentos
+  v0.0.373, Cadastro v0.0.85; P1.3 (margem "padronizada") confirmado pelo usuário como o mesmo bug do P1.2
+  (desconto por item fora da conta da margem) — resolvido junto, sem necessidade de UPDATE em massa; P1.4
+  (desconto por item no Gerenciamento), P2.3 (digitador) e P2.5 (cor preta em Peças) achados/decididos
+  depois dos itens originais da reunião, todos implementados, revisados e publicados; P3.2-P3.4 já estavam
+  resolvidos no Cadastro real (achado ao investigar); P4-P7 aguardando decisão/alinhamento (P7 já feita
+  fora desta SPEC, confirmado pelo usuário)
 data_ultima_modificacao: 2026-09-23
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — P1, P2
@@ -119,7 +121,7 @@ Não era um bug de `readOnly`/`disabled` num input existente — o campo simples
       fora do painel (mesma árvore de estado do react-hook-form), sem sincronização manual necessária.
       Revisado pelo `revisor`, sem achado crítico. Publicado no Skip (v0.0.372).
 
-### P1.3 — "Margem padronizada em 50%" — ⚠️ PRECISA DE ESCLARECIMENTO, NÃO CORRIGIR ÀS CEGAS
+### P1.3 — "Margem padronizada em 50%" — ✅ RESOLVIDO (era o mesmo bug do P1.2)
 
 **Relato ([23:20])**: *"ele tá puxando uma margem já padronizada. Ele não tá fazendo o cálculo da margem...
 Ele tá já colocando como padrão tudo por 50%"*, comparando o aro `6654` com a lâmpada `9801`. Vinícius:
@@ -143,10 +145,12 @@ cadastro** (que ele estava testando naquele momento) — que é o comportamento 
 trecho da ata é ambíguo e a correção proposta na hora (UPDATE em massa em `percentual_lucro`) é
 irreversível e de alto impacto.
 
-- [ ] **Alinhar com o Vinícius antes de qualquer alteração**: mostrar as margens reais dos dois produtos
-      citados e confirmar se o que incomodou foi (a) o desconto por item não entrar na conta (P1.2, já
-      corrigido), (b) o 50% dos itens sem cadastro, ou (c) outra coisa. **Nenhum UPDATE em massa em
-      `produtos.percentual_lucro` deve ser feito sem essa confirmação.**
+- [x] **Confirmado com o usuário (2026-09-23)**: era a opção (a) — "não é que incomodou a % dos itens
+      cadastrados... não era a real % de lucro! agora aparentemente corrigiu!!". O problema nunca foi uma
+      padronização real em 50% nos produtos — era a margem exibida errada no painel Gerenciamento porque o
+      desconto por item não entrava na conta (mesmo bug do P1.2, já corrigido e publicado). Confirmado que
+      a margem exibida agora bate com a realidade. **Nenhum UPDATE em massa em `produtos.percentual_lucro`
+      foi necessário nem deve ser feito** — não havia problema nenhum nos dados, só no cálculo de exibição.
 
 ---
 
@@ -408,7 +412,9 @@ Decisão tomada na reunião:
 
 ## Pendências conhecidas
 
-- P1.3 (margem "padronizada") — bloqueado aguardando esclarecimento; **não** executar UPDATE em massa.
+- P1.3 (margem "padronizada") — **resolvido** (2026-09-23): confirmado pelo usuário que era o mesmo bug do
+  P1.2 (desconto por item fora da conta da margem exibida), não uma padronização real nos dados. Nenhum
+  UPDATE em massa foi necessário.
 - P2.3 (digitador) — **concluído** (2026-09-23): coluna `orcamentos.digitado_por` aplicada em produção,
   captura automática no login, exibida no PDF do orçamento. Revisado (achado corrigido: truncagem do nome
   do(s) arquiteto(s) no PDF pra não colidir visualmente com a nova coluna). Publicado no Skip (Orçamentos

@@ -2,7 +2,58 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-23
+
+### SPEC-158: correções da reunião de revisão geral (22/09/2026)
+
+- **Orçamentos** — bug crítico corrigido: editar um orçamento em "Aprovação Financeira" (ex.: mudar a
+  data de pagamento) devolvia o orçamento para "Aprovação do Cliente", reiniciando o ciclo sem
+  necessidade. Trigger `handle_orcamento_workflow()` corrigida — o reset do ciclo de aprovação passa a
+  valer só para "Orçamento Aprovado"; correção do financeiro em "Aprovação Financeira" mantém o status
+  e só registra em `historico_status_orcamentos`.
+- **Orçamentos** — painel "Gerenciamento" (custo/lucro por peça) passou a considerar o desconto POR
+  ITEM na margem simulada, além do desconto global — antes só o global entrava na conta, inflando a
+  margem exibida para itens com desconto próprio.
+- **Orçamentos** — rótulo "Responsável Obra" → "Engenheiro" no modal de criar projeto (o campo já
+  listava só engenheiros desde a SPEC-152, faltava o texto).
+- **Orçamentos** — botão "Salvar" duplicado no rodapé do formulário (formulário longo, botão do topo
+  saía de vista ao rolar).
+- **Orçamentos** — modal "Criar novo produto" (dentro de item de orçamento sem cadastro) drasticamente
+  simplificado para "Adicionar item sem cadastro": só nome, marca, referência e preço de venda
+  (digitado direto, sem cálculo de custo/margem). Categoria deixou de ser obrigatória na RPC
+  `criar_produto_orcamento`. Marca passou a aparecer no rótulo do item na linha do orçamento
+  (`ProductSelectButton.tsx`, via embed `marca:marcas(nome)`).
+- **Cadastro** — nova ação "Copiar" em Peças: a partir de um produto existente, abre um novo cadastro
+  pré-preenchido com todos os dados do produto de origem (marca, fornecedor, categoria, NCM/CST/CEST,
+  impostos etc.), gerando um `codigo_produto` novo — pedido classificado como urgente pelo usuário
+  ("dificilmente vamos criar um produto do zero").
+- Migrations aplicadas em produção: `supabase/db/migrations/20260923_158_fix_reset_aprovacao_financeira/`,
+  `supabase/db/migrations/20260923_158b_item_sem_cadastro_simplificado/`.
+- SPEC: `03-Projeto/Planos de Ação/SPECs/SPEC-158_Correcoes_Reuniao_22_09.md`.
+
 ## 2026-09-22
+
+### SPEC-157: reconciliação/espelho formal nos 4 scripts de import Connect
+
+- Evoluídos `scripts/importar_contas_pagar_receber.py`, `importar_pedido_compra.py`,
+  `importar_produtos_estoque.py`, `importar_produtos_novos.py` (não reescritos do zero) com
+  biblioteca compartilhada nova `scripts/sync_connect_common.py`: descoberta automática do
+  arquivo mais recente, pré-validações obrigatórias (cabeçalho, mínimo de linhas, unicidade da
+  chave natural na planilha) que abortam sem tocar no banco, e log estruturado por execução em
+  `scripts/logs/sync_connect/`.
+- Produtos (estoque): soft delete (`produtos.ativo`) para produto que saiu do export, reativação
+  para o que volta. Produtos (novos): insert virou upsert `ON CONFLICT (codigo_produto) DO NOTHING`.
+- Pedido de compra: nova coluna `pedido_compra.vigente` (nunca DELETE — planilha não traz
+  histórico), `num_parc` vazio normalizado para 1, `staging_pedido_compra` ganha
+  `UNIQUE(codigo_pedido, num_parc)`. Migration `20260922_159_sync_connect_reconciliacao`
+  (RASCUNHO, **não aplicada** no Supabase real ainda).
+- Contas a pagar/receber: fase de gravação (stg_duplicatas_vigentes + negociações novas +
+  transações + os 3 cancelamentos) movida para uma única transação `psycopg2` — tudo ou nada.
+  Semântica de "ausente na planilha" continua sendo cancelamento (`status_pago=2`), **não**
+  DELETE físico — decisão confirmada com o usuário (retorno_bancario_registros referencia
+  transacoes sem ON DELETE CASCADE; DELETE físico perderia histórico de conciliação bancária).
+- Testado em dry-run contra o Supabase real dos 4 scripts nesta sessão; nenhuma gravação real
+  foi executada. Ver `03-Projeto/Planos de Ação/SPECs/SPEC-157_Reconciliacao_Espelho_Import_Connect.md`.
 
 ### SPEC-156 Módulo 1 implementado e publicado: Controle de Produção
 

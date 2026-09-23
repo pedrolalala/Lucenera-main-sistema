@@ -21,9 +21,13 @@ sistemas_envolvidos:
 
 ### Passos manuais do usuário
 
-- [ ] Nenhum — não há mudança de banco/RLS/migration, é só frontend usando a API de auth já existente (`supabase.auth`)
-- [ ] Testar manualmente no navegador (golden path): trocar senha com senha atual correta, tentar com senha atual errada, tentar nova senha < 6 caracteres, tentar confirmação diferente — depois logout/login com a nova senha
-- [ ] Publicar no Skip (este agente não publica; feito separadamente após rodar o `revisor`)
+- [x] Nenhum — não há mudança de banco/RLS/migration, é só frontend usando a API de auth já existente (`supabase.auth`)
+- [x] Testado ao vivo em produção (2026-09-23) com conta de teste descartável (criada e removida na mesma sessão, sem tocar em conta real): senha atual errada → bloqueado ("Invalid login credentials"); confirmação diferente → bloqueado ("A nova senha e a confirmação não coincidem."); nova senha < 6 caracteres → bloqueado ("A nova senha deve ter no mínimo 6 caracteres."); golden path (senha atual correta) → sucesso, campos limpos, logout/login com a nova senha funcionou
+- [x] Publicado no Skip — `0.0.89` (`6fb8394`), produção: https://catalogo-pecas-ubiqua-e6fa0.goskip.app
+
+### Achado durante o teste
+
+- [ ] O sistema Catálogo Ubiqua **não tem fluxo de "esqueci minha senha"** na tela de login (`AuthWrapper.tsx` só tem login/criar conta, sem link de recuperação) — diferente de CRM e Logística, que já têm esse fluxo. A SPEC-159 cobre só troca self-service *dentro* do site (usuário logado, sabendo a senha atual); usuário deslogado que esqueceu a senha não tem como recuperar hoje. Requer SPEC própria se o usuário quiser esse fluxo.
 
 ## Objetivo
 

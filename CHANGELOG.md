@@ -2,6 +2,33 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-24
+
+### SPEC-162: Controle de Produção — registro de ocorrências por pedido
+
+- **Controle de Produção** — nova tabela `producao_pedido_ocorrencias` (FK `producao_pedidos`,
+  `ON DELETE CASCADE`): `categoria` e `descricao` obrigatórias, `registrado_por` (FK `usuarios`) e
+  `registrado_em` preenchidos automaticamente pelo login. Sem checagem de status em nenhuma camada —
+  pedido em andamento a "Pronto" aceitam ocorrência igual. Append-only (sem editar/excluir pela
+  aplicação), mesmo padrão de RLS aberta (`authenticated` lê/insere) das tabelas da SPEC-161.
+- Botão "Ocorrência" (vermelho) em toda linha da listagem, abre modal com tipo (Desenho errado,
+  Desenho incompleto, Retrabalho de peça pronta, Outro) + descrição. Contador "N ocorrência(s)" sob o
+  status (clicável, abre o painel expansível da linha). Nova seção "Ocorrências" no painel, com quem
+  registrou e quando.
+- Migration redigida em `supabase/db/migrations/20260924_161_producao_ocorrencias/` — **aplicada no Supabase real em 24/09/2026** (junto com as 7 da SPEC-161,
+  dry-run+COMMIT). Depende de `producao_pedidos` (SPEC-156) já existir; independente das migrations da
+  SPEC-161 (`20260923_160_*`), mas o frontend só pode ser publicado depois de as duas SPECs terem a
+  migration aplicada (a listagem embute `producao_pedido_ocorrencias(count)` junto das contagens da
+  SPEC-161).
+- Decisões assumidas (pendentes de confirmação do usuário): categorias iniciais = as 3 citadas + Outro;
+  sem anexo de foto na ocorrência; sem campo "resolvida/tratativa".
+- `tsc --noEmit`, `oxlint src` e `vite build` rodados sem erro no submodule `controle-de-producao`.
+- **Aplicado e publicado em 24/09/2026**: migrations SPEC-161 (`20260923_160_*`) + SPEC-162 aplicadas;
+  Controle de Produção publicado no Skip (projectId 60535, v0.0.9) com SPEC-161 P2-P8 + SPEC-162; submodule
+  `d64bcba`. Testado como `authenticated` (ocorrência em pedido "Pronto" grava; descrição vazia recusada).
+  Controle de Garantia: migrations aplicadas, frontend (SPEC-161 P9-P16) ainda NÃO publicado.
+- SPEC: `03-Projeto/Planos de Ação/SPECs/SPEC-162_Ocorrencias_Controle_Producao.md`.
+
 ## 2026-09-23
 
 ### SPEC-158: correções da reunião de revisão geral (22/09/2026)

@@ -4,6 +4,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-24
 
+### SPEC-163: Controle de Produção e Controle de Garantia registrados na Central (Hub)
+
+- 2 linhas novas em `public.systems` (`controle-producao`, `controle-garantia`) + `visualizar` para todos os 13
+  papéis em `papel_permissoes` (decisão do usuário). Migration
+  `supabase/db/migrations/20260924_162_registro_producao_garantia_hub/` **aplicada** (dry-run+COMMIT). Os
+  cards aparecem no Hub e no menu lateral (SystemSwitcher) dos outros sistemas, sem mudança de código.
+- SPEC: `03-Projeto/Planos de Ação/SPECs/SPEC-163_Registro_Producao_Garantia_no_Hub.md`.
+
 ### SPEC-162: Controle de Produção — registro de ocorrências por pedido
 
 - **Controle de Produção** — nova tabela `producao_pedido_ocorrencias` (FK `producao_pedidos`,

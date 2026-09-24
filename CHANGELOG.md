@@ -34,7 +34,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - **Aplicado e publicado em 24/09/2026**: migrations SPEC-161 (`20260923_160_*`) + SPEC-162 aplicadas;
   Controle de Produção publicado no Skip (projectId 60535, v0.0.9) com SPEC-161 P2-P8 + SPEC-162; submodule
   `d64bcba`. Testado como `authenticated` (ocorrência em pedido "Pronto" grava; descrição vazia recusada).
-  Controle de Garantia: migrations aplicadas, frontend (SPEC-161 P9-P16) ainda NÃO publicado.
+  Controle de Garantia (SPEC-161 P9-P13/P15/P16) publicado no Skip 60545 v0.0.9, submodule `1335a36`.
 - SPEC: `03-Projeto/Planos de Ação/SPECs/SPEC-162_Ocorrencias_Controle_Producao.md`.
 
 ## 2026-09-23

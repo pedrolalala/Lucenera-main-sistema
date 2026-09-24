@@ -1,9 +1,8 @@
 ---
 titulo: "SPEC-161 — Refinamentos do Controle de Produção e do Controle de Garantia, reunião de 22/09/2026"
-status: "PARCIALMENTE PUBLICADA (24/09/2026) — 7 migrations aplicadas no Supabase real; Controle de Produção
-  (P2-P8) publicado no Skip 60535 v0.0.9 (submodule d64bcba). Controle de Garantia (P9-P13/P15/P16): banco
-  aplicado, frontend AINDA NÃO publicado/commitado. Logins da produção ainda pendentes (handoff). P1
-  descartado, P14 não implementado."
+status: "CONCLUÍDA e PUBLICADA (24/09/2026) — 7 migrations aplicadas; Controle de Produção (P2-P8) no Skip
+  60535 v0.0.9 (submodule d64bcba); Controle de Garantia (P9-P13/P15/P16) no Skip 60545 v0.0.9 (submodule
+  1335a36). Pendente: logins da produção (handoff). P1 descartado, P14 não implementado."
 data_ultima_modificacao: 2026-09-23
 sistemas_envolvidos:
   - Controle de Produção (`controle-de-producao`, Skip projectId 60535) — P2-P8

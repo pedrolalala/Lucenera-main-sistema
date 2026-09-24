@@ -1,7 +1,8 @@
 ---
 titulo: "SPEC-161 — Refinamentos do Controle de Produção e do Controle de Garantia, reunião de 22/09/2026"
-status: "RASCUNHO — nenhum item implementado ainda. P1, P3, P4, P5 e P6 já têm decisão do usuário registrada
-  abaixo; P2, P7, P8 e a seção de Garantia (P9-P15) só têm causa raiz confirmada, aguardando implementação."
+status: "APROVADA — todas as decisões de negócio fechadas (P1-P16), enviada para o implementador. P2 e P8
+  têm 1 checagem técnica pequena a fazer durante a implementação (ver texto de cada item), não decisão de
+  negócio pendente."
 data_ultima_modificacao: 2026-09-23
 sistemas_envolvidos:
   - Controle de Produção (`controle-de-producao`, Skip projectId 60535) — P2-P8
@@ -333,14 +334,17 @@ comparando o tipo real da coluna (`information_schema.columns`) com o código de
       (sem concatenar `T00:00:00`) para colunas `timestamptz`, mantendo `fmtDate` (com a concatenação) só
       pra colunas `date` puro como `data_venda_referencia`.
 
-### Pendência de esclarecimento — data "de hoje" num campo não identificado
+### PRIORIDADE 16 — Data da venda: padrão "hoje" quando não dá pra auto-resolver
 
-[08:32]-[08:44]. *"Agora é que não veio, né? Não veio a peça [...] E aqui a data, que acho que teria que vir
-a data de hoje, né?"* — dito durante uma demonstração ao vivo, sem eu conseguir ver a tela. Não deu pra
-identificar com segurança qual campo é esse (pode ser uma data de abertura do item diferente de "data da
-venda", que já existe e já tem fallback manual funcionando). **Não implementar às cegas** — perguntar ao
-usuário qual campo específico da tela de "Novo item de garantia" precisava vir com a data de hoje por
-padrão.
+[08:32]-[08:44]. *"Agora é que não veio, né? Não veio a peça [...] O cliente, beleza, eu não coloquei [...]
+E aqui a data, que acho que teria que vir a data de hoje, né?"* — decisão a partir do contexto: no teste ao
+vivo, ele não informou cliente (a busca automática de data de venda exige cliente + produto, então não roda
+sem isso) e, sem outra fonte pra data, sugeriu que o campo já viesse com a data de hoje como ponto de
+partida, em vez de vazio — o único campo de data do formulário de "Novo item de garantia" é "Data da venda".
+
+- [ ] `ModalNovoItemGarantia.tsx`: inicializar `dataVenda` com a data de hoje (em vez de string vazia) ao
+      abrir o modal. O botão "Buscar automaticamente" e a edição manual continuam funcionando normalmente
+      por cima desse valor inicial — é só um ponto de partida, não uma trava.
 
 ---
 
@@ -362,9 +366,8 @@ padrão.
 - P8 (alteração de prazo): antes de desenhar do zero, localizar o componente equivalente já usado em
   Separação/Logística (citado pelo próprio Vinícius) e reaproveitar.
 - P10 (Garantia — desfecho): nenhuma pendência, decisão registrada acima.
-- Garantia — pendência de esclarecimento (ver nota ao final da seção): qual campo exato da tela de "Novo
-  item de garantia" deveria vir com a data de hoje por padrão ([08:32]-[08:44]) — não identificado com
-  segurança pela transcrição sozinha.
+- P16 (Garantia — data de hoje): **resolvido** — "Data da venda" inicializa com hoje, segue editável/com
+  busca automática por cima.
 
 ## Critérios de aceite (quando implementado)
 

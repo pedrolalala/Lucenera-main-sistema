@@ -2,7 +2,43 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-25
+
+### SPEC-162 (revisão): ocorrências com tipo livre, fotos e "resolvida" com data
+
+- **Controle de Produção** — "Outro (escrever)" abre um campo livre para o tipo; fotos opcionais (várias) por
+  ocorrência; botão "Marcar como resolvida" com a data em que foi resolvida. Listagem mostra ocorrências em aberto.
+- Migration `20260925_163_producao_ocorrencias_fotos_resolvida` **aplicada**: `fotos_urls text[]`,
+  `resolvida_em date`, `resolvido_por uuid`; UPDATE do `authenticated` restrito por GRANT de coluna às colunas
+  de resolução.
+- Publicado no Skip 60535 v0.0.10; submodule `ef31232`.
+
 ## 2026-09-24
+
+### SPEC-164: Memória Lucenera readaptada de memória pessoal para base de conhecimento corporativa
+
+- Diagnóstico em `04-Sistemas/memoria-lucenera/DIAGNOSTICO.md` (stack, modelo, telas, classificação
+  MANTER/ADAPTAR/REMOVER). Achado crítico: RLS por dono deixava os 54 itens da base invisíveis para
+  todo mundo além de quem os importou; `owner_id ON DELETE CASCADE` apagaria o conhecimento de quem
+  fosse desligado.
+- **Banco (schema `memoria`)** — migration `supabase/db/migrations/20260924_164_memoria_base_corporativa/`
+  (**aplicada em 24/09**, 001-005 + `006_correcoes_pos_teste`): `kb_itens` (9 tipos em enum, 5 núcleos derivados,
+  campos do template em jsonb, tags, status rascunho/publicado/arquivado, origem manual/importada com
+  chave estável, autor com `ON DELETE SET NULL`), `kb_itens_versoes`, `kb_anexos` (prefixo `kb/` no
+  bucket existente, pronto para busca por imagem futura), `kb_sinonimos` (21 grupos de jargão de light
+  design), RPCs `kb_buscar`/`kb_sugerir`, RLS "todos os internos leem, autor ou curador edita",
+  `aprovar` no sistema `memoria` para `admin`/`admin_geral` (curador). Conteúdo existente **copiado**
+  (tabelas antigas intactas).
+- **Memória Lucenera (Skip 57204)** — interface React nova (home com busca dominante, autocomplete,
+  chips por núcleo, atalhos por tema, inserção guiada pelos 9 templates, anexos, pendentes antigos).
+  App antigo mantido em `/legado`, sem cadastro aberto nem demonstração. **publicada** (`11d8d24`). Teste ponta a ponta pela API
+  real 24/24 (inclui 2 correções achadas no teste: busca por código do projeto e GRANT ao service_role).
+- Identidade visual padronizada com a Central (logo Lucenera branca, azul-marinho e dourado da Central) e
+  correção de tela em branco ao navegar (efeito devolvia a Promise do `window.scrollTo` do skip.js).
+  Publicado `67f3ef1`; teste visual por cliques na produção sem erros.
+- Importação das planilhas Connect: fora do escopo por decisão do usuário (coberta pela SPEC-157).
+- SPEC: `03-Projeto/Planos de Ação/SPECs/SPEC-164_Memoria_Lucenera_Base_Corporativa.md`.
+- Repositórios que precisam de commit: `pedrolalala/memoria-lucenera` (submodule) e o central.
 
 ### SPEC-163: Controle de Produção e Controle de Garantia registrados na Central (Hub)
 

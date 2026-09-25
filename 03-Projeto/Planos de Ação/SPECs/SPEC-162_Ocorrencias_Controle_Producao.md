@@ -1,9 +1,8 @@
 ---
 titulo: "SPEC-162 — Controle de Produção: registro de ocorrências por pedido"
-status: "CONCLUÍDA e PUBLICADA (24/09/2026) — migration aplicada no Supabase real (dry-run+COMMIT, junto
-  com as da SPEC-161), Controle de Produção publicado no Skip v0.0.9, submodule d64bcba. Pendente: confirmar
-  as 3 decisões assumidas e teste visual no navegador."
-data_ultima_modificacao: 2026-09-24
+status: "CONCLUÍDA e PUBLICADA — v1 em 24/09/2026 (Skip v0.0.9); revisão em 25/09/2026 (Skip v0.0.10,
+  submodule ef31232): tipo livre em Outro, fotos, marcar como resolvida com data."
+data_ultima_modificacao: 2026-09-25
 sistemas_envolvidos:
   - Controle de Produção (`controle-de-producao`, Skip projectId 60535)
 relacionado:
@@ -108,3 +107,23 @@ migrations → publicar.
 4. Confirmar com o usuário as 3 decisões assumidas (categorias, sem foto, sem "resolvida") e a
    pendência de onde documentar `producao_pedidos*`/`garantia_*` em `supabase/db/domains/`.
 5. Rodar o agente `revisor` antes de qualquer commit.
+
+## Revisão 25/09/2026 — decisões do usuário sobre as 4 pendências
+
+> "login nós vamos deixar para quando for usar realmente / tipo de ocorrencia vamos deixar com os campos que
+> temos e mais um campo aberto para a pessoa escrever / pode ter foto sim / então vamos colocar esse campo de
+> resolvida e marcar a data de quando isso aconteceu!!"
+
+- **Logins:** adiado, criados quando a produção for usar de fato.
+- **Tipo:** Desenho errado / Desenho incompleto / Retrabalho de peça pronta + "Outro (escrever)", que abre um
+  campo livre obrigatório; o texto digitado é gravado direto em `categoria` (sem CHECK no banco).
+- **Fotos:** 0..N imagens por ocorrência, no bucket `producao_pedidos` (caminho `<pedido>/ocorrencia-...`),
+  URLs em `fotos_urls text[]`. Miniaturas clicáveis no painel.
+- **Resolvida:** botão "Marcar como resolvida" + data escolhida pelo usuário (padrão hoje) → `resolvida_em`
+  (date) + `resolvido_por`. A listagem passa a mostrar "N ocorrência(s) em aberto" (vermelho) ou "N
+  resolvida(s)" (cinza).
+- **Banco:** migration `supabase/db/migrations/20260925_163_producao_ocorrencias_fotos_resolvida/` aplicada
+  (dry-run+COMMIT). Deixou de ser append-only, mas o UPDATE do `authenticated` ficou restrito por GRANT de
+  coluna a `resolvida_em`/`resolvido_por` — tipo, descrição e fotos continuam imutáveis (testado: UPDATE em
+  `descricao` → permission denied). Sem DELETE.
+- **Fora de escopo:** reabrir uma ocorrência resolvida e adicionar foto depois do registro (não pedido).

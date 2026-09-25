@@ -4,6 +4,15 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-25
 
+### SPEC-164: PDF de orçamento aprovado sai com o número da venda
+
+- **Orçamentos** — Edge Function `generate-report`: com `numero_venda`, o canto superior direito do PDF mostra
+  "Venda VENDA-XXXX" (padrão Connect) em vez de "Orçamento ORC-XXXX"; arquivo baixado `Venda_VENDA-XXXX.pdf`.
+  Publicado (função v99, Skip 32554 `8594ad5`, submodule `95f136c`). Testado com PDF real.
+- Achado: a função publicada antes (v98) não tinha as mudanças de PDF da SPEC-152 (parcelas) e SPEC-158
+  (digitador) — foram ao ar agora junto. Etapa "integrations" do Skip falha em 3 migrations legadas do próprio
+  sistema (sem efeito no banco, conferido).
+
 ### SPEC-162 (revisão): ocorrências com tipo livre, fotos e "resolvida" com data
 
 - **Controle de Produção** — "Outro (escrever)" abre um campo livre para o tipo; fotos opcionais (várias) por

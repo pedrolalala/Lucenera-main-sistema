@@ -19,7 +19,7 @@ sistemas_envolvidos:
 
 - [x] Autorizar a publicação no Skip (28/09)
 - [x] Aplicar e publicar no Skip 32554 (reautorizado pelo usuário)
-- [ ] Testar: criar/editar um orçamento com previsão, conferir a data na lista
+- [x] Testar: criar/editar um orçamento com previsão, conferir a data na lista (teste automatizado 28/09)
 
 ## Objetivo
 
@@ -52,6 +52,11 @@ Registrar, em cada orçamento, a data prevista de entrega informada por quem mon
 - Skip 32554 v0.0.375 (`fa4e7e4`) aplicado (QA ok em todas as etapas) e publicado; o mesmo apply registrou a remoção das 3 migrations legadas da SPEC-165.
 - Conferido depois: `schema_migrations` (239), policies (397), `handle_orcamento_workflow`, `aprovar_orcamento_financeiro` e todas as Edge Functions idênticos ao estado anterior (nenhum redeploy). Chunks `BudgetFormPage` e `Budgets` publicados contêm `previsao_entrega`.
 
+### 2026-09-28 (teste na produção)
+
+- Chrome headless (Playwright) logado com usuário temporário (papel admin) num orçamento de teste `TESTE-SPEC167` copiado do ORC-0013: campo vazio → escolhida data no calendário → "Salvar Alterações" → banco gravou exatamente a data escolhida (sem deslocamento de fuso) → reaberto mostra a mesma data → lista (Todos) mostra a coluna "Previsão Entrega" com a data. Sem erro de JavaScript.
+- Tudo apagado no fim: orçamento + itens, usuário (auth, usuarios, usuario_papeis) e o registro em `funcionarios` que um trigger cria junto com o usuário.
+
 ## Pendências
 
-- [ ] Testar na tela publicada (logado): preencher a previsão num orçamento, salvar, reabrir e conferir a data na lista.
+Nenhuma.

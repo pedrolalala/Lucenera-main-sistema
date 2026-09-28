@@ -40,6 +40,25 @@ de sair e de excluir a conta no site do Ubiqua.
   do onboarding se nenhum outro representante estiver ligado a ela.
 - Orçamentos (`orcamentos_revenda_ubiqua`) não têm FK para o usuário e ficam guardados.
 
+## Correção pós-teste (2026-09-28)
+
+Primeiro teste do usuário deu "Contas da equipe Lucenera não podem ser excluídas por aqui." com uma conta de
+teste. Causa: o gatilho `on_auth_user_created` → `handle_new_user()` insere **toda** conta nova em
+`public.usuarios` (role `viewer`) e cria uma linha vazia em `funcionarios` (status Ativo). A regra "está em
+`usuarios` = equipe" recusava todo mundo.
+
+Regra nova de equipe: `usuarios.role <> 'viewer'` **ou** linha em `usuario_papeis` (Hub) **ou**
+`funcionarios` com cargo/departamento/admissão/contratação/empresa/código legado preenchido. Simulada nas 13
+contas reais: 11 recusadas como equipe (inclui o representante real de 19/07, que tem papel no Hub e 1 cliente),
+só as 2 contas de teste de hoje ficam excluíveis. Ao excluir, apaga também o funcionário vazio do gatilho
+(`funcionarios.usuario_id` é ON DELETE SET NULL e sobraria um "funcionário Ativo" fantasma no RH).
+
+Skip 33302 v0.0.93 (`0139093`): o apply deployou `excluir-conta-ubiqua` v2 (só ela). O publish foi bloqueado
+pelo classificador do auto mode, mas o frontend não mudou nesta correção; publicar só alinha a versão no Skip.
+
+Achado fora do escopo: o gatilho cria um `funcionarios` "Ativo" para cada representante do Ubiqua, e eles
+aparecem no RH como funcionários. Não foi alterado.
+
 ## Rollback
 
 Reverter o commit do submódulo e republicar; apagar a função `excluir-conta-ubiqua` no painel do Supabase.

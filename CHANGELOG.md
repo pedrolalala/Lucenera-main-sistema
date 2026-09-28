@@ -4,6 +4,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-28
 
+### SPEC-171: Catálogo Ubiqua — estoque atual de produtos e pedido dividido entre referências
+
+- **Catálogo Ubiqua** — o estoque exibido vinha de `revenda_ubiqua.disponivel`, cópia parada de 03/06; agora
+  vem de `produtos` (import do Connect) pela função nova `ubiqua_estoque_atual()` (SECURITY DEFINER, só
+  referência + disponível). Cor com 2 referências (Manoella e -IS): o orçamento aceita a soma e divide o
+  pedido entre elas. Ex.: FLORA VERDE SALVIA mostrava 14, aceitava 11; agora mostra e aceita 12 (10 + 2).
+- Migration `20260928_171_ubiqua_estoque_atual` **aplicada**. Publicado no Skip 33302 v0.0.94 (`be3b4e1`).
+
 ### SPEC-170: Catálogo Ubiqua — botões Sair e Excluir conta
 
 - **Catálogo Ubiqua** — "Sair" no topo, no Perfil e no onboarding; "Excluir conta" (confirmação digitando

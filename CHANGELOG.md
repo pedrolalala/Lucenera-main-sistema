@@ -4,6 +4,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-28
 
+### SPEC-167: Previsão de Entrega no orçamento
+
+- **Banco** — migration `20260928_167_orcamento_previsao_entrega` aplicada: `orcamentos.previsao_entrega date` (opcional).
+- **Orçamentos** — campo no formulário (ao lado de Validade) e coluna na lista (abas Todos/Aprovados). Editar a
+  previsão não reinicia a aprovação. Código no working tree do Skip 32554 e commit `b130077`; apply/publish pendente.
+
+## 2026-09-28
+
 ### SPEC-166: Referência do produto na Necessidade de Compra
 
 - **Banco** — migration `20260928_166_necessidade_compra_referencia` aplicada: `vw_necessidade_compra` ganha

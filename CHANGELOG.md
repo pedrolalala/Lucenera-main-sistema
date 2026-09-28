@@ -4,6 +4,17 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-28
 
+### SPEC-166: Referência do produto na Necessidade de Compra
+
+- **Banco** — migration `20260928_166_necessidade_compra_referencia` aplicada: `vw_necessidade_compra` ganha
+  `referencia` (produtos.referencia) como última coluna; resto da view inalterado (237 linhas antes/depois).
+- **Compras** — coluna "Referência" na grade e busca multi-termo passa a casar também pela referência.
+  Publicado no Skip 40326 v0.0.78 (`e117587`); submodule `a61f162`.
+- **Edge Function** — cópia de `generate-report` no Compras estava velha; trocada pela versão no ar antes de publicar
+  (redeploy v100 com mesmo conteúdo da v99, PDF sem regressão).
+
+## 2026-09-28
+
 ### SPEC-165: /admin do Showroom acha e edita toda peça da vitrine
 
 - **Showroom** — as 123 peças da página inicial já estavam na lista do /admin, mas escondidas: a aba padrão

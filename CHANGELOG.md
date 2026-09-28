@@ -4,6 +4,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-28
 
+### SPEC-170: Catálogo Ubiqua — botões Sair e Excluir conta
+
+- **Catálogo Ubiqua** — "Sair" no topo, no Perfil e no onboarding; "Excluir conta" (confirmação digitando
+  EXCLUIR) no Perfil e no onboarding. Edge Function nova `excluir-conta-ubiqua` apaga só a conta de quem chama
+  e recusa equipe Lucenera (cascata em `usuarios`/`memoria`), admin e representante com clientes.
+- Sem migration. Publicado no Skip 33302 v0.0.92 (`acf7869`).
+
 ### SPEC-168 + SPEC-169: Catálogo Ubiqua — foto de toda variante no admin e cadastro sem confirmação
 
 - **Catálogo Ubiqua** — admin: cada card lista todas as variantes do grupo (antes só 1 por cor; 13 variantes

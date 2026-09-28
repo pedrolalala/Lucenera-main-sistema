@@ -4,6 +4,21 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-09-28
 
+### SPEC-168 + SPEC-169: Catálogo Ubiqua — foto de toda variante no admin e cadastro sem confirmação
+
+- **Catálogo Ubiqua** — admin: cada card lista todas as variantes do grupo (antes só 1 por cor; 13 variantes
+  não tinham como receber foto). Cadastro: Edge Function nova `cadastro-ubiqua` cria a conta já confirmada e o
+  site entra direto. A confirmação de e-mail continua ligada no Supabase para os outros sistemas.
+- Sem migration. Publicado no Skip 33302 v0.0.91 (`61e0030`); só `cadastro-ubiqua` foi deployada.
+
+### SPEC-164: Memória Lucenera — formulário de item novo travado (correção)
+
+- Os 9 formulários de inserção congelavam a página (loop infinito de renderização causado por um array
+  padrão recriado a cada render em `FormularioItem`). Corrigido e publicado (`3371e9f`); digitação
+  verificada na produção nos 9 tipos e no fluxo Pendentes → Reunião de projeto. Sem impacto no banco.
+
+## 2026-09-28
+
 ### SPEC-167: Previsão de Entrega no orçamento
 
 - **Banco** — migration `20260928_167_orcamento_previsao_entrega` aplicada: `orcamentos.previsao_entrega date` (opcional).

@@ -42,6 +42,16 @@ Mudança só de frontend, sem banco:
 
 "Atrelar" continua como já era: a foto enviada nesta aba grava direto em `produtos.imagem_showroom_url` daquele produto, e "Gerenciar composição" junta outros produtos à peça.
 
+## Decisão pós-teste (2026-09-28)
+
+Teste do usuário: filtro "Sem foto" + busca "ubiqua" trouxe só 1 peça (#13024 IS-STONE… VERMELHO). Está
+correto: dos 99 produtos Ubiqua ativos, só 34 têm `estoque_showroom > 0` (33 com foto e já na vitrine, 1 sem
+foto). Os outros 65 não entram no /admin porque não têm quantidade no showroom.
+
+Perguntado se o /admin deveria permitir buscar qualquer produto e informar a quantidade no showroom: o
+usuário decidiu **deixar como está**. A lista continua limitada a `estoque_showroom > 0`, e a quantidade do
+showroom continua vindo só do cadastro de produtos (mesma regra da SPEC-137).
+
 ## Rollback
 
 Reverter o commit do submódulo e republicar no Skip.

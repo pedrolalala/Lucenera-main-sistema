@@ -12,6 +12,21 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   `vw_showroom_publico`); badge "Na vitrine"; busca local por nome, marca, referência e códigos.
 - Sem mudança de banco. Publicado no Skip 54698 v0.0.16 (`e4713c0`); submodule `11c3df7`.
 
+## 2026-09-28
+
+### SPEC-165: Administração Bancária (CNAB 400, duplicatas) + JSON da NF-e
+
+- **Banco** — migration `20260928_164_adm_bancaria_cnab` aplicada: dados de cobrança por conta, nosso número
+  bancário, `reservar_remessa_cnab`, `processar_retorno_bancario` reescrita (status `Pago`, ocorrências 02/03/06/15/17,
+  juros, sem baixa duplicada).
+- **Adm. Bancária** (Skip 36395 v0.0.75) — remessa e retorno CNAB 400 no layout Bradesco, edição de duplicata sem
+  perder baixa, filtros/colunas reais, baixa duplicada bloqueada, erros do banco tratados.
+- **Vendas** — JSON Focus NFe com pagamento, destino, consumidor final, regime, CEST e e-mail; bloqueios para dados
+  fiscais ausentes. Deploy da Edge Function pendente (manual).
+- **Incidente revertido** — publicação reexecutou migration legada (dados de teste + policies abertas); revertido
+  por `20260928_165_reverter_reexecucao_billing_automation`. Migrations legadas não registradas ainda existem no
+  Skip de RH, CRM e Logística.
+
 ## 2026-09-25
 
 ### SPEC-164: PDF de orçamento aprovado sai com o número da venda

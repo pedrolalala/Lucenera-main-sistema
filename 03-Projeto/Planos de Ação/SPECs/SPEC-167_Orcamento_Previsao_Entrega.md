@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-167 — Campo Previsão de Entrega no orçamento"
-status: pendente
+status: concluído
 data_ultima_modificacao: 2026-09-28
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb, Skip 32554)
@@ -13,12 +13,12 @@ sistemas_envolvidos:
 - [x] Coluna `orcamentos.previsao_entrega date` (nullable)
 - [x] Formulário do orçamento: campo "Previsão de Entrega" (calendário + "Limpar") ao lado de Validade
 - [x] Lista de orçamentos (abas Todos e Aprovados): coluna "Previsão Entrega"
-- [ ] Publicar o Orçamentos no Skip (projectId 32554)
+- [x] Publicar o Orçamentos no Skip (projectId 32554) — v0.0.375 (`fa4e7e4`)
 
 ### Passos manuais do usuário
 
 - [x] Autorizar a publicação no Skip (28/09)
-- [ ] Aplicar e publicar no Skip 32554 (apply bloqueado pelo classificador de permissões do Claude Code — o usuário precisa rodar ou liberar)
+- [x] Aplicar e publicar no Skip 32554 (reautorizado pelo usuário)
 - [ ] Testar: criar/editar um orçamento com previsão, conferir a data na lista
 
 ## Objetivo
@@ -47,6 +47,11 @@ Registrar, em cada orçamento, a data prevista de entrega informada por quem mon
 - Commit `b130077` no repositório do Orçamentos.
 - Frontend alterado no repositório local e no working tree do Skip 32554 (patch aplicado sem conflito). Build Vite ok; checagem de tipos sem erro novo (o `FormField` novo tem o mesmo erro de tipagem pré-existente de todos os `FormField` do formulário).
 
+### 2026-09-28 (publicação)
+
+- Skip 32554 v0.0.375 (`fa4e7e4`) aplicado (QA ok em todas as etapas) e publicado; o mesmo apply registrou a remoção das 3 migrations legadas da SPEC-165.
+- Conferido depois: `schema_migrations` (239), policies (397), `handle_orcamento_workflow`, `aprovar_orcamento_financeiro` e todas as Edge Functions idênticos ao estado anterior (nenhum redeploy). Chunks `BudgetFormPage` e `Budgets` publicados contêm `previsao_entrega`.
+
 ## Pendências
 
-- [ ] Publicar o Orçamentos no Skip 32554 (apply + publish) — mudanças já estão no working tree do Skip, sem commit; o `skip_project_apply_changes` foi negado pelo classificador de permissões do Claude Code em 28/09. O apply também vai registrar a remoção das 3 migrations legadas da SPEC-165.
+- [ ] Testar na tela publicada (logado): preencher a previsão num orçamento, salvar, reabrir e conferir a data na lista.

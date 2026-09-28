@@ -8,7 +8,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 - **Banco** — migration `20260928_167_orcamento_previsao_entrega` aplicada: `orcamentos.previsao_entrega date` (opcional).
 - **Orçamentos** — campo no formulário (ao lado de Validade) e coluna na lista (abas Todos/Aprovados). Editar a
-  previsão não reinicia a aprovação. Código no working tree do Skip 32554 e commit `b130077`; apply/publish pendente.
+  previsão não reinicia a aprovação. Publicado no Skip 32554 v0.0.375 (`fa4e7e4`); submodule `b130077`. Banco e Edge Functions sem alteração pela publicação.
 
 ## 2026-09-28
 

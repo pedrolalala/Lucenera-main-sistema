@@ -19,7 +19,7 @@ sistemas_envolvidos:
 ### Passos manuais do usuário
 
 - [x] Autorizar a publicação no Skip
-- [ ] Testar na tela: buscar por uma referência (ex.: `LUC55-BR`, `EKPF22`)
+- [x] Testar na tela: buscar por uma referência (ex.: `LUC55-BR`, `EKPF22`)
 
 ## Objetivo
 
@@ -49,6 +49,11 @@ O pessoal de Compras pesquisa os itens pela referência do fabricante. A tela Ne
 - Skip 40326 v0.0.78 (`e117587`) aplicado (QA ok em todas as etapas) e publicado. O apply redeployou só `generate-report` (v100), com conteúdo idêntico ao da v99 (difere só na formatação feita pelo Skip); `schema_migrations` inalterado (239). Chunk `necessidade-compra` do bundle publicado contém a busca por referência.
 - Repositório do Compras: commit `a61f162` (pushado).
 
+### 2026-09-28 (teste na produção)
+
+- Chrome headless (Playwright) logado com usuário temporário no papel `compras_e_entregas`: coluna "Referência" presente e preenchida nas 100 primeiras linhas (0 vazias); placeholder atualizado. Buscas, todas iguais ao esperado calculado no banco: `LUC55-BR` → LUC55-BR; `EKPF22` → EKPF22-2M e EKPF22-3M; `EKPF22 3M` → EKPF22-3M; `3649-AB` (texto que não existe no nome do produto) → 3649-AB-S-PX. Sem erro de JavaScript.
+- Usuário temporário (auth, usuarios, usuario_papeis e a linha criada em `funcionarios`) apagado no fim.
+
 ## Pendências
 
-- [ ] Testar na tela publicada (logado): coluna Referência e busca por `LUC55-BR` / `EKPF22`.
+Nenhuma.

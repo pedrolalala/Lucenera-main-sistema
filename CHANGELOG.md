@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-28
+
+### SPEC-165: /admin do Showroom acha e edita toda peça da vitrine
+
+- **Showroom** — as 123 peças da página inicial já estavam na lista do /admin, mas escondidas: a aba padrão
+  ("Vincular do PPT") não tem as 33 peças Ubiqua, e na aba de fotos elas vinham depois de 158 produtos sem foto.
+- Aba renomeada para "Peças e fotos" e aberta por padrão; filtro Na vitrine / Sem foto / Todos (mesma regra de
+  `vw_showroom_publico`); badge "Na vitrine"; busca local por nome, marca, referência e códigos.
+- Sem mudança de banco. Publicado no Skip 54698 v0.0.16 (`e4713c0`); submodule `11c3df7`.
+
 ## 2026-09-25
 
 ### SPEC-164: PDF de orçamento aprovado sai com o número da venda

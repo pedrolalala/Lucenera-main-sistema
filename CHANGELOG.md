@@ -20,6 +20,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   estoque geral, log para admin e status "Pedido de produção". Estoque por empresa (Manoela, Foco, ISLIGHT)
   fica para uma SPEC própria.
 - Repositórios: só o central.
+- N1 publicado: na Central (Skip 37750 v0.0.46, `7c2bcf9`), o card de sistema abre em nova aba (já logado
+  via SSO) e o menu lateral continua trocando a mesma aba. Corrigido `cross-system-auth.ts`: a opção `newTab`
+  existia mas nunca funcionava (`window.open` com `noopener` devolve `null`). Sem impacto no banco; nenhuma
+  Edge Function redeployada. Testado no preview e conferido no bundle de produção. Submodule local da Central
+  não atualizado (rollout SPEC-120 pendente).
 
 ## 2026-09-30
 

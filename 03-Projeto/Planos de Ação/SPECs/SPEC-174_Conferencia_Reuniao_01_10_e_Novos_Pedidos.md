@@ -32,7 +32,7 @@ dependencias:
 
 ### Parte B — implementação (marcar conforme for feito)
 
-- [ ] N1 — Central (Hub): card de sistema abre em **nova aba**; o menu lateral continua na mesma aba
+- [x] N1 — Central (Hub): card de sistema abre em **nova aba**; o menu lateral continua na mesma aba (publicado 01/10)
 - [ ] N2a — Orçamentos: pop-up obrigatório de **Previsão de Entrega** na aprovação da equipe
 - [ ] N2b — Compras: mostrar a previsão de entrega do cliente na Necessidade de Compra / rastreio do produto
 - [ ] N3 — Orçamentos: aviso de atualização de preço depois que a validade (10 dias) vence — **definir antes**
@@ -290,10 +290,24 @@ arquivo). Não duplicar aqui.
 ### 2026-10-01
 
 - SPEC criada a partir da reunião de 01/10 e do histórico de commits de 22/09 a 01/10.
+- **N1 CONCLUÍDO — Central (Skip 37750) v0.0.46 (`7c2bcf9`) publicada em produção em 01/10 (20:06 UTC).**
+  Depois do publish: nenhuma Edge Function redeployada, `schema_migrations` = 239, bundle de produção
+  (`Dashboard-*.js`) contém `newTab`.
+  - `src/pages/Dashboard.tsx`: card chama `redirectWithCode(..., { newTab: true })`.
+  - `src/lib/cross-system-auth.ts`: a opção `newTab` já existia mas nunca funcionava —
+    `window.open(..., 'noopener')` devolve `null`, então a navegação caía na própria aba. Agora abre sem
+    `noopener` (ainda no clique, antes de qualquer `await`, para não ser barrado como pop-up) e zera
+    `opener` em seguida. Se o SSO falhar, a aba nova vai para o sistema sem código (login normal), em vez de fechar.
+  - `SystemSwitcher` não mudou (não passa `newTab`).
+  - Antes do apply: as 13 migrations legadas da Central já estavam em `schema_migrations` (sem risco de
+    reexecução). Depois do apply: nenhuma Edge Function redeployada (comparado com a foto anterior), `schema_migrations` = 239.
+  - Teste no preview (Chrome, logado): card "Orçamentos" na Central → abriu **nova aba** já logada
+    (`/budgets`, `window.opener === null`), Central intacta na aba original; menu lateral do Orçamentos →
+    CRM na **mesma aba**; menu lateral da própria Central → Cadastro na **mesma aba**.
+  - Submodule local `central-lucenera-dashboard-1c9ba` não alterado (atrasado em relação ao Skip, rollout SPEC-120 pendente).
 
 ## Pendências
 
-- [ ] N1 — Cards da Central (Hub) abrem o sistema em nova aba; o menu lateral (SystemSwitcher) continua na mesma aba.
 - [ ] N2a — Pop-up obrigatório de Previsão de Entrega na aprovação da equipe do orçamento.
 - [ ] N2b — Mostrar a previsão de entrega das vendas no detalhe do produto da Necessidade de Compra.
 - [ ] N3 — Definir com o Vinícius quando e como oferecer a atualização de preços de orçamento vencido (10 dias).

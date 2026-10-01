@@ -2,6 +2,25 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-01
+
+### SPEC-174: conferência das entregas de 22/09 a 01/10 e novos pedidos da reunião de revisão
+
+- SPEC nova (`SPEC-174_Conferencia_Reuniao_01_10_e_Novos_Pedidos.md`), a partir da reunião de revisão com o
+  Vinícius (`02-Reunioes/26. ... 01.10.2026_Reunião revisão do sistema/Reunião.01.txt`). Só documentação, sem
+  código e sem banco.
+- Parte A: tabela de conferência de tudo que foi entregue desde 22/09 (SPEC-158 a SPEC-173 + Sync Connect),
+  marcando o que foi conferido OK, o que teve ajuste pedido e o que ainda não foi conferido (Garantia, Adm.
+  Bancária, Memória, entre outros).
+- Parte B: 12 pedidos novos. Definidos: cards da Central abrem o sistema em nova aba (o menu lateral continua
+  na mesma aba), pop-up obrigatório de Previsão de Entrega na aprovação da equipe com a data levada até a
+  Necessidade de Compra, busca da Necessidade de Compra igual à do orçamento, destaque do produto
+  selecionado, botão Salvar cortado e estoque integrado na vertical no Cadastro, permissão de edição de
+  produto pelo Hub. A definir: atualização de preço após a validade de 10 dias, estoque Casa Cor fora do
+  estoque geral, log para admin e status "Pedido de produção". Estoque por empresa (Manoela, Foco, ISLIGHT)
+  fica para uma SPEC própria.
+- Repositórios: só o central.
+
 ## 2026-09-30
 
 ### SPEC-172: Catálogo Ubiqua — desconto %, PDF real, cadastro completo de cliente e e-mail via mailto

@@ -2,6 +2,27 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-09-30
+
+### SPEC-172: Catálogo Ubiqua — desconto %, PDF real, cadastro completo de cliente e e-mail via mailto
+
+- Desconto global do orçamento passa a ser em % (0–100): grava `desconto_percentual`, `valor_desconto` e
+  `valor_total`; resumo da tela, detalhe do admin, PDF e e-mail usam a mesma conta.
+- "Baixar PDF" gera `.pdf` de verdade pela Edge Function nova `gerar-pdf-orcamento-ubiqua` (pdf-lib, layout do
+  orçamento Lucenera), só com dados da Ubiqua (tabela nova `configuracao_empresa_ubiqua`; `empresa_ubiqua` é a
+  tabela dos parceiros e não é usada). Logo laranja do site ubiqualamps.com em `Logo/ubiqua-logo-orange.png`.
+- Cadastro de cliente completo (endereço com busca de CEP, IE e regime só para CNPJ, entrega, cobrança,
+  transportadora, e-mails comercial/financeiro), com edição.
+- "Enviar por E-mail" abre o programa de e-mail do computador (`mailto:`) com assunto e corpo preenchidos; o
+  sistema não envia e-mail (sem SMTP/backend/anexo), igual à Lucenera (SPEC-067).
+- Banco: migration `20260930_172_ubiqua_orcamento_pdf_cliente` aplicada.
+- Incidente: o apply v0.0.95 do Ubiqua (arquivo novo em `_shared/`) redeployou as 15 Edge Functions da working
+  tree; `generate-report`, `salvar-projeto` e `parse-budget-pdf` voltaram a versões antigas. Restauradas na
+  v0.0.97 com as cópias do Compras, CRM e Cadastro (conferido baixando o que está no ar).
+- Publicado Skip 33302 v0.0.97 (`6d253b3`); submódulo `catalogo-pecas-ubiqua-e6fa0` em `0f48835`.
+- Pendente: dados cadastrais da Ubiqua (razão social, CNPJ, endereço, telefone) e decisão sobre a notificação
+  Gmail do `process-budget-pdf` no "Finalizar".
+
 ## 2026-09-28
 
 ### SPEC-171: Catálogo Ubiqua — estoque atual de produtos e pedido dividido entre referências

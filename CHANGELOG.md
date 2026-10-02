@@ -4,6 +4,29 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-02
 
+### SPEC-177/178/179: Orçamento em abas e rotina de devolução (valor líquido, empresa da venda, setores)
+
+- **SPEC-177 — Orçamento em 3 abas** (Skip 32554 v0.0.378): "Dados do Cliente / Arquiteto", "Produtos" e
+  "Condição de Pagamento"; resumo do que já está preenchido no topo (cliente, projeto, arquiteto, vendedor,
+  empresa, previsão); totais em barra fixa no rodapé (mesmos cálculos); destaque do preenchido no padrão do
+  Cadastro; arquiteto vinculado em destaque no `ArchitectSplitPicker` (caso Cacau Ribeiro / ORC-0036); listagem
+  mostra todos os arquitetos da divisão.
+- **SPEC-178 — Devolução** (v0.0.379): busca da venda de origem com colunas L / Código / Referência / Descrição /
+  Nº da Venda / Qtd. da Venda / A Devolver; preço líquido com o desconto da venda (R$ 4.031,21 com 8% =
+  R$ 3.708,71); a devolução herda empresa, vendedor e arquitetos da venda e trava a empresa; só venda efetivada
+  (com número de venda); conferência ao salvar. ORC-0036 (teste MANOELLA × venda FOCO) cancelado.
+- **SPEC-179 — Saldo e setores**: disponível para devolução = vendido − já devolvido (reserva, entrega futura,
+  em separação e entregue); uma linha por setor (`orcamento_itens.setor_origem`); reserva / em separação /
+  entregue liberam a reserva do produto (entregue volta ao estoque na aprovação); entrega futura reduz a
+  necessidade de compra.
+- **Banco:** migration `20261002_178_devolucao_por_setor` aplicada (dry-run com ROLLBACK antes; `rollback.sql`
+  na pasta): coluna `setor_origem`, `replace_orcamento_itens`, `registrar_devolucao_projeto_item_setor`
+  (setor em_separacao; entregue baixa `q_entregue`), ramo de devolução de `aprovar_orcamento_financeiro`, e os 3
+  triggers da separação passam a mover só `quantidade − quantidade_estornada` (corrige também o estorno
+  parcial). Nenhuma Edge Function redeployada.
+- Impacto em outros sistemas: a aba de devolução do Compras usa a mesma RPC por setor.
+- Repositórios: Orçamentos `b67b6ac` (pushado; ponteiro atualizado).
+
 ### SPEC-176: impressão da separação, listagem da Separação Parcial e empresa/busca em Vendas
 
 - SPEC nova (`SPEC-176_Impressao_Separacao_Listagem_Separacao_Vendas_Empresa.md`), pedido do administrador.

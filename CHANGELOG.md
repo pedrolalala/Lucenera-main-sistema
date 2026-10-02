@@ -4,6 +4,26 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-02
 
+### SPEC-176: impressão da separação, listagem da Separação Parcial e empresa/busca em Vendas
+
+- SPEC nova (`SPEC-176_Impressao_Separacao_Listagem_Separacao_Vendas_Empresa.md`), pedido do administrador.
+- **Separação Parcial** (Skip 48801 v0.0.45): impressão "Pedido em Separação" com logo, sem a coluna "Conf.",
+  referência + descrição em linha única, Cód. Ref./Quantidade centralizados e rodapé só com Entregador e Recebedor;
+  número `ORC-0032-P3 / VENDA-0001` virou `Venda 0001-P3`. Listagem sem a coluna de orçamento, venda sem prefixo,
+  cliente — projeto na mesma linha, empresa, data da venda (`aprovado_cliente_em`) e previsão de entrega. Sem valor
+  em dinheiro (SPEC-072 mantida, decisão do usuário).
+- **Vendas** (Skip 59346 v0.0.14): coluna Empresa Faturada, busca (venda, orçamento, cliente, projeto, empresa) e
+  filtro por empresa combinados.
+- Sem impacto no banco. Nenhuma Edge Function redeployada.
+- Repositórios: Separação Parcial `9affcef`, Vendas `7c621d6` (pushados; ponteiros atualizados).
+
+### SPEC-172: "Enviar por E-mail" do Catálogo Ubiqua baixa o PDF antes de abrir o e-mail
+
+- Catálogo Ubiqua (Skip 33302 v0.0.98): o botão gera e baixa o PDF (mesma função do "Baixar PDF") e só então abre o
+  `mailto:`; o usuário anexa o arquivo. `mailto:` não aceita anexo e o envio por SMTP continua descartado
+  (decisão do usuário reconfirmada em 02/10). Erro no PDF = e-mail não abre.
+- Repositório: Catálogo Ubiqua `6993419` (pushado; ponteiro atualizado).
+
 ### SPEC-174: N2a, N3, N5–N8, N10 e N11 publicados; SPEC-175 (estoque por empresa) criada
 
 - **Orçamentos** (Skip 32554 v0.0.377): N2a — pop-up obrigatório de Previsão de Entrega na aprovação da equipe e em

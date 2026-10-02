@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-174 — Conferência das entregas de 22/09 a 01/10 e novos pedidos da reunião de revisão de 01/10/2026"
-status: pendente
-data_ultima_modificacao: 2026-10-01
+status: concluído
+data_ultima_modificacao: 2026-10-02
 sistemas_envolvidos:
   - Central / Hub (cards de sistema da Central; o SystemSwitcher não muda) — N1
   - Orçamentos (gestao-financeira-clone-544cb) — N2, N3
@@ -33,18 +33,18 @@ dependencias:
 ### Parte B — implementação (marcar conforme for feito)
 
 - [x] N1 — Central (Hub): card de sistema abre em **nova aba**; o menu lateral continua na mesma aba (publicado 01/10)
-- [ ] N2a — Orçamentos: pop-up obrigatório de **Previsão de Entrega** na aprovação da equipe
-- [ ] N2b — Compras: mostrar a previsão de entrega do cliente na Necessidade de Compra / rastreio do produto
-- [ ] N3 — Orçamentos: aviso de atualização de preço depois que a validade (10 dias) vence — **definir antes**
-- [ ] N4 — Necessidade de Compra: busca igual à do orçamento (código interno → referência → nome, vários termos)
-- [ ] N5 — Consulta de Produto: destaque mais forte da linha/card selecionado
-- [ ] N6a — Editar produto: botão **Salvar cortado** (bug)
-- [ ] N6b — Estoque integrado: setores na **vertical**, com todos os setores do produto
-- [ ] N7 — Permissões por ação na Consulta de Produto (todos consultam, só alguns editam) — via Hub
-- [ ] N8 — Estoque **Casa Cor** como setor separado, que não soma no estoque geral — **definir antes**
-- [ ] N9 — Estoque **por empresa** nos bastidores — **levantamento antes, SPEC própria**
-- [ ] N10 — Log de alterações visível para administrador (Produção) — **proposta, confirmar**
-- [ ] N11 — Status "Pedido de produção" visível na lista do Controle de Produção — **confirmar o que faltou**
+- [x] N2a — Orçamentos: pop-up obrigatório de **Previsão de Entrega** na aprovação da equipe (publicado 02/10)
+- [x] N2b — Compras: mostrar a previsão de entrega do cliente na Necessidade de Compra / rastreio do produto (publicado 01/10)
+- [x] N3 — Orçamentos: aviso de orçamento vencido (validade de 10 dias) oferecendo atualizar os preços (publicado 02/10)
+- [x] N4 — Necessidade de Compra: busca igual à do orçamento (código interno → referência → nome, vários termos) (publicado 01/10)
+- [x] N5 — Consulta de Produto: destaque mais forte da linha/card selecionado (publicado 02/10)
+- [x] N6a — Editar produto: botão **Salvar cortado** (bug) (publicado 02/10)
+- [x] N6b — Estoque integrado: setores na **vertical**, com todos os setores do produto (publicado 02/10)
+- [x] N7 — Permissões por ação na Consulta de Produto (todos consultam, só alguns editam) — via Hub (publicado 02/10; matriz final com o Vinícius)
+- [x] N8 — Estoque **Casa Cor**/Garantia como setor separado, fora do estoque geral (publicado 02/10; carga da planilha pendente)
+- [x] N9 — Estoque **por empresa** nos bastidores — levantamento feito na SPEC-175 (implementação depende de decisão)
+- [x] N10 — Aba Log só admin no Controle de Produção e no Controle de Garantia (publicado 02/10)
+- [x] N11 — Status do Controle de Produção selecionável (Select real) (publicado 02/10)
 
 ### Passos manuais do usuário
 
@@ -82,6 +82,18 @@ de trabalho com prioridade e grau de definição.
   saída pela empresa da nota. Venda acima do estoque da empresa **não é bloqueada**.
 - **Cores**: código e referência em preto (SPEC-158 P2.5) aprovados; manter, só deixar mais forte o destaque
   do item selecionado.
+
+### Decisões do usuário em 01/10 (depois da reunião)
+
+- **N3:** aviso ao abrir/editar ou aprovar orçamento vencido: "deseja atualizar os preços?". Sim = preço de
+  venda atual do cadastro, mantendo descontos; Não = segue com os preços antigos.
+- **N8:** setor separado. 'Estoque Casa Cor' e 'Estoque Garantia' aparecem na consulta, mas não entram no
+  estoque geral nem no disponível. Venda = transferir para o geral + desconto no orçamento.
+- **N10:** aba Log só para administrador, no Controle de Produção e no Controle de Garantia.
+- **N11:** o problema é que os status não aparecem para selecionar, só na descrição (legenda) dos status.
+- **N2a:** segue como implementado (gravação da data + RPC de aprovação em dois passos); deixar a versão
+  atômica (RPC única) como melhoria futura.
+- **N9:** vira SPEC própria (SPEC-175).
 
 ## Definição da SPEC
 
@@ -305,21 +317,111 @@ arquivo). Não duplicar aqui.
     (`/budgets`, `window.opener === null`), Central intacta na aba original; menu lateral do Orçamentos →
     CRM na **mesma aba**; menu lateral da própria Central → Cadastro na **mesma aba**.
   - Submodule local `central-lucenera-dashboard-1c9ba` não alterado (atrasado em relação ao Skip, rollout SPEC-120 pendente).
+- **N4 + N2b (Compras) CONCLUÍDOS — Skip 40326 v0.0.79 (`664ba6d`) publicado.** Implementados pelo agente
+  `implementador`, revisados pelo `revisor` (sem achado crítico), gravados no Skip por patch de trechos.
+  - N4: `services/necessidade-compra.ts` ordena por relevância quando há busca (código exato > referência >
+    marca > nome, média por termo, mesma regra de `buscar_produtos_fuzzy`); filtro de inclusão não mudou.
+  - N2b: coluna "Previsão Entrega" no detalhe "Ver projetos". Migration
+    `20261001_174_necessidade_compra_previsao_entrega` **aplicada** (dry-run + COMMIT): view
+    `vw_necessidade_compra_detalhe` ganhou `previsao_entrega` no fim, 19 colunas e 5 linhas preservadas.
+    Hoje nenhum orçamento tem `previsao_entrega` preenchida, então a coluna mostra "—" até o N2a gravar datas.
+- **N5 + N6a + N6b (Cadastro) — Skip 36668 v0.0.89 aplicado, publicação PENDENTE (bloqueada pelo classificador).**
+  - `Pecas.tsx` do Skip tinha a ordenação SPEC-122 que o git local não tem: aplicado só o trecho do destaque.
+  - N6a: Cancelar/Salvar com `flex-wrap` + `min-w` (achado do revisor: risco de corte em ~1366px).
+  - Incidente no apply: 14 arquivos de Edge Functions estavam apagados/vazios na working tree (origem
+    desconhecida); regravados com o conteúdo do ar. Regravar o `deno.json` raiz redeployou as 13 funções do
+    Cadastro; 12 ficaram idênticas ao ar (conferido por download), mas `salvar-projeto` voltou para cópia velha
+    (sem SPEC-077) por ~5 min — restaurado com a cópia do CRM (v0.0.89, no ar v87, conferido por download).
+- **N2a (Orçamentos)** implementado no local (`TeamApprovalDeliveryDialog.tsx` novo, `TeamApprovalTab.tsx`,
+  `BudgetFormPage.tsx`) e revisado (sem crítico; 1 médio: UPDATE da data + RPC de aprovação não são atômicos).
+  Ainda não gravado no Skip 32554.
+
+### 2026-10-01 (continuação) — N10 e N11 (Controle de Produção / Controle de Garantia)
+
+Implementado pelo agente `implementador` **no local** (não aplicado no Supabase real, não publicado no
+Skip, não commitado) — falta o `revisor` e os passos manuais abaixo.
+
+- **N11 (Controle de Produção) — causa confirmada e corrigida.** `ModalAtualizarStatusProducao.tsx` era um
+  `<Input list="...">` com `<datalist>` nativo; dentro do `Dialog` do Radix (overlay/focus-trap próprios) o
+  `<datalist>` não abre de forma confiável — só o texto "Sugestões: ..." do rodapé aparecia, exatamente o
+  relato do usuário ("só na descrição de quais status tem"). Os outros 3 campos do mesmo sistema (Tipo de
+  peça, Empresa, Prioridade em `ModalNovoPedidoProducao.tsx`) já usavam `<Select>` do Radix dentro do mesmo
+  tipo de `Dialog` e funcionam normalmente — confirma que o problema era o `<datalist>`, não o Dialog.
+  Trocado por `<Select>` real com opção "Outro (escrever)" revelando um campo livre (mesmo padrão de
+  `OCORRENCIA_OUTRO`/`ModalOcorrenciaProducao.tsx`), preservando a entrada de valor livre (status continua
+  sem `CHECK` no banco — dado sujo real da planilha). Status legado que não está em `STATUS_SUGESTOES` cai
+  automaticamente em "Outro" já preenchido com o valor atual, sem perder o pedido de vista.
+  Verificado o Controle de Garantia: `ModalAtualizarProtocolo.tsx` já usa `<Select>` para `ProtocoloStatus`
+  (enum fixo) — **a falha de N11 não existe na Garantia**, nada a corrigir lá.
+  - `04-Sistemas/controle-de-producao/src/components/producao/ModalAtualizarStatusProducao.tsx`
+  - `04-Sistemas/controle-de-producao/src/services/producao.ts` (export `STATUS_OUTRO`)
+- **N10 (Controle de Produção + Controle de Garantia) — aba "Log", só administrador.** Levantamento do que já
+  existia: Produção tinha `producao_pedido_ocorrencias` (quem registrou/resolveu), `producao_pedido_handoffs`
+  (quem entregou/recebeu) e `producao_pedido_edicoes`/`producao_pedido_prazo_alteracoes` (quem editou e
+  quando, sem diff de campos); Garantia não tinha **nenhuma** tabela de histórico. Em nenhum dos dois havia
+  registro de **quem** mudou o status (a troca pelo modal rápido é um `UPDATE` direto, sem autor) nem diff de
+  campos. Faltava dado — redigida migration (não aplicada):
+  - `supabase/db/migrations/20261001_174b_log_producao_garantia/001_producao_pedidos_log.sql`: tabela
+    `producao_pedidos_log` + trigger `AFTER INSERT OR UPDATE ON producao_pedidos` (função
+    `registrar_log_producao_pedidos`, `SECURITY DEFINER`) gravando `auth.uid()`, ação
+    (`criado`/`atualizado`/`status_alterado`) e `dados_antigos`/`dados_novos` em `jsonb`. RLS: só
+    `usuarios.role = 'admin'` lê (mesmo critério usado em `cadastro-lucenera-b86fe` e nas policies do
+    snapshot `07_rls_policies.sql`); sem policy de INSERT para `authenticated` (só a função grava).
+    Conferido antes: único trigger existente em `producao_pedidos` é `producao_pedidos_updated_at`
+    (`BEFORE UPDATE`) — sem conflito (fase diferente).
+  - `.../002_garantia_log.sql`: mesma estrutura para `garantia_protocolos_log` (trigger em
+    `garantia_protocolos`) e `garantia_itens_log` (trigger em `garantia_itens`). Conferido antes:
+    `garantia_protocolos_updated_at` e `garantia_itens_updated_at` (`BEFORE UPDATE`) — sem conflito.
+  - Frontend agrega a trilha nova com o que já existia (ocorrências/handoffs na Produção) numa aba "Log"
+    visível só para quem tem `usuarios.role === 'admin'` (hook `useIsAdmin`, mesmo critério, sem e-mail
+    hardcoded): botão "Log" ao lado dos filtros de tipo (Produção) e 4ª aba (Garantia), lista mais recente
+    primeiro com busca simples por usuário/ação/pedido/detalhe.
+    - `04-Sistemas/controle-de-producao/src/hooks/use-is-admin.ts` (novo)
+    - `04-Sistemas/controle-de-producao/src/components/producao/LogPanelProducao.tsx` (novo)
+    - `04-Sistemas/controle-de-producao/src/services/producao.ts` (`listarLogProducao`, `LOG_ACAO_LABEL`,
+      `LogProducaoEntry`)
+    - `04-Sistemas/controle-de-producao/src/pages/Producao.tsx` (toggle "Log", só admin)
+    - `04-Sistemas/controle-de-garantia/src/hooks/use-is-admin.ts` (novo)
+    - `04-Sistemas/controle-de-garantia/src/components/garantia/LogPanelGarantia.tsx` (novo)
+    - `04-Sistemas/controle-de-garantia/src/services/garantia.ts` (`listarLogGarantia`, `LOG_ACAO_LABEL`,
+      `LogGarantiaEntry`)
+    - `04-Sistemas/controle-de-garantia/src/pages/Garantia.tsx` (4ª aba "log", só admin)
+- **Verificação:** `oxlint` e `tsc --noEmit` sem erros e `vite build` ok nos dois sistemas. `oxfmt --check`
+  reporta "format issues" em quase todo `src/` dos dois sistemas (inclusive arquivos nunca tocados, ex.
+  `components/ui/button.tsx`) — drift pré-existente do ambiente (não introduzido por esta mudança;
+  confirmado via `git status`, os arquivos reportados fora dos meus `git status --short` já estavam
+  "desformatados" antes). Não roda `oxfmt` sem `--check` (reformataria o repo inteiro, fora de escopo).
+- **Teste manual pendente (navegador):** abrir Controle de Produção logado como administrador, confirmar que
+  o botão "Log" aparece e que o `Select` de status em "Atualizar status" abre a lista normalmente (e que
+  "Outro" revela o campo livre); confirmar que o botão/aba "Log" **não** aparece para um usuário não-admin;
+  repetir a checagem de visibilidade do "Log" no Controle de Garantia. Sem a migration aplicada, as duas
+  abas "Log" carregam vazias (RLS não erra, só não tem linha ainda).
+
+### 2026-10-02 — Publicação de N2a, N3, N5–N8, N10, N11
+
+- **Migrations:** 174b (log Produção/Garantia) ficou aplicada (aplicada sem querer por um `revisor` em 01/10 durante
+  dry-run — o arquivo tem `COMMIT;` próprio; mantida por decisão do usuário, 3 linhas de log de teste apagadas; 3
+  `updated_at` de registros de teste foram alterados). 174c (permissão "editar" no Cadastro para `compras_e_entregas`
+  e `estoque`, agora idempotente com `WHERE NOT EXISTS`) e 174d (`vw_produtos_estoque_detalhado` sem Casa
+  Cor/Garantia + 2 colunas novas no fim) aplicadas com dry-run (sem BEGIN/COMMIT do texto) + COMMIT. Débora passou a
+  ter "editar"; totais da view inalterados (31599 / 7512,70).
+- **Publicados:** Controle de Produção 60535 v0.0.14 (`8b2ee8b`), Controle de Garantia 60545 v0.0.10 (`1fc8c52`),
+  Orçamentos 32554 v0.0.377 (`237542e`), Cadastro 36668 v0.0.90 (`c037527`). Todos os arquivos levados ao Skip por
+  patch de trechos (Cadastro: só os trechos N7/N8 por cima da versão do Skip, preservando a ordenação SPEC-122).
+  Antes de cada apply: migrations legadas conferidas como registradas; depois: nenhuma Edge Function redeployada,
+  `schema_migrations` = 239.
+- Revisões (`revisor`) sem achado crítico nos 3 pacotes; ajustes feitos: 174c idempotente, `has_estoque` sem
+  Casa Cor/Garantia, botão "Sim, revisar preços" fecha o diálogo antes de navegar.
 
 ## Pendências
 
-- [ ] N2a — Pop-up obrigatório de Previsão de Entrega na aprovação da equipe do orçamento.
-- [ ] N2b — Mostrar a previsão de entrega das vendas no detalhe do produto da Necessidade de Compra.
-- [ ] N3 — Definir com o Vinícius quando e como oferecer a atualização de preços de orçamento vencido (10 dias).
-- [ ] N4 — Busca da Necessidade de Compra com a mesma regra do orçamento (código → referência → nome, vários termos).
-- [ ] N5 — Destaque mais forte da linha selecionada na Consulta de Produto do Cadastro.
-- [ ] N6a — Corrigir o botão Salvar cortado na edição de produto do Cadastro.
-- [ ] N6b — Estoque integrado na vertical, com todos os setores, na edição de produto do Cadastro.
-- [ ] N7 — Permissão de editar/copiar/excluir produto pela matriz do Hub; montar a matriz com o Vinícius.
-- [ ] N8 — Definir e implementar o setor de estoque Casa Cor (fora do estoque geral); carregar a planilha do Matheus.
-- [ ] N9 — Levantamento e SPEC própria para estoque por empresa; receber do Sérgio as 3 planilhas de balanço.
-- [ ] N10 — Confirmar se cria a aba Log (só admin) no Controle de Produção e na Garantia.
-- [ ] N11 — Confirmar o que falta no status "Pedido de produção" do Controle de Produção.
+- [ ] N7 — Fechar com o Vinícius a matriz papel × ação do Cadastro (hoje: `compras_e_entregas` e `estoque` ganharam "editar" pela migration 174c; `viewer` tem "editar" de brinde por `acao IS NULL`; botão "Nova Peça" não é escondido para quem só consulta).
+- [ ] N8 — Carregar a planilha de Casa Cor do Matheus; não existe tela de transferência entre setores (Casa Cor → geral).
+- [ ] N9 — Decidir a modelagem do estoque por empresa (SPEC-175) e receber do Sérgio as 3 planilhas de balanço.
+- [ ] N2a — Melhoria futura: gravar a previsão de entrega e aprovar numa RPC única (hoje são 2 passos, não atômicos).
+- [ ] N10 — Cuidado com UPDATE em massa em `producao_pedidos`/`garantia_protocolos`/`garantia_itens`: cada linha gera um log.
+- [ ] Testar ao vivo com o Vinícius/equipe: N2a, N3, N5–N8, N10, N11 (publicados 02/10).
 - [ ] Conferir com o Vinícius os itens ⬜ da Parte A, principalmente o Controle de Garantia.
 - [ ] Criar os logins do Controle de Produção e da Garantia (depende dos e-mails do Mateus).
 - [ ] Limpar as vendas de teste usadas na reunião.
+- [ ] Commitar o código local dos submodules (Compras, Cadastro, Orçamentos, Produção, Garantia) — o Skip está à frente; o git local do Cadastro não tem a SPEC-122.

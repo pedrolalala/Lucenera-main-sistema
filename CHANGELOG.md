@@ -2,6 +2,30 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-02
+
+### SPEC-174: N2a, N3, N5–N8, N10 e N11 publicados; SPEC-175 (estoque por empresa) criada
+
+- **Orçamentos** (Skip 32554 v0.0.377): N2a — pop-up obrigatório de Previsão de Entrega na aprovação da equipe e em
+  toda gravação nessa etapa (grava `orcamentos.previsao_entrega` e registra a data no histórico via
+  `equipe_aprovar_orcamento`); N3 — aviso de orçamento vencido (validade de 10 dias) oferecendo atualizar os preços
+  pelo preço de venda atual, mantendo descontos, sem salvar sozinho.
+- **Cadastro** (Skip 36668 v0.0.90): N5 destaque da peça selecionada, N6a botão Salvar sem corte, N6b estoque
+  integrado na vertical com Showroom; N7 Editar/Copiar/Excluir só com a ação "editar" do Hub; N8 Casa Cor/Garantia
+  aparecem mas não somam no estoque geral/disponível.
+- **Controle de Produção** (Skip 60535 v0.0.14) e **Controle de Garantia** (Skip 60545 v0.0.10): N10 aba Log só para
+  admin; N11 status da Produção em Select real (o `<datalist>` não abria dentro do modal).
+- **Banco:** migrations `20261001_174b_log_producao_garantia` (tabelas de log + triggers; aplicada por engano durante
+  um dry-run em 01/10 — o arquivo tem `COMMIT;` próprio — e mantida), `20261001_174c_cadastro_permissao_editar`
+  ("editar" no Cadastro para `compras_e_entregas` e `estoque`) e `20261001_174d_estoque_casa_cor_garantia_fora_do_geral`
+  (view `vw_produtos_estoque_detalhado`). Nenhuma Edge Function redeployada nos applies/publishes.
+- **Incidente 01/10 (Cadastro v0.0.88):** regravar o `deno.json` raiz das functions redeployou as 13 funções do
+  Cadastro; `salvar-projeto` voltou à cópia antiga (sem SPEC-077) por ~5 min e foi restaurado com a cópia do CRM.
+- SPEC-175 (`SPEC-175_Estoque_Por_Empresa.md`): levantamento e 3 alternativas de modelagem para estoque por
+  empresa (Manoela, Foco, ISLIGHT); recomenda ledger separado. Sem implementação.
+- Repositórios: central. Código dos submodules alterado só localmente (Skip é a fonte publicada); commit dos
+  submodules pendente de decisão.
+
 ## 2026-10-01
 
 ### SPEC-174: conferência das entregas de 22/09 a 01/10 e novos pedidos da reunião de revisão

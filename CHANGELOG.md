@@ -26,6 +26,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - **N7 (decisão 02/10):** só a administração edita e cria peça no Cadastro (`admin`, `admin_geral`,
   `administracao_comercial`, `compras_e_entregas`); migration `20261002_174e_cadastro_editar_criar_so_administracao`
   aplicada; "Nova Peça" escondido sem a ação "criar" (Cadastro Skip 36668 v0.0.91).
+- **N6c:** Consultar Produtos mostra sempre os 8 setores obrigatórios na vertical (Estoque Geral, Showroom, Garantia,
+  Casa Cor, Reserva, Separação, Entrega Futura, Amostra / Emprestado) — Cadastro Skip 36668 v0.0.92; view nova
+  `vw_cadastro_produto_setores` (migration `20261002_174f`).
 - Repositórios: central + Compras `8996f34`, Cadastro `43fa8ae`, Orçamentos `2f8b271`, Produção `732ad18`,
   Garantia `dc18683` (todos pushados; ponteiros atualizados).
 

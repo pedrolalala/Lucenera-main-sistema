@@ -40,6 +40,7 @@ dependencias:
 - [x] N5 — Consulta de Produto: destaque mais forte da linha/card selecionado (publicado 02/10)
 - [x] N6a — Editar produto: botão **Salvar cortado** (bug) (publicado 02/10)
 - [x] N6b — Estoque integrado: setores na **vertical**, com todos os setores do produto (publicado 02/10)
+- [x] N6c — Consultar Produtos: peça selecionada mostra sempre os 8 setores obrigatórios na vertical (publicado 02/10)
 - [x] N7 — Permissões por ação na Consulta de Produto (todos consultam, só alguns editam) — via Hub (publicado 02/10; matriz final com o Vinícius)
 - [x] N8 — Estoque **Casa Cor**/Garantia como setor separado, fora do estoque geral (publicado 02/10; carga da planilha pendente)
 - [x] N9 — Estoque **por empresa** nos bastidores — levantamento feito na SPEC-175 (implementação depende de decisão)
@@ -216,6 +217,19 @@ Deixar o destaque **mais forte**, na linha inteira (fundo + borda), sem depender
   separação, garantia, Casa Cor (quando N8 existir). O bloco pode ficar mais estreito.
 - Observação da reunião: o histórico de vendas do produto não veio na migração ("não veio o histórico").
   Fica registrado; não faz parte desta SPEC.
+
+#### N6c — Setores obrigatórios na peça selecionada — DEFINIDO (pedido do usuário, 02/10)
+
+Na tela Consultar Produtos, o estoque da peça selecionada aparece na vertical, um setor por linha (nome +
+quantidade), e estes 8 setores aparecem **sempre**, mesmo zerados, nesta ordem: Estoque Geral, Showroom, Estoque
+Garantia, Estoque Casa Cor, Reserva, Separação, Entrega Futura, Amostra / Emprestado.
+
+- Fontes: Estoque Geral = `estoque_itens` local 'Estoque' (+ 'Estoque Geral'); Showroom = `produtos.estoque_showroom`;
+  Garantia, Casa Cor e Amostra / Emprestado = `estoque_itens` pelo local de mesmo nome; Reserva, Separação
+  (a separar + separado) e Entrega Futura = saldos por projeto (`vw_estoque_por_produto_projeto`), somados por peça
+  na view nova `vw_cadastro_produto_setores`.
+- Outros setores com saldo (ex.: Em trânsito, Defeito) continuam aparecendo abaixo dos 8, para não esconder dado.
+- Mesma lista no "Estoque Integrado" da edição da peça (N6b), para as duas telas mostrarem a mesma coisa.
 
 #### N7 — Permissão por ação na Consulta de Produto — DEFINIDO, via Hub
 
@@ -427,6 +441,16 @@ Skip, não commitado) — falta o `revisor` e os passos manuais abaixo.
 - Commits nos repositórios dos sistemas (todos pushados): Compras `8996f34`, Cadastro `43fa8ae` (local alinhado com
   o Skip, inclui a ordenação SPEC-122), Orçamentos `2f8b271`, Produção `732ad18`, Garantia `dc18683`; ponteiros
   atualizados no repo central.
+
+### 2026-10-02 — N6c: 8 setores obrigatórios na peça selecionada
+
+- Migration `20261002_174f_vw_cadastro_produto_setores` aplicada (dry-run + COMMIT): view só leitura com Reserva,
+  Separação (a separar + separado) e Entrega Futura somadas por peça (totais 40 / 10 / 26, iguais à base); leitura
+  conferida simulando Débora e Mariane como `authenticated`.
+- Cadastro (Skip 36668 v0.0.92, `d580c27`, publicado): componente `EstoqueSetoresList` + `buildSetoresObrigatorios`
+  usados no painel da peça selecionada (substitui a tabela "Local / Qtd. Estoque / Disponível") e no "Estoque
+  Integrado" da edição. Os 8 setores aparecem sempre, mesmo zerados; outros setores com saldo aparecem abaixo.
+  Nenhuma Edge Function redeployada.
 
 ## Pendências
 

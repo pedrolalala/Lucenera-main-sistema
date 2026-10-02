@@ -23,8 +23,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   Cadastro; `salvar-projeto` voltou à cópia antiga (sem SPEC-077) por ~5 min e foi restaurado com a cópia do CRM.
 - SPEC-175 (`SPEC-175_Estoque_Por_Empresa.md`): levantamento e 3 alternativas de modelagem para estoque por
   empresa (Manoela, Foco, ISLIGHT); recomenda ledger separado. Sem implementação.
-- Repositórios: central. Código dos submodules alterado só localmente (Skip é a fonte publicada); commit dos
-  submodules pendente de decisão.
+- **N7 (decisão 02/10):** só a administração edita e cria peça no Cadastro (`admin`, `admin_geral`,
+  `administracao_comercial`, `compras_e_entregas`); migration `20261002_174e_cadastro_editar_criar_so_administracao`
+  aplicada; "Nova Peça" escondido sem a ação "criar" (Cadastro Skip 36668 v0.0.91).
+- Repositórios: central + Compras `8996f34`, Cadastro `43fa8ae`, Orçamentos `2f8b271`, Produção `732ad18`,
+  Garantia `dc18683` (todos pushados; ponteiros atualizados).
 
 ## 2026-10-01
 

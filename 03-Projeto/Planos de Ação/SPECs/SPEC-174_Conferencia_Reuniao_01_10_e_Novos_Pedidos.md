@@ -413,9 +413,23 @@ Skip, não commitado) — falta o `revisor` e os passos manuais abaixo.
 - Revisões (`revisor`) sem achado crítico nos 3 pacotes; ajustes feitos: 174c idempotente, `has_estoque` sem
   Casa Cor/Garantia, botão "Sim, revisar preços" fecha o diálogo antes de navegar.
 
+### 2026-10-02 — N7: matriz de permissão do Cadastro fechada (decisão do usuário)
+
+- Só a administração edita e cria peça no Cadastro: `admin`, `admin_geral`, `administracao_comercial` e
+  `compras_e_entregas` (a Débora cadastra peça, SPEC-158). Os demais papéis (`equipe_projetos`, `estoque`,
+  `gerente`, `funcionario`, `operador`, `viewer`) passam a só consultar.
+- Migration `20261002_174e_cadastro_editar_criar_so_administracao` aplicada (dry-run por usuário + COMMIT):
+  Débora ganhou "criar"; Mariane, Marina, Thairine e a conta `viewer` perderam editar/criar; administração intacta.
+- Cadastro (Skip 36668 v0.0.91, `a695d1a`): botão "Nova Peça" só com a ação "criar" (`canCreate`).
+- Observação: no banco, `produtos` continua aceitando INSERT/UPDATE pelas permissões de Orçamentos e Necessidade
+  de Compra (item sem cadastro no orçamento e atualização de custo dependem disso) — a restrição vale para as telas
+  do Cadastro.
+- Commits nos repositórios dos sistemas (todos pushados): Compras `8996f34`, Cadastro `43fa8ae` (local alinhado com
+  o Skip, inclui a ordenação SPEC-122), Orçamentos `2f8b271`, Produção `732ad18`, Garantia `dc18683`; ponteiros
+  atualizados no repo central.
+
 ## Pendências
 
-- [ ] N7 — Fechar com o Vinícius a matriz papel × ação do Cadastro (hoje: `compras_e_entregas` e `estoque` ganharam "editar" pela migration 174c; `viewer` tem "editar" de brinde por `acao IS NULL`; botão "Nova Peça" não é escondido para quem só consulta).
 - [ ] N8 — Carregar a planilha de Casa Cor do Matheus; não existe tela de transferência entre setores (Casa Cor → geral).
 - [ ] N9 — Decidir a modelagem do estoque por empresa (SPEC-175) e receber do Sérgio as 3 planilhas de balanço.
 - [ ] N2a — Melhoria futura: gravar a previsão de entrega e aprovar numa RPC única (hoje são 2 passos, não atômicos).
@@ -424,4 +438,3 @@ Skip, não commitado) — falta o `revisor` e os passos manuais abaixo.
 - [ ] Conferir com o Vinícius os itens ⬜ da Parte A, principalmente o Controle de Garantia.
 - [ ] Criar os logins do Controle de Produção e da Garantia (depende dos e-mails do Mateus).
 - [ ] Limpar as vendas de teste usadas na reunião.
-- [ ] Commitar o código local dos submodules (Compras, Cadastro, Orçamentos, Produção, Garantia) — o Skip está à frente; o git local do Cadastro não tem a SPEC-122.

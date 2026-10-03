@@ -2,6 +2,30 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-03
+
+### SPEC-180: etapa Recebida na devolução, aviso de empresa, correções da rodada de testes e desempenho do banco
+
+- SPEC nova (`SPEC-180_Devolucao_Recebida_Aviso_Empresa_e_Desempenho.md`), após a rodada de testes das SPECs 176–179.
+- **Etapa "Recebida"** (migration `20261003_182_devolucao_recebimento`): devolução de material **Entregue** fica
+  `aguardando_recebimento` na aprovação, sem liberar a reserva; na **Separação Parcial** (Skip 48801 v0.0.46), botão
+  "Devoluções a receber" com "Confirmar recebimento" (RPC `confirmar_recebimento_devolucao`) — só então o disponível
+  sobe e o status vira `recebida`. Reserva / Em separação / Entrega futura continuam com efeito na aprovação.
+- **Empresa diferente:** a devolução continua herdando empresa/equipe da venda, mas sem trava — linha de venda de outra
+  empresa entra com aviso (toast) ao escolher e ao salvar (decisão do usuário). Orçamentos Skip 32554 v0.0.380.
+- **Correções da rodada de testes:** arquiteto vazio ao abrir o orçamento por link direto/F5 (salvar podia apagar o
+  vínculo); barra de totais não ficava fixa (`Layout.tsx` com `overflow-x-clip`); L da venda renumerado na devolução;
+  previsão de entrega 1 dia antes na impressão da separação.
+- **Limpeza de teste** (migration `20261003_180_limpar_transferencia_teste`): apagadas as 2 trocas de reserva de teste
+  entre os aros da VENDA-0001 e VENDA-0002 e seus 4 movimentos; `q_transferida_saida` zerado; saldos inalterados.
+- **Desempenho** (migration `20261003_181_rls_hub_pode_executar_uma_vez_por_consulta`): 51 políticas RLS chamavam
+  `hub_pode_executar` por linha; agora 1 vez por consulta (função `STABLE` + `(SELECT …)`). Produtos: 3 páginas
+  1.099 ms → 26 ms (5 páginas ≈ 50 ms no ar); mesmas linhas, usuário sem permissão continua sem acesso.
+  `rollback.sql` com as 51 políticas originais. Ficam como pontos de decisão: banco em us-east-2, instância pequena,
+  orçamento baixando catálogos inteiros ao abrir.
+- Todas as migrations testadas com ROLLBACK antes de aplicar. Nenhuma Edge Function redeployada.
+- Repositórios: Orçamentos `e5ad289`, Separação Parcial `026ae37` (pushados; ponteiros atualizados).
+
 ## 2026-10-02
 
 ### SPEC-177/178/179: Orçamento em abas e rotina de devolução (valor líquido, empresa da venda, setores)

@@ -2,6 +2,22 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-05
+
+### SPEC-181: devolução/troca vinculada obrigatoriamente a uma venda efetivada
+
+- SPEC nova (`SPEC-181_Devolucao_Troca_Vinculada_a_Venda.md`), regra combinada com o administrador.
+- **Orçamentos** (Skip 32554 v0.0.381): escolher Devolução abre na hora a janela "Vincular venda de origem"; ao
+  vincular, Empresa, Código do Projeto e Cliente vêm da venda e ficam travados (vendedor e arquitetos copiados);
+  "Buscar itens da venda" só libera com a venda vinculada e mostra só os itens dela; salvar sem venda, com item de
+  outra venda ou empresa diferente é bloqueado. Vale para TROCA DEV e CASA COR ENTRADA. Substitui o "aviso sem
+  trava" de empresa de 03/10 (decisão do usuário).
+- **Banco** (migration `20261005_183_devolucao_venda_origem`, dry-run com ROLLBACK antes; `rollback.sql` na pasta):
+  coluna `orcamentos.venda_origem_id` (sem FK, evita embed ambíguo no PostgREST) e `aprovar_orcamento_financeiro`
+  recusa devolução sem venda, com empresa/cliente/projeto diferentes da venda ou com item de outra venda.
+- Testado na tela sem salvar (VENDA-0001). Nenhuma Edge Function redeployada.
+- Repositórios: Orçamentos `24b5554` (pushado; ponteiro atualizado).
+
 ## 2026-10-03
 
 ### SPEC-180: etapa Recebida na devolução, aviso de empresa, correções da rodada de testes e desempenho do banco

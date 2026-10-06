@@ -4,6 +4,18 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-06
 
+### Separação Parcial: janela "Ver itens" e impressão do Pedido em Separação (ajuste da SPEC-182)
+
+- **Separação Parcial** (Skip 48801 v0.0.48): a janela "Ver itens" ficou maior, com os dados da venda (número,
+  empresa, cliente, projeto, vendedor, endereço, telefone) e da parcial (data, funcionário, previsão de entrega,
+  totais separado/estornado/na parcial), e Referência e Descrição em colunas separadas.
+- **Impressão**: colunas L · Cód. · Ref. · Descrição · Quant.; descrição em letra menor e quebrando linha (não corta
+  mais); itens em ordem de L (reunião de 05/10); volta a declaração "Assumo total responsabilidade pelas mercadorias
+  correspondentes a esta entrega, bem como declaro correto o conteúdo e as quantidades mencionadas acima" (texto da
+  SPEC-144). A reimpressão usa a previsão de entrega da venda.
+- Pendente: endereço de entrega próprio na impressão (hoje sai o endereço do cliente).
+- Repositórios: Separação Parcial `57d8624` (ponteiro atualizado).
+
 ### SPEC-182: revisão de 05/10 — devolução pelo código do projeto, números sem prefixo e consulta de peça com abas
 
 - SPEC nova (`SPEC-182_Revisao_05_10_Devolucao_por_Cliente_e_Ajustes.md`), a partir da reunião de 05/10 com o

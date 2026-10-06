@@ -96,6 +96,13 @@ dependencias:
   separação e nas pendências. Ao aplicar, o Skip rodou as 2 migrations legadas da Logística: `seed_admin_user`
   falhou sem efeito (tabela `user_roles` não existe) e `fix_foreign_key_entregas_finalizadas` registrou sem mudar
   nada (PKs/FK já existiam, 0 órfãs). Retirá-las do Skip foi bloqueado pela permissão automática.
+- **Separação Parcial, ajuste de 06/10** (48801 v0.0.48, pedido do usuário): janela "Ver itens" maior com dados da
+  venda (número, empresa, cliente, projeto, vendedor, endereço, telefone) e da parcial (data, funcionário, previsão,
+  totais), colunas Referência e Descrição separadas; impressão com colunas **L · Cód. · Ref. · Descrição · Quant.**,
+  descrição em letra menor quebrando linha (não corta mais), itens em ordem de L (reunião [08:48]) e de volta a
+  declaração "Assumo total responsabilidade pelas mercadorias correspondentes a esta entrega, bem como declaro correto
+  o conteúdo e as quantidades mencionadas acima" (reunião [08:02], texto da SPEC-144). Reimpressão usa a previsão de
+  entrega da venda. Endereço de entrega próprio (reunião [08:30]) continua pendente.
 - **Vendas** (59346 v0.0.15) e **Compras** (40326 v0.0.80): números sem prefixo.
 - **Cadastro** (36668 v0.0.93): C1 corrigido — a carga inicial de todas as peças (em lotes) terminava depois da
   busca e sobrescrevia o resultado; agora só a carga mais recente grava.

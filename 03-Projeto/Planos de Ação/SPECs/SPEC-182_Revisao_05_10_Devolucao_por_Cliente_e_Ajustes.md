@@ -103,6 +103,10 @@ dependencias:
   declaração "Assumo total responsabilidade pelas mercadorias correspondentes a esta entrega, bem como declaro correto
   o conteúdo e as quantidades mencionadas acima" (reunião [08:02], texto da SPEC-144). Reimpressão usa a previsão de
   entrega da venda. Endereço de entrega próprio (reunião [08:30]) continua pendente.
+- **Vendas, reunião [00:00]–[01:10]** (59346 v0.0.16, 06/10): lista em largura total, linha única, letra menor,
+  sem a coluna Orçamento e status da nota Pendente / Parcial / Emitida. **Impressão da separação [10:00]** (48801
+  v0.0.49): coluna "L" virou "ID". O "Total de itens" do rodapé foi mantido (decisão do usuário: "já está certo em
+  partes, vamos corrigir o ID").
 - **Vendas** (59346 v0.0.15) e **Compras** (40326 v0.0.80): números sem prefixo.
 - **Cadastro** (36668 v0.0.93): C1 corrigido — a carga inicial de todas as peças (em lotes) terminava depois da
   busca e sobrescrevia o resultado; agora só a carga mais recente grava.

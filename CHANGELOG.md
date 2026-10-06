@@ -4,6 +4,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-06
 
+### Vendas e impressão da separação: pedidos da reunião de 05/10 que tinham ficado de fora
+
+- **Vendas** (Skip 59346 v0.0.16), reunião [00:00]–[01:10]: lista em largura total, uma linha por venda (cliente e
+  projeto cortados com "…", completos ao passar o mouse), letra um pouco menor, sem a coluna Orçamento (fica só o
+  número da venda) e status da nota sem repetir "Nota": Pendente / Parcial / Emitida.
+- **Separação Parcial** (48801 v0.0.49), reunião [10:00]: a primeira coluna da impressão passa de "L" para "ID".
+- Repositórios: Separação Parcial `b4188d7`, Vendas `4872ce0` (ponteiros atualizados).
+
 ### Separação Parcial: janela "Ver itens" e impressão do Pedido em Separação (ajuste da SPEC-182)
 
 - **Separação Parcial** (Skip 48801 v0.0.48): a janela "Ver itens" ficou maior, com os dados da venda (número,

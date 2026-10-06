@@ -2,6 +2,38 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-06
+
+### SPEC-182: revisão de 05/10 — devolução pelo código do projeto, números sem prefixo e consulta de peça com abas
+
+- SPEC nova (`SPEC-182_Revisao_05_10_Devolucao_por_Cliente_e_Ajustes.md`), a partir da reunião de 05/10 com o
+  Vinícius; desfaz partes das SPECs 179/180/181.
+- **Banco** (migration `20261006_184_devolucao_por_projeto`, dry-run com ROLLBACK antes; `rollback.sql` na pasta):
+  coluna `estoque_saldos_projeto_item.q_devolvida_entregue` — Entregue não baixa na devolução, só a devolvida sobe;
+  `fn_validar_saldo_projeto_item` não conta o entregue devolvido duas vezes; `registrar_devolucao_projeto_item_setor`
+  recusa "em separação", grava sempre `registrada` e libera a reserva (fim da etapa "Recebida");
+  `aprovar_orcamento_financeiro` confere cada item contra venda efetivada do mesmo projeto e empresa
+  (`venda_origem_id` sem uso); `vw_estoque_saldos_projeto_item` expõe `q_devolvida_entregue` e `empresa_id`.
+- **Orçamentos** (Skip 32554 v0.0.382): devolução pelo código do projeto (janela "Vincular venda" removida); aviso
+  quando o projeto tem vendas em mais de uma empresa; busca de itens por projeto + empresa com "Em separação"
+  bloqueada; preço líquido sem %; Carteira e frete opcional na devolução; datas digitáveis; botão "Salvar orçamento";
+  números sem "ORC-/VENDA-" nas telas.
+- **Separação Parcial** (48801 v0.0.47): sem "Devoluções a receber"; "Ver itens" + "Reimprimir" por parcial; texto
+  explicando "Estornar".
+- **Logística** (24039 v0.0.98, só no Skip — o git local tem o rollout do SystemSwitcher pendente): pop-up
+  "Separação cancelada" (pendência `separacao_estornada`, "Ciente" por navegador) e números sem prefixo. O apply rodou
+  as 2 migrations legadas do projeto: `seed_admin_user` falhou sem efeito e `fix_foreign_key_entregas_finalizadas`
+  registrou sem mudar nada; retirar a seed do Skip continua pendente.
+- **Vendas** (59346 v0.0.15) e **Compras** (40326 v0.0.80): números sem prefixo.
+- **Cadastro** (36668 v0.0.93 e v0.0.94): busca de peças não é mais sobrescrita pela carga inicial em lotes (C1);
+  consulta de peça no modelo do Connect (C2) — área larga abaixo da lista, cabeçalho com Disponível em destaque e
+  abas Setores / Reserva / Entrega Futura / Separação / Entregue / Compras (migration
+  `20261006_185_cadastro_peca_abas_setores`: view `vw_cadastro_produto_movimentos`; pedidos de compra com data de
+  emissão e perfil).
+- Nenhuma Edge Function redeployada. Pendentes: T1/T2 (vendas de teste, ORC-0037) e PDF da Edge Function com prefixo.
+- Repositórios: Orçamentos `da1efb1`, Separação Parcial `51e6721`, Vendas `6d387a0`, Compras `973d178`,
+  Cadastro `276858b` (ponteiros atualizados).
+
 ## 2026-10-05
 
 ### SPEC-181: devolução/troca vinculada obrigatoriamente a uma venda efetivada

@@ -111,3 +111,10 @@ Ação a ser realizada: ao especificar o sistema de Estoque/Compras, revisar `es
 - Avaliar padronização de caixa/acentos em `separacao_status`.
 - Homologar o fluxo completo de `orcamentos` depois da normalização da SPEC-016 e da UI das SPECs 017/018.
 - Após a arrumação funcional do DB, fazer análise específica de segurança, permissões, RLS, roles e exposição pública.
+
+## memoria.kb_* (SPEC-164 — aplicado em 2026-09-24)
+
+- `memoria.kb_tipo`: `reuniao_projeto`, `visita_obra`, `teste_material`, `regra_material`, `padrao_projeto`, `procedimento`, `marca`, `designer`, `vivencia_evento`.
+- `memoria.kb_categoria` (derivada do tipo): `tecnico`, `comercial`, `operacional`, `projeto`, `aprendizado`.
+- `memoria.kb_status`: `rascunho`, `publicado`, `arquivado`.
+- `memoria.kb_origem`: `manual`, `importada`.

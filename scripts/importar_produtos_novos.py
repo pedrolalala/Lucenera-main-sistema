@@ -84,8 +84,21 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from _supabase_client import get_client, SUPABASE_URL  # noqa: E402
+from sync_connect_common import (  # noqa: E402
+    ImportacaoAbortada,
+    RelatorioModulo,
+    descobrir_planilha_mais_recente,
+    imprimir_resumo_final,
+    salvar_log,
+    validar_cabecalho,
+    validar_chave_unica,
+    validar_minimo_linhas,
+)
 
-PLANILHA_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "Produtos__2026-09-21.xlsx"
+PASTA_PLANILHAS = ROOT / "01-Documento" / "01 - Planilhas"
+PREFIXO_ARQUIVO = "Produtos__"
+MIN_LINHAS = 500
+COLUNAS_ESPERADAS = ["CodProduto", "DescProduto", "EstoqueTotal", "Showroom", "Disponivel"]
 
 # CodProduto=0 ("PRODUTO ESPCIAL") é lixo conhecido do export Connect --
 # nunca criar como produto real.
@@ -162,11 +175,29 @@ def processar(dry_run: bool) -> None:
     print(f"Supabase: {SUPABASE_URL}")
     print(f"Modo:     {'DRY-RUN (sem gravação)' if dry_run else 'GRAVAÇÃO REAL'}\n")
 
-    df = pd.read_excel(PLANILHA_PADRAO, sheet_name="Estoque", dtype=str)
-    df.columns = [c.strip() for c in df.columns]
-    df["codigo_produto"] = pd.to_numeric(df["CodProduto"], errors="coerce").astype("Int64")
-    df = df.dropna(subset=["codigo_produto"])
-    df = df[~df["codigo_produto"].isin(CODIGOS_IGNORADOS)]
+    relatorio = RelatorioModulo(nome="Produtos (novos)")
+    try:
+        planilha_path = descobrir_planilha_mais_recente(PASTA_PLANILHAS, PREFIXO_ARQUIVO)
+        relatorio.arquivo_origem = planilha_path.name
+        print(f"Planilha: {planilha_path.name}")
+
+        df = pd.read_excel(planilha_path, sheet_name="Estoque", dtype=str)
+        df.columns = [c.strip() for c in df.columns]
+        validar_cabecalho(df.columns.tolist(), COLUNAS_ESPERADAS, origem=planilha_path.name)
+        validar_minimo_linhas(len(df), MIN_LINHAS, origem=planilha_path.name)
+
+        df["codigo_produto"] = pd.to_numeric(df["CodProduto"], errors="coerce").astype("Int64")
+        df = df.dropna(subset=["codigo_produto"])
+        validar_chave_unica(df, ["codigo_produto"], origem=planilha_path.name)
+        df = df[~df["codigo_produto"].isin(CODIGOS_IGNORADOS)]
+    except ImportacaoAbortada as exc:
+        relatorio.abortado = str(exc)
+        relatorio.finalizar()
+        print(f"\nABORTADO: {exc}")
+        relatorio.imprimir()
+        log_path = salvar_log([relatorio], dry_run)
+        imprimir_resumo_final([relatorio], dry_run, log_path)
+        return
 
     client = get_client()
 
@@ -179,6 +210,10 @@ def processar(dry_run: bool) -> None:
     print(f"Produtos novos a criar: {len(novos_df)}")
     if novos_df.empty:
         print("Nada a fazer.")
+        relatorio.ignorados = len(existentes_set)
+        relatorio.finalizar()
+        log_path = salvar_log([relatorio], dry_run)
+        imprimir_resumo_final([relatorio], dry_run, log_path)
         return
 
     print("Buscando marcas (codigo_legado -> id)...")
@@ -273,22 +308,37 @@ def processar(dry_run: bool) -> None:
     print(f"  sem categoria_id resolvido: {sem_categoria}")
     print(f"  sem marca_id resolvido:     {sem_marca}")
 
+    relatorio.ignorados = len(existentes_set)
+
     if dry_run:
         print("\n=== DRY-RUN: nada foi gravado ===")
         print("\nAmostra de produto novo:")
         print(registros[0])
+        relatorio.finalizar()
+        log_path = salvar_log([relatorio], dry_run)
+        imprimir_resumo_final([relatorio], dry_run, log_path)
         return
 
+    # SPEC-157: upsert com ON CONFLICT (codigo_produto) DO NOTHING em vez de
+    # insert simples -- rodar o script 2x (ou em paralelo com outro import)
+    # nao duplica produto; o segundo run so "perde" a corrida sem erro.
     total_ok, total_erro = 0, 0
     for i in range(0, len(registros), 100):
         lote = registros[i : i + 100]
         try:
-            client.table("produtos").insert(lote).execute()
+            client.table("produtos").upsert(
+                lote, on_conflict="codigo_produto", ignore_duplicates=True
+            ).execute()
             total_ok += len(lote)
         except Exception as exc:
             print(f"  ERRO no lote {i}: {exc}")
             total_erro += len(lote)
+            relatorio.registrar_erro(f"lote {i}: {exc}")
     print(f"\nCriação concluída: {total_ok} ok, {total_erro} erros.")
+    relatorio.inseridos = total_ok
+    relatorio.finalizar()
+    log_path = salvar_log([relatorio], dry_run)
+    imprimir_resumo_final([relatorio], dry_run, log_path)
 
 
 if __name__ == "__main__":

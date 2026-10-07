@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-182 — Reunião de revisão 05/10: devolução pelo CÓDIGO DO PROJETO (não por venda), sem 'em separação', sem etapa Recebida, números sem prefixo e ajustes"
-status: em andamento (06/10: tudo publicado exceto T1/T2)
+status: concluído (06/10 publicado; T1/T2 testados pelo usuário em 07/10)
 data_ultima_modificacao: 2026-10-06
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — rotina de devolução/troca, campos de data, botão salvar
@@ -67,8 +67,8 @@ dependencias:
 - [x] C3 (a investigar) Produto 13213/13037 não aparecia na busca da devolução ("tá dando bug") — o Vinícius tinha acabado de reativar o produto. Hoje os dois estão ativos; refazer o teste.
 
 ### Testes e dados
-- [ ] T1 Criar **vendas de teste grandes** (com o nome do Pedro), zerar os testes e refazer o fluxo completo desde o começo.
-- [ ] T2 Decidir o que fazer com a devolução **ORC-0037** aprovada na reunião (6 aros da VENDA-0001: 4 da reserva + 2 que estavam "aguardando separar" — caso que agora deve ser bloqueado).
+- [x] (07/10, testado pelo usuário: funcionando) T1 Criar **vendas de teste grandes** (com o nome do Pedro), zerar os testes e refazer o fluxo completo desde o começo.
+- [x] (07/10, testado pelo usuário: funcionando) T2 Decidir o que fazer com a devolução **ORC-0037** aprovada na reunião (6 aros da VENDA-0001: 4 da reserva + 2 que estavam "aguardando separar" — caso que agora deve ser bloqueado).
 
 ### Passos manuais do usuário
 - [x] Conferir esta SPEC e os Pontos a confirmar antes de qualquer implementação.

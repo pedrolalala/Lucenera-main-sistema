@@ -2,6 +2,39 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-07
+
+### GitHub sincronizado com o código publicado no Skip
+
+- O código de `src/` dos 16 sistemas (e `public/app/` da Memória Lucenera) foi copiado da versão no ar e
+  commitado/enviado em cada repositório. Fonte: source maps de um build de prévia novo gerado em cada projeto
+  (`skip_project_apply_changes` em modo development, sem mudança de código) — o build de prévia anterior estava
+  desatualizado e não serve de fonte. Antes de cada build: migrations da working tree conferidas contra
+  `schema_migrations` (só a `seed_admin_user` da Logística segue pendente e falha sem efeito); depois: nenhuma
+  Edge Function republicada e `schema_migrations` inalterada. O RH não passou pelo build (14 migrations antigas
+  pendentes na working tree); a prévia dele foi conferida contra `skip_file_read`.
+- Fora da sincronização: imagens, `package.json`/configs e `supabase/` das working trees. Mudanças locais que
+  não estavam commitadas ficaram num `git stash` ("backup antes do sync com o Skip 2026-10-07") em cada repo.
+
+### SPEC-183: Acesso a Sistemas define o que a pessoa vê; papel define o que ela faz
+
+- Migration `20261007_186_spec183_acesso_sistemas_visibilidade` aplicada (dry-run com ROLLBACK antes):
+  `hub_sistemas_permitidos` passa a ler só `user_system_access`; `hub_pode_executar` ganhou o portão de acesso
+  (admin passa direto); policy `user_insert_usa` removida. Cada pessoa ficou com o que via antes; a Mariane
+  com a lista marcada pelo usuário (sem Adm. Bancária, com Showroom e Memória).
+- Central (Skip 37750 v0.0.47): textos e aviso nas abas Acesso a Sistemas, Matriz de Acesso, Papéis e Exceções.
+
+### Sync Connect (planilhas de 07/10), migration 159 e DEV TROCA
+
+- 4 imports gravados (via session pooler: o host direto do banco só resolve IPv6); dry-run pós-gravação zero;
+  conferência planilha × `v_financeiro_realizado` = R$ 0,00.
+- Migration `20260922_159_sync_connect_reconciliacao` aplicada: 155 pedidos de compra marcados `vigente=false`.
+- DEV TROCA = DEVOLUÇÃO (2020028): regra no import + backfill de 505 negociações (R$ 1.793.930,18).
+
+### Relatório de alterações 07/08 a 07/10
+
+- `03-Projeto/08_RELATORIO_ALTERACOES_07_08_a_07_10_2026.pdf` (usabilidade × sistêmica, solicitante e datas).
+
 ## 2026-10-06
 
 ### Vendas e impressão da separação: pedidos da reunião de 05/10 que tinham ficado de fora
@@ -211,6 +244,34 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Publicado Skip 33302 v0.0.97 (`6d253b3`); submódulo `catalogo-pecas-ubiqua-e6fa0` em `0f48835`.
 - Pendente: dados cadastrais da Ubiqua (razão social, CNPJ, endereço, telefone) e decisão sobre a notificação
   Gmail do `process-budget-pdf` no "Finalizar".
+
+## 2026-09-29
+
+### SPEC-165: Memória Lucenera — importar reunião de projeto, decisões por projeto e fila de revisão
+
+- Segundo ajuste: importação dentro de "Reunião de projeto"; após registrar abre a edição para corrigir o que a IA
+  preparou e as sugestões pendentes (migration `002_sugestao_editavel_enquanto_pendente`). Publicado `44088bd`.
+- Ajuste (mesmo dia, pedido do usuário): a reunião importada vai direto para o histórico do projeto; só as sugestões
+  de aproveitamento passam pela Revisão. Publicado `7cfe5ec`.
+- Reunião de projeto vira histórico: andamento, próximos passos e decisões estruturadas vinculadas ao código do
+  projeto (`kb_decisoes`), com marca de solução excepcional. Página "Histórico do projeto" (`/projeto/:codigo`).
+- "Importar reunião" (texto, .txt/.md/.docx ou Pendentes antigos): Edge Function `interpretar-reuniao` (Gemini) propõe o
+  registro; a pessoa confere e salva.
+- Sugestões de aproveitamento para os demais temas vão para a fila "Revisão" (`kb_sugestoes`); só curador aprova
+  (criando o item no tema) ou rejeita. Banco impede aprovação automática e sugestão a partir de solução excepcional.
+- Migration `20260929_165_memoria_reunioes_revisao` aplicada; frontend publicado (`2b5bb48`); teste ponta a ponta no navegador.
+
+
+### Sync Connect (planilhas de 29/09) — primeira execução real da versão SPEC-157
+
+- Produtos novos: 2 criados. Estoque: 632 produtos atualizados (preço de venda conferido, intacto).
+  Pedidos de compra: 13 novos, 13 atualizados. Contas: 73 duplicatas novas, 125 parcelas novas,
+  110 atualizadas, 14 parcelas órfãs canceladas.
+- 3 falsos "alterados" corrigidos nos scripts (NaN em `dt_pagamento`, arredondamento de
+  `percentual_lucro` e de `valor_nota`) — dry-run pós-gravação com zero pendências nos 4 scripts.
+- Conferência planilha × `v_financeiro_realizado`: R$ 0,00 de diferença (pago jun–set, em aberto set–dez).
+- Pendente: migration `20260922_159_sync_connect_reconciliacao` (SPEC-157) segue não aplicada; 14 despesas
+  novas com `cod_apropriacao = 1` sem categoria (decisão do usuário).
 
 ## 2026-09-28
 

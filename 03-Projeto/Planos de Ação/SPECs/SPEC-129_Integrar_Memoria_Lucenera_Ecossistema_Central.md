@@ -232,6 +232,292 @@ do usuário antes de executar.
 - **PUBLICADO em produção** 2026-09-10 (v0.0.7 `e270d8e`, `https://memoria-lucenera-2e074.goskip.app`). `CHANGELOG.md` atualizado.
 - Falta: teste ao vivo do SSO pelo Hub; submodule (GitHub tem só o scaffold — Skip não sincroniza pro Git sozinho); docs de sistema/domínio; fase 2.
 
+## Fase 2 — Plano técnico (2026-09-21)
+
+> Verificado ao vivo em 2026-09-21 (Management API, `psql` direto falhou por DNS de
+> novo): schema `memoria` no Supabase real segue com só as 12 tabelas do núcleo —
+> nenhuma das 3 migrations de fase 2 foi aplicada. Nenhuma das 4 Edge Functions
+> existe em código em lugar nenhum do repo (nem versão OpenAI, nem Gemini) — precisam
+> ser escritas do zero. `GEMINI_API_KEY` está no `.env` local e foi configurada como
+> env var do projeto Skip 57204 (mas isso só vira `VITE_*` no build do frontend —
+> **não** alimenta Edge Function nenhuma; ainda falta como secret de Edge Functions
+> no Supabase).
+
+> Base lida para este plano: `supabase/db/migrations/20260909_130_memoria_lucenera_schema/{02,03,04}_*.sql`,
+> `supabase/db/domains/memoria.md`, `supabase/functions/chat-consulta/index.ts`,
+> `supabase/functions/classificar_solicitacao/index.ts` (padrão de Edge Function + Gemini
+> já estabelecido neste repo). Nenhum arquivo de frontend do app (`public/app/*.js`) existe
+> neste repositório — eles vivem só no projeto Skip 57204; os campos exatos de
+> `openVoiceReview` precisam ser lidos via `skip_file_read` no início da implementação,
+> não foram re-verificados neste plano.
+
+### Convenção adotada (consistente com o padrão já usado no repo)
+
+Todas as 4 funções seguem o padrão de `chat-consulta` (não o de `classificar_solicitacao`,
+que usa `service_role` porque roda como trigger de sistema): criam um client Supabase com
+a **anon key + `Authorization` do usuário repassado**, para que `auth.uid()` resolva
+corretamente dentro de RLS e das RPCs `security invoker`. Nenhuma das 4 funções usa
+`SUPABASE_SERVICE_ROLE_KEY`. CORS via `../_shared/cors.ts` (mesmo módulo de
+`classificar_solicitacao`). Erros do Gemini nunca viram 500 cru — sempre JSON
+`{ error: "..." }` com status apropriado (400/401/404/422/502), replicando `chat-consulta`.
+
+#### 1. Edge Function `interpret-memory`
+
+**Request**: `POST`, `multipart/form-data`, campo `audio` (Blob, hoje `audio/webm` do
+`MediaRecorder`). Headers: `Authorization: Bearer <jwt>`, `apikey`.
+
+**Risco a resolver antes de codar de verdade (spike obrigatório)**: a lista oficial de MIME
+types de áudio aceitos pelo Gemini (`generateContent` com `inlineData`) é
+`audio/wav, audio/mp3, audio/aiff, audio/aac, audio/ogg, audio/flac` — **não inclui
+`audio/webm`**. Plano de verificação, nesta ordem, antes de fechar a implementação:
+1. Testar `inlineData: { mimeType: 'audio/webm', data: <base64> }` direto — alguns relatos
+   de terceiros dizem que funciona mesmo fora da lista documentada (contêiner
+   webm/opus é próximo de ogg/opus). Se der 200 com transcrição coerente, seguir com isso.
+2. Se rejeitar (400 "unsupported mime type"), testar declarar `mimeType: 'audio/ogg'` no
+   mesmo payload (mesmo blob, só troca o header) — chance de o decoder aceitar pelo codec
+   real (Opus) e ignorar o nome do contêiner.
+3. Se os dois falharem, o app precisa gravar em outro formato aceito nativamente
+   (ex.: capturar PCM via Web Audio API e empacotar como `audio/wav`, ou usar uma lib de
+   transcodificação client-side) — **isso é trabalho adicional fora da estimativa desta
+   fase**, não decidir sozinho, voltar para o usuário com a opção antes de expandir escopo.
+4. Limite de tamanho: manter o áudio dentro do limite prático de `inlineData` (~20MB
+   antes de exigir a Files API do Gemini). Rejeitar com 413 e mensagem clara acima disso
+   (não usar a Files API nesta fase — complexidade extra sem necessidade clara ainda).
+
+**Fluxo**:
+1. `createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { global: { headers: { Authorization } } })`,
+   `auth.getUser()` — sem usuário, 401.
+2. Ler o `FormData`, pegar o campo `audio`; ausente/vazio → 400.
+3. Converter para base64, montar `contents: [{ role:'user', parts: [{ inlineData: { mimeType, data } }, { text: PROMPT } ] }]` com `generationConfig: { responseMimeType: 'application/json' }` (mesmo padrão de `classificar_solicitacao`).
+4. `PROMPT`/`systemInstruction` pede à IA: transcrever o áudio literalmente E devolver uma interpretação estruturada. **Schema de resposta a confirmar contra `openVoiceReview` em `public/app/app.js` antes de fechar** — proposta inicial mínima e estável:
+   ```json
+   { "transcription": "string",
+     "structured": { "title": "string", "summary": "string", "domain": "string|null",
+       "knowledge_type": "string|null", "tags": ["string"], "confidence": 0-100 } }
+   ```
+5. Chamar Gemini (modelo `gemini-2.0-flash` ou `gemini-1.5-flash`, alinhar com o que já
+   está em uso nas outras 2 funções do repo — hoje há `gemini-1.5-flash` em
+   `chat-consulta` e `gemini-3.6-flash` em `classificar_solicitacao`; escolher um e
+   documentar por quê, não é decisão de negócio, é escolha técnica).
+6. Parsear `candidates[0].content.parts[0].text` como JSON; se não for JSON válido → 502
+   `{ error: 'Não foi possível interpretar o áudio.' }` (nunca inventar um resultado).
+7. Retornar 200 com o JSON acima. **Não persiste nada no banco** — o app já tem o form de
+   revisão que grava depois (mecanismo de salvar é código já existente em `app.js`, fora do
+   escopo desta fase).
+8. Timeout: 28s (mesmo valor de `classificar_solicitacao`, áudio pode demorar mais que texto).
+
+**Pendência explícita**: se o app espera persistir o **áudio original** (não só a
+transcrição) para proveniência, isso não está coberto aqui — decisão de produto em aberto,
+não assumida.
+
+#### 2. Edge Function `process-document`
+
+**Pré-requisito de banco**: migration `03_document-ingestion.sql` aplicada (RPC
+`save_document_analysis`) — a função em si não depende da RPC, mas o fluxo completo
+(revisão → salvar) só fecha com ela.
+
+**Request**: `POST` JSON `{ inbox_id, file_id }`, `Authorization: Bearer <jwt>`.
+
+**Fluxo**:
+1. Client user-scoped (padrão acima). `auth.getUser()` → 401 se ausente.
+2. `select * from memoria.inbox_items where id=inbox_id and owner_id=user.id` e
+   `select * from memoria.files where id=file_id and owner_id=user.id` — 404 se não achar
+   (RLS já protege, mas checar explícito dá mensagem melhor que erro genérico do PostgREST).
+3. Obter o texto do documento:
+   - Se `files.extracted_text` já estiver preenchido (extração feita no cliente, ex. `.docx`
+     via `mammoth`, já usado no app), usar direto.
+   - Se `files.mime_type = 'application/pdf'`, baixar o binário do Storage
+     (`lucenera-memory-files/<storage_path>`) e mandar pro Gemini como
+     `inlineData: { mimeType: 'application/pdf', data: base64 }` — Gemini 1.5/2.x Flash lê
+     PDF nativamente (texto + estrutura), evita reimplementar parser de PDF no Edge Function.
+   - Outro tipo sem `extracted_text` → 422 `{ error: 'Formato não suportado ainda: extraia o texto antes de interpretar.' }` (não tentar inventar suporte a mais formatos aqui).
+4. Atualizar `inbox_items.processing_status='processing'`, `files.processing_status='analyzing'` antes de chamar o Gemini.
+5. Montar `systemInstruction` pedindo o JSON EXATAMENTE na forma que `save_document_analysis` espera (contrato lido de `03_document-ingestion.sql`):
+   ```json
+   { "source": { "source_type","title","author","publisher","publication_date","language","reliability","summary","domain","outline" },
+     "entities": [{ "client_key","canonical_name","entity_type","alternative_names","short_description","domain","mentions" }],
+     "knowledge_items": [{ "client_key","title","summary","content","domain","knowledge_type","confidence","tags","epistemic_type",
+        "entity_keys":["..."], "related_knowledge_keys":["..."],
+        "citations":[{"locator","excerpt","support_type":"supports|contradicts|contextualizes"}] }],
+     "relations": [{ "source_kind":"entity|knowledge", "source_key","target_kind":"entity|knowledge","target_key","relation_type","description","confidence" }] }
+   ```
+   `client_key` é um identificador arbitrário (ex. `"e1"`, `"k1"`) que a própria IA inventa
+   para poder referenciar entidades/conhecimentos entre si dentro da mesma resposta — a RPC
+   usa esses keys só para resolver relações internas, não são gravados como estão.
+6. Chamar Gemini com `responseMimeType: 'application/json'`. Parse falhou ou Gemini erro →
+   `inbox_items.processing_status='failed'`, `files.processing_status='failed'`, retornar
+   502/500 com mensagem.
+7. Sucesso → `inbox_items.processing_status='awaiting_review'`,
+   `files.processing_status='awaiting_review'`, retornar
+   `200 { analysis: <jsonb acima>, inbox_id, file_id }`.
+8. **Não chama `save_document_analysis`** — isso é feito pelo frontend depois da revisão
+   do usuário (ver `document-ingestion.js` abaixo), porque a RPC precisa do JSON já
+   **editado pelo usuário**, não o bruto da IA.
+
+#### 3. Edge Function `process-document-section`
+
+**Pré-requisito de banco**: migration `04_long-document-ingestion.sql` aplicada.
+
+**Request**: `POST` JSON `{ section_id }`, `Authorization: Bearer <jwt>`.
+
+**Fluxo**:
+1. Auth + `select * from memoria.document_sections where id=section_id and owner_id=user.id`
+   (join implícito com `document_ingestion_runs` via `run_id`, mas RLS já restringe por
+   `owner_id` de ambas as tabelas) — 404 se não achar.
+2. `select * from memoria.document_ingestion_runs where id = section.run_id` para pegar
+   `title`, `domain`, `subcategory`, `language` (contexto do livro todo).
+3. `update document_sections set status='processing' where id=section_id`.
+4. Mesmo shape de `analysis` do `process-document` (entities/knowledge_items/relations),
+   mas escopado **só ao conteúdo desta seção** (`section.content` + `section.context_before`
+   como contexto de continuidade — evita a IA redefinir uma entidade já mencionada na seção
+   anterior). `client_key`s só precisam ser únicos dentro desta chamada.
+5. Gemini falhou → `document_sections.status='failed', error_message=<msg>` → 502.
+6. Sucesso → `document_sections.status='awaiting_review', analysis=<jsonb>` →
+   `document_ingestion_runs.processed_sections = processed_sections + 1` (incrementar, não
+   travar se paralelo — usar `update ... set processed_sections = processed_sections + 1`
+   atômico do Postgres) → retornar `200 { section_id, status:'awaiting_review', analysis }`.
+7. **Não chama `save_long_document_analysis`** — só roda por seção; a consolidação final é
+   a próxima função.
+
+#### 4. Edge Function `consolidate-document-run`
+
+**Pré-requisito de banco**: migration `04` aplicada.
+
+**Request**: `POST` JSON `{ run_id, project_id? }`, `Authorization: Bearer <jwt>`.
+
+**Fluxo** — é um wrapper fino, não reimplementa lógica que já está na RPC:
+1. Client user-scoped (mesmo padrão — **importante**: aqui não dá pra usar `service_role`,
+   porque `save_long_document_analysis` é `security invoker` e lê `auth.uid()` para todo
+   `owner_id` gravado; com `service_role` a função ainda rodaria mas `auth.uid()` seria
+   `null` e a RPC lançaria `'Autenticação obrigatória'`).
+2. `const { data, error } = await client.rpc('save_long_document_analysis', { p_run_id: run_id, p_project_id: project_id ?? null })`.
+3. Erro da RPC (ex. `"Ainda existem seções sem análise ou com falha"`,
+   `"Este livro já foi organizado"`) → repassar a `error.message` verbatim com status 422 —
+   são mensagens de negócio já decididas no SQL, a função só encaminha, não reinterpreta.
+4. Sucesso → `200 { success:true, result: data }` (contadores retornados pela própria RPC:
+   `source_id, created_entities, created_knowledge_items, created_citations, created_relations`).
+5. Não precisa tocar `document_ingestion_runs`/`document_sections` diretamente — a RPC já
+   faz isso (`status='approved'` no run, `status='approved'` nas seções).
+
+#### 5. Frontend — os 3 arquivos que faltam
+
+Carregados hoje só em comentário no `index.html` do Skip 57204
+(`"SPEC-129 fase 2 (Edge Functions Gemini + migrations 02-04): memory-organization.js,
+document-ingestion.js, book-ingestion.js"`). Precisam ser escritos como scripts vanilla
+(mesmo estilo sem-build de `app.js`/`supabase-adapter.js` — **não** introduzir React aqui,
+o sistema já tem um padrão estabelecido e a Opção A de porte foi a escolhida na SPEC).
+
+**Antes de escrever qualquer um dos 3**: ler `public/app/app.js` e `supabase-adapter.js`
+reais no Skip (`skip_file_read`) para confirmar nomes de funções globais esperadas
+(`window.processDocument`, estrutura de `optionalRemoteTables`, helpers de CRUD genérico
+já existentes no adapter) e reaproveitar, não duplicar.
+
+**`document-ingestion.js`**
+- Define `window.processDocument = async function(inboxId) { ... }` (hoje undefined,
+  chamado pelo botão `data-process-document`).
+- Passos: acha o `file_id` do item na Caixa de Entrada já carregada em memória pelo
+  adapter → `supabase.functions.invoke('process-document', { body: { inbox_id: inboxId, file_id } })`
+  → em sucesso, abre um modal/painel de revisão com `data.analysis` (listas editáveis de
+  entidades/itens de conhecimento/relações — aceitar/rejeitar/editar cada item) → botão
+  "Confirmar e salvar" chama
+  `supabase.rpc('save_document_analysis', { p_inbox_id, p_file_id, p_analysis: <jsonb editado>, p_project_id: projetoSelecionado ?? null, p_applied_rule_ids: [] })`
+  direto do cliente (não via Edge Function) → em sucesso, recarrega a Caixa de Entrada e
+  mostra os contadores retornados.
+- Guarda de indisponibilidade: como `save_document_analysis` só existe depois da migration
+  03, envolver a chamada de `rpc` em `try/catch` e, se o erro tiver o código PostgREST de
+  "função não encontrada" (`PGRST202`) ou mensagem equivalente, mostrar
+  "Recurso ainda não disponível" em vez de erro cru — mesmo espírito do `optionalRemoteTables`
+  do adapter, só que para RPC (que o adapter não cobre hoje).
+- Estados de erro do `process-document` (400/404/422/502) → mensagem inline no item da
+  Caixa de Entrada, sem travar a lista inteira.
+
+**`book-ingestion.js`**
+- Ação "Processar como livro" num item da Caixa de Entrada com arquivo grande:
+  1. Insere uma linha em `memoria.document_ingestion_runs` (via PostgREST direto,
+     `owner_id` resolvido pela sessão + RLS) com `inbox_id`, `file_id`, `title`, `language`,
+     `domain`, `subcategory`, `target_words` (default da tabela = 2200, editável no form).
+  2. Divide `files.extracted_text` em seções (~`target_words` palavras cada, com um trecho
+     final da seção anterior como `context_before`) e insere uma linha por seção em
+     `document_sections` (`status='prepared'`). **Algoritmo de corte exato (por palavra,
+     por parágrafo, por capítulo) é detalhe de implementação, não bloqueante** — MVP: corte
+     simples por contagem de palavras, locator genérico (`"Seção N"`), pode refinar depois.
+  3. Para cada seção `prepared`, chama `process-document-section({section_id})` — em série
+     ou com um limite pequeno de paralelismo (ex. 2-3 simultâneas) para não estourar rate
+     limit do Gemini; atualiza uma barra de progresso local (`processed_sections/total_sections`,
+     já disponível no `document_ingestion_runs` — mas atualizado pela Edge Function, então
+     ler via realtime/poll simples).
+  4. Tela de revisão por seção: lista `document_sections` do run, mostra `analysis` de cada
+     uma (`awaiting_review`), permite editar/marcar `included=false` (update direto via
+     PostgREST — RLS por `owner_id` já protege).
+  5. Botão "Finalizar livro" → `supabase.functions.invoke('consolidate-document-run', { body: { run_id, project_id } })`
+     → sucesso: mostra os contadores e marca o `run` como concluído na UI; erro 422 (ex.
+     "ainda existem seções sem análise") → mostra a mensagem e mantém a tela de revisão
+     aberta apontando quais seções faltam.
+- Guarda de indisponibilidade: `document_ingestion_runs`/`document_sections` já estão em
+  `optionalRemoteTables` do `supabase-adapter.js` (dado confirmado) — reaproveitar a mesma
+  flag de disponibilidade que o adapter já calcula, em vez de reimplementar a detecção.
+
+**`memory-organization.js`**
+- CRUD simples sobre `memory_organization_rules`/`_settings`/`_conflicts` via PostgREST
+  direto (sem Edge Function — é puro dado, sem chamada a IA). Pode ser implementado e
+  publicado assim que a migration 02 estiver aplicada, **independente das 4 Edge
+  Functions**.
+- Tela mínima: listar regras ativas/candidatas, formulário de criar/editar regra
+  (`title, description, rule_type, scope, domain, status, priority`), formulário de
+  `memory_organization_settings` (um registro por `owner_id`, `minimum_evidence`,
+  `minimum_confidence`, `minimum_diverse_contexts`), lista de conflitos abertos com botão
+  resolver/dispensar (`update status='resolved'|'dismissed'`).
+- **Fora do escopo desta função (decisão de produto em aberto, não assumida aqui)**: o
+  loop automático de "aprender regra a partir de feedback do usuário" (quando/como gravar
+  `memory_organization_feedback` a partir de edições feitas nas telas de revisão de voz/
+  documento, e quando promover uma regra `candidate`→`active`). O MVP desta fase entrega
+  só CRUD manual das regras; o aprendizado automático fica como pendência explícita.
+- Reativar o item de nav "Organização" no `index.html`/`navItems` (hoje removido).
+
+#### 6. Ordem de execução e checkpoints de autorização
+
+| # | Passo | Exige autorização explícita do usuário? |
+|---|---|---|
+| 1 | Aplicar `02_memory-organization.sql` no Supabase real | **Sim** |
+| 2 | Aplicar `03_document-ingestion.sql` no Supabase real | **Sim** |
+| 3 | Aplicar `04_long-document-ingestion.sql` no Supabase real | **Sim** |
+| 4 | Rodar `99_verify-isolation.sql`, anexar resultado ao README do grupo de migrations | Não (é só leitura) |
+| 5 | Configurar secret `GEMINI_API_KEY` em Edge Functions → Secrets no Supabase (distinto da env var do Skip, que só vira `VITE_*`) | **Sim** |
+| 6 | Spike do MIME type de áudio (script local/curl contra a API do Gemini, sem tocar produção) | Não |
+| 7 | Escrever `interpret-memory`, deploy no Supabase real | **Sim** (deploy) |
+| 8 | Escrever `process-document`, deploy | **Sim** (deploy) |
+| 9 | Escrever `process-document-section` + `consolidate-document-run`, deploy | **Sim** (deploy) |
+| 10 | Escrever `document-ingestion.js`, `book-ingestion.js`, `memory-organization.js` | Não (código) |
+| 11 | Reativar nav items/scripts no `index.html` do Skip | Não, mas avisar (reexpor UI escondida de propósito na fase 1) |
+| 12 | Rodar QA pipeline do Skip (lint/build) no preview | Não |
+| 13 | Teste manual golden-path de cada fluxo (voz, documento simples, livro) no preview | Não |
+| 14 | `skip_project_publish` em produção (57204) | **Sim** |
+
+Ordem sugerida dentro dos passos "não-autorização": fazer o spike do áudio (6) **antes**
+de escrever `interpret-memory` de verdade, para não retrabalhar o contrato de resposta.
+
+#### 7. Critérios de aceite (verificação manual — sem suíte de testes automatizada)
+
+- `select proname from pg_proc where pronamespace='memoria'::regnamespace and proname in ('save_document_analysis','save_long_document_analysis')` retorna as 2 linhas.
+- `99_verify-isolation.sql` roda limpo após as migrations 02-04 (RLS ativo em todas as tabelas novas, nada fora de `memoria`).
+- Golden path voz: gravar frase curta no app publicado → `interpret-memory` responde 200 com transcrição reconhecível e campos estruturados coerentes → form de revisão populado → salvar → linha correspondente aparece no banco.
+- Golden path documento simples: anexar PDF/texto curto → "Interpretar com IA" → análise retornada em tempo razoável (<60s) → revisar → salvar → `select` em `memoria.sources/knowledge_items/entities/relations` confirma linhas novas com `owner_id` certo e contadores retornados pela RPC > 0.
+- Golden path livro: documento longo → seções criadas → cada seção processada fica `awaiting_review` com `analysis` preenchida → `consolidate-document-run` com todas as seções revisadas retorna sucesso, `document_ingestion_runs.status='approved'`.
+- Sem `GEMINI_API_KEY` configurada, cada uma das 4 funções responde com JSON de erro claro (nunca 500 cru, nunca trava o navegador).
+- RLS: um segundo usuário autenticado não lê/edita `document_ingestion_runs`/`document_sections`/`memory_organization_*` de outro `owner_id` (checagem manual com 2 contas, como `authenticated` — não `service_role`).
+- `oxlint`/`oxfmt`/`tsc`/build do Skip (QA pipeline) verde após os 3 arquivos novos + nav items reativados.
+- Nenhuma alteração em `public.*` (`git diff`/histórico de migrations confirma).
+- `CHANGELOG.md`, `supabase/db/domains/memoria.md` e a própria SPEC-129 atualizados refletindo o estado real pós-implementação.
+
+#### 8. Pontos explicitamente deixados em aberto (não decididos aqui)
+
+- Formato exato do JSON esperado por `openVoiceReview` em `app.js` — confirmar por leitura direta do arquivo real no Skip antes de fechar o contrato de `interpret-memory`.
+- Se o áudio original da memória por voz deve ser persistido no bucket `lucenera-memory-files` para proveniência, ou só a transcrição.
+- Algoritmo exato de corte de seções do livro (por palavra/parágrafo/capítulo) e formato do `locator`.
+- Loop automático de aprendizado de regras (`memory_organization_feedback` → promoção de regra `candidate`→`active`) — MVP entrega só CRUD manual.
+- Modelo Gemini a padronizar entre as 4 funções (`gemini-1.5-flash` vs `gemini-2.0-flash` vs `gemini-3.6-flash`, já há inconsistência entre `chat-consulta` e `classificar_solicitacao` no repo).
+- Se o MIME `audio/webm` for rejeitado pelo Gemini nos dois testes do spike, expandir escopo para transcodificação client-side é uma decisão de produto/esforço adicional, não assumida aqui.
+
 ## Pendências
 
 - [ ] `VITE_SUPABASE_PUBLISHABLE_KEY` (anon key) não configurada no Skip (projectId 57204) — a IA foi bloqueada de ler o segredo do `.env`. Sem ela o app publica em modo demo. Passo do usuário: `skip_env_set` (colar a chave) ou setar na UI de Environment Variables do Skip.

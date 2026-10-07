@@ -72,8 +72,25 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from _supabase_client import get_client, SUPABASE_URL, SUPABASE_DB_URL  # noqa: E402
+from sync_connect_common import (  # noqa: E402
+    ImportacaoAbortada,
+    RelatorioModulo,
+    descobrir_planilha_mais_recente,
+    imprimir_resumo_final,
+    salvar_log,
+    validar_cabecalho,
+    validar_chave_unica,
+    validar_minimo_linhas,
+)
 
-PLANILHA_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "Produtos__2026-09-21.xlsx"
+PASTA_PLANILHAS = ROOT / "01-Documento" / "01 - Planilhas"
+PREFIXO_ARQUIVO = "Produtos__"
+
+# SPEC-157: piso de seguranca (NUNCA expectativa de volume -- so pra travar
+# um export vazio/truncado de disparar inativacao em massa).
+MIN_LINHAS = 500
+COLUNAS_ESPERADAS = ["CodProduto", "EstoqueTotal", "Showroom", "Disponivel", "vlCustoTotal", "ValorVenda"]
+CHAVE_NATURAL = ["codigo_produto"]
 
 BATCH_SIZE = 200
 PAGE_SIZE = 1000
@@ -150,8 +167,12 @@ def carregar_planilha(path: Path) -> pd.DataFrame:
     df = pd.read_excel(path, sheet_name="Estoque", dtype=str)
     df.columns = [c.strip() for c in df.columns]
 
+    validar_cabecalho(df.columns.tolist(), COLUNAS_ESPERADAS, origem=path.name)
+    validar_minimo_linhas(len(df), MIN_LINHAS, origem=path.name)
+
     df["codigo_produto"] = pd.to_numeric(df["CodProduto"], errors="coerce").astype("Int64")
     df = df.dropna(subset=["codigo_produto"])
+    validar_chave_unica(df, CHAVE_NATURAL, origem=path.name)
 
     df["estoque_total"] = to_numeric_br(df["EstoqueTotal"]).fillna(0)
     df["estoque_showroom"] = to_numeric_br(df["Showroom"]).fillna(0)
@@ -209,15 +230,32 @@ def close_enough(a: float, b: float, tol: float = 0.005) -> bool:
     # "diferente" de 0 e o script gravava 0 em tudo.
     a = 0.0 if pd.isna(a) else float(a)
     b = 0.0 if pd.isna(b) else float(b)
-    return abs(a - b) <= tol
+    # Folga de ponto flutuante: percentual_lucro é numeric(,2) no banco e a
+    # planilha manda 3 casas (152.075 vira 152.08); a diferença "exata" de
+    # 0.005 sai 0.0050000000000x e o produto parecia alterado em todo run.
+    return abs(a - b) <= tol + 1e-9
 
 
 def processar(dry_run: bool) -> None:
     print(f"Supabase: {SUPABASE_URL}")
     print(f"Modo:     {'DRY-RUN (sem gravação)' if dry_run else 'GRAVAÇÃO REAL'}\n")
 
-    planilha = carregar_planilha(PLANILHA_PADRAO)
+    relatorio = RelatorioModulo(nome="Produtos (estoque)")
+    try:
+        planilha_path = descobrir_planilha_mais_recente(PASTA_PLANILHAS, PREFIXO_ARQUIVO)
+        relatorio.arquivo_origem = planilha_path.name
+        print(f"Planilha: {planilha_path.name}")
+        planilha = carregar_planilha(planilha_path)
+    except ImportacaoAbortada as exc:
+        relatorio.abortado = str(exc)
+        relatorio.finalizar()
+        print(f"\nABORTADO: {exc}")
+        relatorio.imprimir()
+        log_path = salvar_log([relatorio], dry_run)
+        imprimir_resumo_final([relatorio], dry_run, log_path)
+        return
     print(f"Linhas na planilha, após limpeza: {len(planilha)}")
+    codigos_planilha = set(planilha["codigo_produto"].astype(int))
 
     client = get_client()
 
@@ -226,7 +264,7 @@ def processar(dry_run: bool) -> None:
         client,
         "produtos",
         "id,codigo_produto,estoque_total,estoque_showroom,estoque_disponivel,"
-        "custo_total,valor_venda,percentual_lucro,ncm,cest,preco_venda,"
+        "custo_total,valor_venda,percentual_lucro,ncm,cest,preco_venda,ativo,"
         + ",".join(FISCAL_NUM_TRIGGER + FISCAL_NUM_SAFE + FISCAL_TXT),
     )
     produtos["codigo_produto"] = pd.to_numeric(produtos["codigo_produto"], errors="coerce").astype(
@@ -242,6 +280,7 @@ def processar(dry_run: bool) -> None:
     n_ncm = 0
     n_cest = 0
     n_fiscal = 0
+    n_reativado = 0
 
     def _norm_cod_fiscal(v: object) -> object:
         s = str(v).strip() if v is not None else ""
@@ -291,8 +330,16 @@ def processar(dry_run: bool) -> None:
                 fiscal_txt_alt[campo] = novo
         mudou_fiscal = bool(fiscal_num_alt or fiscal_txt_alt)
 
-        if mudou_num or mudou_ncm or mudou_cest or mudou_fiscal:
+        # SPEC-157: produto que tinha sido inativado (ativo=false, porque saiu
+        # de um export anterior) e voltou a aparecer no export atual -- a
+        # planilha e' a fonte de verdade, reativa.
+        reativar = existente.get("ativo") is False
+
+        if mudou_num or mudou_ncm or mudou_cest or mudou_fiscal or reativar:
             rec = {"id": existente["id"]}
+            if reativar:
+                rec["ativo"] = True
+                n_reativado += 1
             # Só manda os campos numéricos quando algum deles mudou de verdade —
             # evita ~4 mil UPDATEs redundantes de estoque_total (que disparam o
             # trigger fn_sync_estoque_itens_from_produtos) durante o backfill de ncm/cest.
@@ -322,18 +369,36 @@ def processar(dry_run: bool) -> None:
         else:
             inalterados += 1
 
+    # SPEC-157: espelho com SOFT DELETE — produto que estava ativo no banco e
+    # saiu do export atual e' inativado (ativo=false). NUNCA apagado
+    # fisicamente (vendas/NF-e referenciam produtos.id).
+    inativar_ids = [
+        p["id"]
+        for cod, p in produtos_map.items()
+        if p.get("ativo") is True and int(cod) not in codigos_planilha
+    ]
+    for pid in inativar_ids:
+        updates_produtos.append({"id": pid, "ativo": False})
+
     print("=== RESUMO ===")
     print(f"Produtos a atualizar:               {len(updates_produtos)}")
     print(f"  com estoque/custo/valor alterado: {n_num}")
     print(f"  com ncm novo/alterado:            {n_ncm}")
     print(f"  com cest novo/alterado:           {n_cest}")
     print(f"  com campo fiscal (SPEC-132):      {n_fiscal}")
+    print(f"  reativados (ativo=false -> true): {n_reativado}")
+    print(f"  inativados (ativo=true -> false, soft delete): {len(inativar_ids)}")
     print(f"Produtos já sincronizados:           {inalterados}")
     print(f"CodProduto da planilha sem match no banco: {len(sem_match)}")
     print("(estoque_itens é atualizado automaticamente pelo trigger em produtos)")
     print("(preco_venda NÃO muda — os 2 triggers de preço ficam desligados durante a gravação)")
     if sem_match:
         print(f"  Exemplos: {sem_match[:15]}")
+
+    relatorio.atualizados = len(updates_produtos) - n_reativado - len(inativar_ids)
+    relatorio.reativados = n_reativado
+    relatorio.inativados = len(inativar_ids)
+    relatorio.ignorados = len(sem_match) + inalterados
 
     if dry_run:
         print("\n=== DRY-RUN: nada foi gravado ===")
@@ -346,6 +411,9 @@ def processar(dry_run: bool) -> None:
             if amostra_fiscal:
                 print("Amostra com campo fiscal do trigger:")
                 print(amostra_fiscal)
+        relatorio.finalizar()
+        log_path = salvar_log([relatorio], dry_run)
+        imprimir_resumo_final([relatorio], dry_run, log_path)
         return
 
     if not SUPABASE_DB_URL:
@@ -402,14 +470,21 @@ def processar(dry_run: bool) -> None:
             )
         else:
             print(f"  Conferido: preco_venda idêntico em todos os {len(ids_afetados)} produtos tocados.")
-    except Exception:
+    except Exception as exc:
         conn.rollback()
         print("\nFALHOU — transação revertida por completo (nenhum update ficou gravado, triggers intactos).")
+        relatorio.registrar_erro(str(exc))
+        relatorio.finalizar()
+        log_path = salvar_log([relatorio], dry_run)
+        imprimir_resumo_final([relatorio], dry_run, log_path)
         raise
     finally:
         conn.close()
 
     print("estoque_itens sincronizado automaticamente pelo trigger (fn_sync_estoque_itens_from_produtos).")
+    relatorio.finalizar()
+    log_path = salvar_log([relatorio], dry_run)
+    imprimir_resumo_final([relatorio], dry_run, log_path)
 
 
 def main():

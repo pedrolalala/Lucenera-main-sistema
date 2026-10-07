@@ -72,6 +72,17 @@ Regras:
 - A UI administrativa do Hub lê/escreve diretamente nas tabelas novas, protegidas por RLS `is_admin()`.
 - Outros sistemas devem consumir o contrato via RPC, não por leitura direta das tabelas.
 
+## SPEC-183 — Acesso a Sistemas define visibilidade (aplicada 2026-10-07)
+
+Migration: `supabase/db/migrations/20261007_186_spec183_acesso_sistemas_visibilidade/` (rollback.sql incluso; backup em `_bkp_user_system_access_20261007`).
+
+- `hub_sistemas_permitidos(u)` = sistemas `visivel_no_hub` marcados em `user_system_access` (aba "Acesso a Sistemas"). Papel **não** faz sistema aparecer.
+- `hub_pode_executar` tem um portão antes da exceção: sistema `visivel_no_hub` não marcado em `user_system_access` → `false`. Admin (`usuarios.role = 'admin'`) passa direto; sistemas internos (`visivel_no_hub = false`, ex. `hub`) seguem só por papel.
+- Exceção `conceder` não fura o portão; `negar` continua tirando a ação.
+- Policy `user_insert_usa` removida: só admin grava em `user_system_access` (`admin_all_usa`).
+- Visibilidade marcada sem papel no sistema = cartão aparece, mas `hub_pode_executar` nega as ações. Sistemas que só exigem login (Showroom, Ubiqua, Memória, Produção/Garantia) não consultam a função.
+- `boletos` SELECT também libera por `separacao-parcial` (visualizar) — quem tem Separação vê boletos mesmo sem Adm. Bancária (proposital).
+
 ## SPEC-007 — SSO entre sistemas
 
 Migration central: `supabase/db/migrations/20260708_030_spec007_sso_cross_system/`.

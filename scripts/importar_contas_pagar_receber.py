@@ -54,6 +54,8 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import psycopg2
+from psycopg2.extras import execute_batch
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -61,10 +63,33 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _supabase_client import get_client, SUPABASE_URL  # noqa: E402
+from _supabase_client import get_client, SUPABASE_URL, SUPABASE_DB_URL  # noqa: E402
+from sync_connect_common import (  # noqa: E402
+    ImportacaoAbortada,
+    RelatorioModulo,
+    descobrir_planilha_mais_recente,
+    imprimir_resumo_final,
+    salvar_log,
+    validar_cabecalho,
+    validar_chave_unica,
+    validar_minimo_linhas,
+)
 
-CP_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaPagar_2026-09-21.xlsx"
-CR_PADRAO = ROOT / "01-Documento" / "01 - Planilhas" / "ContaReceber_2026-09-21.xlsx"
+PASTA_PLANILHAS = ROOT / "01-Documento" / "01 - Planilhas"
+
+# SPEC-157: pisos de seguranca (NUNCA expectativa de volume -- so travam
+# exportacao vazia/truncada; volume real varia mes a mes com o estado das
+# obras).
+MIN_LINHAS_CP = 1000
+MIN_LINHAS_CR = 500
+COLUNAS_ESPERADAS = [
+    "dt_emissao",
+    "dt_vencimento",
+    "cod_itens_duplicata",
+    "cod_duplicata",
+    "cod_apropriacao",
+    "cod_pessoa",
+]
 
 # "LUCE NERA" = MANOELLA. NAO é uma decisão, é um fato permanente: é assim
 # que a empresa está identificada no banco de dados do Connect (sistema
@@ -103,9 +128,14 @@ COLUNAS_TRANSACAO = [
 
 
 def carregar_planilha(path: Path, tipo: str) -> pd.DataFrame:
-    df = pd.read_excel(path, sheet_name="Financeiro")
-    df.columns = [c.strip() for c in df.columns]
-    df = df[COLUNAS_TRANSACAO].copy()
+    df_raw = pd.read_excel(path, sheet_name="Financeiro")
+    df_raw.columns = [c.strip() for c in df_raw.columns]
+
+    validar_cabecalho(df_raw.columns.tolist(), COLUNAS_ESPERADAS, origem=path.name)
+    minimo = MIN_LINHAS_CP if tipo == "despesa" else MIN_LINHAS_CR
+    validar_minimo_linhas(len(df_raw), minimo, origem=path.name)
+
+    df = df_raw[COLUNAS_TRANSACAO].copy()
     df["tipo"] = tipo
 
     for col in ["dt_emissao", "dt_vencimento", "dt_pagamento"]:
@@ -127,6 +157,7 @@ def carregar_planilha(path: Path, tipo: str) -> pd.DataFrame:
     df["nm_funcionario"] = df["nm_funcionario"].astype(str).str.strip().str.upper()
     df.loc[df["nm_funcionario"].isin(["NAN", "NONE", ""]), "nm_funcionario"] = None
     df = df.dropna(subset=["cod_itens_duplicata", "cod_duplicata"])
+    validar_chave_unica(df, ["cod_itens_duplicata"], origem=path.name)
 
     df["data_transacao"] = df["dt_pagamento"].fillna(df["dt_vencimento"]).fillna(df["dt_emissao"])
     df["descricao"] = df["desc_apropriacao"].fillna("SEM DESCRICAO").str.strip()
@@ -158,22 +189,34 @@ def processar(dry_run: bool) -> None:
     print(f"Supabase: {SUPABASE_URL}")
     print(f"Modo:     {'DRY-RUN (sem gravação)' if dry_run else 'GRAVAÇÃO REAL'}\n")
 
-    cp = carregar_planilha(CP_PADRAO, "despesa")
-    cr = carregar_planilha(CR_PADRAO, "receita")
+    relatorio = RelatorioModulo(nome="Contas a Pagar/Receber")
+    try:
+        cp_path = descobrir_planilha_mais_recente(PASTA_PLANILHAS, "ContaPagar_")
+        cr_path = descobrir_planilha_mais_recente(PASTA_PLANILHAS, "ContaReceber_")
+        relatorio.arquivo_origem = f"{cp_path.name} + {cr_path.name}"
+        print(f"Planilhas: {cp_path.name} + {cr_path.name}")
+        cp = carregar_planilha(cp_path, "despesa")
+        cr = carregar_planilha(cr_path, "receita")
+    except ImportacaoAbortada as exc:
+        relatorio.abortado = str(exc)
+        relatorio.finalizar()
+        print(f"\nABORTADO: {exc}")
+        relatorio.imprimir()
+        log_path = salvar_log([relatorio], dry_run)
+        imprimir_resumo_final([relatorio], dry_run, log_path)
+        return
+
     planilha = pd.concat([cp, cr], ignore_index=True)
     print(f"Linhas na planilha (CP+CR), após limpeza: {len(planilha)}")
 
     client = get_client()
 
+    # SPEC-157: a gravação de stg_duplicatas_vigentes (delete+insert) só é
+    # calculada aqui — a escrita real acontece dentro da transação única no
+    # final da função, junto com negociacoes/transacoes/cancelamentos.
     chaves_vigentes = sorted({(int(cd), t) for cd, t in zip(planilha["cod_duplicata"], planilha["tipo"])})
-    if dry_run:
-        print(f"(dry-run) stg_duplicatas_vigentes seria atualizada com {len(chaves_vigentes)} chaves")
-    else:
-        print(f"Atualizando stg_duplicatas_vigentes ({len(chaves_vigentes)} chaves)…")
-        client.table("stg_duplicatas_vigentes").delete().neq("cod_duplicata", -1).execute()
-        registros_stg = [{"cod_duplicata": cd, "tipo": t} for cd, t in chaves_vigentes]
-        for i in range(0, len(registros_stg), BATCH_SIZE):
-            client.table("stg_duplicatas_vigentes").insert(registros_stg[i : i + BATCH_SIZE]).execute()
+    registros_stg = [{"cod_duplicata": cd, "tipo": t} for cd, t in chaves_vigentes]
+    print(f"stg_duplicatas_vigentes será atualizada com {len(chaves_vigentes)} chaves")
 
     print("Buscando negociacoes existentes…")
     neg = buscar_paginado(client, "negociacoes", "id,empresa_id,cod_duplicata,tipo,created_at")
@@ -277,11 +320,27 @@ def processar(dry_run: bool) -> None:
         if chave in novas_chaves and chave not in primeira_linha_por_chave:
             primeira_linha_por_chave[chave] = row
 
+    # Decisão do usuário (2026-10-07): toda duplicata de despesa com
+    # tipo_pagamento "DEV TROCA" é devolução. A Connect manda ~metade delas
+    # com cod_apropriacao = 1 (sem nome, inexistente no plano_de_contas) --
+    # nesses casos usa a categoria DEVOLUÇÃO (2020028), a mesma que a Connect
+    # já usa nas outras DEV TROCA. Categoria válida vinda da planilha vence.
+    PC_DEVOLUCAO_CODIGO_CONNECT = 2020028
+
     novas_negociacoes = []
     sem_plano_contas = 0
+    dev_troca_para_devolucao = 0
     for chave in novas_chaves:
         row = primeira_linha_por_chave[chave]
         plano_contas_id = pc_map.get(int(row["cod_apropriacao"])) if pd.notna(row["cod_apropriacao"]) else None
+        if (
+            plano_contas_id is None
+            and row["tipo"] == "despesa"
+            and str(row.get("tipo_pagamento") or "").strip().upper() == "DEV TROCA"
+        ):
+            plano_contas_id = pc_map.get(PC_DEVOLUCAO_CODIGO_CONNECT)
+            if plano_contas_id is not None:
+                dev_troca_para_devolucao += 1
         if plano_contas_id is None:
             sem_plano_contas += 1
         funcionario_id = func_map.get(row["nm_funcionario"]) if row["nm_funcionario"] else None
@@ -301,21 +360,17 @@ def processar(dry_run: bool) -> None:
             }
         )
     if novas_chaves:
+        print(f"  DEV TROCA sem categoria -> DEVOLUÇÃO (2020028): {dev_troca_para_devolucao}")
         print(f"  Sem plano_contas_id resolvido (cod_apropriacao não encontrado): {sem_plano_contas}")
 
-    if dry_run:
-        for chave, rec in zip(novas_chaves, novas_negociacoes):
-            neg_map[chave] = f"DRY-RUN-{rec['cod_duplicata']}-{rec['tipo']}"
-    elif novas_negociacoes:
-        print(f"Criando {len(novas_negociacoes)} negociacoes novas sob empresa LUCE NERA…")
-        for i in range(0, len(novas_negociacoes), BATCH_SIZE):
-            lote_chaves = novas_chaves[i : i + BATCH_SIZE]
-            lote = novas_negociacoes[i : i + BATCH_SIZE]
-            resp = client.table("negociacoes").insert(lote).execute()
-            for chave, criado in zip(lote_chaves, resp.data):
-                neg_map[chave] = criado["id"]
-            print(f"  Negociacoes criadas: {min(i+BATCH_SIZE, len(novas_negociacoes))}/{len(novas_negociacoes)}", end="\r")
-        print()
+    # SPEC-157: negociacoes novas NÃO são criadas aqui via REST — ficam com um
+    # sentinela ("NOVA", chave) em neg_map, e a criação real (com o id
+    # verdadeiro sendo substituído nas transações que apontam pra ela)
+    # acontece dentro da MESMA transação psycopg2 do resto da gravação, no
+    # final da função — pra que negociação+transações+cancelamentos sejam
+    # tudo-ou-nada (requisito de transação única).
+    for chave in novas_chaves:
+        neg_map[chave] = ("NOVA", chave)
 
     print("Buscando transacoes existentes…")
     trans = buscar_paginado(
@@ -325,6 +380,10 @@ def processar(dry_run: bool) -> None:
         "vl_parcela,dt_vencimento,dt_emissao,vl_frete,vl_ipi",
     )
     print(f"  {len(trans)} transacoes no banco\n")
+    # NULL do banco chega do DataFrame como NaN, e `NaN or None` continua NaN:
+    # sem esta conversão toda parcela sem dt_pagamento parecia "alterada"
+    # (2.946 falsos positivos no sync de 29/09/2026).
+    trans = trans.astype(object).where(pd.notna(trans), None)
     trans_map = {
         (r["negociacao_id"], r["cod_itens_duplicata"]): r
         for r in trans.to_dict("records")
@@ -489,6 +548,11 @@ def processar(dry_run: bool) -> None:
         codes = sorted({(r["cod_duplicata"], r["tipo"]) for r in sem_negociacao})
         print(f"  Exemplos de (cod_duplicata, tipo): {codes[:15]}")
 
+    relatorio.inseridos = len(novas_transacoes)
+    relatorio.atualizados = len(atualizacoes)
+    relatorio.cancelados = len(orfas_a_cancelar) + len(perdedoras_a_cancelar) + len(duplicata_ausente_a_cancelar)
+    relatorio.ignorados = inalteradas + len(sem_negociacao)
+
     if dry_run:
         print("\n=== DRY-RUN: nada foi gravado ===")
         if novas_transacoes:
@@ -497,75 +561,138 @@ def processar(dry_run: bool) -> None:
         if atualizacoes:
             print("\nAmostra de atualização:")
             print(atualizacoes[0])
+        relatorio.finalizar()
+        log_path = salvar_log([relatorio], dry_run)
+        imprimir_resumo_final([relatorio], dry_run, log_path)
         return
 
-    total_ok, total_erro = 0, 0
-    for i in range(0, len(novas_transacoes), BATCH_SIZE):
-        lote = novas_transacoes[i : i + BATCH_SIZE]
-        try:
-            client.table("transacoes").insert(lote).execute()
-            total_ok += len(lote)
-        except Exception as exc:
-            print(f"  ERRO ao inserir lote {i}-{i+len(lote)}: {exc}")
-            total_erro += len(lote)
-        print(f"  Inserindo: {min(i+BATCH_SIZE, len(novas_transacoes))}/{len(novas_transacoes)}", end="\r")
-    print(f"\nInsert concluído: {total_ok} ok, {total_erro} erros.")
+    if not SUPABASE_DB_URL:
+        raise RuntimeError("Configure SUPABASE_DB_URL no .env — necessário p/ a transação única de gravação.")
 
-    total_ok2, total_erro2 = 0, 0
-    for rec in atualizacoes:
-        try:
-            client.table("transacoes").update(
-                {
-                    "status_pago": rec["status_pago"],
-                    "vl_pago": rec["vl_pago"],
-                    "dt_pagamento": rec["dt_pagamento"],
-                    "vl_desconto": rec["vl_desconto"],
-                    "vl_juros": rec["vl_juros"],
-                    "vl_parcela": rec["vl_parcela"],
-                    "dt_vencimento": rec["dt_vencimento"],
-                    "dt_emissao": rec["dt_emissao"],
-                    "vl_frete": rec["vl_frete"],
-                    "vl_ipi": rec["vl_ipi"],
-                }
-            ).eq("id", rec["id"]).execute()
-            total_ok2 += 1
-        except Exception as exc:
-            print(f"  ERRO ao atualizar id={rec['id']}: {exc}")
-            total_erro2 += 1
-    print(f"Update concluído: {total_ok2} ok, {total_erro2} erros.")
+    # SPEC-157: TUDO nesta transação — stg_duplicatas_vigentes, negociacoes
+    # novas, transações novas/atualizadas e os 3 cancelamentos (status_pago=2)
+    # — ou tudo é gravado, ou (em caso de erro) nada é, e as negociacoes
+    # sentinela ("NOVA", chave) nunca chegam a existir. `ON CONFLICT` nas 2
+    # unique keys já existentes no banco (uq_negociacoes_empresa_cod_dup_tipo,
+    # uq_transacoes_connect) é a rede de segurança contra duplicação — não
+    # depende só do diff calculado em Python.
+    conn = psycopg2.connect(SUPABASE_DB_URL)
+    try:
+        conn.autocommit = False
+        cur = conn.cursor()
+        cur.execute("BEGIN")
 
-    total_ok3, total_erro3 = 0, 0
-    for i in range(0, len(orfas_a_cancelar), BATCH_SIZE):
-        lote = orfas_a_cancelar[i : i + BATCH_SIZE]
-        try:
-            client.table("transacoes").update({"status_pago": 2}).in_("id", lote).execute()
-            total_ok3 += len(lote)
-        except Exception as exc:
-            print(f"  ERRO ao cancelar orfas lote {i}: {exc}")
-            total_erro3 += len(lote)
-    print(f"Cancelamento de orfas concluido: {total_ok3} ok, {total_erro3} erros.")
+        print(f"Regravando stg_duplicatas_vigentes ({len(registros_stg)} chaves)…")
+        cur.execute("DELETE FROM public.stg_duplicatas_vigentes")
+        execute_batch(
+            cur,
+            "INSERT INTO public.stg_duplicatas_vigentes (cod_duplicata, tipo) VALUES (%s, %s)",
+            [(r["cod_duplicata"], r["tipo"]) for r in registros_stg],
+            page_size=BATCH_SIZE,
+        )
 
-    total_ok4, total_erro4 = 0, 0
-    for i in range(0, len(perdedoras_a_cancelar), BATCH_SIZE):
-        lote = perdedoras_a_cancelar[i : i + BATCH_SIZE]
-        try:
-            client.table("transacoes").update({"status_pago": 2}).in_("id", lote).execute()
-            total_ok4 += len(lote)
-        except Exception as exc:
-            print(f"  ERRO ao cancelar negociação duplicada lote {i}: {exc}")
-            total_erro4 += len(lote)
-    print(f"Cancelamento de negociação duplicada (perdedora) concluido: {total_ok4} ok, {total_erro4} erros.")
+        chave_para_id_real: dict = {}
+        if novas_negociacoes:
+            print(f"Criando {len(novas_negociacoes)} negociacoes novas sob empresa LUCE NERA…")
+            for chave, rec in zip(novas_chaves, novas_negociacoes):
+                cur.execute(
+                    """
+                    INSERT INTO public.negociacoes
+                        (empresa_id, contato_id, funcionario_id, plano_contas_id, tipo,
+                         cod_duplicata, cod_venda, total_parc, dev_troca, cod_pessoa)
+                    VALUES (%s::uuid, %s::uuid, %s::uuid, %s::uuid, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (empresa_id, cod_duplicata, tipo)
+                    DO UPDATE SET empresa_id = EXCLUDED.empresa_id
+                    RETURNING id
+                    """,
+                    (
+                        rec["empresa_id"],
+                        rec["contato_id"],
+                        rec["funcionario_id"],
+                        rec["plano_contas_id"],
+                        rec["tipo"],
+                        rec["cod_duplicata"],
+                        rec["cod_venda"],
+                        rec["total_parc"],
+                        rec["dev_troca"],
+                        rec["cod_pessoa"],
+                    ),
+                )
+                chave_para_id_real[chave] = cur.fetchone()[0]
 
-    total_ok5, total_erro5 = 0, 0
-    for i in range(0, len(duplicata_ausente_a_cancelar), BATCH_SIZE):
-        lote = duplicata_ausente_a_cancelar[i : i + BATCH_SIZE]
-        try:
-            client.table("transacoes").update({"status_pago": 2}).in_("id", lote).execute()
-            total_ok5 += len(lote)
-        except Exception as exc:
-            print(f"  ERRO ao cancelar duplicata ausente lote {i}: {exc}")
-            total_erro5 += len(lote)
-    print(f"Cancelamento de duplicata ausente do export concluido: {total_ok5} ok, {total_erro5} erros.")
+        def _resolver_negociacao_id(valor):
+            if isinstance(valor, tuple) and valor[0] == "NOVA":
+                return chave_para_id_real[valor[1]]
+            return valor
+
+        print(f"Inserindo {len(novas_transacoes)} transações novas…")
+        execute_batch(
+            cur,
+            """
+            INSERT INTO public.transacoes
+                (negociacao_id, tipo, descricao, valor, data_transacao, cod_itens_duplicata,
+                 num_parc, dt_emissao, dt_vencimento, dt_pagamento, vl_parcela, vl_desconto,
+                 vl_juros, vl_pago, vl_frete, vl_ipi, status_pago, tipo_pagamento, acordo, cod_venda)
+            VALUES (%(negociacao_id)s::uuid, %(tipo)s, %(descricao)s, %(valor)s, %(data_transacao)s,
+                    %(cod_itens_duplicata)s, %(num_parc)s, %(dt_emissao)s, %(dt_vencimento)s,
+                    %(dt_pagamento)s, %(vl_parcela)s, %(vl_desconto)s, %(vl_juros)s, %(vl_pago)s,
+                    %(vl_frete)s, %(vl_ipi)s, %(status_pago)s, %(tipo_pagamento)s, %(acordo)s,
+                    %(cod_venda)s)
+            ON CONFLICT (negociacao_id, cod_itens_duplicata) DO UPDATE SET
+                status_pago = EXCLUDED.status_pago, vl_pago = EXCLUDED.vl_pago,
+                dt_pagamento = EXCLUDED.dt_pagamento, vl_desconto = EXCLUDED.vl_desconto,
+                vl_juros = EXCLUDED.vl_juros, vl_parcela = EXCLUDED.vl_parcela,
+                dt_vencimento = EXCLUDED.dt_vencimento, dt_emissao = EXCLUDED.dt_emissao,
+                vl_frete = EXCLUDED.vl_frete, vl_ipi = EXCLUDED.vl_ipi
+            """,
+            [{**rec, "negociacao_id": _resolver_negociacao_id(rec["negociacao_id"])} for rec in novas_transacoes],
+            page_size=BATCH_SIZE,
+        )
+
+        print(f"Atualizando {len(atualizacoes)} transações existentes…")
+        execute_batch(
+            cur,
+            """
+            UPDATE public.transacoes SET
+                status_pago = %(status_pago)s, vl_pago = %(vl_pago)s, dt_pagamento = %(dt_pagamento)s,
+                vl_desconto = %(vl_desconto)s, vl_juros = %(vl_juros)s, vl_parcela = %(vl_parcela)s,
+                dt_vencimento = %(dt_vencimento)s, dt_emissao = %(dt_emissao)s,
+                vl_frete = %(vl_frete)s, vl_ipi = %(vl_ipi)s
+            WHERE id = %(id)s::uuid
+            """,
+            atualizacoes,
+            page_size=BATCH_SIZE,
+        )
+
+        print("Cancelando (status_pago=2) órfãs / negociação duplicada / duplicata ausente…")
+        for nome, ids in (
+            ("órfãs (item fora do export)", orfas_a_cancelar),
+            ("negociação duplicada (perdedora)", perdedoras_a_cancelar),
+            ("duplicata ausente do export", duplicata_ausente_a_cancelar),
+        ):
+            if ids:
+                cur.execute(
+                    "UPDATE public.transacoes SET status_pago = 2 WHERE id = ANY(%s::uuid[])",
+                    (ids,),
+                )
+                print(f"  {nome}: {len(ids)} cancelada(s)")
+
+        conn.commit()
+        print("\nTransação única concluída (commit) — todas as gravações desta execução foram aplicadas juntas.")
+    except Exception as exc:
+        conn.rollback()
+        print("\nFALHOU — transação revertida por completo (NADA desta execução foi gravado).")
+        relatorio.registrar_erro(str(exc))
+        relatorio.finalizar()
+        log_path = salvar_log([relatorio], dry_run)
+        imprimir_resumo_final([relatorio], dry_run, log_path)
+        raise
+    finally:
+        conn.close()
+
+    relatorio.finalizar()
+    log_path = salvar_log([relatorio], dry_run)
+    imprimir_resumo_final([relatorio], dry_run, log_path)
 
 
 def main():

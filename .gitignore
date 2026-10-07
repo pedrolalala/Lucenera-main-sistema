@@ -36,6 +36,9 @@ supabase/.temp/
 # Saída local do import de fotos do showroom (SPEC-125): imagens extraídas + CSV
 scripts/_saida_showroom/
 
+# Log estruturado por execução do ciclo de sincronização Connect (SPEC-157)
+scripts/logs/
+
 
 __pycache__/
 *.pyc

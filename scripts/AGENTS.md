@@ -76,9 +76,101 @@ uma corrigiu um bug real de divergencia planilha x Dashboard):
   colaram despesa - COMPRAS-REVENDA, RT, RETIRADA DE LUCRO, ICMS - dentro de
   negociacao `tipo='receita'`). A planilha e a fonte de verdade.
 
+- **DEV TROCA = DEVOLUÇÃO** (decisao do usuario, 2026-10-07): duplicata de
+  despesa com `tipo_pagamento = 'DEV TROCA'` cujo `cod_apropriacao` nao
+  resolve no plano (a Connect manda `1`, sem nome, em ~metade delas) entra
+  com a categoria DEVOLUCAO (`codigo_connect = 2020028`). Categoria valida
+  vinda da planilha vence. Backfill do historico feito no mesmo dia: 505
+  negociacoes (R$ 1.793.930,18) -> DEVOLUCAO; nao ha trigger em
+  `negociacoes`. ContaReceber nao traz `tipo_pagamento = 'DEV TROCA'`.
+
 - **`LUCE NERA` = MANOELLA** (`EMPRESA_LUCE_NERA_ID`). Mapeamento permanente do
   Connect, nao e decisao. Duplicata genuinamente nova -> criada sob MANOELLA.
 
 Criterio de sucesso da conferencia: receita e despesa **realizadas** (status
 pago, por `dt_pagamento`) batem mes a mes com a planilha, e "Em Aberto" (por
 `dt_vencimento`, `pago==0`) bate com a planilha. Diferenca esperada: R$ 0,00.
+
+## SPEC-157 (2026-09-22): reconciliacao/espelho formal
+
+Biblioteca compartilhada `scripts/sync_connect_common.py` usada pelos 4
+scripts (`importar_contas_pagar_receber.py`, `importar_pedido_compra.py`,
+`importar_produtos_estoque.py`, `importar_produtos_novos.py`). Invariantes
+novas, **nao podem ser removidas**:
+
+- **Descoberta automatica do arquivo mais recente** (`descobrir_planilha_mais_recente`)
+  — nao precisa mais editar constante de caminho a cada exportacao nova. Pega o
+  maior nome de arquivo `<Prefixo>_*.xlsx` na pasta (funciona porque o padrao
+  de nome e' `Prefixo_AAAA-MM-DD.xlsx`).
+- **Pre-validacoes obrigatorias antes de tocar no banco**: cabecalho (so
+  presenca das colunas usadas — os scripts leem por NOME, nunca por posicao,
+  entao ordem de coluna no export NAO importa e nunca deve voltar a ser
+  validada), minimo de linhas (piso de seguranca contra export vazio/truncado,
+  NUNCA expectativa de volume), e unicidade da chave natural na propria
+  planilha. Qualquer falha aborta ANTES de qualquer escrita — ver
+  `ImportacaoAbortada`.
+- **Produtos (estoque)**: soft delete via `produtos.ativo` — produto que
+  estava ativo e saiu do export atual e' inativado (`ativo=false`); produto
+  que volta a aparecer e' reativado (`ativo=true`). Roda dentro da MESMA
+  transacao que ja desligava os 2 triggers de preco (nao mudou).
+- **Produtos (novos)**: insert virou `upsert(..., on_conflict="codigo_produto", ignore_duplicates=True)`
+  — idempotente de verdade (rodar 2x nao duplica nem erra).
+- **Pedido de compra**: coluna `pedido_compra.vigente` (migration
+  `20260922_159_sync_connect_reconciliacao`, APLICADA no Supabase real em
+  2026-10-07; no 1o run 155 de 204 pedidos viraram `vigente=false`) — pedido que sai do export vira
+  `vigente=false`, NUNCA DELETE (decisao de 2026-07-22, a planilha nao traz
+  historico). O script detecta em runtime se a coluna ja existe
+  (`_coluna_vigente_existe`) e degrada de forma segura (sem marcar
+  nao-vigencia) se a migration ainda nao foi aplicada — nunca falha por
+  coluna faltando. `num_parc` vazio e' normalizado para 1 (nunca NULL) —
+  `staging_pedido_compra` ganha `UNIQUE(codigo_pedido, num_parc)` na mesma
+  migration.
+- **Contas a pagar/receber**: a fase de gravacao (stg_duplicatas_vigentes +
+  negociacoes novas + transacoes novas/atualizadas + os 3 cancelamentos)
+  roda **dentro de uma unica transacao `psycopg2`** — tudo ou nada. As
+  negociacoes novas usam sentinela `("NOVA", chave)` em `neg_map` durante o
+  calculo em Python (em vez de criar via REST antes do resto) e so ganham id
+  real dentro da transacao, via `INSERT ... ON CONFLICT (empresa_id,
+  cod_duplicata, tipo) DO UPDATE ... RETURNING id` — nunca REST insert solto
+  fora da transacao. O cancelamento (`status_pago=2`) continua sendo a
+  politica pra "ausente na planilha" (NAO virou DELETE fisico — decisao
+  confirmada com o usuario em 2026-09-22, motivo:
+  `retorno_bancario_registros.transacao_id` referencia `transacoes(id)` sem
+  `ON DELETE CASCADE`, e apagar destruiria historico de conciliacao
+  bancaria).
+- **Log estruturado**: cada run grava um JSON em `scripts/logs/sync_connect/`
+  com contadores por modulo (inseridos/atualizados/removidos ou
+  inativados/cancelados/ignorados/erros) e timestamp — usar pra conferencia
+  do gestor em vez de so ler o stdout.
+
+Ver `03-Projeto/Planos de Ação/SPECs/SPEC-157_Reconciliacao_Espelho_Import_Connect.md`
+pra decisoes completas e pendencias (migration 159 aplicada em 2026-10-07).
+
+**Rede sem IPv6**: o host direto `db.<ref>.supabase.co` so resolve IPv6. Se
+`psycopg2.connect` falhar com "could not translate host name", usar o session
+pooler IPv4 (`aws-1-us-east-2.pooler.supabase.com:5432`, usuario
+`postgres.<ref>`) trocando `SUPABASE_DB_URL` no modulo `_supabase_client`
+antes de chamar o script (o `.env` e' carregado com `override=True`).
+
+## Sync 2026-09-29: 3 falsos "alterados" corrigidos (nao remover)
+
+Primeira execucao real da versao SPEC-157. O dry-run logo apos gravar tem de
+dar **zero pendencias** nos 4 scripts — e' o teste de idempotencia; se nao
+der, ha comparacao errada.
+
+- **Contas**: `transacoes` existentes vem do DataFrame com NULL = NaN e
+  `NaN or None` continua NaN — toda parcela sem `dt_pagamento` parecia
+  alterada (2.946 falsos positivos de 2.947). Correcao:
+  `trans.astype(object).where(pd.notna(trans), None)` logo apos carregar.
+- **Produtos (estoque)**: `percentual_lucro` e' `numeric(,2)` e a planilha
+  manda 3 casas; a diferenca 0,005 saia 0,0050000000000x em ponto flutuante e
+  estourava a tolerancia. `close_enough` agora usa `tol + 1e-9`.
+- **Pedido de compra**: `valor_nota`/`valor_duplicata` sao `numeric(,2)` e a
+  planilha manda 3 casas; a comparacao agora arredonda para 2 casas
+  (`_cmp`, mantendo 0 == vazio como antes).
+
+Conferencia 29/09: recebido/pago jun-set e em aberto set-dez da planilha x
+`v_financeiro_realizado` = R$ 0,00 de diferenca. `cod_apropriacao = 1` (sem
+nome) continua sem categoria — 14 despesas novas (R$ 48.186,30) com
+`tipo_pagamento = 'DEV TROCA'` ligadas a clientes/projetos; decisao do usuario
+pendente desde 21/09.

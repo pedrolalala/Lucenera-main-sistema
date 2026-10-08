@@ -2,6 +2,22 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-08
+
+### RH: salvar funcionário sem empresa dava erro (`funcionarios_beneficios_empresas.empresa` NOT NULL)
+
+- `updateEmployee`/`createEmployee` gravavam sempre a linha de benefício com `empresa: data.empresa || null`;
+  sem empresa no cadastro, o salvar quebrava depois de já ter gravado `funcionarios_novo` (por isso a Teresinha
+  já aparecia desativada). Agora o benefício só é gravado quando há empresa. Afetava também Giovana, Isabella e
+  Vitória (sem empresa).
+- RH Skip 23919 v0.0.229 (`acd9d55`) publicado. Antes, com autorização do usuário, as 14 migrations legadas não
+  registradas (mar–abr) foram retiradas da working tree do Skip (continuam no git do RH); conferido depois do
+  apply: `schema_migrations` (241), policies (402) e Edge Functions inalteradas.
+
+### SPEC-184: Showroom — tirar peça da vitrine e trazer de volta
+
+- Migration `20261008_187_showroom_ocultar_peca` + Showroom Skip 54698 v0.0.18.
+
 ## 2026-10-07
 
 ### GitHub sincronizado com o código publicado no Skip

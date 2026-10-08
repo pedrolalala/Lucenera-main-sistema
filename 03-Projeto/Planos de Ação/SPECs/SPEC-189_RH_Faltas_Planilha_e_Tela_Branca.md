@@ -28,7 +28,15 @@ sistemas_envolvidos:
 - 164 registros novos (85 licença-maternidade, 41 atestado, 25 folga, 13 falta); 135 já existiam e foram mantidos; todos os nomes casaram com o cadastro. 2026 no sistema: 301 registros. Conferido como Lana.
 - RH Skip 23919 v0.0.233 (`945591c`) publicado com a correção da tela branca; textos conferidos no bundle.
 
+### 2026-10-08 (erro ao criar férias na tela da Lana)
+
+- Lana viu "Algo deu errado nesta tela" ao criar férias (registro foi gravado; tentou 4x para a Vitória, 14/10–26/10 e 3x 14/10–27/10).
+- Não reproduzido: usuário de teste temporário (admin) fez o mesmo fluxo em produção com Playwright — criou sem erro e sem erro no console. Usuário, funcionário e férias de teste apagados.
+- Para pegar a causa real: tabela `erros_tela` (migration `20261008_193_erros_tela`; logado grava, só admin lê) e a tela de erro do RH grava mensagem/pilha/URL/navegador e mostra o detalhe. RH v0.0.234.
+
 ## Pendências
+
+- [ ] Consultar `erros_tela` na próxima ocorrência e corrigir a causa.
 
 - [ ] `kimberly@adapta.org` é admin geral e por isso entra em todos os sistemas, inclusive o RH (bypass de admin) — decidir se mantém.
 - [ ] Os outros sistemas também carregam páginas em pedaços (SPEC-123) e podem ter a mesma tela branca depois de publicação — aplicar a mesma proteção se aparecer.

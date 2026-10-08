@@ -4,6 +4,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-08
 
+### SPEC-186: RH — saldo de férias zerado para quase todos
+
+- `vw_controle_ferias_clt` passa a calcular pelo último período aquisitivo completo desde a admissão (30 dias − férias
+  aprovadas iniciadas depois do fim dele); antes dependia de `periodos_aquisitivos` cadastrados à mão (7 pessoas).
+  Regra provisória até o PDF de controle. Migration `20261008_190_saldo_ferias_ultimo_periodo`; nova coluna
+  `data_limite_gozo` reativa o aviso "férias a vencer" da página inicial.
+
 ### SPEC-185: RH — férias sem etapa de aprovação
 
 - Nova solicitação nasce `Aprovado`; botões Aprovar/Rejeitar removidos; `ferias.status` default `Aprovado` e a única

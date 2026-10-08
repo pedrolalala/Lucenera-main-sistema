@@ -10,7 +10,14 @@ Mapeamento (grounded no schema real, supabase/db/current/01_schema_full.sql):
                   ATÉ 2026-09-08 essa coluna da planilha se chamava `CustoTotal`; o export
                   Connect de 2026-09-10 renomeou para `vlCustoTotal` (mesmo dado, formato BR).
   ValorVenda   -> produtos.valor_venda (coluna nunca foi sincronizada antes — hoje 100% zerada)
-  Lucro        -> produtos.percentual_lucro
+  Lucro        -> produtos.percentual_lucro E produtos.margem_lucro (campo "% Lucro" do PecaForm)
+  vlCusto      -> produtos.preco_custo (preço de TABELA do fornecedor, antes do desconto). Reunião
+                  Vinícius 08/10/2026: "qualquer preço de custo aqui tem que bater com a tabela do
+                  fornecedor; o sistema de forma alguma pode mudar isso". Conta da Connect (confere
+                  nos 4.537 produtos da planilha 07/10): líquido = vlCusto − desconto%;
+                  BDI = líquido × (ST% + IPI% + despesas%); custo_total = líquido + BDI;
+                  valor_venda = custo_total × (1 + Lucro%). Gravado com os triggers de preço
+                  desligados (ver abaixo), como os demais.
   ncm          -> produtos.ncm  (SPEC "Fase A" 2026-09-10: coluna já existia, só ~372/4726
                   preenchidos; a planilha 09-10 traz 4.496. Texto de 8 dígitos.)
   cest         -> produtos.cest (idem; ~2 preenchidos hoje, planilha traz 1.249. Texto de
@@ -161,6 +168,8 @@ def limpar_texto(series: pd.Series) -> pd.Series:
 FISCAL_NUM_TRIGGER = ["ipi_entrada", "porc_despesas", "porc_desconto"]
 FISCAL_NUM_SAFE = ["porc_st", "porc_frete"]
 FISCAL_TXT = ["grupo_fiscal_nao_contribuinte", "grupo_fiscal_revenda"]
+# Reunião 08/10/2026: preço de tabela do fornecedor e % lucro usados pela tela de edição.
+PRECO_CONNECT = ["preco_custo", "margem_lucro"]
 
 
 def carregar_planilha(path: Path) -> pd.DataFrame:
@@ -190,6 +199,8 @@ def carregar_planilha(path: Path) -> pd.DataFrame:
     df["porc_despesas"] = to_numeric_br(df["despesas"])
     df["porc_desconto"] = to_numeric_br(df["desconto"])
     df["porc_frete"] = to_numeric_br(df["frete"])
+    df["preco_custo"] = to_numeric_br(df["vlCusto"])
+    df["margem_lucro"] = to_numeric_br(df["Lucro"])
     df["grupo_fiscal_nao_contribuinte"] = limpar_texto(df["GrupoFiscalNContribuinte"])
     df["grupo_fiscal_revenda"] = limpar_texto(df["GrupoFiscalRevenda"])
 
@@ -207,6 +218,7 @@ def carregar_planilha(path: Path) -> pd.DataFrame:
             *FISCAL_NUM_TRIGGER,
             *FISCAL_NUM_SAFE,
             *FISCAL_TXT,
+            *PRECO_CONNECT,
         ]
     ]
 
@@ -265,7 +277,7 @@ def processar(dry_run: bool) -> None:
         "produtos",
         "id,codigo_produto,estoque_total,estoque_showroom,estoque_disponivel,"
         "custo_total,valor_venda,percentual_lucro,ncm,cest,preco_venda,ativo,"
-        + ",".join(FISCAL_NUM_TRIGGER + FISCAL_NUM_SAFE + FISCAL_TXT),
+        + ",".join(FISCAL_NUM_TRIGGER + FISCAL_NUM_SAFE + FISCAL_TXT + PRECO_CONNECT),
     )
     produtos["codigo_produto"] = pd.to_numeric(produtos["codigo_produto"], errors="coerce").astype(
         "Int64"
@@ -317,7 +329,7 @@ def processar(dry_run: bool) -> None:
         # SPEC-132 — percentuais fiscais. close_enough trata None==0 (não grava
         # onde a planilha traz 0 e o banco está nulo). Pula valor ausente (NaN).
         fiscal_num_alt = {}
-        for campo in FISCAL_NUM_TRIGGER + FISCAL_NUM_SAFE:
+        for campo in FISCAL_NUM_TRIGGER + FISCAL_NUM_SAFE + PRECO_CONNECT:
             val = row[campo]
             if pd.isna(val):
                 continue

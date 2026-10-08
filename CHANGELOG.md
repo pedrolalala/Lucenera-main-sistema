@@ -4,6 +4,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-08
 
+### SPEC-185: RH — férias sem etapa de aprovação
+
+- Nova solicitação nasce `Aprovado`; botões Aprovar/Rejeitar removidos; `ferias.status` default `Aprovado` e a única
+  pendente (Isabella, 07/09–11/09) virou Aprovado (migration `20261008_189_ferias_sem_aprovacao`). RH Skip 23919 v0.0.230.
+
 ### RH: salvar funcionário sem empresa dava erro (`funcionarios_beneficios_empresas.empresa` NOT NULL)
 
 - `updateEmployee`/`createEmployee` gravavam sempre a linha de benefício com `empresa: data.empresa || null`;

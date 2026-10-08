@@ -4,6 +4,16 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-08
 
+### SPEC-190: Cadastro — custo da peça na lógica da Connect (reunião Vinícius 08/10)
+
+- Regra: preço de custo (tabela do fornecedor) − % desconto = custo c/ desconto; + BDI (% frete + % ST + % IPI + % outras
+  despesas sobre o custo c/ desconto) = custo total; × (1 + % lucro) = preço de venda. Confere com a Connect (custo total
+  4.537/4.537).
+- Cadastro Skip 36668 v0.0.99: Editar Peça com campo "% Desconto (fornecedor)", tela na ordem do negócio; ao abrir mostra
+  o preço da Connect (12895 = R$ 142,29, não mais 155,36). v0.0.97 (derivava o custo) estava errada e foi substituída.
+- `importar_produtos_estoque.py` grava `vlCusto → preco_custo` e `Lucro → margem_lucro`; 3.643 produtos corrigidos
+  (preço de custo antigo, ex.: 10539 564,55 → 601,00). 21 produtos em que a Connect não segue a regra ficaram para o Sérgio.
+
 ### Todos os sistemas: página em pt-BR e sem tradução automática do navegador
 
 - `index.html` com `lang="pt-BR" translate="no"` + meta `notranslate` em 12 sistemas (os outros 3 já eram pt-BR). Evita o

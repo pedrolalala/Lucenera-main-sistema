@@ -82,6 +82,41 @@ do banco, novo host do pooler. Tudo que aponta para `vcvcwzmbiftcawncibke` preci
   (a cobrança dele para).
 - [ ] 2.4 Atualizar documentação e memórias (`reference_supabase_*`, pooler `aws-0-sa-east-1`…, ref novo).
 
+## Realizado
+
+### 2026-10-08 — projeto novo + inventário + ensaio do banco
+
+- Projeto novo: ref `bgtfrcbipuxnsexbppsh`, **sa-east-1**, Postgres 17.11 (Ohio 17.6). Pooler que funciona nesta rede:
+  `aws-1-sa-east-1.pooler.supabase.com:5432`, usuário `postgres.bgtfrcbipuxnsexbppsh` (host direto `db.…` não resolve
+  aqui). `.env`: bloco "NOVO SUPABASE SÃO PAULO" (mesmos nomes do bloco de Ohio — scripts ainda leem Ohio, o último).
+  **Compute aparece sem add-on (Nano) — colocar Pro/Micro antes da virada.**
+- Inventário de Ohio (`scratchpad migsp/inventario_ohio.txt`): 116 MB; extensões pg_cron, pg_net (schema public),
+  pg_trgm, unaccent (public), uuid-ossp, pgcrypto, vault; 2 cron (`sharepoint-projetos-pull` */5 min,
+  `ferias-gerar-periodos` diário); 2 funções com URL (`disparar_pull_sharepoint`, `trg_projetos_sharepoint_push_fn`,
+  usam vault: `sharepoint_pull_url`, `sharepoint_push_url`, `sharepoint_sync_secret`, `supabase_anon_key`);
+  9 buckets (~140 MB, quase tudo `showroom-lucenera`); 27 Edge Functions; 16 secrets de functions (GEMINI, GMAIL_*,
+  RESEND, SHAREPOINT_*…); Auth: 38 redirect URLs `*.goskip.app`, site_url localhost, sem SMTP próprio.
+- **Ensaio do banco OK**: estrutura + dados de `public`/`memoria` + `auth.users`/`auth.identities` + `storage.buckets` +
+  `supabase_migrations` copiados. Conferido: 156 tabelas, 128.623 linhas, 189 funções, 438 policies, 89 triggers,
+  61 views — idênticos; acentos ok.
+- Cuidados descobertos no ensaio (repetir na virada):
+  1. `PGCLIENTENCODING=UTF8` no psql (Windows lia como WIN1252 → "OrÃ§amento").
+  2. Tirar `ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin"` do dump (já existe no projeto novo; dá permissão negada).
+  3. Criar antes as extensões nos mesmos schemas (pg_net e unaccent em `public`).
+  4. Criar o schema `supabase_migrations` antes dos dados.
+  5. CHECK `orcamentos_data_inicio_pagamento_check` é NOT VALID (usa a data de hoje): dropar antes dos dados e
+     recriar NOT VALID depois.
+  6. Dados com `SET session_replication_role = replica` (não dispara `handle_new_user` nem triggers de SharePoint).
+- Na virada: Ohio continua mudando até lá → repetir só os dados (esvaziar e recarregar) na janela.
+
+### Falta
+
+- [ ] Storage: copiar os arquivos dos 9 buckets.
+- [ ] Vault (4 segredos) + 2 jobs do pg_cron (apontando para as functions novas).
+- [ ] 27 Edge Functions + 16 secrets (valores: `.env` / usuário — a API só mostra os nomes).
+- [ ] Auth: 38 redirect URLs, site_url, modelos de e-mail.
+- [ ] Virada dos 16 sistemas (env do Skip + integração Supabase) e dos 5 arquivos com endereço fixo.
+
 ## Custos (conferir no painel no momento da assinatura)
 
 - Pro: US$ 25/mês por organização (inclui crédito de compute que cobre um Micro).

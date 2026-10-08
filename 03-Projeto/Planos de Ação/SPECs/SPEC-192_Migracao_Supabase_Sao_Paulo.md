@@ -50,7 +50,11 @@ do banco, novo host do pooler. Tudo que aponta para `vcvcwzmbiftcawncibke` preci
     Skip — **o Skip executa migrations e deploya functions no Supabase ligado**: tem que ser religado ao projeto novo,
     senão continua publicando em Ohio);
   - URLs fixas no código (`grep vcvcwzmbiftcawncibke` em 04-Sistemas, scripts, Memória `supabase-adapter.js`,
-    dashboard Streamlit, Power BI se conectado).
+    dashboard Streamlit, Power BI se conectado). Achados no código-fonte local (08/10, conferir também no Skip):
+    `catalogo-pecas-ubiqua-e6fa0/src/components/PartDetailSheet.tsx`, `catalogo-pecas-ubiqua-e6fa0/src/hooks/use-parts.ts`,
+    `lucenera-crm-3bd29 (1)/src/components/Layout.tsx`, `separacao-parcial/src/pages/LoginPage.tsx`,
+    `separacao-parcial/src/pages/SeparacaoParcialPage.tsx`, `supabase/.temp/linked-project.json` (CLI linkada);
+    os demais sistemas têm o ref só no build (`dist/`), vindo do env do Skip.
 - [ ] 0.4 Ensaio: restaurar um dump de Ohio no projeto novo, conferir erros e contagens, apagar e repetir na janela.
 
 ### Fase 1 — Janela de migração (fim de semana/noite, sistemas parados)

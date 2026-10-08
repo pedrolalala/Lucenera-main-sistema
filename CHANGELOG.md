@@ -4,6 +4,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-08
 
+### Todos os sistemas: página em pt-BR e sem tradução automática do navegador
+
+- `index.html` com `lang="pt-BR" translate="no"` + meta `notranslate` em 12 sistemas (os outros 3 já eram pt-BR). Evita o
+  erro "removeChild" que o tradutor do Edge/Chrome causava (caso da Lana no RH).
+
 ### RH: erro "removeChild" ao salvar férias no Edge da Lana
 
 - Causa (registrada em `erros_tela`, migration `20261008_193_erros_tela`): tradutor automático do navegador alterando o DOM do

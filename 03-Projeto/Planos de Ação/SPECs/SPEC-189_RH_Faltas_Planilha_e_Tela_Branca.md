@@ -37,7 +37,7 @@ sistemas_envolvidos:
 ## Pendências
 
 - [x] ~~Consultar `erros_tela` na próxima ocorrência~~ — causa achada (15:00, Edge 154 da Lana, /ferias): `NotFoundError: Failed to execute 'removeChild' on 'Node'` = tradutor automático do navegador mexendo no DOM do React (a própria mensagem veio traduzida). Corrigido: `index.html` com `lang="pt-BR" translate="no"` + `<meta name="google" content="notranslate">` (RH v0.0.235).
-- [ ] Os outros 13 sistemas também declaram `lang="en"` — aplicar a mesma correção.
+- [x] Os outros sistemas com `lang="en"` corrigidos em 08/10 (Cadastro, Ubiqua, Central, Compras, Garantia, Dashboard, Orçamentos, CRM, Logística, Adm. Bancária, Separação, Vendas); Memória, Produção e Showroom já eram `pt-BR`. Conferido no ar; nenhuma Edge Function republicada; `schema_migrations` igual (Logística repetiu a falha sem efeito da seed legada).
 
 - [ ] `kimberly@adapta.org` é admin geral e por isso entra em todos os sistemas, inclusive o RH (bypass de admin) — decidir se mantém.
 - [ ] Os outros sistemas também carregam páginas em pedaços (SPEC-123) e podem ter a mesma tela branca depois de publicação — aplicar a mesma proteção se aparecer.

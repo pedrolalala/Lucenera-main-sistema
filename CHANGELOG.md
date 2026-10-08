@@ -4,6 +4,15 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-08
 
+### SPEC-188: RH — controle de férias importado da planilha da Lana
+
+- Migration `20261008_191_ferias_controle_planilha`: lançamentos sem data (`ferias_lancamentos`), saldo por período
+  (`vw_ferias_periodos`), saldo total pela regra da planilha e geração automática de períodos (pg_cron diário).
+- Importados 24 funcionários (51 períodos, 95 férias, 43 lançamentos); admissões de Thais, Giovanna Nori, Lana e Vitória
+  corrigidas; Teresinha inativa. RH Skip 23919 v0.0.231: período base mostra saldo.
+- Correção: 14 funcionários duplicados criados pelo gatilho `handle_new_user` (contas da SPEC-187) — contas ligadas ao
+  cadastro real e duplicados apagados.
+
 ### SPEC-187: contas novas da equipe e página "Minha senha" na Central
 
 - 14 contas criadas com a senha padrão via `criar_usuario` (Terezinha não; Marina, Thairine, Mariane e Filippo já tinham).

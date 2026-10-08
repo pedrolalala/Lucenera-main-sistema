@@ -4,6 +4,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-08
 
+### RH: erro "removeChild" ao salvar férias no Edge da Lana
+
+- Causa (registrada em `erros_tela`, migration `20261008_193_erros_tela`): tradutor automático do navegador alterando o DOM do
+  React — a página se declarava `lang="en"`. RH v0.0.235: `lang="pt-BR" translate="no"` + meta `notranslate`.
+
 ### SPEC-189: RH — faltas de 2026 da planilha e fim da tela branca
 
 - Tela branca (Lana): recarrega sozinho quando a página antiga some após publicação + `ErrorBoundary` com "Recarregar".

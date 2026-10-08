@@ -4,6 +4,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-08
 
+### SPEC-189: RH — faltas de 2026 da planilha e fim da tela branca
+
+- Tela branca (Lana): recarrega sozinho quando a página antiga some após publicação + `ErrorBoundary` com "Recarregar".
+  RH Skip 23919 v0.0.233.
+- `Controle de Faltas.xlsx` (2026 até 08/10): 164 registros novos lidos pela cor da legenda (falta, folga, atestado,
+  licença-maternidade da Thairine e da Thais); 135 existentes mantidos.
+
 ### SPEC-188 (ajuste): férias sem período não descontavam o saldo
 
 - Migration `20261008_192_ferias_periodo_automatico`: trigger liga a férias ao período do próprio funcionário; views de saldo

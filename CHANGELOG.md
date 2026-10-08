@@ -4,6 +4,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-08
 
+### SPEC-187: contas novas da equipe e página "Minha senha" na Central
+
+- 14 contas criadas com a senha padrão via `criar_usuario` (Terezinha não; Marina, Thairine, Mariane e Filippo já tinham).
+- Central (Skip 37750 v0.0.49): `/minha-conta` com botão "Minha senha" no cabeçalho; confere a senha atual antes de trocar.
+
 ### SPEC-186: RH — saldo de férias zerado para quase todos
 
 - `vw_controle_ferias_clt` passa a calcular pelo último período aquisitivo completo desde a admissão (30 dias − férias

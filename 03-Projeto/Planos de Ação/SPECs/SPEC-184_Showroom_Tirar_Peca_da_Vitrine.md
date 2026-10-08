@@ -48,6 +48,11 @@ Hoje a peça entra na vitrine sozinha (produto ativo + foto do showroom + `estoq
 - Migration 187 aplicada após dry-run com ROLLBACK (teste como `anon`: senha errada recusada; ocultar tirou a peça da view 166→165; tabela não legível direto; reexibir voltou a 166). Vitrine seguiu com 166 peças depois de aplicar.
 - Showroom Skip 54698 v0.0.18 (`432c11f`) publicado; textos conferidos no bundle de produção. Teste visual pelo usuário pendente.
 
+### 2026-10-08 (ampliação, pedido do usuário)
+
+- "Tirar do showroom" vale para qualquer peça (LED, lâmpada que não são decorativas), não só as da vitrine, e a peça oculta some também das listas do /admin: aba "Peças e fotos" (`showroom_listar_produtos_estoque`) e busca ao vincular peça do PPT (`showroom_buscar_produto`). A montagem de conjuntos continua achando a peça (`p_incluir_ocultos = true`) para compor luminária + lâmpada.
+- Migration `20261008_188_showroom_ocultas_fora_do_admin` (DROP da assinatura antiga de `showroom_buscar_produto` antes de criar a nova — 1 versão só; dry-run: peça oculta sumiu da lista e da busca padrão, apareceu com incluir_ocultos). Showroom Skip 54698 v0.0.19 (`bca1aa0`) publicado.
+
 ## Pendências
 
 - [ ] Nenhuma além do checklist.

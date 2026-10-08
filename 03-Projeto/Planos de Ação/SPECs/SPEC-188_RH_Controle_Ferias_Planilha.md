@@ -15,7 +15,7 @@ Substitui a regra provisória da SPEC-186.
 
 - [x] Migration `20261008_191_ferias_controle_planilha` (tabela `ferias_lancamentos`, colunas `direito_dias`/`formalizacao`, `vw_ferias_periodos`, nova `vw_controle_ferias_clt`, `gerar_periodos_aquisitivos()` + cron diário 06:00 UTC).
 - [x] Importar `01-Documento/01 - Planilhas/CONTROLE DE FÉRIAS ATUALIZADO (1).xlsx` (24 abas).
-- [x] RH: "Período Aquisitivo Base" mostra o saldo de cada período e sugere o mais antigo com saldo.
+- [x] ~~RH: "Período Aquisitivo Base" com saldo~~ → campo retirado a pedido do usuário (08/10): o banco vincula sozinho (`trg_ferias_definir_periodo`, migration 192) ao período do próprio funcionário mais antigo com saldo.
 
 ### Passos manuais do usuário
 
@@ -39,6 +39,12 @@ Substitui a regra provisória da SPEC-186.
 - RH Skip 23919 v0.0.231 (`9e63967`) publicado.
 - Divergências da planilha (importadas como lançamento sem data, valendo o saldo): Marina 14/01/2025–04/05/2025 (111 dias corridos, desconta 21); Giovanna Nori 19/12/2025–11/01/2026 (24 corridos, desconta 21). Carol: "RESIDUAL FINAL 2025 −3" estava na coluna SALDO (lido como 3 dias consumidos).
 - Achado no mesmo dia: o gatilho `handle_new_user` criou 14 funcionários duplicados ao criar as contas da SPEC-187; contas ligadas ao cadastro real (`usuario_id` + e-mail) e duplicados apagados (Rafaela não tinha cadastro: ficou a linha nova, renomeada).
+
+### 2026-10-08 (ajuste, migration 192 + RH v0.0.232)
+
+- Bug: 3 férias da Vitória gravadas sem período não entravam no saldo. Trigger `trg_ferias_definir_periodo` (BEFORE INSERT/UPDATE em `ferias`) liga ao período do próprio funcionário (mais antigo com saldo, senão o mais recente); as 3 foram ligadas.
+- Segurança: `vw_ferias_periodos` e `vw_controle_ferias_clt` viraram `security_invoker` (antes qualquer logado — e anon na de saldo — via todos os saldos); conferido: Lana vê 24, funcionário só o próprio, anon negado.
+- Campo "Período Aquisitivo Base" retirado da tela (pedido do usuário). Teste como Lana: férias de 5 dias sem período → ligada ao período da Mariane, saldo 25 → 20 (desfeito).
 
 ## Pendências
 

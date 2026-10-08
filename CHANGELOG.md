@@ -4,6 +4,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-08
 
+### SPEC-188 (ajuste): férias sem período não descontavam o saldo
+
+- Migration `20261008_192_ferias_periodo_automatico`: trigger liga a férias ao período do próprio funcionário; views de saldo
+  com `security_invoker` (fecha leitura de saldos de todos). RH Skip 23919 v0.0.232 sem o campo "Período Aquisitivo Base".
+
 ### SPEC-188: RH — controle de férias importado da planilha da Lana
 
 - Migration `20261008_191_ferias_controle_planilha`: lançamentos sem data (`ferias_lancamentos`), saldo por período

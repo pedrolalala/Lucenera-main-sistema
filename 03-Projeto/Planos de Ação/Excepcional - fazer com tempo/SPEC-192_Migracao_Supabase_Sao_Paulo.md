@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-192 — Migrar o Supabase de Ohio (us-east-2) para São Paulo (sa-east-1), em plano pago"
-status: aguardando aprovação
-data_ultima_modificacao: 2026-10-08
+status: adiada (excepcional — fazer com tempo, fora da rotina)
+data_ultima_modificacao: 2026-10-09
 sistemas_envolvidos:
   - Supabase "LUCENERA DATACENTER" (ref vcvcwzmbiftcawncibke, us-east-2, compute Nano) -> projeto novo em sa-east-1
   - Todos os sistemas do Skip (16) + Memória Lucenera (app estático com supabase-adapter.js)
@@ -10,6 +10,8 @@ sistemas_envolvidos:
 ---
 
 # SPEC-192 — Migração do Supabase para São Paulo
+
+> **ADIADA em 09/10/2026.** Fica para ser feita de forma excepcional, com tempo e janela própria. Não interfere no trabalho do dia a dia: todos os sistemas seguem em Ohio. O projeto de São Paulo é só cópia parada (na virada, recarregar os dados do zero).
 
 ## Por quê (08/10/2026)
 
@@ -34,7 +36,7 @@ do banco, novo host do pooler. Tudo que aponta para `vcvcwzmbiftcawncibke` preci
   (cobrança por hora; para quando Ohio for apagado).
 - [ ] 0.2 Criar o projeto novo em **South America (São Paulo) — sa-east-1**, compute **Micro** (ou Small se o
   desempenho pedir), Postgres 17 (mesma versão de Ohio: 17.6).
-- [ ] 0.3 Inventário completo de Ohio (com o banco de pé), salvo em `03-Projeto/Migracao_SP/`:
+- [ ] 0.3 Inventário completo de Ohio (com o banco de pé), salvo em `03-Projeto/Planos de Ação/Excepcional - fazer com tempo/Migracao_SP/`:
   - extensões (`pg_extension`), schemas, contagem de linhas por tabela (para conferir depois);
   - jobs do `pg_cron` (ex.: `ferias-gerar-periodos`) e chamadas `pg_net`/`net.http_post` em funções e triggers
     (procurar `vcvcwzmbiftcawncibke`, `supabase.co`, chaves dentro de funções — ex. sync SharePoint);
@@ -111,7 +113,7 @@ do banco, novo host do pooler. Tudo que aponta para `vcvcwzmbiftcawncibke` preci
 
 ### 2026-10-09 — etapa 2 (preparar São Paulo), sem afetar quem usa
 
-- [x] Storage: 402 arquivos copiados (`03-Projeto/Migracao_SP/scripts/copiar_storage.py`, idempotente); conferido por
+- [x] Storage: 402 arquivos copiados (`03-Projeto/Planos de Ação/Excepcional - fazer com tempo/Migracao_SP/scripts/copiar_storage.py`, idempotente); conferido por
   bucket (quantidade e bytes iguais) e foto aberta pelo endereço público de SP.
 - [x] **485 links de arquivos gravados nos dados** apontavam para Ohio (`produtos.imagem_showroom_url` 219,
   `showroom_import_pecas.imagem_url` 167, `revenda_ubiqua.imagem_catalogo_url` 83, `producao_pedidos` PDFs,
@@ -123,7 +125,7 @@ do banco, novo host do pooler. Tudo que aponta para `vcvcwzmbiftcawncibke` preci
 - [x] Auth: 37 redirect URLs, site_url e jwt_exp iguais a Ohio. Modelos de e-mail de Ohio eram os padrões antigos — não copiados.
 - [x] 27 Edge Functions baixadas do que está publicado em Ohio (`supabase functions download --use-api`, cada uma
   com o próprio `_shared`), sem endereço fixo, e publicadas em SP com o mesmo verify_jwt; todas respondem.
-  Lista: `03-Projeto/Migracao_SP/edge_functions_ohio.json`.
+  Lista: `03-Projeto/Planos de Ação/Excepcional - fazer com tempo/Migracao_SP/edge_functions_ohio.json`.
 - [x] Secrets em SP: `GEMINI_API_KEY`, `SHAREPOINT_CLIENT_ID/TENANT_ID/CLIENT_SECRET` (do `.env`; hash igual a Ohio).
 - [x] Endereço fixo no código trocado por `import.meta.env.VITE_SUPABASE_URL` (continua Ohio até a virada):
   Catálogo Ubiqua 33302 v0.0.101, CRM 24580 v0.0.318, Separação Parcial 48801 v0.0.52 — publicados, conferido no ar;

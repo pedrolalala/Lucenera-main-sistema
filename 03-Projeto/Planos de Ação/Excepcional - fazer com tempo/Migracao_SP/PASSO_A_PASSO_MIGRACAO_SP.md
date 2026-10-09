@@ -1,6 +1,6 @@
 # Passo a passo — Migração do Supabase de Ohio para São Paulo
 
-> Plano técnico completo: `03-Projeto/Planos de Ação/SPECs/SPEC-192_Migracao_Supabase_Sao_Paulo.md`.
+> Plano técnico completo: `03-Projeto/Planos de Ação/Excepcional - fazer com tempo/SPEC-192_Migracao_Supabase_Sao_Paulo.md`.
 > Aqui está **quem faz o quê, em que ordem e como conferir**.
 >
 > - **Ohio (atual):** projeto `LUCENERA DATACENTER`, ref `vcvcwzmbiftcawncibke`, região us-east-2.

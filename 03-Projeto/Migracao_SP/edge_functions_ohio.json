@@ -1,0 +1,245 @@
+[
+ {
+  "slug": "salvar-projeto",
+  "name": "salvar-projeto",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_8c471072-7a22-4d18-a0e9-057213634d60_88/source/supabase/functions/salvar-projeto/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_8c471072-7a22-4d18-a0e9-057213634d60_88/source/supabase/functions/deno.json",
+  "version": 88
+ },
+ {
+  "slug": "update-project",
+  "name": "update-project",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_c0857a34-3c7f-48dd-845f-71ef3fa11d18_75/source/supabase/functions/update-project/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_c0857a34-3c7f-48dd-845f-71ef3fa11d18_75/source/supabase/functions/update-project/deno.json",
+  "version": 75
+ },
+ {
+  "slug": "chat-consulta",
+  "name": "chat-consulta",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_50d3ffca-7744-49bb-a391-45bffdd3df43_72/source/supabase/functions/chat-consulta/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_50d3ffca-7744-49bb-a391-45bffdd3df43_72/source/supabase/functions/chat-consulta/deno.json",
+  "version": 72
+ },
+ {
+  "slug": "chat-agent",
+  "name": "chat-agent",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_4fd84180-9edd-4516-b83e-f2a47fd62089_69/source/supabase/functions/chat-agent/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_4fd84180-9edd-4516-b83e-f2a47fd62089_69/source/supabase/functions/chat-agent/deno.json",
+  "version": 69
+ },
+ {
+  "slug": "welcome-email",
+  "name": "welcome-email",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_fc474d25-6f3a-4126-bb1d-e9524dcd7ff4_70/source/supabase/functions/welcome-email/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_fc474d25-6f3a-4126-bb1d-e9524dcd7ff4_70/source/supabase/functions/welcome-email/deno.json",
+  "version": 70
+ },
+ {
+  "slug": "generate-report",
+  "name": "generate-report",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_c28ab91f-0dfa-4298-b3c1-999f1cff898f_104/source/supabase/functions/generate-report/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_c28ab91f-0dfa-4298-b3c1-999f1cff898f_104/source/supabase/functions/generate-report/deno.json",
+  "version": 104
+ },
+ {
+  "slug": "sync-teams",
+  "name": "sync-teams",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_7abaef1e-f8dc-4a05-8188-f31fa8b139a6_68/source/supabase/functions/sync-teams/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_7abaef1e-f8dc-4a05-8188-f31fa8b139a6_68/source/supabase/functions/deno.json",
+  "version": 68
+ },
+ {
+  "slug": "enviar-confirmacao-email",
+  "name": "enviar-confirmacao-email",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_f31e103f-8fb3-40d4-abe0-372c0e4527f1_68/source/supabase/functions/enviar-confirmacao-email/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_f31e103f-8fb3-40d4-abe0-372c0e4527f1_68/source/supabase/functions/enviar-confirmacao-email/deno.json",
+  "version": 68
+ },
+ {
+  "slug": "parse-budget-pdf",
+  "name": "parse-budget-pdf",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_b72f6c8f-d892-4ad1-b66a-a8b05a5297d8_70/source/supabase/functions/parse-budget-pdf/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_b72f6c8f-d892-4ad1-b66a-a8b05a5297d8_70/source/supabase/functions/parse-budget-pdf/deno.json",
+  "version": 70
+ },
+ {
+  "slug": "process-budget-pdf",
+  "name": "process-budget-pdf",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_8a141889-ed13-42fa-8123-3f44879aacc5_69/source/supabase/functions/process-budget-pdf/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_8a141889-ed13-42fa-8123-3f44879aacc5_69/source/supabase/functions/deno.json",
+  "version": 69
+ },
+ {
+  "slug": "process-remittance",
+  "name": "process-remittance",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_2277aa08-856a-4b80-98aa-991325c665dc_60/source/supabase/functions/process-remittance/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_2277aa08-856a-4b80-98aa-991325c665dc_60/source/supabase/functions/process-remittance/deno.json",
+  "version": 60
+ },
+ {
+  "slug": "process-billing-automation",
+  "name": "process-billing-automation",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_8a7b9373-5806-4694-b445-5dc44590db0b_23/source/supabase/functions/process-billing-automation/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_8a7b9373-5806-4694-b445-5dc44590db0b_23/source/supabase/functions/process-billing-automation/deno.json",
+  "version": 31
+ },
+ {
+  "slug": "generate-cross-system-code",
+  "name": "generate-cross-system-code",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_ca9336e2-407a-4320-8c57-822047dc7e8e_20/source/supabase/functions/generate-cross-system-code/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_ca9336e2-407a-4320-8c57-822047dc7e8e_20/source/supabase/functions/deno.json",
+  "version": 28
+ },
+ {
+  "slug": "exchange-cross-system-code",
+  "name": "exchange-cross-system-code",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_965e6f54-dcc1-4a78-86cd-47f6341ea1bb_20/source/supabase/functions/exchange-cross-system-code/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_965e6f54-dcc1-4a78-86cd-47f6341ea1bb_20/source/supabase/functions/deno.json",
+  "version": 28
+ },
+ {
+  "slug": "sync-fechamentos-automatica",
+  "name": "sync-fechamentos-automatica",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_7c094c3e-04b4-4d12-bf3c-3b35f15f2a8d_33/source/supabase/functions/sync-fechamentos-automatica/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_7c094c3e-04b4-4d12-bf3c-3b35f15f2a8d_33/source/supabase/functions/deno.json",
+  "version": 33
+ },
+ {
+  "slug": "classificar_solicitacao",
+  "name": "classificar_solicitacao",
+  "verify_jwt": true,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_84f3f988-4a54-4c5b-a93b-d5569ac95655_2/source/supabase/functions/classificar_solicitacao/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_84f3f988-4a54-4c5b-a93b-d5569ac95655_2/source/supabase/functions/classificar_solicitacao/deno.json",
+  "version": 5
+ },
+ {
+  "slug": "sharepoint-projetos-push",
+  "name": "sharepoint-projetos-push",
+  "verify_jwt": true,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_706a410d-26d8-4036-8d11-c8db9635a5f6_5/source/supabase/functions/sharepoint-projetos-push/index.ts",
+  "import_map": false,
+  "import_map_path": null,
+  "version": 5
+ },
+ {
+  "slug": "sharepoint-projetos-pull",
+  "name": "sharepoint-projetos-pull",
+  "verify_jwt": true,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_6f16cf44-4022-4f31-81d3-f201c671420d_5/source/supabase/functions/sharepoint-projetos-pull/index.ts",
+  "import_map": false,
+  "import_map_path": null,
+  "version": 5
+ },
+ {
+  "slug": "emitir-nota-fiscal",
+  "name": "emitir-nota-fiscal",
+  "verify_jwt": true,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_b577080d-2c9b-4bab-9b4d-28e90523fac8_1/source/supabase/functions/emitir-nota-fiscal/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_b577080d-2c9b-4bab-9b4d-28e90523fac8_1/source/supabase/functions/emitir-nota-fiscal/deno.json",
+  "version": 1
+ },
+ {
+  "slug": "focus-nfe-webhook",
+  "name": "focus-nfe-webhook",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_0a5b596c-81b6-439b-8c27-5e8896ba8af4_1/source/supabase/functions/focus-nfe-webhook/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_0a5b596c-81b6-439b-8c27-5e8896ba8af4_1/source/supabase/functions/focus-nfe-webhook/deno.json",
+  "version": 1
+ },
+ {
+  "slug": "verificar-notas-pendentes",
+  "name": "verificar-notas-pendentes",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_114ead56-112a-4643-b85d-2aec77693d29_1/source/supabase/functions/verificar-notas-pendentes/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_114ead56-112a-4643-b85d-2aec77693d29_1/source/supabase/functions/verificar-notas-pendentes/deno.json",
+  "version": 1
+ },
+ {
+  "slug": "sync-sharepoint",
+  "name": "sync-sharepoint",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_97948e39-7e23-471b-ba35-e9288b4a8bd0_4/source/supabase/functions/sync-sharepoint/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_97948e39-7e23-471b-ba35-e9288b4a8bd0_4/source/supabase/functions/deno.json",
+  "version": 4
+ },
+ {
+  "slug": "skip-teste-remocao",
+  "name": "skip-teste-remocao",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_e7e1eb60-f28a-4f29-9ef2-552cf26766a8_1/source/supabase/functions/skip-teste-remocao/index.ts",
+  "import_map": false,
+  "import_map_path": null,
+  "version": 1
+ },
+ {
+  "slug": "cadastro-ubiqua",
+  "name": "cadastro-ubiqua",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_d0ef2da3-c3b0-4a77-9aa5-6d5953e69a62_2/source/supabase/functions/cadastro-ubiqua/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_d0ef2da3-c3b0-4a77-9aa5-6d5953e69a62_2/source/supabase/functions/cadastro-ubiqua/deno.json",
+  "version": 2
+ },
+ {
+  "slug": "excluir-conta-ubiqua",
+  "name": "excluir-conta-ubiqua",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_e4d068e7-08fd-45a4-a001-f2e95cef6f2d_3/source/supabase/functions/excluir-conta-ubiqua/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_e4d068e7-08fd-45a4-a001-f2e95cef6f2d_3/source/supabase/functions/excluir-conta-ubiqua/deno.json",
+  "version": 3
+ },
+ {
+  "slug": "interpretar-reuniao",
+  "name": "interpretar-reuniao",
+  "verify_jwt": true,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_9f96151d-82d3-4542-b9d9-c426a6868e94_4/source/supabase/functions/interpretar-reuniao/index.ts",
+  "import_map": false,
+  "import_map_path": null,
+  "version": 4
+ },
+ {
+  "slug": "gerar-pdf-orcamento-ubiqua",
+  "name": "gerar-pdf-orcamento-ubiqua",
+  "verify_jwt": false,
+  "entrypoint_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_854df6b4-2fd5-45ee-b4ba-f8b0a8d5e1eb_1/source/supabase/functions/gerar-pdf-orcamento-ubiqua/index.ts",
+  "import_map": true,
+  "import_map_path": "file:///tmp/user_fn_vcvcwzmbiftcawncibke_854df6b4-2fd5-45ee-b4ba-f8b0a8d5e1eb_1/source/supabase/functions/gerar-pdf-orcamento-ubiqua/deno.json",
+  "version": 1
+ }
+]

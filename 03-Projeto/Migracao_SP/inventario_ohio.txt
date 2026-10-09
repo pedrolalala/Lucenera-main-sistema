@@ -1,0 +1,113 @@
+
+## extensões (9)
+   ('pg_cron', '1.6.4')
+   ('pg_net', '0.20.0')
+   ('pg_stat_statements', '1.11')
+   ('pg_trgm', '1.6')
+   ('pgcrypto', '1.3')
+   ('plpgsql', '1.0')
+   ('supabase_vault', '0.3.1')
+   ('unaccent', '1.1')
+   ('uuid-ossp', '1.1')
+
+## schemas não-sistema (12)
+   ('auth',)
+   ('cron',)
+   ('extensions',)
+   ('graphql',)
+   ('graphql_public',)
+   ('memoria',)
+   ('net',)
+   ('public',)
+   ('realtime',)
+   ('storage',)
+   ('supabase_migrations',)
+   ('vault',)
+
+## cron jobs (2)
+   (1, 'sharepoint-projetos-pull', '*/5 * * * *', True, 'select public.disparar_pull_sharepoint();')
+   (4, 'ferias-gerar-periodos', '0 6 * * *', True, 'select public.gerar_periodos_aquisitivos()')
+
+## funções com URL/ref do projeto ou net.http (2)
+   ('public.disparar_pull_sharepoint',)
+   ('public.trg_projetos_sharepoint_push_fn',)
+
+## triggers de webhook (supabase_functions) (0)
+
+## vault secrets (só nomes) (4)
+   ('sharepoint_pull_url',)
+   ('sharepoint_push_url',)
+   ('sharepoint_sync_secret',)
+   ('supabase_anon_key',)
+
+## publicações realtime (7)
+   ('supabase_realtime_messages_publication', 'realtime.messages_2026_10_05')
+   ('supabase_realtime_messages_publication', 'realtime.messages_2026_10_06')
+   ('supabase_realtime_messages_publication', 'realtime.messages_2026_10_07')
+   ('supabase_realtime_messages_publication', 'realtime.messages_2026_10_08')
+   ('supabase_realtime_messages_publication', 'realtime.messages_2026_10_09')
+   ('supabase_realtime_messages_publication', 'realtime.messages_2026_10_10')
+   ('supabase_realtime_messages_publication', 'realtime.messages_2026_10_11')
+
+## buckets (9)
+   ('garantia_anexos', True, None)
+   ('Logo', True, None)
+   ('lucenera-memory-files', False, 52428800)
+   ('notas_fiscais', True, None)
+   ('notas_fiscais_compra', True, None)
+   ('orcamentos', True, None)
+   ('producao_pedidos', True, None)
+   ('revenda-ubiqua-images', True, None)
+   ('showroom-lucenera', True, 5242880)
+
+## roles customizadas (1)
+   ('cli_login_postgres',)
+
+## edge functions deployadas 27
+   cadastro-ubiqua ACTIVE verify_jwt= False
+   chat-agent ACTIVE verify_jwt= False
+   chat-consulta ACTIVE verify_jwt= False
+   classificar_solicitacao ACTIVE verify_jwt= True
+   emitir-nota-fiscal ACTIVE verify_jwt= True
+   enviar-confirmacao-email ACTIVE verify_jwt= False
+   exchange-cross-system-code ACTIVE verify_jwt= False
+   excluir-conta-ubiqua ACTIVE verify_jwt= False
+   focus-nfe-webhook ACTIVE verify_jwt= False
+   generate-cross-system-code ACTIVE verify_jwt= False
+   generate-report ACTIVE verify_jwt= False
+   gerar-pdf-orcamento-ubiqua ACTIVE verify_jwt= False
+   interpretar-reuniao ACTIVE verify_jwt= True
+   parse-budget-pdf ACTIVE verify_jwt= False
+   process-billing-automation ACTIVE verify_jwt= False
+   process-budget-pdf ACTIVE verify_jwt= False
+   process-remittance ACTIVE verify_jwt= False
+   salvar-projeto ACTIVE verify_jwt= False
+   sharepoint-projetos-pull ACTIVE verify_jwt= True
+   sharepoint-projetos-push ACTIVE verify_jwt= True
+   skip-teste-remocao ACTIVE verify_jwt= False
+   sync-fechamentos-automatica ACTIVE verify_jwt= False
+   sync-sharepoint ACTIVE verify_jwt= False
+   sync-teams ACTIVE verify_jwt= False
+   update-project ACTIVE verify_jwt= False
+   verificar-notas-pendentes ACTIVE verify_jwt= False
+   welcome-email ACTIVE verify_jwt= False
+
+## secrets das functions (só nomes)
+   SUPABASE_URL
+   SUPABASE_ANON_KEY
+   SUPABASE_SERVICE_ROLE_KEY
+   SUPABASE_DB_URL
+   SUPABASE_PUBLISHABLE_KEYS
+   SUPABASE_SECRET_KEYS
+   SUPABASE_JWKS
+   lucenera Gestão Financeira
+   GEMINI_API_KEY
+   GMAIL_USER
+   GMAIL_APP_PASSWORD
+   RESEND_API_KEY
+   SHAREPOINT_CLIENT_SECRET
+   SHAREPOINT_CLIENT_ID
+   SHAREPOINT_TENANT_ID
+   SHAREPOINT_SYNC_SECRET
+
+## auth: site_url= http://localhost:3000 | redirects= ,https://lucenera-crm-3bd29--preview.goskip.app/**,https://lucenera-crm-3bd29.goskip.app/**,https://pixel-implementation-clone-d04a1--preview.goskip.app/**,https://pixel-implementation-clone-d04a1.goskip.app/**,https://dashboard-rh-lucenera-5fe9c--preview.goskip.app/**,https://dashboard-rh-lucenera-5fe9c.goskip.app/**,https://gestaofinanceiralucenera.goskip.app/**,https://dashboard-lucenera-ffd77--preview.goskip.app/**,https://dashboard-lucenera-ffd77.goskip.app/**,https://fluxo-de-caixa-lucenera-531a0--preview.goskip.app/**,https://fluxo-de-caixa-lucenera-531a0.goskip.app/**,https://catalogo-pecas-ubiqua-e6fa0--preview.goskip.app/**,https://catalogo-pecas-ubiqua-e6fa0.goskip.app/**,https://orcamentos-multi-empresa-32f43--preview.goskip.app/**,https://orcamentos-multi-empresa-32f43.goskip.app/**,https://gestao-financeira-clone-544cb--preview.goskip.app/**,https://gestao-financeira-clone-544cb.goskip.app/**,https://lucenera-logistics-b7cd1--preview.goskip.app/**,https://lucenera-logistics-b7cd1.goskip.app/**,https://retorno-bancario-bradesco-5392a--preview.goskip.app/**,https://retorno-bancario-bradesco-5392a.goskip.app/**,https://cadastro-lucenera-b86fe--preview.goskip.app/**,https://cadastro-lucenera-b86fe.goskip.app/**,https://central-lucenera-dashboard-1c9ba--preview.goskip.app/**,https://central-lucenera-dashboard-1c9ba.goskip.app/**,https://consultar-produtos-modal-1e5c2--preview.goskip.app/**,https://consultar-produtos-modal-1e5c2.goskip.app/**,https://pagina-em-branco-cdd79--preview.goskip.app/**,https://pagina-em-branco-cdd79.goskip.app/**,https://separacao-parcial-dff01--preview.goskip.app/**,https://separacao-parcial-dff01.goskip.app/**,https://tela-showroom-522b1--preview.goskip.app/**,https://tela-showroom-522b1.goskip.app/**,https://memoria-lucenera-2e074--preview.goskip.app/**,https://memoria-lucenera-2e074.goskip.app/**,https://pagina-em-branco-b044c--preview.goskip.app/**,https://pagina-em-branco-b044c.goskip.app/** | smtp_host= None | jwt_exp= 3600 | signup desligado= False

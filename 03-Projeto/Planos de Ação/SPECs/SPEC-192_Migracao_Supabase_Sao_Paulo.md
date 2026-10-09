@@ -109,13 +109,40 @@ do banco, novo host do pooler. Tudo que aponta para `vcvcwzmbiftcawncibke` preci
   6. Dados com `SET session_replication_role = replica` (não dispara `handle_new_user` nem triggers de SharePoint).
 - Na virada: Ohio continua mudando até lá → repetir só os dados (esvaziar e recarregar) na janela.
 
+### 2026-10-09 — etapa 2 (preparar São Paulo), sem afetar quem usa
+
+- [x] Storage: 402 arquivos copiados (`03-Projeto/Migracao_SP/scripts/copiar_storage.py`, idempotente); conferido por
+  bucket (quantidade e bytes iguais) e foto aberta pelo endereço público de SP.
+- [x] **485 links de arquivos gravados nos dados** apontavam para Ohio (`produtos.imagem_showroom_url` 219,
+  `showroom_import_pecas.imagem_url` 167, `revenda_ubiqua.imagem_catalogo_url` 83, `producao_pedidos` PDFs,
+  `configuracao_empresa_ubiqua.logo_url`, `quotes.items`, logs da produção). Script `pos_virada_links.py` (triggers
+  desligados) troca para SP — testado na cópia de ensaio: 485 trocados; 335/338 links abrem. Os 3 que não abrem
+  (`revenda-ubiqua-images/catalogos/339104, 189201, 339101_catalogo.jpg`) **já não abriam em Ohio** (arquivo nunca enviado).
+  **Rodar de novo na virada, depois de recarregar os dados.**
+- [x] pg_cron em SP: `sharepoint-projetos-pull` e `ferias-gerar-periodos` criados **desligados** (ligar na virada).
+- [x] Auth: 37 redirect URLs, site_url e jwt_exp iguais a Ohio. Modelos de e-mail de Ohio eram os padrões antigos — não copiados.
+- [x] 27 Edge Functions baixadas do que está publicado em Ohio (`supabase functions download --use-api`, cada uma
+  com o próprio `_shared`), sem endereço fixo, e publicadas em SP com o mesmo verify_jwt; todas respondem.
+  Lista: `03-Projeto/Migracao_SP/edge_functions_ohio.json`.
+- [x] Secrets em SP: `GEMINI_API_KEY`, `SHAREPOINT_CLIENT_ID/TENANT_ID/CLIENT_SECRET` (do `.env`; hash igual a Ohio).
+- [x] Endereço fixo no código trocado por `import.meta.env.VITE_SUPABASE_URL` (continua Ohio até a virada):
+  Catálogo Ubiqua 33302 v0.0.101, CRM 24580 v0.0.318, Separação Parcial 48801 v0.0.52 — publicados, conferido no ar;
+  migrations dos 3 já registradas (nada executado no banco); commits nos submodules.
+- [x] Configuração dos sistemas no Skip: 12 têm `VITE_SUPABASE_URL`/`VITE_SUPABASE_PUBLISHABLE_KEY` nas variáveis
+  (Cadastro, Vendas, Separação, Adm. Bancária, Logística, Dashboard, Garantia, Compras, Central, Showroom, Produção,
+  Memória); 4 recebem pela **integração Supabase do Skip** (CRM 24580, Orçamentos 32554, Ubiqua 33302, RH 23919) —
+  sem variável visível. Separação 48801 também tem um `.env` no projeto Skip.
+
 ### Falta
 
-- [ ] Storage: copiar os arquivos dos 9 buckets.
-- [ ] Vault (4 segredos) + 2 jobs do pg_cron (apontando para as functions novas).
-- [ ] 27 Edge Functions + 16 secrets (valores: `.env` / usuário — a API só mostra os nomes).
-- [ ] Auth: 38 redirect URLs, site_url, modelos de e-mail.
-- [ ] Virada dos 16 sistemas (env do Skip + integração Supabase) e dos 5 arquivos com endereço fixo.
+- [ ] Secrets que dependem do usuário: `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `RESEND_API_KEY`, `lucenera Gestão Financeira`.
+- [ ] Vault em SP (`sharepoint_pull_url`, `sharepoint_push_url`, `sharepoint_sync_secret`, `supabase_anon_key`) e
+  secret `SHAREPOINT_SYNC_SECRET`: ler o cofre de Ohio e as chaves de SP foi **bloqueado pelo classificador**
+  (credenciais) — precisa de autorização do usuário ou ele cadastra pelo painel.
+- [ ] **Integração Supabase de cada projeto no Skip**: religar ao projeto novo na virada (tela do Skip — é ela que
+  publica migrations/functions e injeta as variáveis nos 4 sistemas acima). Tarefa do usuário no Skip.
+- [ ] Ensaio geral (etapa 3) e virada (etapa 4).
+- [ ] Plano pago + Micro em SP antes da virada (usuário: amanhã).
 
 ## Custos (conferir no painel no momento da assinatura)
 

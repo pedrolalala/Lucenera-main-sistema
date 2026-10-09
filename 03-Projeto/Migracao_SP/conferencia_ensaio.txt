@@ -1,0 +1,4 @@
+tabelas: 156 x 156 | linhas Ohio: 128623 SP: 128623
+funções/policies/triggers/views Ohio: (189, 438, 89, 61)  SP: (189, 438, 89, 61)
+acento (ORC-0032 status): ('Orçamento Aprovado',) x ('Orçamento Aprovado',)
+diferenças: nenhuma

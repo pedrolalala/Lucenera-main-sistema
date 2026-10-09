@@ -2,6 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-09
+
+### SPEC-191: reunião 08/10 — Controle de Produção e Disponível da Consulta de Produtos
+
+- Migration `20261009_194`: pedido de produção é inativado (não apagado); `producao_editores` + `producao_pode_alterar()`
+  — todos veem, só Vinícius/Débora/Matheus/Vitória (+ suporte) alteram; `vw_cadastro_produto_movimentos.data_venda`.
+- Controle de Produção Skip 60535 v0.0.16: abas Em aberto/Concluídos/Inativos, Inativar/Reativar, filtros "Empresas"/
+  "Prioridade", coluna de ação fixa (Editar não sai mais da tela), "Somente visualização" para quem não altera.
+- Cadastro Skip 36668 v0.0.100: Disponível = Geral − maior(reserva+separação do sistema, reservado da Connect), igual na
+  lista e no painel (6654 = 19); data da venda nas abas; setores compactos; sem a faixa "Pendente".
+- Pedido de compra de teste nº 1771 (10 un. da 6654) cancelado.
+
 ## 2026-10-08
 
 ### SPEC-190: Cadastro — custo da peça na lógica da Connect (reunião Vinícius 08/10)

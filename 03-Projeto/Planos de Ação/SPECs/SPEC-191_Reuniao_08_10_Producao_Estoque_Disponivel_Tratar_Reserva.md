@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-191 — Reunião 08/10 (geral): Controle de Produção, disponível certo na Consulta de Produtos e rotina \"tratar a reserva\""
-status: aguardando aprovação
-data_ultima_modificacao: 2026-10-08
+status: blocos A, B e D2/D3 publicados (09/10); C e D1 aguardando
+data_ultima_modificacao: 2026-10-09
 origem: "02-Reunioes/28. Lucenera (viniciu) - 08.10.2026_ Reuniões gerais/Reunião.01"
 sistemas_envolvidos:
   - Controle de Produção (controle-de-producao)
@@ -21,21 +21,21 @@ sistemas_envolvidos:
 
 ### Bloco A — Controle de Produção
 
-- [ ] **A1. Inativar em vez de apagar.** Pedido não é apagado: ganha a ação "Inativar" (some das listas, fica no
+- [x] **A1. Inativar em vez de apagar.** Pedido não é apagado: ganha a ação "Inativar" (some das listas, fica no
   histórico). Vinícius: "pode deixar liberado só para mim… em vez de apagar, inativar o pedido".
-- [ ] **A2. Poder editar o pedido** ("Deixa eu poder editar. Não tem como editar").
-- [ ] **A3. Visão principal só com os em aberto.** Pedido com status Pronto/Concluído sai da visão principal e
+- [x] **A2. Poder editar o pedido** ("Deixa eu poder editar. Não tem como editar").
+- [x] **A3. Visão principal só com os em aberto.** Pedido com status Pronto/Concluído sai da visão principal e
   fica numa outra aba (ou filtro de status) para consulta posterior ("depois que ficar pronto, na teoria eu não quero
   ver mais… só se tiver necessidade de busca"). A prioridade (ex.: Urgente) continua como está.
-- [ ] **A4. Filtro de empresa:** rótulo "Empresas" (em vez de "Todas as empresas"), opções Todas / Foco / ISLIGHT /
+- [x] **A4. Filtro de empresa:** rótulo "Empresas" (em vez de "Todas as empresas"), opções Todas / Foco / ISLIGHT /
   Manoela ("slide" na transcrição = ISLIGHT).
-- [ ] **A5. Permissão:** todos podem ver; **só Vinícius, Débora, Mateus, Vitória e João podem alterar** (pessoal do
+- [x] **A5. Permissão:** todos podem ver; **só Vinícius, Débora, Mateus, Vitória e João podem alterar** (pessoal do
   estoque). As demais ("as meninas") só visualizam. Se o João faltar, delega-se a outra pessoa (ex.: Vitória).
   Contas: o Mateus vai mandar o e-mail de todos; o João ainda não tem e-mail da Lucenera.
 
 ### Bloco B — Consulta de Produtos (Cadastro): disponível certo
 
-- [ ] **B1. Conta do disponível** (Vinícius, exemplo peça 66554/6654):
+- [x] **B1. Conta do disponível** (Vinícius, exemplo peça 66554/6654):
   ```
   Disponível = Estoque Geral − Reserva − Separação
   ```
@@ -43,13 +43,13 @@ sistemas_envolvidos:
   - linha da lista: **45** — é `produtos.estoque_disponivel` (vem da planilha da Connect; "52 − 12 + 5", não bate);
   - painel dos setores: **31** — `PecaDetailsPanel.tsx` calcula `totalGeral − q_reserva`, sem tirar a separação.
   O mesmo valor (19) tem que aparecer **nos dois lugares** (coluna Disponível da lista e destaque do painel).
-- [ ] **B2. Destaque "Disponível" do painel puxando o estoque total** (ex. 10289: estoque total 568, disponível 191 —
+- [x] **B2. Destaque "Disponível" do painel puxando o estoque total** (ex. 10289: estoque total 568, disponível 191 —
   o painel mostra 568). Corrigir junto com B1.
-- [ ] **B3. Datas dos setores (Reserva, Separação, Entrega Futura): data da VENDA, não do orçamento** ("o orçamento pode
+- [x] **B3. Datas dos setores (Reserva, Separação, Entrega Futura): data da VENDA, não do orçamento** ("o orçamento pode
   ter acontecido em janeiro e ter fechado em março"). Hoje vem `data_orcamento` de `vw_cadastro_produto_movimentos`.
-- [ ] **B4. Visualização dos setores:** trazer a coluna de quantidade para perto do nome do setor (hoje "abre muito
+- [x] **B4. Visualização dos setores:** trazer a coluna de quantidade para perto do nome do setor (hoje "abre muito
   longe", tem que correr o olho) ou linha tracejada guia; clicar no setor continua abrindo o detalhe (ex. Reserva).
-- [ ] **B5. Ganhar espaço:** tirar a linha "Pendente" (negativo, já mostrado em destaque) e informação repetida, para
+- [x] **B5. Ganhar espaço:** tirar a linha "Pendente" (negativo, já mostrado em destaque) e informação repetida, para
   caber mais itens; manter visível qual peça está selecionada ao rolar ("perdi a intenção de qual que é a peça").
 
 ### Bloco C — Rotina "tratar a reserva" (precisa ser criada; acontece todo dia)
@@ -72,9 +72,9 @@ sistemas_envolvidos:
   estoque — usar os dois sistemas em paralelo e um bater com o outro; carregar a planilha por cima bagunça o estoque
   (ex. 9801: planilha de ontem com disponível −204 + entrada de 400 da Débora hoje). Hoje o sync da Connect grava
   `estoque_total`/`estoque_disponivel`/`estoque_showroom` todo dia.
-- [ ] **D2.** Conferir se todo orçamento aprovado está indo para Entrega Futura mesmo com estoque disponível (dúvida
+- [x] **D2.** Conferir se todo orçamento aprovado está indo para Entrega Futura mesmo com estoque disponível (dúvida
   levantada com a venda de exemplo da 9801).
-- [ ] **D3.** Compra simulada de 10 unidades (teste do Pedro) aparecendo na peça — localizar e remover.
+- [x] **D3.** Compra simulada de 10 unidades (teste do Pedro) aparecendo na peça — localizar e remover.
 
 ## Perguntas abertas
 
@@ -85,7 +85,38 @@ sistemas_envolvidos:
    disponível = geral − reserva − separação, e a entrega futura é tratada pela rotina C.
 5. D1: parar de importar o **estoque** da Connect (mantendo preço/fiscal da SPEC-190)? A partir de quando?
 
-## Realizado
+## Realizado (09/10/2026)
 
-(nada ainda — SPEC criada em 08/10/2026 a partir da transcrição; banco indisponível na hora para conferir os números
-das peças 66554/10289/9801, conferir antes de implementar)
+Migration `20261009_194_spec191_producao_permissao_data_venda` (dry-run com teste como usuário comum e como editor,
+depois aplicada com autorização do usuário). Publicados: Controle de Produção (Skip 60535) v0.0.16 `f485e3d` e Cadastro
+(Skip 36668) v0.0.100 `510e81f`. Nenhuma Edge Function foi redeployada (conferido pela API).
+
+- **A1** `producao_pedidos.inativo/inativado_em/inativado_por`; botão "Inativar" (com confirmação) e "Reativar" na aba
+  Inativos. Nada é apagado. Inativar fica com os mesmos que podem alterar (A5) — pergunta aberta 1.
+- **A2** O "Editar" já existia (SPEC-174), mas a coluna Ação ficava no fim de uma tabela de 1300px e saía da tela.
+  Agora a coluna é fixa à direita.
+- **A3** Abas "Em aberto" (padrão) / "Concluídos" (status Pronto) / "Inativos". Pergunta aberta 2 resolvida como aba.
+- **A4** Filtros mostram "Empresas" e "Prioridade"; dentro, "Todas" + Foco/ISLIGHT/Manoella e Normal/Urgente.
+- **A5** Tabela `producao_editores` (e-mail) + função `producao_pode_alterar()`; RLS de INSERT/UPDATE/DELETE de todas
+  as tabelas `producao_*` exige estar na lista. Lista: Vinícius, Débora, Matheus, Vitória + Pedro/Filippo (suporte).
+  **João entra quando tiver e-mail** (`INSERT INTO producao_editores (email, nome) VALUES (...)`, sem migration).
+  Quem não está na lista vê tudo e lê "Somente visualização".
+- **B1/B2** Disponível = Estoque Geral − maior(Reserva+Separação do sistema, reservado da Connect) — decisão do usuário
+  09/10, porque as duas reservas convivem enquanto a Connect roda em paralelo. Mesma função (`calcularDisponivel`) na
+  coluna da lista e no destaque do painel. 6654 → 52 − 33 = **19**; 10289 → 568 − 757 = −189 (o 191 da reunião era
+  o dado da Connect daquele dia; a planilha muda todo dia).
+- **B3** `vw_cadastro_produto_movimentos.data_venda` = primeira vez que virou "Orçamento Aprovado" (quando ganha o
+  número da venda); sem histórico, aceite do cliente. Abas mostram "Data da Venda".
+- **B4** Setores numa lista estreita com linha pontilhada até a quantidade; clicar continua abrindo o detalhe.
+- **B5** Saiu a faixa "Fornecedor Sugerido · Pendente". O cabeçalho (código/referência/descrição) ficou, porque é o
+  que mostra qual peça está selecionada quando a lista rola.
+- **C2 (investigado)** Os 5 de Entrega Futura da 6654 vieram da aprovação do ORC-0034 (VENDA-0002) em 15/09: 34
+  peças, e só 29 apareciam livres naquele dia (número da Connect) → 29 reserva + 5 entrega futura. Não foi separação
+  parcial nem empréstimo. Esses 5 são exatamente o caso da rotina C1 ("tratar a reserva").
+- **D2** Não é todo orçamento: a aprovação reserva até `estoque − quantidade_reservada` de `estoque_itens`, e esse
+  reservado é sobrescrito todo dia pela planilha da Connect. A 9801 (ORC-0032, 11/09) foi inteira para Entrega Futura
+  porque a Connect dizia disponível negativo naquele dia. Liga direto com D1.
+- **D3** Pedido de compra nº 1771 (obs. "Teste", 18/09, 10 un. da 6654) cancelado com autorização do usuário.
+
+**Falta:** C1/C3 (rotina "tratar a reserva" — depende do Mateus mostrar a rotina atual) e D1 (decisão
+Filippo/Vinícius sobre parar de importar estoque da Connect).

@@ -55,6 +55,17 @@ Usar essas variaveis quando precisar consultar o Supabase real, gerar snapshot, 
 
 Nunca invente tabela, coluna, funcao ou policy sem verificar o snapshot central.
 
+### Seguranca do banco (SPEC-196, 11/10/2026)
+
+A chave `anon` vai dentro de todo site; quem protege os dados e o banco, nao a tela.
+
+1. Tabela nova: sempre `ENABLE ROW LEVEL SECURITY` e `REVOKE ALL ... FROM anon` (o Supabase da grant para `anon` por padrao).
+2. Nunca `USING (true)` / `WITH CHECK (true)` para `authenticated` em dado financeiro, de RH ou pessoal. Use `(SELECT public.pode_acessar_sistema('<slug>'))` (Acesso a Sistemas) — sempre dentro de `(SELECT ...)`, nunca chamada por linha.
+3. View de dono `postgres` pula o RLS das tabelas de baixo: view com dado sensivel precisa de portao no `WHERE` (ex.: `pode_acessar_sistema`) e nunca grant para `anon`.
+4. Pagina publica (sem login) le dados so por RPC `SECURITY DEFINER` que filtra o necessario. Hoje o unico acesso `anon` liberado e o site do Showroom (`vw_showroom_publico`, `showroom_import_pecas`).
+5. Mais de uma politica permissiva para o mesmo comando = vale a mais aberta. Ao trocar uma politica, apague as antigas.
+6. Depois de mexer em permissao, testar como `anon` e como um usuario sem o sistema (ex.: auxiliar de estoque), em ROLLBACK.
+
 ## Fluxo de implementacao
 
 1. Atualize ou crie a SPEC no repo central.

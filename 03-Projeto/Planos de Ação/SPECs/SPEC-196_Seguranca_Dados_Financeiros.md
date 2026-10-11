@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-196 — Segurança dos dados financeiros (quem pode ler e alterar o financeiro direto no banco)"
-status: Fases 0 e 1 APLICADAS (11/10); Fase 2 pendente
+status: Fases 0, 1 e 2a APLICADAS (11/10); 2b listada
 data_ultima_modificacao: 2026-10-11
 origem: "achado durante a SPEC-195 F2 (11/10/2026) + pedido do usuário"
 sistemas_envolvidos:
@@ -110,7 +110,7 @@ Como:
 
 - [ ] **2.1** Outras tabelas com `USING (true)` fora do financeiro (`contatos`, `contato_tipos`, `contato_origens`,
   `categorias_financeiras`, `notas_fiscais_compra`, `recebimentos_compra`…): levantar e decidir uma a uma.
-- [ ] **2.2** Regra para o futuro no `AGENTS.md`: tabela nova sempre com RLS ligado, nunca `USING (true)` em dado
+- [x] **2.2** Regra para o futuro no `AGENTS.md`: tabela nova sempre com RLS ligado, nunca `USING (true)` em dado
   financeiro/pessoal, view financeira nunca com grant para `anon`.
 
 ## Riscos
@@ -175,3 +175,34 @@ antes, mas vale a conferência na tela) e decidir se o login da Kimberly deve se
 - 11/10: **login da Kimberly (kimberly@adapta.org) bloqueado** a pedido do usuário — ban no Supabase Auth (até 2126,
   pela API de admin) + `usuarios.ativo = false`. Cadastro e papéis mantidos; para reativar: tirar o ban
   (`ban_duration: "none"`) e voltar `ativo = true`.
+
+### 11/10 — Fase 2a APLICADA (aprovada pelo usuário: "pode fazer a Fase 2")
+
+Varredura dos 196 objetos do banco como sem login e como auxiliar. Achados além do financeiro: `funcionarios` com RLS
+**desligado** (36 cadastros legíveis — e alteráveis — sem login), `vw_historico_faltas` (95), backups do RH
+`_bkp_*` (faltas 137, férias 12) e de acessos, auditoria (`logs_auditoria`), projetos dos clientes
+(`vw_projetos_*`, até 4.119), orçamentos com token (política `anon_can_read_orcamento_by_token`), catálogo/vendas
+Ubiqua, estoque — tudo sem login. Com login: auxiliar alterava `estoque_itens`, `funcionarios`,
+`funcionarios_detalhes/beneficios` e `user_roles_separacao` (permissões da Separação).
+
+Migration `20261011_200_spec196_fase2_sem_login_e_rh` (rollback.sql com grants/políticas/RLS de antes):
+- `REVOKE ALL FROM anon` em **146 objetos** — sobra só o site público do Showroom (`vw_showroom_publico`,
+  `showroom_import_pecas`). A aprovação do orçamento pelo cliente usa RPCs `SECURITY DEFINER`
+  (`buscar_orcamento_para_aprovacao`, `aprovar_/recusar_orcamento_cliente_publico`) e continua funcionando;
+- RLS ligado em `funcionarios` (as políticas por papel que já existiam passam a valer), backups `_bkp_*` e staging de
+  import; backups e staging sem uso fechados também para logado; `staging_pedido_compra` só Dashboard;
+- `funcionarios_detalhes` e `funcionarios_beneficios_empresas`: só RH; `user_roles_separacao`: só admin grava;
+  `estoque_itens`: some a escrita aberta (ficam as regras por papel admin/gerente/operador).
+- Conferido de fora (API pública): tudo 401, Showroom 200, RPC de aprovação responde normalmente. Logado: Lana,
+  Vinícius e Mariane iguais; auxiliar não altera mais funcionários/estoque/permissões.
+- Regra para o futuro gravada no `AGENTS.md` ("Segurança do banco").
+
+### Fase 2b — fica listada (precisa decidir tela a tela)
+
+- `orcamentos`: a política `anon_can_read_orcamento_by_token` também deixa **qualquer logado** ver todo orçamento com
+  token, e `anon_insert_orcamentos` deixa inserir sem regra — trocar pelas regras do Hub (SPEC-069).
+- Tabelas com escrita aberta a qualquer logado, usadas pela Logística/Separação/Garantia: `separacoes`,
+  `separacao_arquivos`, `entregas_pendentes`, `entregas_finalizadas`, `garantia_itens`, `garantia_protocolos`,
+  `projetos_fechados`, `historico_status_orcamentos`, `contato_tipos`, `empresas`, `quotes`/Ubiqua.
+- `contatos` (clientes, CPF/CNPJ, telefones) legível por qualquer logado — decidir quem precisa.
+- Supabase continua dando grant a `anon` em tabela NOVA por padrão (regra no AGENTS.md cobre).

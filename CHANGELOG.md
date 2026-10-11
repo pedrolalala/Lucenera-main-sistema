@@ -7,6 +7,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - SPEC-194: 5 logins dos auxiliares de estoque criados e ligados ao funcionário (sem duplicado); login testado.
 - SPEC-195 F1: área Estoque (Separação Parcial, Consultar Produtos, Sistema de Entregas) liberada para Vitória,
   Matheus, Alexandre e os 5 auxiliares; papel `estoque` para quem não tinha.
+- SPEC-196 Fase 2a: migration 200 aplicada — nada do banco legível sem login exceto o site do Showroom (146 objetos
+  fechados: funcionários, faltas, backups do RH, auditoria, projetos, orçamentos, Ubiqua, estoque); RLS ligado em
+  funcionarios; detalhes/benefícios só RH; permissões da Separação só admin. Regra de segurança no AGENTS.md.
 - Login da Kimberly (adapta.org) bloqueado a pedido do usuário (ban no Auth + usuário inativo; reversível).
 - SPEC-196 Fase 1: migration 199 aplicada — financeiro por sistema liberado (Acesso a Sistemas): transações só Adm.
   Bancária/Dashboard; dados de funcionários e comissões só RH; folha = RH ou a própria; Dashboard só Vinícius, Pedro e

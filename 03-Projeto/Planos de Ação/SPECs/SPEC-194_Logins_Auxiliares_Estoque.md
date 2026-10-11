@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-194 — Criar login dos auxiliares de estoque e ligar ao cadastro de funcionário"
-status: aguardando aprovação
+status: contas criadas (11/10); falta liberar os sistemas
 data_ultima_modificacao: 2026-10-11
 origem: "pedido do usuário 11/10 (lista de e-mails dos funcionários)"
 sistemas_envolvidos:
@@ -33,15 +33,15 @@ ficariam iguais se só criarmos a conta: eles entram, mas não veem sistema nenh
 
 ## Plano
 
-- [ ] **1. Gravar o e-mail no cadastro de cada um dos 5 funcionários** antes de criar a conta. O gatilho
+- [x] **1. Gravar o e-mail no cadastro de cada um dos 5 funcionários** antes de criar a conta. O gatilho
   `handle_new_user` só reaproveita o funcionário se `funcionarios.email` bater; sem isso ele cria um funcionário
   duplicado "Ativo" (aconteceu em 08/10 com 14 contas).
-- [ ] **2. Criar as 5 contas** com a mesma lógica da RPC `criar_usuario` (e-mail já confirmado, senha padrão,
+- [x] **2. Criar as 5 contas** com a mesma lógica da RPC `criar_usuario` (e-mail já confirmado, senha padrão,
   `usuarios.role = 'funcionario'` igual ao Alexandre, nome do cadastro). Script único, em transação, com dry-run
   (rollback) antes do real. A senha não fica gravada em arquivo do repositório.
 - [ ] **3. Liberar os sistemas** de cada um em Acesso a Sistemas / papéis (lista a definir, pergunta 1). Aplicar
   também ao Alexandre.
-- [ ] **4. Conferir:**
+- [x] **4. Conferir:**
   - cada funcionário com `usuario_id` e `email` certos;
   - nenhum funcionário novo criado (`funcionarios.created_at` na última hora = 0);
   - login de verdade com e-mail + senha padrão (API de login do Supabase), uma vez por conta.
@@ -60,3 +60,11 @@ ficariam iguais se só criarmos a conta: eles entram, mas não veem sistema nenh
 
 - SPEC-193 C2: os e-mails da Lana e da Carol foram encontrados no mesmo levantamento — Lana = `financeiro@lucenera.com.br`,
   Carol = `caroline@lucenera.com.br` (as duas já têm login ligado ao funcionário).
+
+## Realizado (11/10)
+
+- Script `criar_logins_194.py` (scratchpad): dry-run com ROLLBACK e depois COMMIT. Gravou o e-mail no cadastro, criou
+  `auth.users` + `auth.identities` e definiu `usuarios.role = 'funcionario'`. Os 5 ficaram ligados ao funcionário real.
+- `funcionarios`: 36 antes e 36 depois; nenhum criado na última hora (sem duplicado).
+- Login real (API de senha do Supabase) testado nas 5 contas: todas OK.
+- **Pendente:** passo 3 (sistemas liberados) e as perguntas abertas.

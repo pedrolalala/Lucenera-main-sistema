@@ -1,6 +1,6 @@
 -- SPEC-195 F2 (reunião 30.03, Filippo): "um dashboard financeiro, tira o que eu recebo".
 -- A Distribuição de Lucro (retiradas/lucro distribuído FILIPPO e MANOELLA) some do Dashboard
--- Financeiro para todo mundo, menos o Filippo. Filtro no BANCO (não só na tela), nas duas views
+-- Financeiro para todo mundo, menos Filippo, Pedro e Vinícius (decisão do usuário 11/10). Filtro no BANCO (não só na tela), nas duas views
 -- que o Dashboard lê. Scripts com conexão direta (sem JWT) e service_role continuam vendo tudo,
 -- para o Panorama Financeiro e os imports não mudarem.
 -- Junto: as duas views estavam liberadas para `anon` (sem login) — revogado.
@@ -14,7 +14,7 @@ SET search_path = public
 AS $$
   SELECT coalesce(nullif(current_setting('request.jwt.claims', true), ''), '') = ''
       OR coalesce(auth.role(), '') = 'service_role'
-      OR lower(coalesce(auth.jwt() ->> 'email', '')) = 'filippo@lucenera.com.br'
+      OR lower(coalesce(auth.jwt() ->> 'email', '')) IN ('filippo@lucenera.com.br', 'pedro@lucenera.com.br', 'vinicius@lucenera.com.br')
 $$;
 
 REVOKE ALL ON FUNCTION public.pode_ver_distribuicao_lucro() FROM public, anon;

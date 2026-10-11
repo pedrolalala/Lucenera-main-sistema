@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-195 — Orçamento de vínculo (venda já aprovada na Connect) + pendências da reunião 30 (09/10)"
-status: em andamento — F1 Estoque aplicado; F2 aguardando aprovação; A aguardando respostas
+status: em andamento — F1 Estoque e F2 aplicados; A aguardando respostas
 data_ultima_modificacao: 2026-10-11
 origem:
   - "pedido do usuário 11/10: orçamento que só liga peças e valor, sem estoque e sem financeiro"
@@ -130,11 +130,13 @@ alterou o pedido). O usuário entende que o ponto é o orçamento.
 - [x] **F1 (Estoque, 11/10).** Liberados Separação Parcial, Consultar Produtos e Sistema de Entregas para Vitória,
   Matheus, Alexandre e os 5 auxiliares (Débora já tinha). Quem não tinha papel ganhou o papel `estoque`. Só
   acrescentou, nada removido. Projetos e Financeiro/CRM: falta a lista de quem é da equipe de projetos.
-- [ ] **F2.** Dashboard Financeiro: **esconder de todo mundo o que o Filippo recebe** (Distribuição de Lucro:
-  RETIRADAS LUCRO FILIPPO/MANOELLA e LUCRO DISTRIBUÍDO FILIPPO). Migration
-  `20261011_196_dashboard_ocultar_distribuicao_lucro` (filtro no banco nas views `v_financeiro_realizado` e
-  `v_cash_flow_lucenera`; só o Filippo e os scripts veem; revoga `anon`). Dry-run ok em 11/10 (Vinícius/Pedro: 0
-  linhas; Filippo: 193). **Aguardando aprovação para aplicar.** Depois: esconder o cartão na tela.
+- [x] **F2 (11/10).** Dashboard Financeiro: a Distribuição de Lucro (RETIRADAS LUCRO FILIPPO/MANOELLA e LUCRO
+  DISTRIBUÍDO FILIPPO) só aparece para **Filippo, Pedro e Vinícius** (decisão do usuário). Migration
+  `20261011_196_dashboard_ocultar_distribuicao_lucro` **aplicada** (aprovada pelo usuário): função
+  `pode_ver_distribuicao_lucro()` + filtro nas views `v_financeiro_realizado` e `v_cash_flow_lucenera`; conexão direta
+  e service_role continuam vendo tudo (Panorama/imports); `anon` revogado. Conferido depois: Vinícius 193 linhas, Lana
+  0. Tela: cartão escondido para quem não pode (Skip 41135 v0.0.46 `3ff7aa4`, publicado; nenhuma Edge Function
+  alterada).
 - **Achado de segurança (11/10):** a tabela `transacoes` tem política `authenticated_all_transacoes = true` —
   qualquer pessoa com login (inclusive os auxiliares novos) consegue ler e alterar todo o financeiro pela API. E as
   views financeiras estavam abertas a `anon`. Precisa de SPEC própria.

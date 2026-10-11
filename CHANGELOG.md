@@ -2,7 +2,21 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-11
+
+- SPEC-194: 5 logins dos auxiliares de estoque criados e ligados ao funcionário (sem duplicado); login testado.
+- SPEC-195 F1: área Estoque (Separação Parcial, Consultar Produtos, Sistema de Entregas) liberada para Vitória,
+  Matheus, Alexandre e os 5 auxiliares; papel `estoque` para quem não tinha.
+- SPEC-195 F2: migration 196 aplicada — Distribuição de Lucro no Dashboard só para Filippo, Pedro e Vinícius (filtro no
+  banco + cartão escondido, Skip 41135 v0.0.46); views financeiras fechadas para `anon`.
+
 ## 2026-10-09
+
+### Contatos: novos tipos "Escritório de Arquitetura" e "Incorporadora"
+
+- Migration `20261009_195` APLICADA: enum `contato_tipo` + check `contato_tipos_tipo_check` aceitam
+  `escritorio_arquitetura` e `incorporadora` (mesmo padrão da 173/construtora). Teste com rollback: inserir contato com
+  esses tipos cria a linha em `contato_tipos` pelo trigger. Nenhum sistema exibe os novos tipos ainda.
 
 ### SPEC-191: reunião 08/10 — Controle de Produção e Disponível da Consulta de Produtos
 

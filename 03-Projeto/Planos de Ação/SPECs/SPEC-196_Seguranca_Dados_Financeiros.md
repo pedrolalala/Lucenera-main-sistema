@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-196 — Segurança dos dados financeiros (quem pode ler e alterar o financeiro direto no banco)"
-status: Fase 0 APLICADA (11/10); Fase 1 redigida e testada — aguardando aprovação para aplicar
+status: Fases 0 e 1 APLICADAS (11/10); Fase 2 pendente
 data_ultima_modificacao: 2026-10-11
 origem: "achado durante a SPEC-195 F2 (11/10/2026) + pedido do usuário"
 sistemas_envolvidos:
@@ -94,16 +94,16 @@ Regra (mesma da SPEC-183: Acesso a Sistemas = o que a pessoa vê):
   (`pode_ver_distribuicao_lucro()` — Filippo, Pedro, Vinícius).
 
 Como:
-- [ ] **1.1** Função `pode_acessar_sistema(slug)` `SECURITY DEFINER STABLE` (admin ou `user_system_access`), usada nas
+- [x] **1.1** Função `pode_acessar_sistema(slug)` `SECURITY DEFINER STABLE` (admin ou `user_system_access`), usada nas
   políticas sempre como `(SELECT public.pode_acessar_sistema('...'))` — chamada por linha deixa tudo lento (já
   aconteceu: ver `reference_rls_hub_pode_executar_por_linha`).
-- [ ] **1.2** Apagar as políticas `USING (true)` duplicadas e deixar **uma** política por operação em cada tabela.
-- [ ] **1.3** Teste por perfil (como `authenticated`, em ROLLBACK), com uma pessoa de cada área: Lana (financeiro),
+- [x] **1.2** Apagar as políticas `USING (true)` duplicadas e deixar **uma** política por operação em cada tabela.
+- [x] **1.3** Teste por perfil (como `authenticated`, em ROLLBACK), com uma pessoa de cada área: Lana (financeiro),
   Vinícius (admin), Débora (estoque/compras), Marina (projetos), João (auxiliar), Mariane. Conferir contagens e que
   cada tela continua abrindo: Adm. Bancária (todas as páginas), Dashboard (todas as abas), RH (Folha), CRM (projeto),
   Orçamentos (resumo financeiro), Separação Parcial (boletos), Vendas.
-- [ ] **1.4** Medir o tempo das telas antes/depois (Dashboard carrega ~17 mil linhas).
-- [ ] **1.5** Publicar nada de front, se possível (a mudança é só no banco). Se alguma tela quebrar, corrigir a tela,
+- [x] **1.4** Medir o tempo das telas antes/depois (Dashboard carrega ~17 mil linhas).
+- [x] **1.5** Publicar nada de front, se possível (a mudança é só no banco). Se alguma tela quebrar, corrigir a tela,
   não reabrir a política.
 
 ### Fase 2 — revisão do resto (depois)
@@ -144,7 +144,7 @@ Como:
   Showroom (`vw_showroom_publico`) continua respondendo. Scripts com conexão direta continuam lendo o staging.
 - Logado: nada mudou ainda (auxiliar continua lendo `transacoes`, `folha_pagamento` etc.) — é a Fase 1.
 
-### 11/10 — Fase 1 redigida e testada (NÃO aplicada)
+### 11/10 — Fase 1 APLICADA (aprovada pelo usuário; Kimberly não precisa mais de acesso)
 
 Migration `20261011_199_spec196_fase1_financeiro_por_sistema` (rollback.sql recria as políticas e views de antes).
 Função `pode_acessar_sistema(slug)` (Acesso a Sistemas; scripts/service_role passam). Achado no teste: a folha de
@@ -164,3 +164,10 @@ Dry-run por perfil (antes → depois):
 
 Tempo: v_financeiro_realizado 0,29–0,30 s antes e depois (sem perda). Boletos/contas bancárias/remessas não mudam
 (já protegidos pela SPEC-069).
+
+Conferido depois de aplicar, com **login real** do João (auxiliar) pela API: transações 0, negociações 0, dados
+financeiros de funcionários 0, Dashboard 0, views de funcionários/comissão 0, staging 403; parcelas 410 (só leitura,
+Separação Parcial); folha 32 (só a própria). Nenhuma tela foi republicada (mudança só no banco).
+
+Pendente: Lana abrir as telas da Administração Bancária e do RH na segunda (o teste por perfil deu acesso igual ao de
+antes, mas vale a conferência na tela) e decidir se o login da Kimberly deve ser bloqueado de vez.

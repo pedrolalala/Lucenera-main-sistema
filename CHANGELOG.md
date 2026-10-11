@@ -7,6 +7,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - SPEC-194: 5 logins dos auxiliares de estoque criados e ligados ao funcionário (sem duplicado); login testado.
 - SPEC-195 F1: área Estoque (Separação Parcial, Consultar Produtos, Sistema de Entregas) liberada para Vitória,
   Matheus, Alexandre e os 5 auxiliares; papel `estoque` para quem não tinha.
+- SPEC-196 Fase 1: migration 199 aplicada — financeiro por sistema liberado (Acesso a Sistemas): transações só Adm.
+  Bancária/Dashboard; dados de funcionários e comissões só RH; folha = RH ou a própria; Dashboard só Vinícius, Pedro e
+  Filippo. Testado com login real do auxiliar.
 - SPEC-196 Fase 0: migration 198 aplicada — contas a pagar/receber, duplicatas, transações completas, funcionários e
   comissões deixaram de ser legíveis sem login (antes: até 22.649 linhas pela chave pública). Conferido de fora: 401.
 - SPEC-195 A: orçamento de **vínculo** de venda já aprovada na Connect — migration 197 aplicada (vincular/desvincular,

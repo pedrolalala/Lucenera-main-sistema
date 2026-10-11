@@ -38,7 +38,7 @@ cada projeto/cliente, sem reservar estoque de novo, sem gerar parcela/boleto e s
 
 | O que grava | Tabela | No vínculo |
 |---|---|---|
-| número da venda `VENDA-XXXX` | `orcamentos.numero_venda` | **não** (pergunta 2) |
+| número da venda | `orcamentos.numero_venda` | **sim, o número da Connect** (decisão 11/10) |
 | itens do projeto (peça, qtd, preço, L) | `projeto_itens` | **sim** — é o "link" |
 | reserva de estoque | `estoque_itens.quantidade_reservada`, `estoque_saldos_projeto_item`, `estoque_movimentos_projeto_item` | **não** |
 | parcelas | `projeto_parcelas` | **não** |
@@ -60,8 +60,10 @@ do vínculo.
   - **não** exige forma/plano de pagamento;
   - grava `projeto_itens` com `orcamento_id`/`orcamento_item_id`/`l_fixo` (igual à aprovação);
   - **não** toca estoque, parcelas, boletos;
-  - status final: `Orçamento Aprovado` (com `vinculo_connect = true`) ou um status próprio "Vinculado (Connect)" —
-    pergunta 3;
+  - **número da venda = número da Connect** (decisão 11/10). Quando o sistema novo passar a vender de verdade, a
+    sequência própria **continua a partir do último número da Connect** (não recomeça em 0001 e não repete número);
+  - status final: **`Orçamento Aprovado`** com `vinculo_connect = true` — **sem status próprio** (decisão 11/10). Por
+    isso o filtro do A4 (pela coluna, não pelo status) é obrigatório antes de ir para produção;
   - grava histórico "Vínculo de venda aprovada na Connect nº X — sem estoque e sem financeiro";
   - idempotente (rodar duas vezes não duplica `projeto_itens`);
   - permissão: `hub_pode_executar(..., 'orcamentos', NULL, 'aprovar')` (mesma de aprovar).
@@ -129,7 +131,13 @@ alterou o pedido). O usuário entende que o ponto é o orçamento.
 
 - [x] **F1 (Estoque, 11/10).** Liberados Separação Parcial, Consultar Produtos e Sistema de Entregas para Vitória,
   Matheus, Alexandre e os 5 auxiliares (Débora já tinha). Quem não tinha papel ganhou o papel `estoque`. Só
-  acrescentou, nada removido. Projetos e Financeiro/CRM: falta a lista de quem é da equipe de projetos.
+  acrescentou, nada removido.
+- [x] **F1 (Projetos, 11/10).** Orçamentos, Sistema de Entregas, Fichas Técnicas e Showroom liberados para as 3
+  equipes (lista do usuário): **Thais** (Helena Fogaça, Murillo Spimpolo, Thais Gomes, Trícia Borges), **Marina**
+  (Giovanna Nori, Isabella Jacob, Ketlyn Verônica, Marina Pousa), **Thairine** (Adriana Jabur, Giovana Gonella,
+  Rafaela Netto, Thairine Silva). 10 ganharam o papel `equipe_projetos` (Marina e Thairine já tinham); Rafaela
+  Netto entrou na equipe Thairine (estava sem equipe). Os outros 11 já estavam na equipe certa. Só acrescentou.
+  Financeiro/CRM (Lana, Vinícius, Carol): já têm os acessos de hoje — não mexido.
 - [x] **F2 (11/10).** Dashboard Financeiro: a Distribuição de Lucro (RETIRADAS LUCRO FILIPPO/MANOELLA e LUCRO
   DISTRIBUÍDO FILIPPO) só aparece para **Filippo, Pedro e Vinícius** (decisão do usuário). Migration
   `20261011_196_dashboard_ocultar_distribuicao_lucro` **aplicada** (aprovada pelo usuário): função
@@ -152,15 +160,12 @@ Filippo: *"não interessa agora implementar coisas que não são indispensáveis
 
 ## Perguntas abertas
 
-1. **A2:** o vínculo ganha número `VENDA-XXXX` do sistema, ou fica só com o **nº da Connect**? (Recomendo só o da
-   Connect.)
-2. **A2:** status final próprio "Vinculado (Connect)"? (Recomendo, para nenhuma tela pegar por engano.)
-3. **D1:** ver Bloco D (confirmar com o Vinícius).
-4. **F1:** quem é a equipe de projetos (Orçamentos, Entregas, Fichas Técnicas, Showroom)?
+1. **D1:** ver Bloco D (confirmar com o Vinícius).
 
-Respondidas em 11/10: XML fica como está; riscos do A4 ficam para depois; impostos não mexe; filtro de estoque com
-desativadas marcadas; marca prevalece (fornecedor no Editar); linhas pretas; "não disponível"; troca direta
-descartada; filtro por etapa já existe; matriz de acesso aprovada.
+Respondidas em 11/10: número = o da Connect, e a sequência própria continua depois dele; sem status próprio
+(`Orçamento Aprovado` + `vinculo_connect`); equipes de projetos (F1); XML fica como está; riscos do A4 ficam para
+depois; impostos não mexe; filtro de estoque com desativadas marcadas; marca prevalece (fornecedor no Editar);
+linhas pretas; "não disponível"; troca direta descartada; filtro por etapa já existe; matriz de acesso aprovada.
 
 ## Realizado
 

@@ -171,3 +171,7 @@ Separação Parcial); folha 32 (só a própria). Nenhuma tela foi republicada (m
 
 Pendente: Lana abrir as telas da Administração Bancária e do RH na segunda (o teste por perfil deu acesso igual ao de
 antes, mas vale a conferência na tela) e decidir se o login da Kimberly deve ser bloqueado de vez.
+
+- 11/10: **login da Kimberly (kimberly@adapta.org) bloqueado** a pedido do usuário — ban no Supabase Auth (até 2126,
+  pela API de admin) + `usuarios.ativo = false`. Cadastro e papéis mantidos; para reativar: tirar o ban
+  (`ban_duration: "none"`) e voltar `ativo = true`.

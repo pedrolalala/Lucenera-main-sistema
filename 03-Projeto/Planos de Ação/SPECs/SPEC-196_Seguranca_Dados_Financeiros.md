@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-196 — Segurança dos dados financeiros (quem pode ler e alterar o financeiro direto no banco)"
-status: Fase 0 APLICADA (11/10); Fase 1 aguardando respostas 2 e 3
+status: Fase 0 APLICADA (11/10); Fase 1 redigida e testada — aguardando aprovação para aplicar
 data_ultima_modificacao: 2026-10-11
 origem: "achado durante a SPEC-195 F2 (11/10/2026) + pedido do usuário"
 sistemas_envolvidos:
@@ -41,7 +41,7 @@ Teste real como **visitante sem login** (`anon`) e como **auxiliar de estoque** 
 | `transacoes` | 0 | 22.649 | **sim** |
 | `negociacoes` | 0 | 13.687 | (política `write = true`) |
 | `projeto_parcelas` | 0 | 410 | **sim** |
-| `folha_pagamento` (salários) | 0 | **32** | não |
+| `folha_pagamento` (salários) | 0 | 32 (**só a própria folha** — correção 11/10) | não |
 | `funcionarios_financeiro` (dados bancários/salário) | 0 | 27 | **sim** |
 | `plano_de_contas` | 0 | 159 | (política `write = true`) |
 | `projeto_parcelas_backup_migration` | 0 | 4.742 | — |
@@ -119,11 +119,12 @@ Como:
   Skip). Por isso o teste 1.3 abre cada tela, e cada fase tem `rollback.sql`.
 - Edge Functions e scripts usam service_role/postgres e **não** passam pelo RLS — não são afetados.
 
-## Perguntas abertas
+## Respostas do usuário (11/10)
 
-1. Pode aplicar a **Fase 0 já** (risco baixo, nenhuma tela usa)? Recomendo sim, hoje.
-2. Fase 1: quem tem **Dashboard Financeiro** pode ler as transações (somente leitura), ou só quem tem Adm. Bancária?
-3. `projeto_parcelas_backup_migration`: apagar a tabela (é uma cópia de migração antiga) ou só fechar?
+1. Fase 0: aplicar já — feito.
+2. **Dashboard Financeiro é só para Vinícius, Pedro e Filippo.** Por isso a Fase 1 não dá passe livre a "admin":
+   vale só o que está liberado em Acesso a Sistemas (Pedro ganhou a linha do Dashboard, que faltava).
+3. `projeto_parcelas_backup_migration`: **fica fechada como está** (não apagar).
 
 ## Realizado
 
@@ -142,3 +143,24 @@ Como:
 - Conferido depois, **de fora** (API pública com a chave anon): todos os objetos acima → HTTP 401; o site público do
   Showroom (`vw_showroom_publico`) continua respondendo. Scripts com conexão direta continuam lendo o staging.
 - Logado: nada mudou ainda (auxiliar continua lendo `transacoes`, `folha_pagamento` etc.) — é a Fase 1.
+
+### 11/10 — Fase 1 redigida e testada (NÃO aplicada)
+
+Migration `20261011_199_spec196_fase1_financeiro_por_sistema` (rollback.sql recria as políticas e views de antes).
+Função `pode_acessar_sistema(slug)` (Acesso a Sistemas; scripts/service_role passam). Achado no teste: a folha de
+pagamento inteira (771) aparecia para quem é "gerente/admin" no cadastro de usuários (Mariane, Kimberly) — a Fase 1
+passa a folha para **RH + a própria folha**.
+
+Dry-run por perfil (antes → depois):
+
+| Perfil | Transações | Parcelas | Folha | Dados fin. funcionários | Dashboard (v_financeiro) |
+|---|---|---|---|---|---|
+| Lana (Adm. Bancária, RH) | 22.649 → 22.649 | 410 → 410 | 771 → 771 | 27 → 27 | 17.476 → **0** (não tem Dashboard) |
+| Vinícius / Pedro / Filippo | igual | igual | igual | igual | igual |
+| Marina, Mariane (Projetos/CRM) | 22.649 → **0** | 410 → 410 | própria | 27 → **0** | → **0** |
+| Débora (Estoque/Compras) | → **0** | 410 → 410 (só ler) | própria | → **0** | → **0** |
+| João (auxiliar) | → **0** | 410 → 410 (só ler) | própria | → **0** | → **0** |
+| Kimberly (adapta.org) | → **0** | → **0** | 771 → **0** | → **0** | → **0** |
+
+Tempo: v_financeiro_realizado 0,29–0,30 s antes e depois (sem perda). Boletos/contas bancárias/remessas não mudam
+(já protegidos pela SPEC-069).

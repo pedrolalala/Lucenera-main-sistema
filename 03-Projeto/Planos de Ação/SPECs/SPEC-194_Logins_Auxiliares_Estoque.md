@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-194 — Criar login dos auxiliares de estoque e ligar ao cadastro de funcionário"
-status: contas criadas (11/10); falta liberar os sistemas
+status: concluída (11/10) — contas criadas e área Estoque liberada
 data_ultima_modificacao: 2026-10-11
 origem: "pedido do usuário 11/10 (lista de e-mails dos funcionários)"
 sistemas_envolvidos:
@@ -39,7 +39,7 @@ ficariam iguais se só criarmos a conta: eles entram, mas não veem sistema nenh
 - [x] **2. Criar as 5 contas** com a mesma lógica da RPC `criar_usuario` (e-mail já confirmado, senha padrão,
   `usuarios.role = 'funcionario'` igual ao Alexandre, nome do cadastro). Script único, em transação, com dry-run
   (rollback) antes do real. A senha não fica gravada em arquivo do repositório.
-- [ ] **3. Liberar os sistemas** de cada um em Acesso a Sistemas / papéis (lista a definir, pergunta 1). Aplicar
+- [x] **3. Liberar os sistemas** de cada um em Acesso a Sistemas / papéis (lista a definir, pergunta 1). Aplicar
   também ao Alexandre.
 - [x] **4. Conferir:**
   - cada funcionário com `usuario_id` e `email` certos;
@@ -68,3 +68,5 @@ ficariam iguais se só criarmos a conta: eles entram, mas não veem sistema nenh
 - `funcionarios`: 36 antes e 36 depois; nenhum criado na última hora (sem duplicado).
 - Login real (API de senha do Supabase) testado nas 5 contas: todas OK.
 - **Pendente:** passo 3 (sistemas liberados) e as perguntas abertas.
+- 11/10: passo 3 feito pela matriz da reunião 30.03 (SPEC-195 F1): Separação Parcial, Consultar Produtos e Sistema de
+  Entregas para os 5 novos + Alexandre, Vitória e Matheus; papel `estoque` para quem não tinha papel.

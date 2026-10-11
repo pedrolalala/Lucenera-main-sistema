@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-195 — Orçamento de vínculo (venda já aprovada na Connect) + pendências da reunião 30 (09/10)"
-status: aguardando aprovação
+status: em andamento — F1 Estoque aplicado; F2 aguardando aprovação; A aguardando respostas
 data_ultima_modificacao: 2026-10-11
 origem:
   - "pedido do usuário 11/10: orçamento que só liga peças e valor, sem estoque e sem financeiro"
@@ -17,8 +17,12 @@ relacionadas: [SPEC-050, SPEC-136, SPEC-152, SPEC-183, SPEC-190, SPEC-191, SPEC-
 
 # SPEC-195 — Orçamento de vínculo (Connect) + pendências da reunião 30
 
-> **Intocável:** a regra de custo da SPEC-190 e a decisão de impostos da SPEC-193 (cada produto com os próprios
-> impostos, sem motor fiscal). A Reunião 30.01 é a mesma conversa da reunião 29 e já está coberta pela SPEC-193.
+> **NÃO MEXER — impostos e custo da peça (decisão do usuário, 11/10):** a conta de imposto da peça **já está
+> funcionando** e esta SPEC **não altera nada** nela: nem a regra de custo da SPEC-190 (custo − desconto + BDI de
+> Frete/ST/IPI/Outras Despesas × (1 + % Lucro)), nem os campos de imposto do cadastro, nem o import diário da
+> planilha. A Reunião 30.01 é a mesma conversa da reunião 29 e já está coberta pela SPEC-193.
+>
+> **Import de XML da Connect (SPEC-050):** já funciona e fica como está.
 
 ## Bloco A — Orçamento de vínculo (prioridade)
 
@@ -64,7 +68,7 @@ do vínculo.
 - [ ] **A3. Tela (Orçamentos):** no orçamento importado da Connect (ou marcado à mão), botão **"Vincular venda da
   Connect"** no lugar de "Enviar para aprovação". Pula as etapas cliente/equipe/financeira. Etiqueta visível
   "Vínculo Connect nº X" na lista, no detalhe e no filtro.
-- [ ] **A4. Ninguém pode tratar vínculo como venda nova.** Conferir e ajustar cada consumidor:
+- [ ] **A4. (DEPOIS — decisão do usuário 11/10: resolver mais tarde) Ninguém pode tratar vínculo como venda nova.** Conferir e ajustar cada consumidor:
   - **Vendas / Pendências de Nota Fiscal:** vínculo não aparece para emitir nota (a Connect já emitiu).
   - **Necessidade de Compra** (`vw_necessidade_compra`, `_detalhe`, `_item_orcamento`) e **Entrega Futura**
     (`vw_entrega_futura_projeto_item`, `vw_pendencias_re_reserva`): leem `projeto_itens`; sem filtro, um item de
@@ -79,42 +83,40 @@ do vínculo.
   `estoque_saldos_projeto_item`, `projeto_parcelas` e `boletos` **não mudaram**, que o projeto mostra peças/valor e
   que Necessidade de Compra e Vendas não mostram nada novo.
 
-## Bloco B — Consulta de Produtos (reunião 30.02)
+## Bloco B — Consulta de Produtos (reunião 30.02 + respostas 11/10)
 
-- [ ] **B1. Não carregar peça com estoque zero na lista inicial.** A busca continua procurando em todas as peças
-  (Filippo: *"se eu procurar, procura sim"*). Junta com a view enxuta de estoque da SPEC-193 C1.
-- [ ] **B2. Busca combinada marca + categoria**: digitar "Stella lâmpada" traz o que é da marca Stella e categoria
-  Lâmpada. Na Consulta aparece **marca, não fornecedor** (fornecedor só no Cadastro — decisão da SPEC-193 B2).
+- [ ] **B1. Filtro "Só com estoque"** (positivo **ou negativo**; esconde só os zerados). A busca continua achando
+  todas as peças. Peça **desativada** aparece com a marcação **"Desativada"** (não some).
+- [ ] **B2. Marca prevalece** na Consulta e na busca. O **fornecedor continua no Editar** da peça (campo que já
+  existe), não na lista. Busca combinada marca + categoria: "Stella lâmpada".
 - [ ] **B3. Campos da Consulta**: código interno, referência, descrição, marca, categoria/grupo, setores e preço de
   venda (sem impostos — SPEC-193 C2).
-- [ ] **B4. Linhas da tabela invisíveis no computador do Vinícius** (os "quadradinhos" não aparecem): aumentar o
-  contraste das bordas/linhas.
-- [ ] **B5. "Fora do disponível"** (Casa Cor e Garantia) fica — Vinícius confirmou que faz sentido; só deixar mais
-  bonito, ao lado do número.
+- [ ] **B4. Linhas da tabela em preto**, no estilo padrão de sistema operacional (hoje somem no computador do
+  Vinícius).
+- [ ] **B5. "Fora do disponível"** (Casa Cor e Garantia) fica ao lado do número e o texto deixa claro que a peça
+  **não está disponível** (ex.: "não disponível").
 
-## Bloco C — Trocar reserva direto da peça (reunião 30.02)
+## ~~Bloco C — Trocar reserva direto da peça~~ (descartado 11/10)
 
-Hoje a troca existe na **Separação Parcial**, a partir da venda (com log de quem, quando, de quem para quem). O
-Filippo pediu a mesma coisa **sem sair da Consulta de Produtos**:
+Decidido na própria reunião que não faz sentido: a troca já existe na Separação Parcial, a partir da venda
+(Vinícius: na venda feita é lá que elas vão; Filippo: *"ficou da hora do jeito que nós fez"*).
 
-- [ ] **C1.** No detalhe da reserva da peça (ex. 6654: reserva 21 de vários clientes), botão **"Trocar"** → janela:
-  quantas peças, de qual cliente/venda e **de qual L**, para qual venda em aberto (busca pelo nome do cliente/
-  orçamento). Usa a mesma rotina da Separação Parcial (mesmo log, mesma regra: em separação não pode).
-- [ ] **C2.** Duas situações (Vinícius): (a) venda feita → continua na Separação Parcial; (b) cliente chegou agora →
-  faz o orçamento/venda e depois troca. A troca só vale para quem já tem venda.
-- [ ] **C3.** Pergunta 6: precisa de autorização do vendedor dono da reserva?
+## Bloco D — Editar em vez de estornar tudo (a confirmar)
 
-## Bloco D — Separação: editar lista em vez de estornar tudo (reunião 30.02)
+Trecho da transcrição (30.02, 81:58–83:33):
+- Pedro: *"Estornar é estornar uma lista de separação. Tipo, alterou uma lista, tem que estornar para fazer de novo."*
+- Vinícius: *"Uma vez eu fui separar o material do Clara e era um trilhão de item. Aí um item tinha ficado para
+  trás. Para não ter que gerar uma lista separada, eu estornei tudo e tirei tudo de novo."*
+- *"Você não foi lá em São Paulo e mudou um monte de coisa? Teve que estornar todas as listas."*
+- *"No caso dela teria que ter como editar, mas não existe isso."* / *"de 50 itens eu tive que estornar os 50 para
+  pegar 51"* / *"Só pegou ali, apertou editar."* / Filippo: *"eu não quero repetir as cagadas do outro."*
 
-- [ ] **D1.** Hoje, para acrescentar 1 item numa lista de 50, é preciso estornar as 50 e refazer. Permitir
-  **editar a lista** (incluir/remover item) enquanto ela não foi entregue ao Matheus. Levantar a regra exata com o
-  Vinícius/Matheus antes de implementar.
+Leitura: é a **lista de separação** (na Connect), e o motivo é o **orçamento que mudou** (item esquecido ou cliente
+alterou o pedido). O usuário entende que o ponto é o orçamento.
+- [ ] **D1.** Confirmar com o Vinícius: quando o orçamento aprovado muda (entra ou sai item), a lista de separação
+  já gerada deve **se ajustar só na diferença** (sem estornar tudo)? Ou o pedido é poder **editar a lista** direto?
 
-## Bloco E — Orçamentos (reunião 30.02)
-
-- [ ] **E1. Filtro por etapa** na lista: aprovação do cliente, da equipe, financeira, aprovados.
-- [ ] **E2.** Conferir o aviso de **atualizar preço depois de 10 dias** (validade do orçamento): Pedro disse que já
-  funciona; validar com o Vinícius.
+## ~~Bloco E — Filtro por etapa no Orçamento~~ (já existe — confirmado 11/10)
 
 ## Bloco F — Acesso por área (reunião 30.03) → usa na SPEC-194 e na SPEC-183
 
@@ -125,9 +127,17 @@ Filippo pediu a mesma coisa **sem sair da Consulta de Produtos**:
 | Estoque | Logística, Consulta de Produtos, Sistema de Entregas | Débora, Vitória, Matheus, Alexandre (e os auxiliares da SPEC-194) |
 | Controle de Garantia / Produção | "por enquanto nem usamos" | — |
 
-- [ ] **F1.** Aplicar essa matriz em Acesso a Sistemas (uma vez, "para nunca mais"), começando pelos 6 auxiliares de
-  estoque da SPEC-194.
-- [ ] **F2.** Dashboard Financeiro: **esconder de todo mundo o que o Filippo recebe**.
+- [x] **F1 (Estoque, 11/10).** Liberados Separação Parcial, Consultar Produtos e Sistema de Entregas para Vitória,
+  Matheus, Alexandre e os 5 auxiliares (Débora já tinha). Quem não tinha papel ganhou o papel `estoque`. Só
+  acrescentou, nada removido. Projetos e Financeiro/CRM: falta a lista de quem é da equipe de projetos.
+- [ ] **F2.** Dashboard Financeiro: **esconder de todo mundo o que o Filippo recebe** (Distribuição de Lucro:
+  RETIRADAS LUCRO FILIPPO/MANOELLA e LUCRO DISTRIBUÍDO FILIPPO). Migration
+  `20261011_196_dashboard_ocultar_distribuicao_lucro` (filtro no banco nas views `v_financeiro_realizado` e
+  `v_cash_flow_lucenera`; só o Filippo e os scripts veem; revoga `anon`). Dry-run ok em 11/10 (Vinícius/Pedro: 0
+  linhas; Filippo: 193). **Aguardando aprovação para aplicar.** Depois: esconder o cartão na tela.
+- **Achado de segurança (11/10):** a tabela `transacoes` tem política `authenticated_all_transacoes = true` —
+  qualquer pessoa com login (inclusive os auxiliares novos) consegue ler e alterar todo o financeiro pela API. E as
+  views financeiras estavam abertas a `anon`. Precisa de SPEC própria.
 
 ## Bloco G — Backlog registrado (não fazer agora)
 
@@ -140,15 +150,15 @@ Filippo: *"não interessa agora implementar coisas que não são indispensáveis
 
 ## Perguntas abertas
 
-1. **A1/A3:** o vínculo nasce sempre do **XML da Connect** (import já existe) ou também pode ser digitado à mão?
-2. **A2:** o vínculo ganha número `VENDA-XXXX` do sistema, ou fica só com o **nº da Connect**? (Recomendo só o da
-   Connect, para não parecer venda feita aqui.)
-3. **A2:** status final `Orçamento Aprovado` com etiqueta "Vínculo Connect", ou um status próprio
-   "Vinculado (Connect)"? (Recomendo status próprio: nenhuma tela que filtra "Orçamento Aprovado" pega por engano.)
-4. **A4:** quando a entrega dessas vendas acontecer, ela é feita **na Connect** (sistema novo só consulta) ou o
-   sistema novo deve permitir separar/entregar, puxando a reserva nessa hora?
-5. **A4:** o valor do vínculo entra nos relatórios de venda, RT e comissão do sistema novo?
-6. **C3:** trocar reserva de outro vendedor precisa de autorização dele, ou basta ficar no log?
+1. **A2:** o vínculo ganha número `VENDA-XXXX` do sistema, ou fica só com o **nº da Connect**? (Recomendo só o da
+   Connect.)
+2. **A2:** status final próprio "Vinculado (Connect)"? (Recomendo, para nenhuma tela pegar por engano.)
+3. **D1:** ver Bloco D (confirmar com o Vinícius).
+4. **F1:** quem é a equipe de projetos (Orçamentos, Entregas, Fichas Técnicas, Showroom)?
+
+Respondidas em 11/10: XML fica como está; riscos do A4 ficam para depois; impostos não mexe; filtro de estoque com
+desativadas marcadas; marca prevalece (fornecedor no Editar); linhas pretas; "não disponível"; troca direta
+descartada; filtro por etapa já existe; matriz de acesso aprovada.
 
 ## Realizado
 

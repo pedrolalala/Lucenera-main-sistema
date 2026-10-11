@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-196 — Segurança dos dados financeiros (quem pode ler e alterar o financeiro direto no banco)"
-status: aguardando aprovação — Fase 0 é URGENTE
+status: Fase 0 APLICADA (11/10); Fase 1 aguardando respostas 2 e 3
 data_ultima_modificacao: 2026-10-11
 origem: "achado durante a SPEC-195 F2 (11/10/2026) + pedido do usuário"
 sistemas_envolvidos:
@@ -68,16 +68,16 @@ Quem usa cada coisa (conferido no código em 11/10):
 ### Fase 0 — fechar o que está aberto sem login (URGENTE, risco baixo)
 
 Nenhuma tela lê esses objetos, então nada quebra para o usuário.
-- [ ] **0.1** `staging_conta_pagar`, `staging_conta_receber`, `stg_duplicatas_vigentes`: ligar RLS **sem política**
+- [x] **0.1** `staging_conta_pagar`, `staging_conta_receber`, `stg_duplicatas_vigentes`: ligar RLS **sem política**
   (só scripts/postgres e service_role leem) e `REVOKE ALL ... FROM anon, authenticated`.
-- [ ] **0.2** `vw_transacoes_completas`, `vw_conferencia_financeira`, `vw_financeiro_projetos`: `REVOKE ALL ... FROM
+- [x] **0.2** `vw_transacoes_completas`, `vw_conferencia_financeira`, `vw_financeiro_projetos`: `REVOKE ALL ... FROM
   anon, authenticated` (scripts e Edge Functions continuam).
-- [ ] **0.3** `REVOKE ALL FROM anon` em **todas** as tabelas/views financeiras listadas acima (hoje o RLS segura, mas
+- [x] **0.3** `REVOKE ALL FROM anon` em **todas** as tabelas/views financeiras listadas acima (hoje o RLS segura, mas
   qualquer política nova mal escrita reabre). Conferir antes que nenhuma página pública (aprovação de orçamento pelo
   cliente por token, site do showroom) lê alguma delas sem login.
-- [ ] **0.4** `projeto_parcelas_backup_migration` (cópia antiga, 4.742 linhas): fechar para `authenticated` ou apagar
+- [x] **0.4** `projeto_parcelas_backup_migration` (cópia antiga, 4.742 linhas): fechar para `authenticated` ou apagar
   (pergunta 3).
-- [ ] **0.5** Teste: repetir a tabela acima — "sem login" tem que dar 0/negado em tudo.
+- [x] **0.5** Teste: repetir a tabela acima — "sem login" tem que dar 0/negado em tudo.
 
 ### Fase 1 — financeiro só para quem tem o sistema liberado
 
@@ -127,4 +127,18 @@ Como:
 
 ## Realizado
 
-(nada ainda — SPEC criada em 11/10/2026; os números da tabela foram medidos no banco no mesmo dia, sem alterar nada.)
+### 11/10 — Fase 0 aplicada (aprovada pelo usuário)
+
+- Migration `20261011_198_spec196_fase0_fechar_financeiro_sem_login` (rollback.sql gerado a partir dos grants reais
+  de antes):
+  - RLS ligado sem política em `staging_conta_pagar`, `staging_conta_receber`, `stg_duplicatas_vigentes`;
+  - fechados para **sem login e logado** (nenhuma tela usa): os 3 staging, `vw_transacoes_completas`,
+    `vw_conferencia_financeira`, `vw_financeiro_projetos`, `vw_staging_resumo`, `projeto_parcelas_backup_migration`
+    (fechada, não apagada — pergunta 3 em aberto);
+  - fechados só para **sem login**: 20 tabelas e 10 views financeiras, incluindo `vw_funcionarios_completo` (27
+    funcionários) e `vw_comissao_mensal` (11), que também estavam abertas sem login (achadas no levantamento).
+- Conferido antes de aplicar: nenhuma tela nem Edge Function lê os objetos fechados para logado; `generate-report`
+  usa a chave anon + login do usuário, mas não lê nenhum deles.
+- Conferido depois, **de fora** (API pública com a chave anon): todos os objetos acima → HTTP 401; o site público do
+  Showroom (`vw_showroom_publico`) continua respondendo. Scripts com conexão direta continuam lendo o staging.
+- Logado: nada mudou ainda (auxiliar continua lendo `transacoes`, `folha_pagamento` etc.) — é a Fase 1.

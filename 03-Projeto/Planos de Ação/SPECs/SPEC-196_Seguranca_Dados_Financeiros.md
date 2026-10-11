@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-196 — Segurança dos dados financeiros (quem pode ler e alterar o financeiro direto no banco)"
-status: Fases 0, 1 e 2a APLICADAS (11/10); 2b listada
+status: Fases 0, 1, 2a e 2b APLICADAS (11/10)
 data_ultima_modificacao: 2026-10-11
 origem: "achado durante a SPEC-195 F2 (11/10/2026) + pedido do usuário"
 sistemas_envolvidos:
@@ -197,7 +197,7 @@ Migration `20261011_200_spec196_fase2_sem_login_e_rh` (rollback.sql com grants/p
   Vinícius e Mariane iguais; auxiliar não altera mais funcionários/estoque/permissões.
 - Regra para o futuro gravada no `AGENTS.md` ("Segurança do banco").
 
-### Fase 2b — fica listada (precisa decidir tela a tela)
+### Fase 2b — APLICADA em 11/10 (ver abaixo); lista original
 
 - `orcamentos`: a política `anon_can_read_orcamento_by_token` também deixa **qualquer logado** ver todo orçamento com
   token, e `anon_insert_orcamentos` deixa inserir sem regra — trocar pelas regras do Hub (SPEC-069).
@@ -206,3 +206,28 @@ Migration `20261011_200_spec196_fase2_sem_login_e_rh` (rollback.sql com grants/p
   `projetos_fechados`, `historico_status_orcamentos`, `contato_tipos`, `empresas`, `quotes`/Ubiqua.
 - `contatos` (clientes, CPF/CNPJ, telefones) legível por qualquer logado — decidir quem precisa.
 - Supabase continua dando grant a `anon` em tabela NOVA por padrão (regra no AGENTS.md cobre).
+
+### 11/10 — Fase 2b APLICADA (aprovada pelo usuário)
+
+Migration `20261011_201_spec196_fase2b_operacional_por_sistema` (rollback.sql recria as políticas de antes). Função
+`pode_acessar_algum(slugs[])` = admin ativo **ou** algum dos sistemas em Acesso a Sistemas (scripts/service_role passam).
+- `orcamentos` e `historico_status_orcamentos`: só quem tem algum sistema interno (saem as políticas `USING (true)` e as
+  de `anon`). **Fecha a leitura dos orçamentos da Lucenera pelos representantes Ubiqua** e por contas sem sistema.
+  O histórico deixa de poder ser editado (só inserir).
+- `separacoes` (leitura), `separacao_arquivos`, `entregas_pendentes`, `entregas_finalizadas`: Logística ou Separação
+  Parcial. `garantia_itens`/`garantia_protocolos`: Controle de Garantia.
+- `projetos_fechados`: RH/CRM/financeiro/Dashboard leem; RH ou admin gravam.
+- `contato_tipos`: grava quem cadastra contato (Orçamentos, CRM, Compras, Adm. Bancária, Cadastro).
+- `empresas`: todos leem; só admin altera.
+- `contatos`: **mantido** legível por qualquer logado (9 sistemas usam); gravação já era por papel/Hub.
+
+Dry-run por perfil: Vinícius, Lana, Marina, Débora, João, Matheus iguais nas telas que usam; João/Matheus perdem a
+Garantia (não têm o sistema); só admin altera empresas; conta sem sistema (Moara) → 0. Conferido depois com **login
+real** do João: orçamentos 20, separações 441, entregas 2, garantia 0, projetos fechados 0. Contas sem sistema
+(erp.lucenera@gmail.com, marianelighting@outlook.com, vinicius_bortolin@hotmail.com, moara@) continuam vendo o catálogo
+Ubiqua (produtos 74, revendas 87, orçamentos Ubiqua 23) e veem 0 orçamentos Lucenera.
+
+Fica para depois (anotado): tabelas Ubiqua (`orcamentos_revenda_ubiqua`, `revenda_ubiqua`, `quotes`) — cada
+representante vê os orçamentos/revendas de todos os outros; gatilhos `propagate_contato_nome`/`propagate_projeto_codigo`
+rodam com a permissão de quem edita o contato/projeto (já não atualizavam a separação de quem não tem Logística — era
+assim antes).

@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-195 — Orçamento de vínculo (venda já aprovada na Connect) + pendências da reunião 30 (09/10)"
-status: em andamento — F1 Estoque e F2 aplicados; A aguardando respostas
+status: em andamento — A (vínculo) publicado 11/10; F1/F2 aplicados; D1 a confirmar
 data_ultima_modificacao: 2026-10-11
 origem:
   - "pedido do usuário 11/10: orçamento que só liga peças e valor, sem estoque e sem financeiro"
@@ -51,10 +51,10 @@ do vínculo.
 
 ### Checklist
 
-- [ ] **A1. Marcar o orçamento como vínculo.** Nova coluna `orcamentos.vinculo_connect boolean NOT NULL DEFAULT false`
+- [x] **A1. Marcar o orçamento como vínculo.** Nova coluna `orcamentos.vinculo_connect boolean NOT NULL DEFAULT false`
   (ou `natureza_operacao = 'vinculo_connect'` — decidir na implementação; a coluna é mais segura porque `natureza`
   já separa venda × devolução). Exige `origem_connect_cod_orcamento` preenchido (número do orçamento na Connect).
-- [ ] **A2. RPC nova `vincular_orcamento_connect(p_orcamento_id)`**, separada de `aprovar_orcamento_financeiro`
+- [x] **A2. RPC nova `vincular_orcamento_connect(p_orcamento_id)`**, separada de `aprovar_orcamento_financeiro`
   (a aprovação normal não muda):
   - mesmas validações básicas: projeto, cliente, empresa, itens com produto cadastrado, quantidade e preço > 0;
   - **não** exige forma/plano de pagamento;
@@ -67,7 +67,7 @@ do vínculo.
   - grava histórico "Vínculo de venda aprovada na Connect nº X — sem estoque e sem financeiro";
   - idempotente (rodar duas vezes não duplica `projeto_itens`);
   - permissão: `hub_pode_executar(..., 'orcamentos', NULL, 'aprovar')` (mesma de aprovar).
-- [ ] **A3. Tela (Orçamentos):** no orçamento importado da Connect (ou marcado à mão), botão **"Vincular venda da
+- [x] **A3. Tela (Orçamentos):** no orçamento importado da Connect (ou marcado à mão), botão **"Vincular venda da
   Connect"** no lugar de "Enviar para aprovação". Pula as etapas cliente/equipe/financeira. Etiqueta visível
   "Vínculo Connect nº X" na lista, no detalhe e no filtro.
 - [ ] **A4. (DEPOIS — decisão do usuário 11/10: resolver mais tarde) Ninguém pode tratar vínculo como venda nova.** Conferir e ajustar cada consumidor:
@@ -79,9 +79,9 @@ do vínculo.
     ações que movem estoque nele até decidir a virada (pergunta 4).
   - **Dashboard / relatórios de venda, RT e comissão:** decidir se o valor conta (pergunta 5).
   - `vw_cadastro_produto_movimentos` (aba Movimentos do Cadastro): mostrar com a etiqueta "Connect".
-- [ ] **A5. Desfazer:** `desvincular_orcamento_connect` apaga os `projeto_itens` do vínculo e volta para rascunho
+- [x] **A5. Desfazer:** `desvincular_orcamento_connect` apaga os `projeto_itens` do vínculo e volta para rascunho
   (só se nada foi feito em cima deles).
-- [ ] **A6. Teste ponta a ponta** com um XML real da Connect: importar → vincular → conferir que `estoque_itens`,
+- [x] **A6. Teste ponta a ponta** com um XML real da Connect: importar → vincular → conferir que `estoque_itens`,
   `estoque_saldos_projeto_item`, `projeto_parcelas` e `boletos` **não mudaram**, que o projeto mostra peças/valor e
   que Necessidade de Compra e Vendas não mostram nada novo.
 
@@ -169,4 +169,30 @@ linhas pretas; "não disponível"; troca direta descartada; filtro por etapa já
 
 ## Realizado
 
-(nada ainda — SPEC criada em 11/10/2026. O mapa da aprovação e dos consumidores foi conferido no banco no mesmo dia.)
+### 11/10 — Bloco A (vínculo Connect) publicado
+
+- Migration `20261011_197_spec195_orcamento_vinculo_connect` **aplicada** (rollback.sql com as definições anteriores):
+  - `orcamentos.vinculo_connect` + índice único em `numero_venda`;
+  - `vincular_orcamento_connect(id)`: exige XML da Connect (`origem_connect_cod_orcamento`), projeto/cliente/empresa,
+    itens com produto; grava `projeto_itens`, número `VENDA-<nº Connect>`, status `Orçamento Aprovado`, histórico;
+    **não** toca estoque, parcelas, boletos; idempotente; permissão = mesma de aprovar;
+  - `desvincular_orcamento_connect(id, motivo)`: apaga os `projeto_itens` do vínculo e volta o orçamento;
+  - proteções: orçamento vinculado não edita itens/valores, não aprova financeiro, não "desfaz aprovação", não cancela
+    (usar "Desfazer vínculo"), e item vinculado não vira origem de devolução;
+  - correção junto: `sync_projeto_valor_total` não recalculava o valor do projeto em DELETE (afetava também o
+    "Desfazer aprovação").
+- Teste ponta a ponta (dry-run) no ORC-0038 = Connect nº 7994 (150 peças, R$ 190.830,62): vínculo criou 150 itens e o
+  projeto passou a R$ 190.830,62; estoque reservado, saldos, movimentos, parcelas, boletos e Necessidade de Compra
+  **idênticos** antes/depois; todas as proteções bloquearam; desvincular voltou o projeto a R$ 0; auxiliar de estoque
+  sem permissão. Nada foi vinculado de verdade.
+- Necessidade de Compra, Entrega Futura, re-reserva, estoque_resumo e Separação leem `estoque_saldos_projeto_item`
+  (o vínculo não cria saldo) — ficam de fora sem mudança.
+- Telas publicadas: **Orçamentos** (Skip 32554 v0.0.385 `39a0b03`) — botão roxo "Vincular venda da Connect" no
+  orçamento importado do XML, selo "Vínculo Connect nº X", "Desfazer vínculo" no lugar de "Desfazer aprovação";
+  **Vendas** (59346 v0.0.19 `9e385ca`) — vínculo não aparece para emitir nota. Nenhuma Edge Function alterada.
+- Achado (já existia, fora do vínculo): "Desfazer aprovação" do ORC-0033 falha na constraint
+  `estoque_movimentos_projeto_item_tipo_check` (tipo `estorno_aprovacao_orcamento` não permitido).
+- Atenção à numeração: enquanto Connect e sistema rodarem juntos, uma venda real aprovada aqui pega MAX+1 (depois do
+  maior nº da Connect); se a Connect usar esse número depois, o vínculo dele vai recusar ("número já existe").
+
+

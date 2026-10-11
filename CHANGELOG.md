@@ -7,6 +7,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - SPEC-194: 5 logins dos auxiliares de estoque criados e ligados ao funcionário (sem duplicado); login testado.
 - SPEC-195 F1: área Estoque (Separação Parcial, Consultar Produtos, Sistema de Entregas) liberada para Vitória,
   Matheus, Alexandre e os 5 auxiliares; papel `estoque` para quem não tinha.
+- SPEC-195 A: orçamento de **vínculo** de venda já aprovada na Connect — migration 197 aplicada (vincular/desvincular,
+  proteções, correção do recálculo do valor do projeto); Orçamentos 32554 v0.0.385 e Vendas 59346 v0.0.19 publicados.
+- SPEC-195 F1 (Projetos): Orçamentos, Entregas, Fichas Técnicas e Showroom para as 3 equipes de projetos.
 - SPEC-195 F2: migration 196 aplicada — Distribuição de Lucro no Dashboard só para Filippo, Pedro e Vinícius (filtro no
   banco + cartão escondido, Skip 41135 v0.0.46); views financeiras fechadas para `anon`.
 

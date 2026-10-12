@@ -4,6 +4,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-12
 
+- SPEC-193 B1/B3 etapa 1: telas passam a usar só `referencia` (sem `sku`/`codigo_legado` de produtos) e a categoria
+  pelo `categoria_id`. O campo "Referência" do Cadastro grava em `referencia` (antes ia para `sku`). Publicados:
+  Cadastro 36668 v0.0.103, Orçamentos 32554 v0.0.387, Showroom 54698 v0.0.20, Compras 40326 v0.0.84, Garantia 60545
+  v0.0.13, Vendas 59346 v0.0.21.
 - SPEC-193 C2/A1/B4: custo e impostos da peça só para a Administração (Lana, Débora, Carol, Matheus, Vinícius +
   Pedro/Filippo). Migration 202 (lista `produto_custo_visualizadores`, `pode_ver_custo_produto()`,
   `vw_produtos_custo`, coluna `produtos.tem_st`) e 203 (colunas de custo fechadas em `produtos` para `authenticated`;

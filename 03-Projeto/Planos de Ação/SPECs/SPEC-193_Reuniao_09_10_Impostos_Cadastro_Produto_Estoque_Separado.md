@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-193 — Reunião 09/10 (Vinícius e Filippo): impostos no custo, limpeza do cadastro de produto e estoque separado"
-status: em implementação — passo 1 (C2 + A1/B4) publicado em 12/10
+status: em implementação — passos 1 (C2 + A1/B4) e 2 (B1 + B3 etapa 1) publicados em 12/10
 data_ultima_modificacao: 2026-10-12
 origem: "02-Reunioes/29. Lucenera (Vinicius e Filippo) - 09.10.2026_ Imposto e Regras/Reunião.01"
 sistemas_envolvidos:
@@ -61,7 +61,7 @@ Números conferidos no banco em 09/10 (4.537 produtos ativos):
 | `descricao_tecnica` | 2 preenchidos | Fica como está. Ideia para depois (Pedro/Vinícius): usar como descrição curta para o cliente. |
 | `multiplo_compra` | tudo = 1 | Fica (é configuração da Connect, necessária para emitir nota). Ver Bloco D. |
 
-- [ ] **B1.** Categoria visível pelo `categoria_id` em todo lugar que mostra produto. Conferir as categorias erradas:
+- [x] **B1.** Categoria visível pelo `categoria_id` em todo lugar que mostra produto. Conferir as categorias erradas:
   na reunião a "Fly arandela indireta" apareceu com categoria duvidosa.
 - [ ] **B2. A marca manda no fornecedor (decidido 09/10).** O fornecedor do produto é sempre o `marcas.fornecedor_id`
   da marca dele (4.526 produtos têm marca). O import **não** grava fornecedor por produto; usa `CodFornecedor`/
@@ -184,3 +184,30 @@ SPEC criada em 09/10/2026 a partir da transcrição (números do Bloco B conferi
 - **Fica para os próximos passos**: B1, B3 (o campo "Referência" do Editar ainda grava em `sku`), B2, C1/C3/C4 e B3
   etapa 2. Não verificado na tela (extensão do navegador fora); conferir com login da Administração e de uma
   projetista.
+
+### 12/10/2026 — Passo 2: B1 (categoria por `categoria_id`) + B3 etapa 1 (telas usam `referencia`)
+
+- **Cadastro 36668 v0.0.103**: o campo "Referência" do Editar/Nova peça agora grava em `referencia` (antes gravava em
+  `sku`; quem editava a referência mudava só a cópia). A checagem "Em uso" passa a ser pela referência. Até a etapa 2,
+  o Salvar também copia a referência para `sku`, para a cópia não ficar desatualizada. Lista e painel da peça sem
+  fallback para `codigo_legado`/`sku`; categoria sempre o nome de `categoria_id`. Busca sem `sku`.
+- **Orçamentos 32554 v0.0.387**: nenhuma leitura de `produtos.sku`/`codigo_legado`; os rótulos "SKU: …" saíram (fica
+  "Ref: …"); "Código de Referência" do item e a coluna "Referência" da busca vêm de `referencia`; import de planilha
+  casa só pela referência.
+- **Showroom 54698 v0.0.20**: "Cód. legado" saiu do /admin (era igual ao código da peça); fica "Ref.".
+- **Compras 40326 v0.0.84**: "SKU:" virou "Ref:" no estoque; buscas sem `sku`.
+- **Garantia 60545 v0.0.13**: a busca de peça mostra a referência.
+- **Vendas 59346 v0.0.21**: o espelho da nota usa referência → código (sem `sku`).
+- Nenhuma Edge Function redeployada (conferido antes/depois). Dados: `referencia` cobre tudo o que `sku` tinha (0
+  peças com `sku` e sem referência; 184 recentes com referência e `sku` vazio); 1 referência repetida
+  (`3651-FE-S-PX`, a peça "EMBUTIDO de teste").
+- **Ainda leem as colunas (etapa 2, no banco)**: funções `buscar_produtos_fuzzy`, `garantia_buscar_produtos`,
+  `get_next_sku`, `criar_produto_orcamento` (grava `sku`/`percentual_lucro`), `showroom_*` (devolvem `codigo_legado`);
+  views `vw_estoque_liquido`, `vw_estoque_produtos`, `vw_produtos_estoque_detalhado`, `vw_vendas_loja`,
+  `vw_vendas_produtos` (essas 3 últimas + `vw_estoque_liquido` ainda mostram `categoria` texto, sempre vazia — trocar
+  pelo nome de `categoria_id`); Edge Function `emitir-nota-fiscal` (lê `sku`, mas usa referência antes) e os scripts
+  `importar_produtos_*.py`.
+- **B1, conferência de dados** (não alterado, decisão de negócio): 6 peças sem categoria (4 lâmpadas Philips e 2
+  cadastros de carro: BMW 320i e Outlander); 83 peças em LUMINARIA cujo nome começa com PERFIL (73), DRIVER, LAMPADA ou
+  FONTE — como a RT é calculada sobre Luminária, vale revisar. A "Fly arandela indireta" da reunião não foi achada
+  pelo nome (há "TORUS FLY" e "FLYING", todas LUMINARIA).

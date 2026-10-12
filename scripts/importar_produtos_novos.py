@@ -30,7 +30,7 @@ vlCustoIndireto/vlCustoTotal da planilha):
                      trigger de preço, equivalente ao NEW.preco_custo)
   vlCustoTotal    -> produtos.custo_total (mesmo mapeamento do script de sync)
   ValorVenda      -> produtos.valor_venda (idem)
-  Lucro           -> produtos.percentual_lucro (idem)
+  Lucro           -> produtos.margem_lucro (SPEC-193 B3: percentual_lucro saiu do banco)
   EstoqueTotal/Showroom/Disponivel -> estoque_total/estoque_showroom/estoque_disponivel (idem)
   Unidade         -> produtos.unidade
   ncm/cest        -> produtos.ncm/cest (idem, texto, nunca vira número)
@@ -282,7 +282,7 @@ def processar(dry_run: bool) -> None:
             "preco_custo": _num(_bn(r["vlCusto"])),
             "custo_total": _num(_bn(r["vlCustoTotal"])),
             "valor_venda": _num(_bn(r["ValorVenda"])),
-            "percentual_lucro": _num(_bn(r["Lucro"])),
+            "margem_lucro": _num(_bn(r["Lucro"])),
             "estoque_total": _num(_bn(r["EstoqueTotal"])),
             "estoque_showroom": _int(_bn(r["Showroom"])),
             "estoque_disponivel": _num(_bn(r["Disponivel"])),

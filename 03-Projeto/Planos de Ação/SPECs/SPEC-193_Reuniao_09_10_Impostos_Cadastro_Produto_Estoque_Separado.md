@@ -255,3 +255,32 @@ SPEC criada em 09/10/2026 a partir da transcrição (números do Bloco B conferi
   sistema). 292 peças mudam; em 250 o que aparecia disponível passa a zero ou negativo. Nenhuma Edge Function
   redeployada.
 - Não verificado na tela (sem navegador): conferir a Consulta abrindo e o filtro "Só com estoque".
+
+### 12/10/2026 — Passo 5 (preparado, NÃO aplicado): B3 etapa 2 — colunas duplicadas saem de `produtos`
+
+- **Migration 205** (`20261012_205_spec193_colunas_duplicadas_produtos`, gerada das definições reais por script):
+  - `001_redefinir_leitores.sql`: tudo que ainda lia as colunas passa a ler a que fica, **mantendo nomes e tipos**
+    (nenhum sistema percebe): `buscar_produtos_fuzzy`, `garantia_buscar_produtos` (sku ← referencia),
+    `showroom_listar_produtos_estoque`, `showroom_obter_composicao`, `showroom_buscar_produto` (codigo_legado ←
+    codigo_produto), `criar_produto_orcamento` (não grava mais sku), views `vw_produtos_custo_restrito` (base das 8
+    views de estoque/compra/vendas), `vw_produtos_custo`, `vw_showroom_publico`, `vw_produtos_estoque_detalhado`
+    (categoria ← nome de categoria_id, percentual_lucro ← round(margem_lucro, 2)). `get_next_sku` sai.
+  - `002_remover_colunas.sql`: cópia de segurança `_bkp_spec193_produtos_colunas`; `DROP COLUMN` de
+    `codigo_legado`, `percentual_lucro` e `categoria`; **`sku` vira coluna gerada = referencia (só leitura)** —
+    o PDF do orçamento (Edge Function `generate-report`, com cópia em 9 sistemas e rodando com o login do usuário) e a
+    emissão de NF-e ainda pedem `sku`; assim continuam funcionando e ninguém consegue gravar valor diferente.
+  - `rollback.sql`: devolve as 4 colunas com os dados da cópia, índices/constraints/grants e as definições originais.
+  - **Fica para depois**: `fornecedor_principal_id` (o campo "Fornecedor" do Cadastro ainda grava nele — junto com a
+    decisão do B2).
+- **Ensaio (transação desfeita, 0,8 s)**: 24 views que dependem de `produtos` com as mesmas linhas e os mesmos
+  valores fora das 4 colunas; funções com o mesmo número de resultados; PDF do orçamento (nome/referencia/sku) ok
+  com login da Mariane; ler `codigo_legado` = erro (esperado); Salvar do Cadastro **de hoje** (envia sku) = erro →
+  o Cadastro precisa ser publicado antes; Salvar sem sku = ok; criar peça pelo Orçamento ok (antes aceitava sku
+  diferente da referência, depois sku = referência); `vw_vendas_produtos` passa a mostrar a categoria. Rollback
+  rodado no mesmo ensaio: 0 peças diferentes do original e as 24 views idênticas.
+- **Dados que se perdem**: nenhum. `codigo_legado` = `codigo_produto` em todas; `categoria` texto vazia;
+  `percentual_lucro` difere de `margem_lucro` só por arredondamento (6) ou por estar zerado (369).
+- **Fora do banco, já feito (funciona antes e depois)**: `importar_produtos_estoque.py` e `importar_produtos_novos.py`
+  deixam de gravar `percentual_lucro` (o novo passa a gravar `margem_lucro`); dry-run do import ok.
+- **Ordem para aplicar (com aprovação)**: (1) publicar o Cadastro sem enviar `sku` no Salvar; (2) aplicar 001 + 002
+  numa transação; (3) recarregar o cache da API e conferir Consulta, busca do Orçamento, PDF e Showroom.

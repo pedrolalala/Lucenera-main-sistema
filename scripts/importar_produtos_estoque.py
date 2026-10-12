@@ -10,7 +10,8 @@ Mapeamento (grounded no schema real, supabase/db/current/01_schema_full.sql):
                   ATÉ 2026-09-08 essa coluna da planilha se chamava `CustoTotal`; o export
                   Connect de 2026-09-10 renomeou para `vlCustoTotal` (mesmo dado, formato BR).
   ValorVenda   -> produtos.valor_venda (coluna nunca foi sincronizada antes — hoje 100% zerada)
-  Lucro        -> produtos.percentual_lucro E produtos.margem_lucro (campo "% Lucro" do PecaForm)
+  Lucro        -> produtos.margem_lucro (campo "% Lucro" do PecaForm). SPEC-193 B3: percentual_lucro
+                  era cópia e saiu do banco (migration 205).
   vlCusto      -> produtos.preco_custo (preço de TABELA do fornecedor, antes do desconto). Reunião
                   Vinícius 08/10/2026: "qualquer preço de custo aqui tem que bater com a tabela do
                   fornecedor; o sistema de forma alguma pode mudar isso". Conta da Connect (confere
@@ -189,7 +190,6 @@ def carregar_planilha(path: Path) -> pd.DataFrame:
     # 2026-09-10: coluna renomeada de "CustoTotal" para "vlCustoTotal" no export Connect.
     df["custo_total"] = to_numeric_br(df["vlCustoTotal"]).fillna(0)
     df["valor_venda"] = to_numeric_br(df["ValorVenda"]).fillna(0)
-    df["percentual_lucro"] = to_numeric_br(df["Lucro"]).fillna(0)
     df["ncm"] = limpar_codigo_fiscal(df["ncm"])
     df["cest"] = limpar_codigo_fiscal(df["cest"])
 
@@ -212,7 +212,6 @@ def carregar_planilha(path: Path) -> pd.DataFrame:
             "estoque_disponivel",
             "custo_total",
             "valor_venda",
-            "percentual_lucro",
             "ncm",
             "cest",
             *FISCAL_NUM_TRIGGER,
@@ -242,7 +241,7 @@ def close_enough(a: float, b: float, tol: float = 0.005) -> bool:
     # "diferente" de 0 e o script gravava 0 em tudo.
     a = 0.0 if pd.isna(a) else float(a)
     b = 0.0 if pd.isna(b) else float(b)
-    # Folga de ponto flutuante: percentual_lucro é numeric(,2) no banco e a
+    # Folga de ponto flutuante: valores numeric(,2) no banco e a
     # planilha manda 3 casas (152.075 vira 152.08); a diferença "exata" de
     # 0.005 sai 0.0050000000000x e o produto parecia alterado em todo run.
     return abs(a - b) <= tol + 1e-9
@@ -276,7 +275,7 @@ def processar(dry_run: bool) -> None:
         client,
         "produtos",
         "id,codigo_produto,estoque_total,estoque_showroom,estoque_disponivel,"
-        "custo_total,valor_venda,percentual_lucro,ncm,cest,preco_venda,ativo,"
+        "custo_total,valor_venda,ncm,cest,preco_venda,ativo,"
         + ",".join(FISCAL_NUM_TRIGGER + FISCAL_NUM_SAFE + FISCAL_TXT + PRECO_CONNECT),
     )
     produtos["codigo_produto"] = pd.to_numeric(produtos["codigo_produto"], errors="coerce").astype(
@@ -316,7 +315,6 @@ def processar(dry_run: bool) -> None:
             or not close_enough(existente["estoque_disponivel"], row["estoque_disponivel"])
             or not close_enough(existente["custo_total"], row["custo_total"])
             or not close_enough(existente["valor_venda"], row["valor_venda"])
-            or not close_enough(existente["percentual_lucro"], row["percentual_lucro"])
         )
 
         # ncm/cest: só grava quando a planilha traz valor E é diferente do banco.
@@ -364,7 +362,6 @@ def processar(dry_run: bool) -> None:
                         "estoque_disponivel": row["estoque_disponivel"],
                         "custo_total": row["custo_total"],
                         "valor_venda": row["valor_venda"],
-                        "percentual_lucro": row["percentual_lucro"],
                     }
                 )
             if mudou_ncm:

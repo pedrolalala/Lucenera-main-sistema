@@ -87,15 +87,15 @@ do vínculo.
 
 ## Bloco B — Consulta de Produtos (reunião 30.02 + respostas 11/10)
 
-- [ ] **B1. Filtro "Só com estoque"** (positivo **ou negativo**; esconde só os zerados). A busca continua achando
+- [x] **B1. Filtro "Só com estoque"** (positivo **ou negativo**; esconde só os zerados). A busca continua achando
   todas as peças. Peça **desativada** aparece com a marcação **"Desativada"** (não some).
-- [ ] **B2. Marca prevalece** na Consulta e na busca. O **fornecedor continua no Editar** da peça (campo que já
+- [x] **B2. Marca prevalece** na Consulta e na busca. O **fornecedor continua no Editar** da peça (campo que já
   existe), não na lista. Busca combinada marca + categoria: "Stella lâmpada".
 - [ ] **B3. Campos da Consulta**: código interno, referência, descrição, marca, categoria/grupo, setores e preço de
   venda (sem impostos — SPEC-193 C2).
-- [ ] **B4. Linhas da tabela em preto**, no estilo padrão de sistema operacional (hoje somem no computador do
+- [x] **B4. Linhas da tabela em preto**, no estilo padrão de sistema operacional (hoje somem no computador do
   Vinícius).
-- [ ] **B5. "Fora do disponível"** (Casa Cor e Garantia) fica ao lado do número e o texto deixa claro que a peça
+- [x] **B5. "Fora do disponível"** (Casa Cor e Garantia) fica ao lado do número e o texto deixa claro que a peça
   **não está disponível** (ex.: "não disponível").
 
 ## ~~Bloco C — Trocar reserva direto da peça~~ (descartado 11/10)
@@ -196,3 +196,18 @@ linhas pretas; "não disponível"; troca direta descartada; filtro por etapa já
   maior nº da Connect); se a Connect usar esse número depois, o vínculo dele vai recusar ("número já existe").
 
 
+
+### 11/10 — Bloco B (Consulta de Produtos) publicado
+
+Cadastro (Skip 36668 v0.0.101 `0b120aa`, publicado; nenhuma Edge Function alterada):
+- B1: chave **"Só com estoque"** ligada ao abrir — mostra só peças com alguma quantidade ≠ 0 (geral, disponível,
+  showroom ou qualquer setor; positivo ou negativo). Com termo de busca o filtro não esconde nada (aviso no contador).
+  **Desativadas** (374; 1 com estoque) passam a aparecer, no fim da lista, com selo vermelho "Desativada" e linha
+  cinza; na busca entram por código/referência/descrição (a busca inteligente `buscar_produtos_fuzzy` só traz
+  ativas e não foi mexida, porque o Orçamento também usa). No painel: "Desativada" no lugar de "Inativo".
+- B2: busca "Stella lâmpada" **já funcionava** (120 lâmpadas Stellatech + 1 com "lâmpada" no nome). Marca continua na
+  lista; fornecedor segue no Editar.
+- B3: coluna **Categoria** na lista (telas largas), ordenável. Impostos fora da Consulta = SPEC-193 C2.
+- B4: grade da tabela com **linhas pretas** (estilo planilha do sistema operacional).
+- B5: aviso de Casa Cor/Garantia agora diz **"não disponível"** e fica ao lado do número (aba Setores e Editar).
+- Não deu para conferir no navegador (extensão desconectada): conferir na tela.

@@ -7,6 +7,8 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - SPEC-194: 5 logins dos auxiliares de estoque criados e ligados ao funcionário (sem duplicado); login testado.
 - SPEC-195 F1: área Estoque (Separação Parcial, Consultar Produtos, Sistema de Entregas) liberada para Vitória,
   Matheus, Alexandre e os 5 auxiliares; papel `estoque` para quem não tinha.
+- SPEC-195 B: Consulta de Produtos (Cadastro 36668 v0.0.101) — filtro "Só com estoque", desativadas marcadas,
+  coluna Categoria, linhas pretas, aviso "não disponível" ao lado do número.
 - SPEC-196 Fase 2b: migration 201 aplicada — orçamentos, histórico, separações, entregas, garantia, projetos fechados,
   tipos de contato e empresas só para quem usa o sistema correspondente (representantes Ubiqua deixam de ver os
   orçamentos da Lucenera). Testado com login real.

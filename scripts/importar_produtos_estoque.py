@@ -504,6 +504,14 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Apenas mostra o que seria feito")
     args = parser.parse_args()
     processar(args.dry_run)
+    # SPEC-193 B2: lista de conferência marca x fornecedor da planilha. Só lê — o fornecedor da
+    # peça é o da marca e nada é gravado. Falha aqui não afeta o import, que já terminou.
+    try:
+        from conferencia_marca_fornecedor import gerar_conferencia
+
+        gerar_conferencia()
+    except Exception as exc:  # noqa: BLE001
+        print(f"\n(Conferência marca x fornecedor não gerada: {exc})")
 
 
 if __name__ == "__main__":

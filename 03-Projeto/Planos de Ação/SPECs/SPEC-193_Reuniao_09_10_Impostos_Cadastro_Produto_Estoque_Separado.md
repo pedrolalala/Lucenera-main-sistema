@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-193 — Reunião 09/10 (Vinícius e Filippo): impostos no custo, limpeza do cadastro de produto e estoque separado"
-status: em implementação — passos 1 (C2 + A1/B4) e 2 (B1 + B3 etapa 1) publicados em 12/10
+status: em implementação — passos 1 (C2 + A1/B4), 2 (B1 + B3 etapa 1) e 3 (B2) feitos em 12/10
 data_ultima_modificacao: 2026-10-12
 origem: "02-Reunioes/29. Lucenera (Vinicius e Filippo) - 09.10.2026_ Imposto e Regras/Reunião.01"
 sistemas_envolvidos:
@@ -63,7 +63,7 @@ Números conferidos no banco em 09/10 (4.537 produtos ativos):
 
 - [x] **B1.** Categoria visível pelo `categoria_id` em todo lugar que mostra produto. Conferir as categorias erradas:
   na reunião a "Fly arandela indireta" apareceu com categoria duvidosa.
-- [ ] **B2. A marca manda no fornecedor (decidido 09/10).** O fornecedor do produto é sempre o `marcas.fornecedor_id`
+- [x] **B2. A marca manda no fornecedor (decidido 09/10).** O fornecedor do produto é sempre o `marcas.fornecedor_id`
   da marca dele (4.526 produtos têm marca). O import **não** grava fornecedor por produto; usa `CodFornecedor`/
   `nmFornecedor` da planilha só para gerar uma lista de conferência: (a) marcas sem fornecedor cadastrado, com o
   fornecedor que a planilha sugere; (b) produtos onde a planilha diz outro fornecedor que o da marca. Nada é gravado
@@ -211,3 +211,24 @@ SPEC criada em 09/10/2026 a partir da transcrição (números do Bloco B conferi
   cadastros de carro: BMW 320i e Outlander); 83 peças em LUMINARIA cujo nome começa com PERFIL (73), DRIVER, LAMPADA ou
   FONTE — como a RT é calculada sobre Luminária, vale revisar. A "Fly arandela indireta" da reunião não foi achada
   pelo nome (há "TORUS FLY" e "FLYING", todas LUMINARIA).
+
+### 12/10/2026 — Passo 3: B2 (lista de conferência marca × fornecedor)
+
+- Script novo `scripts/conferencia_marca_fornecedor.py`, que roda sozinho e também no fim de
+  `importar_produtos_estoque.py` (se falhar, não afeta o import). Só lê a planilha e o banco (conexão somente
+  leitura); nada é gravado. Gera `scripts/logs/conferencia_fornecedor/conferencia_marca_fornecedor_<data>.xlsx`
+  com as abas Resumo, Marcas sem fornecedor, Marca x planilha e Peças com outro fornecedor.
+- `contatos` não tem o código da Connect: o fornecedor da planilha é casado pelo nome (sem acento/LTDA/EPP/ME);
+  contatos duplicados com o mesmo nome contam como o mesmo fornecedor (há vários: STELLA, ACEND, TENSOFLEX, LA LAMPE,
+  KLAXON, NORTEL, SWELL, FIGUEIREDO NUNES).
+- Resultado da planilha de 07/10:
+  - **45 marcas sem fornecedor** no sistema; 37 têm peças na planilha, com sugestão (ex.: DSGNSELO → Design Selo,
+    BRILIA → Swell, ZAFFERANO → Zaff Light, EXPORLUX → Lunarte, ARTEMIDE → Figueiredo Nunes, PIULUCE → Boseli).
+    TARGETTI e MUNDIAL LUX: fornecedor sugerido não está cadastrado.
+  - **9 marcas** em que o fornecedor da planilha é outro: EKLART (sistema "EKLART 2", planilha LHP Distribuidora,
+    225 peças), LUCENERA (planilha FM Indústria, 168 de 293), BERTOLLUCI (C Bertolucci × Cristiana Bertolucci),
+    LEMCA (dois nomes), METALSPOT (Bella Luce × Emmetre), ACCORD (Fábrica Accord × LC Martinkoski), FLOS (Flos SpA ×
+    Lucenera), NEW LINE (× GNL), WENTZ (× Luxion).
+  - **944 peças** com fornecedor diferente do da marca — quase todas dessas 9 marcas. A marca LUCENERA (peças de
+    fabricação própria) tem peças de vários fornecedores de matéria-prima (FM, Agmatec, Ribertubo, Dimetal...): a regra
+    "a marca manda" talvez não sirva para ela — decidir com o Vinícius.

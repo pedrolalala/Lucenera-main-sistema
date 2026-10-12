@@ -4,6 +4,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-12
 
+- SPEC-193 B2: `scripts/conferencia_marca_fornecedor.py` (roda também no fim do import de Produtos) gera a lista de
+  conferência marca × fornecedor da planilha, sem gravar nada. Planilha 07/10: 45 marcas sem fornecedor, 9 marcas
+  com fornecedor diferente na planilha, 944 peças divergentes.
 - SPEC-193 B1/B3 etapa 1: telas passam a usar só `referencia` (sem `sku`/`codigo_legado` de produtos) e a categoria
   pelo `categoria_id`. O campo "Referência" do Cadastro grava em `referencia` (antes ia para `sku`). Publicados:
   Cadastro 36668 v0.0.103, Orçamentos 32554 v0.0.387, Showroom 54698 v0.0.20, Compras 40326 v0.0.84, Garantia 60545

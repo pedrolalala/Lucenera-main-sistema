@@ -24,6 +24,14 @@ scripts (`importar_contas_pagar_receber.py`, `importar_pedido_compra.py`,
 (conferir que os numeros batem com a execucao real) -> gravar -> conferir o
 Dashboard contra a planilha.
 
+**Fornecedor da peca = fornecedor da marca (SPEC-193 B2, decisao 09/10/2026).** O import de
+Produtos NUNCA grava fornecedor por produto. No fim dele roda `conferencia_marca_fornecedor.py`
+(tambem roda sozinho), que so le a planilha (`CodFornecedor`/`nmFornecedor`) e o banco e gera
+`scripts/logs/conferencia_fornecedor/conferencia_marca_fornecedor_<data>.xlsx` com: marcas sem
+fornecedor (e o sugerido pela planilha), marcas cujo fornecedor na planilha e outro, e pecas com
+fornecedor diferente do da marca. Correcao e manual (Cadastro/Connect). `contatos` nao tem o
+codigo da Connect: o casamento e pelo nome normalizado; contatos duplicados contam como o mesmo.
+
 **Invariantes que os scripts JA implementam e NAO podem ser removidas** (cada
 uma corrigiu um bug real de divergencia planilha x Dashboard):
 

@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-12
+
+- SPEC-193 C2/A1/B4: custo e impostos da peça só para a Administração (Lana, Débora, Carol, Matheus, Vinícius +
+  Pedro/Filippo). Migration 202 (lista `produto_custo_visualizadores`, `pode_ver_custo_produto()`,
+  `vw_produtos_custo`, coluna `produtos.tem_st`) e 203 (colunas de custo fechadas em `produtos` para `authenticated`;
+  8 views de estoque/compra/vendas passam a ler `vw_produtos_custo_restrito`, custo nulo para quem não é da lista).
+  Publicados: Cadastro 36668 v0.0.102 (bloco de custo escondido e não gravado para quem não vê; textos de ajuda de
+  % ST / % IPI / % Frete / % Outras Despesas e "% Lucro (sobre o custo total)"), Orçamentos 32554 v0.0.386
+  (Gerenciamento e resumo fiscal), Vendas 59346 v0.0.20 (DANFE), Compras 40326 v0.0.83 (pedido). Testado por perfil.
+
 ## 2026-10-11
 
 - SPEC-194: 5 logins dos auxiliares de estoque criados e ligados ao funcionário (sem duplicado); login testado.

@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-193 — Reunião 09/10 (Vinícius e Filippo): impostos no custo, limpeza do cadastro de produto e estoque separado"
-status: aprovada com respostas (09/10) — aguardando início da implementação
-data_ultima_modificacao: 2026-10-09
+status: em implementação — passo 1 (C2 + A1/B4) publicado em 12/10
+data_ultima_modificacao: 2026-10-12
 origem: "02-Reunioes/29. Lucenera (Vinicius e Filippo) - 09.10.2026_ Imposto e Regras/Reunião.01"
 sistemas_envolvidos:
   - Cadastro Lucenera — Cadastro e Consulta de Produtos (cadastro-lucenera-b86fe, Skip 36668)
@@ -31,7 +31,7 @@ O que muda é **deixar o cadastro de produto limpo e certo** e **separar o estoq
 
 ### Bloco A — Impostos no custo (registro e uso)
 
-- [ ] **A1. Registrar o que cada coluna de imposto quer dizer** no cadastro (texto de ajuda nos campos, sem mudar a
+- [x] **A1. Registrar o que cada coluna de imposto quer dizer** no cadastro (texto de ajuda nos campos, sem mudar a
   conta). **Decidido 09/10: o nome "% Outras Despesas" NÃO muda** (fica igual à Connect); entra só o texto de ajuda:
   - **% ST**: substituição tributária destacada na nota. O fornecedor recolhe antes e a Lucenera paga junto com a nota.
   - **% Outras Despesas**: na prática é o **ICMS que a Lucenera recolhe por fora no fim do mês** (não vem destacado na
@@ -87,7 +87,7 @@ Números conferidos no banco em 09/10 (4.537 produtos ativos):
 
   O `sku` aparece na **nota fiscal** (Focus NFe, código do produto) — trocar por `referencia` só depois de conferir
   que a referência nunca vem vazia nesses itens (hoje 35 produtos estão sem referência; ver linha `referencia`).
-- [ ] **B4. Lucro fica em % como hoje (decidido 09/10).** É o "Lucro" da Connect aplicado sobre o custo total
+- [x] **B4. Lucro fica em % como hoje (decidido 09/10).** É o "Lucro" da Connect aplicado sobre o custo total
   (`valor_venda = custo_total × (1 + Lucro%)`, ex. 46,46 × 2,5209 = 117,12). Sem campo de markup a mais. Só ajustar o
   rótulo/ajuda para "% Lucro (sobre o custo total)".
 
@@ -100,7 +100,7 @@ precisa de uma estrutura enxuta, mais rápida e com menos chance de erro.
   separação, entrega futura…). Entram **só as peças com saldo diferente de zero**. No banco isso já existe em parte
   (`estoque_itens`, `vw_cadastro_produto_setores`); o trabalho é ter **uma view única de consulta** que junte
   isso com código, referência, descrição e preço de venda, e mais nada.
-- [ ] **C2. Duas formas de ver o produto:**
+- [x] **C2. Duas formas de ver o produto:**
   - **Consulta de Produtos** (as meninas, na hora de orçar): código, referência, descrição, preço de venda e
     setores/disponível. **Sem impostos.**
   - **Cadastro de Produto** — **decidido 09/10: só a Administração vê custo e impostos: Lana, Débora, Carol, Matheus e
@@ -153,5 +153,34 @@ precisa de uma estrutura enxuta, mais rápida e com menos chance de erro.
 
 ## Realizado
 
-(nada ainda — SPEC criada em 09/10/2026 a partir da transcrição. Os números da tabela do Bloco B foram conferidos no
-banco no mesmo dia.)
+SPEC criada em 09/10/2026 a partir da transcrição (números do Bloco B conferidos no banco no mesmo dia).
+
+### 12/10/2026 — Passo 1: C2 (custo/impostos só para a Administração) + A1/B4 (textos de ajuda)
+
+- **Banco, migration 202** (`20261012_202_spec193_custo_produto_visao_restrita`, só acrescenta): tabela
+  `produto_custo_visualizadores` (Lana/financeiro@, Débora, Carol, Matheus, Vinícius, Pedro nos 2 e-mails, Filippo),
+  função `pode_ver_custo_produto()` (SECURITY DEFINER; sem JWT/service_role = true), view `vw_produtos_custo` (id + 13
+  colunas de custo/imposto, vazia para quem não está na lista) e coluna gerada `produtos.tem_st` (porc_st > 0).
+- **Sistemas publicados** antes de fechar o banco (nenhuma Edge Function redeployada, conferido antes/depois):
+  - Cadastro 36668 v0.0.102: `produtos` lido com lista de colunas (sem `*`); custo do Editar vem de
+    `vw_produtos_custo`; quem não é da Administração vê só o Preço de Venda e o aviso "Custo e impostos ficam visíveis
+    só para a Administração", e o Salvar não envia custo/impostos/preço (não zera o que a Administração gravou).
+    A1/B4: (i) com texto de ajuda em % Frete, % ST, % IPI, % Outras Despesas (= ICMS recolhido por fora no fim do
+    mês, exemplo da Stella) e rótulo "% Lucro (sobre o custo total)". Nome "% Outras Despesas" mantido.
+  - Orçamentos 32554 v0.0.386: Gerenciamento lê custo por `vw_produtos_custo` (aviso para quem não é da
+    Administração, ex.: Mariane); resumo fiscal usa `tem_st`.
+  - Vendas 59346 v0.0.20: CFOP do espelho da DANFE usa `tem_st`. A emissão real (Edge Function, service_role) não muda.
+  - Compras 40326 v0.0.83: custo/ICMS/IPI/ST do pedido por `vw_produtos_custo` (todos os usuários de Compras estão
+    na lista).
+- **Banco, migration 203** (`20261012_203_spec193_fechar_custo_produto`, gerada das definições reais, com rollback):
+  `REVOKE SELECT ON produtos FROM authenticated` + `GRANT SELECT (33 colunas sem custo)`; nova
+  `vw_produtos_custo_restrito` (todas as colunas, custo nulo fora da lista, filtro por sistema) usada pelas 8 views que
+  liam custo: `v_estoque_produtos`, `vw_estoque_liquido`, `vw_estoque_produtos`, `vw_necessidade_compra`,
+  `vw_necessidade_compra_item_orcamento`, `vw_produtos_estoque_por_local`, `vw_vendas_loja`, `vw_vendas_produtos`.
+- **Teste (ROLLBACK e depois real)**: Débora/Vinícius continuam com 245/245 custos na Necessidade de Compra e o
+  valor de estoque no Dashboard (R$ 4,2 mi); Mariane, Marina e João veem as mesmas linhas com custo vazio; leitura
+  direta de `preco_custo` ou `*` em `produtos` = negada para todos os logins; atualizar peça continua funcionando;
+  sem login = 401; Showroom público intacto. Views em 0,14–0,28 s.
+- **Fica para os próximos passos**: B1, B3 (o campo "Referência" do Editar ainda grava em `sku`), B2, C1/C3/C4 e B3
+  etapa 2. Não verificado na tela (extensão do navegador fora); conferir com login da Administração e de uma
+  projetista.

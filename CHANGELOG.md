@@ -4,6 +4,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-12
 
+- SPEC-193 B3 etapa 2 (aprovada): migration 205 aplicada — `codigo_legado`, `percentual_lucro` e `categoria` (texto)
+  removidas de `produtos`; `sku` virou coluna gerada = `referencia` (só leitura; PDF do orçamento e NF-e seguem
+  funcionando). Funções e views mantêm o formato. Cadastro 36668 v0.0.105 (Salvar sem `sku`). Imports da Connect
+  sem `percentual_lucro`. Cópia de segurança em `_bkp_spec193_produtos_colunas`; rollback testado.
 - SPEC-193 C1/C3/C4: migration 204 (`vw_consulta_estoque`, consulta de estoque enxuta com saldos calculados no
   banco). Consulta de Produtos (Cadastro 36668 v0.0.104) abre em ~1,7 s (antes ~6,1 s); busca de peça do Orçamento
   (32554 v0.0.388) passa a mostrar o mesmo Disponível do Cadastro (292 peças mudam).

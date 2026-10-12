@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-193 — Reunião 09/10 (Vinícius e Filippo): impostos no custo, limpeza do cadastro de produto e estoque separado"
-status: em implementação — passos 1 a 4 (C2, A1/B4, B1, B3 etapa 1, B2, C1/C3/C4) feitos em 12/10; falta B3 etapa 2
+status: concluída em 12/10/2026 (blocos A, B e C); pendentes de decisão: LUCENERA × fornecedor (B2), fornecedor_principal_id, categorias suspeitas (B1); blocos D/E/F fora do escopo de código
 data_ultima_modificacao: 2026-10-12
 origem: "02-Reunioes/29. Lucenera (Vinicius e Filippo) - 09.10.2026_ Imposto e Regras/Reunião.01"
 sistemas_envolvidos:
@@ -68,7 +68,7 @@ Números conferidos no banco em 09/10 (4.537 produtos ativos):
   `nmFornecedor` da planilha só para gerar uma lista de conferência: (a) marcas sem fornecedor cadastrado, com o
   fornecedor que a planilha sugere; (b) produtos onde a planilha diz outro fornecedor que o da marca. Nada é gravado
   automaticamente. `fornecedor_principal_id` (1 preenchido) entra no levantamento do B3 como coluna a remover.
-- [ ] **B3. Colunas duplicadas saem do banco (decidido 09/10)**, em duas etapas:
+- [x] **B3. Colunas duplicadas saem do banco (decidido 09/10)**, em duas etapas:
   1. **Front-end primeiro:** tudo que hoje mostra/busca/ordena por `produtos.codigo_legado` passa a usar
      **`referencia`** (pedido do usuário). O mesmo para `sku` → `referencia`, `percentual_lucro` → `margem_lucro` e
      `categoria` texto → nome de `categoria_id`. Publicar todos os sistemas afetados.
@@ -256,7 +256,7 @@ SPEC criada em 09/10/2026 a partir da transcrição (números do Bloco B conferi
   redeployada.
 - Não verificado na tela (sem navegador): conferir a Consulta abrindo e o filtro "Só com estoque".
 
-### 12/10/2026 — Passo 5 (preparado, NÃO aplicado): B3 etapa 2 — colunas duplicadas saem de `produtos`
+### 12/10/2026 — Passo 5: B3 etapa 2 — colunas duplicadas saem de `produtos` (APLICADO, ver abaixo)
 
 - **Migration 205** (`20261012_205_spec193_colunas_duplicadas_produtos`, gerada das definições reais por script):
   - `001_redefinir_leitores.sql`: tudo que ainda lia as colunas passa a ler a que fica, **mantendo nomes e tipos**
@@ -284,3 +284,11 @@ SPEC criada em 09/10/2026 a partir da transcrição (números do Bloco B conferi
   deixam de gravar `percentual_lucro` (o novo passa a gravar `margem_lucro`); dry-run do import ok.
 - **Ordem para aplicar (com aprovação)**: (1) publicar o Cadastro sem enviar `sku` no Salvar; (2) aplicar 001 + 002
   numa transação; (3) recarregar o cache da API e conferir Consulta, busca do Orçamento, PDF e Showroom.
+- **Aplicado em 12/10/2026** (aprovação do usuário): Cadastro 36668 v0.0.105 publicado antes (o Salvar não envia mais
+  `sku`; nenhuma Edge Function redeployada), depois 001 + 002 numa transação (1,7 s). `produtos`: 4.911 peças, cópia de
+  segurança com as 4.911, `sku` = referência em todas, as 3 colunas removidas. Conferido pela API depois: PDF do
+  orçamento e NF-e (embed com `sku`), Consulta de estoque, busca fuzzy, busca da Garantia, Showroom /admin (261 peças) e
+  público sem login, Compras (estoque e necessidade), Vendas (categoria agora preenchida) — tudo ok; `codigo_legado`
+  = coluna inexistente; `produtos` sem login = 401.
+- **B1, achado**: a "Fly arandela indireta" da reunião é a **PLY ARANDELA INDIRETA** (12399, 12400, 12401), categoria
+  LUMINARIA; a tampa PLY (12402) está em ACESSORIO.

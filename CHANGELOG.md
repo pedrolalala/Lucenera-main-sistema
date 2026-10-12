@@ -4,6 +4,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-12
 
+- SPEC-193 C1/C3/C4: migration 204 (`vw_consulta_estoque`, consulta de estoque enxuta com saldos calculados no
+  banco). Consulta de Produtos (Cadastro 36668 v0.0.104) abre em ~1,7 s (antes ~6,1 s); busca de peça do Orçamento
+  (32554 v0.0.388) passa a mostrar o mesmo Disponível do Cadastro (292 peças mudam).
 - SPEC-193 B2: `scripts/conferencia_marca_fornecedor.py` (roda também no fim do import de Produtos) gera a lista de
   conferência marca × fornecedor da planilha, sem gravar nada. Planilha 07/10: 45 marcas sem fornecedor, 9 marcas
   com fornecedor diferente na planilha, 944 peças divergentes.

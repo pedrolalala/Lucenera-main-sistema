@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-193 — Reunião 09/10 (Vinícius e Filippo): impostos no custo, limpeza do cadastro de produto e estoque separado"
-status: em implementação — passos 1 (C2 + A1/B4), 2 (B1 + B3 etapa 1) e 3 (B2) feitos em 12/10
+status: em implementação — passos 1 a 4 (C2, A1/B4, B1, B3 etapa 1, B2, C1/C3/C4) feitos em 12/10; falta B3 etapa 2
 data_ultima_modificacao: 2026-10-12
 origem: "02-Reunioes/29. Lucenera (Vinicius e Filippo) - 09.10.2026_ Imposto e Regras/Reunião.01"
 sistemas_envolvidos:
@@ -96,7 +96,7 @@ Números conferidos no banco em 09/10 (4.537 produtos ativos):
 O pedido do Filippo e do Vinícius: a consulta de estoque não pode "ler tudo" do produto (impostos, fiscal etc.). Ela
 precisa de uma estrutura enxuta, mais rápida e com menos chance de erro.
 
-- [ ] **C1. Estrutura só de estoque**: id do produto, estoque total, showroom, disponível e os setores (reserva,
+- [x] **C1. Estrutura só de estoque**: id do produto, estoque total, showroom, disponível e os setores (reserva,
   separação, entrega futura…). Entram **só as peças com saldo diferente de zero**. No banco isso já existe em parte
   (`estoque_itens`, `vw_cadastro_produto_setores`); o trabalho é ter **uma view única de consulta** que junte
   isso com código, referência, descrição e preço de venda, e mais nada.
@@ -107,9 +107,9 @@ precisa de uma estrutura enxuta, mais rápida e com menos chance de erro.
     Vinícius** (+ Pedro/Filippo como suporte do sistema, igual à Produção). Quem não está na lista vê só a Consulta.
     Mesmo modelo da SPEC-191: tabela por e-mail + função `SECURITY DEFINER`; os campos de custo/imposto não podem
     sair do banco para quem não está na lista (não basta esconder na tela).
-- [ ] **C3.** Medir o tempo de carregar a Consulta antes e depois. Hoje ela busca a tabela `produtos` inteira em lotes
+- [x] **C3.** Medir o tempo de carregar a Consulta antes e depois. Hoje ela busca a tabela `produtos` inteira em lotes
   de 500 com o estoque embutido.
-- [ ] **C4.** Usar a estrutura nova na Consulta do Cadastro e na busca de peça do Orçamento.
+- [x] **C4.** Usar a estrutura nova na Consulta do Cadastro e na busca de peça do Orçamento.
 
 ### Bloco D — Caixa fechada / múltiplo de compra (levantamento)
 
@@ -232,3 +232,26 @@ SPEC criada em 09/10/2026 a partir da transcrição (números do Bloco B conferi
   - **944 peças** com fornecedor diferente do da marca — quase todas dessas 9 marcas. A marca LUCENERA (peças de
     fabricação própria) tem peças de vários fornecedores de matéria-prima (FM, Agmatec, Ribertubo, Dimetal...): a regra
     "a marca manda" talvez não sirva para ela — decidir com o Vinícius.
+
+### 12/10/2026 — Passo 4: C1/C3/C4 (consulta de estoque enxuta)
+
+- **Banco, migration 204** (`20261012_204_spec193_vw_consulta_estoque`, só acrescenta; rollback = `DROP VIEW`):
+  view `vw_consulta_estoque` (security_invoker, sem anon) com uma linha por peça: código, referência, descrição,
+  ativo, preço de venda, marca/categoria (nome e id, para filtro) e os saldos já calculados — Geral, reserva e
+  separação do sistema, reserva da Connect, comprometido (o maior dos dois), Disponível, Showroom, `tem_saldo`.
+  Nada de custo, imposto ou fiscal. Conferida peça a peça contra a conta da tela (`calcularDisponivel`): 4.911 peças,
+  0 diferenças; 2.008 com saldo. Por login (Débora, Mariane, Marina, Vitória): mesmas linhas, 0,15–0,34 s no banco;
+  sem login = negado.
+- **C3, tempo de carregar a Consulta** (mesmas chamadas da tela pela API, mediana de 3):
+  | | Antes (tabela `produtos` + estoque embutido, conta na tela) | Depois (`vw_consulta_estoque`) |
+  |---|---|---|
+  | Abrir a Consulta ("Só com estoque", padrão) | 6,1 s, 2,2 MB (baixava as 4.911 e filtrava na tela) | **1,7 s**, 0,8 MB (2.008 peças, filtro no banco) |
+  | Desligar "Só com estoque" (todas) | 6,1 s | **2,6 s**, 1,9 MB |
+  | Busca do Orçamento ("spot", 50 peças) | 1,05 s | 0,93 s (o peso é a busca por texto) |
+- **C4**: Cadastro 36668 v0.0.104 — a Consulta de Produtos lê a view (o filtro "Só com estoque" vai para o banco; com
+  busca continua mostrando todas). Orçamentos 32554 v0.0.388 — a busca de peça lê Estoque/Disponível da view em vez
+  de `vw_detalhe_produto_estoque`. **Muda número no Orçamento**: antes o Disponível da busca era só
+  `quantidade − reserva da Connect`; agora é o mesmo do Cadastro (conta também a reserva/separação feitas no
+  sistema). 292 peças mudam; em 250 o que aparecia disponível passa a zero ou negativo. Nenhuma Edge Function
+  redeployada.
+- Não verificado na tela (sem navegador): conferir a Consulta abrindo e o filtro "Só com estoque".

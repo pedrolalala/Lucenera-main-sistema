@@ -46,7 +46,7 @@ relacionadas: [SPEC-192, SPEC-120, SPEC-183]
 - [ ] Cancelar o Skip.
 
 ### Passos manuais do usuário
-- [ ] Criar a conta na Cloudflare (com e-mail da empresa) e entrar — a IA não cria conta nem digita senha.
+- [x] Conta na Cloudflare: o usuário já tem (13/10) — é a mesma usada pelo sistema de Ficha Técnica.
 - [ ] Piloto: Cloudflare → **Workers & Pages → Create → Pages → Connect to Git** → autorizar o GitHub
   (`pedrolalala`) → escolher `showroom-qtq8er2dk` → preencher:
   - Framework preset: **Vite** (ou "None")
@@ -100,6 +100,6 @@ janela o banco muda de Ohio para São Paulo (SPEC-192). O Supabase continua send
 
 ## Pendências
 
-- [ ] SPEC-198 piloto — usuário criar conta Cloudflare e ligar o repositório `showroom-qtq8er2dk` (configuração na seção "Passos manuais").
+- [ ] SPEC-198 piloto — usuário ligar na Cloudflare (conta já existe) o repositório `showroom-qtq8er2dk` (configuração na seção "Passos manuais").
 - [ ] SPEC-198 — `public/_redirects` existe só no GitHub do Showroom; o Skip 54698 não recebeu (não precisa, ele é abandonado depois da virada).
 - [ ] SPEC-198 — definir dia da janela da virada (Cloudflare + banco São Paulo) e concluir pendências da SPEC-192 (plano pago, segredos SharePoint/e-mail).

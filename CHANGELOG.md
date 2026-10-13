@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-13
+
+- SPEC-197: "Vínculo Connect" virou opção do Tipo de Operação no Novo Orçamento (ao lado de Venda/Devolução/Outros/
+  SAC). Número da Connect só pelo XML; "Salvar e vincular" salva e já vincula (sem estoque, financeiro ou nota).
+  Também ao editar uma venda importada do XML e ainda não vinculada. Migration 206: `vincular_orcamento_connect`
+  aceita quem pode criar orçamento (antes só quem aprova); desfazer continua só para quem aprova. Orçamentos 32554
+  v0.0.389.
+
 ## 2026-10-12
 
 - SPEC-193 B3 etapa 2 (aprovada): migration 205 aplicada — `codigo_legado`, `percentual_lucro` e `categoria` (texto)

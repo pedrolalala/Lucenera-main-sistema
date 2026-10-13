@@ -17,9 +17,12 @@ relacionadas: [SPEC-192, SPEC-120, SPEC-183]
 - [x] Conferir que o Showroom local = versão no ar no Skip (54698 v0.0.20 `3d59cf6`).
 - [x] Conferir que compila fora do Skip (`vite build` ok) e que não usa login, `goskip` nem nada exclusivo do Skip.
 - [x] `public/_redirects` (`/* /index.html 200`) para as rotas `/peca/:codigo`, `/showroom` e `/admin` abrirem direto.
-- [ ] Projeto na Cloudflare Pages ligado ao GitHub `pedrolalala/showroom-qtq8er2dk` (passo do usuário, abaixo).
-- [ ] Testar no endereço `*.pages.dev`: vitrine com fotos, detalhe da peça, `/showroom`, `/admin` (entrar, tirar/voltar
-  peça da vitrine), atualizar a página numa rota interna (F5) e abrir no celular.
+- [x] Projeto `showroom-lucenera` na Cloudflare Pages (conta Pedrollaghi@gmail.com, a da Ficha Técnica) ligado ao GitHub
+  `pedrolalala/showroom-qtq8er2dk`, branch `main` → https://showroom-lucenera.pages.dev
+- [x] Testado no `pages.dev`: vitrine (185 peças, fotos), `/peca/11233` aberto direto (igual ao goskip: R$ 10.527,66),
+  `/showroom` e `/admin` abertos direto (sem 404).
+- [ ] Usuário: entrar no `/admin` (senha da curadoria) e tirar/voltar uma peça; abrir no celular.
+- [ ] Selo "Criado com o Skip" aparece (vem do `skip.js` no `index.html`) — tirar quando o Showroom sair do Skip de vez.
 - [ ] Com o teste ok, decidir o endereço final (domínio próprio, ex. `showroom.lucenera.com.br`) e trocar o link divulgado.
 
 ### Etapa 2 — Preparar os outros 15 sistemas (sem trocar nada no ar)
@@ -97,9 +100,10 @@ janela o banco muda de Ohio para São Paulo (SPEC-192). O Supabase continua send
 - SPEC criada. Showroom conferido (local = Skip v0.0.20), build local ok, `public/_redirects` criado e enviado ao GitHub
   (`1c6e46f`). Ensaio do build da Cloudflare: clone limpo do GitHub, sem `.env`, `pnpm@10 install --frozen-lockfile` +
   `vite build` ok, `dist/_redirects` presente.
+- Projeto Cloudflare `showroom-lucenera` criado e publicado (1º build ~35 s, pnpm 10.11.1, Node 22). Testes acima ok.
 
 ## Pendências
 
-- [ ] SPEC-198 piloto — usuário ligar na Cloudflare (conta já existe) o repositório `showroom-qtq8er2dk` (configuração na seção "Passos manuais").
+- [ ] SPEC-198 piloto — usuário testar o `/admin` em https://showroom-lucenera.pages.dev (entrar e tirar/voltar uma peça) e no celular.
 - [ ] SPEC-198 — `public/_redirects` existe só no GitHub do Showroom; o Skip 54698 não recebeu (não precisa, ele é abandonado depois da virada).
 - [ ] SPEC-198 — definir dia da janela da virada (Cloudflare + banco São Paulo) e concluir pendências da SPEC-192 (plano pago, segredos SharePoint/e-mail).

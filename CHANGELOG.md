@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-14
+
+- SPEC-198: os 15 sistemas no ar na Cloudflare Pages (`*-lucenera.pages.dev`, banco de Ohio), iguais ao Skip.
+  Links entre sistemas no código passam a apontar para `*.pages.dev` (13 repositórios). Migration 207: links da lista
+  do Hub (`systems.link`) para `*.pages.dev`. Vendas: `pnpm-lock.yaml` atualizado.
+
 ## 2026-10-13
 
 - SPEC-197: "Vínculo Connect" virou opção do Tipo de Operação no Novo Orçamento (ao lado de Venda/Devolução/Outros/

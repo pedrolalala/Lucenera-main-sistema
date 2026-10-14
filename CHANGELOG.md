@@ -4,6 +4,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-14
 
+- SPEC-199: Orçamento aceita quantidade com vírgula (peça por metro, ex.: 4,5 m) — ao abrir/editar não arredonda mais
+  para inteiro; peça com unidade MT ou quantidade quebrada aparece com o campo Qtd em âmbar e selo "m". Orçamentos
+  `0c8822d`, no ar na Cloudflare.
 - Limpeza dos dados de TESTE antes do uso em paralelo com a Connect (`scripts/limpar_dados_teste_orcamento_separacao.py`,
   aplicado em SP): apagados os 21 orçamentos (todos teste, inclusive ORC-0038/0039 do XML), 317 itens, 149
   `projeto_itens`, 83 movimentos e 23 saldos de estoque por item, 17 separações de jul–out (Separação Parcial) com 21

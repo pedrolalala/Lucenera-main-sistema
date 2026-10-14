@@ -5,7 +5,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 ## 2026-10-14
 
 - SPEC-183: migration 210 aplicada e DESFEITA (rollback) no mesmo dia — Moara saiu da empresa; ela segue sem papel e
-  sem sistema. Conferidos os 33 usuários: nenhuma outra pessoa de equipe sem acesso.
+  sem sistema. Conferidos os 33 usuários: nenhuma outra pessoa de equipe sem acesso. Login da Moara bloqueado (ban no Auth de SP, sem prazo) — conta e histórico mantidos.
 - SPEC-199: Orçamento aceita quantidade com vírgula (peça por metro, ex.: 4,5 m) — ao abrir/editar não arredonda mais
   para inteiro; peça com unidade MT ou quantidade quebrada aparece com o campo Qtd em âmbar e selo "m". Orçamentos
   `0c8822d`, no ar na Cloudflare.

@@ -1,0 +1,62 @@
+name: Backup diario Sao Paulo -> Ohio
+
+# SPEC-198: o banco oficial e o Supabase de Sao Paulo. Todo dia de madrugada ele e copiado para o projeto
+# antigo de Ohio, que fica como reserva SOMENTE LEITURA (scripts/backup_sp_para_ohio.py). O arquivo do
+# backup tambem fica guardado aqui no GitHub (aba Actions -> execucao -> Artifacts) por 90 dias.
+
+on:
+  schedule:
+    # 3h da manha (horario de Brasilia, UTC-3) = 6h UTC.
+    - cron: "0 6 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: backup-sp-para-ohio
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cliente PostgreSQL 17 (mesma versao dos bancos)
+        run: |
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dependencias
+        run: pip install psycopg2-binary
+
+      - name: Copiar Sao Paulo para Ohio
+        env:
+          SP_DB_URL: ${{ secrets.SP_DB_URL }}
+          OHIO_DB_URL: ${{ secrets.OHIO_DB_URL }}
+          SP_URL: https://bgtfrcbipuxnsexbppsh.supabase.co
+          OHIO_URL: https://vcvcwzmbiftcawncibke.supabase.co
+          SP_SERVICE_ROLE_KEY: ${{ secrets.SP_SERVICE_ROLE_KEY }}
+          OHIO_SERVICE_ROLE_KEY: ${{ secrets.OHIO_SERVICE_ROLE_KEY }}
+          BACKUP_DIR: backup_out
+        run: |
+          pg_dump --version
+          python scripts/backup_sp_para_ohio.py
+
+      - name: Guardar o arquivo do backup (90 dias)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lucenera-sp-${{ github.run_number }}
+          path: |
+            backup_out/lucenera_sp.dump
+            backup_out/lucenera_sp_auth.dump
+          retention-days: 90
+          if-no-files-found: warn

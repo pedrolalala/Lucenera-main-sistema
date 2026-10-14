@@ -50,3 +50,6 @@
 [submodule "04-Sistemas/controle-de-garantia"]
 	path = 04-Sistemas/controle-de-garantia
 	url = https://github.com/pedrolalala/controle-de-garantia.git
+[submodule "04-Sistemas/central-de-solicitacoes"]
+	path = 04-Sistemas/central-de-solicitacoes
+	url = https://github.com/pedrolalala/central-de-solicitacoes.git

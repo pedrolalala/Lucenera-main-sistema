@@ -111,6 +111,10 @@ janela o banco muda de Ohio para São Paulo (SPEC-192). O Supabase continua send
 - 14/10: links fixos no código (Central, Orçamentos, Adm. Bancária) trocados para `*.pages.dev` nos 13 repositórios.
   Migration 207 (`systems.link` do Hub → `*.pages.dev`; logistica/ubiqua/memoria/solicitacoes ficam como estão)
   escrita, dry-run ok (13 linhas); APLICADA em 14/10 pelo usuário (Management API, 201).
+- 14/10: Memória (`memoria-lucenera.pages.dev`; GitHub estava sem 5 arquivos e sem supabase-js, completado do Skip
+  57204 — `896cc9e`) e Central de Solicitações (sem GitHub: repositório novo `central-de-solicitacoes` montado do Skip
+  53113 v0.0.5, submodule; `solicitacoes-lucenera.pages.dev`, CSS idêntico ao Skip). Migration 209 (links do Hub
+  dos dois) escrita, dry-run ok.
 
 ## Pendências
 
@@ -119,4 +123,4 @@ janela o banco muda de Ohio para São Paulo (SPEC-192). O Supabase continua send
 - [ ] SPEC-198 — definir dia da janela da virada (Cloudflare + banco São Paulo) e concluir pendências da SPEC-192 (plano pago, segredos SharePoint/e-mail).
 - [ ] SPEC-198 — migration 207 aplicada; falta testar login + troca entre sistemas pela Cloudflare.
 - [ ] SPEC-198 — avisar usuários dos endereços novos; links de aprovação já enviados a clientes (`gestaofinanceiralucenera.goskip.app/aprovacao`) só funcionam enquanto o Skip estiver no ar.
-- [ ] SPEC-198 — Memória Lucenera e Central de Solicitações ainda só no Skip; "Sistema de Entregas" do Hub aponta para `lucenera.lovable.app`.
+- [ ] SPEC-198 — aplicar migration 209 (Memória e Solicitações no Hub). "Sistema de Entregas" do Hub aponta para `lucenera.lovable.app`.

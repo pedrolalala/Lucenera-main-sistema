@@ -4,6 +4,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-14
 
+- SPEC-198: Memória e Central de Solicitações na Cloudflare (`memoria-lucenera.pages.dev`,
+  `solicitacoes-lucenera.pages.dev`). Central de Solicitações ganhou repositório no GitHub (submodule
+  `04-Sistemas/central-de-solicitacoes`). Migration 209: links do Hub dos dois.
 - SPEC-183: migration 208 (aplicada) — as 13 pessoas da Equipe de Projetos (papel `equipe_projetos`) veem na
   Central Orçamentos, CRM, Consultar Produtos, Separação Parcial, Sistema de Entregas, Fichas Técnicas, Showroom e
   Memória (44 acessos acrescentados, nenhum removido; backup `_bkp_user_system_access_20261014`).

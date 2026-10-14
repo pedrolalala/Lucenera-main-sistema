@@ -4,6 +4,12 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-14
 
+- Orçamentos (pedido do usuário, 3 correções). (1) Filtro de status da lista sem "Recusado pelo Cliente" (e sem
+  Finalizado/Obra Finalizada/Recusado/Expirado, que nenhum orçamento usa). (2) Peça da Ubiqua (`revenda_ubiqua`)
+  escolhida na busca agora é ligada ao produto do cadastro pelo código/referência — antes entrava sem `produto_id`,
+  sem código e referência, como item sem cadastro (ORC-0002/0003); o valor da linha escolhida é mantido.
+  (3) Migration 212 (aplicada em SP): `handle_orcamento_workflow()` não promove mais sozinho rascunho →
+  `enviado_cliente` — o bloco tirado na SPEC-051 tinha voltado na 158. Orçamentos `9a67172`.
 - SPEC-200: Orçamento por equipe. Migration 211 (aplicada em SP): `orcamentos.equipe_id` obrigatória (vem do projeto,
   do vendedor ou de quem digitou), `digitado_por` gravado pelo banco com o login, política RESTRICTIVE: quem é só da
   Equipe de Projetos vê apenas os orçamentos da própria equipe (Marina/Thairine/Thais) e os que digitou. Módulo novo

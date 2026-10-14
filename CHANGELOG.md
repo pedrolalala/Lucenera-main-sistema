@@ -4,6 +4,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-14
 
+- SPEC-183: migration 208 (aplicada) — as 13 pessoas da Equipe de Projetos (papel `equipe_projetos`) veem na
+  Central Orçamentos, CRM, Consultar Produtos, Separação Parcial, Sistema de Entregas, Fichas Técnicas, Showroom e
+  Memória (44 acessos acrescentados, nenhum removido; backup `_bkp_user_system_access_20261014`).
 - SPEC-198: os 15 sistemas no ar na Cloudflare Pages (`*-lucenera.pages.dev`, banco de Ohio), iguais ao Skip.
   Links entre sistemas no código passam a apontar para `*.pages.dev` (13 repositórios). Migration 207 (aplicada): links da lista
   do Hub (`systems.link`) para `*.pages.dev`. Vendas: `pnpm-lock.yaml` atualizado.

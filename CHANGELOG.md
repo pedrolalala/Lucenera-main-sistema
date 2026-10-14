@@ -10,7 +10,8 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   itens e entregas, 23 parcelas, 17 boletos, 3 notas de homologação, transferências/devoluções — 748 linhas, cópia em
   `_bkp_limpeza_20261014_*`. Reservas de teste devolvidas (6 produtos). Ficam as 424 separações de fev–jun (histórico).
   Em seguida import de Produtos com `Produtos__2026-10-14.xlsx`: os 4.536 produtos da planilha ficam com estoque
-  idêntico ao da Connect. `_supabase_client.py` troca o host direto (só IPv6) pelo pooler da região do projeto.
+  idêntico ao da Connect; 7 produtos novos da Connect cadastrados (`importar_produtos_novos.py`, códigos
+  13765–13771). `_supabase_client.py` troca o host direto (só IPv6) pelo pooler da região do projeto.
 - SPEC-192/198 VIRADA: banco oficial passa a ser o Supabase de São Paulo (`bgtfrcbipuxnsexbppsh`). Estrutura, dados,
   usuários e migrations copiados de Ohio e conferidos (134.014 linhas, tudo igual); 485 links de arquivo trocados;
   vault/cron/segredo do SharePoint em SP; os 17 sistemas da Cloudflare republicados apontando para SP; `.env` central

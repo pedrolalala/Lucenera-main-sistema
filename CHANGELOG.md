@@ -4,6 +4,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-14
 
+- Orçamentos — ROLLBACK a pedido do usuário: todas as alterações de tela da sessão de 14/10 desfeitas (`5a2da22`
+  reverte 95f7caa, 9a67172, a3120b4, 8ec2c2d, 8b6c1db, 0eb94ce; volta ao `0c8822d`). Depois só `Budgets.tsx`
+  (`b7b7683`): 5 abas (Todos, Rascunho, Aprovação do cliente, Aprovação da Equipe, Aprovados) e dropdown de status com
+  7 opções (sem Recusado pelo Cliente/Finalizado/Obra Finalizada/Recusado/Expirado). Banco NÃO revertido
+  (migrations 211 e 212 seguem aplicadas). Os itens abaixo sobre telas de Orçamentos de 14/10 ficam sem efeito.
 - Orçamentos: lista com todos os campos de negócio em colunas (tabela rola na horizontal). Novas: Validade,
   Nº Orçamento, Projeto, Tipo, Perfil, Vendedor, Equipe, Digitado por, Pagamento (forma + condições), Prazo Entrega,
   Frete, Desconto e Sinal. Ficam fora os campos técnicos (token, datas internas do fluxo, ids, plano de parcelas).

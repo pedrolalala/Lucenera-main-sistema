@@ -4,6 +4,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-14
 
+- SPEC-200: Orçamento por equipe. Migration 211 (aplicada em SP): `orcamentos.equipe_id` obrigatória (vem do projeto,
+  do vendedor ou de quem digitou), `digitado_por` gravado pelo banco com o login, política RESTRICTIVE: quem é só da
+  Equipe de Projetos vê apenas os orçamentos da própria equipe (Marina/Thairine/Thais) e os que digitou. Módulo novo
+  no Hub "Aprovação do Cliente" dado à Equipe de Projetos: agora ela consegue "Aprovar Manualmente" (antes só
+  admin/gerente/operador). Orçamentos `95f7caa`: campo Equipe no formulário, "Digitado por" e equipe na lista.
 - SPEC-183: migration 210 aplicada e DESFEITA (rollback) no mesmo dia — Moara saiu da empresa; ela segue sem papel e
   sem sistema. Conferidos os 33 usuários: nenhuma outra pessoa de equipe sem acesso. Login da Moara bloqueado (ban no Auth de SP, sem prazo) — conta e histórico mantidos.
 - SPEC-199: Orçamento aceita quantidade com vírgula (peça por metro, ex.: 4,5 m) — ao abrir/editar não arredonda mais

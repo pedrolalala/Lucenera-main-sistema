@@ -4,6 +4,7 @@ def _bloco(ini, fim):
     L=open(r"C:\script python\ADAPTA-PASS-Lucenera-main\.env",encoding="utf-8").read().splitlines()
     i=next(n for n,l in enumerate(L) if ini in l.lower()); out={}
     for l in L[i+1:]:
+        l=l.replace("#OHIO_ANTIGO# ","",1)
         if l.startswith("#") and fim in l.lower(): break
         if "=" in l and not l.startswith("#"):
             k,v=l.split("=",1); out.setdefault(k.strip(), v.strip().strip('"'))

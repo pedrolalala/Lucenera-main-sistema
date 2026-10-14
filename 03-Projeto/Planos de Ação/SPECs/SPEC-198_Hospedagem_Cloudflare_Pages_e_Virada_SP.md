@@ -116,6 +116,21 @@ janela o banco muda de Ohio para São Paulo (SPEC-192). O Supabase continua send
   53113 v0.0.5, submodule; `solicitacoes-lucenera.pages.dev`, CSS idêntico ao Skip). Migration 209 (links do Hub
   dos dois) escrita, dry-run ok.
 
+### 2026-10-14 — VIRADA para São Paulo (durante o dia, equipe parada)
+- Cron de Ohio desligado. Dump de Ohio (estrutura public/memoria + dados + auth + migrations) e carga em SP numa
+  transação só (`DROP SCHEMA public/memoria CASCADE` + recriar pg_net/unaccent em public, 29 policies de storage e
+  trigger `on_auth_user_created` recriados a partir de Ohio com `search_path = public`). Conferido igual: 156 tabelas,
+  196 funções, 402 policies, 92 triggers, 64 views, 33 usuários, 242 migrations, 134.014 linhas.
+- `pos_virada_links.py --real`: 485 links de arquivo → SP (pular colunas geradas: `produtos.sku`).
+- Vault SP: 4 nomes; `sharepoint_sync_secret` NOVO (também como secret `SHAREPOINT_SYNC_SECRET` das functions);
+  `supabase_anon_key` = chave anon LEGADA (JWT) de SP — as functions do SharePoint têm verify_jwt. Pull testado: 200.
+  2 crons de SP ligados.
+- Cloudflare: os 17 projetos com `VITE_SUPABASE_URL`/`PUBLISHABLE_KEY` de SP (anon JWT legada, igual ao formato de
+  Ohio), via API com o login do wrangler, e republicados. Memória: `index.html` do Skip (pt-BR + MEMORIA_CONFIG do
+  /legado) faltava no GitHub — corrigido (`35b9335`).
+- Auth SP: redirects = os 17 `*.pages.dev` (os do Skip saíram: lista tem limite de tamanho).
+- `.env` central: bloco de Ohio comentado (`#OHIO_ANTIGO# `); backup `.env.bkp_antes_virada_20261014` (ignorado).
+
 ## Pendências
 
 - [ ] SPEC-198 piloto — usuário testar o `/admin` em https://showroom-lucenera.pages.dev (entrar e tirar/voltar uma peça) e no celular.
@@ -124,3 +139,6 @@ janela o banco muda de Ohio para São Paulo (SPEC-192). O Supabase continua send
 - [ ] SPEC-198 — migration 207 aplicada; falta testar login + troca entre sistemas pela Cloudflare.
 - [ ] SPEC-198 — avisar usuários dos endereços novos; links de aprovação já enviados a clientes (`gestaofinanceiralucenera.goskip.app/aprovacao`) só funcionam enquanto o Skip estiver no ar.
 - [ ] SPEC-198 — aplicar migration 209 (Memória e Solicitações no Hub). "Sistema de Entregas" do Hub aponta para `lucenera.lovable.app`.
+- [ ] SPEC-198 virada — GMAIL_USER/GMAIL_APP_PASSWORD/RESEND_API_KEY ainda não cadastrados em SP (e-mails de confirmação/boas-vindas).
+- [ ] SPEC-198 virada — Ohio somente leitura; 1–2 semanas depois, backup final e apagar Ohio; cancelar o Skip.
+- [ ] SPEC-198 virada — trocar Compute de SP para Micro (ainda Nano em 14/10).

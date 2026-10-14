@@ -4,6 +4,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-14
 
+- SPEC-192/198 VIRADA: banco oficial passa a ser o Supabase de São Paulo (`bgtfrcbipuxnsexbppsh`). Estrutura, dados,
+  usuários e migrations copiados de Ohio e conferidos (134.014 linhas, tudo igual); 485 links de arquivo trocados;
+  vault/cron/segredo do SharePoint em SP; os 17 sistemas da Cloudflare republicados apontando para SP; `.env` central
+  em SP (Ohio comentado). Memória: `index.html` do Skip restaurado no GitHub.
 - SPEC-198: Memória e Central de Solicitações na Cloudflare (`memoria-lucenera.pages.dev`,
   `solicitacoes-lucenera.pages.dev`). Central de Solicitações ganhou repositório no GitHub (submodule
   `04-Sistemas/central-de-solicitacoes`). Migration 209: links do Hub dos dois.

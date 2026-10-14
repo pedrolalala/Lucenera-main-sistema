@@ -4,6 +4,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-14
 
+- Orçamentos (pedido do usuário, depois do rollback): lista SEM abas — só busca + dropdown de status com 7 opções
+  (sem Recusado pelo Cliente). Ações que só existiam na aba Aprovação da Equipe ("Aprovar e Enviar ao Financeiro",
+  "Devolver ao Cliente") passaram para os botões da linha (`TeamApprovalRowActions.tsx`, mesma lógica: aviso de
+  vencido, previsão de entrega obrigatória, motivo). As demais ações das abas já existiam na linha. Orçamentos `20eddf8`.
 - Orçamentos — ROLLBACK a pedido do usuário: todas as alterações de tela da sessão de 14/10 desfeitas (`5a2da22`
   reverte 95f7caa, 9a67172, a3120b4, 8ec2c2d, 8b6c1db, 0eb94ce; volta ao `0c8822d`). Depois só `Budgets.tsx`
   (`b7b7683`): 5 abas (Todos, Rascunho, Aprovação do cliente, Aprovação da Equipe, Aprovados) e dropdown de status com

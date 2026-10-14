@@ -138,7 +138,7 @@ janela o banco muda de Ohio para São Paulo (SPEC-192). O Supabase continua send
 - [ ] SPEC-198 — definir dia da janela da virada (Cloudflare + banco São Paulo) e concluir pendências da SPEC-192 (plano pago, segredos SharePoint/e-mail).
 - [ ] SPEC-198 — migration 207 aplicada; falta testar login + troca entre sistemas pela Cloudflare.
 - [ ] SPEC-198 — avisar usuários dos endereços novos; links de aprovação já enviados a clientes (`gestaofinanceiralucenera.goskip.app/aprovacao`) só funcionam enquanto o Skip estiver no ar.
-- [ ] SPEC-198 — aplicar migration 209 (Memória e Solicitações no Hub). "Sistema de Entregas" do Hub aponta para `lucenera.lovable.app`.
+- [x] SPEC-198 — migration 209 aplicada em SP (14/10, depois da virada); nenhum link do Hub aponta mais para o Skip. "Sistema de Entregas" do Hub aponta para `lucenera.lovable.app`.
 - [ ] SPEC-198 virada — GMAIL_USER/GMAIL_APP_PASSWORD/RESEND_API_KEY ainda não cadastrados em SP (e-mails de confirmação/boas-vindas).
 - [ ] SPEC-198 virada — Ohio somente leitura; 1–2 semanas depois, backup final e apagar Ohio; cancelar o Skip.
 - [ ] SPEC-198 virada — trocar Compute de SP para Micro (ainda Nano em 14/10).

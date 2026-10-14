@@ -39,12 +39,19 @@ def trancar(on):
     c = psycopg2.connect(OH_DB, connect_timeout=30, options=RW)
     c.autocommit = True
     k = c.cursor()
+    # o pooler ignora opções de conexão: liberar a gravação dentro da própria sessão
+    k.execute("SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE")
     k.execute(f"ALTER DATABASE postgres SET default_transaction_read_only = {'on' if on else 'off'}")
     # derruba conexões abertas dos serviços para reabrirem já com a regra nova
     k.execute("""select count(pg_terminate_backend(pid)) from pg_stat_activity
                  where datname = 'postgres'
                    and pid <> pg_backend_pid()
                    and usename in ('authenticator', 'supabase_auth_admin', 'supabase_storage_admin', 'postgres')""")
+    # a própria conexão também volta para o pool com a regra antiga: encerrar
+    try:
+        k.execute("select pg_terminate_backend(pg_backend_pid())")
+    except Exception:
+        pass
     c.close()
     print("Ohio", "trancado (somente leitura)." if on else "destrancado para a cópia.")
 
@@ -91,6 +98,7 @@ def dump_sp():
 
     inc = lambda f: "\\i " + p(f).replace("\\", "/")
     open(p("restore.sql"), "w", encoding="utf-8").write("\n".join([
+        "SET TRANSACTION READ WRITE;",
         "DO $$ declare r record; begin",
         "  for r in select policyname from pg_policies where schemaname='storage' and tablename='objects' loop",
         "    execute format('drop policy %I on storage.objects', r.policyname); end loop; end $$;",

@@ -7,7 +7,8 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Orçamentos: lista com todos os campos de negócio em colunas (tabela rola na horizontal). Novas: Validade,
   Nº Orçamento, Projeto, Tipo, Perfil, Vendedor, Equipe, Digitado por, Pagamento (forma + condições), Prazo Entrega,
   Frete, Desconto e Sinal. Ficam fora os campos técnicos (token, datas internas do fluxo, ids, plano de parcelas).
-  Orçamentos `a3120b4`, sem mudança no banco.
+  Orçamentos `a3120b4`, sem mudança no banco. **DESFEITO** no mesmo dia a pedido do usuário (revert `8ec2c2d`):
+  a lista voltou às 9 colunas de antes.
 - Orçamentos (pedido do usuário, 3 correções). (1) Filtro de status da lista sem "Recusado pelo Cliente" (e sem
   Finalizado/Obra Finalizada/Recusado/Expirado, que nenhum orçamento usa). (2) Peça da Ubiqua (`revenda_ubiqua`)
   escolhida na busca agora é ligada ao produto do cadastro pelo código/referência — antes entrava sem `produto_id`,

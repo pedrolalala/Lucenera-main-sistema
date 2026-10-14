@@ -4,6 +4,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-14
 
+- SPEC-183: migration 210 (aplicada em SP) — Moara (Assistente Projetista, conta de 08/10) estava sem papel e sem
+  sistema ("Sem acesso configurado"); recebe `equipe_projetos` e os 8 sistemas da equipe. Conferidos os 33 usuários:
+  era a única pessoa de equipe sem acesso.
 - SPEC-199: Orçamento aceita quantidade com vírgula (peça por metro, ex.: 4,5 m) — ao abrir/editar não arredonda mais
   para inteiro; peça com unidade MT ou quantidade quebrada aparece com o campo Qtd em âmbar e selo "m". Orçamentos
   `0c8822d`, no ar na Cloudflare.

@@ -48,7 +48,7 @@ O campo Responsável listava funcionários e gravava o nome completo em `respons
 - Ao escolher uma equipe, grava `equipe_id`, `responsavel_nome` = nome da equipe (o mesmo valor que o SharePoint já usa) e `responsavel_funcionario_id` = líder da equipe (preenche o Vendedor no Orçamento).
 - "Novo Funcionário" saiu desse campo.
 - Teste como Marina, desfeito no fim: 26.319 com a equipe Thairine resolveu `equipe_id` = Thairine e líder = Thairine Cristina da Silva.
-- Dado antigo: o 26.319 está gravado com "Thairine Cristina da Silva" e sem equipe. Ao editar e escolher a equipe, corrige.
+- Dado antigo corrigido 15/10 a pedido do usuário: 26.319 (LAFONTTI) passou de "Thairine Cristina da Silva", sem equipe, para a equipe Thairine (equipe_id, responsavel_nome e líder). Push do SharePoint registrado como ok.
 
 ## Critérios de aceite
 1. Na edição do projeto, digitar parte do nome no Cliente e no Engenheiro encontra qualquer contato do tipo.

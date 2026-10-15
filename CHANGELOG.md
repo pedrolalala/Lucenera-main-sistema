@@ -4,6 +4,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-14
 
+- Orçamentos — ESTADO FINAL a pedido do usuário: módulo restaurado para `9a67172` (revert `aad2290`), o escopo das 3
+  tarefas (dropdown de status sem Recusado pelo Cliente, peça da Ubiqua ligada ao cadastro, rascunho) + SPEC-200.
+  Sem as colunas extras; abas originais. Os itens de tela de Orçamentos de 14/10 abaixo que vieram depois do
+  `9a67172` ficam sem efeito. Banco: migrations 211 e 212 aplicadas.
 - Orçamentos — novo ROLLBACK a pedido do usuário (`18eddbe`, volta ao `0c8822d`) e depois `6c491e5`: busca +
   dropdown de status (mesmo bloco de antes) sempre visíveis no topo, acima das abas; dropdown com 7 opções (sem
   Recusado pelo Cliente e obsoletos); escolher status leva à aba Todos; tabela com todas as colunas de negócio e

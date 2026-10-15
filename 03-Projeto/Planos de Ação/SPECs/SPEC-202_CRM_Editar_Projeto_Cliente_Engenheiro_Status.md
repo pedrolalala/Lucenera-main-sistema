@@ -42,6 +42,14 @@ O status do projeto (junto com responsável, perfil e nível estratégico) é **
 - Teste como Marina, desfeito no fim: salvou engenheiro SCALA ENGENHARIA com status Finalizado.
 - Pendente opcional: levar `engenheiro_id` para a coluna "Responsável da Obra" do SharePoint. Exige republicar `sharepoint-projetos-push/pull`.
 
+## E. Responsável = equipe (pedido 15/10)
+O campo Responsável listava funcionários e gravava o nome completo em `responsavel_nome` (ex.: "Thairine Cristina da Silva"). O trigger `fn_sync_equipe_por_responsavel` só casa pelo nome da equipe, então o projeto ficava sem `equipe_id` e a visibilidade por equipe (SPEC-200) falhava.
+- CRM (Editar e Novo Projeto) e Orçamentos (Criar Projeto) listam `equipes_projetos`: Administração, Estoque, Marina, Thais e Thairine.
+- Ao escolher uma equipe, grava `equipe_id`, `responsavel_nome` = nome da equipe (o mesmo valor que o SharePoint já usa) e `responsavel_funcionario_id` = líder da equipe (preenche o Vendedor no Orçamento).
+- "Novo Funcionário" saiu desse campo.
+- Teste como Marina, desfeito no fim: 26.319 com a equipe Thairine resolveu `equipe_id` = Thairine e líder = Thairine Cristina da Silva.
+- Dado antigo: o 26.319 está gravado com "Thairine Cristina da Silva" e sem equipe. Ao editar e escolher a equipe, corrige.
+
 ## Critérios de aceite
 1. Na edição do projeto, digitar parte do nome no Cliente e no Engenheiro encontra qualquer contato do tipo.
 2. Salvar com status Finalizado, Ajustes finais e afins, num projeto sem itens, salva sem erro.
@@ -54,4 +62,5 @@ O status do projeto (junto com responsável, perfil e nível estratégico) é **
 - [x] CRM publicado 37924dc (crm-lucenera.pages.dev, conferido no bundle)
 - [x] C — eletricista (migration 216 aplicada + CRM)
 - [x] D — engenheiro em engenheiro_id (migration 217)
+- [x] E — Responsável = equipe (CRM + Orçamentos)
 - [ ] Teste pela tela com conta da equipe

@@ -35,8 +35,12 @@ O status do projeto (junto com responsável, perfil e nível estratégico) é **
 - CRM: campo "Eletricista" com busca em Editar Projeto e em Novo Projeto. No Novo Projeto, o eletricista é gravado com um update depois do `salvar-projeto`, para não precisar republicar a Edge Function. `getProjeto` traz `eletricista:eletricista_id(nome)`.
 - Hoje não existe nenhum contato do tipo eletricista; cadastre pelo CRM ou pelo Orçamento (migration 214).
 
-## D. Achado — Engenheiro não salva (AGUARDA DECISÃO)
-`projetos.responsavel_obra_id` tem FK para `usuarios`, mas as telas (CRM e Orçamentos) oferecem contatos do tipo engenheiro, e escolher um dá erro de FK. Nenhum projeto tem o campo preenchido. A sincronização com o SharePoint (`sharepoint-projetos-pull`/`-push` e os scripts `sincronizar_planilha_projetos.py`/`backfill_sharepoint_projetos.py`) mapeia a coluna "Responsável Obra" para `usuarios`. Falta o usuário dizer o que essa coluna significa: engenheiro externo (contato) ou funcionário.
+## D. Achado — Engenheiro não salvava (RESOLVIDO 15/10)
+`projetos.responsavel_obra_id` tem FK para `usuarios`, mas as telas (CRM e Orçamentos) oferecem contatos do tipo engenheiro, e escolher um dá erro de FK. Nenhum projeto tem o campo preenchido. A sincronização com o SharePoint (`sharepoint-projetos-pull`/`-push` e os scripts `sincronizar_planilha_projetos.py`/`backfill_sharepoint_projetos.py`) mapeia a coluna "Responsável Obra" para `usuarios`. O usuário recebeu `violates foreign key constraint "projetos_responsavel_obra_id_fkey"` ao salvar. A correção não mexe na sincronização com o SharePoint, porque as Edge Functions não podiam ser republicadas (token da CLI inválido):
+- Migration `20261015_217_spec202_projeto_engenheiro_contato` (APLICADA): nova `projetos.engenheiro_id` → `contatos`.
+- CRM (Editar e Novo Projeto, `getProjeto`/lista) e Orçamentos (`ProjectCreateModal`) gravam e leem o engenheiro em `engenheiro_id`. `responsavel_obra_id` fica só para a sincronização com o SharePoint (usuarios).
+- Teste como Marina, desfeito no fim: salvou engenheiro SCALA ENGENHARIA com status Finalizado.
+- Pendente opcional: levar `engenheiro_id` para a coluna "Responsável da Obra" do SharePoint. Exige republicar `sharepoint-projetos-push/pull`.
 
 ## Critérios de aceite
 1. Na edição do projeto, digitar parte do nome no Cliente e no Engenheiro encontra qualquer contato do tipo.
@@ -49,5 +53,5 @@ O status do projeto (junto com responsável, perfil e nível estratégico) é **
 - [x] B — migration 215 aplicada em SP 15/10 (autorizada pelo usuário); teste como Marina: status Finalizado sem itens salvou (rollback)
 - [x] CRM publicado 37924dc (crm-lucenera.pages.dev, conferido no bundle)
 - [x] C — eletricista (migration 216 aplicada + CRM)
-- [ ] D — engenheiro: decidir contato × usuário
+- [x] D — engenheiro em engenheiro_id (migration 217)
 - [ ] Teste pela tela com conta da equipe

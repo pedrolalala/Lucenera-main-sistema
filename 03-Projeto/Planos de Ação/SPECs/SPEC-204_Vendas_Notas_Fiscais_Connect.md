@@ -62,7 +62,7 @@ O Vendas é o único lugar onde nota fiscal e boleto são orquestrados a partir 
 
 ### Tela Vendas `/notas-fiscais-connect`
 
-- Cards: notas autorizadas, valor das autorizadas, canceladas (respeitam os filtros).
+- Cards: notas de venda, valor das vendas, remessas, canceladas (respeitam os filtros). Remessa e cancelada não somam no valor.
 - Filtros: busca (número, destinatário, CPF/CNPJ, natureza), empresa, mês, situação.
 - Tabela: número, emissão, empresa, destinatário + documento, natureza, nº de itens, valor (riscado se cancelada), situação + selo de carta de correção.
 - Clique abre o detalhe: chave, protocolo, destinatário (e se está no cadastro), itens, valores, duplicatas, eventos (texto da correção), informações complementares.
@@ -70,7 +70,8 @@ O Vendas é o único lugar onde nota fiscal e boleto são orquestrados a partir 
 ### Critérios de aceite
 
 - Usuário com o Vendas vê as notas; usuário sem o Vendas não vê nada; `anon` recebe permission denied; ninguém altera pela API.
-- Jan/2026 Manoella: 19 notas, 141 itens, 18 duplicatas, 3 eventos, 1 cancelada (4590); autorizadas somam R$ 783.135,28.
+- Jan/2026 Manoella: 19 notas, 141 itens, 18 duplicatas, 3 eventos, 1 cancelada (4590).
+- **Só soma no valor a nota de venda autorizada.** Remessa (natureza "REMESSA", envio para transporte/industrialização, sem valor de venda) e cancelada não somam (decisão do usuário 15/10). Jan/2026: 17 notas de venda = R$ 775.116,33 (fica fora a remessa 4591, R$ 8.018,95).
 
 ## Realizado
 
@@ -86,3 +87,8 @@ O Vendas é o único lugar onde nota fiscal e boleto são orquestrados a partir 
 
 - [ ] Conferir a aba Notas Fiscais Connect logado com um usuário do Vendas.
 - [ ] Definir se/como ligar cada nota da Connect a uma venda (`orcamento_id`) e se destinatários fora do cadastro devem virar clientes.
+
+### 2026-10-15 (ajustes)
+
+- Migration 220 aplicada: leitura também para quem entra no Vendas pelo Hub (`hub_pode_executar`), não só por Acesso a Sistemas — o usuário via a aba vazia.
+- Remessa deixa de somar no valor (só venda autorizada soma); selo "Remessa · não soma" na linha.

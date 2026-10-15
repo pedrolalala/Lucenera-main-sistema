@@ -2,6 +2,19 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-15
+
+- Vendas (SPEC-204): aba "Notas Fiscais Connect" (`/notas-fiscais-connect`, só consulta) com as NF-e emitidas pela
+  Connect, importadas dos XMLs por `scripts/importar_nfe_connect.py` (idempotente pela chave; cancelamento marca a nota
+  como cancelada). Banco: migration 219 APLICADA (`notas_fiscais_connect` + `_itens`/`_duplicatas`/`_eventos`, leitura
+  só com o sistema Vendas, sem escrita pela API). 1ª carga: Manoella jan/2026 — 19 notas (4579–4597), 4590 cancelada,
+  R$ 783.135,28 autorizadas. Vendas `8b0e933`. XMLs não vão para o Git (têm CPF de clientes).
+- Catálogo Ubiqua: peça Manoella/Islight (`-IS`) com a quantidade somada no orçamento e a origem de cada parte
+  (`b3164be`); "Meus Orçamentos" do representante + acompanhamento por representante no admin (`092a5ec`); descrição
+  com a cor da referência selecionada (`1a55605`). Banco: migration 215 APLICADA — orçamento/itens da Ubiqua só para
+  quem enxerga o cliente (representante dono, admin/interno Ubiqua, admin/gerente Lucenera); numeração via função
+  SECURITY DEFINER. Base de orçamentos/clientes/representantes Ubiqua zerada pelo usuário (limpeza intencional).
+
 ## 2026-10-14
 
 - Orçamentos — ESTADO FINAL a pedido do usuário: módulo restaurado para `9a67172` (revert `aad2290`), o escopo das 3

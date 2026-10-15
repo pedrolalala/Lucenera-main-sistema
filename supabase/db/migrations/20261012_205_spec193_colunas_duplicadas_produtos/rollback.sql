@@ -1,3 +1,4 @@
+-- migration 218 (15/10): as cópias _bkp_* foram movidas para o schema backup.
 -- Rollback da migration 205 (SPEC-193 B3 etapa 2). Devolve as 4 colunas com os dados da cópia de
 -- segurança, os índices/constraints/grants e as definições originais das views e funções.
 ALTER TABLE public.produtos DROP COLUMN sku;
@@ -16,7 +17,7 @@ ALTER TABLE public.produtos DISABLE TRIGGER produtos_updated_at;
 ALTER TABLE public.produtos DISABLE TRIGGER update_produtos_updated_at;
 UPDATE public.produtos p
    SET sku = b.sku, categoria = b.categoria, codigo_legado = b.codigo_legado, percentual_lucro = b.percentual_lucro
-  FROM public._bkp_spec193_produtos_colunas b
+  FROM backup._bkp_spec193_produtos_colunas b
  WHERE b.id = p.id;
 ALTER TABLE public.produtos ENABLE TRIGGER trg_calculo_preco_venda;
 ALTER TABLE public.produtos ENABLE TRIGGER trg_atualizar_preco_venda;

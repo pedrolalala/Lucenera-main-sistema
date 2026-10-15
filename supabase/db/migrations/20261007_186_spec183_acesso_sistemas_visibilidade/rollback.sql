@@ -1,3 +1,4 @@
+-- migration 218 (15/10): as cópias _bkp_* foram movidas para o schema backup.
 -- Rollback da 20261007_186 (SPEC-183): volta a regra antiga (Hub por papel).
 
 CREATE OR REPLACE FUNCTION public.hub_sistemas_permitidos(p_usuario_id uuid)
@@ -55,6 +56,6 @@ CREATE POLICY user_insert_usa ON public.user_system_access
 
 -- Dados: restaurar user_system_access do backup
 DELETE FROM public.user_system_access;
-INSERT INTO public.user_system_access SELECT * FROM public._bkp_user_system_access_20261007;
+INSERT INTO public.user_system_access SELECT * FROM backup._bkp_user_system_access_20261007;
 
 NOTIFY pgrst, 'reload schema';

@@ -17,7 +17,7 @@ vínculo com pedido de compra. Depois devolve as reservas: estoque_itens (local 
 volta a ser exatamente o que está em produtos (quantidade = estoque_total,
 reservada = total − disponível), como faz o trigger fn_sync_estoque_itens_from_produtos.
 
-Cada linha apagada/alterada é copiada antes para public._bkp_limpeza_20261014_<tabela>
+Cada linha apagada/alterada é copiada antes para backup._bkp_limpeza_20261014_<tabela>
 (RLS ligada, sem policy = invisível pelo app) para auditoria e para desfazer.
 
 Uso:
@@ -96,6 +96,7 @@ def main():
     c = psycopg2.connect(SUPABASE_DB_URL, connect_timeout=30)  # já vem trocado para o pooler
     k = c.cursor()
     k.execute("set local statement_timeout = '5min'")
+    k.execute("create schema if not exists backup")
     k.execute(CONJUNTOS)
     for t in ("x_orc", "x_pi", "x_sep", "x_parc"):
         k.execute(f"select count(*) from {t}")
@@ -115,9 +116,9 @@ def main():
     total = 0
     for tab, filtro in APAGAR:
         b = BKP + tab
-        k.execute(f"drop table if exists public.{b}")
-        k.execute(f"create table public.{b} as select * from public.{tab} where {filtro}")
-        k.execute(f"alter table public.{b} enable row level security")
+        k.execute(f"drop table if exists backup.{b}")
+        k.execute(f"create table backup.{b} as select * from public.{tab} where {filtro}")
+        k.execute(f"alter table backup.{b} enable row level security")
         k.execute(f"delete from public.{tab} where {filtro}")
         n = k.rowcount
         total += n
@@ -127,10 +128,10 @@ def main():
 
     # devolve as reservas: estoque_itens volta a espelhar produtos (dado da Connect)
     b = BKP + "estoque_itens"
-    k.execute(f"drop table if exists public.{b}")
-    k.execute(f"""create table public.{b} as select e.* from public.estoque_itens e
+    k.execute(f"drop table if exists backup.{b}")
+    k.execute(f"""create table backup.{b} as select e.* from public.estoque_itens e
                   join public.produtos p on p.id = e.produto_id where {ESTOQUE_DIVERGENTE}""")
-    k.execute(f"alter table public.{b} enable row level security")
+    k.execute(f"alter table backup.{b} enable row level security")
     k.execute(f"""update public.estoque_itens e
                   set quantidade = coalesce(p.estoque_total, 0),
                       quantidade_disponivel = coalesce(p.estoque_disponivel, 0),

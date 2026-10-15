@@ -1,13 +1,14 @@
+-- migration 218 (15/10): as cópias _bkp_* foram movidas para o schema backup.
 -- Rollback da 200: devolve grants de anon, RLS e políticas exatamente como em 11/10.
 DROP POLICY IF EXISTS spec196_staging_pc_select ON public.staging_pedido_compra;
 DROP POLICY IF EXISTS spec196_user_roles_sep_update ON public.user_roles_separacao;
 DROP POLICY IF EXISTS spec196_user_roles_sep_insert ON public.user_roles_separacao;
 DROP POLICY IF EXISTS spec196_func_ben_all ON public.funcionarios_beneficios_empresas;
 DROP POLICY IF EXISTS spec196_func_det_all ON public.funcionarios_detalhes;
-GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."_bkp_controle_falta_20261008" TO anon;
-GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."_bkp_ferias_20261008" TO anon;
-GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."_bkp_periodos_aquisitivos_20261008" TO anon;
-GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."_bkp_user_system_access_20261007" TO anon;
+GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON backup."_bkp_controle_falta_20261008" TO anon;
+GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON backup."_bkp_ferias_20261008" TO anon;
+GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON backup."_bkp_periodos_aquisitivos_20261008" TO anon;
+GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON backup."_bkp_user_system_access_20261007" TO anon;
 GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."auditoria_permissoes" TO anon;
 GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."categorias_produto" TO anon;
 GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."configuracao_empresa_ubiqua" TO anon;
@@ -151,17 +152,17 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."v
 GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."vw_vendas_por_projeto" TO anon;
 GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."vw_vendas_produtos" TO anon;
 ALTER TABLE public."funcionarios" DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public."_bkp_controle_falta_20261008" DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public."_bkp_ferias_20261008" DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public."_bkp_periodos_aquisitivos_20261008" DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public."_bkp_user_system_access_20261007" DISABLE ROW LEVEL SECURITY;
+ALTER TABLE backup."_bkp_controle_falta_20261008" DISABLE ROW LEVEL SECURITY;
+ALTER TABLE backup."_bkp_ferias_20261008" DISABLE ROW LEVEL SECURITY;
+ALTER TABLE backup."_bkp_periodos_aquisitivos_20261008" DISABLE ROW LEVEL SECURITY;
+ALTER TABLE backup."_bkp_user_system_access_20261007" DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public."staging_import_bruto" DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public."staging_produtos" DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public."staging_pedido_compra" DISABLE ROW LEVEL SECURITY;
-GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."_bkp_controle_falta_20261008" TO authenticated;
-GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."_bkp_ferias_20261008" TO authenticated;
-GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."_bkp_periodos_aquisitivos_20261008" TO authenticated;
-GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."_bkp_user_system_access_20261007" TO authenticated;
+GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON backup."_bkp_controle_falta_20261008" TO authenticated;
+GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON backup."_bkp_ferias_20261008" TO authenticated;
+GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON backup."_bkp_periodos_aquisitivos_20261008" TO authenticated;
+GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON backup."_bkp_user_system_access_20261007" TO authenticated;
 GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."staging_import_bruto" TO authenticated;
 GRANT DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON public."staging_produtos" TO authenticated;
 CREATE POLICY "fn_det_select_auth" ON public.funcionarios_detalhes AS PERMISSIVE FOR SELECT TO authenticated USING (true);

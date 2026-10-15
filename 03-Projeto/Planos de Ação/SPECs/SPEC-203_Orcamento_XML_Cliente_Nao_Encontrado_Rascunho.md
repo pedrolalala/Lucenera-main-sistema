@@ -19,11 +19,14 @@ O XML da Connect traz só o `cod_cliente`, que é comparado com `contatos.codigo
 
 Arquivos alterados: `BudgetFormPage.tsx`, `ImportConnectXmlModal.tsx` (texto) e `useBudgetStore.ts`.
 
+## Ajuste 16/10
+O usuário não quer cadastrar o cliente dentro do orçamento nesse fluxo. O aviso agora só orienta: escolher o cliente já cadastrado ou salvar como rascunho, cadastrar no CRM e voltar. O link de cadastro saiu do aviso. O botão "+" ao lado do campo Cliente continua (SPEC-201), mas só abre se a pessoa clicar.
+
 ## Critérios de aceite
 1. Importar um XML com cliente desconhecido carrega os itens e mostra o aviso na aba Cliente.
 2. Dá para escolher um cliente existente e salvar; o próximo XML com o mesmo código casa sozinho, se o cliente não tinha código.
 3. Dá para salvar o rascunho sem cliente; "Enviar para o Cliente" recusa até escolher o cliente.
-4. Cadastrar um novo cliente pelo aviso preenche o campo sem duplicar os itens.
+4. Nenhum cadastro de cliente abre sozinho ao importar o XML.
 
 ## Checklist
 - [x] Implementado (build ok; tsc sem erro novo: 186 contra 187 antes)

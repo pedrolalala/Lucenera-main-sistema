@@ -30,6 +30,14 @@ O status do projeto (junto com responsável, perfil e nível estratégico) é **
 
 **Permissão da equipe:** já existia. As RLS `spec069_projetos_update` (Hub crm/editar), `replace_projeto_arquitetos` e `spec196_parcelas_*` liberam a equipe (Marina, Thais e outros com crm/editar = true). O bloqueio era só o trigger.
 
+## C. Eletricista no projeto (pedido 15/10)
+- Migration `20261015_216_spec202_projeto_eletricista` (APLICADA): `projetos.eletricista_id uuid` → `contatos(id)` ON DELETE SET NULL, com índice.
+- CRM: campo "Eletricista" com busca em Editar Projeto e em Novo Projeto. No Novo Projeto, o eletricista é gravado com um update depois do `salvar-projeto`, para não precisar republicar a Edge Function. `getProjeto` traz `eletricista:eletricista_id(nome)`.
+- Hoje não existe nenhum contato do tipo eletricista; cadastre pelo CRM ou pelo Orçamento (migration 214).
+
+## D. Achado — Engenheiro não salva (AGUARDA DECISÃO)
+`projetos.responsavel_obra_id` tem FK para `usuarios`, mas as telas (CRM e Orçamentos) oferecem contatos do tipo engenheiro, e escolher um dá erro de FK. Nenhum projeto tem o campo preenchido. A sincronização com o SharePoint (`sharepoint-projetos-pull`/`-push` e os scripts `sincronizar_planilha_projetos.py`/`backfill_sharepoint_projetos.py`) mapeia a coluna "Responsável Obra" para `usuarios`. Falta o usuário dizer o que essa coluna significa: engenheiro externo (contato) ou funcionário.
+
 ## Critérios de aceite
 1. Na edição do projeto, digitar parte do nome no Cliente e no Engenheiro encontra qualquer contato do tipo.
 2. Salvar com status Finalizado, Ajustes finais e afins, num projeto sem itens, salva sem erro.
@@ -38,6 +46,8 @@ O status do projeto (junto com responsável, perfil e nível estratégico) é **
 
 ## Checklist
 - [x] A — componente de busca + ProjectDetail (build ok; tsc com os mesmos 55 erros antigos)
-- [ ] B — aplicar a migration 215 em SP (PENDENTE: bloqueada pela proteção automática; precisa de autorização do usuário)
+- [x] B — migration 215 aplicada em SP 15/10 (autorizada pelo usuário); teste como Marina: status Finalizado sem itens salvou (rollback)
 - [x] CRM publicado 37924dc (crm-lucenera.pages.dev, conferido no bundle)
+- [x] C — eletricista (migration 216 aplicada + CRM)
+- [ ] D — engenheiro: decidir contato × usuário
 - [ ] Teste pela tela com conta da equipe

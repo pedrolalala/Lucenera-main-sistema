@@ -27,5 +27,5 @@ Arquivos alterados: `BudgetFormPage.tsx`, `ImportConnectXmlModal.tsx` (texto) e 
 
 ## Checklist
 - [x] Implementado (build ok; tsc sem erro novo: 186 contra 187 antes)
-- [ ] Publicado (push → Cloudflare financeiro-lucenera)
+- [x] Publicado b89f275 (financeiro-lucenera.pages.dev, conferido no bundle)
 - [ ] Teste pela tela

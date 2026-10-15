@@ -38,6 +38,6 @@ O status do projeto (junto com responsável, perfil e nível estratégico) é **
 
 ## Checklist
 - [x] A — componente de busca + ProjectDetail (build ok; tsc com os mesmos 55 erros antigos)
-- [ ] B — aplicar a migration 215 em SP
-- [ ] Publicar o CRM (push → Cloudflare)
+- [ ] B — aplicar a migration 215 em SP (PENDENTE: bloqueada pela proteção automática; precisa de autorização do usuário)
+- [x] CRM publicado 37924dc (crm-lucenera.pages.dev, conferido no bundle)
 - [ ] Teste pela tela com conta da equipe

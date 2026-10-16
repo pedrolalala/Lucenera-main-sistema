@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-16
+
+- Vendas (SPEC-204): importadas as notas da Connect da Manoella de fev a set/2026 (236 notas no total com jan,
+  nº 4579–4814). Só grava em `notas_fiscais_connect*` — nada do financeiro alterado (conferido pelos contadores
+  do banco). Total da aba passa a somar só nota de VENDA (CFOP de venda); remessa, devolução, retorno e
+  industrialização não somam. Vendas `bea828a`. `scripts/importar_nfe_connect.py` lê subpastas e pula evento de nota de terceiro.
+
 ## 2026-10-15
 
 - Vendas (SPEC-204): aba "Notas Fiscais Connect" (`/notas-fiscais-connect`, só consulta) com as NF-e emitidas pela

@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-204 — Vendas: Notas Fiscais Connect (importação dos XMLs)"
 status: pendente
-data_ultima_modificacao: 2026-10-15
+data_ultima_modificacao: 2026-10-16
 sistemas_envolvidos:
   - Vendas
   - Banco (Supabase)
@@ -86,9 +86,17 @@ O Vendas é o único lugar onde nota fiscal e boleto são orquestrados a partir 
 ## Pendências
 
 - [ ] Conferir a aba Notas Fiscais Connect logado com um usuário do Vendas.
+- [ ] Devolução de cliente (entrada, CFOP 1202/1411, 10 notas R$ 18.171,73) hoje só não soma — confirmar com o usuário se deve abater do valor das vendas.
 - [ ] Definir se/como ligar cada nota da Connect a uma venda (`orcamento_id`) e se destinatários fora do cadastro devem virar clientes.
 
 ### 2026-10-15 (ajustes)
 
 - Migration 220 aplicada: leitura também para quem entra no Vendas pelo Hub (`hub_pode_executar`), não só por Acesso a Sistemas — o usuário via a aba vazia.
 - Remessa deixa de somar no valor (só venda autorizada soma); selo "Remessa · não soma" na linha.
+
+### 2026-10-16
+
+- Importados fev–set/2026 da Manoella (pastas por mês em `01-Documento/04 - XML/XML NOTA FISCAL/`; script agora lê subpastas). Total: 236 notas (nº 4579–4814, sem buraco), 6 canceladas (4590, 4673, 4722, 4734, 4740, 4777), 18 eventos.
+- Ignorados: rascunho sem protocolo do nº 4755 (julho, emitente zerado, R$ 0 — a 4755 real foi importada) e evento "Operação não Realizada" de nota de outro emitente (manifestação de nota recebida). O script agora pula evento de nota de terceiro.
+- **Nada do financeiro foi tocado** (pedido do usuário): contadores do banco antes/depois mostram escrita só nas 4 tabelas `notas_fiscais_connect*`; essas tabelas não têm trigger, view nem função ligada.
+- Regra de soma: só nota de VENDA autorizada (CFOP 5101–5123/5401–5405 e 6xxx) soma. Remessa, devolução, devolução de compra, retorno de amostra, saída para industrialização e bonificação ficam na lista com o selo "Não é venda · não soma". Vendas `bea828a`. Total de vendas jan–set: 199 notas, R$ 2.894.799,93.

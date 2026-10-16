@@ -7,6 +7,9 @@ essas tabelas.
 - *-procEventoNFe.xml: carta de correção (110110), cancelamento (110111)... Cancelamento homologado
   (cStat 135/155) marca a nota como cancelada.
 - Só entra nota emitida por empresa do grupo (empresas.cnpj); as outras são listadas e puladas.
+- Lê a pasta e as subpastas (ex.: uma pasta por mês).
+- Só grava nas 4 tabelas notas_fiscais_connect*: não mexe em financeiro (parcelas, boletos, contas,
+  transações), estoque, orçamentos nem notas_fiscais. Essas tabelas não têm trigger nem view ligada.
 - Vínculos: empresa pelo CNPJ do emitente; cliente (contatos) pelo CPF/CNPJ do destinatário quando
   só existe um contato com ele; peça (produtos) pelo cProd = codigo_produto.
 
@@ -222,15 +225,16 @@ def gravar_evento(cur, evento):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("pasta", help="pasta com os XMLs (*.xml)")
+    parser.add_argument("pasta", help="pasta com os XMLs (*.xml), inclusive subpastas")
     parser.add_argument("--aplicar", action="store_true", help="grava (sem isso, desfaz no fim)")
     args = parser.parse_args()
 
-    arquivos = sorted(Path(args.pasta).glob("*.xml"))
+    arquivos = sorted(Path(args.pasta).rglob("*.xml"))
     if not arquivos:
         sys.exit(f"Nenhum XML em {args.pasta}")
 
     notas, eventos, ignorados = [], [], []
+    chaves_vistas = {}
     for arq in arquivos:
         conteudo = arq.read_text(encoding="utf-8")
         try:
@@ -242,7 +246,10 @@ def main():
             nota = ler_nota(arq, conteudo)
             if nota and nota["status_sefaz"] not in (None, "100", "150"):
                 ignorados.append((arq.name, f"nota não autorizada (cStat {nota['status_sefaz']})"))
+            elif nota and nota["chave_nfe"] in chaves_vistas:
+                ignorados.append((arq.name, f"mesma nota de {chaves_vistas[nota['chave_nfe']]}"))
             elif nota:
+                chaves_vistas[nota["chave_nfe"]] = arq.name
                 notas.append(nota)
         elif raiz_tag == "procEventoNFe":
             evento = ler_evento(arq, conteudo)
@@ -301,6 +308,11 @@ def main():
                 atualizadas += 1
 
         for evento in eventos:
+            # posições 7-20 da chave = CNPJ do emitente; evento de nota de terceiro (ex.: manifestação de
+            # nota recebida) não entra
+            if evento["chave_nfe"][6:20] not in empresas:
+                ignorados.append((evento["arquivo_nome"], f"evento ({evento['descricao']}) de nota de outro emitente"))
+                continue
             gravar_evento(cur, evento)
 
         # liga eventos às notas e marca as canceladas
@@ -320,8 +332,20 @@ def main():
         canceladas = cur.rowcount
 
         cur.execute(
+            """select to_char(data_emissao at time zone 'America/Sao_Paulo', 'YYYY-MM') mes, count(*),
+                      count(*) filter (where situacao = 'cancelada'),
+                      count(*) filter (where situacao = 'autorizada' and natureza_operacao ~* 'REMESSA'),
+                      coalesce(sum(valor_total) filter (where situacao = 'autorizada' and natureza_operacao !~* 'REMESSA'), 0)
+               from public.notas_fiscais_connect group by 1 order by 1"""
+        )
+        por_mes = cur.fetchall()
+        cur.execute(
+            """select count(*) from public.notas_fiscais_connect_eventos where nota_id is null"""
+        )
+        eventos_soltos = cur.fetchone()[0]
+        cur.execute(
             """select count(*), count(*) filter (where situacao = 'cancelada'),
-                      coalesce(sum(valor_total) filter (where situacao = 'autorizada'), 0)
+                      coalesce(sum(valor_total) filter (where situacao = 'autorizada' and natureza_operacao !~* 'REMESSA'), 0)
                from public.notas_fiscais_connect"""
         )
         total, total_canc, valor = cur.fetchone()
@@ -333,7 +357,12 @@ def main():
               + (f" -> {', '.join(sorted(p or '?' for p in pecas_sem_cadastro))}" if pecas_sem_cadastro else ""))
         for nome, motivo in ignorados:
             print(f"  IGNORADO {nome}: {motivo}")
-        print(f"Na tabela agora: {total} notas ({total_canc} canceladas), autorizadas somam R$ {valor:,.2f}")
+        print("Por mês (emissão): notas / canceladas / remessas / valor das vendas")
+        for mes, qtd, canc, rem, val in por_mes:
+            print(f"  {mes}: {qtd:3d} / {canc} / {rem} / R$ {val:,.2f}")
+        if eventos_soltos:
+            print(f"Eventos sem a nota correspondente importada: {eventos_soltos}")
+        print(f"Na tabela agora: {total} notas ({total_canc} canceladas), vendas autorizadas somam R$ {valor:,.2f}")
 
         if args.aplicar:
             conn.commit()

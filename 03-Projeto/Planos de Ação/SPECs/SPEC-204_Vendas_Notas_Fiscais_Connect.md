@@ -86,7 +86,8 @@ O Vendas é o único lugar onde nota fiscal e boleto são orquestrados a partir 
 ## Pendências
 
 - [ ] Conferir a aba Notas Fiscais Connect logado com um usuário do Vendas.
-- [ ] Devolução de cliente (entrada, CFOP 1202/1411, 10 notas R$ 18.171,73) hoje só não soma — confirmar com o usuário se deve abater do valor das vendas.
+- [x] Devolução de cliente abate do valor das vendas (decisão do usuário 16/10).
+- [ ] Islight março/2026 (notas 784–812): a pasta `Islight/Março` é cópia da de fevereiro — pedir os XMLs certos.
 - [ ] Definir se/como ligar cada nota da Connect a uma venda (`orcamento_id`) e se destinatários fora do cadastro devem virar clientes.
 
 ### 2026-10-15 (ajustes)
@@ -100,3 +101,7 @@ O Vendas é o único lugar onde nota fiscal e boleto são orquestrados a partir 
 - Ignorados: rascunho sem protocolo do nº 4755 (julho, emitente zerado, R$ 0 — a 4755 real foi importada) e evento "Operação não Realizada" de nota de outro emitente (manifestação de nota recebida). O script agora pula evento de nota de terceiro.
 - **Nada do financeiro foi tocado** (pedido do usuário): contadores do banco antes/depois mostram escrita só nas 4 tabelas `notas_fiscais_connect*`; essas tabelas não têm trigger, view nem função ligada.
 - Regra de soma: só nota de VENDA autorizada (CFOP 5101–5123/5401–5405 e 6xxx) soma. Remessa, devolução, devolução de compra, retorno de amostra, saída para industrialização e bonificação ficam na lista com o selo "Não é venda · não soma". Vendas `bea828a`. Total de vendas jan–set: 199 notas, R$ 2.894.799,93.
+- **Devolução de cliente abate** (decisão do usuário 16/10): nota autorizada de entrada CFOP 1201–1204/1410–1411 (e 2xxx) é descontada do valor das vendas; card "Devoluções de cliente", valor em vermelho com "−" e selo "Devolução · abate". Devolução de compra, remessa, retorno, industrialização, bonificação e compra continuam sem entrar na conta. Script mostra o resumo pela mesma regra (por empresa/mês).
+- Correção: a tabela por mês da Manoella informada antes ao usuário usava a regra antiga (só tirava REMESSA); o total R$ 2.894.799,93 estava certo. Manoella jan–set: vendas R$ 2.894.799,93 − devoluções R$ 18.171,73 = R$ 2.876.628,20. Islight (sem março): R$ 3.287.523,39 − R$ 164.945,34 = R$ 3.122.578,05.
+- **Islight importada** (pastas por mês em `XML NOTA FISCAL/Islight/`): 191 notas nº 738–958, 9 canceladas (751, 778, 840, 863, 871, 889, 891, 913, 955), 26 eventos. Inutilizações 780–782 e 4141 (procInutNFe) ignoradas. **Março faltando**: a pasta `Março` é cópia idêntica de `fevereiro` (758–783); faltam as notas 784–812. Antes/depois do banco: escrita só nas 4 tabelas `notas_fiscais_connect*` (fora a `sharepoint_sync_state`, sincronização automática não relacionada).
+

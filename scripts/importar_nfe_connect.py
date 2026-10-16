@@ -34,6 +34,9 @@ from _supabase_client import SUPABASE_DB_URL  # noqa: E402
 NS = {"n": "http://www.portalfiscal.inf.br/nfe"}
 CANCELAMENTO = "110111"
 EVENTO_HOMOLOGADO = {"135", "136", "155"}
+# Soma no valor: nota de venda (5101–5123, 5401–5405 e 6xxx); abate: devolução de cliente (entrada).
+CFOP_VENDA = r"^[56](10[1-9]|11\d|12[0-3]|40[1-5])$"
+CFOP_DEVOLUCAO = r"^[12](20[1-4]|41[01])$"
 
 
 def txt(el, caminho):
@@ -331,12 +334,15 @@ def main():
         )
         canceladas = cur.rowcount
 
+        # Mesma regra da tela do Vendas: soma só a nota de VENDA autorizada (CFOP de venda) e abate a
+        # devolução de cliente autorizada (entrada 1201–1204/1410–1411 e 2xxx). O resto não soma.
         cur.execute(
-            """select to_char(data_emissao at time zone 'America/Sao_Paulo', 'YYYY-MM') mes, count(*),
-                      count(*) filter (where situacao = 'cancelada'),
-                      count(*) filter (where situacao = 'autorizada' and natureza_operacao ~* 'REMESSA'),
-                      coalesce(sum(valor_total) filter (where situacao = 'autorizada' and natureza_operacao !~* 'REMESSA'), 0)
-               from public.notas_fiscais_connect group by 1 order by 1"""
+            f"""select e.nome, to_char(n.data_emissao at time zone 'America/Sao_Paulo', 'YYYY-MM') mes,
+                      count(*), count(*) filter (where n.situacao = 'cancelada'),
+                      coalesce(sum(n.valor_total) filter (where n.situacao = 'autorizada' and n.cfop_principal ~ '{CFOP_VENDA}'), 0),
+                      coalesce(sum(n.valor_total) filter (where n.situacao = 'autorizada' and n.cfop_principal ~ '{CFOP_DEVOLUCAO}'), 0)
+               from public.notas_fiscais_connect n left join public.empresas e on e.id = n.empresa_id
+               group by 1, 2 order by 1, 2"""
         )
         por_mes = cur.fetchall()
         cur.execute(
@@ -344,8 +350,9 @@ def main():
         )
         eventos_soltos = cur.fetchone()[0]
         cur.execute(
-            """select count(*), count(*) filter (where situacao = 'cancelada'),
-                      coalesce(sum(valor_total) filter (where situacao = 'autorizada' and natureza_operacao !~* 'REMESSA'), 0)
+            f"""select count(*), count(*) filter (where situacao = 'cancelada'),
+                      coalesce(sum(valor_total) filter (where situacao = 'autorizada' and cfop_principal ~ '{CFOP_VENDA}'), 0)
+                      - coalesce(sum(valor_total) filter (where situacao = 'autorizada' and cfop_principal ~ '{CFOP_DEVOLUCAO}'), 0)
                from public.notas_fiscais_connect"""
         )
         total, total_canc, valor = cur.fetchone()
@@ -357,12 +364,12 @@ def main():
               + (f" -> {', '.join(sorted(p or '?' for p in pecas_sem_cadastro))}" if pecas_sem_cadastro else ""))
         for nome, motivo in ignorados:
             print(f"  IGNORADO {nome}: {motivo}")
-        print("Por mês (emissão): notas / canceladas / remessas / valor das vendas")
-        for mes, qtd, canc, rem, val in por_mes:
-            print(f"  {mes}: {qtd:3d} / {canc} / {rem} / R$ {val:,.2f}")
+        print("Por empresa e mês (emissão): notas / canceladas / vendas − devoluções = líquido")
+        for emp, mes, qtd, canc, vend, dev in por_mes:
+            print(f"  {emp} {mes}: {qtd:3d} / {canc} / R$ {vend:,.2f} − R$ {dev:,.2f} = R$ {vend - dev:,.2f}")
         if eventos_soltos:
             print(f"Eventos sem a nota correspondente importada: {eventos_soltos}")
-        print(f"Na tabela agora: {total} notas ({total_canc} canceladas), vendas autorizadas somam R$ {valor:,.2f}")
+        print(f"Na tabela agora: {total} notas ({total_canc} canceladas), vendas líquidas (vendas − devoluções) R$ {valor:,.2f}")
 
         if args.aplicar:
             conn.commit()

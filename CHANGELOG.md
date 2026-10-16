@@ -8,6 +8,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   nº 4579–4814). Só grava em `notas_fiscais_connect*` — nada do financeiro alterado (conferido pelos contadores
   do banco). Total da aba passa a somar só nota de VENDA (CFOP de venda); remessa, devolução, retorno e
   industrialização não somam. Vendas `bea828a`. `scripts/importar_nfe_connect.py` lê subpastas e pula evento de nota de terceiro.
+- Vendas (SPEC-204): devolução de cliente (entrada 1201–1204/1410–1411) passa a ABATER do valor das vendas (Vendas
+  `a81c17b`); resumo do script pela mesma regra, por empresa e mês. Importada a Islight jan–set/2026 sem março
+  (191 notas, nº 738–958, 9 canceladas) — a pasta `Islight/Março` é cópia da de fevereiro, faltam as notas 784–812.
+  De novo só `notas_fiscais_connect*` recebeu escrita.
 
 ## 2026-10-15
 

@@ -14,6 +14,8 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   De novo só `notas_fiscais_connect*` recebeu escrita.
 - Vendas (SPEC-204): importada a Foco jan–set/2026 (143 notas, nº 1354–1496, 6 canceladas; líquido R$ 3.270.369,49).
   Só `notas_fiscais_connect*` recebeu escrita.
+- Vendas (SPEC-204): importado março/2026 da Islight (29 notas, nº 784–812). Notas Connect jan–set completas nas 3
+  empresas: 599 notas, líquido R$ 9.981.861,72. Só `notas_fiscais_connect*` recebeu escrita.
 
 ## 2026-10-15
 

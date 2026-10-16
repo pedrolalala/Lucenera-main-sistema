@@ -87,7 +87,7 @@ O Vendas é o único lugar onde nota fiscal e boleto são orquestrados a partir 
 
 - [ ] Conferir a aba Notas Fiscais Connect logado com um usuário do Vendas.
 - [x] Devolução de cliente abate do valor das vendas (decisão do usuário 16/10).
-- [ ] Islight março/2026 (notas 784–812): a pasta `Islight/Março` é cópia da de fevereiro — pedir os XMLs certos.
+- [x] Islight março/2026 (notas 784–812) importada.
 - [ ] Definir se/como ligar cada nota da Connect a uma venda (`orcamento_id`) e se destinatários fora do cadastro devem virar clientes.
 
 ### 2026-10-15 (ajustes)
@@ -106,3 +106,6 @@ O Vendas é o único lugar onde nota fiscal e boleto são orquestrados a partir 
 - **Islight importada** (pastas por mês em `XML NOTA FISCAL/Islight/`): 191 notas nº 738–958, 9 canceladas (751, 778, 840, 863, 871, 889, 891, 913, 955), 26 eventos. Inutilizações 780–782 e 4141 (procInutNFe) ignoradas. **Março faltando**: a pasta `Março` é cópia idêntica de `fevereiro` (758–783); faltam as notas 784–812. Antes/depois do banco: escrita só nas 4 tabelas `notas_fiscais_connect*` (fora a `sharepoint_sync_state`, sincronização automática não relacionada).
 - **Foco importada** (`XML NOTA FISCAL/Foco/<mês>`): 143 notas nº 1354–1496 jan–set/2026, sem buraco; 6 canceladas (1361, 1362, 1394, 1410, 1416, 1458). 102 vendas R$ 3.330.691,02 − devoluções R$ 60.321,53 = R$ 3.270.369,49. Ignorados 7 eventos de manifestação sobre notas recebidas de fornecedores. Contadores do banco: escrita só nas 4 tabelas `notas_fiscais_connect*`.
 - Tabela agora: 570 notas (Manoella 236, Islight 191 sem março, Foco 143), líquido R$ 9.269.575,74.
+- **Islight março importada** (XMLs certos recopiados pelo usuário): 29 notas nº 784–812, 1 cancelada (805), 22 vendas R$ 723.857,39 − devoluções R$ 11.571,41 = R$ 712.285,98. Islight completa jan–set: 220 notas nº 738–958 (780–782 inutilizadas), 10 canceladas, 160 vendas, líquido R$ 3.834.864,03. Contadores: escrita só nas 4 tabelas `notas_fiscais_connect*`.
+- Tabela completa jan–set/2026 das 3 empresas: 599 notas, 22 canceladas, líquido R$ 9.981.861,72 (Manoella R$ 2.876.628,20; Islight R$ 3.834.864,03; Foco R$ 3.270.369,49).
+

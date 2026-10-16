@@ -12,6 +12,8 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   `a81c17b`); resumo do script pela mesma regra, por empresa e mês. Importada a Islight jan–set/2026 sem março
   (191 notas, nº 738–958, 9 canceladas) — a pasta `Islight/Março` é cópia da de fevereiro, faltam as notas 784–812.
   De novo só `notas_fiscais_connect*` recebeu escrita.
+- Vendas (SPEC-204): importada a Foco jan–set/2026 (143 notas, nº 1354–1496, 6 canceladas; líquido R$ 3.270.369,49).
+  Só `notas_fiscais_connect*` recebeu escrita.
 
 ## 2026-10-15
 

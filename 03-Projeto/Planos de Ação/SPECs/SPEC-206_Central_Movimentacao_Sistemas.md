@@ -36,7 +36,7 @@ sistemas_envolvidos:
 - [x] `src/lib/registro-tela.ts` igual nos 17 sistemas, ligado no `main.tsx`. Escuta pushState/replaceState/popstate, vale para qualquer roteador, guarda só o caminho (sem ?parâmetros) e só registra quem está logado.
 - [x] CRM: Novo Projeto chama `auditoria_registrar_acao('criou','projetos',id)` depois do `salvar-projeto`.
 - [x] Central: tipo "Abriu tela", chave "Mostrar telas abertas" (começa desligada) e coluna "Telas abertas" em Pessoas.
-- [ ] Publicar os 17 sistemas e conferir
+- [x] Publicar os 17 sistemas e conferir (19/10: código novo conferido no bundle dos 17 *.pages.dev)
 
 ### Passos manuais do usuário
 - [x] Aprovar esta SPEC e as escolhas da seção "Decisões" (19/10: 12 meses, só admin, fase 2 depois)

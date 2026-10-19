@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-209 — Compras: pedidos da reunião de 19/10 (Necessidade de Compra, Pedidos, Entrada e Separação Parcial)"
-status: não iniciado
+status: pendente
 data_ultima_modificacao: 2026-10-19
 sistemas_envolvidos:
   - Necessidade de Compra (compras-lucenera)
@@ -24,12 +24,12 @@ O minuto da gravação aparece entre colchetes em cada pedido.
 - [ ] A6. Barra do pedido em montagem sempre visível: N itens, fornecedor, empresa, total, botão "Fechar pedido" e "Limpar".
 
 **B. Valores no pedido (janelas Gerar Compra e Fechar Pedido em Lote)**
-- [ ] B1. Tirar a coluna ICMS.
-- [ ] B2. Ordem das colunas: Preço de custo · ST · IPI · Outras despesas · Total.
-- [ ] B3. "Líquido" passa a se chamar "Preço de custo" e já vem com o desconto do produto (`porc_desconto`). Exemplo: R$ 100 com 25% vem R$ 75.
-- [ ] B4. ST, IPI e Outras despesas calculados sobre o preço de custo com desconto, pelos % do cadastro (`porc_st`, `ipi_entrada`, `porc_despesas`). Mostrar o % junto do R$ para bater com o cadastro.
-- [ ] B5. Rodapé com "Valor total dos produtos" (preço de custo × quantidade) e embaixo "Valor total dos produtos com impostos" (com ST + IPI + outras despesas). Este substitui o "Total estimado".
-- [ ] B6. Gravar outras despesas no item do pedido (coluna nova `valor_outras_despesas` em `pedido_compra_itens`).
+- [x] B1. Tirar a coluna ICMS.
+- [x] B2. Ordem das colunas: Preço de custo · ST · IPI · Outras despesas · Total.
+- [x] B3. "Líquido" passa a se chamar "Preço de custo" e já vem com o desconto do produto (`porc_desconto`). Exemplo: R$ 100 com 25% vem R$ 75.
+- [x] B4. ST, IPI e Outras despesas calculados sobre o preço de custo com desconto, pelos % do cadastro (`porc_st`, `ipi_entrada`, `porc_despesas`). Mostrar o % junto do R$ para bater com o cadastro.
+- [x] B5. Rodapé com "Valor total dos produtos" (preço de custo × quantidade) e embaixo "Valor total dos produtos com impostos" (com ST + IPI + outras despesas). Este substitui o "Total estimado".
+- [x] B6. Gravar outras despesas no item do pedido (coluna nova `valor_outras_despesas` em `pedido_compra_itens`).
 
 **C. Condição de pagamento e previsão de entrega**
 - [ ] C1. Aceitar "30/60/90" (dias) e também datas digitadas (ex.: 15/11, 15/12). As parcelas são divididas em partes iguais.
@@ -54,10 +54,10 @@ O minuto da gravação aparece entre colchetes em cada pedido.
 - [ ] F1. Parcelas dos pedidos em aberto entram como previsão de pagamento no fluxo de caixa (visualização que o Vinicius vai montar com Carol e Lana).
 
 **G. Separação Parcial (mesmo padrão da consulta de produtos)**
-- [ ] G1. Linhas da tabela em preto, como no Cadastro (SPEC-195 B4). No computador do Vinicius as linhas cinza somem.
-- [ ] G2. Linha mais grossa separando cada L (acabou o L1, linha; acabou o L2, linha).
-- [ ] G3. Linha selecionada ou com o mouse em cima em azul claro bem visível, igual para todos.
-- [ ] G4. Cabeçalho fixo ao rolar, se a lista for longa (mesma correção da SPEC-208).
+- [x] G1. Linhas da tabela em preto, como no Cadastro (SPEC-195 B4). No computador do Vinicius as linhas cinza somem.
+- [x] G2. Linha mais grossa separando cada L (acabou o L1, linha; acabou o L2, linha).
+- [x] G3. Linha selecionada ou com o mouse em cima em azul claro bem visível, igual para todos.
+- [x] G4. Cabeçalho fixo ao rolar, se a lista for longa (mesma correção da SPEC-208).
 
 **H. Já feito / fora do sistema**
 - [x] H1. Busca de item na Separação Parcial (SPEC-207, 19/10).
@@ -146,7 +146,24 @@ Os 52 pedidos `enviado` viram `aguardando_aprovar` (ou `aprovado`, ver decisão 
 
 ## Realizado
 
-(nada ainda)
+### 2026-10-19 — partes B e G
+
+- **B (compras-lucenera c844b87):** as 3 janelas de compra mostram a mesma coisa.
+  - As janelas são Gerar Compra por item, Pedido em Lote e Comprar.
+  - Colunas: Preço de custo (já com `porc_desconto`) · ST % · IPI % · Outras despesas % (o R$ de cada um embaixo) · Total/un.
+  - O ICMS saiu.
+  - Rodapé com "Valor total dos produtos" e "Valor total dos produtos com impostos".
+  - Os % vêm do cadastro e podem ser ajustados no pedido.
+  - O custo do fornecedor (`produto_fornecedores.custo_unitario`) continua valendo sem aplicar desconto.
+- **B6:** migration 225 aplicada.
+  - `pedido_compra_itens.valor_outras_despesas` e `criar_pedido_compra_lote` gravam outras despesas.
+  - `criar_pedido_compra_de_necessidade` ganhou `p_valor_outras_despesas`; foi recriada com DROP para não virar overload.
+  - Dry-run testou as duas RPCs e a chamada antiga; o rollback foi conferido.
+- **G (separacao-parcial c9ad7cb):** tabela de itens da venda:
+  - em ordem de L, com linhas pretas;
+  - linha grossa entre um L e outro;
+  - linha azul ao passar o mouse e mais forte enquanto se digita nela;
+  - cabeçalho fixo, com a tabela rolando dentro de 70% da altura da tela.
 
 ## Pendências
 

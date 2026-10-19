@@ -51,7 +51,7 @@ O minuto da gravação aparece entre colchetes em cada pedido.
 - [ ] E3. Conferir a entrada de ponta a ponta com a Débora depois de A–D prontos ("gostaria que arrumasse antes de testar").
 
 **F. Fluxo de caixa (depois de C2)**
-- [ ] F1. Parcelas dos pedidos em aberto entram como previsão de pagamento no fluxo de caixa (visualização que o Vinicius vai montar com Carol e Lana).
+- [x] F1. Parcelas dos pedidos em aberto entram como previsão de pagamento no fluxo de caixa (visualização que o Vinicius vai montar com Carol e Lana).
 
 **G. Separação Parcial (mesmo padrão da consulta de produtos)**
 - [x] G1. Linhas da tabela em preto, como no Cadastro (SPEC-195 B4). No computador do Vinicius as linhas cinza somem.
@@ -185,9 +185,19 @@ Os 52 pedidos `enviado` viram `aguardando_aprovar` (ou `aprovado`, ver decisão 
   - Pop-up de chegada.
   - Saíram `ModalPedidoLote`, `SolicitarCompraDialog`, `Solicitacoes.tsx` e `solicitacoes-compra.ts`. A observação de caixa fechada foi para `ObservacaoCaixaFechada.tsx`.
 
+### 2026-10-19 — parte F (fluxo de caixa)
+
+- **Migration 227 aplicada:** view `vw_contas_pagar_pedidos_compra`, no formato de `v_financeiro_realizado`, com a mesma trava `pode_acessar_sistema('dashboard-financeiro')`.
+  - Uma linha por parcela, em aberto, com o vencimento da parcela, em DESPESAS › PEDIDOS DE COMPRA.
+  - Entra pedido `aprovado` ou `parcialmente_recebido` (só a parte que não chegou).
+  - Fica de fora: aguardando aprovar, concluído (a duplicata vem do Connect), cancelado, PC-LEGADO-* e parcela paga.
+- **Aprovar:** `aprovar_pedido_compra` gera as parcelas pela condição de pagamento se ainda não houver. Sem condição, aprova e avisa.
+- **Dashboard Financeiro 578f56e:** `fetchFinanceiro` soma a view, então o pedido aparece no A Pagar do Fluxo Futuro, no Contas a Pagar e na Visão geral. O bloco "Pedidos de Compra" virou "Pedidos fora do A Pagar" (aguardando aprovação + PC-LEGADO).
+- **Compras 963d49d:** o aviso ao aprovar diz quantas parcelas foram ao Contas a Pagar.
+- Dry-run: aguardando não entra; aprovado entra; parcial entra proporcional (R$ 50 → R$ 37,50 com 1/4 recebido); concluído sai; usuário sem acesso ao financeiro não vê.
+
 ## Pendências
 
-- [ ] SPEC-209 F: levar as parcelas dos pedidos de compra em aberto para o fluxo de caixa (visualização que o Vinicius vai montar com Carol e Lana).
 - [ ] SPEC-209 E3: teste ponta a ponta com a Débora: montar pedido com L de vendas diferentes, aprovar, entrada parcial e depois total.
 - [ ] SPEC-209: adicionar item novo num pedido já gerado (a edição hoje muda e tira itens, não inclui).
 - [ ] Acesso da Débora ao sistema (senha trocada); e-mail de recuperação depende do SMTP da SPEC-205.

@@ -37,6 +37,7 @@ sistemas_envolvidos:
 - [x] CRM: Novo Projeto chama `auditoria_registrar_acao('criou','projetos',id)` depois do `salvar-projeto`.
 - [x] Central: tipo "Abriu tela", chave "Mostrar telas abertas" (começa desligada) e coluna "Telas abertas" em Pessoas.
 - [x] Publicar os 17 sistemas e conferir (19/10: código novo conferido no bundle dos 17 *.pages.dev)
+- [x] Histórico anterior (migration 224, aplicada 19/10): 176 eventos de abr–out vindos de auth.sessions, last_sign_in_at, logs_auditoria, auditoria_permissoes, historico_status_orcamentos, producao_pedidos_log e colunas de autor (pedidos_compra, producao, garantia, orçamentos, contatos). Marcados com navegador 'Histórico importado — <origem>'. Sem autor não entra; logins antigos dia a dia e edições anteriores não existiam no banco.
 
 ### Passos manuais do usuário
 - [x] Aprovar esta SPEC e as escolhas da seção "Decisões" (19/10: 12 meses, só admin, fase 2 depois)

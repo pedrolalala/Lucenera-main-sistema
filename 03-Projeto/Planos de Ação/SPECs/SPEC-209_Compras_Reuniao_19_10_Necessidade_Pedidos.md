@@ -16,12 +16,12 @@ O minuto da gravação aparece entre colchetes em cada pedido.
 ## Checklist de Ação
 
 **A. Montar o pedido de compra (Necessidade de Compra)**
-- [ ] A1. Seleção que não se perde: marcar L de produtos diferentes (e produtos inteiros) num só "carrinho" do pedido. Abrir outro produto não pode desmarcar o anterior.
-- [ ] A2. Fechar o pedido só com os L marcados. Hoje "Fechar pedido em lote" leva o produto inteiro, todos os L.
-- [ ] A3. Filtro de empresa (Manoela / Foco / Islight / Todas) na lista da Necessidade de Compra, pela empresa da venda.
-- [ ] A4. Já trazer a empresa da venda selecionada no pedido, podendo trocar.
-- [ ] A5. Poder arrastar a janela "Gerar compra" / "Fechar pedido" para o lado e ver a tela de trás.
-- [ ] A6. Barra do pedido em montagem sempre visível: N itens, fornecedor, empresa, total, botão "Fechar pedido" e "Limpar".
+- [x] A1. Seleção que não se perde: marcar L de produtos diferentes (e produtos inteiros) num só "carrinho" do pedido. Abrir outro produto não pode desmarcar o anterior.
+- [x] A2. Fechar o pedido só com os L marcados. Hoje "Fechar pedido em lote" leva o produto inteiro, todos os L.
+- [x] A3. Filtro de empresa (Manoela / Foco / Islight / Todas) na lista da Necessidade de Compra, pela empresa da venda.
+- [x] A4. Já trazer a empresa da venda selecionada no pedido, podendo trocar.
+- [x] A5. Poder arrastar a janela "Gerar compra" / "Fechar pedido" para o lado e ver a tela de trás.
+- [x] A6. Barra do pedido em montagem sempre visível: N itens, fornecedor, empresa, total, botão "Fechar pedido" e "Limpar".
 
 **B. Valores no pedido (janelas Gerar Compra e Fechar Pedido em Lote)**
 - [x] B1. Tirar a coluna ICMS.
@@ -32,22 +32,22 @@ O minuto da gravação aparece entre colchetes em cada pedido.
 - [x] B6. Gravar outras despesas no item do pedido (coluna nova `valor_outras_despesas` em `pedido_compra_itens`).
 
 **C. Condição de pagamento e previsão de entrega**
-- [ ] C1. Aceitar "30/60/90" (dias) e também datas digitadas (ex.: 15/11, 15/12). As parcelas são divididas em partes iguais.
-- [ ] C2. Gerar as parcelas do pedido (`pedido_compra_parcelas`) com data e valor, para alimentar a previsão de pagamento.
-- [ ] C3. Aviso de chegada: quando faltarem 10 dias para a data prevista de entrega de um pedido em aberto, mostrar aviso ao abrir o sistema ("Em 10 dias chega o pedido #N da Interlight — confirme com o fornecedor").
-- [ ] C4. (Depois, quando houver histórico) sugerir o prazo médio de entrega do fornecedor, pela diferença entre a data do pedido e a data da entrada. Por enquanto só mostrar quando já houver pedidos concluídos.
+- [x] C1. Aceitar "30/60/90" (dias) e também datas digitadas (ex.: 15/11, 15/12). As parcelas são divididas em partes iguais.
+- [x] C2. Gerar as parcelas do pedido (`pedido_compra_parcelas`) com data e valor, para alimentar a previsão de pagamento.
+- [x] C3. Aviso de chegada: quando faltarem 10 dias para a data prevista de entrega de um pedido em aberto, mostrar aviso ao abrir o sistema ("Em 10 dias chega o pedido #N da Interlight — confirme com o fornecedor").
+- [x] C4. (Depois, quando houver histórico) sugerir o prazo médio de entrega do fornecedor, pela diferença entre a data do pedido e a data da entrada. Por enquanto só mostrar quando já houver pedidos concluídos.
 
 **D. Pedidos: juntar Solicitações em Pedidos e novos status**
-- [ ] D1. A aba "Solicitações" deixa de existir; tudo fica na tela "Pedidos".
-- [ ] D2. Status do pedido: **Aguardando aprovar** (enviado ao fornecedor, esperando o retorno) → **Aprovado** (fornecedor confirmou) → **Concluído parcialmente** / **Concluído**. Também **Cancelado**. Não usar "Rejeitado".
-- [ ] D3. Pedido em "Aguardando aprovar" pode ser editado: quantidade, preço, desconto, itens a mais ou a menos, condição, previsão.
-- [ ] D4. Botão "Aprovar" (Aguardando aprovar → Aprovado).
-- [ ] D5. Cancelar exige justificativa (como na aprovação financeira). Ao cancelar, a necessidade de compra dos itens volta a aparecer.
-- [ ] D6. Abas ou filtro por status na tela Pedidos.
+- [x] D1. A aba "Solicitações" deixa de existir; tudo fica na tela "Pedidos".
+- [x] D2. Status do pedido: **Aguardando aprovar** (enviado ao fornecedor, esperando o retorno) → **Aprovado** (fornecedor confirmou) → **Concluído parcialmente** / **Concluído**. Também **Cancelado**. Não usar "Rejeitado".
+- [x] D3. Pedido em "Aguardando aprovar" pode ser editado: quantidade, preço, desconto, itens a mais ou a menos, condição, previsão.
+- [x] D4. Botão "Aprovar" (Aguardando aprovar → Aprovado).
+- [x] D5. Cancelar exige justificativa (como na aprovação financeira). Ao cancelar, a necessidade de compra dos itens volta a aparecer.
+- [x] D6. Abas ou filtro por status na tela Pedidos.
 
 **E. Entrada de mercadoria amarrada ao pedido**
-- [ ] E1. A entrada pelo número do pedido atualiza `qtd_recebida` de cada item.
-- [ ] E2. Se todos os itens chegaram, o pedido vai sozinho para **Concluído**. Se chegou só uma parte, vai para **Concluído parcialmente**. Quando o resto der entrada, vai para **Concluído**.
+- [x] E1. A entrada pelo número do pedido atualiza `qtd_recebida` de cada item.
+- [x] E2. Se todos os itens chegaram, o pedido vai sozinho para **Concluído**. Se chegou só uma parte, vai para **Concluído parcialmente**. Quando o resto der entrada, vai para **Concluído**.
 - [ ] E3. Conferir a entrada de ponta a ponta com a Débora depois de A–D prontos ("gostaria que arrumasse antes de testar").
 
 **F. Fluxo de caixa (depois de C2)**
@@ -135,14 +135,14 @@ Tudo continua editável na linha, porque o fornecedor pode dar outro preço.
 
 Os 52 pedidos `enviado` viram `aguardando_aprovar` (ou `aprovado`, ver decisão 3). `rascunho` sai do CHECK se não houver uso.
 
-## Decisões em aberto (perguntar ao Vinicius/Débora)
+## Decisões tomadas em 19/10 (antes "em aberto")
 
-1. Na seleção por L, o pedido continua sendo de **um fornecedor só**? Hoje o lote trava num fornecedor.
-2. O filtro de empresa usa a **empresa da venda** (orçamento) ou a empresa que vai comprar?
-3. Os 52 pedidos antigos `enviado` vão para "Aguardando aprovar" ou "Aprovado"?
-4. Aviso dos 10 dias: só para a Débora (papel de compras) ou para todos que abrem a Necessidade de Compra? Aparece só em pop-up ou também numa lista "Chegando nos próximos 10 dias"?
-5. Pedido "Aprovado" ainda pode ser editado, ou só "Aguardando aprovar"?
-6. A tela Solicitações e a tabela `solicitacoes_aprovacao_compra` (vazia hoje) somem de vez?
+1. Um fornecedor por pedido. Marcar L de outro fornecedor avisa e não entra.
+2. O filtro de empresa usa a empresa da venda (`orcamentos.empresa_id`). O pedido já vem com ela, mas dá para trocar.
+3. Os 52 pedidos `enviado` viraram **Aprovado**.
+4. O aviso de 10 dias aparece para quem abre o sistema de Compras: pop-up uma vez por dia e lista fixa no topo de Pedidos.
+5. Só "Aguardando aprovar" pode ser editado (conforme a reunião).
+6. A tela Solicitações saiu do menu; `/solicitacoes` leva para Pedidos. A tabela `solicitacoes_aprovacao_compra` (vazia) ficou no banco.
 
 ## Realizado
 
@@ -165,8 +165,29 @@ Os 52 pedidos `enviado` viram `aguardando_aprovar` (ou `aprovado`, ver decisão 
   - linha azul ao passar o mouse e mais forte enquanto se digita nela;
   - cabeçalho fixo, com a tabela rolando dentro de 70% da altura da tela.
 
+### 2026-10-19 — partes A, C, D e E
+
+- **Migration 226 aplicada** (dry-run testado e rollback conferido):
+  - status `aguardando_aprovar`/`aprovado`/`parcialmente_recebido`/`recebido`/`cancelado`;
+  - `enviado` passou a `aprovado`;
+  - RPCs novas `aprovar_pedido_compra`, `editar_pedido_compra`, `registrar_entrada_pedido_compra` e `prazo_medio_entrega_fornecedor`;
+  - `_lucenera_datas_parcelas` (dias ou datas);
+  - cancelar exige justificativa;
+  - colunas `recebido_em`/`primeira_entrada_em`;
+  - `vw_necessidade_compra_item_orcamento` com `empresa_id`/`empresa_nome`.
+- **Compras ad88eea:**
+  - Necessidade de Compra com "Pedido em montagem": o checkbox do produto põe todos os L dele; em "Projetos" marca-se L por L.
+  - A seleção não se perde e há um botão "Fechar pedido".
+  - Filtro de empresa.
+  - A janela "Fechar pedido" é arrastável, com prazo médio do fornecedor e parcelas geradas sozinhas.
+  - Pedidos com abas por status: Aprovar, Editar e Cancelar com justificativa, itens pedido × recebido e lista "Chegando nos próximos 10 dias".
+  - Entrada de Nota Fiscal com "Chegou agora" por item; o status muda sozinho e o estoque não é mexido, porque vem da Connect.
+  - Pop-up de chegada.
+  - Saíram `ModalPedidoLote`, `SolicitarCompraDialog`, `Solicitacoes.tsx` e `solicitacoes-compra.ts`. A observação de caixa fechada foi para `ObservacaoCaixaFechada.tsx`.
+
 ## Pendências
 
-- [ ] Responder as 6 decisões em aberto da SPEC-209 com o Vinicius e a Débora antes de implementar A, D e E.
-- [ ] Implementar a SPEC-209 por partes: B + G primeiro (só tela), depois A, depois D + E (com migration), depois C e F.
+- [ ] SPEC-209 F: levar as parcelas dos pedidos de compra em aberto para o fluxo de caixa (visualização que o Vinicius vai montar com Carol e Lana).
+- [ ] SPEC-209 E3: teste ponta a ponta com a Débora: montar pedido com L de vendas diferentes, aprovar, entrada parcial e depois total.
+- [ ] SPEC-209: adicionar item novo num pedido já gerado (a edição hoje muda e tira itens, não inclui).
 - [ ] Acesso da Débora ao sistema (senha trocada); e-mail de recuperação depende do SMTP da SPEC-205.

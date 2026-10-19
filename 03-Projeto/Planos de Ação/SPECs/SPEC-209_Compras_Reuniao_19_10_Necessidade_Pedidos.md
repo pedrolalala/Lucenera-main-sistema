@@ -196,8 +196,16 @@ Os 52 pedidos `enviado` viram `aguardando_aprovar` (ou `aprovado`, ver decisão 
 - **Compras 963d49d:** o aviso ao aprovar diz quantas parcelas foram ao Contas a Pagar.
 - Dry-run: aguardando não entra; aprovado entra; parcial entra proporcional (R$ 50 → R$ 37,50 com 1/4 recebido); concluído sai; usuário sem acesso ao financeiro não vê.
 
+### 2026-10-19 — correção da parte F (decisão do usuário)
+
+- **Quem cuida do A Pagar:** a Lana e a Carol (financeiro). A forma de visualizar vai ser definida depois com elas e o Vinicius.
+- **Regra agora:** a parcela do pedido aprovado fica no A Pagar até a baixa (paga) ou o cancelamento do pedido. A entrada de mercadoria não tira nem reduz mais.
+- **Migration 228 aplicada:** a view passou a incluir `recebido` e saiu o fator proporcional. Dry-run: R$ 100 em aprovado, parcial e concluído; R$ 50 depois de pagar a 1ª parcela.
+- **Dashboard 3811c2b:** texto do Fluxo Futuro ajustado.
+
 ## Pendências
 
+- [ ] SPEC-209 F (com Lana/Carol): definir onde o financeiro dá baixa na parcela do pedido de compra (hoje só pelo painel de parcelas do pedido, no sistema de Compras) e a visualização do Contas a Pagar.
 - [ ] SPEC-209 E3: teste ponta a ponta com a Débora: montar pedido com L de vendas diferentes, aprovar, entrada parcial e depois total.
 - [ ] SPEC-209: adicionar item novo num pedido já gerado (a edição hoje muda e tira itens, não inclui).
 - [ ] Acesso da Débora ao sistema (senha trocada); e-mail de recuperação depende do SMTP da SPEC-205.

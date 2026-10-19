@@ -28,7 +28,15 @@ sistemas_envolvidos:
 - [x] Detalhe de um evento: o que mudou, campo a campo (antes → depois)
 
 **Fase 2 — telas abertas ("no que ela mexe" além de gravar)**
-- [ ] Registro de navegação: cada sistema avisa a tela aberta (1 componente pequeno, igual nos 16)
+- [x] Migration `20261019_223_spec206_fase2_telas` (APLICADA 19/10):
+  - RPC `auditoria_registrar_tela`: ignora a mesma tela em menos de 1 min, e a primeira tela depois do login preenche o sistema do login;
+  - RPC `auditoria_registrar_acao`: para gravações via Edge Function com service role;
+  - aprovação do cliente pelo link público (anon) entra em orcamentos como "Cliente (link de aprovação)";
+  - `auditoria_listar(p_incluir_telas)` e `telas_periodo` no resumo.
+- [x] `src/lib/registro-tela.ts` igual nos 17 sistemas, ligado no `main.tsx`. Escuta pushState/replaceState/popstate, vale para qualquer roteador, guarda só o caminho (sem ?parâmetros) e só registra quem está logado.
+- [x] CRM: Novo Projeto chama `auditoria_registrar_acao('criou','projetos',id)` depois do `salvar-projeto`.
+- [x] Central: tipo "Abriu tela", chave "Mostrar telas abertas" (começa desligada) e coluna "Telas abertas" em Pessoas.
+- [ ] Publicar os 17 sistemas e conferir
 
 ### Passos manuais do usuário
 - [x] Aprovar esta SPEC e as escolhas da seção "Decisões" (19/10: 12 meses, só admin, fase 2 depois)
@@ -125,7 +133,7 @@ Para saber "no que mexe" mesmo quando a pessoa só consulta, sem gravar nada, ca
 - Limitações da fase 1:
   - o **login** não sabe de qual sistema veio, porque o Auth do Supabase não repassa o endereço; aparece como "—";
   - ações feitas por **Edge Function com service role** não têm usuário e ficam fora. Exemplo: criar projeto pelo CRM usa `salvar-projeto`. A alteração seguinte do projeto entra normalmente;
-  - os dois casos se resolvem na fase 2.
+  - os dois casos foram resolvidos na fase 2 (migration 223).
 - Achado fora do escopo, corrigido em 19/10 pela migration `20261019_222_orcamento_data_inicio_pagamento_so_ao_mudar` (aplicada a pedido do usuário):
   - o CHECK `orcamentos_data_inicio_pagamento_check` comparava com `now()` e é reavaliado em todo UPDATE, então **todo** orçamento travava no dia seguinte ao início do pagamento (ORC-0001: início em 15/10, travou em 16/10);
   - virou um trigger que valida só no INSERT ou quando a data muda;

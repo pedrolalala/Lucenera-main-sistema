@@ -206,6 +206,7 @@ Os 52 pedidos `enviado` viram `aguardando_aprovar` (ou `aprovado`, ver decisão 
 ### 2026-10-20 — ajuste da parte G (pedido do usuário)
 
 - Separação Parcial 6529b2e: cada L fica "fechado" em preto (linha grossa entre L, laterais e fim da tabela em preto); a divisão entre peças do mesmo L e entre colunas passou a cinza, para o L se destacar mais que a peça.
+- Compras 7af50e6: o filtro de empresa da Necessidade de Compra lista sempre as 3 empresas (Foco, ISLIGHT, Manoella), não só as que têm L a comprar no momento (só havia venda da Manoella).
 
 ## Pendências
 

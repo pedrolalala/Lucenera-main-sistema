@@ -10,11 +10,11 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Adicionar biblioteca de geração de `.xlsx` no sistema (nenhum sistema do projeto tem hoje; sugestão: `exceljs`, carregada só no clique — import dinâmico — para não pesar a tela)
-- [ ] Botão **"Exportar Excel"** no cabeçalho da tela Contas em Aberto, ao lado de "Atualizar"
-- [ ] Exportar as linhas filtradas (todas as páginas) com exatamente as 11 colunas da tabela, na mesma ordem
-- [ ] Nome do arquivo conforme o modo (Pagar/Receber) e a data
-- [ ] `vite build` ok e publicar (Cloudflare `adm-bancaria-lucenera.pages.dev`)
+- [x] Adicionar biblioteca de geração de `.xlsx` no sistema (nenhum sistema do projeto tem hoje; sugestão: `exceljs`, carregada só no clique — import dinâmico — para não pesar a tela)
+- [x] Botão **"Exportar Excel"** no cabeçalho da tela Contas em Aberto, ao lado de "Atualizar"
+- [x] Exportar as linhas filtradas (todas as páginas) com exatamente as 11 colunas da tabela, na mesma ordem
+- [x] Nome do arquivo conforme o modo (Pagar/Receber) e a data
+- [x] `vite build` ok e publicar (Cloudflare `adm-bancaria-lucenera.pages.dev`)
 
 ### Passos manuais do usuário
 
@@ -87,4 +87,10 @@ exibidos** em Contas a Pagar e Contas a Receber, sem acrescentar, tirar ou renom
 
 ## Realizado
 
-(nada ainda)
+### 2026-10-20
+
+- Adm. Bancária 7a5c18b, no ar em `adm-bancaria-lucenera.pages.dev`:
+  - `exceljs` 4.4.0 adicionado (pnpm 11, mesmo da pasta); vira um arquivo à parte que só baixa no clique.
+  - `src/lib/exportar-contas-excel.ts`: 11 colunas fixas; datas como data `dd/mm/aaaa`, Valor como número `R$ #,##0.00`, Parcela/Total como texto; cabeçalho em negrito, congelado e com autofiltro; arquivo `Contas_a_Pagar_AAAA-MM-DD.xlsx` / `Contas_a_Receber_AAAA-MM-DD.xlsx`.
+  - `ContasEmAberto.tsx`: botão "Exportar Excel" ao lado de "Atualizar"; exporta `filteredData` (todos os filtros, todas as páginas).
+- Teste: `vite build` ok; arquivo gerado e relido em Node (data, número e "2/5" como texto conferidos). Falta o teste na tela pelo usuário.

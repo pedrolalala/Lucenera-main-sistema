@@ -15,11 +15,13 @@ sistemas_envolvidos:
 - [x] PDF do fornecedor: a mesma peça numa linha só (quantidade e subtotal somados)
 - [x] `vite build` ok; PDF do pedido real 1783 conferido (peça 12822: 30 + 6 + 4 = 40 numa linha)
 - [x] Publicar
+- [x] Entrada de Nota Fiscal: a mesma peça numa linha só (Pedido, Já chegou, Falta e Chegou agora somados)
 
 ### Passos manuais do usuário
 
 - [ ] Abrir Editar no pedido 1783 e conferir a peça 12822 numa linha com 40
 - [ ] Baixar o PDF e conferir que não há peça repetida
+- [ ] Entrada de Nota Fiscal do pedido 1783: peça 12822 numa linha com 40; informar uma entrada parcial e conferir
 
 ## Objetivo
 
@@ -43,8 +45,13 @@ pode aparecer em várias linhas.
 - PDF (`pdf-pedido-fornecedor-desenho.ts`): agrupa por `produto_id`; Qtd. = soma, Subtotal = soma, Vl. Unit. =
   subtotal ÷ quantidade (igual ao preço quando as linhas têm o mesmo preço).
 
+- Entrada de Nota Fiscal (`EntradaNotaFiscal.tsx`): agrupa por `produto_id`. O "Chegou agora" da peça é repartido
+  entre as linhas (L) na ordem do pedido: completa o que falta no primeiro L, depois no seguinte. Valor maior que o
+  que falta na peça fica em vermelho e não deixa registrar (a RPC `registrar_entrada_pedido_compra` também barra).
+
 ## Realizado
 
 ### 2026-10-20
 
 - Compras 11331fc.
+- Compras (Entrada de Nota Fiscal agrupada), commit seguinte.

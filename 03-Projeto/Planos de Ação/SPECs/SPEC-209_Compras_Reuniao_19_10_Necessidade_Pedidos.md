@@ -203,6 +203,10 @@ Os 52 pedidos `enviado` viram `aguardando_aprovar` (ou `aprovado`, ver decisão 
 - **Migration 228 aplicada:** a view passou a incluir `recebido` e saiu o fator proporcional. Dry-run: R$ 100 em aprovado, parcial e concluído; R$ 50 depois de pagar a 1ª parcela.
 - **Dashboard 3811c2b:** texto do Fluxo Futuro ajustado.
 
+### 2026-10-20 — ajuste da parte G (pedido do usuário)
+
+- Separação Parcial 6529b2e: cada L fica "fechado" em preto (linha grossa entre L, laterais e fim da tabela em preto); a divisão entre peças do mesmo L e entre colunas passou a cinza, para o L se destacar mais que a peça.
+
 ## Pendências
 
 - [ ] SPEC-209 F (com Lana/Carol): definir onde o financeiro dá baixa na parcela do pedido de compra (hoje só pelo painel de parcelas do pedido, no sistema de Compras) e a visualização do Contas a Pagar.

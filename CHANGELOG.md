@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-21
+
+- Compras (SPEC-214): botão "Enviar ao fornecedor" em Pedidos › Aguardando aprovar. Abre uma janela com os e-mails do
+  fornecedor, assunto e texto padrão (editáveis) e baixa um e-mail pronto (.eml, `X-Unsent`) que o Outlook clássico
+  abre já com o PDF anexado. E-mail digitado fica gravado em `contatos.email`/`email_alternativo`. PDF passa a se
+  chamar `Pedido_Compra_<número>_<Fornecedor>.pdf`. Sem migration.
+
 ## 2026-10-16
 
 - Vendas (SPEC-204): importadas as notas da Connect da Manoella de fev a set/2026 (236 notas no total com jan,

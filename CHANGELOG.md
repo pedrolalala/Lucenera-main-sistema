@@ -8,6 +8,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   fornecedor, assunto e texto padrão (editáveis) e baixa um e-mail pronto (.eml, `X-Unsent`) que o Outlook clássico
   abre já com o PDF anexado. E-mail digitado fica gravado em `contatos.email`/`email_alternativo`. PDF passa a se
   chamar `Pedido_Compra_<número>_<Fornecedor>.pdf`. Sem migration.
+- Compras (SPEC-214): botões PDF e Enviar ao fornecedor em todos os pedidos da aba Pedidos (antes só Aguardando aprovar).
 
 ## 2026-10-16
 

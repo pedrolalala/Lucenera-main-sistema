@@ -10,7 +10,8 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [x] Pedidos › Aguardando aprovar: botão **Enviar ao fornecedor** ao lado do PDF
+- [x] Pedidos: botão **Enviar ao fornecedor** ao lado do PDF
+- [x] PDF e Enviar ao fornecedor em **todos** os pedidos da aba Pedidos, qualquer status (antes o PDF só aparecia em Aguardando aprovar)
 - [x] Janela com os e-mails do fornecedor (do cadastro), assunto e texto padrão, todos editáveis
 - [x] E-mail que for digitado/alterado fica gravado no cadastro do fornecedor (`contatos.email` / `email_alternativo`)
 - [x] "Abrir no Outlook" baixa um e-mail pronto (.eml) com o PDF anexado; abrindo o arquivo, o Outlook clássico mostra o e-mail novo
@@ -68,3 +69,5 @@ cadastro**; assunto/texto/nome do PDF = **sugestão** abaixo.
   `lib/pdf-pedido-fornecedor.ts`; serviços `getEmailsFornecedor`/`salvarEmailsFornecedor`/`getNomeUsuario`.
 - Teste: .eml montado com o mesmo código, lido de volta (Para, assunto UTF-8, texto, anexo igual byte a byte).
   Não deu para abrir no Outlook aqui (o Outlook desta máquina não tem conta configurada) — conferir no da Débora.
+- Usuário (21/10): "esse botão deve aparecer sempre, em todos os casos na aba pedidos" — PDF e Enviar ao fornecedor
+  saíram do bloco de Aguardando aprovar; Editar e Aprovar continuam só lá.

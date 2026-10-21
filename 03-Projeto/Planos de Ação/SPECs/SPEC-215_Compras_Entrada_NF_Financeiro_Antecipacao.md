@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-215 — Entrada de Nota Fiscal: CNPJ, troca de fornecedor, parcelas da nota e pagamento antecipado"
-status: não iniciado
+status: pendente
 data_ultima_modificacao: 2026-10-21
 sistemas_envolvidos:
   - Compras (compras-lucenera-3o23t98ee) — Entrada de Nota Fiscal
@@ -14,32 +14,34 @@ sistemas_envolvidos:
 ## Checklist de Ação
 
 **A. Fornecedor e CNPJ na entrada (Compras)**
-- [ ] A1. Entrada por pedido mostra o fornecedor com CNPJ
-- [ ] A2. Botão "Trocar fornecedor" (busca no cadastro, mostra CNPJ); ao registrar, o fornecedor do **pedido** passa a ser o novo (decisão do usuário) e a troca fica na auditoria
+- [x] A1. Entrada por pedido mostra o fornecedor com CNPJ
+- [x] A2. Botão "Trocar fornecedor" (busca no cadastro, mostra CNPJ); ao registrar, o fornecedor do **pedido** passa a ser o novo (decisão do usuário) e a troca fica na auditoria
 
 **B. Parcelas da nota (Compras)**
-- [ ] B1. Na entrada: Valor total da nota e Valor do ST da nota (sugerido pelos itens que chegaram, editável)
-- [ ] B2. Parcelas sugeridas pela condição de pagamento do pedido, **com o ST inteiro na 1ª parcela**; vencimento e valor de cada parcela editáveis; incluir/tirar parcela
-- [ ] B3. Soma das parcelas + antecipação vinculada tem que bater com o valor da nota (mostra a diferença e não deixa registrar)
+- [x] B1. Na entrada: Valor total da nota e Valor do ST da nota (sugerido pelos itens que chegaram, editável)
+- [x] B2. Parcelas sugeridas pela condição de pagamento do pedido, **com o ST inteiro na 1ª parcela**; vencimento e valor de cada parcela editáveis; incluir/tirar parcela
+- [x] B3. Soma das parcelas + antecipação vinculada tem que bater com o valor da nota (mostra a diferença e não deixa registrar)
 
 **C. Pagamento antecipado**
-- [ ] C1. Adm. Bancária › Contas em Aberto (Pagar): botão "Lançar pagamento antecipado" — fornecedor, empresa, valor, data em que foi pago, pedido de compra (opcional), observação
-- [ ] C2. Lista de pagamentos antecipados com saldo (Disponível / Usado em parte / Usado), cancelar lançamento sem uso
-- [ ] C3. Na entrada da nota: aviso "Existe pagamento antecipado para este fornecedor" com a lista (saldo); selecionar e vincular
-- [ ] C4. Antecipação cobre a nota toda → não gera parcela. Sinal → desconta do total e as parcelas são do restante. Sobra de saldo fica para a próxima nota
+- [x] C1. Adm. Bancária › Contas em Aberto (Pagar): botão "Lançar pagamento antecipado" — fornecedor, empresa, valor, data em que foi pago, pedido de compra (opcional), observação
+- [x] C2. Lista de pagamentos antecipados com saldo (Disponível / Usado em parte / Usado), cancelar lançamento sem uso
+- [x] C3. Na entrada da nota: aviso "Existe pagamento antecipado para este fornecedor" com a lista (saldo); selecionar e vincular
+- [x] C4. Antecipação cobre a nota toda → não gera parcela. Sinal → desconta do total e as parcelas são do restante. Sobra de saldo fica para a próxima nota
 
 **D. Contas a Pagar**
-- [ ] D1. Parcelas da nota entram no Contas a Pagar (DESPESAS › PEDIDOS DE COMPRA, marcadas "nota") e a previsão do pedido diminui no valor da nota
-- [ ] D2. Pagamento antecipado aparece como pago (DESPESAS › PAGAMENTO ANTECIPADO) e, se ligado a pedido, abate a previsão do pedido
-- [ ] D3. Quando a duplicata do Connect da mesma nota chega na importação, a parcela da nota sai (vale a do Connect)
-- [ ] D4. Importação do Connect passa a gravar `num_nota` em `negociacoes`
+- [x] D1. Parcelas da nota entram no Contas a Pagar (DESPESAS › PEDIDOS DE COMPRA, marcadas "nota") e a previsão do pedido diminui no valor da nota
+- [x] D2. Pagamento antecipado aparece como pago (DESPESAS › PAGAMENTO ANTECIPADO) e, se ligado a pedido, abate a previsão do pedido
+- [x] D3. Quando a duplicata do Connect da mesma nota chega na importação, a parcela da nota sai (vale a do Connect)
+- [x] D4. Importação do Connect passa a gravar `num_nota` em `negociacoes`
 
 **Banco / entrega**
-- [ ] Migration (rascunho + dry-run em ROLLBACK + aplicar)
-- [ ] `vite build` dos 3 sistemas; testar como a Débora e como usuário sem financeiro
-- [ ] Publicar e atualizar CHANGELOG
+- [x] Migration (rascunho + dry-run em ROLLBACK + aplicar) — 229 aplicada 21/10
+- [x] `vite build` de Compras e Adm. Bancária (Dashboard não muda: já soma a view); testado no banco como a Débora, a Lana e anon
+- [x] Publicar e atualizar CHANGELOG
 
 ### Passos manuais do usuário
+
+- [ ] Dar à Carol acesso ao sistema "Administração Bancária" no Hub (hoje só a Lana tem; sem ele não lança antecipação)
 
 - [ ] Confirmar com Lana/Carol o item "Pendências" 1 (antecipação também lançada no Connect?)
 - [ ] Teste: lançar um sinal de 50% num pedido, dar entrada na nota, vincular, conferir as parcelas do restante no Contas a Pagar
@@ -123,4 +125,25 @@ Pedido do usuário em 21/10/2026 (Necessidade de Compra › Entrada de Nota Fisc
 
 ## Realizado
 
-(vazio)
+### 2026-10-21
+
+- **Migration 229 aplicada** (`20261021_229_spec215_entrada_nf_financeiro_antecipacao`, com `rollback.sql`):
+  `notas_fiscais_compra.valor_st`, `negociacoes.num_nota`, tabelas `nota_fiscal_compra_parcelas`,
+  `pagamentos_antecipados`, `pagamento_antecipado_vinculos` (RLS, sem anon, escrita só por RPC, auditoria),
+  view `vw_pagamentos_antecipados`, RPCs `registrar_entrada_nota_compra`, `lancar_pagamento_antecipado`,
+  `cancelar_pagamento_antecipado`, `antecipacoes_para_entrada`; `vw_contas_pagar_pedidos_compra` refeita.
+- Dry-run (ROLLBACK) com o pedido 1783 e parcelas de teste 500/500/456,71:
+  - sinal de 700 (Lana) → previsão 0/300/456,71 + linha paga de 700;
+  - Débora não vê a tabela, vê o saldo pela RPC; não consegue lançar antecipação;
+  - entrada parcial com nota de 1.000 (ST 50), 700 do sinal e parcelas 200+100, nota em nome de outro fornecedor →
+    pedido Concluído parcialmente e trocado de fornecedor, sinal "usado", A Pagar = previsão 456,71 + nota 200 e 100;
+  - duplicata do Connect com num_nota 12345 e total 1.000 → as parcelas da nota saem;
+  - completar o pedido → previsão some;
+  - recusados: soma que não bate, uso acima do saldo, nota repetida no pedido, anon.
+- **Compras:** Entrada de Nota Fiscal com CNPJ, "Trocar fornecedor", valor total e ST sugeridos pelo que chegou,
+  parcelas sugeridas pela condição do pedido (ST na 1ª) e editáveis, quadro de pagamento antecipado, tudo gravado
+  pela RPC numa transação só. Entrada avulsa continua como antes.
+- **Adm. Bancária:** Contas em Aberto › Pagar › "Pagamentos antecipados" (lançar, lista com saldo, cancelar sem uso).
+- **Importação do Connect** (`scripts/importar_contas_pagar_receber.py`): grava `num_nota` em `negociacoes`
+  (testado em ROLLBACK: 3.230 negociações recebem o número na próxima importação).
+- Observação: a Carol não tem acesso ao sistema `financeiro` (Adm. Bancária); só a Lana consegue lançar hoje.

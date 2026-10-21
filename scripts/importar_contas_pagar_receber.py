@@ -124,6 +124,8 @@ COLUNAS_TRANSACAO = [
     "cod_pessoa",
     "nm_funcionario",
     "dev_troca",
+    # SPEC-215: número da nota (casa a duplicata do Connect com a nota lançada na Entrada de NF)
+    "num_nota",
 ]
 
 
@@ -154,6 +156,8 @@ def carregar_planilha(path: Path, tipo: str) -> pd.DataFrame:
     df["acordo"] = pd.to_numeric(df["acordo"], errors="coerce").fillna(0).astype(int)
     df["cod_venda"] = pd.to_numeric(df["cod_venda"], errors="coerce").astype("Int64")
     df["dev_troca"] = df["dev_troca"].fillna(0).astype(int).astype(bool)
+    df["num_nota"] = pd.to_numeric(df["num_nota"], errors="coerce").astype("Int64")
+    df.loc[df["num_nota"] <= 0, "num_nota"] = pd.NA
     df["nm_funcionario"] = df["nm_funcionario"].astype(str).str.strip().str.upper()
     df.loc[df["nm_funcionario"].isin(["NAN", "NONE", ""]), "nm_funcionario"] = None
     df = df.dropna(subset=["cod_itens_duplicata", "cod_duplicata"])
@@ -216,6 +220,14 @@ def processar(dry_run: bool) -> None:
     # final da função, junto com negociacoes/transacoes/cancelamentos.
     chaves_vigentes = sorted({(int(cd), t) for cd, t in zip(planilha["cod_duplicata"], planilha["tipo"])})
     registros_stg = [{"cod_duplicata": cd, "tipo": t} for cd, t in chaves_vigentes]
+    # SPEC-215: num_nota por duplicata (1º valor preenchido), gravado em negociacoes na transação única.
+    num_nota_por_dup = (
+        planilha.dropna(subset=["num_nota"])
+        .groupby(["cod_duplicata", "tipo"])["num_nota"]
+        .first()
+    )
+    registros_num_nota = [(int(cd), t, int(n)) for (cd, t), n in num_nota_por_dup.items()]
+    print(f"num_nota (SPEC-215): {len(registros_num_nota)} duplicatas com número de nota")
     print(f"stg_duplicatas_vigentes será atualizada com {len(chaves_vigentes)} chaves")
 
     print("Buscando negociacoes existentes…")
@@ -619,6 +631,26 @@ def processar(dry_run: bool) -> None:
                     ),
                 )
                 chave_para_id_real[chave] = cur.fetchone()[0]
+
+        # SPEC-215: num_nota nas negociacoes (novas e existentes) — só onde mudou. Sem trigger em negociacoes.
+        cur.execute(
+            "CREATE TEMP TABLE _num_nota (cod_duplicata integer, tipo text, num_nota bigint) ON COMMIT DROP"
+        )
+        execute_batch(
+            cur,
+            "INSERT INTO _num_nota VALUES (%s, %s, %s)",
+            registros_num_nota,
+            page_size=BATCH_SIZE,
+        )
+        cur.execute(
+            """
+            UPDATE public.negociacoes n SET num_nota = x.num_nota
+              FROM _num_nota x
+             WHERE n.cod_duplicata = x.cod_duplicata AND n.tipo::text = x.tipo
+               AND n.num_nota IS DISTINCT FROM x.num_nota
+            """
+        )
+        print(f"num_nota gravado em {cur.rowcount} negociacao(oes)")
 
         def _resolver_negociacao_id(valor):
             if isinstance(valor, tuple) and valor[0] == "NOVA":

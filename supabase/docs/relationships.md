@@ -487,6 +487,19 @@ projetos
 
 Ação a ser realizada: não criar novas regras hardcoded de etapa no código. Quando evoluir o CRM, criar tabelas de configuração para etapas, sub-status, checklists, dependências, bloqueios, SLA e responsáveis.
 
+## Compras: nota de entrada, parcelas e pagamento antecipado (SPEC-215, migration 229)
+
+- `notas_fiscais_compra.pedido_compra_id` -> `pedidos_compra.id`; `fornecedor_id` = fornecedor da nota (se a nota
+  veio em outro nome, o pedido passa a ser desse fornecedor).
+- `nota_fiscal_compra_parcelas.nota_id` -> `notas_fiscais_compra.id` (parcelas digitadas na entrada; ST na 1ª).
+- `pagamentos_antecipados.fornecedor_id` -> `contatos.id`; `empresa_id` -> `empresas.id`; `pedido_compra_id`
+  (opcional) -> `pedidos_compra.id`.
+- `pagamento_antecipado_vinculos.pagamento_id` -> `pagamentos_antecipados.id`; `nota_id` -> `notas_fiscais_compra.id`.
+  Saldo = `valor` − soma de `valor_aplicado`.
+- `negociacoes.num_nota` (Connect) casa com `notas_fiscais_compra.numero_nf` por empresa + número + total (±R$ 1):
+  quando a duplicata do Connect chega, a parcela da nota sai do A Pagar (`vw_contas_pagar_pedidos_compra`).
+  O fornecedor não serve para casar (fornecedores dos pedidos não são os contatos das duplicatas do Connect).
+
 ## Caminhos recomendados para navegação nos sistemas
 
 ### Aprovação de orçamento para financeiro

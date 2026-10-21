@@ -22,6 +22,12 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   Enter; caixa de texto grande só quebra linha; Cotações (Compras) deixou de salvar ao sair do campo. Sem banco.
 - 12 sistemas com o card da Central (SPEC-217): o card de trocar de sistema reserva a faixa da direita da página e
   não cobre mais a última coluna (ex.: VL Pago na Adm. Bancária) nem a barra de rolagem. Sem banco.
+- Compras (SPEC-218): botão "Cancelar" em Entrada de Nota Fiscal › Últimas entradas (motivo obrigatório). Desfaz a
+  entrada: quantidade recebida e status do pedido voltam, parcelas da nota saem do Contas a Pagar, antecipação usada
+  volta a ter saldo; a nota fica na lista como cancelada. Banco: migration 230 APLICADA —
+  `nota_fiscal_compra_itens`, colunas de cancelamento em `notas_fiscais_compra`, RPC `cancelar_entrada_nota_compra`,
+  `registrar_entrada_nota_compra` e `vw_contas_pagar_pedidos_compra` refeitas; corrige o trigger de `atualizado_em`
+  da tabela de notas (todo UPDATE dava erro). NF 211026 (pedido 1783), lançada sem querer pelo Vinícius, já cancelada (pedido voltou para Aprovado). Compras `bfb2e5c`.
 
 ## 2026-10-16
 

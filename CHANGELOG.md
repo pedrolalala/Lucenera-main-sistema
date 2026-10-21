@@ -9,6 +9,8 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   abre já com o PDF anexado. E-mail digitado fica gravado em `contatos.email`/`email_alternativo`. PDF passa a se
   chamar `Pedido_Compra_<número>_<Fornecedor>.pdf`. Sem migration.
 - Compras (SPEC-214): botões PDF e Enviar ao fornecedor em todos os pedidos da aba Pedidos (antes só Aguardando aprovar).
+- Compras (correção): card "Custo total estoque" da aba Estoque somava o custo de 1 unidade de cada produto (R$ 3.263.069,92,
+  inclusive produtos sem estoque); agora é estoque × custo, igual ao Dash (R$ 4.282.444,14 em 21/10). Sem banco.
 
 ## 2026-10-16
 

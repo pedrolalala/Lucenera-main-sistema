@@ -17,8 +17,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   `pagamentos_antecipados`, `pagamento_antecipado_vinculos`, RPCs e `vw_contas_pagar_pedidos_compra` refeita: a nota
   substitui a previsão do pedido e sai quando a duplicata do Connect da mesma nota chega). Import do Connect grava
   `negociacoes.num_nota`. Docs: SPEC-215, `supabase/docs/relationships.md`, AI_DB_CONTEXT da Adm. Bancária.
-- Todos os sistemas (SPEC-216, só registro): pedido do usuário — Enter pula para o próximo campo (como o Tab) e
-  salvar/confirmar só com clique. SPEC criada, ainda não implementada.
+- Todos os sistemas (SPEC-216): Enter pula para o próximo campo (Shift+Enter volta) e nunca salva/confirma; salvar só
+  com clique. `src/lib/enter-pula-campo.ts` + 1 linha no `main.tsx` dos 17 sistemas. Busca e login continuam com
+  Enter; caixa de texto grande só quebra linha; Cotações (Compras) deixou de salvar ao sair do campo. Sem banco.
+- 12 sistemas com o card da Central (SPEC-217): o card de trocar de sistema reserva a faixa da direita da página e
+  não cobre mais a última coluna (ex.: VL Pago na Adm. Bancária) nem a barra de rolagem. Sem banco.
 
 ## 2026-10-16
 

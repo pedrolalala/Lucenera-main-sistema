@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-216 — Todos os sistemas: Enter pula para o próximo campo; salvar/confirmar só com clique"
-status: não iniciado
+status: pendente
 data_ultima_modificacao: 2026-10-21
 sistemas_envolvidos:
   - Hub / Central (central-lucenera-dashboard-1c9ba)
@@ -26,12 +26,13 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Confirmar com o usuário os 3 pontos em "Pontos para confirmar"
-- [ ] Criar o comportamento único (`enter-pula-campo.ts`) e testar num sistema piloto (Necessidade de Compra)
-- [ ] Copiar o mesmo arquivo para os demais sistemas e ligar no `main.tsx`/`App.tsx` de cada um (uma linha)
-- [ ] `vite build` de cada sistema
-- [ ] Teste por sistema: um formulário de cadastro, uma janela (modal) de edição e uma tela com busca
-- [ ] Publicar (Cloudflare; Sistema de Entregas pelo Lovable) e atualizar CHANGELOG
+- [x] Confirmar com o usuário os 3 pontos em "Pontos para confirmar" (21/10: sim para os três)
+- [x] Criar o comportamento único (`enter-pula-campo.ts`) e testar no navegador (15 casos)
+- [x] Copiar o mesmo arquivo para os 17 sistemas e ligar no `main.tsx` de cada um
+- [x] `vite build` de cada sistema (17 ok)
+- [ ] Teste por sistema com o usuário: um formulário de cadastro, uma janela (modal) de edição e uma tela com busca
+- [x] Publicar (push no GitHub → Cloudflare) e atualizar CHANGELOG
+- [ ] Sistema de Entregas: publicar no Lovable (o push no GitHub não publica sozinho lá)
 
 ### Passos manuais do usuário
 
@@ -100,6 +101,29 @@ Não muda nada no banco. Não muda o Tab. Não muda atalhos com Ctrl/Alt.
 
 - Tirar a linha `instalarEnterPulaCampo()` do `main.tsx` do sistema e publicar de novo.
 
+## Decisões do usuário (21/10/2026)
+
+- Sim para os três pontos: busca continua buscando com Enter, login continua entrando com Enter, regra vale para
+  todos os usuários.
+- "Tudo que estiver relacionado a fechar/salvar uma operação tem que ser no clique; se estiver fazendo algo, o Enter
+  nunca pode salvar nada."
+
 ## Realizado
 
-(vazio)
+### 2026-10-21
+
+- `src/lib/enter-pula-campo.ts` (idêntico nos 17 sistemas) + `instalarEnterPulaCampo()` no `main.tsx`.
+  Escuta o Enter na janela (fase de captura), antes das telas:
+  - Enter num campo: não envia formulário, não "clica" botão e não dispara o Enter da tela; vai para o próximo
+    campo da janela aberta / do formulário (pula desabilitado, escondido, só leitura e botões de ação); Shift+Enter volta;
+  - caixa de texto de várias linhas: só quebra a linha (o chat dos Orçamentos não envia mais com Enter);
+  - Ctrl/Cmd/Alt+Enter: não faz nada (a Memória salvava com Ctrl+Enter);
+  - continuam: lista de sugestões/seleção aberta (escolhe), busca (campo de busca fora de formulário de cadastro, ou
+    formulário de um campo só com botão Buscar/Pesquisar/Filtrar), login (1 senha + e-mail/usuário + botão "Entrar";
+    cadastro de usuário e troca de senha não contam) e `data-enter="permitir"`.
+- Telas que salvavam com Enter e passam a salvar só no clique: Hub › Papéis (criar papel), Necessidade de Compra ›
+  Cotações (preço e desconto — também deixaram de salvar ao sair do campo; salva no ✓, Esc cancela), Sistema de
+  Entregas (adicionar item da separação), Memória (tag continua entrando com vírgula ou ao sair do campo).
+- Teste no Chrome (página de teste com o mesmo código): 15 casos ok — cadastro pula campo e não salva nem no último
+  campo nem com Enter no botão Salvar; clique no Salvar salva; busca busca; login entra; criar usuário e trocar senha
+  não salvam; campo que salvava com Enter não salva; janela pula campo desabilitado e o OK não confirma; chat não envia.

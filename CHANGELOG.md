@@ -26,6 +26,12 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   na tela e em PDF para o Mateus. Banco: migration 233 APLICADA (`nota_fiscal_compra_vinculos`, RPCs
   `entregas_futuras_para_entrada`/`espelho_entrada_nota_compra`, entrada/cancelamento e A Pagar com apropriação
   COMPRAS - REVENDA). Estoque físico da Connect não é tocado.
+- Necessidade de Compra (SPEC-222, só registro): SPEC do teste da reunião 35 (Vinicius e Débora, 22/10). Fluxo da
+  entrada funcionou (entrega futura → reserva, limitador, necessidade volta, cancelamento volta tudo), mas o **estoque
+  físico não sobe na entrada**: peça 12728 com -4, compra de 10, ficou -4 (esperado 6). Causa: a migration 233 mexe só
+  no saldo dos L e não soma em `estoque_itens`. Também: ajustes da tela de entrada, espelho triplicado, cancelar
+  entrada volta "aguardando aprovar", troca de reserva entre L do mesmo cliente, pedido de compra avulso, condição de
+  pagamento obrigatória, cópias fixas no e-mail ao fornecedor. SPEC-221 em standby.
 - Necessidade de Compra (SPEC-221, só registro): reunião 35 (Vinicius, 22/10) — necessidade só aparece se a peça
   estiver negativa e nenhum pedido em andamento cobrir (inclusive o comprado a mais), cobrindo as vendas da mais
   antiga para a mais nova; o que chega vai para a venda mais antiga. Hoje a tela cobre por L (diverge com troca de

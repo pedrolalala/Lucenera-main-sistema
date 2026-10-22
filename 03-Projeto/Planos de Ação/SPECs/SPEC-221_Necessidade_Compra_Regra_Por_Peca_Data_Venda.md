@@ -10,6 +10,7 @@ sistemas_envolvidos:
 # SPEC-221 — Regra da necessidade de compra por peça e destino pela data da venda
 
 > Origem: `02-Reunioes/35. Lucenera (Vinicius) - 22.10.2026_ Reuniões gerais/Reunião.01` (Vinicius, 22/10/2026).
+> **22/10 (Reunião.04): em standby** — o Vinicius pediu para primeiro ver a estrutura de reserva em uso (SPEC-222).
 > O usuário avisou: "o Vinicius passou uma informação sobre o banco de dados que é bem delicada".
 
 ## O que o Vinicius explicou (regra do negócio)

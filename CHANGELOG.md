@@ -26,6 +26,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   na tela e em PDF para o Mateus. Banco: migration 233 APLICADA (`nota_fiscal_compra_vinculos`, RPCs
   `entregas_futuras_para_entrada`/`espelho_entrada_nota_compra`, entrada/cancelamento e A Pagar com apropriação
   COMPRAS - REVENDA). Estoque físico da Connect não é tocado.
+- Necessidade de Compra (SPEC-221, só registro): reunião 35 (Vinicius, 22/10) — necessidade só aparece se a peça
+  estiver negativa e nenhum pedido em andamento cobrir (inclusive o comprado a mais), cobrindo as vendas da mais
+  antiga para a mais nova; o que chega vai para a venda mais antiga. Hoje a tela cobre por L (diverge com troca de
+  reserva e compra a mais). Registrados para SPECs próprias: setor showroom × estoque geral, orçamento de empréstimo,
+  peça com avaria e promoção por quantidade na Ubiqua.
 
 ## 2026-10-21
 

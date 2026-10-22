@@ -4,6 +4,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-22
 
+- Orçamentos (SPEC-223, só registro): SPEC do **orçamento de empréstimo** — Tipo de Operação Outros → Tipo
+  EMPRÉSTIMO, usando o mesmo empréstimo da SPEC-219 (EMP-, termo, fotos, devolução peça a peça), sem aprovação
+  financeira, com **Virar venda** (orçamento de venda novo só com as peças que o cliente ficou). Achado: hoje a
+  aprovação financeira trata Outros como venda (reserva + parcelas + boletos). 6 pontos para confirmar.
 - Showroom (SPEC-219): aba **Empréstimos** no /admin. Registra peças emprestadas a um cliente do cadastro (empresa,
   peças, prazo) e gera o **Termo de Empréstimo** em PDF para assinar: devolver no mesmo estado ou pagar o valor
   integral da peça danificada (valor de venda do dia). Devolução peça a peça (OK ou com dano), status Em aberto /

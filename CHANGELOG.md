@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-22
+
+- Necessidade de Compra / Adm. Bancária (SPEC-220, só registro): SPEC da reunião 33 (Vinicius, 21/10) — entrada de
+  nota completa: vínculo com o cliente (entrega futura → reserva) com limitador, apropriação COMPRAS - REVENDA,
+  chave de acesso e datas, valores por item que batem com a nota, setor Estoque Geral e espelho da entrada para o
+  Mateus. Aguardando respostas dos pontos para confirmar.
+
 ## 2026-10-21
 
 - Compras (SPEC-214): botão "Enviar ao fornecedor" em Pedidos › Aguardando aprovar. Abre uma janela com os e-mails do

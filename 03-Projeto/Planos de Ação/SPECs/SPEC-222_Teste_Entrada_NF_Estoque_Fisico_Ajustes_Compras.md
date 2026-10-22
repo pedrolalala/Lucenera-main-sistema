@@ -240,3 +240,4 @@ parte "Reserva sem venda (herança Connect)" = reservado da Connect − (reserva
 - Tirado o número ao lado de Reserva / Entrega Futura / Separação / Entregue (contava linhas, não peças).
 - Nessas abas, uma linha por venda: a mesma peça em vários L da venda vira uma linha com a quantidade somada e os L
   listados (ex.: VENDA-0001 Cristiane Torrente, L10 + L11 = 4). Cadastro `ac17a16` (no ar).
+- Aba **Entregue** removida da consulta da peça (pedido do usuário: informação que não precisa). Cadastro `c951798`.

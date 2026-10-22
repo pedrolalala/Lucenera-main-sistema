@@ -26,6 +26,17 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   na tela e em PDF para o Mateus. Banco: migration 233 APLICADA (`nota_fiscal_compra_vinculos`, RPCs
   `entregas_futuras_para_entrada`/`espelho_entrada_nota_compra`, entrada/cancelamento e A Pagar com apropriação
   COMPRAS - REVENDA). Estoque físico da Connect não é tocado.
+- Compras / Separação Parcial / Cadastro (SPEC-222 implementada, seções B–H): Entrada de NF enxuta (botão "Escolher
+  cliente", sem IPI/ST por unidade, valor da nota = total calculado — corrige o desconto que travava —, resumo com IPI,
+  ST, desconto e despesas editáveis, datas numa linha); espelho com uma linha por peça; cancelar entrada devolve o
+  pedido para "Aguardando aprovar"; botão "Voltar para edição" no pedido aprovado; aba Estoque virou "Pedido de compra
+  avulso" e Cotações saiu; "Fechar pedido" com uma linha por peça, desconto no quadro de totais e ST/IPI/outras
+  separados; condição de pagamento obrigatória (A prazo / À vista / Antecipado); cópias fixas no e-mail ao fornecedor
+  e e-mails editáveis na tela de Marcas; troca de reserva entre L da mesma venda; Cadastro com compras por pedido e
+  "Reserva sem venda (herança Connect)". Banco: migration 235 APLICADA (espelho, cancelamento, nova
+  `voltar_pedido_compra_para_edicao`, aprovação exige condição, "À vista"/"Antecipado", `usuarios.copias_pedido_compra`).
+  Import de estoque da Connect suspenso por padrão (`--incluir-estoque`). Compras `584bf2d`, Separação `5ede8b3`,
+  Cadastro `8b39378`.
 - Necessidade de Compra (SPEC-222 A implementada): a **entrada de nota passa a somar no estoque físico** (Estoque
   Geral, `estoque_itens` local Estoque), vinculado ou livre; cancelar a entrada subtrai (bloqueia se a peça já saiu).
   Reserva não muda (já vem da aprovação do orçamento). Banco: migration 234 APLICADA — coluna

@@ -1,12 +1,13 @@
 ---
 titulo: "SPEC-222 — Teste da entrada de nota (reunião Vinicius 22/10): estoque físico não sobe na entrada (-4 continuou -4) + ajustes de Compras, Entrada de NF, espelho, cancelamento e Separação Parcial"
-status: pendente
+status: implementada (falta o teste do Vinicius/Débora)
 data_ultima_modificacao: 2026-10-22
 sistemas_envolvidos:
   - Necessidade de Compra (compras-lucenera-3o23t98ee) — Necessidade, Pedido de Compra, Entrada de Nota Fiscal, Marcas/Fornecedores
   - Separação Parcial (separacao-parcial) — troca de reserva entre L do mesmo cliente
   - Cadastro / Consulta de Produtos — estoque, reserva, compras em andamento
-  - Banco — estoque_itens, RPCs de entrada/cancelamento da SPEC-220 (migration 233)
+  - Banco — estoque_itens, RPCs de entrada/cancelamento da SPEC-220 (migrations 234 e 235)
+  - scripts/importar_produtos_estoque.py — estoque da Connect suspenso (A4)
 ---
 
 # SPEC-222 — Teste da entrada de nota com o Vinicius e a Débora (22/10)
@@ -50,91 +51,91 @@ continuou **19** e o disponível **-4**.
       separada/entregue — e explicar o motivo)
 - [x] A3. Conferir `quantidade_reservada`: o vínculo **não** soma reserva de novo (já foi somada na aprovação); peça
       livre não mexe em reserva. Documentar a regra em `AI_DB_CONTEXT.md`
-- [ ] A4. Proteger contra a importação da Connect sobrescrever o que a entrada somou (`fn_sync_estoque_itens_from_produtos`
+- [x] A4. Proteger contra a importação da Connect sobrescrever o que a entrada somou (`fn_sync_estoque_itens_from_produtos`
       copia `produtos.estoque_*` → `estoque_itens`). Ver Ponto 1
 - [ ] A5. Teste com a mesma peça (12728) ou outra só de venda: anotar estoque/reserva/disponível antes, comprar 10 para
       -4, conferir 29/6; cancelar e conferir que volta para 19/-4
-- [ ] A6. Reserva de **herança** (os 19 reservados sem histórico): hoje aparece no cadastro sem dono. Fica para a
+- [x] A6. Reserva de **herança** (os 19 reservados sem histórico): hoje aparece no cadastro sem dono. Fica para a
       importação dos relatórios (vem amarrada ao cliente) — só registrar, não mexer agora
 
 ## B. Entrada de Nota Fiscal — tela
 
-- [ ] B1. Tirar o bloco "Para quem" com os nomes; ficar só um botão **"Escolher cliente"** por peça, ao lado do total da
+- [x] B1. Tirar o bloco "Para quem" com os nomes; ficar só um botão **"Escolher cliente"** por peça, ao lado do total da
       linha (abre a escolha das vendas/L em entrega futura). Não poluir com nomes
-- [ ] B2. Tirar das colunas da peça o **IPI por unidade** (e ST/outras): esses valores só no **Resumo financeiro**
-- [ ] B3. Tirar o campo **"Valor total da nota"** digitado: o total vem da soma dos itens + impostos − desconto + despesas
-- [ ] B4. Tirar a linha **"Diferença para nota"**
-- [ ] B5. Cabeçalho: nº da nota + data de emissão + data da entrega + data da entrada **na mesma linha**; chave de
+- [x] B2. Tirar das colunas da peça o **IPI por unidade** (e ST/outras): esses valores só no **Resumo financeiro**
+- [x] B3. Tirar o campo **"Valor total da nota"** digitado: o total vem da soma dos itens + impostos − desconto + despesas
+- [x] B4. Tirar a linha **"Diferença para nota"**
+- [x] B5. Cabeçalho: nº da nota + data de emissão + data da entrega + data da entrada **na mesma linha**; chave de
       acesso na segunda linha, à esquerda
-- [ ] B6. **Desconto** e **despesas acessórias** preenchidos no Resumo financeiro (em **reais**), não em cima
-- [ ] B7. Tudo editável, exceto **Valor total dos produtos** (= soma de quantidade × valor unitário)
-- [ ] B8. **Bug:** com desconto a entrada não deixou registrar ([15:00]–[19:27]: nota de 1.200, desconto aplicado,
+- [x] B6. **Desconto** e **despesas acessórias** preenchidos no Resumo financeiro (em **reais**), não em cima
+- [x] B7. Tudo editável, exceto **Valor total dos produtos** (= soma de quantidade × valor unitário)
+- [x] B8. **Bug:** com desconto a entrada não deixou registrar ([15:00]–[19:27]: nota de 1.200, desconto aplicado,
       total R$ 774, travou na diferença). Reproduzir e corrigir — desconto tem que reduzir o total e liberar o registro
 - [ ] B9. Pagamento antecipado: com 2+ antecipações do mesmo fornecedor, escolher qual vincular (já existe, SPEC-215);
       **"limpar" está limpando tudo** — limpar só a escolhida
-- [ ] B10. Anexo da nota (PDF/foto do documento) — fica só como registro da entrada, não vai para o financeiro (confirmar
+- [x] B10. Anexo da nota (PDF/foto do documento) — fica só como registro da entrada, não vai para o financeiro (confirmar
       que já está assim)
 
 ## C. Espelho da entrada (Mateus)
 
-- [ ] C1. **Bug:** cada peça aparece **triplicada** (repete por parcela — junção errada). Uma linha por peça
-- [ ] C2. Números sem sentido na coluna de vínculo (ex.: "4", "30, 30, 30", "1 e 1" — [27:04]–[28:47]). Mostrar por peça:
+- [x] C1. **Bug:** cada peça aparece **triplicada** (repete por parcela — junção errada). Uma linha por peça
+- [x] C2. Números sem sentido na coluna de vínculo (ex.: "4", "30, 30, 30", "1 e 1" — [27:04]–[28:47]). Mostrar por peça:
       **quantidade total que entrou** + embaixo os **L e para quem** (cliente/venda) com a quantidade de cada + o que
       ficou livre no estoque
-- [ ] C3. Valor pode continuar no espelho
+- [x] C3. Valor pode continuar no espelho
 
 ## D. Cancelar a entrada → pedido volta "Aguardando aprovar"
 
-- [ ] D1. Hoje o cancelamento devolve o pedido como **aprovado** (`cancelar_entrada_nota_compra`). Decisão na reunião:
+- [x] D1. Hoje o cancelamento devolve o pedido como **aprovado** (`cancelar_entrada_nota_compra`). Decisão na reunião:
       volta como **`aguardando_aprovar`**, com o pedido original, para **editar** (tirar/ajustar item, desconto) ou
       **cancelar**. Assim não precisa refazer um pedido de 40 itens por causa de um erro
-- [ ] D2. Pedido **aprovado** com quantidade errada (antes de qualquer entrada): hoje só dá para cancelar. Permitir
+- [x] D2. Pedido **aprovado** com quantidade errada (antes de qualquer entrada): hoje só dá para cancelar. Permitir
       **voltar para "aguardando aprovar"** e editar (some do Contas a Pagar até aprovar de novo)
 
 ## E. Separação Parcial — trocar reserva entre L do mesmo cliente
 
-- [ ] E1. Hoje a troca só é entre clientes diferentes. Permitir trocar a reserva **entre L da mesma venda/cliente**
+- [x] E1. Hoje a troca só é entre clientes diferentes. Permitir trocar a reserva **entre L da mesma venda/cliente**
       (ex.: tirar do L6, que não vai sair agora, para o L26 que precisa ser entregue). Registrar a troca; o L que ficou
       sem vira entrega futura e **volta para a necessidade** (mesma regra da troca entre clientes)
 
 ## F. Necessidade de Compra / Pedido de Compra
 
-- [ ] F1. **Pedido de compra avulso**: a aba **"Estoque"** passa a se chamar **"Pedido de compra"** e serve para montar
+- [x] F1. **Pedido de compra avulso**: a aba **"Estoque"** passa a se chamar **"Pedido de compra"** e serve para montar
       pedido **sem necessidade** (qualquer produto do cadastro, ex.: o fornecedor ofereceu 50% para fechar R$ 10 mil;
       caixa fechada). Mesmo carrinho da necessidade, com desconto %. Hoje a necessidade só lista peças negativas e não
       deixa escolher outras (ex.: código 1003)
-- [ ] F2. Tirar a aba **"Cotação"** (repetida; desconto fica na necessidade e no pedido avulso)
-- [ ] F3. Tirar o card de **custo de estoque** da necessidade (número não bate com nada). Se ficar algum número, só o da
+- [x] F2. Tirar a aba **"Cotação"** (repetida; desconto fica na necessidade e no pedido avulso)
+- [x] F3. Tirar o card de **custo de estoque** da necessidade (número não bate com nada). Se ficar algum número, só o da
       necessidade de compra (déficit)
-- [ ] F4. **Fechar pedido**: mostrar **uma linha por peça** com a soma (sem L) — a lista por L, com quantidade e escolha
+- [x] F4. **Fechar pedido**: mostrar **uma linha por peça** com a soma (sem L) — a lista por L, com quantidade e escolha
       de L, fica na Necessidade. Motivo: 10–15 dias sem comprar de um fornecedor viram uma lista gigante para conferir
-- [ ] F5. No fechamento, poder **alterar a quantidade** da linha (ver Ponto 3: só para menos ou também para mais —
+- [x] F5. No fechamento, poder **alterar a quantidade** da linha (ver Ponto 3: só para menos ou também para mais —
       caixa fechada)
-- [ ] F6. **Desconto %** preenchido no próprio fechamento (campo de cima, mais intuitivo). Cálculo atual está certo
+- [x] F6. **Desconto %** preenchido no próprio fechamento (campo de cima, mais intuitivo). Cálculo atual está certo
       (desconto no unitário e depois os impostos dá o mesmo resultado — conferido na reunião)
-- [ ] F7. Total do fechamento discriminado: produtos, **IPI, ST e outras despesas separados** (não só o total com
+- [x] F7. Total do fechamento discriminado: produtos, **IPI, ST e outras despesas separados** (não só o total com
       impostos) — na tela e na impressão
-- [ ] F8. **Condição de pagamento obrigatória** para fechar/aprovar (hoje aprovou "sem parcela, sem condição de
+- [x] F8. **Condição de pagamento obrigatória** para fechar/aprovar (hoje aprovou "sem parcela, sem condição de
       pagamento" e não entrou no Contas a Pagar, e depois de aprovado não dá para editar)
-- [ ] F9. Condição de pagamento com opção **À vista / pagamento antecipado já pago**: quando a Lana/Carol já lançou o
+- [x] F9. Condição de pagamento com opção **À vista / pagamento antecipado já pago**: quando a Lana/Carol já lançou o
       pagamento no Contas a Pagar antes do material chegar, o pedido **não** pode gerar outra saída (duplicidade no
       fluxo). Amarrar com o pagamento antecipado da SPEC-215
-- [ ] F10. Previsão de entrega continua opcional, mas incentivar (base para o tempo médio de entrega por fornecedor)
+- [x] F10. Previsão de entrega continua opcional, mas incentivar (base para o tempo médio de entrega por fornecedor)
 
 ## G. Enviar ao fornecedor (SPEC-214)
 
-- [ ] G1. **Cópias fixas**: além do e-mail do fornecedor, um campo de cópias sempre usadas (quando a Débora manda:
+- [x] G1. **Cópias fixas**: além do e-mail do fornecedor, um campo de cópias sempre usadas (quando a Débora manda:
       comercial, Ronaldo e o Vinicius; quando o Vinicius manda, o inverso). Ver Ponto 4
-- [ ] G2. Editar os e-mails do fornecedor também na tela de **Marcas** (botão ao lado da marca: vincular fornecedor à
+- [x] G2. Editar os e-mails do fornecedor também na tela de **Marcas** (botão ao lado da marca: vincular fornecedor à
       marca — uma marca pode ter mais de um —, adicionar/trocar e-mail, desativar o antigo). Lista em ordem alfabética
 - [ ] G3. O .eml abriu no **Outlook novo** e não no clássico (dois Outlook no computador — provável atualização do
       Windows 11). Investigar o programa padrão para .eml; a assinatura vem do Outlook certo
 
 ## H. Consulta / Cadastro de Produtos
 
-- [ ] H1. **Compras em andamento** da peça: mostrar unificado por pedido — nº do pedido, quantidade, data de emissão e
+- [x] H1. **Compras em andamento** da peça: mostrar unificado por pedido — nº do pedido, quantidade, data de emissão e
       data prevista de entrega (sem cliente)
-- [ ] H2. Tirar o número de **reserva** solto do rodapé do cadastro (ex.: 12822 mostrava "reserva 3" sem origem) ou
+- [x] H2. Tirar o número de **reserva** solto do rodapé do cadastro (ex.: 12822 mostrava "reserva 3" sem origem) ou
       mostrar de onde vem
 
 ## Passos manuais do usuário
@@ -180,3 +181,57 @@ continuou **19** e o disponível **-4**.
 - Compras `6ef4d19`: os avisos da entrada e do cancelamento dizem quantas peças entraram/saíram do Estoque Geral.
 - **Ainda aberto:** A4 (importação da Connect sobrescreve `estoque_itens` — não rodar o import de estoque da Connect
   sem decidir o Ponto 1), A5 (teste do Vinicius com outra peça) e A6.
+
+### 2026-10-22 — Seções B a H (pedido do usuário: "pode implementar a spec 222!! vamos fazer tudo funcionar!!")
+Decisões dos Pontos para confirmar: seguidas as recomendações (1: estoque da Connect suspenso; 2: cancelar entrada
+volta "Aguardando aprovar"; 3: quantidade no fechamento para mais e para menos; 4: cópias por usuário).
+
+**Banco** — migration `supabase/db/migrations/20261022_235_spec222_compras_ajustes/` (`001_compras_ajustes.sql` +
+`rollback.sql`) **APLICADA** no SP:
+- `espelho_entrada_nota_compra`: itens agrupados por peça (vinha uma linha por L do pedido = "triplicado") — C1/C2;
+- `cancelar_entrada_nota_compra`: sem nada recebido, o pedido volta para `aguardando_aprovar` (limpa aprovado_por/em) — D1;
+- nova `voltar_pedido_compra_para_edicao(p_pedido_id, p_motivo)`: aprovado, sem entrada de nota nem parcela paga,
+  volta para `aguardando_aprovar` (motivo anotado na observação; sai do A Pagar) — D2;
+- `aprovar_pedido_compra`: exige condição de pagamento; se não for "Antecipado", exige que as parcelas sejam geradas
+  (condição não reconhecida dá erro claro) — F8;
+- `_lucenera_datas_parcelas`: "À vista" = 1 parcela na data do pedido; "Antecipado" = nenhuma;
+  `gerar_parcelas_pedido_compra`: "Antecipado" devolve 0 parcelas sem erro — F9;
+- `usuarios.copias_pedido_compra` (o próprio usuário edita, RLS `usuarios_update_own`) — G1;
+- `gerar_parcelas_pedido_compra` e `_lucenera_datas_parcelas` deixaram de ser executáveis por `anon` (SPEC-196).
+- Dry-run em ROLLBACK: espelho da NF 221025 com 1 linha (12728 × 10); cancelar → `aguardando_aprovar`; voltar pedido
+  1783 para edição; aprovar sem condição (erro), "À vista" (1 parcela), "Antecipado" (0 parcelas), "xpto" (erro);
+  `anon` sem EXECUTE nas funções; `rollback.sql` remove a coluna.
+
+**Script** `scripts/importar_produtos_estoque.py` — A4: EstoqueTotal/Disponivel só são gravados com `--incluir-estoque`
+(o trigger `fn_sync_estoque_itens_from_produtos` sobrescreve `estoque_itens`, inclusive a reserva). Anotado em
+`scripts/AGENTS.md`.
+
+**Compras** `584bf2d` (no ar):
+- Entrada de NF — B1: coluna "Cliente" com botão "Escolher cliente" e "x de y vinculado" (sem a lista de nomes); B2: sem
+  IPI/ST por unidade nas linhas; B3/B4/B8: o valor da nota é o total calculado (sem campo digitado nem "diferença" —
+  o desconto agora só reduz o total, que era o que travava); B5: nº + 3 datas numa linha, chave de acesso embaixo à
+  esquerda; B6/B7: "Resumo da nota" com produtos (fixo), IPI, ST, desconto e despesas acessórias editáveis em R$;
+  B10: anexo marcado "só registro". Cancelar avisa que o pedido volta para "Aguardando aprovar" e o estoque sai.
+- B9 (antecipação): conferido — desmarcar tira só aquela antecipação; as parcelas são refeitas porque o restante a
+  pagar muda. Não houve mudança.
+- Pedidos — D2: botão "Voltar para edição" (com motivo) em pedido aprovado; aprovar mostra o caso antecipado.
+- F1/F2/F3: aba "Estoque" virou **"Pedido de compra avulso"** (`/pedido-avulso`: fornecedor + qualquer produto do
+  cadastro + mesmo fechamento da necessidade); aba Cotações saiu (rota redireciona para Pedidos); o card de custo
+  saiu junto com a página de estoque; na Necessidade, o "Comprar" direto virou "Pôr no pedido" (um caminho só).
+- F4/F5: "Fechar pedido" com uma linha por peça (soma dos L, coluna "Vendas" com quantos L e o que é a mais/continua
+  na necessidade); o pedido grava 1 item por peça ligado a cada L (origem repartida na ordem do carrinho);
+  quantidade editável para mais e para menos.
+- F6/F7: desconto % no quadro de totais; totais com ST, IPI e outras despesas separados (fechar e editar pedido).
+- F8/F9: campo de condição obrigatório com "A prazo / À vista / Antecipado (já pago)" (fechar e editar).
+- F10: previsão de entrega continua opcional, com o prazo médio do fornecedor embaixo (já existia).
+- G1: campo "Cópia" no Enviar ao fornecedor (gravado no usuário; vai como `Cc` no .eml). G2: ícone de e-mail em cada
+  fornecedor da marca (tela Marcas) para editar os e-mails de pedido; marcas já em ordem alfabética.
+- G3 (Outlook novo × clássico): não é do sistema — é o programa padrão do Windows para `.eml`. Pendente com o Pedro.
+
+**Separação Parcial** `5ede8b3` (no ar) — E1: a lista do "Trocar" mostra o L, marca "esta venda" e põe os L da
+própria venda primeiro; só lista quem tem reserva. O banco já aceitava troca no mesmo projeto.
+
+**Cadastro** `8b39378` (no ar) — H1: aba Compras uma linha por pedido (quantidade somada). H2/A6: nos Setores, linha à
+parte "Reserva sem venda (herança Connect)" = reservado da Connect − (reserva + entrega futura + separação dos L).
+
+**Ainda aberto:** A5 (teste com outra peça, anotando antes/depois), G3 (Outlook), teste geral da Débora.

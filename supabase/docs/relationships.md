@@ -521,6 +521,13 @@ Ação a ser realizada: não criar novas regras hardcoded de etapa no código. Q
   coluna estiver preenchida. `quantidade_reservada` não muda (a aprovação do orçamento já reservou a venda inteira).
   `produtos.estoque_*` (Connect) não é tocado — atenção: `trg_sync_estoque_itens_from_produtos` sobrescreve
   `estoque_itens` (quantidade e reservada) quando a importação da Connect atualiza `produtos.estoque_*`.
+  Desde a SPEC-222 o `scripts/importar_produtos_estoque.py` não grava estoque sem `--incluir-estoque`.
+- SPEC-222 (migration 235): `espelho_entrada_nota_compra` agrupa os itens por peça. Cancelar a entrada sem nada
+  recebido devolve `pedidos_compra.status` para `aguardando_aprovar`; `voltar_pedido_compra_para_edicao` faz o mesmo
+  com pedido aprovado sem nota nem parcela paga (a previsão em `vw_contas_pagar_pedidos_compra` só conta aprovado).
+  `aprovar_pedido_compra` exige `condicoes_pagamento`; "Antecipado" não gera `pedido_compra_parcelas`.
+  O "Fechar pedido" grava 1 `pedido_compra_itens` por peça com várias linhas em `pedido_compra_item_origem` (uma por L).
+- `usuarios.copias_pedido_compra` (texto, e-mails separados por `;`): cópias do e-mail "Enviar ao fornecedor" de quem envia.
 - `notas_fiscais_compra.plano_contas_id` -> `plano_de_contas.id` (padrão COMPRAS - REVENDA, 2050001): grupo/sub-grupo
   da parcela da nota em `vw_contas_pagar_pedidos_compra`.
 

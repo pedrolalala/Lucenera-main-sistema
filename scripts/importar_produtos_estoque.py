@@ -247,7 +247,7 @@ def close_enough(a: float, b: float, tol: float = 0.005) -> bool:
     return abs(a - b) <= tol + 1e-9
 
 
-def processar(dry_run: bool) -> None:
+def processar(dry_run: bool, incluir_estoque: bool = False) -> None:
     print(f"Supabase: {SUPABASE_URL}")
     print(f"Modo:     {'DRY-RUN (sem gravação)' if dry_run else 'GRAVAÇÃO REAL'}\n")
 
@@ -309,10 +309,16 @@ def processar(dry_run: bool) -> None:
             sem_match.append(cod)
             continue
 
-        mudou_num = (
+        # SPEC-222 A4: o estoque (estoque_total/disponivel) só é gravado com --incluir-estoque. O trigger
+        # fn_sync_estoque_itens_from_produtos sobrescreve estoque_itens (quantidade E quantidade_reservada)
+        # e apagaria as entradas de nota e as reservas feitas no sistema novo.
+        mudou_estoque = incluir_estoque and (
             not close_enough(existente["estoque_total"], row["estoque_total"])
-            or not close_enough(existente["estoque_showroom"], row["estoque_showroom"])
             or not close_enough(existente["estoque_disponivel"], row["estoque_disponivel"])
+        )
+        mudou_num = (
+            mudou_estoque
+            or not close_enough(existente["estoque_showroom"], row["estoque_showroom"])
             or not close_enough(existente["custo_total"], row["custo_total"])
             or not close_enough(existente["valor_venda"], row["valor_venda"])
         )
@@ -357,13 +363,18 @@ def processar(dry_run: bool) -> None:
                 n_num += 1
                 rec.update(
                     {
-                        "estoque_total": row["estoque_total"],
                         "estoque_showroom": row["estoque_showroom"],
-                        "estoque_disponivel": row["estoque_disponivel"],
                         "custo_total": row["custo_total"],
                         "valor_venda": row["valor_venda"],
                     }
                 )
+                if mudou_estoque:
+                    rec.update(
+                        {
+                            "estoque_total": row["estoque_total"],
+                            "estoque_disponivel": row["estoque_disponivel"],
+                        }
+                    )
             if mudou_ncm:
                 rec["ncm"] = ncm_novo
                 n_ncm += 1
@@ -499,8 +510,16 @@ def processar(dry_run: bool) -> None:
 def main():
     parser = argparse.ArgumentParser(description="Sincroniza planilha Produtos/Estoque com Supabase")
     parser.add_argument("--dry-run", action="store_true", help="Apenas mostra o que seria feito")
+    parser.add_argument(
+        "--incluir-estoque",
+        action="store_true",
+        help="Grava também EstoqueTotal/Disponivel (SPEC-222: desligado por padrão — sobrescreve as entradas "
+        "de nota e as reservas do sistema novo)",
+    )
     args = parser.parse_args()
-    processar(args.dry_run)
+    if args.incluir_estoque:
+        print("ATENÇÃO: --incluir-estoque sobrescreve estoque_itens (entradas de nota e reservas do sistema novo).")
+    processar(args.dry_run, args.incluir_estoque)
     # SPEC-193 B2: lista de conferência marca x fornecedor da planilha. Só lê — o fornecedor da
     # peça é o da marca e nada é gravado. Falha aqui não afeta o import, que já terminou.
     try:

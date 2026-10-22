@@ -509,6 +509,16 @@ Ação a ser realizada: não criar novas regras hardcoded de etapa no código. Q
   quando a duplicata do Connect chega, a parcela da nota sai do A Pagar (`vw_contas_pagar_pedidos_compra`).
   O fornecedor não serve para casar (fornecedores dos pedidos não são os contatos das duplicatas do Connect).
 
+## Entrada de NF de compra → reserva dos L (SPEC-220, migration 233)
+
+- `nota_fiscal_compra_vinculos.nota_id` -> `notas_fiscais_compra.id`; `projeto_item_id` -> `projeto_itens.id`;
+  `produto_id` -> `produtos.id`. Cada linha = quanto da nota saiu da entrega futura e foi para a reserva daquele L
+  (`estoque_saldos_projeto_item.q_entrega_futura` -> `q_reserva`, movimento `recebimento_para_reserva` em
+  `estoque_movimentos_projeto_item`, `origem = 'nota_fiscal_compra'`, `referencia_id` = nota). Cancelar a entrada desfaz
+  (movimento `cancelamento`). Não mexe em `estoque_itens` nem em `produtos.estoque_*` (vêm da Connect).
+- `notas_fiscais_compra.plano_contas_id` -> `plano_de_contas.id` (padrão COMPRAS - REVENDA, 2050001): grupo/sub-grupo
+  da parcela da nota em `vw_contas_pagar_pedidos_compra`.
+
 ## Caminhos recomendados para navegação nos sistemas
 
 ### Aprovação de orçamento para financeiro

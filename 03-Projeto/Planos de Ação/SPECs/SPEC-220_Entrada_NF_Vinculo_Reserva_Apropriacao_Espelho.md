@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-220 — Entrada de Nota Fiscal completa (reunião Vinicius 21/10): vínculo com o cliente (entrega futura → reserva), apropriação, valores por item e espelho para o Mateus"
-status: não iniciado
+status: pendente
 data_ultima_modificacao: 2026-10-22
 sistemas_envolvidos:
   - Necessidade de Compra (compras-lucenera-3o23t98ee) — Entrada de Nota Fiscal
@@ -19,51 +19,51 @@ sistemas_envolvidos:
 ## Checklist de Ação
 
 **A. Vínculo com o cliente — entrega futura → reserva** (o principal: "é isso que precisa ser criado")
-- [ ] A1. Na entrada, para cada peça que chegou, mostrar para quem ela vai: as vendas/L em **entrega futura** daquela
+- [x] A1. Na entrada, para cada peça que chegou, mostrar para quem ela vai: as vendas/L em **entrega futura** daquela
       peça. Já vem sugerido com os L de origem do pedido (`pedido_compra_item_origem`), na ordem do pedido
-- [ ] A2. Poder trocar/acrescentar o destino: lista de todas as vendas com essa peça em entrega futura (venda, cliente,
+- [x] A2. Poder trocar/acrescentar o destino: lista de todas as vendas com essa peça em entrega futura (venda, cliente,
       L, quantidade em entrega futura) e "quantidade a vincular" em cada uma
-- [ ] A3. **Limitador**: a soma vinculada não pode passar do que chegou na peça (nem do que a venda tem em entrega
+- [x] A3. **Limitador**: a soma vinculada não pode passar do que chegou na peça (nem do que a venda tem em entrega
       futura). O que sobrar sem vínculo entra como estoque livre
-- [ ] A4. Ao registrar: `q_entrega_futura` → `q_reserva` no saldo de cada L vinculado (`estoque_saldos_projeto_item`)
+- [x] A4. Ao registrar: `q_entrega_futura` → `q_reserva` no saldo de cada L vinculado (`estoque_saldos_projeto_item`)
       + movimento em `estoque_movimentos_projeto_item` (origem = nota). A Separação Parcial passa a mostrar no reserva
-- [ ] A5. Cancelar a entrada (SPEC-218) desfaz o vínculo (reserva volta para entrega futura)
+- [x] A5. Cancelar a entrada (SPEC-218) desfaz o vínculo (reserva volta para entrega futura)
 
 **B. Apropriação (plano de contas)**
-- [ ] B1. Toda entrada que gera financeiro tem apropriação; padrão **COMPRAS - REVENDA** (`plano_de_contas` 2050001, grupo PRODUTOS), editável
-- [ ] B2. As parcelas da nota entram no Contas a Pagar com essa apropriação (hoje vão como "PEDIDOS DE COMPRA")
+- [x] B1. Toda entrada que gera financeiro tem apropriação; padrão **COMPRAS - REVENDA** (`plano_de_contas` 2050001, grupo PRODUTOS). Escolher outra apropriação na tela: ainda não (o banco já aceita `plano_contas_id`)
+- [x] B2. As parcelas da nota entram no Contas a Pagar com essa apropriação (hoje vão como "PEDIDOS DE COMPRA")
 
 **C. Dados da nota**
-- [ ] C1. Chave de acesso (44 dígitos), opcional agora; preenchida sozinha quando houver entrada por XML (fase 2)
-- [ ] C2. Datas: emissão, entrega (padrão hoje) e entrada (padrão hoje); quem fez a entrada = usuário logado (já existe)
+- [x] C1. Chave de acesso (44 dígitos), opcional agora; preenchida sozinha quando houver entrada por XML (fase 2)
+- [x] C2. Datas: emissão, entrega (padrão hoje) e entrada (padrão hoje); quem fez a entrada = usuário logado (já existe)
 
 **D. Valores por item (bater com a nota)**
-- [ ] D1. Itens da nota com valor unitário, IPI, ICMS e ST **já preenchidos** do pedido de compra/cadastro
-- [ ] D2. Poder ajustar o valor unitário (diferença de centavos) e o **total recalcula na hora** (na Connect não recalcula)
-- [ ] D3. Desconto da nota e despesas acessórias (frete etc.) no total
-- [ ] D4. "Outras despesas" do pedido (ICMS recolhido depois, fora da nota) **não entram** no valor da nota
-- [ ] D5. Total calculado × valor da nota: mostrar a diferença e só registrar quando bater (mesma regra das parcelas)
+- [x] D1. Itens da nota com valor unitário, IPI, ICMS e ST **já preenchidos** do pedido de compra/cadastro
+- [x] D2. Poder ajustar o valor unitário (diferença de centavos) e o **total recalcula na hora** (na Connect não recalcula)
+- [x] D3. Desconto da nota e despesas acessórias (frete etc.) no total
+- [x] D4. "Outras despesas" do pedido (ICMS recolhido depois, fora da nota) **não entram** no valor da nota
+- [x] D5. Total calculado × valor da nota: mostrar a diferença e só registrar quando bater (mesma regra das parcelas)
 
 **E. Setor**
-- [ ] E1. Toda entrada entra no setor **Estoque Geral** (sem precisar vincular setor na mão, como na Connect)
+- [x] E1. Toda entrada entra no setor **Estoque Geral** (sem precisar vincular setor na mão, como na Connect)
 - [ ] E2. Transferência de setor (Estoque Geral → Showroom etc.): **não existe** no sistema hoje (o que existe é
       transferir reserva entre L, SPEC-011) → SPEC própria depois (ver Pendências)
 
 **F. Espelho da entrada (para o Mateus)**
-- [ ] F1. Espelho da entrada: nota, o que chegou, para quem foi vinculado (venda/cliente/L) e o que ficou livre
-- [ ] F2. Formato (ver Pontos para confirmar): PDF com nome padrão e/ou tela online para o Mateus
-- [ ] F3. Resumo financeiro da entrada (parcelas, antecipação usada) — já existe na tela (SPEC-215), entra no espelho
+- [x] F1. Espelho da entrada: nota, o que chegou, para quem foi vinculado (venda/cliente/L) e o que ficou livre
+- [x] F2. PDF com nome padrão (`Entrada_NF_<nº>_<Fornecedor>.pdf`) + espelho na tela (botão "Espelho" em Últimas entradas). Tela própria no sistema do Mateus: pendente (a RPC já libera para Separação Parcial e Logística)
+- [x] F3. Resumo financeiro da entrada (parcelas, antecipação usada) — já existe na tela (SPEC-215), entra no espelho
 
 **G. Pagamento antecipado** (já atendido pela SPEC-215 — conferir com o Vinicius)
 - [x] G1. Na entrada, lista todos os pagamentos antecipados do fornecedor (pode haver 2 ou mais), escolhe quais usar;
       os usados saem da lista (ficam "Usado")
 
 **Entrega**
-- [ ] Migration (rascunho + dry-run em ROLLBACK + aplicar), `vite build`, publicar, CHANGELOG
+- [x] Migration 233 (rascunho + dry-run em ROLLBACK + aplicada 22/10), `vite build`, publicar, CHANGELOG
 
 ### Passos manuais do usuário
 
-- [ ] Responder os "Pontos para confirmar"
+- [x] Responder os "Pontos para confirmar" (22/10: "vamos implementar o que pode" — seguidas as 4 recomendações)
 - [ ] Teste com o Vinicius/Débora: entrada de uma peça com 2 vendas em entrega futura, vincular parte em cada, conferir
       na Separação Parcial que foi para o reserva
 
@@ -120,6 +120,35 @@ que conseguir deixar menos moroso, mais prático, ótimo".
 
 - Telas: reverter os commits. Banco: `rollback.sql` da migration (vínculos desfeitos voltam a reserva para entrega futura).
 
+## Decisões (22/10/2026)
+
+Usuário: "vamos implementar o que pode" → seguidas as recomendações dos 4 pontos:
+1. A entrada move só o saldo dos L (entrega futura → reserva); o estoque físico da Connect não é tocado.
+2. Espelho em PDF e na tela. 3. Valores por item agora. 4. Transferência de setor em SPEC separada.
+
 ## Realizado
 
-(vazio)
+### 2026-10-22
+
+- **Migration 233 aplicada** (`20261022_233_spec220_entrada_nf_vinculo_reserva`, com `rollback.sql`):
+  - colunas novas: chave de acesso (44 números), datas de entrega e de entrada, apropriação, desconto e despesas
+    acessórias na nota; valor unitário, IPI, ICMS e ST nos itens da nota;
+  - tabela `nota_fiscal_compra_vinculos` (RLS, sem anon, escrita só pela RPC);
+  - RPCs `entregas_futuras_para_entrada` e `espelho_entrada_nota_compra`;
+  - `registrar_entrada_nota_compra` com `p_vinculos` (a assinatura antiga foi apagada, sem sobrecarga; a tela
+    antiga continua funcionando porque os parâmetros novos têm padrão);
+  - `cancelar_entrada_nota_compra` desfaz o vínculo;
+  - parcela da nota no A Pagar com a apropriação (PRODUTOS / DESPESAS).
+- Dry-run (ROLLBACK) com o pedido 1783, usuário do Vinicius:
+  - 30 da peça 07809: 20 para o L14 e 6 para o L35 (4 livres) → L14 com entrega futura 30→10 e reserva 8→28;
+    L35 com entrega futura 6→0 e reserva 0→6; movimentos `recebimento_para_reserva`;
+  - apropriação COMPRAS - REVENDA; espelho com os vínculos; cancelar devolveu 26 para a entrega futura;
+  - recusados: vincular mais do que chegou, mais do que o L espera, L de outra peça, chave com 3 números, anon.
+- Compras:
+  - itens com Vl. unit., IPI/un., ST/un. e total (já preenchidos do pedido, editáveis);
+  - linha "Para quem" com os L sugeridos e o botão "Escolher clientes" (limitador na tela e no banco);
+  - campos de chave, datas, desconto e despesas acessórias; quadro "Total pelos itens × valor da nota" (só registra
+    quando bate);
+  - espelho abre sozinho depois de registrar; botão "Espelho" em Últimas entradas; PDF conferido.
+- Não feito nesta etapa: escolher outra apropriação na tela, tela do espelho no sistema do Mateus, entrada por XML,
+  grupo de CFOP e transferência de setor.

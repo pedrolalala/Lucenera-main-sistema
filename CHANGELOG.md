@@ -19,7 +19,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Necessidade de Compra / Adm. Bancária (SPEC-220, só registro): SPEC da reunião 33 (Vinicius, 21/10) — entrada de
   nota completa: vínculo com o cliente (entrega futura → reserva) com limitador, apropriação COMPRAS - REVENDA,
   chave de acesso e datas, valores por item que batem com a nota, setor Estoque Geral e espelho da entrada para o
-  Mateus. Aguardando respostas dos pontos para confirmar.
+  Mateus.
+- Necessidade de Compra (SPEC-220 implementada): Entrada de Nota Fiscal com valores por item (do pedido, editáveis;
+  total precisa bater com a nota), chave de acesso, datas, desconto e despesas acessórias; "Para quem" — o que chega
+  sai da entrega futura e vai para a reserva dos L (limitador na tela e no banco; cancelar desfaz); espelho da entrada
+  na tela e em PDF para o Mateus. Banco: migration 233 APLICADA (`nota_fiscal_compra_vinculos`, RPCs
+  `entregas_futuras_para_entrada`/`espelho_entrada_nota_compra`, entrada/cancelamento e A Pagar com apropriação
+  COMPRAS - REVENDA). Estoque físico da Connect não é tocado.
 
 ## 2026-10-21
 

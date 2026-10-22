@@ -44,11 +44,11 @@ continuou **19** e o disponível **-4**.
   reservados na aprovação; o vínculo só muda o estado do L) → disponível **6**. Bate com o que o Vinicius esperava.
 
 ### Checklist
-- [ ] A1. Ao registrar a entrada: somar a quantidade que chegou de cada peça em `estoque_itens.quantidade` no local
+- [x] A1. Ao registrar a entrada: somar a quantidade que chegou de cada peça em `estoque_itens.quantidade` no local
       **Estoque (Estoque Geral)** + movimento/auditoria com origem = nota. Vale para a parte vinculada e a livre
-- [ ] A2. Cancelar a entrada (SPEC-218): subtrair de volta a mesma quantidade (bloquear se a peça já saiu — ex.: já
+- [x] A2. Cancelar a entrada (SPEC-218): subtrair de volta a mesma quantidade (bloquear se a peça já saiu — ex.: já
       separada/entregue — e explicar o motivo)
-- [ ] A3. Conferir `quantidade_reservada`: o vínculo **não** soma reserva de novo (já foi somada na aprovação); peça
+- [x] A3. Conferir `quantidade_reservada`: o vínculo **não** soma reserva de novo (já foi somada na aprovação); peça
       livre não mexe em reserva. Documentar a regra em `AI_DB_CONTEXT.md`
 - [ ] A4. Proteger contra a importação da Connect sobrescrever o que a entrada somou (`fn_sync_estoque_itens_from_produtos`
       copia `produtos.estoque_*` → `estoque_itens`). Ver Ponto 1
@@ -164,4 +164,19 @@ continuou **19** e o disponível **-4**.
 
 ## Realizado
 
-(vazio)
+### 2026-10-22 — Seção A (estoque físico na entrada)
+- Pedido do usuário: "pode seguir com a correção do estoque".
+- Migration `supabase/db/migrations/20261022_234_spec222_entrada_nf_soma_estoque/` (`001_entrada_nf_soma_estoque.sql` +
+  `rollback.sql`) **APLICADA** no SP:
+  - coluna `notas_fiscais_compra.estoque_somado_em`;
+  - `registrar_entrada_nota_compra`: soma o que chegou de cada peça em `estoque_itens.quantidade` (local `Estoque`),
+    devolve `estoque_somado`;
+  - `cancelar_entrada_nota_compra`: subtrai o que a nota somou (só se `estoque_somado_em` preenchido); bloqueia se o
+    estoque da peça já for menor que o que a nota deu entrada; devolve `estoque_retirado`;
+  - acerto da única nota ativa (NF 221025, pedido 1786): peça 12728 foi de 19 / reservado 23 / disponível **-4** para
+    **29 / 23 / 6** (o que o Vinicius esperava).
+- Dry-run em ROLLBACK: acerto (29/23/6), cancelamento da NF 221025 (volta 19/23/-4), nova entrada de 10 pela RPC
+  (29/23/6), `rollback.sql` (volta 19/23/-4); grants iguais (só `authenticated`).
+- Compras `6ef4d19`: os avisos da entrada e do cancelamento dizem quantas peças entraram/saíram do Estoque Geral.
+- **Ainda aberto:** A4 (importação da Connect sobrescreve `estoque_itens` — não rodar o import de estoque da Connect
+  sem decidir o Ponto 1), A5 (teste do Vinicius com outra peça) e A6.

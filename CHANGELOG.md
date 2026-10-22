@@ -26,6 +26,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   na tela e em PDF para o Mateus. Banco: migration 233 APLICADA (`nota_fiscal_compra_vinculos`, RPCs
   `entregas_futuras_para_entrada`/`espelho_entrada_nota_compra`, entrada/cancelamento e A Pagar com apropriação
   COMPRAS - REVENDA). Estoque físico da Connect não é tocado.
+- Necessidade de Compra (SPEC-222 A implementada): a **entrada de nota passa a somar no estoque físico** (Estoque
+  Geral, `estoque_itens` local Estoque), vinculado ou livre; cancelar a entrada subtrai (bloqueia se a peça já saiu).
+  Reserva não muda (já vem da aprovação do orçamento). Banco: migration 234 APLICADA — coluna
+  `notas_fiscais_compra.estoque_somado_em` + `registrar_entrada_nota_compra`/`cancelar_entrada_nota_compra`; acerto da
+  NF 221025 (peça 12728: estoque 19 → 29, disponível -4 → 6). Compras `6ef4d19` (avisos na tela).
 - Necessidade de Compra (SPEC-222, só registro): SPEC do teste da reunião 35 (Vinicius e Débora, 22/10). Fluxo da
   entrada funcionou (entrega futura → reserva, limitador, necessidade volta, cancelamento volta tudo), mas o **estoque
   físico não sobe na entrada**: peça 12728 com -4, compra de 10, ficou -4 (esperado 6). Causa: a migration 233 mexe só

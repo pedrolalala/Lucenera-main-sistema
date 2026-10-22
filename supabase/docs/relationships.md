@@ -515,7 +515,12 @@ Ação a ser realizada: não criar novas regras hardcoded de etapa no código. Q
   `produto_id` -> `produtos.id`. Cada linha = quanto da nota saiu da entrega futura e foi para a reserva daquele L
   (`estoque_saldos_projeto_item.q_entrega_futura` -> `q_reserva`, movimento `recebimento_para_reserva` em
   `estoque_movimentos_projeto_item`, `origem = 'nota_fiscal_compra'`, `referencia_id` = nota). Cancelar a entrada desfaz
-  (movimento `cancelamento`). Não mexe em `estoque_itens` nem em `produtos.estoque_*` (vêm da Connect).
+  (movimento `cancelamento`).
+- SPEC-222 (migration 234): a entrada soma o que chegou (vinculado ou livre) em `estoque_itens.quantidade`, local
+  `'Estoque'` (Estoque Geral), e marca `notas_fiscais_compra.estoque_somado_em`; o cancelamento subtrai só se essa
+  coluna estiver preenchida. `quantidade_reservada` não muda (a aprovação do orçamento já reservou a venda inteira).
+  `produtos.estoque_*` (Connect) não é tocado — atenção: `trg_sync_estoque_itens_from_produtos` sobrescreve
+  `estoque_itens` (quantidade e reservada) quando a importação da Connect atualiza `produtos.estoque_*`.
 - `notas_fiscais_compra.plano_contas_id` -> `plano_de_contas.id` (padrão COMPRAS - REVENDA, 2050001): grupo/sub-grupo
   da parcela da nota em `vw_contas_pagar_pedidos_compra`.
 

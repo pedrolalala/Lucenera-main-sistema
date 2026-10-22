@@ -235,3 +235,8 @@ própria venda primeiro; só lista quem tem reserva. O banco já aceitava troca 
 parte "Reserva sem venda (herança Connect)" = reservado da Connect − (reserva + entrega futura + separação dos L).
 
 **Ainda aberto:** A5 (teste com outra peça, anotando antes/depois), G3 (Outlook), teste geral da Débora.
+
+### 2026-10-22 — Cadastro: abas de setor da peça (pedido do usuário)
+- Tirado o número ao lado de Reserva / Entrega Futura / Separação / Entregue (contava linhas, não peças).
+- Nessas abas, uma linha por venda: a mesma peça em vários L da venda vira uma linha com a quantidade somada e os L
+  listados (ex.: VENDA-0001 Cristiane Torrente, L10 + L11 = 4). Cadastro `ac17a16` (no ar).

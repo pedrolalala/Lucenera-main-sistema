@@ -93,6 +93,15 @@ orcamentos.arquiteto_id              -> contatos.id
 produtos.fornecedor_principal_id     -> contatos.id
 negociacoes.contato_id               -> contatos.id
 separacoes.cliente_id                -> contatos.id
+showroom_emprestimos.contato_id      -> contatos.id   (SPEC-219; dados do cliente também copiados em cliente_snapshot)
+```
+
+SPEC-219 (2026-10-22) — empréstimo de peças do Showroom (só registro, não movimenta estoque):
+
+```text
+showroom_emprestimos.empresa_id             -> empresas.id
+showroom_emprestimo_itens.emprestimo_id     -> showroom_emprestimos.id (ON DELETE CASCADE)
+showroom_emprestimo_itens.produto_id        -> produtos.id
 ```
 
 SPEC-077 (2026-08-11) — divisão de lucro entre múltiplos arquitetos por percentual, uma tabela de junção por domínio (substitui `arquiteto_id` singular como fonte de verdade; a coluna singular continua sincronizada só por compatibilidade):

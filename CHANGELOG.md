@@ -4,6 +4,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-22
 
+- Showroom (SPEC-219): aba **Empréstimos** no /admin. Registra peças emprestadas a um cliente do cadastro (empresa,
+  peças, prazo) e gera o **Termo de Empréstimo** em PDF para assinar: devolver no mesmo estado ou pagar o valor
+  integral da peça danificada (valor de venda do dia). Devolução peça a peça (OK ou com dano), status Em aberto /
+  Atrasado / Devolvido / Devolvido com dano / Cancelado. Só registro: estoque do showroom e vitrine não mudam.
+  Banco: migration 231 APLICADA — tabelas `showroom_emprestimos` e `showroom_emprestimo_itens` (RLS, sem grant) e
+  RPCs `showroom_emp_*` (credencial do /admin, só `anon`). Docs: SPEC-219, `supabase/docs/relationships.md`,
+  AI_DB_CONTEXT do Showroom. Showroom `ead135a`.
 - Necessidade de Compra / Adm. Bancária (SPEC-220, só registro): SPEC da reunião 33 (Vinicius, 21/10) — entrada de
   nota completa: vínculo com o cliente (entrega futura → reserva) com limitador, apropriação COMPRAS - REVENDA,
   chave de acesso e datas, valores por item que batem com a nota, setor Estoque Geral e espelho da entrada para o

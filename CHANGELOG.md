@@ -26,6 +26,8 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   na tela e em PDF para o Mateus. Banco: migration 233 APLICADA (`nota_fiscal_compra_vinculos`, RPCs
   `entregas_futuras_para_entrada`/`espelho_entrada_nota_compra`, entrada/cancelamento e A Pagar com apropriação
   COMPRAS - REVENDA). Estoque físico da Connect não é tocado.
+- Compras (SPEC-222): Pedido avulso, Pedidos, Entrada de Nota Fiscal e Marcas com a mesma largura (tela inteira) e
+  espaçamento da Necessidade de Compra. Compras `7e81098`.
 - Cadastro (SPEC-222): nas abas de setor da peça, sem o número ao lado do nome e uma linha por venda (L somados).
   Cadastro `ac17a16`.
 - Compras / Separação Parcial / Cadastro (SPEC-222 implementada, seções B–H): Entrada de NF enxuta (botão "Escolher

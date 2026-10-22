@@ -17,6 +17,7 @@ sistemas_envolvidos:
 - [x] PDF "Termo de Empréstimo de Peças" no navegador (`pdf-lib`, mesmo padrão da Compras/SPEC-211)
 - [x] Atualizar `04-Sistemas/showroom-qtq8er2dk/supabase/AI_DB_CONTEXT.md` (+ `supabase/docs/relationships.md`)
 - [x] `CHANGELOG.md` + ponteiro do submodule
+- [x] **Fase 2 — fotos** (pedido do Pedro, 22/10): foto de como as peças saíram (obrigatória ao criar) e de como cada peça voltou (obrigatória na devolução, OK ou com dano). Migration `20261022_232_spec219_showroom_emprestimo_fotos` APLICADA; anexo de fotos no PDF
 
 ### Passos manuais do usuário
 
@@ -123,6 +124,14 @@ Gerado no navegador com `pdf-lib` (carregada só no clique), no mesmo visual do 
 4. As peças continuam sendo propriedade da [EMPRESA] e não podem ser vendidas, cedidas ou emprestadas a terceiros.
 5. A conferência na devolução será feita pela [EMPRESA], que registrará o estado de cada peça.
 
+### Fase 2 — fotos de saída e volta (22/10/2026)
+
+- **Saída**: no Novo empréstimo é obrigatório escolher pelo menos 1 foto (câmera ou galeria) de como as peças estão saindo. As fotos sobem logo depois de gravar o empréstimo; se falharem, o empréstimo fica gravado, a lista mostra "Sem foto da saída" e as fotos podem ser adicionadas no detalhe.
+- **Volta**: "Devolvida OK" e "Com dano" abrem um painel com fotos obrigatórias de como a peça voltou (substitui o clique direto, que não tinha confirmação).
+- **Armazenamento**: bucket privado `showroom-emprestimos` (registro interno, diferente da vitrine pública). Envio e leitura só com liberação temporária criada por RPC com a credencial do /admin; sem troca nem exclusão de foto pela tela.
+- **PDF**: anexo "Fotos de como as peças saíram" (4 por página, rubrica do cliente); cláusula 1 passa a dizer "conforme as fotos anexas a este termo, que dele fazem parte".
+- Fotos são reduzidas no navegador para JPEG de até 1600 px. HEIC fora do Safari não abre: a tela pede JPG/PNG (no celular, a câmera do navegador já entrega JPEG).
+
 ### Fora do escopo
 
 - Movimentar estoque ou esconder a peça da vitrine (decisão 1)
@@ -156,6 +165,17 @@ Gerado no navegador com `pdf-lib` (carregada só no clique), no mesmo visual do 
   - `estoque_showroom` intacto; depois do ROLLBACK, 0 tabelas criadas e credencial original intacta.
 - Migration 231 **aplicada** no Supabase SP (transação única). Conferido: 2 tabelas com RLS e sem grant; 8 RPCs executáveis só por `anon`; função de status sem grant; pela API pública, senha errada é recusada e a tabela não pode ser lida.
 - Showroom `ead135a` (push no GitHub, a Cloudflare publica): aba **Empréstimos** no /admin (filtros Em aberto/Atrasados/Com dano/Todos, busca), diálogo **Novo empréstimo** (empresa, cliente do cadastro, peças com quantidade e aviso de estoque, prazo, observações) e detalhe (devolução OK/com dano, cancelar, **Baixar termo (PDF)**). PDF com `pdf-lib` 1.17.1 (mesma versão da Compras), logo Lucenera + dados da empresa escolhida. Build e lint ok; PDF de exemplo conferido visualmente.
+- **Fase 2 (fotos)**: migration 232 escrita; ensaio em ROLLBACK com 20 verificações. Todas ok:
+  - envio sem liberação, reenvio e foto de outro momento ou de outra peça são recusados;
+  - devolução sem foto e com foto não enviada são recusadas;
+  - leitura vale só com a liberação ativa;
+  - `authenticated` fica bloqueado; sobra só 1 versão de `registrar_devolucao`.
+- O ensaio pegou um bug (`path` ambíguo em `ON CONFLICT`), corrigido. Migration 232 **APLICADA**.
+- Teste real pela API de Storage, com empréstimo de teste nº 999999 apagado depois:
+  - envio liberado funciona; sem liberação ou sobrescrevendo dá 403;
+  - URL pública não abre (bucket privado); link assinado baixa a foto (200);
+  - delete pela API não apaga nada; link novo é recusado depois que a liberação vence.
+- Sequence de número zerada (os ensaios tinham consumido 3 números).
 - Achado: `empresas` tem só **MANOELLA, ISLIGHT e FOCO ILUMINACAO**, não existe empresa "Lucenera". O termo sai em nome de uma dessas três.
 
 ## Pendências

@@ -11,6 +11,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   Banco: migration 231 APLICADA — tabelas `showroom_emprestimos` e `showroom_emprestimo_itens` (RLS, sem grant) e
   RPCs `showroom_emp_*` (credencial do /admin, só `anon`). Docs: SPEC-219, `supabase/docs/relationships.md`,
   AI_DB_CONTEXT do Showroom. Showroom `ead135a`.
+- Showroom (SPEC-219 fase 2): fotos de como as peças **saíram** (obrigatórias ao criar o empréstimo) e de como cada
+  peça **voltou** (obrigatórias na devolução, OK ou com dano). Fotos da saída vão como anexo do termo em PDF (cláusula 1
+  cita as fotos). Banco: migration 232 APLICADA — bucket privado `showroom-emprestimos`, tabelas
+  `showroom_emprestimo_fotos` e `showroom_emp_foto_grants`, policies de storage só com liberação temporária, RPCs de
+  foto; `showroom_emp_registrar_devolucao` passa a exigir fotos e `showroom_emp_listar` traz `fotos_saida`. Showroom `0e67b23`.
 - Necessidade de Compra / Adm. Bancária (SPEC-220, só registro): SPEC da reunião 33 (Vinicius, 21/10) — entrada de
   nota completa: vínculo com o cliente (entrega futura → reserva) com limitador, apropriação COMPRAS - REVENDA,
   chave de acesso e datas, valores por item que batem com a nota, setor Estoque Geral e espelho da entrada para o

@@ -24,6 +24,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   mudam no empréstimo. Banco: migration 238 APLICADA (colunas, travas, RPCs `emprestimo_*`, internas comuns com o
   /admin, `aprovar_orcamento_financeiro` recusa empréstimo, `replace_orcamento_itens` com `ja_com_cliente`).
   Showroom: status Virou venda/Parcial e origem do empréstimo.
+- Hub (SPEC-224): Movimentação de Peças logo depois de Vendas e antes do Controle de Produção (migration 238 APLICADA, só `systems.display_order`).
 - Movimentação de Peças (SPEC-224): Reserva, Entrega Futura e Separação no quadro de setores e no Mover (escolhendo o L).
 - Movimentação de Peças (SPEC-224): com a busca vazia, lista todas as peças com estoque positivo (1.920), com
   Estoque, Showroom e Outros setores. Migration 237 APLICADA. Sistema `e7ef665`.

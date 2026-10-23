@@ -161,3 +161,4 @@ partir da Separação Parcial (mesmo login, SystemSwitcher, registro de telas):
   "Mover" aceita esses setores como origem: escolhe-se o L da venda e só aparecem os destinos possíveis
   (Reserva → Entrega Futura, Entrega Futura → Reserva, Separação → Reserva), usando `movimentar_peca_venda`.
   Sem mudança no banco. Sistema publicado pelo wrangler.
+- Hub: Movimentação de Peças na posição 14 (depois de Vendas, antes do Controle de Produção 15 e da Garantia 16) — migration `20261023_238_spec224_ordem_hub` APLICADA.

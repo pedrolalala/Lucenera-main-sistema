@@ -155,3 +155,9 @@ partir da Separação Parcial (mesmo login, SystemSwitcher, registro de telas):
 - Banco: migration `20261023_237_spec224_lista_pecas_com_estoque` **APLICADA** (`movimentacao_buscar_pecas` com a
   coluna `outros`; DROP + CREATE porque mudou o retorno). Dry-run: 1.920 com busca vazia, 40 com termo, `anon` sem
   EXECUTE, rollback volta a versão da 236. Sistema `e7ef665`, publicado pelo wrangler.
+
+### 2026-10-23 — Reserva, Entrega Futura e Separação no Mover (pedido do usuário)
+- O quadro da peça mostra também os setores de venda (Reserva, Entrega Futura, Separação = soma dos L) e o formulário
+  "Mover" aceita esses setores como origem: escolhe-se o L da venda e só aparecem os destinos possíveis
+  (Reserva → Entrega Futura, Entrega Futura → Reserva, Separação → Reserva), usando `movimentar_peca_venda`.
+  Sem mudança no banco. Sistema publicado pelo wrangler.

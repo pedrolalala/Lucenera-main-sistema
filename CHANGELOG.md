@@ -13,6 +13,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   permissão de dados continua `financeiro` (nenhuma policy mudou). `002_esconder_card_antigo.sql` fica para depois do
   teste. Links de boletos/NF do Orçamento e do Vendas apontam para Contas a Receber. Repos:
   retorno-bancario-bradesco-5392a, gestao-financeira-clone-544cb (1), vendas-lucenera.
+- SPEC-225: card "Administração Bancária" escondido do Hub (239/002 APLICADA). Migration 240 APLICADA:
+  `hub_pode_executar` mantém o portão do Acesso a Sistemas para `financeiro` mesmo escondido (sem isso, papel com
+  `financeiro` sem o sistema liberado passava nas 16 policies que usam a função).
 - Orçamentos (SPEC-223 implementada): **orçamento de empréstimo** — Tipo de Operação Outros → Tipo EMPRÉSTIMO. Cliente
   obrigatório, projeto opcional, data prevista de devolução, sem condição de pagamento. "Confirmar empréstimo" (fotos da
   saída) gera o EMP- e o termo em PDF — o mesmo empréstimo do /admin do Showroom. Devolução por peça ou quantidade (foto,

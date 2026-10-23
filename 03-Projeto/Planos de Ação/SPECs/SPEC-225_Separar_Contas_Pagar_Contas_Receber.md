@@ -29,7 +29,7 @@ sistemas_envolvidos:
 ### Passos manuais do usuário
 
 - [x] Aprovar a SPEC
-- [ ] Testar os 2 sistemas com o pessoal da administração antes de esconder o card antigo
+- [x] Esconder o card antigo (usuário pediu em 23/10, antes do teste)
 - [ ] (Se faltar espaço) conferir no painel do Supabase Auth que os 2 endereços novos entraram nos redirects
 
 ## Objetivo
@@ -130,8 +130,13 @@ Regras:
   menu sem boletos no Pagar).
 - Orçamento (`gestao-financeira-clone-544cb (1)` 93fdb80) e Vendas (`vendas-lucenera` e9bb328): links de NF/boletos
   apontam para Contas a Receber (SSO `contas-receber`).
+- Card antigo escondido: `239/002_esconder_card_antigo.sql` APLICADA a pedido do usuário. Achado: o passo 0 de
+  `hub_pode_executar` só exige o Acesso a Sistemas para sistema com `visivel_no_hub = true` — com `financeiro`
+  escondido, quem tem papel com `financeiro` sem o sistema liberado (mariane@) passava nas 16 policies que usam
+  `hub_pode_executar(..., 'financeiro')`. Migration 240 (`20261023_240_spec225_portao_financeiro`) APLICADA ~2 min
+  depois: o portão vale também para o slug `financeiro`. Conferido: mariane volta a `false`.
 
 ## Pendências
 
-- [ ] SPEC-225 — pessoal da administração testar Contas a Pagar e Contas a Receber; depois aplicar `20261023_239_spec225_contas_pagar_receber/002_esconder_card_antigo.sql` para tirar o card "Administração Bancária" do Hub.
+- [ ] SPEC-225 — pessoal da administração testar Contas a Pagar e Contas a Receber pelo Hub (o card antigo já foi escondido em 23/10).
 - [ ] SPEC-225 — incluir contas-pagar-lucenera.pages.dev e contas-receber-lucenera.pages.dev nos redirects do Supabase Auth (SP) se algum fluxo por e-mail (link mágico/recuperação) precisar voltar direto para eles; o token da Management API no `.env` está inválido, fazer pelo painel.

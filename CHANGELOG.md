@@ -4,6 +4,15 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-23
 
+- Administração Bancária (SPEC-225 implementada): virou **2 sistemas** no Hub — **Contas a Pagar**
+  (https://contas-pagar-lucenera.pages.dev) e **Contas a Receber** (https://contas-receber-lucenera.pages.dev), mesmo
+  código (`VITE_MODO_SISTEMA` via `vite build --mode pagar|receber`), sem seletor Pagar/Receber em nenhuma tela.
+  Boletos/remessa/retorno Bradesco só em Receber; pagamentos antecipados só em Pagar. O endereço antigo
+  `adm-bancaria-lucenera` virou página de escolha. Banco: migration 239 APLICADA (`systems` contas-pagar e
+  contas-receber; trigger `trg_espelhar_acesso_financeiro` — acesso igual nos 3 slugs; carga dos 4 usuários). A
+  permissão de dados continua `financeiro` (nenhuma policy mudou). `002_esconder_card_antigo.sql` fica para depois do
+  teste. Links de boletos/NF do Orçamento e do Vendas apontam para Contas a Receber. Repos:
+  retorno-bancario-bradesco-5392a, gestao-financeira-clone-544cb (1), vendas-lucenera.
 - Orçamentos (SPEC-223 implementada): **orçamento de empréstimo** — Tipo de Operação Outros → Tipo EMPRÉSTIMO. Cliente
   obrigatório, projeto opcional, data prevista de devolução, sem condição de pagamento. "Confirmar empréstimo" (fotos da
   saída) gera o EMP- e o termo em PDF — o mesmo empréstimo do /admin do Showroom. Devolução por peça ou quantidade (foto,

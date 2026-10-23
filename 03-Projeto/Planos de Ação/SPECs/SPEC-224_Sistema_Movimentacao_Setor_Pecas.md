@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-224 — Sistema novo \"Movimentação de Peças\": mudar a peça de setor (físico e de venda) com registro de quem, quando, de onde, para onde e por quê"
-status: pendente (decisões principais tomadas em 23/10; falta OK para implementar)
+status: implementada (no ar 23/10; falta liberar acessos no Hub e o teste do usuário)
 data_ultima_modificacao: 2026-10-23
 sistemas_envolvidos:
   - Sistema NOVO "Movimentação de Peças" (React + Supabase SP, Cloudflare Pages, registrado no Hub)
@@ -87,18 +87,19 @@ sistemas_envolvidos:
 - SPEC-223 (empréstimo) usa o mesmo registro quando a peça vai para "Amostra / Emprestado".
 
 ## Checklist de Ação
-- [ ] A1. Migration: tabela `movimentacoes_peca` + RLS + auditoria; RPCs de setor, de venda, de leitura; correção do
+- [x] A1. Migration: tabela `movimentacoes_peca` + RLS + auditoria; RPCs de setor, de venda, de leitura; correção do
       trigger de preço; dry-run em ROLLBACK + rollback.sql
-- [ ] A2. Script: Showroom fora da importação padrão da Connect
-- [ ] B1. Sistema novo: repositório, projeto React (template de um sistema existente), login, SystemSwitcher,
+- [x] A2. Script: Showroom fora da importação padrão da Connect
+- [x] B1. Sistema novo: repositório, projeto React (template de um sistema existente), login, SystemSwitcher,
       registro-tela
-- [ ] B2. Tela Movimentar (peça → setores → origem/destino/qtd/motivo)
-- [ ] B3. Tela Histórico (filtros + exportar)
-- [ ] B4. Cloudflare Pages + registro no Hub (`systems`) + acessos por usuário
-- [ ] C1. Docs: AI_DB_CONTEXT do sistema, `supabase/docs/relationships.md`, CHANGELOG
+- [x] B2. Tela Movimentar (peça → setores → origem/destino/qtd/motivo)
+- [x] B3. Tela Histórico (filtros + exportar)
+- [x] B4. Cloudflare Pages + registro no Hub (`systems`) + acessos por usuário
+- [x] C1. Docs: AI_DB_CONTEXT do sistema, `supabase/docs/relationships.md`, CHANGELOG
 
 ### Passos manuais do usuário
-- [ ] Criar o projeto no Cloudflare Pages ligado ao repositório novo (se a IA não conseguir pelo `wrangler`)
+- [x] Criar o projeto no Cloudflare Pages (feito pelo `wrangler`, upload direto)
+- [ ] (Opcional) Ligar o projeto `movimentacao-lucenera` ao GitHub no painel da Cloudflare para publicar a cada push
 - [ ] Liberar o sistema no Hub para quem vai usar
 - [ ] Testar: mover 1 peça Estoque → Showroom e conferir Setores no Cadastro e a vitrine
 
@@ -116,4 +117,33 @@ sistemas_envolvidos:
 
 ## Realizado
 
-(vazio)
+### 2026-10-23 (pedido do usuário: "pode implementar!")
+Pontos para confirmar: seguidas as recomendações (nome "Movimentação de Peças"; 6 setores físicos; Estoque Geral
+abaixo do reservado = bloqueia; acesso liberado no Hub por pessoa).
+
+**Banco** — migration `supabase/db/migrations/20261023_236_spec224_movimentacao_pecas/` (`001_movimentacao_pecas.sql` +
+`rollback.sql`) **APLICADA** no SP:
+- tabela `movimentacoes_peca` (RLS, sem grant, número MOV-000001) e RPCs `movimentar_peca_setor`,
+  `movimentar_peca_venda`, `movimentacao_buscar_pecas`, `movimentacao_peca_setores`, `movimentacao_listar`,
+  `movimentacao_usuarios` (só `authenticated`; acesso = admin ou sistema liberado no Hub);
+- "livre no Estoque Geral" = quantidade − (reservado − entrega futura dos L): não deixa tirar peça guardada para venda;
+- `fn_atualizar_preco_venda`: UPDATE só de estoque não recalcula o preço. **Achado no dry-run:** a 1ª versão não
+  funcionava porque `tem_st` e `sku` são colunas geradas (vêm nulas no NEW do BEFORE) — mover para o Showroom mudava
+  o preço da 6367 de R$ 272,73 para R$ 230,69; corrigido e testado (preço fica; mudar o custo ainda recalcula);
+- sistema registrado no Hub (`systems`, slug `movimentacao-pecas`).
+- Dry-run em ROLLBACK: 12728 sem peça livre (bloqueado — a NF 221025 foi cancelada pelo Pedro em 23/10 08:28, o
+  estoque voltou a 19); 6367 Estoque → Showroom 3, Showroom → Casa Cor 2, Estoque → Defeito 1,5; erros de Showroom
+  fracionado, saldo insuficiente, mesmo setor, setor inválido e sem motivo; L da 9815 Reserva → Entrega Futura → Reserva;
+  histórico com quem/saldos; usuário sem acesso bloqueado; `anon` sem EXECUTE; `rollback.sql` limpa tudo.
+
+**Script** — `importar_produtos_estoque.py`: `estoque_showroom` também só com `--incluir-estoque`.
+
+**Sistema novo** `04-Sistemas/movimentacao-pecas` (repo privado `pedrolalala/movimentacao-pecas`, submodule) — feito a
+partir da Separação Parcial (mesmo login, SystemSwitcher, registro de telas):
+- **Movimentar:** busca a peça → quantidade em cada setor + livre no Estoque Geral → "Mover de setor" (De, Para,
+  quantidade, motivo; atalhos Estoque ↔ Showroom) → "Vendas com esta peça" (botão Mover por L: Reserva → Entrega
+  Futura, Entrega Futura → Reserva, Separação → Reserva) → últimos movimentos da peça.
+- **Histórico:** filtros por quem, setor, tipo, período e texto; exportar para Excel (CSV).
+- No ar em https://movimentacao-lucenera.pages.dev (Cloudflare Pages, upload direto pelo `wrangler`). Não foi aberto
+  no navegador (extensão do Chrome desconectada) — falta o teste do usuário.
+

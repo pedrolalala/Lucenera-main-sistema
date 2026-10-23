@@ -53,3 +53,6 @@
 [submodule "04-Sistemas/central-de-solicitacoes"]
 	path = 04-Sistemas/central-de-solicitacoes
 	url = https://github.com/pedrolalala/central-de-solicitacoes.git
+[submodule "04-Sistemas/movimentacao-pecas"]
+	path = 04-Sistemas/movimentacao-pecas
+	url = https://github.com/pedrolalala/movimentacao-pecas.git

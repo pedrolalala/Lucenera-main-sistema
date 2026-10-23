@@ -4,6 +4,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-23
 
+- Sistema novo **Movimentação de Peças** (SPEC-224 implementada): https://movimentacao-lucenera.pages.dev — move a peça
+  entre Estoque Geral, Showroom, Garantia, Casa Cor, Defeito e Amostra/Emprestado e, nas vendas, Reserva ↔ Entrega
+  Futura e Separação → Reserva, sem aprovação, com registro (MOV-000001: quem, quando, peça, quantidade, de onde, para
+  onde, motivo, saldos antes/depois) e histórico com filtros e exportação. Banco: migration 236 APLICADA (tabela
+  `movimentacoes_peca`, RPCs `movimentar_peca_*`/`movimentacao_*`, sistema no Hub; preço não muda quando o UPDATE é
+  só de estoque). Import da Connect não grava mais o Showroom sem `--incluir-estoque`. Repo `movimentacao-pecas`
+  (submodule).
 - Sistema novo "Movimentação de Peças" (SPEC-224, só registro): mudar a peça de setor (Estoque Geral ↔ Showroom ↔
   Garantia ↔ Casa Cor ↔ Defeito ↔ Amostra/Emprestado) e de venda (reserva ↔ entrega futura, separação → reserva),
   sem aprovação, com registro de quem, quando, de onde, para onde e motivo. O Showroom passa a ser do sistema (a

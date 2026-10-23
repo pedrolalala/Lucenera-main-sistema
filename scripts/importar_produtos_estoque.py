@@ -312,13 +312,14 @@ def processar(dry_run: bool, incluir_estoque: bool = False) -> None:
         # SPEC-222 A4: o estoque (estoque_total/disponivel) só é gravado com --incluir-estoque. O trigger
         # fn_sync_estoque_itens_from_produtos sobrescreve estoque_itens (quantidade E quantidade_reservada)
         # e apagaria as entradas de nota e as reservas feitas no sistema novo.
+        # SPEC-224: o Showroom passou a ser do sistema "Movimentação de Peças" — também só com --incluir-estoque.
         mudou_estoque = incluir_estoque and (
             not close_enough(existente["estoque_total"], row["estoque_total"])
             or not close_enough(existente["estoque_disponivel"], row["estoque_disponivel"])
+            or not close_enough(existente["estoque_showroom"], row["estoque_showroom"])
         )
         mudou_num = (
             mudou_estoque
-            or not close_enough(existente["estoque_showroom"], row["estoque_showroom"])
             or not close_enough(existente["custo_total"], row["custo_total"])
             or not close_enough(existente["valor_venda"], row["valor_venda"])
         )
@@ -363,7 +364,6 @@ def processar(dry_run: bool, incluir_estoque: bool = False) -> None:
                 n_num += 1
                 rec.update(
                     {
-                        "estoque_showroom": row["estoque_showroom"],
                         "custo_total": row["custo_total"],
                         "valor_venda": row["valor_venda"],
                     }
@@ -373,6 +373,7 @@ def processar(dry_run: bool, incluir_estoque: bool = False) -> None:
                         {
                             "estoque_total": row["estoque_total"],
                             "estoque_disponivel": row["estoque_disponivel"],
+                            "estoque_showroom": row["estoque_showroom"],
                         }
                     )
             if mudou_ncm:
@@ -513,8 +514,8 @@ def main():
     parser.add_argument(
         "--incluir-estoque",
         action="store_true",
-        help="Grava também EstoqueTotal/Disponivel (SPEC-222: desligado por padrão — sobrescreve as entradas "
-        "de nota e as reservas do sistema novo)",
+        help="Grava também EstoqueTotal/Disponivel/Showroom (SPEC-222/224: desligado por padrão — sobrescreve as "
+        "entradas de nota, as reservas e as movimentações de setor do sistema novo)",
     )
     args = parser.parse_args()
     if args.incluir_estoque:

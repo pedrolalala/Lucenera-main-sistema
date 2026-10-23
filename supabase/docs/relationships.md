@@ -531,6 +531,14 @@ Ação a ser realizada: não criar novas regras hardcoded de etapa no código. Q
 - `notas_fiscais_compra.plano_contas_id` -> `plano_de_contas.id` (padrão COMPRAS - REVENDA, 2050001): grupo/sub-grupo
   da parcela da nota em `vw_contas_pagar_pedidos_compra`.
 
+## Movimentação de peças (SPEC-224, migration 236)
+
+- `movimentacoes_peca.produto_id` -> `produtos.id`; `projeto_item_id` -> `projeto_itens.id` (só nos movimentos de
+  venda); `criado_por` -> `usuarios.id`. Setor físico: Estoque Geral = `estoque_itens` local `Estoque`, Showroom =
+  `produtos.estoque_showroom`, demais = `estoque_itens` do local. Venda: `estoque_saldos_projeto_item` +
+  `estoque_movimentos_projeto_item` (origem `movimentacao_pecas`); Separação → Reserva passa por
+  `estornar_item_separacao`. Leitura só pelas RPCs `movimentacao_*`.
+
 ## Caminhos recomendados para navegação nos sistemas
 
 ### Aprovação de orçamento para financeiro

@@ -226,9 +226,9 @@ pelo orçamento vão para o schema `backup` antes). Reverter os commits dos trê
 
 ### 2026-10-23
 
-- Migration `supabase/db/migrations/20261023_237_spec223_orcamento_emprestimo/` (001 + rollback). O número 236 já tinha
-  sido usado pela SPEC-224 (outra sessão) no mesmo dia; a pasta foi renomeada para 237 depois de aplicada (o conteúdo é o
-  mesmo).
+- Migration `supabase/db/migrations/20261023_238_spec223_orcamento_emprestimo/` (001 + rollback). Os números 236 e
+  237 foram usados pela SPEC-224 (outra sessão) no mesmo dia; a pasta foi renomeada para 238 depois de aplicada (o
+  conteúdo é o mesmo; o commit do Orçamentos cita "237").
   - Colunas: `showroom_emprestimos.origem/orcamento_id/projeto_id`, `showroom_emprestimo_itens.orcamento_venda_id` e
     situação `convertido_venda`, `orcamentos.data_prevista_devolucao/emprestimo_origem_id`, status `emprestimo`,
     `orcamento_itens.ja_com_cliente`.

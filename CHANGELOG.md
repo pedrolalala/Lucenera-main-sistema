@@ -9,7 +9,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   saída) gera o EMP- e o termo em PDF — o mesmo empréstimo do /admin do Showroom. Devolução por peça ou quantidade (foto,
   OK ou com dano), **Virar venda** (orçamento de venda novo só com o que o cliente ficou; peças "já com o cliente" vão
   direto para Entregue na aprovação, desmarcável) e cancelar. Aba "Empréstimos" na lista. Estoque e financeiro não
-  mudam no empréstimo. Banco: migration 237 APLICADA (colunas, travas, RPCs `emprestimo_*`, internas comuns com o
+  mudam no empréstimo. Banco: migration 238 APLICADA (colunas, travas, RPCs `emprestimo_*`, internas comuns com o
   /admin, `aprovar_orcamento_financeiro` recusa empréstimo, `replace_orcamento_itens` com `ja_com_cliente`).
   Showroom: status Virou venda/Parcial e origem do empréstimo.
 - Movimentação de Peças (SPEC-224): com a busca vazia, lista todas as peças com estoque positivo (1.920), com

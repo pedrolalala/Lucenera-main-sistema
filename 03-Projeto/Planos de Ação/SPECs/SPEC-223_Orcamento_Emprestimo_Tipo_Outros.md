@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-223 — Orçamento de empréstimo (Tipo de Operação: Outros → EMPRÉSTIMO), com devolução e virar venda"
-status: não iniciado
-data_ultima_modificacao: 2026-10-22
+status: implementado (falta teste do usuário)
+data_ultima_modificacao: 2026-10-23
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — Novo Orçamento, lista de orçamentos, detalhe
   - Showroom (showroom-qtq8er2dk) — aba Empréstimos do /admin (SPEC-219), passa a mostrar também os empréstimos feitos pelo orçamento
@@ -57,7 +57,7 @@ lados (Orçamentos e /admin do Showroom).
   (zerado) nos Setores da peça no Cadastro (SPEC-174 N6c), lido de `estoque_itens` local de mesmo nome — que hoje não
   tem nenhuma linha.
 
-## Decisões (propostas — ver "Pontos para confirmar")
+## Decisões (confirmadas em 23/10 — ver "Pontos confirmados")
 
 1. **Um empréstimo só, dois lugares.** O orçamento de empréstimo grava no mesmo `showroom_emprestimos` (coluna nova
    `orcamento_id`). Mesmo número `EMP-`, mesmo termo, mesmas fotos, mesma devolução. O /admin do Showroom lista os dois
@@ -163,46 +163,42 @@ não passa pela aprovação financeira. Para cobrar, use Virar venda.").
 ## Checklist de Ação
 
 **A. Banco**
-- [ ] A1. Colunas novas em `showroom_emprestimos`, `showroom_emprestimo_itens` e `orcamentos`; situação `convertido_venda`
-- [ ] A2. Funções internas comuns + RPCs `emprestimo_*` para `authenticated` (com `REVOKE` de `public`/`anon`)
-- [ ] A3. Trava de `outros/EMPRESTIMO` em `aprovar_orcamento_financeiro` (com `DROP` da assinatura antiga se ela mudar)
-- [ ] A4. Ação nova na matriz do Hub (ex.: `orcamentos.emprestar`) para os papéis que o usuário indicar
-- [ ] A5. "Amostra / Emprestado" na `vw_cadastro_produto_setores` vindo dos empréstimos em aberto
-- [ ] A6. Dry-run em ROLLBACK: anon e usuário sem acesso bloqueados; empréstimo não cria reserva, entrega futura,
-      parcela nem boleto; necessidade de compra não muda; converter parcial e devolver o resto
+- [x] A1. Colunas novas em `showroom_emprestimos`, `showroom_emprestimo_itens` e `orcamentos`; situação `convertido_venda`
+- [x] A2. Funções internas comuns + RPCs `emprestimo_*` para `authenticated` (com `REVOKE` de `public`/`anon`)
+- [x] A3. Trava de `outros/EMPRESTIMO` em `aprovar_orcamento_financeiro`
+- [x] A4. Permissão: as ações `criar`/`editar` que já existem no Orçamentos (decisão 4: "os mesmos que fazem atualmente") — sem ação nova
+- [ ] A5. ~~"Amostra / Emprestado" na `vw_cadastro_produto_setores`~~ — **não feito**: a SPEC-224 (Movimentação de Peças, outra sessão, 23/10) passou a usar "Amostra / Emprestado" como setor físico de verdade (`estoque_itens`). Misturar com o empréstimo (que não move estoque) confundiria. Ver Pendências.
+- [x] A6. Dry-run em ROLLBACK: anon e usuário sem acesso bloqueados; empréstimo não cria reserva, entrega futura, parcela nem boleto; converter parcial e devolver o resto
 
 **B. Orçamentos**
-- [ ] B1. Opção EMPRÉSTIMO no Tipo (Outros) e campos do empréstimo no formulário
-- [ ] B2. Confirmar empréstimo com fotos + termo PDF (reaproveitando o PDF da SPEC-219)
-- [ ] B3. Detalhe: devolução, virar venda, cancelar; filtro na lista
-- [ ] B4. Orçamento de venda com origem no empréstimo
+- [x] B1. Opção EMPRÉSTIMO no Tipo (Outros) e campos do empréstimo no formulário
+- [x] B2. Confirmar empréstimo com fotos + termo PDF (reaproveitando o PDF da SPEC-219)
+- [x] B3. Detalhe: devolução, virar venda, cancelar; aba "Empréstimos" na lista
+- [x] B4. Orçamento de venda com origem no empréstimo ("Peças que já estão com o cliente", desmarcável)
 
 **C. Showroom e Cadastro**
-- [ ] C1. /admin lista os empréstimos do orçamento (origem + número)
-- [ ] C2. Setores da peça com "Amostra / Emprestado"
+- [x] C1. /admin lista os empréstimos do orçamento (origem + número), status novos e filtro "Viraram venda"
+- [ ] C2. Setores da peça — ver A5
 
 **Entrega**
-- [ ] Migration com rollback, telas, publicar (Orçamentos, Showroom, Cadastro), CHANGELOG, ponteiros
+- [x] Migration com rollback, telas, CHANGELOG, ponteiros
 
 ### Passos manuais do usuário
-- [ ] Responder os "Pontos para confirmar"
+- [x] Responder os pontos (23/10)
 - [ ] Validar as cláusulas do termo (pendente desde a SPEC-219) — o mesmo termo vale para o orçamento
 - [ ] Teste real: empréstimo de 3 peças → devolver 1, 1 com dano, 1 vira venda
 
-## Pontos para confirmar
+## Pontos confirmados (usuário, 23/10/2026)
 
-1. **Estoque não muda (recomendado) ou move para o setor empréstimo?** O Vinicius falou em "jogar para o setor
-   empréstimo e o disponível permanece". Mover de verdade hoje **tiraria a peça do disponível** (a venda só olha o
-   local "Estoque") e contrariaria a SPEC-219. Recomendação: **não mover**; mostrar "Amostra / Emprestado" só como
-   informação, e avisar na venda quando a peça estiver emprestada.
-2. **Um registro só para Showroom e Orçamentos?** Recomendação: **sim** (mesmo `EMP-`, mesmo termo).
-3. **Venda que veio do empréstimo:** a peça já está com o cliente. Recomendação: na aprovação financeira essas peças
-   vão **direto para Entregue** (sem Separação), baixando o estoque como uma entrega normal.
-4. **Quem pode criar empréstimo pelo orçamento?** Recomendação: quem já cria orçamento, com a ação nova no Hub para
-   poder restringir depois.
-5. **Peça sem estoque pode ser emprestada?** Recomendação: **aviso, sem bloqueio** (igual ao /admin), porque o
-   estoque da Connect pode estar atrasado.
-6. **Projeto obrigatório?** Recomendação: **opcional** (Casa Cor e empréstimo para arquiteto nem sempre têm projeto).
+1. **Estoque não muda** — sim. "Amostra / Emprestado" é só informação.
+2. **Um registro só** para Showroom e Orçamentos — sim.
+3. **Venda que veio do empréstimo vai direto para Entregue** — sim, **podendo ser alterado**: cada peça da venda
+   convertida vem marcada "Já está com o cliente" (vai direto para Entregue na aprovação financeira); dá para desmarcar
+   e ela segue o fluxo normal (reserva / separação).
+4. **Quem cria empréstimo** — os mesmos que criam orçamento hoje.
+5. **Peça sem estoque** — não bloqueia (a peça precisa estar fisicamente aqui para ser emprestada; o estoque da Connect
+   pode estar atrasado). Só aviso.
+6. **Cliente obrigatório**; projeto opcional.
 
 ## Fora do escopo
 
@@ -228,4 +224,44 @@ pelo orçamento vão para o schema `backup` antes). Reverter os commits dos trê
 
 ## Realizado
 
-(vazio)
+### 2026-10-23
+
+- Migration `supabase/db/migrations/20261023_237_spec223_orcamento_emprestimo/` (001 + rollback). O número 236 já tinha
+  sido usado pela SPEC-224 (outra sessão) no mesmo dia; a pasta foi renomeada para 237 depois de aplicada (o conteúdo é o
+  mesmo).
+  - Colunas: `showroom_emprestimos.origem/orcamento_id/projeto_id`, `showroom_emprestimo_itens.orcamento_venda_id` e
+    situação `convertido_venda`, `orcamentos.data_prevista_devolucao/emprestimo_origem_id`, status `emprestimo`,
+    `orcamento_itens.ja_com_cliente`.
+  - Travas: `trg_2_orcamento_emprestimo_guard` (empréstimo só fica em rascunho → emprestimo → cancelado; status
+    `emprestimo` só muda pelas RPCs) e `trg_orcamento_itens_emprestimo_guard` (peças de empréstimo confirmado não mudam).
+  - Funções internas comuns a /admin e Orçamentos: `showroom_emp_detalhe`, `_listar_int`, `_separar_item` (devolução
+    ou venda de parte da linha), `_devolver_item`, `_liberar_fotos_int`, `_liberar_leitura_int`; status ganhou
+    `virou_venda` e `parcial`. As RPCs do /admin passaram a usar essas internas (mesma assinatura; `showroom_emp_listar`
+    ganhou `origem/orcamento_id/orcamento_numero`).
+  - RPCs do Orçamentos (só `authenticated`; `criar`/`editar` do Hub; regra de equipe da SPEC-200):
+    `emprestimo_confirmar_orcamento`, `_obter`, `_do_orcamento`, `_listar`, `_liberar_fotos`, `_confirmar_fotos_saida`,
+    `_liberar_leitura_fotos`, `_registrar_devolucao` (com quantidade), `_converter_em_venda`, `_cancelar`,
+    `_em_aberto_por_produto`. Policies de storage do bucket `showroom-emprestimos` também para `authenticated`.
+  - `aprovar_orcamento_financeiro` recusa empréstimo e manda peça `ja_com_cliente` direto para Entregue (movimento
+    `entregue`, origem `emprestimo`); `replace_orcamento_itens` grava/compara `ja_com_cliente`.
+- Ensaio em transação com ROLLBACK (usuário `funcionario` com criar/editar): orçamento de empréstimo não vai para o
+  cliente; confirmar gera EMP- com o valor do orçamento; confirmar de novo, mudar peça e mudar status são recusados;
+  devolução sem foto recusada; devolver 1 de 2 divide a linha; virar venda cria ORC de venda em rascunho (projeto e
+  equipe copiados, peças "já com o cliente"); cancelar depois de devolução recusado; dano acima do integral recusado;
+  status final `parcial`; aprovar a venda → saldos só em Entregue, 1 parcela; aprovar o empréstimo recusado; estoque
+  físico igual; usuário sem permissão, anon e senha errada do /admin recusados. Rollback também ensaiado.
+- Migration **aplicada** no Supabase SP (23/10). Sequence do EMP- devolvida para o último número real (os ensaios tinham
+  consumido 3).
+- Orçamentos: Tipo EMPRESTIMO, data prevista de devolução, projeto opcional, sem a aba de pagamento; quadro
+  "Empréstimo" no orçamento (fotos da saída + Confirmar e baixar termo; depois devolução por peça/quantidade com foto,
+  Virar venda, Cancelar, termo PDF igual ao do Showroom com `pdf-lib` 1.17.1); aviso de estoque (não bloqueia); aba
+  "Empréstimos" na lista (inclui os do Showroom); rascunho de empréstimo mostra "Confirmar empréstimo" no lugar de
+  "Enviar para o Cliente"; venda que veio de empréstimo mostra "Peças que já estão com o cliente".
+- Showroom: status "Virou venda"/"Parcial", filtro "Viraram venda", origem "(orçamento ORC-…)" na lista e número da
+  venda na peça convertida.
+
+## Pendências
+
+- [ ] Setor "Amostra / Emprestado": a SPEC-224 usa como setor físico. Decidir se o empréstimo (que hoje não move
+  estoque, decisão 1) deve passar a mover a peça para esse setor pela Movimentação de Peças, ou se continua só registro.
+- [ ] Teste real do usuário logado (criar, confirmar com foto, termo, devolver parte, virar venda, aprovar a venda).

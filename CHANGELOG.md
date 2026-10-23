@@ -4,6 +4,16 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-23
 
+- Orçamentos (SPEC-223 implementada): **orçamento de empréstimo** — Tipo de Operação Outros → Tipo EMPRÉSTIMO. Cliente
+  obrigatório, projeto opcional, data prevista de devolução, sem condição de pagamento. "Confirmar empréstimo" (fotos da
+  saída) gera o EMP- e o termo em PDF — o mesmo empréstimo do /admin do Showroom. Devolução por peça ou quantidade (foto,
+  OK ou com dano), **Virar venda** (orçamento de venda novo só com o que o cliente ficou; peças "já com o cliente" vão
+  direto para Entregue na aprovação, desmarcável) e cancelar. Aba "Empréstimos" na lista. Estoque e financeiro não
+  mudam no empréstimo. Banco: migration 237 APLICADA (colunas, travas, RPCs `emprestimo_*`, internas comuns com o
+  /admin, `aprovar_orcamento_financeiro` recusa empréstimo, `replace_orcamento_itens` com `ja_com_cliente`).
+  Showroom: status Virou venda/Parcial e origem do empréstimo.
+- Movimentação de Peças (SPEC-224): com a busca vazia, lista todas as peças com estoque positivo (1.920), com
+  Estoque, Showroom e Outros setores. Migration 237 APLICADA. Sistema `e7ef665`.
 - Sistema novo **Movimentação de Peças** (SPEC-224 implementada): https://movimentacao-lucenera.pages.dev — move a peça
   entre Estoque Geral, Showroom, Garantia, Casa Cor, Defeito e Amostra/Emprestado e, nas vendas, Reserva ↔ Entrega
   Futura e Separação → Reserva, sem aprovação, com registro (MOV-000001: quem, quando, peça, quantidade, de onde, para

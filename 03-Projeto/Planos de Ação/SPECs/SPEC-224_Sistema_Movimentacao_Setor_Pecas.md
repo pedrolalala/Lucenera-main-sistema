@@ -147,3 +147,11 @@ partir da Separação Parcial (mesmo login, SystemSwitcher, registro de telas):
 - No ar em https://movimentacao-lucenera.pages.dev (Cloudflare Pages, upload direto pelo `wrangler`). Não foi aberto
   no navegador (extensão do Chrome desconectada) — falta o teste do usuário.
 
+
+### 2026-10-23 — Lista das peças com estoque (pedido do usuário)
+- Com a busca vazia, a tela Movimentar já lista todas as peças com estoque positivo em algum setor (1.920 hoje),
+  por código, carregando de 100 em 100 ao rolar; com termo continua a busca (até 40). Cada peça mostra Estoque,
+  Showroom e "Outros setores" (Garantia + Casa Cor + Defeito + Amostra).
+- Banco: migration `20261023_237_spec224_lista_pecas_com_estoque` **APLICADA** (`movimentacao_buscar_pecas` com a
+  coluna `outros`; DROP + CREATE porque mudou o retorno). Dry-run: 1.920 com busca vazia, 40 com termo, `anon` sem
+  EXECUTE, rollback volta a versão da 236. Sistema `e7ef665`, publicado pelo wrangler.

@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-23
+
+- Sistema novo "Movimentação de Peças" (SPEC-224, só registro): mudar a peça de setor (Estoque Geral ↔ Showroom ↔
+  Garantia ↔ Casa Cor ↔ Defeito ↔ Amostra/Emprestado) e de venda (reserva ↔ entrega futura, separação → reserva),
+  sem aprovação, com registro de quem, quando, de onde, para onde e motivo. O Showroom passa a ser do sistema (a
+  Connect para de gravar). Decisões do usuário registradas; falta OK para implementar.
+
 ## 2026-10-22
 
 - Orçamentos (SPEC-223, só registro): SPEC do **orçamento de empréstimo** — Tipo de Operação Outros → Tipo

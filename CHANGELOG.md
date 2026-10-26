@@ -4,6 +4,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-26
 
+- Projetos x SharePoint (SPEC-228): o fluxo do Power Automate (Igor) só numera e cria o grupo/pasta no Teams quando o
+  item chega na lista "Organização Projetos" **sem Código** — projeto criado pelo sistema ia com código e ficava sem grupo.
+  Agora o código oficial é gerado só pelo SharePoint: o projeto nasce com `PROV-NNNN`, vai para a lista sem `field_0` e
+  recebe o oficial pelo pull (até ~6 min). Novo Projeto sem campo Código (CRM `efb1e73`, Orçamentos `de0b6a5`, Cadastro
+  `3265a6e`); código só leitura. Edge Functions `sharepoint-projetos-push` e `salvar-projeto` v4 publicadas. Migration 244
+  APLICADA (trigger `trg_projetos_codigo_provisorio`, `gerar_codigo_provisorio_projeto()`, push aceita `PROV-*`, pull sem
+  `gerar_codigo_projeto`, propagação do código para entregas; removidos `gerar_codigo_projeto()` e
+  `projeto_codigo_sequencia`). Testes 26.330 (apagado) e 26.1620 (ainda no ar).
 - Central de Solicitações (SPEC-225): quem abriu o pedido edita (título, descrição, tipo, sistema) enquanto está
   **Aberto**; fotos no pedido (no Novo Pedido e no detalhe; escolher, arrastar ou colar print). Migration 240 APLICADA
   (RPC `editar_minha_solicitacao`, tabela `solicitacao_anexos`, bucket privado `solicitacoes-anexos`; saiu a policy que

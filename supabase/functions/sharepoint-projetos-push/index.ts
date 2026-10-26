@@ -7,8 +7,13 @@ import { corsHeaders } from '../_shared/cors.ts'
 // projeto. Nunca chamada por usuário final — protegida por um segredo compartilhado
 // (header x-sync-secret), gerado junto com o secret do Vault 'sharepoint_sync_secret'.
 //
+// SPEC-228 (2026-10-26): NUNCA envia field_0 (Código). O código oficial é gerado só pelo fluxo
+// do Power Automate da lista, e o fluxo só roda (numera + cria grupo/pasta no Teams) quando o
+// item chega com o Código vazio. O sistema cria o projeto com código provisório `PROV-NNNN` e
+// recebe o código oficial pelo pull (sharepoint-projetos-pull).
+//
 // Mapa de campos (confirmado por leitura real da lista + amostra de dados em 2026-09-11):
-//   Title = nome | field_0 = codigo | field_9 = responsavel_nome | field_4 = cidade
+//   Title = nome | field_0 = codigo (só leitura, ver acima) | field_9 = responsavel_nome | field_4 = cidade
 //   Arquivado = arquivado | N_x00ed_velEstrat_x00e9_gico = "Nível N" | field_10 = status
 //   (via sharepoint_status_map) | field_2 = nome do arquiteto | Respons_x00e1_veldaObra =
 //   nome do responsável da obra. Campo vazio = caractere literal "." (convenção observada
@@ -79,14 +84,9 @@ Deno.serve(async (req: Request) => {
       })
     }
 
-    // código é fonte única do sistema — se por acaso não tiver, gera agora
-    let codigo = projeto.codigo
-    if (!codigo) {
-      const { data: novoCodigo, error: codigoError } = await supabase.rpc('gerar_codigo_projeto')
-      if (codigoError) throw new Error(`Falha ao gerar código: ${codigoError.message}`)
-      codigo = novoCodigo as string
-      await supabase.from('projetos').update({ codigo }).eq('id', projetoId)
-    }
+    // SPEC-228: só código oficial (AA.NNN) serve para a busca anti-duplicação; o provisório
+    // (PROV-NNNN) não existe na lista.
+    const codigo: string | null = /^\d{2}\.\d+$/.test(projeto.codigo ?? '') ? projeto.codigo : null
 
     let statusSharepoint: string | null = null
     if (projeto.status) {
@@ -113,7 +113,6 @@ Deno.serve(async (req: Request) => {
 
     const fields: Record<string, unknown> = {
       Title: projeto.nome,
-      field_0: codigo,
       field_9: campoOuVazio(projeto.responsavel_nome),
       field_4: campoOuVazio(projeto.cidade),
       Arquivado: !!projeto.arquivado,

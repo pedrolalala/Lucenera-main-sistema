@@ -89,7 +89,7 @@ Duas mudanças de modelagem no cadastro de projeto:
 
 **⚠️ Guarda de segurança existente, não remover sem entender por quê**: a function só dispara push quando `codigo` bate com o formato real de projeto (`^\d{2}\.\d+$`, ex. `26.267`). Isso é **proposital** — `projetos` também guarda registros internos que não são projeto de cliente (ex. `codigo` tipo `COM-1`..`COM-15` "Projeto Comissão N", `PRJ-TESTE`), e sem essa guarda esses registros quase viraram itens reais na lista de produção do SharePoint durante o incidente citado acima. Se um dia esses registros internos saírem de `projetos` para uma tabela própria, essa guarda pode ser reavaliada — até lá, ela é a única proteção contra isso.
 
-Outras tabelas/RPCs relacionadas: `sharepoint_sync_log` (auditoria de cada push/pull), `sharepoint_status_map`, `sharepoint_estado_map`, `sharepoint_sync_state`, `gerar_codigo_projeto()`, `confirmar_push_sharepoint()`, `aplicar_pull_sharepoint()`, `aplicar_planilha_projetos()`.
+Outras tabelas/RPCs relacionadas: `sharepoint_sync_log` (auditoria de cada push/pull), `sharepoint_status_map`, `sharepoint_estado_map`, `sharepoint_sync_state`, `gerar_codigo_provisorio_projeto()` (SPEC-228: `gerar_codigo_projeto()` removido — código oficial vem só do SharePoint; projeto nasce `PROV-NNNN`), `confirmar_push_sharepoint()`, `aplicar_pull_sharepoint()`, `aplicar_planilha_projetos()`.
 
 ## Ação a ser realizada
 

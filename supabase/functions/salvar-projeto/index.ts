@@ -20,8 +20,9 @@ Deno.serve(async (req: Request) => {
 
     const body = await req.json()
 
+    // SPEC-228: o código não é mais recebido da tela. O banco grava um provisório (PROV-NNNN)
+    // e o código oficial vem do fluxo do SharePoint pelo pull.
     const {
-      codigo,
       nome,
       status,
       cidade,
@@ -30,17 +31,11 @@ Deno.serve(async (req: Request) => {
       responsavel_obra_id,
       responsavel_id,
       responsavel_nome,
+      responsavel_funcionario_id,
       cliente_id,
       data_entrada,
       nivel_estrategico,
     } = body
-
-    if (!codigo || String(codigo).trim() === '') {
-      return new Response(JSON.stringify({ error: 'O campo Código é obrigatório.' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
 
     if (!nome || String(nome).trim() === '') {
       return new Response(JSON.stringify({ error: 'O campo Nome é obrigatório.' }), {
@@ -49,8 +44,18 @@ Deno.serve(async (req: Request) => {
       })
     }
 
+    // SPEC-077: Responsável agora é obrigatório e vem da tela como FK real
+    // pra funcionarios — responsavel_nome continua sendo mandado junto (nome
+    // do funcionário escolhido) pra não quebrar o trigger que deriva a
+    // equipe/comissão do projeto a partir do texto.
+    if (!responsavel_funcionario_id) {
+      return new Response(JSON.stringify({ error: 'O campo Responsável é obrigatório.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const payloadInsercao = {
-      codigo: String(codigo).trim(),
       nome,
       status: status || 'Estudo Inicial',
       cidade,
@@ -59,6 +64,7 @@ Deno.serve(async (req: Request) => {
       responsavel_obra_id,
       responsavel_id,
       responsavel_nome,
+      responsavel_funcionario_id,
       cliente_id,
       data_entrada: data_entrada || null,
       nivel_estrategico: nivel_estrategico || null,
@@ -79,6 +85,16 @@ Deno.serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error: any) {
+    if (error?.code === '23505' && String(error?.message || '').includes('projetos_codigo_key')) {
+      return new Response(
+        JSON.stringify({ error: 'Este código de projeto já está em uso. Escolha outro código.' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      )
+    }
+
     return new Response(JSON.stringify({ error: error.message || 'Erro interno no servidor' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

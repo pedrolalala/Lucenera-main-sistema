@@ -539,6 +539,13 @@ Ação a ser realizada: não criar novas regras hardcoded de etapa no código. Q
   `estoque_movimentos_projeto_item` (origem `movimentacao_pecas`); Separação → Reserva passa por
   `estornar_item_separacao`. Leitura só pelas RPCs `movimentacao_*`.
 
+## Central de Solicitações — fotos (SPEC-225, migration 240)
+
+- `solicitacao_anexos.solicitacao_id` -> `solicitacoes.id` (ON DELETE CASCADE); `criado_por` -> `usuarios.id`.
+  Arquivo em `storage.objects` (bucket privado `solicitacoes-anexos`), caminho `<solicitacao_id>/<arquivo>`.
+  Quem pode pôr/tirar: `solicitacao_pode_anexar(solicitacao_id)` (autor com status `aberto` ou `hub_pode_executar(...,
+  'solicitacoes', NULL, 'aprovar')`). Edição do pedido pelo autor só pela RPC `editar_minha_solicitacao`.
+
 ## Caminhos recomendados para navegação nos sistemas
 
 ### Aprovação de orçamento para financeiro

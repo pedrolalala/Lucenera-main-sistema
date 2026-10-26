@@ -4,6 +4,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-26
 
+- Central de Solicitações (SPEC-225): quem abriu o pedido edita (título, descrição, tipo, sistema) enquanto está
+  **Aberto**; fotos no pedido (no Novo Pedido e no detalhe; escolher, arrastar ou colar print). Migration 240 APLICADA
+  (RPC `editar_minha_solicitacao`, tabela `solicitacao_anexos`, bucket privado `solicitacoes-anexos`; saiu a policy que
+  deixava o autor mudar qualquer coluna). Central de Solicitações `165238c`.
 - Hub: Contas a Pagar e Contas a Receber lado a lado (a Separação Parcial ficava no meio por empate de
   `systems.display_order`). Ordem renumerada sem empate (migration 239 APLICADA, com rollback).
 

@@ -4,6 +4,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-26
 
+- Estoque (SPEC-232): **venda feita no sistema nunca vira "Reserva sem venda (herança Connect)"** (regra do usuário).
+  Entregar (finalizar separação ou entrega na Logística) agora baixa o Estoque Geral e libera o reservado, sem contar
+  em dobro; devolver do Entregue soma de volta no Estoque Geral e não mexe no reservado; re-reserva e aprovação com peça
+  já com o cliente não somam o reservado de novo. Acerto da 12822 (GU10 Dicroica 2700K): Estoque Geral 100 → 97,
+  herança 35 → 32, Reserva 50, disponível 15. Migration 247 APLICADA. Sem mudança de tela.
 - Projetos x SharePoint (SPEC-228): o fluxo do Power Automate (Igor) só numera e cria o grupo/pasta no Teams quando o
   item chega na lista "Organização Projetos" **sem Código** — projeto criado pelo sistema ia com código e ficava sem grupo.
   Agora o código oficial é gerado só pelo SharePoint: o projeto nasce com `PROV-NNNN`, vai para a lista sem `field_0` e

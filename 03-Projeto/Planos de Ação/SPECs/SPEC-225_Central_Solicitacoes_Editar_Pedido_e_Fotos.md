@@ -25,8 +25,8 @@ sistemas_envolvidos:
    descrição, tipo e sistema relacionado. Pela RPC `editar_minha_solicitacao`; a policy solta sai. Ao editar, a
    classificação da IA é refeita.
 2. **Fotos:** imagens (JPG, PNG, WEBP, GIF) até 10 MB, várias por pedido. Anexa o **autor** (ao criar e enquanto o
-   pedido estiver Aberto) e **quem atende** (permissão `aprovar` da Central, a qualquer momento). Quem anexou (ou o
-   aprovador) pode remover enquanto o pedido estiver Aberto. Todos que veem o pedido veem as fotos.
+   pedido estiver Aberto) e **quem atende** (permissão `aprovar` da Central, a qualquer momento). Remover: quem anexou
+   enquanto o pedido estiver Aberto; o aprovador a qualquer momento. Todos que veem o pedido veem as fotos.
 3. Bucket **privado** `solicitacoes-anexos` (link temporário para ver); tabela `solicitacao_anexos` com RLS.
 
 ## Checklist de Ação

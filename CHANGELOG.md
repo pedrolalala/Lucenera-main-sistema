@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-26
+
+- Hub: Contas a Pagar e Contas a Receber lado a lado (a Separação Parcial ficava no meio por empate de
+  `systems.display_order`). Ordem renumerada sem empate (migration 239 APLICADA, com rollback).
+
 ## 2026-10-23
 
 - Administração Bancária (SPEC-225 implementada): virou **2 sistemas** no Hub — **Contas a Pagar**

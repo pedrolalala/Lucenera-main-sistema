@@ -127,9 +127,9 @@ sequenceDiagram
 ## Pendências
 
 - [x] TESTE 2 (26.330, item 7220) apagado no sistema e na lista em 26/10 a pedido do usuário. O número 26.330 fica gasto (próximo real = 26.331).
-- [ ] Grupo do Teams do teste 26.330 ("TESTE 2", equipe Marina) ainda existe — só o Igor apaga.
 - [ ] Projeto **TESTE** (26.1620, item 7219, sem grupo) ainda está no sistema e na lista — apagar quando o usuário liberar.
-- [ ] Projeto **TESTE 3** (26.331, item 7221, teste final de 26/10) — confirmar com o usuário se o grupo apareceu no Teams e depois apagar (sistema + lista; grupo com o Igor). Próximo real = 26.332.
+- [x] TESTE 3 (26.331, item 7221): grupo confirmado pelo usuário no Teams; apagado no sistema e na lista em 26/10. Próximo real = 26.332.
+- [ ] Grupos do Teams dos testes "TESTE 2" (26.330) e "TESTE 3" (26.331), equipe Marina — só o Igor apaga.
 - [ ] `salvar-projeto` usa service role e não confere quem chama (`verify_jwt` desligado): qualquer pessoa com a chave anon pode criar projeto. Já era assim antes desta SPEC — avaliar numa SPEC de segurança.
 - [ ] Risco residual de item duplicado na lista se o push gravar no Graph e falhar antes de confirmar `sharepoint_item_id` com código `PROV-*` (antes a busca por código protegia). Avaliar gravar o código provisório numa coluna oculta da lista se acontecer.
 - [ ] Confirmar com o Igor que o fluxo não filtra por criador e que nenhuma mudança prevista impede rodar em item criado pelo app "Lucenera CRM".

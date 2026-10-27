@@ -118,6 +118,9 @@ separação, sem o "orçamento fake" que o Matheus faz hoje na Connect.
 
 - Disponível = estoque geral + showroom − reservado (exemplos da reunião: 13442 "44 geral + 2/3 showroom", 13454
   "40 + 5", 12956 "disponível 0 com 1 no showroom": tem que somar).
+- Regra de uso (confirmada pelo usuário em 27/10): se o estoque geral não tem a peça (zero/negativo) e precisa, usa-se
+  a do Showroom, mas **antes** ela é movimentada do Showroom para o estoque geral (Movimentação de Peças) e só depois
+  sai/é reservada. Ninguém vende/reserva direto do Showroom.
 
 ### G. Inventário
 
@@ -140,8 +143,10 @@ separação, sem o "orçamento fake" que o Matheus faz hoje na Connect.
 
 ### F1 — proposta (a confirmar)
 
-- Migration de dados: zerar o reservado negativo das 286 linhas, onde ele é exatamente −showroom. As 4 que não batem
-  vão para conferência manual.
+- Migration de dados: tirar o Showroom de dentro do reservado (reservado real = reservado gravado + showroom) nas
+  peças vindas do import da Connect — não só zerar os negativos, porque 12 peças com Showroom têm reservado ≥ 0 que
+  provavelmente também já está descontado. Conferir antes contra as reservas/entregas futuras reais. As 4 que não
+  batem (13009, 13442, 11830, 12529) vão para conferência manual. Lista: 290 peças com reservado negativo (27/10).
 - Disponível passa a ser calculado sempre como `quantidade − reservado + estoque_showroom`, num só lugar (view/função),
   e as telas (Cadastro de peças, Orçamentos, Consulta) leem dali.
 - Import da Connect (`scripts/importar_produtos_estoque.py`) deixa de derivar reservado do Disponivel.
@@ -181,6 +186,6 @@ separação, sem o "orçamento fake" que o Matheus faz hoje na Connect.
 - [ ] GARANTIA: escolher de qual setor sai (geral, Estoque Garantia ou Casa Cor) ou adotar a regra "move para o geral e
       sai junto" (D).
 - [ ] Sinal na NF parcial (C): abater 30% de cada nota ou outra regra. Fecha junto com SPEC-231 F4.
-- [ ] F1: confirmar que pode zerar o reservado negativo e o disponível único, e corrigir a migration 251 antes de aplicar.
+- [ ] F1: conferir as reservas reais e confirmar a correção do reservado e o disponível único, e corrigir a migration 251 antes de aplicar.
 - [ ] CFOP/natureza de cada NF nova com o contador.
 - [ ] SPEC do sistema de Inventário (G).

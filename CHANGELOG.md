@@ -39,6 +39,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Separação Parcial / Logística (SPEC-231): o PDF "Pedido em Separação" ganhou a coluna **Marca** (do cadastro da
   peça) entre Ref. e Descrição, para identificar o item. Separação Parcial `c743a2f`, Logística `a7a72c7`. Sem mudança
   no banco.
+- Separação Parcial / Logística (SPEC-231): no rodapé do "Pedido em Separação", abaixo de Entregador/Recebedor, um
+  bloco "Controle interno" com as assinaturas **Separado por** e **Conferido por** (processo em duas etapas). Separação
+  Parcial `019dd74`, Logística `b36ecf9`. Sem mudança no banco.
 - SPEC-231 A3 já coberto pela SPEC-232; A4 (centavos de ST/IPI) e A5 (pedido aguardando aprovação na Necessidade)
   conferidos — o sistema segue a regra atual, aguardando decisão.
 

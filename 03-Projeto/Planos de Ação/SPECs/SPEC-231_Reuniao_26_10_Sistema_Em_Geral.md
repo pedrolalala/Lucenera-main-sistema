@@ -169,6 +169,8 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
 - [x] D5 — (pedido do usuário 27/10) PDF "Pedido em Separação" com a coluna **Marca** (`produtos.marca_id → marcas`;
       fornecedor principal quase nunca preenchido) nos dois sistemas — layouts duplicados, mudar juntos. Separação
       Parcial `c743a2f`, Logística `a7a72c7`.
+- [x] D6 — (pedido do usuário 27/10) rodapé do mesmo PDF com "Separado por" e "Conferido por" (controle interno,
+      duas etapas). Separação Parcial `019dd74`, Logística `b36ecf9`.
 
 ### G. Relatório de movimentação do item (kardex)
 - [ ] G1 — Relatório "Movimentação do item" (Relatórios → Estoque): filtro por **código da peça**, **período** e

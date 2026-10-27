@@ -141,6 +141,24 @@ separação, sem o "orçamento fake" que o Matheus faz hoje na Connect.
   que contaria o Showroom duas vezes (no Estoque e no setor Showroom). **Corrigir a 251 antes de aplicar**:
   reservado negativo tratado como 0 no saldo do Estoque, ou corrigir os dados primeiro (F1).
 
+### Conferência das reservas reais (27/10, autorizada pelo usuário)
+
+- Planilha Produtos da Connect (14/10): nas 302 peças com Showroom vale `Disponível = Total + Showroom − Reservado`.
+  Nas 4.242 sem Showroom o disponível nunca passa do total. Com essa conta o reservado da Connect nunca dá negativo.
+- Reservado real = vendas do sistema (Reserva + Entrega Futura + Ag. separar + Separado em
+  `estoque_saldos_projeto_item`) + reservado da Connect.
+- Com a correção `reservado + showroom`, **300 das 302** peças fecham com a planilha (inclusive 13009, 11830, 12529,
+  12956, 13454 e as 12 com reservado ≥ 0: ex. 11814 Total 4, Showroom 1, Disp 1 → Connect reservado 4).
+- **13653**: tem venda do sistema (1); corrigido = 1. Fecha.
+- **13442** (a da reunião): na planilha Total 44, Showroom 2, Disp 46 → Connect reservado 0. Hoje no banco geral 45,
+  Showroom 1, reservado −2: uma peça passou do Showroom para o geral depois do import e o reservado negativo ficou →
+  disponível 47, contado duas vezes. Corrigido = 0, disponível 46.
+- Fórmula final: `reservado novo = maior(reservado + showroom, vendas do sistema)`. O disponível (geral + showroom −
+  reservado) fica **igual ao de hoje** em todas as peças, menos a 13442 (47 → 46). Muda só onde o Showroom aparece:
+  explícito, e não escondido no reservado.
+- Atenção: tela/view que calcula disponível como `quantidade − reservado` passa a mostrar sem o Showroom; precisa somar
+  `estoque_showroom` (ex.: `vw_consulta_estoque` hoje usa `maior(sistema, reservado_connect)` e ignora o Showroom).
+
 ### F1 — proposta (a confirmar)
 
 - Migration de dados: tirar o Showroom de dentro do reservado (reservado real = reservado gravado + showroom) nas

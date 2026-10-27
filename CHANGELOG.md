@@ -11,6 +11,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Compras → Contas a Pagar (SPEC-231 A2): toda entrada de NF de compra com parcelas gera as duplicatas no Contas a Pagar
   (`boletos` CP, 1 por parcela, `conta_grupo_id` = nota); cancelar a entrada apaga as não pagas e é bloqueado se alguma
   foi paga. Migration 248 APLICADA: as 2 notas de teste da Stella ganharam as 3 duplicatas.
+- Separação Parcial (SPEC-231 D1): "Separar" abre a tela Nova Separação igual à da Logística, já preenchida com código
+  da obra, venda, número da parcial, gestora, solicitante, cliente, telefone e endereço; a separação já entra em
+  "Solicitado" no estoque e o número da entrega na Logística passa a ser o da parcial (ex.: 0002-P2). Sem mudança no banco.
 - SPEC-231 A3 já coberto pela SPEC-232; A4 (centavos de ST/IPI) e A5 (pedido aguardando aprovação na Necessidade)
   conferidos — o sistema segue a regra atual, aguardando decisão.
 

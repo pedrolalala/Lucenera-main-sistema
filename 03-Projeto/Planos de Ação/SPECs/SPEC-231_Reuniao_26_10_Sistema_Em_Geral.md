@@ -77,7 +77,7 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
       Exemplo do teste: Adriana (equipe da Marina) não aparecia para o Pedro.
 
 ### D. Separação Parcial + Logística — editar pedido e ver a entrega
-- [ ] D1 — Ao clicar **Separar** na Separação Parcial, abrir a **mesma tela de solicitação** que as meninas já usam
+- [x] D1 — Ao clicar **Separar** na Separação Parcial, abrir a **mesma tela de solicitação** que as meninas já usam
       (pedido normal / empréstimo / garantia, incluir garantia, "retirar devolução nesta visita", endereço de entrega,
       observações tipo "falar com o eletricista"), para não precisarem abrir uma solicitação nova. Se a venda tiver
       garantia, a solicitação de garantia também sai por aqui.
@@ -85,7 +85,8 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
       entrega).
 - [ ] D3 — **Visualização simples da entrega** dentro da Separação Parcial: status (ex.: finalizado), quem recebeu
       (ex.: porteiro) e data — para não ter que ir na Logística → Finalizados.
-- [ ] D4 — **Código do pedido = código da parcial** (ex.: `0002-P1`) em Logística → Entregas finalizadas e na nova
+- [ ] D4 — (parcial 27/10: separação nova grava `numero_entrega` = número da parcial, ex.: `0002-P2`, que a Logística
+      já mostra no cartão e nas finalizadas; falta o nº da venda ao lado) **Código do pedido = código da parcial** (ex.: `0002-P1`) em Logística → Entregas finalizadas e na nova
       separação, **mais o número da venda** ao lado. Hoje aparece o código do projeto/obra. Assim as meninas filtram
       o cliente, acham a parcial e veem quem recebeu.
 
@@ -190,6 +191,14 @@ Cada bloco é independente: reverter o commit do sistema e, se houver migration,
   separado + estorno 1 (status mantido); duplicatas das 2 notas da Stella geradas; parcela nova gera duplicata e
   atualiza o total; excluir parcela paga é bloqueado, não paga apaga a duplicata.
 - Separação Parcial: avisos "Venda totalmente separada" trocados por "enviada para o estoque separar".
+- D1 (pedido do usuário 27/10): "Separar" abre a tela **Nova Separação** igual à da Logística (componente
+  `NovaSeparacaoModal`, cópia de `lucenera-logistics-b7cd1/src/components/separacao/SeparacaoFormModal.tsx`) com a lista
+  das peças e já preenchida: código da obra, nº da venda, nº da parcial, gestora (equipe do orçamento →
+  Marina Pousa / Thais Gomes / Thairine Silva / Matheus), solicitante (usuário logado), cliente, telefone e endereço.
+  A separação nasce em `material_solicitado` com todos os campos da Logística (tipo, horário, responsável,
+  complexidade, forma de entrega, observações, garantia, retirada de devolução) e os anexos vão para
+  `materiais-separacao`/`separacao_arquivos`. Saiu o campo solto "Data de entrega" ao lado do botão. Gravação testada
+  como usuário logado em ROLLBACK. Separação Parcial publicada.
 - A3: já resolvido pela SPEC-232. A4 e A5: conferidos, aguardando decisão.
 - Migration 248 APLICADA (autorizada pelo usuário). Conferido no banco: 2 triggers em `nota_fiscal_compra_parcelas`,
   funções novas no ar, 3 duplicatas CP da Stella (261000 1/1 293,54; 26102026 1/2 431,03 e 2/2 256,03).

@@ -14,6 +14,8 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Separação Parcial (SPEC-231 D1): "Separar" abre a tela Nova Separação igual à da Logística, já preenchida com código
   da obra, venda, número da parcial, gestora, solicitante, cliente, telefone e endereço; a separação já entra em
   "Solicitado" no estoque e o número da entrega na Logística passa a ser o da parcial (ex.: 0002-P2). Sem mudança no banco.
+- Logística (SPEC-231): botão "Pedido" no cartão da separação exporta o mesmo "Pedido em Separação" (PDF) que a
+  Separação Parcial imprime ao separar. Na Nova Separação o nº da venda aparece só como número (ex.: 0003).
 - SPEC-231 A3 já coberto pela SPEC-232; A4 (centavos de ST/IPI) e A5 (pedido aguardando aprovação na Necessidade)
   conferidos — o sistema segue a regra atual, aguardando decisão.
 

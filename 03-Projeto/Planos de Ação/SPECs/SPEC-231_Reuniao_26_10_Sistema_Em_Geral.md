@@ -199,6 +199,11 @@ Cada bloco é independente: reverter o commit do sistema e, se houver migration,
   complexidade, forma de entrega, observações, garantia, retirada de devolução) e os anexos vão para
   `materiais-separacao`/`separacao_arquivos`. Saiu o campo solto "Data de entrega" ao lado do botão. Gravação testada
   como usuário logado em ROLLBACK. Separação Parcial publicada.
+- Ajustes pedidos pelo usuário (27/10): nº da venda aparece só como número (ex.: `0003`, sem "VENDA-" e sem o
+  orçamento). Logística: botão **Pedido** no cartão da separação exporta o mesmo "Pedido em Separação" que a Separação
+  Parcial imprime ao separar (`src/lib/pedido-separacao.ts`, layout copiado — mudou um, mudar o outro), a qualquer
+  momento, não só na hora de separar. Conferido que o estoque (Matheus) lê orçamento, peças, cliente e empresa — sem
+  mudança no banco. Logística `8e9abac`, Separação Parcial `2232ef0`.
 - A3: já resolvido pela SPEC-232. A4 e A5: conferidos, aguardando decisão.
 - Migration 248 APLICADA (autorizada pelo usuário). Conferido no banco: 2 triggers em `nota_fiscal_compra_parcelas`,
   funções novas no ar, 3 duplicatas CP da Stella (261000 1/1 293,54; 26102026 1/2 431,03 e 2/2 256,03).

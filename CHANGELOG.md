@@ -22,6 +22,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Separação Parcial / Logística (SPEC-231 D2–D4): a parcial mostra o andamento e a entrega (quem recebeu, quando) e
   permite editar data, endereço, responsável, telefone e observações enquanto não foi entregue; na Logística o número
   da venda aparece ao lado da parcial no cartão e nas entregas finalizadas. Sem mudança no banco.
+- Cadastro (SPEC-231 C1): nas abas Reserva / Entrega Futura / Separação / Entregue da peça, todas as equipes veem
+  orçamento, venda, funcionário, cliente, projeto, quantidade e datas; o valor total só a equipe da venda (e
+  admin/gerente). Migration 249 APLICADA (`vw_cadastro_produto_movimentos` sem security_invoker, com o portão de
+  sistemas de orçamentos no WHERE, sem anon). Cadastro `1a5d480`.
 - SPEC-231 A3 já coberto pela SPEC-232; A4 (centavos de ST/IPI) e A5 (pedido aguardando aprovação na Necessidade)
   conferidos — o sistema segue a regra atual, aguardando decisão.
 

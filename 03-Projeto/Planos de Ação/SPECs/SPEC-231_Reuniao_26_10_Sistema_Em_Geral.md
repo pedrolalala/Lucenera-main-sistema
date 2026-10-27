@@ -78,11 +78,20 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
       "Chegou" na linha da peça, nome com ~metade da largura e janela mais larga. O PDF do espelho já era assim.
 
 ### C. Consulta de Produtos / Orçamentos — reservas e entrega futura visíveis para todos
-- [ ] C1 — Na lista de **reservas** e de **entrega futura** de uma peça, **todo mundo vê** (não só a própria equipe —
+- [x] C1 — Na lista de **reservas** e de **entrega futura** de uma peça, **todo mundo vê** (não só a própria equipe —
       SPEC-200): orçamento, número da venda, funcionário, cliente, projeto, quantidade, data da venda e data de entrega.
       **Só o valor (valor total da venda) fica oculto** para quem não é da equipe. Motivo: uma vendedora pede peça
       emprestada à outra ("Marina, preciso de uma lâmpada da venda tal").
       Exemplo do teste: Adriana (equipe da Marina) não aparecia para o Pedro.
+      **27/10 — migration 249 APLICADA (autorizada pelo usuário), Cadastro `1a5d480` publicado.** A tela é o Cadastro → peça → abas Reserva / Entrega
+      Futura / Separação / Entregue (`PecaAbasSetores.tsx`, view `vw_cadastro_produto_movimentos`). Causa: a view era
+      `security_invoker` e a política restritiva `spec200_orcamentos_equipe` apagava orçamento/venda/funcionário/datas
+      das outras equipes. Migration `20261027_249_spec231_reservas_visiveis_todas_equipes`: a view roda como dono com o
+      mesmo portão de sistemas de `orcamentos` no WHERE e `valor_total_orcamento` nulo para outra equipe; sem anon.
+      Dry-run (ROLLBACK): Tricia (Thais) passou de 5 linhas vazias para orçamento/venda/Marina/cliente com valor oculto;
+      Marina e Vinicius veem o valor; anon bloqueado. Cadastro: dica "Valor visível só para a equipe da venda"
+      Conferido no banco depois de aplicar: view `security_invoker=false`, só SELECT para authenticated; Tricia vê
+      as linhas com valor oculto, Marina vê o valor, anon bloqueado.
 
 ### D. Separação Parcial + Logística — editar pedido e ver a entrega
 - [x] D1 — Ao clicar **Separar** na Separação Parcial, abrir a **mesma tela de solicitação** que as meninas já usam
@@ -137,10 +146,11 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
 
 ### Passos manuais do usuário
 - [ ] Aprovar esta SPEC (e a ordem dos blocos) antes de implementar.
-- [ ] Confirmar com o Vinicius: C1 (todos veem as reservas, só valor oculto) e F4 (regra de sinal/adiantamento).
+- [ ] Confirmar com o Vinicius: F4 (regra de sinal/adiantamento). (C1 liberado pelo usuário em 27/10.)
 - [x] Aplicar a migration 248 (A1 + A2) — aplicada 27/10.
 - [x] Publicar a Separação Parcial (textos dos avisos do A1) — `9f64dd6`.
-- [ ] Aplicar as migrations que surgirem (C1, G1) depois do dry-run.
+- [x] Aplicar a migration 249 (C1) — aplicada 27/10; Cadastro publicado.
+- [ ] Aplicar as migrations que surgirem (G1) depois do dry-run.
 - [ ] Teste guiado de novo com a 12822: compra → entrada NF → Contas a Pagar → orçamento → separação → estorno →
       devolução → relatório de movimentação.
 

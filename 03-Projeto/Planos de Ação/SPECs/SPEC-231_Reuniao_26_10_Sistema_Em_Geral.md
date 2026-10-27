@@ -166,6 +166,10 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
 - [ ] F5 — Teste de emissão real: hoje não emite ("não está configurado"). Fazer 1 emissão em **homologação** a partir
       de uma venda de teste para validar o fluxo.
 
+- [x] D5 — (pedido do usuário 27/10) PDF "Pedido em Separação" com a coluna **Marca** (`produtos.marca_id → marcas`;
+      fornecedor principal quase nunca preenchido) nos dois sistemas — layouts duplicados, mudar juntos. Separação
+      Parcial `c743a2f`, Logística `a7a72c7`.
+
 ### G. Relatório de movimentação do item (kardex)
 - [ ] G1 — Relatório "Movimentação do item" (Relatórios → Estoque): filtro por **código da peça**, **período** e
       **setor** (sem setor = todos; ex.: Showroom mostra só o Showroom). Colunas: código, data, histórico (venda nº,

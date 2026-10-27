@@ -36,6 +36,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   Devolução. Migration 250 APLICADA (9 colunas em `notas_fiscais`, RPC `definir_dados_emissao_nota_fiscal`). Edge
   Function `emitir-nota-fiscal` publicada (v5). Vendas `f320f44`, `f162b41`. CFOP de devolução provisório — validar com
   o contador.
+- Separação Parcial / Logística (SPEC-231): o PDF "Pedido em Separação" ganhou a coluna **Marca** (do cadastro da
+  peça) entre Ref. e Descrição, para identificar o item. Separação Parcial `c743a2f`, Logística `a7a72c7`. Sem mudança
+  no banco.
 - SPEC-231 A3 já coberto pela SPEC-232; A4 (centavos de ST/IPI) e A5 (pedido aguardando aprovação na Necessidade)
   conferidos — o sistema segue a regra atual, aguardando decisão.
 

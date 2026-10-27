@@ -89,12 +89,12 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
       (pedido normal / empréstimo / garantia, incluir garantia, "retirar devolução nesta visita", endereço de entrega,
       observações tipo "falar com o eletricista"), para não precisarem abrir uma solicitação nova. Se a venda tiver
       garantia, a solicitação de garantia também sai por aqui.
-- [ ] D2 — Permitir **editar** endereço de entrega e observações de uma separação já enviada (antes de sair para
+- [x] D2 — Permitir **editar** endereço de entrega e observações de uma separação já enviada (antes de sair para
       entrega).
-- [ ] D3 — **Visualização simples da entrega** dentro da Separação Parcial: status (ex.: finalizado), quem recebeu
+- [x] D3 — **Visualização simples da entrega** dentro da Separação Parcial: status (ex.: finalizado), quem recebeu
       (ex.: porteiro) e data — para não ter que ir na Logística → Finalizados.
-- [ ] D4 — (parcial 27/10: separação nova grava `numero_entrega` = número da parcial, ex.: `0002-P2`, que a Logística
-      já mostra no cartão e nas finalizadas; falta o nº da venda ao lado) **Código do pedido = código da parcial** (ex.: `0002-P1`) em Logística → Entregas finalizadas e na nova
+- [x] D4 — (27/10: separação nova grava `numero_entrega` = número da parcial, ex.: `0002-P2`; e "Venda 0003" ao lado
+      no cartão, nas finalizadas e no detalhe) **Código do pedido = código da parcial** (ex.: `0002-P1`) em Logística → Entregas finalizadas e na nova
       separação, **mais o número da venda** ao lado. Hoje aparece o código do projeto/obra. Assim as meninas filtram
       o cliente, acham a parcial e veem quem recebeu.
 
@@ -212,6 +212,15 @@ Cada bloco é independente: reverter o commit do sistema e, se houver migration,
   Parcial imprime ao separar (`src/lib/pedido-separacao.ts`, layout copiado — mudou um, mudar o outro), a qualquer
   momento, não só na hora de separar. Conferido que o estoque (Matheus) lê orçamento, peças, cliente e empresa — sem
   mudança no banco. Logística `8e9abac`, Separação Parcial `2232ef0`.
+- D2/D3 (Separação Parcial `2794bf2`): histórico das parciais com status claro (Solicitado ao estoque, Em separação,
+  Separado, Entregue, Estornado, Recusado pelo estoque) e coluna Entrega (prevista dd/mm, ou entregue dd/mm + quem
+  recebeu). Em "Ver itens", bloco Entrega com previsão, endereço, responsável, telefone, observações e, se entregue,
+  data/hora, recebido por, entregue por e observação da Logística (`entregas_finalizadas`). Botão **Editar** (data,
+  endereço, responsável, telefone, observações) enquanto a parcial não foi entregue nem estornada; grava nos mesmos
+  campos que a Logística lê.
+- D4 (Logística `41625a2`): `separacoes.numero_venda` guarda o nº do orçamento (ORC-0003); o nº da venda vem de
+  `orcamentos.numero_venda` e aparece como "Venda 0003" no cartão da separação, na lista de entregas finalizadas e
+  no detalhe da entrega. Separações antigas (numero_venda em outro formato) ficam sem o rótulo. Sem mudança no banco.
 - A3: já resolvido pela SPEC-232. A4 e A5: conferidos, aguardando decisão.
 - Migration 248 APLICADA (autorizada pelo usuário). Conferido no banco: 2 triggers em `nota_fiscal_compra_parcelas`,
   funções novas no ar, 3 duplicatas CP da Stella (261000 1/1 293,54; 26102026 1/2 431,03 e 2/2 256,03).

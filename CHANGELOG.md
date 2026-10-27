@@ -19,6 +19,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Compras (SPEC-231 B): pedido de compra com condição "Por datas" (data de cada parcela no calendário — pedido da
   Débora); entrada de NF avisa quando peça chega sem vínculo e há cliente esperando (pode registrar mesmo assim);
   espelho da entrada com a quantidade na linha da peça e nome mais largo. Sem mudança no banco.
+- Separação Parcial / Logística (SPEC-231 D2–D4): a parcial mostra o andamento e a entrega (quem recebeu, quando) e
+  permite editar data, endereço, responsável, telefone e observações enquanto não foi entregue; na Logística o número
+  da venda aparece ao lado da parcial no cartão e nas entregas finalizadas. Sem mudança no banco.
 - SPEC-231 A3 já coberto pela SPEC-232; A4 (centavos de ST/IPI) e A5 (pedido aguardando aprovação na Necessidade)
   conferidos — o sistema segue a regra atual, aguardando decisão.
 

@@ -60,14 +60,22 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
       necessidade. Tirar faz a peça voltar à lista e permite comprar em dobro. **Aguardando decisão do usuário.**
 
 ### B. Compras — pedido e entrada de NF
-- [ ] B1 — Condição de pagamento do pedido de compra: além de "30/60 dias", permitir **digitar a data** de cada
+- [x] B1 — Condição de pagamento do pedido de compra: além de "30/60 dias", permitir **digitar a data** de cada
       parcela (pedido da Débora). Motivo: é previsão — se a entrega é em 15 dias e a condição é 30 da nota, a 1ª parcela
       é ~45 dias, não 30 a partir de hoje. Hoje a data só existe na entrada da nota (`CondicaoPagamentoCampo.tsx`).
-- [ ] B2 — Entrada de NF: **alerta ao salvar** quando há item sem vínculo (necessidade/cliente). No teste o Pedro
+      **Feito 27/10:** opção "Por datas" (calendário por parcela, + Parcela / tirar) no Novo Pedido e no Editar
+      Pedido; grava "dd/mm/aaaa, dd/mm/aaaa" em `condicoes_pagamento`, que `_lucenera_datas_parcelas` já lia
+      (conferido no banco). Valor em partes iguais. Sem mudança no banco.
+- [x] B2 — Entrada de NF: **alerta ao salvar** quando há item sem vínculo (necessidade/cliente). No teste o Pedro
       salvou sem vincular e o estoque ficou somado errado (32 + 48 = 80 em vez de abater a necessidade). Não travar —
       só avisar e pedir confirmação. (Uso principal: Débora.)
-- [ ] B3 — Entrada de NF, layout da lista de itens: tirar a parte de baixo que sobra, trazer a quantidade para a
+      **Feito 27/10:** se parte do que chegou não foi vinculada e há cliente em entrega futura da peça, abre aviso
+      com a peça, a quantidade sem vínculo e quem está esperando (venda, L, quantidade): "Voltar e vincular" ou
+      "Registrar mesmo assim".
+- [x] B3 — Entrada de NF, layout da lista de itens: tirar a parte de baixo que sobra, trazer a quantidade para a
       linha do item e **alargar a coluna do nome** da peça.
+      **Feito 27/10:** era a tela do **Espelho da entrada** (o "chegaram X" embaixo do nome). Agora coluna
+      "Chegou" na linha da peça, nome com ~metade da largura e janela mais larga. O PDF do espelho já era assim.
 
 ### C. Consulta de Produtos / Orçamentos — reservas e entrega futura visíveis para todos
 - [ ] C1 — Na lista de **reservas** e de **entrega futura** de uma peça, **todo mundo vê** (não só a própria equipe —

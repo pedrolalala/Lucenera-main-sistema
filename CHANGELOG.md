@@ -16,6 +16,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   "Solicitado" no estoque e o número da entrega na Logística passa a ser o da parcial (ex.: 0002-P2). Sem mudança no banco.
 - Logística (SPEC-231): botão "Pedido" no cartão da separação exporta o mesmo "Pedido em Separação" (PDF) que a
   Separação Parcial imprime ao separar. Na Nova Separação o nº da venda aparece só como número (ex.: 0003).
+- Compras (SPEC-231 B): pedido de compra com condição "Por datas" (data de cada parcela no calendário — pedido da
+  Débora); entrada de NF avisa quando peça chega sem vínculo e há cliente esperando (pode registrar mesmo assim);
+  espelho da entrada com a quantidade na linha da peça e nome mais largo. Sem mudança no banco.
 - SPEC-231 A3 já coberto pela SPEC-232; A4 (centavos de ST/IPI) e A5 (pedido aguardando aprovação na Necessidade)
   conferidos — o sistema segue a regra atual, aguardando decisão.
 

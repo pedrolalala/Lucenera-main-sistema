@@ -4,6 +4,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-27
 
+- SPEC-234 criada (reunião 27/10 com o Vinicius): regra de cada Tipo de Operação do orçamento (responde a matriz da
+  SPEC-233; tira RETORNO/TRANSFERENCIA/OUTRAS ENTRADAS/ACERTO CITEL/INVENTARIO, move conserto/garantia/dev. compra
+  para SAC), NF de remessa e NF de venda parcial a partir da separação, setores Empréstimo/Estoque Garantia/Casa Cor,
+  acesso do Matheus/Vitória à Separação Parcial e disponível somando o Showroom. Achado: 290 peças com reservado
+  negativo (= Showroom, herança do import Connect), o que afeta o saldo da migration 251 (ainda não aplicada).
 - Separação Parcial / Logística (SPEC-231 A1): pedir toda a venda na Separação Parcial **não marca mais as peças como
   Separado** — vai para a aba "Solicitado" do estoque (`material_solicitado`) e a entrega continua sendo criada. Separado
   só quando o estoque marca na Logística; voltar o status devolve as peças para "Aguardando separar". Estorno não muda o

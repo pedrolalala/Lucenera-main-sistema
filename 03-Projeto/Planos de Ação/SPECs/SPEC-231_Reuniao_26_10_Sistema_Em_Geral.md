@@ -108,14 +108,22 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
       o cliente, acham a parcial e veem quem recebeu.
 
 ### E. Contas a Pagar / Contas a Receber
-- [ ] E1 — Busca de cliente/fornecedor com **duplo clique** abrindo uma tela de pesquisa (como no sistema antigo),
+- [x] E1 — Busca de cliente/fornecedor com **duplo clique** abrindo uma tela de pesquisa (como no sistema antigo),
       em vez da lista que abre para baixo. Selecionou → filtra **só aquele** cadastro.
       - Contas a Receber: código do projeto, nome do cliente (razão social), nome do projeto, CPF/CNPJ.
       - Contas a Pagar: nome fantasia (se tiver), razão social, CNPJ.
       Motivo: vários cadastros com o mesmo nome (ex.: "Estância Santa Clara" com CNPJs diferentes; cliente com 2–3
       casas/projetos, caso do André; vários "Vinícius").
-- [ ] E2 — Contas a Pagar: **juntar "Notas Fiscais" (registrar NF avulsa) e "Cadastrar Duplicatas" em uma só**
+      **Feito 27/10:** campo "Pessoa" de Consultar Duplicatas e Contas em Aberto — digitar continua filtrando pelo nome;
+      dois cliques (ou a lupa) abrem a busca do cadastro (`BuscaPessoaDialog`). Receber: linhas por projeto (código,
+      razão social, nome do projeto, CPF/CNPJ) e uma linha "(todos)" por cliente; Pagar: fornecedores (fantasia,
+      razão social, CNPJ). CPF/CNPJ lido de `cpf_cnpj`, `cnpj` ou `cpf`. Escolhido vira etiqueta "Só: ..." com X.
+      Filtro: projeto → `orcamentos.projeto_id` (duplicatas) / `negociacoes.projeto_id` (em aberto); cliente/fornecedor
+      → `contato_id` ou `orcamentos.cliente_id`; duplicata antiga sem vínculo casa pelo nome. Sem mudança no banco.
+- [x] E2 — Contas a Pagar: **juntar "Notas Fiscais" (registrar NF avulsa) e "Cadastrar Duplicatas" em uma só**
       ("Cadastrar duplicata"), com campo de número da nota e demais dados da NF. Nome continua "duplicata" (não "boleto").
+      **Feito 27/10 (Pagar e Receber):** menu "Notas Fiscais" saiu e a rota leva ao Cadastrar Duplicata (campo NF). A
+      tela gravava em `notas_fiscais` (tabela das notas de venda) e não tinha nenhum registro — nada perdido.
 - [ ] E3 — Consultar Duplicatas: trazer o **histórico** das duplicatas em aberto da planilha antiga (Connect) para poder
       dar baixa no sistema novo — sem vínculo de venda, mas com o número da venda da planilha. Pedro vai avaliar como
       (ver SPEC-215, que já casa por `num_nota`).

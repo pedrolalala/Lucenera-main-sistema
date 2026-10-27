@@ -26,6 +26,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
   orçamento, venda, funcionário, cliente, projeto, quantidade e datas; o valor total só a equipe da venda (e
   admin/gerente). Migration 249 APLICADA (`vw_cadastro_produto_movimentos` sem security_invoker, com o portão de
   sistemas de orçamentos no WHERE, sem anon). Cadastro `1a5d480`.
+- Contas a Pagar / Receber (SPEC-231 E1/E2): dois cliques no campo "Pessoa" abrem a busca do cadastro (Receber:
+  projeto, razão social, CPF/CNPJ; Pagar: fantasia, razão social, CNPJ) e filtram só o escolhido; saiu o menu "Notas
+  Fiscais" (registrar NF avulsa) — a duplicata já leva o nº da NF. Sem mudança no banco.
 - SPEC-231 A3 já coberto pela SPEC-232; A4 (centavos de ST/IPI) e A5 (pedido aguardando aprovação na Necessidade)
   conferidos — o sistema segue a regra atual, aguardando decisão.
 

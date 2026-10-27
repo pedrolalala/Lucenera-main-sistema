@@ -29,6 +29,13 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Contas a Pagar / Receber (SPEC-231 E1/E2): dois cliques no campo "Pessoa" abrem a busca do cadastro (Receber:
   projeto, razão social, CPF/CNPJ; Pagar: fantasia, razão social, CNPJ) e filtram só o escolhido; saiu o menu "Notas
   Fiscais" (registrar NF avulsa) — a duplicata já leva o nº da NF. Sem mudança no banco.
+- Vendas → Nota Fiscal (SPEC-231 F1–F3): número, série e data não se digitam mais (vêm da Focus/SEFAZ); o faturamento
+  pode ajustar CPF/CNPJ e IE do destinatário, desconto, frete (CIF/FOB/terceiros/sem), transportadora e dados
+  adicionais. Devolução aprovada aparece na lista e emite **nota de devolução** (entrada, finalidade 4, CFOP 1202/1411,
+  referenciando a chave da NF de venda original) — só documento fiscal; crédito e estoque continuam no orçamento de
+  Devolução. Migration 250 APLICADA (9 colunas em `notas_fiscais`, RPC `definir_dados_emissao_nota_fiscal`). Edge
+  Function `emitir-nota-fiscal` publicada (v5). Vendas `f320f44`, `f162b41`. CFOP de devolução provisório — validar com
+  o contador.
 - SPEC-231 A3 já coberto pela SPEC-232; A4 (centavos de ST/IPI) e A5 (pedido aguardando aprovação na Necessidade)
   conferidos — o sistema segue a regra atual, aguardando decisão.
 

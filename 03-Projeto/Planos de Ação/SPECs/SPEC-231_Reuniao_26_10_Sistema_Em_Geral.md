@@ -131,16 +131,38 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
       só aparece quando houver algo pago — confirmar com ele.
 
 ### F. Vendas — emissão de NF (Focus NFe, SPEC-154)
-- [ ] F1 — Emissão de NF **só em Vendas** (Contas a Receber não emite). Tudo cai em Vendas com a nomenclatura e a
+- [x] F1 — (venda e devolução; remessas ficam para a SPEC-233) Emissão de NF **só em Vendas** (Contas a Receber não emite). Tudo cai em Vendas com a nomenclatura e a
       **configuração fiscal do tipo**: venda, devolução, remessa em garantia, simples remessa. Remessa em garantia /
       simples remessa **não geram financeiro**.
-- [ ] F2 — Número, série e data de emissão **automáticos e travados** (não digitáveis). Tirar os campos que não
+- [x] F2 — Número, série e data de emissão **automáticos e travados** (não digitáveis). Tirar os campos que não
       importam (descrição solta etc.).
-- [ ] F3 — Espelho da nota já vem **100% preenchido** com o que o sistema tem (cliente, CPF/CNPJ, IE, itens, impostos,
+- [x] F3 — Espelho da nota já vem **100% preenchido** com o que o sistema tem (cliente, CPF/CNPJ, IE, itens, impostos,
       faturamento). Pode editar: CPF/CNPJ e IE (quando vieram errados), **dados adicionais**, **transportadora**,
       **frete CIF/FOB**, valor, desconto e data do boleto.
 - [ ] F4 — Valor dos boletos tem que fechar com o valor da nota (nota de 10.000 à vista → boleto de 10.000). Sinal pago
       antes entra como parcela de adiantamento + boleto do restante, nunca um boleto menor solto.
+      **F2/F3 — 27/10, NO AR (migration 250 aplicada, Edge Function v5, Vendas `f320f44`):**
+      tela "Emitir Nota Fiscal" do Vendas sem número/série/data/tipo/perfil/fornecedor (número e série vêm da
+      Focus na autorização; rascunho grava "A DEFINIR"); mostra emissão de hoje e emitente. Campos ajustáveis:
+      CPF/CNPJ e IE do destinatário (pré-preenchidos do cliente; limpos ao trocar o pagador), desconto (R$), frete
+      (CIF/FOB/terceiros/sem frete), transportadora + CNPJ, dados adicionais. Migration
+      `20261027_250_spec231_nf_emissao_dados_editaveis` (9 colunas em `notas_fiscais`, `registrar_nota_fiscal_parcial`
+      mesma assinatura com número opcional, RPC `definir_dados_emissao_nota_fiscal` com a permissão
+      `vendas/emitir_nota_fiscal`); dry-run ok (rascunho sem número, dados gravados, frete inválido recusado, estoque
+      barrado). Edge Function `emitir-nota-fiscal` + `montar-payload-nfe`: manda `informacoes_adicionais_contribuinte`,
+      `modalidade_frete`, `nome_/cnpj_transportador`, `valor_desconto` (rateado nos itens), IE corrigida (ISENTO =
+      indicador 2) e `formas_pagamento` com o valor líquido; `deno check` ok.
+      Ordem para publicar: 1) migration 250, 2) deploy da Edge Function, 3) push do Vendas.
+      **F1 — 27/10, especificação do usuário (nota de venda e de devolução) + decisões:** a devolução continua
+      nascendo no orçamento de Devolução (que já gera o crédito e devolve as peças) e a nota de devolução é só o
+      documento fiscal; a nota de venda NÃO baixa estoque (continua na entrega, SPEC-232); usar o crédito como saldo
+      numa compra nova / estornar fica para SPEC própria. Feito (junto da migration 250, no ar):
+      `notas_fiscais.tipo_nota` (venda|devolucao, definido pelo orçamento) e `chave_nfe_referenciada`;
+      `registrar_nota_fiscal_parcial` aceita devolução aprovada; Vendas lista devoluções aprovadas com a venda original
+      (venda_origem_id ou a venda dos itens devolvidos), mostra empresa/projeto/cliente da venda e a chave da NF de
+      venda (pré-preenchida se houver nota autorizada); Focus: entrada, finalidade 4, notas_referenciadas, CFOP
+      1202/1411 (validar com contador), sem pagamento, ref `DEV-<orçamento>`; espelho igual. Vendas `f162b41`.
+      Remessa em garantia / simples remessa: etapa futura (SPEC-233). F4 depende do Vinicius; F5 da conta Focus.
 - [ ] F5 — Teste de emissão real: hoje não emite ("não está configurado"). Fazer 1 emissão em **homologação** a partir
       de uma venda de teste para validar o fluxo.
 
@@ -158,6 +180,7 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
 - [x] Aplicar a migration 248 (A1 + A2) — aplicada 27/10.
 - [x] Publicar a Separação Parcial (textos dos avisos do A1) — `9f64dd6`.
 - [x] Aplicar a migration 249 (C1) — aplicada 27/10; Cadastro publicado.
+- [x] Aplicar a migration 250 (F1–F3), publicar a Edge Function emitir-nota-fiscal e fazer push do Vendas — feito 27/10 (Edge v5).
 - [ ] Aplicar as migrations que surgirem (G1) depois do dry-run.
 - [ ] Teste guiado de novo com a 12822: compra → entrada NF → Contas a Pagar → orçamento → separação → estorno →
       devolução → relatório de movimentação.

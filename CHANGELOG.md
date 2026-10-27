@@ -4,6 +4,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-27
 
+- SPEC-235 criada (reunião 27/10, parte 2): Separação Parcial vira "Venda Parcial"; ajuste reserva ⇄ entrega futura
+  dentro da mesma venda só para Matheus/admin; peça desativada ou fora de linha sem saldo não entra no orçamento;
+  selos Fora de linha/Lançamento; fornecedor na peça; busca de pessoa por duplo clique no orçamento; NF postergada.
+  SPEC-234 F: regra provisória — disponível = geral + Showroom − reservado, somado na hora (confirmar com o Vinicius).
 - SPEC-234 criada (reunião 27/10 com o Vinicius): regra de cada Tipo de Operação do orçamento (responde a matriz da
   SPEC-233; tira RETORNO/TRANSFERENCIA/OUTRAS ENTRADAS/ACERTO CITEL/INVENTARIO, move conserto/garantia/dev. compra
   para SAC), NF de remessa e NF de venda parcial a partir da separação, setores Empréstimo/Estoque Garantia/Casa Cor,

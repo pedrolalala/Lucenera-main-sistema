@@ -122,6 +122,15 @@ separação, sem o "orçamento fake" que o Matheus faz hoje na Connect.
   a do Showroom, mas **antes** ela é movimentada do Showroom para o estoque geral (Movimentação de Peças) e só depois
   sai/é reservada. Ninguém vende/reserva direto do Showroom.
 
+- **Regra provisória registrada (usuário, 27/10, até falar com o Vinicius):** o disponível soma o Showroom como a
+  Connect faz — Estoque geral e Showroom são dois saldos separados (cada peça está num lugar só) e a soma é feita **na
+  hora de mostrar**: `Disponível = Estoque geral + Showroom − Reservado`. Assim mover do Showroom para o geral não muda
+  o disponível e não há duplicidade. A duplicidade da 13442 (47 em vez de 46) é erro do nosso import, que gravou o
+  Showroom dentro do reservado (reserva negativa congelada) — ver "Conferência das reservas reais".
+- **Em aberto com o Vinicius:** se o Showroom deve mesmo contar no disponível, já que a peça exposta nem sempre pode ir
+  para o cliente (exposta, com sinal de uso, ou não pode sair de lá). Qualquer que seja a decisão, a correção do banco
+  (F1) é a mesma; só muda se a conta inclui ou não o `estoque_showroom`.
+
 ### G. Inventário
 
 - Inventário sai do orçamento e vira um sistema próprio de balanço de peças. SPEC separada.

@@ -2,6 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-27
+
+- Separação Parcial / Logística (SPEC-231 A1): pedir toda a venda na Separação Parcial **não marca mais as peças como
+  Separado** — vai para a aba "Solicitado" do estoque (`material_solicitado`) e a entrega continua sendo criada. Separado
+  só quando o estoque marca na Logística; voltar o status devolve as peças para "Aguardando separar". Estorno não muda o
+  status. Migration 248 APLICADA. Separação Parcial `9f64dd6` (textos dos avisos).
+- Compras → Contas a Pagar (SPEC-231 A2): toda entrada de NF de compra com parcelas gera as duplicatas no Contas a Pagar
+  (`boletos` CP, 1 por parcela, `conta_grupo_id` = nota); cancelar a entrada apaga as não pagas e é bloqueado se alguma
+  foi paga. Migration 248 APLICADA: as 2 notas de teste da Stella ganharam as 3 duplicatas.
+- SPEC-231 A3 já coberto pela SPEC-232; A4 (centavos de ST/IPI) e A5 (pedido aguardando aprovação na Necessidade)
+  conferidos — o sistema segue a regra atual, aguardando decisão.
+
 ## 2026-10-26
 
 - Estoque (SPEC-232): **venda feita no sistema nunca vira "Reserva sem venda (herança Connect)"** (regra do usuário).

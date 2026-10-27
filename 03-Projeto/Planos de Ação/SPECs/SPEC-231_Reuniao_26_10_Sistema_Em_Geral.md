@@ -1,0 +1,203 @@
+---
+titulo: "SPEC-231 — Reunião 26/10 (sistema em geral): Compras, Entrada NF → Contas a Pagar, Separação, Entregas, Contas a Pagar/Receber, Emissão de NF e relatório de movimentação"
+status: pendente
+data_ultima_modificacao: 2026-10-27
+sistemas_envolvidos:
+  - Compras (compras-lucenera-3o23t98ee) — pedido de compra e entrada de NF
+  - Contas a Pagar / Contas a Receber (retorno-bancario-bradesco-5392a, 2 modos — SPEC-225)
+  - Separação Parcial (separacao-parcial)
+  - Logística (lucenera-logistics-b7cd1) — entregas finalizadas
+  - Vendas (vendas-lucenera) — emissão de NF
+  - Orçamentos (gestao-financeira-clone-544cb (1)) / Consulta de Produtos — reservas e entrega futura
+  - Relatórios (dashboard-lucenera-b02z85wa3) — movimentação do item
+  - Banco (estoque/reservas, notas_fiscais, contas a pagar)
+---
+
+# SPEC-231 — Reunião 26/10 (sistema em geral)
+
+> Fonte: `02-Reunioes/38. Lucenera (vinicius) - 26.10.2026_ sistema em geral/Reunião.01` (teste guiado com o Vinicius,
+> peça de teste **12822**). Transcrição automática: nomes podem estar trocados ("herança" = Reserva sem venda / herança Connect,
+> SPEC-232; "Pontas Apagar" = Contas a Pagar; "Citel" = sistema antigo de busca; "7886" = pedido 1786). Quem decide status de separação é o **Sérgio** (não o Mateus).
+>
+> Itens já cobertos por outra SPEC e **fora** desta:
+> - preço do orçamento ≠ consulta (12822: 42,95 × 35,79) → **SPEC-230** (migration 246 aplicada; na reunião o
+>   orçamento da Marina já saiu certo, 35,79);
+> - Showroom "pegando o campo antigo" no empréstimo → corrigido durante a reunião (conferir no teste).
+
+## Checklist de Ação
+
+Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ordem sugerida: **A (bugs) → B → C → D → E → F → G**.
+
+### A. Bugs que apareceram no teste (prioridade)
+- [x] A1 — Separação Parcial: peças iam para "Separado" sozinhas. **Causa (27/10):** não era o estorno. Quando a
+      separação pede tudo o que falta da venda, `finalizar_separacao_parcial_pronta` marcava a separação como
+      `'Pronto'` e o trigger `sync_separado_ao_ficar_pronto` passava tudo de "Aguardando separar" para "Separado"
+      (ORC-0002 em 26/10 16:03:00, no mesmo segundo da criação; o estorno foi às 16:05). Correção (migration 248):
+      vai para `'material_solicitado'` (aba Solicitado do estoque) e a RPC cria a entrega; "Separado" só quando o
+      estoque marca `separado` na Logística; se voltar para Solicitado/Em separação, as peças voltam para
+      "Aguardando separar". Estorno mantém o status (testado em ROLLBACK). Separação Parcial: textos dos avisos.
+- [x] A2 — Entrada de NF com financeiro não gerava Contas a Pagar. **Causa (27/10):** o sistema Contas a Pagar lê
+      `boletos` (`tipo_operacao = 'CP'`) e nada criava esses registros — as parcelas da nota
+      (`nota_fiscal_compra_parcelas`) só iam para a `vw_contas_pagar_pedidos_compra` (painel financeiro). Correção
+      (migration 248): trigger em `nota_fiscal_compra_parcelas` gera 1 duplicata por parcela (fornecedor, NF, valor,
+      vencimento, apropriação = plano de contas da nota, referência = pedido; `conta_grupo_id` = id da nota,
+      `nosso_numero` = `NFC-<id da parcela>`); cancelar a entrada apaga as não pagas e é bloqueado se alguma já foi
+      paga. As 2 notas da Stella (26102026 em 2x, 261000 em 1x) ganham as 3 duplicatas. Nenhum painel lê `boletos`,
+      então não conta em dobro.
+- [x] A3 — "Herança" da 12822 subiu de 32 para 35 depois da devolução → resolvido pela **SPEC-232** (26/10,
+      migration 247 aplicada: entregar/devolver/re-reservar não mexem mais na herança da Connect; 12822 acertada).
+- [ ] A4 — Pedido de compra: valores de ST e IPI com diferença de centavos em relação à conta na calculadora
+      (ST 175,01 × 175,20; IPI 31,25 × 31,20). Conferir a base de cálculo e o arredondamento (arredondar por item
+      ou no total? aplicar desconto antes?) em `services/pedido-compra.ts`, `EditarPedidoDialog.tsx` e no PDF.
+      **Conferido 27/10 (pedido 1787, 40 × R$ 12,02 = R$ 480,80; peça com ST 36,4% e IPI 6,5%):** o sistema calcula
+      o imposto sobre o total do item — ST 175,01 e IPI 31,25, que é como a NF-e faz. A calculadora arredondou o
+      imposto por peça antes (4,38 × 40 = 175,20; 0,78 × 40 = 31,20). **Aguardando decisão do usuário** se muda.
+- [ ] A5 — Necessidade/Compras: informação de pedidos **cancelados** ou **ainda não aprovados** (ex.: pedido 7886)
+      não pode aparecer como compra em andamento / previsão de entrada. Só pedido aprovado conta. Conferir também que
+      reserva 0 não aparece mais (Pedro já tirou "informações sobrando" — validar).
+      **Conferido 27/10:** cancelado já não entra em nenhuma view da Necessidade. Pedido **aguardando aprovação**
+      (o 1786 estava assim na hora) conta como "em pedido aberto" (`vw_necessidade_compra_pedidos_abertos`) e abate a
+      necessidade. Tirar faz a peça voltar à lista e permite comprar em dobro. **Aguardando decisão do usuário.**
+
+### B. Compras — pedido e entrada de NF
+- [ ] B1 — Condição de pagamento do pedido de compra: além de "30/60 dias", permitir **digitar a data** de cada
+      parcela (pedido da Débora). Motivo: é previsão — se a entrega é em 15 dias e a condição é 30 da nota, a 1ª parcela
+      é ~45 dias, não 30 a partir de hoje. Hoje a data só existe na entrada da nota (`CondicaoPagamentoCampo.tsx`).
+- [ ] B2 — Entrada de NF: **alerta ao salvar** quando há item sem vínculo (necessidade/cliente). No teste o Pedro
+      salvou sem vincular e o estoque ficou somado errado (32 + 48 = 80 em vez de abater a necessidade). Não travar —
+      só avisar e pedir confirmação. (Uso principal: Débora.)
+- [ ] B3 — Entrada de NF, layout da lista de itens: tirar a parte de baixo que sobra, trazer a quantidade para a
+      linha do item e **alargar a coluna do nome** da peça.
+
+### C. Consulta de Produtos / Orçamentos — reservas e entrega futura visíveis para todos
+- [ ] C1 — Na lista de **reservas** e de **entrega futura** de uma peça, **todo mundo vê** (não só a própria equipe —
+      SPEC-200): orçamento, número da venda, funcionário, cliente, projeto, quantidade, data da venda e data de entrega.
+      **Só o valor (valor total da venda) fica oculto** para quem não é da equipe. Motivo: uma vendedora pede peça
+      emprestada à outra ("Marina, preciso de uma lâmpada da venda tal").
+      Exemplo do teste: Adriana (equipe da Marina) não aparecia para o Pedro.
+
+### D. Separação Parcial + Logística — editar pedido e ver a entrega
+- [ ] D1 — Ao clicar **Separar** na Separação Parcial, abrir a **mesma tela de solicitação** que as meninas já usam
+      (pedido normal / empréstimo / garantia, incluir garantia, "retirar devolução nesta visita", endereço de entrega,
+      observações tipo "falar com o eletricista"), para não precisarem abrir uma solicitação nova. Se a venda tiver
+      garantia, a solicitação de garantia também sai por aqui.
+- [ ] D2 — Permitir **editar** endereço de entrega e observações de uma separação já enviada (antes de sair para
+      entrega).
+- [ ] D3 — **Visualização simples da entrega** dentro da Separação Parcial: status (ex.: finalizado), quem recebeu
+      (ex.: porteiro) e data — para não ter que ir na Logística → Finalizados.
+- [ ] D4 — **Código do pedido = código da parcial** (ex.: `0002-P1`) em Logística → Entregas finalizadas e na nova
+      separação, **mais o número da venda** ao lado. Hoje aparece o código do projeto/obra. Assim as meninas filtram
+      o cliente, acham a parcial e veem quem recebeu.
+
+### E. Contas a Pagar / Contas a Receber
+- [ ] E1 — Busca de cliente/fornecedor com **duplo clique** abrindo uma tela de pesquisa (como no sistema antigo),
+      em vez da lista que abre para baixo. Selecionou → filtra **só aquele** cadastro.
+      - Contas a Receber: código do projeto, nome do cliente (razão social), nome do projeto, CPF/CNPJ.
+      - Contas a Pagar: nome fantasia (se tiver), razão social, CNPJ.
+      Motivo: vários cadastros com o mesmo nome (ex.: "Estância Santa Clara" com CNPJs diferentes; cliente com 2–3
+      casas/projetos, caso do André; vários "Vinícius").
+- [ ] E2 — Contas a Pagar: **juntar "Notas Fiscais" (registrar NF avulsa) e "Cadastrar Duplicatas" em uma só**
+      ("Cadastrar duplicata"), com campo de número da nota e demais dados da NF. Nome continua "duplicata" (não "boleto").
+- [ ] E3 — Consultar Duplicatas: trazer o **histórico** das duplicatas em aberto da planilha antiga (Connect) para poder
+      dar baixa no sistema novo — sem vínculo de venda, mas com o número da venda da planilha. Pedro vai avaliar como
+      (ver SPEC-215, que já casa por `num_nota`).
+- [ ] E4 — Conferir os filtros de data/situação das telas (Vinicius disse que "não mudou nada"); o filtro de pagamento
+      só aparece quando houver algo pago — confirmar com ele.
+
+### F. Vendas — emissão de NF (Focus NFe, SPEC-154)
+- [ ] F1 — Emissão de NF **só em Vendas** (Contas a Receber não emite). Tudo cai em Vendas com a nomenclatura e a
+      **configuração fiscal do tipo**: venda, devolução, remessa em garantia, simples remessa. Remessa em garantia /
+      simples remessa **não geram financeiro**.
+- [ ] F2 — Número, série e data de emissão **automáticos e travados** (não digitáveis). Tirar os campos que não
+      importam (descrição solta etc.).
+- [ ] F3 — Espelho da nota já vem **100% preenchido** com o que o sistema tem (cliente, CPF/CNPJ, IE, itens, impostos,
+      faturamento). Pode editar: CPF/CNPJ e IE (quando vieram errados), **dados adicionais**, **transportadora**,
+      **frete CIF/FOB**, valor, desconto e data do boleto.
+- [ ] F4 — Valor dos boletos tem que fechar com o valor da nota (nota de 10.000 à vista → boleto de 10.000). Sinal pago
+      antes entra como parcela de adiantamento + boleto do restante, nunca um boleto menor solto.
+- [ ] F5 — Teste de emissão real: hoje não emite ("não está configurado"). Fazer 1 emissão em **homologação** a partir
+      de uma venda de teste para validar o fluxo.
+
+### G. Relatório de movimentação do item (kardex)
+- [ ] G1 — Relatório "Movimentação do item" (Relatórios → Estoque): filtro por **código da peça**, **período** e
+      **setor** (sem setor = todos; ex.: Showroom mostra só o Showroom). Colunas: código, data, histórico (venda nº,
+      NF nº, devolução...), tipo (E entrada / S saída / T transferência), quantidade, **saldo após** e setor.
+      É o que acontece no estoque da empresa — **não** tem a ver com entregue ao cliente (8 vendidas podem estar
+      ainda reservadas no estoque). Fonte: schema `auditoria` / movimentações (SPEC-206/224) — conferir se a view já
+      existe antes de criar.
+
+### Passos manuais do usuário
+- [ ] Aprovar esta SPEC (e a ordem dos blocos) antes de implementar.
+- [ ] Confirmar com o Vinicius: C1 (todos veem as reservas, só valor oculto) e F4 (regra de sinal/adiantamento).
+- [x] Aplicar a migration 248 (A1 + A2) — aplicada 27/10.
+- [x] Publicar a Separação Parcial (textos dos avisos do A1) — `9f64dd6`.
+- [ ] Aplicar as migrations que surgirem (C1, G1) depois do dry-run.
+- [ ] Teste guiado de novo com a 12822: compra → entrada NF → Contas a Pagar → orçamento → separação → estorno →
+      devolução → relatório de movimentação.
+
+## Objetivo
+
+Corrigir os erros vistos no teste de ponta a ponta de 26/10 (estorno muda status, entrada de NF não gera Contas a
+Pagar, reserva muda na devolução, centavos de ST/IPI) e fazer os ajustes pedidos para o uso diário em Compras,
+Separação, Contas a Pagar/Receber, emissão de NF e um relatório de movimentação do item.
+
+## Decisões aprovadas (na reunião)
+
+- Cadastro de fornecedor/cliente é **só no CRM** (todo mundo tem acesso) — sem cadastro novo em outros sistemas.
+- Status de separação é responsabilidade do Sérgio; estorno não altera status.
+- Reservas/entrega futura: informação visível a todos, valor oculto.
+- Toda entrada de NF de mercadoria com financeiro gera Contas a Pagar.
+- Emissão de NF centralizada em Vendas, por tipo de operação com configuração fiscal própria.
+- Contas a Pagar: um único "Cadastrar duplicata" (sai o registrar NF avulsa).
+- Relatório de movimentação do item é do estoque da empresa, independente de entrega.
+
+## Definição da SPEC
+
+### Análise de ecossistema
+| Pergunta | Resposta |
+|---|---|
+| Tabelas centrais | `projeto_itens`, `projeto_parcelas`, `contatos`, `produtos` (só leitura; custo continua só em `vw_produtos_custo`), notas fiscais de compra/venda, reservas/estoque por setor |
+| Sistemas | Compras, Contas a Pagar/Receber, Separação Parcial, Logística, Vendas, Orçamentos, Relatórios |
+| Permissão | C1 mexe na regra da SPEC-200 (equipe) — a linha fica visível a todos, a coluna de valor continua com o filtro de equipe. Qualquer view nova com `(SELECT pode_acessar_sistema(...))`, sem grant para `anon` |
+| Dado duplicado | Código da parcial e nº da venda devem vir por relacionamento, não copiados para a entrega |
+| `AI_DB_CONTEXT.md` | Atualizar em Separação Parcial (A1), Compras (A2/B1) e Relatórios (G1) se mudar banco |
+
+### Critérios de aceite
+- A1: estornar parte de uma separação em "Aguardando separar" → status continua "Aguardando separar"; em "Separado"
+  → continua "Separado" com quantidade atualizada; reimpressão mostra as quantidades certas.
+- A2: entrada de NF com 1 parcela e com 3 parcelas → duplicatas aparecem no Contas a Pagar com valor e vencimento da
+  entrada.
+- A3: devolução de N peças só altera o setor de origem escolhido; reserva de outro pedido não muda.
+- A4: ST e IPI do pedido batem com a conta manual (diferença máxima de arredondamento final: R$ 0,01).
+- C1: usuária da equipe A vê reserva de vendedora da equipe B com todos os campos, sem o valor.
+- D4: entrega finalizada mostra `0002-P1` + nº da venda.
+- E1: com dois clientes de mesmo nome, duplo clique → escolher um → lista só as duplicatas dele.
+- F2/F3: abrir emissão a partir de uma venda → número/série travados, espelho preenchido, transportadora/CIF-FOB e
+  dados adicionais editáveis.
+- G1: 12822 no período do teste mostra as entradas/saídas do dia 26/10 com saldo correndo e filtro de setor.
+
+### Rollback
+Cada bloco é independente: reverter o commit do sistema e, se houver migration, o `rollback.sql` dela.
+
+## Realizado
+
+### 2026-10-27
+
+- A1/A2: diagnóstico pelo `auditoria.eventos` e `estoque_movimentos_projeto_item` do teste de 26/10; migration
+  `20261027_248_spec231_separacao_status_e_nf_compra_contas_pagar` (up + rollback) gerada a partir do
+  `pg_get_functiondef` atual. Dry-run em ROLLBACK: separação de teste Pendente → Solicitado (continua aguardando) →
+  estorno 1 (status mantido) → estoque marca separado (3 em Separado) → volta Em separação (volta para aguardando) →
+  separado + estorno 1 (status mantido); duplicatas das 2 notas da Stella geradas; parcela nova gera duplicata e
+  atualiza o total; excluir parcela paga é bloqueado, não paga apaga a duplicata.
+- Separação Parcial: avisos "Venda totalmente separada" trocados por "enviada para o estoque separar".
+- A3: já resolvido pela SPEC-232. A4 e A5: conferidos, aguardando decisão.
+- Migration 248 APLICADA (autorizada pelo usuário). Conferido no banco: 2 triggers em `nota_fiscal_compra_parcelas`,
+  funções novas no ar, 3 duplicatas CP da Stella (261000 1/1 293,54; 26102026 1/2 431,03 e 2/2 256,03).
+  Separação Parcial `9f64dd6` publicada (push).
+
+## Pendências
+
+- [ ] SPEC-231 A4 — decidir se ST/IPI do pedido de compra continuam calculados sobre o total do item (como a NF-e) ou arredondando por peça (como a calculadora do Vinicius).
+- [ ] SPEC-231 A5 — decidir se pedido de compra aguardando aprovação deve abater a Necessidade de Compra (hoje abate; tirar permite comprar em dobro).
+- [ ] SPEC-231 E3 — decidir como importar o histórico de duplicatas em aberto da planilha antiga para o Consultar Duplicatas (Pedro vai avaliar).
+- [ ] SPEC-231 F5 — emissão de NF em homologação (Focus NFe) nunca foi testada a partir de uma venda; depende da configuração da SPEC-154.

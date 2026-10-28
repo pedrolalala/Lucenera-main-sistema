@@ -275,7 +275,9 @@ Cada bloco é independente: reverter o commit do sistema e, se houver migration,
 
 ## Pendências
 
-- [ ] SPEC-231 A4 — decidir se ST/IPI do pedido de compra continuam calculados sobre o total do item (como a NF-e) ou arredondando por peça (como a calculadora do Vinicius).
-- [ ] SPEC-231 A5 — decidir se pedido de compra aguardando aprovação deve abater a Necessidade de Compra (hoje abate; tirar permite comprar em dobro).
+- [ ] SPEC-231 A4 — decidir se ST/IPI do pedido de compra continuam calculados sobre o total do item (como a NF-e) ou arredondando por peça (como a calculadora do Vinicius). Resposta "ok" em 28/10 não diz qual — reperguntado.
+- [x] SPEC-231 A5 — **Decidido (usuário, 28/10): continua abatendo.** Pedido aguardando aprovação já "atendeu a necessidade" (evita comprar em dobro). Nada a mudar.
+- [x] SPEC-231 E4 — **Esclarecido (usuário, 28/10):** o "não mudou nada" era porque as duplicatas do Excel (Connect) ainda não tinham sido carregadas. Não é defeito dos filtros; depende do E3.
+- [x] SPEC-231 F4 — sinal: **sem percentual fixo** (usuário, 28/10; ver SPEC-234 C).
 - [ ] SPEC-231 E3 — decidir como importar o histórico de duplicatas em aberto da planilha antiga para o Consultar Duplicatas (Pedro vai avaliar).
 - [ ] SPEC-231 F5 — emissão de NF em homologação (Focus NFe) nunca foi testada a partir de uma venda; depende da configuração da SPEC-154.

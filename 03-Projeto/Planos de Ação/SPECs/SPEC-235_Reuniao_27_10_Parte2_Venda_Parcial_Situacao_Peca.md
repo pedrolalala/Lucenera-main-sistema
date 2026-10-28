@@ -181,8 +181,10 @@ e de busca que apareceram no teste.
 - [ ] **CPF/CNPJ não vem porque não está cadastrado**: só 71 de 2.641 clientes (e 226 de 867 arquitetos) têm documento em
       `contatos`; o da família Pessoa (23121) está vazio. Não é erro da tela. Dá para preencher a partir das duplicatas
       da Connect (`staging_conta_receber.cpf_cnpj`) — decidir se faz.
-- [ ] **Engenheiro**: o Novo Orçamento não tem campo de engenheiro (só cliente, projeto, arquiteto e vendedor). Criar o
-      campo ou era em outra tela?
+- [x] **Engenheiro**: o Novo Orçamento não tem campo de engenheiro. Usuário (28/10) não lembra de ter falado disso →
+      **não criar**; o duplo clique (F) vale para cliente, projeto e arquiteto.
 - [ ] B: além de reserva ⇄ entrega futura, incluir "separação → reserva" (a função já tem)?
 - [ ] E: confirmar a fonte do fornecedor (planilha Connect `CodFornecedor`) e se vale importar para as 4.918 peças.
 - [ ] I: desenho do boleto pelo Contas a Receber e do ajuste de datas. Fecha junto com SPEC-231 F4 / SPEC-234 C.
+      **Decidido (usuário, 28/10):** a ordem é **1) ajustar as datas das parcelas**, **2) emitir a NF e o boleto** já
+      com as datas corretas. Falta implementar.

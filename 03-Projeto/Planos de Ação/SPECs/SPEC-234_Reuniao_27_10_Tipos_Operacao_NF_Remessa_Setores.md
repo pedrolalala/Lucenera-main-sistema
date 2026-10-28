@@ -55,7 +55,7 @@ separação, sem o "orçamento fake" que o Matheus faz hoje na Connect.
 | Venda / VENDAS | regra atual (S na aprovação) | gera | venda | já definido |
 | Devolução / TROCA DEV | regra atual | crédito | devolução | já definido |
 | Outros / EMPRESTIMO | **não sai**; peça vai para o setor **Empréstimo** e continua contando como disponível | não | — | ao virar venda (editado ou aprovado integralmente) segue a regra de venda. Ver D. |
-| Outros / CASA COR SAIDA | sai do estoque (geral ou showroom) | não | **remessa para demonstração** | o retorno é CASA COR ENTRADA (retorno de demonstração); peça vendida lá: retorno + NF de venda |
+| Outros / CASA COR SAIDA | **sai do estoque** (geral ou showroom) — não é o fluxo do Empréstimo (usuário, 28/10) | não | remessa para demonstração **opcional** ("nem sempre tem nota", usuário 28/10) | o retorno é CASA COR ENTRADA (retorno de demonstração); peça vendida lá: retorno + NF de venda |
 | Outros / REMESSA TRANSP | não mexe | não | remessa para transporte | na prática nasce da separação (ver B), não de orçamento |
 | Outros / RETORNO | — | — | — | **tirar** (não se usa mais) |
 | Outros / TRANSFERENCIA | — | — | — | **tirar** |
@@ -90,7 +90,10 @@ separação, sem o "orçamento fake" que o Matheus faz hoje na Connect.
 - Venda fechada sem NF emitida, cliente paga sinal (ex.: 30% de R$ 90 mil) e o resto conforme envio (28 dias).
 - Sem NF de venda não existe simples remessa: a cada envio emite-se uma **NF de venda só dos itens enviados**, que já
   acompanha a mercadoria.
-- Em cada NF parcial abate-se a parte do sinal (30% do valor da nota), e o restante vira boleto de 28 dias.
+- Em cada NF parcial abate-se uma parte do sinal, e o restante vira boleto de 28 dias.
+- **Decidido (usuário, 28/10):** **sem percentual fixo** — os 30% eram só exemplo, os números mudam de venda para venda.
+  Proposta: na emissão de cada NF parcial, informar quanto do sinal abater (sugerindo o saldo de sinal ainda não usado,
+  nunca mais que ele nem que o valor da nota).
 - A venda pode ter **várias NF de venda** enquanto houver item sem nota. Se a venda já tem NF de venda cheia, **não**
   pode emitir outra NF de venda (só remessa, item B).
 - Venda enviada inteira sem NF: emite pela rotina normal de venda no Vendas.
@@ -232,13 +235,20 @@ separação, sem o "orçamento fake" que o Matheus faz hoje na Connect.
 
 ## Pendências
 
-- [ ] Começo da reunião (00:00): NF de **entrada de importação** (nacionalização da mercadoria importada, com impostos
-      pagos). Hoje quem faz é o Sérgio no sistema dele. Definir se o sistema vai fazer e como.
-- [ ] CASA COR SAIDA: confirmar se é o mesmo fluxo do Empréstimo (setor visual) ou saída de estoque com remessa para
-      demonstração (a reunião disse "sai do estoque"). E se CASA COR ENTRADA sai de "Devolução" (hoje exige venda de origem).
-- [ ] GARANTIA: escolher de qual setor sai (geral, Estoque Garantia ou Casa Cor) ou adotar a regra "move para o geral e
-      sai junto" (D).
-- [ ] Sinal na NF parcial (C): abater 30% de cada nota ou outra regra. Fecha junto com SPEC-231 F4.
+- [ ] NF de **entrada de importação** (nacionalização da mercadoria importada, com impostos pagos; hoje o Sérgio faz no
+      sistema dele). **Decidido (usuário, 28/10): o sistema tem que fazer.** Falta SPEC própria (como entra, impostos,
+      custo da peça).
+- [x] CASA COR SAIDA (usuário, 28/10): **sai do estoque mesmo** (não é o fluxo do Empréstimo); a NF de remessa para
+      demonstração é **opcional** — nem sempre tem nota.
+- [x] CASA COR ENTRADA (usuário, 28/10): **sai de "Devolução"** e vira o **retorno da demonstração**, sem exigir venda de
+      origem. A peça pode entrar no **estoque geral**; depois, se for o caso, muda-se de setor para o Estoque Casa Cor
+      pela Movimentação de Peças.
+- [x] GARANTIA (usuário, 28/10): **em regra sai do estoque geral** (como está).
+- [ ] Garantia × Controle de Garantia (SPEC-156): o orçamento de GARANTIA aprovado deve abrir um caso no Controle de
+      Garantia? Pergunta reexplicada ao usuário em 28/10, aguardando resposta.
+- [x] Sinal na NF parcial (C) (usuário, 28/10): **sem regra fixa de percentual** — ver C. Fecha junto com SPEC-231 F4.
+- [ ] DEV COMPRA (A3): nasce no orçamento (destinatário = fornecedor) ou no Compras? Resposta "ok" em 28/10 não diz qual
+      — reperguntado.
 - [ ] F1: conferir as reservas reais e confirmar a correção do reservado e o disponível único, e corrigir a migration 251 antes de aplicar.
 - [ ] CFOP/natureza de cada NF nova com o contador.
 - [ ] SPEC do sistema de Inventário (G).

@@ -4,6 +4,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-27
 
+- SPEC-235 implementada (migrations 252/253 APLICADAS 28/10): Venda Parcial (novo nome) com
+  "Ajustar" Reserva ⇄ Entrega Futura só para Matheus/admin; Orçamentos recusa peça desativada e fora de linha sem
+  saldo/acima do disponível (tela + gatilho), selos Fora de linha/Lançamento, lupa e dois cliques em projeto/cliente/
+  arquiteto; Cadastro com selos e fornecedor (da peça ou da marca); Movimentação de Peças atualiza a lista após mover;
+  "GRUPO CONVERSAO" desativado.
 - SPEC-235 criada (reunião 27/10, parte 2): Separação Parcial vira "Venda Parcial"; ajuste reserva ⇄ entrega futura
   dentro da mesma venda só para Matheus/admin; peça desativada ou fora de linha sem saldo não entra no orçamento;
   selos Fora de linha/Lançamento; fornecedor na peça; busca de pessoa por duplo clique no orçamento; NF postergada.

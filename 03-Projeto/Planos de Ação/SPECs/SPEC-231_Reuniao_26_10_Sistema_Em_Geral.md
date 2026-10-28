@@ -173,7 +173,7 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
       duas etapas). Separação Parcial `019dd74`, Logística `b36ecf9`.
 
 ### G. Relatório de movimentação do item (kardex)
-- [ ] G1 — Relatório "Movimentação do item" (Relatórios → Estoque): filtro por **código da peça**, **período** e
+- [x] G1 — Relatório "Movimentação do item" (Relatórios → Estoque): filtro por **código da peça**, **período** e
       **setor** (sem setor = todos; ex.: Showroom mostra só o Showroom). Colunas: código, data, histórico (venda nº,
       NF nº, devolução...), tipo (E entrada / S saída / T transferência), quantidade, **saldo após** e setor.
       É o que acontece no estoque da empresa — **não** tem a ver com entregue ao cliente (8 vendidas podem estar
@@ -187,7 +187,7 @@ Agrupado por sistema. Cada bloco pode ser implementado e publicado separado. Ord
 - [x] Publicar a Separação Parcial (textos dos avisos do A1) — `9f64dd6`.
 - [x] Aplicar a migration 249 (C1) — aplicada 27/10; Cadastro publicado.
 - [x] Aplicar a migration 250 (F1–F3), publicar a Edge Function emitir-nota-fiscal e fazer push do Vendas — feito 27/10 (Edge v5).
-- [ ] Aplicar as migrations que surgirem (G1) depois do dry-run.
+- [x] Aplicar as migrations que surgirem (G1) depois do dry-run — 251 aplicada 28/10 (depois da 255 da SPEC-234); Dashboard `058cb21`.
 - [ ] Teste guiado de novo com a 12822: compra → entrada NF → Contas a Pagar → orçamento → separação → estorno →
       devolução → relatório de movimentação.
 

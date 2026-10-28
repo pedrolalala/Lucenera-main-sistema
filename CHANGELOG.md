@@ -2,6 +2,19 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-28
+
+- Dashboard (SPEC-231 G1): relatório "Movimentação do item" (Estoque) — kardex por peça com saldo inicial de 28/10,
+  venda aprovada = saída, entrega não aparece. Migration 251 APLICADA (depois da 255).
+- Compras (SPEC-236, migration 256 APLICADA 28/10): PDF do pedido com "Endereço de entrega" automático (estoque FOCO
+  ILUMINAÇÃO LTDA, ou o endereço próprio do fornecedor — Manoella/Islight → showroom, editável no "Enviar ao
+  fornecedor"); e-mail ao fornecedor com o WhatsApp do Compras; tudo em `compras_config`. Razão social da FOCO
+  atualizada para "FOCO ILUMINAÇÃO LTDA".
+- SPEC-234 A/A1/A2/F (migrations 255/254 APLICADAS 28/10): cada Tipo de Outros/SAC com regra própria na aprovação
+  (Garantia/Bonificação/Outras saídas/Casa Cor saída saem do estoque sem financeiro; Uso e consumo/Descarte baixam o
+  Geral; Remessa/Industrialização/Conserto/Dev. em garantia só aprovam; Dev. compra bloqueada); lista de Tipos limpa;
+  Showroom fora do reservado e somado no disponível da Consulta (13442 deixa de contar 2x).
+
 ## 2026-10-27
 
 - SPEC-235 implementada (migrations 252/253 APLICADAS 28/10): Venda Parcial (novo nome) com

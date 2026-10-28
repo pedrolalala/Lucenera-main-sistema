@@ -53,7 +53,8 @@ Mapeamento (grounded no schema real, supabase/db/current/01_schema_full.sql):
   estoque_itens: NAO e tocado diretamente por este script. Desde a migration
   20260716_046 existe um trigger (fn_sync_estoque_itens_from_produtos) em
   produtos que mantem estoque_itens(local='Estoque') sempre igual --
-  quantidade = estoque_total, quantidade - quantidade_reservada = estoque_disponivel --
+  quantidade = estoque_total, quantidade_reservada = estoque_total + estoque_showroom - estoque_disponivel
+  (SPEC-234 F, migration 255: o Disponivel da Connect soma o Showroom, que fica fora do reservado) --
   automaticamente a cada UPDATE de produtos.estoque_total/estoque_disponivel,
   inclusive os que este script faz. Link permanente pedido pelo usuario em 2026-07-16.
 

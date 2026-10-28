@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-234 — Reunião 27/10: regra de cada Tipo de Operação, NF de remessa/venda parcial pela separação, setores visuais e acesso do Matheus"
-status: não iniciado
-data_ultima_modificacao: 2026-10-27
+status: em andamento
+data_ultima_modificacao: 2026-10-28
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb) — Tipo de Operação / Tipo (subgrupo), aprovação
   - Banco (Supabase SP) — aprovar_orcamento_financeiro, estoque_itens, produtos, setores
@@ -23,15 +23,15 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] A — Tipos de Operação: aplicar a matriz decidida (seção A) na aprovação do orçamento, um comportamento por vez (fases 2–4 da SPEC-233).
-- [ ] A1 — Limpar a lista de Tipos: tirar RETORNO, TRANSFERENCIA, OUTRAS ENTRADAS, ACERTO CITEL e INVENTARIO de "Outros".
-- [ ] A2 — Mover REMESSA CONSERTO, DEV EM GARANTIA e DEV COMPRA de "Outros" para "SAC".
+- [x] A — Tipos de Operação: aplicar a matriz decidida (seção A) na aprovação do orçamento, um comportamento por vez (fases 2–4 da SPEC-233).
+- [x] A1 — Limpar a lista de Tipos: tirar RETORNO, TRANSFERENCIA, OUTRAS ENTRADAS, ACERTO CITEL e INVENTARIO de "Outros".
+- [x] A2 — Mover REMESSA CONSERTO, DEV EM GARANTIA e DEV COMPRA de "Outros" para "SAC".
 - [ ] A3 — DEV COMPRA: vincular à NF de compra (chave de acesso) e gerar saída de estoque + contrapartida no Contas a Pagar.
 - [ ] B — NF de remessa para transporte / simples remessa a partir de uma separação (Separação Parcial), só dos itens separados.
 - [ ] C — Venda com NF parcial: permitir mais de uma NF de venda por venda, cada uma só com os itens enviados, abatendo o sinal.
 - [ ] D — Setores visuais Empréstimo, Estoque Garantia e Casa Cor; saída deles sem "gap" de reserva.
-- [ ] E — Matheus e Vitória com acesso à Separação Parcial (consultar a venda inteira, tirar/corrigir lista de entrega, emitir NF de remessa).
-- [ ] F — Disponível = Estoque geral + Showroom − reservado, sem o "reservado negativo" herdado da Connect.
+- [x] E — Matheus e Vitória com acesso à Separação Parcial (consultar a venda inteira, tirar/corrigir lista de entrega, emitir NF de remessa).
+- [x] F — Disponível = Estoque geral + Showroom − reservado, sem o "reservado negativo" herdado da Connect.
 - [ ] G — Inventário vira sistema próprio (balanço) — abrir SPEC separada.
 
 ### Passos manuais do usuário
@@ -122,14 +122,13 @@ separação, sem o "orçamento fake" que o Matheus faz hoje na Connect.
   a do Showroom, mas **antes** ela é movimentada do Showroom para o estoque geral (Movimentação de Peças) e só depois
   sai/é reservada. Ninguém vende/reserva direto do Showroom.
 
-- **Regra provisória registrada (usuário, 27/10, até falar com o Vinicius):** o disponível soma o Showroom como a
+- **REGRA DEFINITIVA (usuário, 28/10 — antes provisória de 27/10):** o disponível soma o Showroom como a
   Connect faz — Estoque geral e Showroom são dois saldos separados (cada peça está num lugar só) e a soma é feita **na
   hora de mostrar**: `Disponível = Estoque geral + Showroom − Reservado`. Assim mover do Showroom para o geral não muda
   o disponível e não há duplicidade. A duplicidade da 13442 (47 em vez de 46) é erro do nosso import, que gravou o
   Showroom dentro do reservado (reserva negativa congelada) — ver "Conferência das reservas reais".
-- **Em aberto com o Vinicius:** se o Showroom deve mesmo contar no disponível, já que a peça exposta nem sempre pode ir
-  para o cliente (exposta, com sinal de uso, ou não pode sair de lá). Qualquer que seja a decisão, a correção do banco
-  (F1) é a mesma; só muda se a conta inclui ou não o `estoque_showroom`.
+- **Decidido (usuário, 28/10):** o Showroom continua somando com o Estoque geral no disponível. A peça do Showroom só é
+  reservada/sai depois de movida para o geral.
 
 ### G. Inventário
 
@@ -200,6 +199,33 @@ separação, sem o "orçamento fake" que o Matheus faz hoje na Connect.
 - 13442, 13454 e 12956 mostram o mesmo disponível em todas as telas, somando o Showroom.
 
 ## Realizado
+
+- 28/10/2026 — **migrations 255, 251 e 254 APLICADAS** (autorizadas pelo usuário). Conferido: 0 reservado negativo,
+  cópia com 302, 13442 = 46, 13454 = 43; kardex com 1.529 + 302 saldos iniciais e 3 gatilhos; aprovação de Outros/SAC
+  desviando para a regra nova. Orçamentos `243dcd6`, Dashboard `058cb21`.
+- 28/10/2026 — implementado:
+  - **E:** Matheus e Vitória já tinham acesso à Venda Parcial (`separacao-parcial`) — nada a mudar.
+  - **A1/A2 (Orçamentos):** Outros sem RETORNO, TRANSFERENCIA, OUTRAS ENTRADAS, ACERTO CITEL e INVENTARIO; SAC =
+    REMESSA CONSERTO, DEV EM GARANTIA, DEV COMPRA (o "SAC" solto saiu). Orçamento antigo continua mostrando o Tipo
+    dele. Aviso abaixo do Tipo explica o que ele faz na aprovação.
+  - **A — migration 254** `20261028_254_spec234_regra_tipo_operacao`: `tipo_operacao_regra(natureza, subgrupo)` e
+    `_aprovar_operacao_sem_financeiro`; `aprovar_orcamento_financeiro` desvia Outros/SAC para ela (nenhum vira venda):
+    - **saida_cliente** (GARANTIA, OUTRAS SAIDAS, BONIFICACAO, CASA COR SAIDA): reserva / entrega futura e entrega como
+      venda, sem parcela, boleto ou nº de venda (aparece na Venda Parcial pelo nº do orçamento);
+    - **baixa_direta** (USO E CONSUMO, DESCARTE): baixa do Estoque Geral na aprovação, registro em movimentacoes_peca
+      "Baixa (descarte / uso e consumo)"; não deixa passar do que há; desfazer/cancelar bloqueados depois;
+    - **sem_estoque** (REMESSA TRANSP, SAIDA INDUSTRIALIZACAO, REMESSA CONSERTO, DEV EM GARANTIA): só aprova;
+    - **sem_regra** (DEV COMPRA até o A3, tipos retirados): recusa.
+    Dry-run ok com orçamentos de teste de cada tipo (13454): GARANTIA reserva 2 sem financeiro; DESCARTE 40 → 38 e
+    desfazer/cancelar bloqueados; REMESSA CONSERTO só aprova; DEV COMPRA e RETORNO recusados; 2ª aprovação idempotente.
+  - **F — migration 255** `20261028_255_spec234_showroom_fora_do_reservado`: cópia em
+    `backup._bkp_255_estoque_itens_reservado` (302); reservado = maior(reservado + Showroom, vendas do sistema);
+    `fn_sync_estoque_itens_from_produtos` passa a tirar o Showroom do reservado da Connect; `vw_consulta_estoque`
+    soma o Showroom no disponível. Dry-run: 0 reservado negativo; 291 peças passam a somar o Showroom na Consulta
+    (só peças com Showroom); a conta interna muda só na 13442 (47 → 46). Script de import com o comentário atualizado.
+  - Com a 255, a **251 (kardex)** fica certa: saldo inicial em 1.529 peças no Estoque e 302 no Showroom (13442: 45 + 1).
+    251 com saldo inicial negativo no Estoque = vendido sem peça (entrega futura), como decidido.
+  - Sequência das MOV realinhada (próxima = MOV 2; os dry-runs tinham avançado).
 
 - 27/10/2026: SPEC criada a partir da reunião. Conferidos no banco os dados de estoque das peças citadas (seção
   "Achado no banco").

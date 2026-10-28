@@ -4,6 +4,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-10-28
 
+- Cadastro (SPEC-237, migration 257 APLICADA 28/10, Cadastro 55cc11a): fornecedor de 4.303 peças a partir da planilha Produtos da Connect
+  (14/10) em `produto_fornecedores` e no fornecedor principal da peça (que a edição mostra); gatilho mantém o vínculo
+  ao trocar o principal; edição de peça passa a carregar o fornecedor no campo. 241 peças ficam sem (lista no relatório).
 - Dashboard (SPEC-231 G1): relatório "Movimentação do item" (Estoque) — kardex por peça com saldo inicial de 28/10,
   venda aprovada = saída, entrega não aparece. Migration 251 APLICADA (depois da 255).
 - Compras (SPEC-236, migration 256 APLICADA 28/10): PDF do pedido com "Endereço de entrega" automático (estoque FOCO

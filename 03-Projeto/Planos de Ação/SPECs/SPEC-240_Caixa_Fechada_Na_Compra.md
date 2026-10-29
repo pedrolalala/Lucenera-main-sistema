@@ -78,6 +78,21 @@ sistemas_envolvidos:
       ela substitui a marca daquele vínculo (o rollback da 257 deixa de achar só esse).
 - [x] Mostrar e editar a caixa também no **Cadastro** (edição da peça).
 
+- [x] (29/10, depois de publicado) Usuário confirmou: **arredondamento automático continua como o Filippo pediu**, e
+      pediu **desconto por caixa fechada**: só algumas peças têm; o fornecedor dá desconto quando a compra fecha caixa.
+
+### C. Desconto da caixa fechada (pedido do usuário 29/10)
+- Coluna nova `produtos.desconto_caixa_fechada numeric(5,2)` (%, 0 = sem desconto, 0 ≤ x < 100). É **campo de custo**
+  (SPEC-193): `authenticated` não lê direto; sai pela `vw_produtos_custo` (coluna acrescentada no fim).
+- Mesma trava de "Itens por caixa" (Débora + administração) — gatilho da 260 passa a vigiar as duas colunas.
+- Fechar pedido: o preço de custo da linha vem com o desconto enquanto a quantidade **fecha caixa** e volta ao preço cheio
+  quando não fecha; texto "−5% caixa fechada" (verde) embaixo do preço. Preço digitado à mão não é mexido.
+  Popover "Caixa / observação" ganha o campo "Desconto na caixa fechada (%)".
+- Cadastro: campo "Desconto caixa fechada (%)" ao lado de Itens por caixa, só para quem vê custo; só Débora/adm alteram.
+- Migration 261 (`20261029_261_spec240_desconto_caixa_fechada`). Dry-run 29/10: authenticated não lê a coluna direto,
+  Débora vê pela view, preço/custo da peça não muda ao gravar, Matheus é barrado.
+- **Ordem:** aplicar a 261 **antes** de publicar o Compras (a tela lê a coluna nova da view; sem ela o custo não carrega).
+
 ## Checklist de Ação
 
 - [x] Usuário responder as decisões (29/10).
@@ -90,6 +105,7 @@ sistemas_envolvidos:
       "+N a mais (caixa fechada, estoque)"; observação "SPEC-237: ..." escondida; `qtd_minima` deixou de ser gravada.
 - [x] Cadastro: campo **Itens por caixa** na edição da peça (somente leitura para quem não pode).
 - [x] Aplicar a 260 (29/10) e publicar Compras (`ca6e46d`) e Cadastro (`93264ad`).
+- [x] C: aplicar a 261 (29/10) e publicar Compras (`5b7b1f5`) e Cadastro (`05bd91c`).
 - [ ] Teste: peça com necessidade 38, preencher caixa 10 → linha vira 40, "+2 caixa fechada (estoque)"; fechar o pedido
       e conferir que a venda recebeu 38 e o pedido tem 40; abrir outra compra da mesma peça → já vem arredondada.
 

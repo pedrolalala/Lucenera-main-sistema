@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-239 — CPF/CNPJ dos clientes a partir das notas fiscais da Connect"
-status: migration pronta (dry-run ok), aplicação pendente
+status: no ar
 data_ultima_modificacao: 2026-10-29
 sistemas_envolvidos:
   - Banco (Supabase SP) — contatos (cpf, cnpj, tipo_pessoa, inscricao_estadual), notas_fiscais_connect
@@ -16,7 +16,7 @@ sistemas_envolvidos:
 
 - [x] Levantar as fontes de CPF/CNPJ.
 - [x] Migration 259 com backup e dry-run.
-- [ ] Aplicar a 259 em produção (precisa da frase do usuário).
+- [x] Aplicar a 259 — aplicada 29/10 (177 no backup, 248 clientes com documento, 25 IE).
 - [ ] Decidir o que fazer com os clientes que dividem documento (lista abaixo).
 
 ## Estado encontrado (29/10)

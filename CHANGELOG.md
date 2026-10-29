@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-10-29
+
+- Banco (SPEC-239, migration 259 pronta, dry-run ok, NÃO aplicada): CPF/CNPJ de 177 clientes a partir das notas da
+  Connect (casamento pelo nome do destinatário; 71 → 248 clientes com documento), com IE em 25 e backup em
+  `backup._bkp_259_contatos_documento`. Ficam fora 75 que dividem documento ou estão no grupo Clara.
+
 ## 2026-10-28
 
 - Cadastro (SPEC-237, migration 257 APLICADA 28/10, Cadastro 55cc11a): fornecedor de 4.303 peças a partir da planilha Produtos da Connect

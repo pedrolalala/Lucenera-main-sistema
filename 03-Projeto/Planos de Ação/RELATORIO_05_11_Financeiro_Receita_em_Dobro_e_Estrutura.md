@@ -27,3 +27,14 @@ Ver também a regra de coerência: a própria Connect usa contas de tipo "despes
 - 82 parcelas pagas de 08/05 sem par na planilha: conferir (não são cópias).
 - Cadastro "PESSOA NÃO IDENTIFICADA" e 3 contas do plano: aguardando averiguação do usuário.
 - Nada foi apagado; nada foi commitado nem enviado por push.
+
+## 5. Batimento do Supabase (05/11, `scripts/bater_supabase_financeiro.py`, somente leitura)
+- **Planilha x espelho x sistema FECHA** nas parcelas ativas: Receber 4.969 · R$ 38.273.249,74 · pago R$ 27.905.574,40; Pagar 13.347 · R$ 36.930.520,03 · pago R$ 29.730.336,73. As 95 (Receber, R$ 800.313,96) e 961 (Pagar, R$ 9.861.076,00) linhas restantes têm `pago = 2` na própria Connect e estão canceladas (`status_pago = 2`) no sistema.
+- **Fora da planilha (histórico de cargas antigas, pagas):** 82 receitas (R$ 205.950,27) e 267 despesas (R$ 1.083.839,52) — explicam a diferença de pago e ficam fora do dashboard.
+- **Duplicidade: 0** (código, cópia receita×despesa, mesma parcela com códigos diferentes, duplicata repetida).
+- **Pontos a decidir/tratar (não são erro de carga):**
+  1. **2.295 parcelas "pagas" com valor pago zero (R$ 10,76 mi de parcela)** — a própria planilha traz assim (Carteira 935, DEV TROCA 713, Duplicata Gerada 321, Boleto 234, Acordo 64...). O "realizado" do dashboard soma `vl_pago`, então esses R$ não entram. Precisa de regra do financeiro (Filippo): contam como pago? Boleto pago sem valor é suspeito.
+  2. **2.456 duplicatas sem nenhuma parcela** (841 despesa, 1.615 receita; criadas em 07/05, 15/05 e 29/06). Não têm dinheiro; 236 têm outra duplicata de mesmo número com as parcelas. Candidatas a limpeza/arquivo, com backup.
+  3. 489 parcelas ativas com valor zero; 78 pagas acima do valor (juros/multa); 5 pagas sem data de pagamento; 919 com vencimento antes da emissão (dado da Connect).
+  4. 2 boletos ligados a parcela cancelada/inexistente (de 5 boletos).
+  5. 1.723 despesas ligadas a contato do tipo "cliente" e 229 duplicatas cujo contato tem nome diferente do da planilha — rever junto do mapa de pessoas.

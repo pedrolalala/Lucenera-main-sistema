@@ -2,6 +2,21 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-04 (SPEC-243)
+
+- Herança Connect por cliente (SPEC-243): vendas da Connect viram orçamentos do sistema (`origem = 'connect'`, `CNX-<orçamento>`) a partir das planilhas
+  Reserva × Ambiente e Entrega Futura × Ambiente. Banco: migrations 264 (espelho `connect_reserva_ambiente`, tratamento, colunas `orcamentos.origem/connect_lote/
+  vendas_vinculadas_connect`, permissão `pode_tratar_heranca_connect`, views), 265 (`funcionarios.nm_connect` de 6 digitadores), 266 (funções
+  `carregar_connect_reserva_ambiente` / `remover_connect_lote`) e 267 (view `sem_vinculo`) APLICADAS; `scripts/importar_reserva_entrega_futura_connect.py --aplicar` rodado
+  (191 orçamentos, 2.645 itens, 2.692 de 3.826 linhas; estoque, financeiro e vendas inalterados). Limpeza: ORC-0001..0004, usuária `kimberly` e 4 funcionários de teste
+  apagados (backup em `backup.`); `scripts/apagar_orcamento.py` passou a apagar `nota_fiscal_compra_vinculos` e `movimentacoes_peca`. Rodada 04/11: Produtos (+24 novos, marca NORDECOR,
+  `--incluir-estoque`), Pedido de Compra e Contas. Regra fixa no AGENTS.md: LUCE NERA = MANOELLA.
+- Venda Parcial (`04-Sistemas/separacao-parcial`, commit 2fba684 pushado e NO AR em https://separacao-lucenera.pages.dev, conferido 04/11): duas abas ("Vendas do sistema Lucenera" × "Vendas parciais Connect"), venda Connect só consulta
+  (sem separar/ajustar/trocar), aviso de reserva sem data, cartão amarelo para venda até jun/2025. Usa a migration 268 (view `vw_venda_parcial_lista`, APLICADA 04/11).
+- Valor do orçamento Connect (migration 269 APLICADA 04/11 + importador `--aplicar` rodado): o orçamento Connect mostra o TOTAL DA VENDA (parcelas vigentes de receita do Contas a Receber; `vl_pago` nunca é usado), antes R$ 0,00. 191 de 191 com valor, soma R$ 12.136.545,94; preço dos itens segue 0 e `projetos.valor_total` não muda. Estoque, financeiro e vendas inalterados.
+- Cadastro/Consultar produtos (migration 270 APLICADA 04/11; `cadastro-lucenera` commit 9e5393f pushado): setores "Reserva herança Connect" e "Entrega futura herança Connect" (só visualização) com abas por cliente e L; Reserva/Entrega Futura/Separação voltam a mostrar só vendas do sistema; coluna `origem` em `vw_estoque_saldos_projeto_item`, `vw_estoque_por_produto_projeto` e `vw_cadastro_produto_movimentos`.
+- Commit no repositório central (04/11): SPEC-243, migrations 264–270, script de importação, AGENTS.md, CHANGELOG e ponteiros `separacao-parcial` 2fba684 e `cadastro-lucenera` 9e5393f.
+
 ## 2026-10-29
 
 - Banco (SPEC-239, migration 259 APLICADA 29/10): CPF/CNPJ de 177 clientes a partir das notas da

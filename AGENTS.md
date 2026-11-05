@@ -101,6 +101,10 @@ Toda mudanca relevante deve registrar em `CHANGELOG.md`:
 - impacto no banco, se houver;
 - repositorios que precisam receber commit.
 
+## Regras fixas de negocio
+
+- **Empresa `LUCE NERA` = `MANOELLA`.** Nas planilhas da Connect (Contas a Receber e Contas a Pagar, colunas `cod_empresa`/`nm_empresa`) a empresa 1 aparece como `LUCE NERA`; no banco ela e a `MANOELLA`. Os demais nomes batem direto: `ISLIGHT` = `ISLIGHT`, `FOCO ILUMINACAO` = `FOCO ILUMINACAO`. Todo importador que le empresa da Connect usa esse mapeamento (definido pelo usuario em 04/11/2026, SPEC-243).
+
 ## Nao fazer
 
 - Nao tratar migrations antigas dentro de `04-Sistemas/*/supabase/migrations` como fonte final do banco.

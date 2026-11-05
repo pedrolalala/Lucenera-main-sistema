@@ -59,6 +59,9 @@ APAGAR = [
     ("transferencias_estoque", "origem_projeto_item_id in (select id from x_pi) or destino_projeto_item_id in (select id from x_pi)"),
     ("devolucoes_estoque", "projeto_item_id in (select id from x_pi)"),
     ("estoque_movimentos_projeto_item", "projeto_item_id in (select id from x_pi) or projeto_item_destino_id in (select id from x_pi)"),
+    # SPEC-243 (04/11): tabelas criadas depois do script (FK NO ACTION em projeto_itens)
+    ("nota_fiscal_compra_vinculos", "projeto_item_id in (select id from x_pi)"),
+    ("movimentacoes_peca", "projeto_item_id in (select id from x_pi)"),
     ("estoque_saldos_projeto_item", "projeto_item_id in (select id from x_pi)"),
     ("pedido_compra_item_origem", "projeto_item_id in (select id from x_pi)"),
     ("notas_fiscais", """orcamento_id in (select id from x_orc) or boleto_id in (select id from public.boletos

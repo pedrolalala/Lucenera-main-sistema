@@ -323,6 +323,16 @@ Prazo da reunião: planilha de teste imediata; data de virada a combinar (Connec
 
 ## Realizado
 
+### 2026-11-05 (RODADA INTERMEDIÁRIA: nova exportação da Connect importada; migration 275 APLICADA; Compras no ar)
+
+- **Arquivos de 05/11:** `Produtos__`, `PedidoCompra_`, `ContaPagar_`, `ContaReceber_` (todos `2026-11-05`), `ReservaxAmbiente.xlsx` e `EntregaFuturaxAmbiente.xlsx`. **Clientes não foram reimportados** (decisão do usuário; entra na rodada final de 07/11).
+- **Ordem executada (cada passo primeiro em dry-run, depois gravando):** `importar_produtos_novos.py` (0 novos) → `importar_produtos_estoque.py --incluir-estoque` (84 produtos; preço de venda idêntico) → `importar_pedido_compra.py` (1 novo, 7 atualizados, 11 não vigentes) → `importar_contas_pagar_receber.py` (93 transações novas, 21 atualizadas, 2 órfãs canceladas, 18 negociações novas LUCE NERA) → `importar_reserva_entrega_futura_connect.py --aplicar` (230 orçamentos, 0 erros) → `importar_xml_orcamentos_connect.py --aplicar`.
+- **REGRA DE ORDEM:** a carga de Reserva/Entrega Futura troca o lote e **apaga o enriquecimento do XML**; por isso o importador de XML **sempre roda depois** (aqui reaplicou 69 orçamentos e 541 itens só do XML). Contas a Receber/Pagar vêm antes (a empresa de cada venda é deduzida por elas).
+- **Fotografia depois:** Estoque Geral 32.521,70 e reservado 25.594,70 (vêm do estoque de 05/11 da Connect; eram 31.966,70/25.453,70); saldos Connect Reserva 15.617,7, Entrega Futura 4.726,1, Entregue 0 (eram 15.315,7/5.020,1: vêm das planilhas novas); 230 orçamentos, nenhum com valor zero; 28 projetos com valor_total e 263 vendas preservados; 0 tratamentos; 0 vínculos de NF; XML sem itens entregues e sem reinício de aprovação.
+- **Números do dia:** herança em 315 orçamentos, 78 com XML e 237 sem (161 já são orçamento no sistema); 313 XMLs fora da herança (sem decisão); sugestões de projeto subiram de 18 para 19 (não aplicadas); herança negativa só na peça 13653 (−1); 3 orçamentos com empresa do XML diferente da deduzida (7763 ISLIGHT, 7885 e 8466 FOCO ILUMINACAO contra MANOELLA; o XML prevaleceu); orçamento 8466 com total do XML R$ 0,17 acima dos itens.
+- **Compras (item I):** migration `275_spec243_compras_heranca_connect` **APLICADA** (função `pode_vincular_heranca_connect()` = Débora/administração, trigger em `nota_fiscal_compra_vinculos`, coluna `origem` em `entregas_futuras_para_entrada`); Compras `b4b00e9` pushado (deploy pelo build do GitHub); central `57c1543`. Falta o teste da Débora na entrada de NF.
+- **Rodada final de 07/11:** mesma ordem, mais a planilha de Clientes (`importar_clientes_connect.py` antes da Reserva) e os XMLs que faltam; só depois publicar a Venda Parcial com o botão Tratar.
+
 ### 2026-11-04 (FASE 2: migration 274 APLICADA; publicação da Venda Parcial adiada para depois da importação final)
 
 - **274 aplicada** (autorizada). Conferido: função criada (`anon` não executa; `authenticated` executa mas a própria função recusa quem não é Matheus/administração), restrição de ações atualizada, **0 tratamentos gravados**, saldos Connect e estoque inalterados (Reserva 15.315,7; Entrega Futura 5.020,1; Entregue 0; estoque 31.966,70/25.453,70). O Matheus tem a exceção `tratar_heranca_connect`.

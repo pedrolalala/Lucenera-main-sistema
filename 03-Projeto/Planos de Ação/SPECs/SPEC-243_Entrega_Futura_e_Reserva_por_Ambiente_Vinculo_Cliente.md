@@ -36,7 +36,7 @@ sistemas_envolvidos:
 - [x] G — Venda Parcial com duas visões (seção 6.2): **NO AR** (commit 2fba684, https://separacao-lucenera.pages.dev, conferido que o código novo está no bundle da tela); migration 268 APLICADA. Falta o teste visual do usuário.
 - [x] H — Cadastro: setores "Reserva herança Connect" e "Entrega futura herança Connect" por cliente: migration 270 **APLICADA** e código **commitado e pushado** (`cadastro-lucenera` 9e5393f); falta o teste visual do usuário.
 - [ ] I — Compras (entrada de NF): as duas entregas futuras juntas.
-- [ ] J — Destaque de venda antiga (≤ 2477) e fila para "matar" (fase 2, seção 6.3).
+- [~] J — Destaque de venda antiga (≤ 2477): feito. Fila para "matar" (fase 2, seção 6.3): **migration 274 APLICADA em 04/11**; a tela (botão Tratar) está pronta mas **NÃO commitada nem publicada de propósito: publicar só DEPOIS da importação final de 07/11** (autorizado pelo usuário).
 - [ ] K — Conferência de totais e documentação (CHANGELOG, AI_DB_CONTEXT, Pendencias).
 
 ### Passos manuais do usuário
@@ -322,6 +322,27 @@ Prazo da reunião: planilha de teste imediata; data de virada a combinar (Connec
 9. **Peças divergentes:** as 4 peças que ficam com herança negativa e as 42 sem EF cujo reservado é maior que a Reserva da planilha: tratar na reconciliação (lista no dry-run) ou ignorar?
 
 ## Realizado
+
+### 2026-11-04 (FASE 2: migration 274 APLICADA; publicação da Venda Parcial adiada para depois da importação final)
+
+- **274 aplicada** (autorizada). Conferido: função criada (`anon` não executa; `authenticated` executa mas a própria função recusa quem não é Matheus/administração), restrição de ações atualizada, **0 tratamentos gravados**, saldos Connect e estoque inalterados (Reserva 15.315,7; Entrega Futura 5.020,1; Entregue 0; estoque 31.966,70/25.453,70). O Matheus tem a exceção `tratar_heranca_connect`.
+- **Decisão do usuário:** a tela (botão Tratar) só será **commitada, enviada ao GitHub e publicada DEPOIS da importação final de sábado, 07/11**, porque o primeiro tratamento passa a recusar a reimportação das planilhas. Código pronto em `04-Sistemas/separacao-parcial` (não commitado).
+- **Roteiro de sábado (07/11), nesta ordem:** (1) exportar da Connect: Produtos, Pedido de Compra, Contas a Pagar/Receber, Reserva × Ambiente, Entrega Futura × Ambiente, Clientes e os XML que faltam; (2) `importar_produtos_estoque.py --incluir-estoque` (+ `importar_produtos_novos.py`), `importar_pedido_compra.py`, `importar_contas_pagar_receber.py`; (3) `importar_clientes_connect.py`; (4) `importar_reserva_entrega_futura_connect.py --aplicar`; (5) `importar_xml_orcamentos_connect.py --aplicar`; (6) conferir fotografia (estoque, financeiro, saldos) e SÓ ENTÃO commitar/enviar/publicar a Venda Parcial com o botão Tratar e avisar o Matheus.
+
+### 2026-11-04 (FASE 2 — tratar a herança: migration 274 e tela em RASCUNHO, ensaio com ROLLBACK feito)
+
+- **Quem:** só Matheus e administração (`pode_tratar_heranca_connect()`); o banco recusa os demais, com a mensagem "Só o Matheus ou um administrador pode tratar a herança da Connect".
+- **Função `tratar_heranca_connect(item, ação, setor, quantidade, observação)`** (migration 274, **NÃO aplicada**): usa a **mesma conta da SPEC-232**. Em toda ação o reservado sai na mesma medida do saldo, então a **"herança sem cliente" de cada peça nunca muda**.
+  | Ação | Saldo do item | Estoque Geral | Reservado |
+  |---|---|---|---|
+  | `entregue_baixa_estoque` (já saiu e a Connect ainda a contava) | Reserva −q, Entregue +q | **−q** | −q |
+  | `entregue_estoque_ja_ajustado` (o check "não mexe no estoque") | Reserva −q, Entregue +q | 0 | −q |
+  | `nao_sera_entregue` (Reserva ou Entrega Futura) | saldo −q, Devolvida +q | 0 | −q (a peça volta a ficar disponível) |
+  | `mantida_confirmada` / `observacao` | nenhum | 0 | 0 (só registra) |
+  Entrega Futura não pode ser entregue (não tem peça física). A **observação é obrigatória**; sem crédito, sem financeiro, não é devolução. Cada ação grava `connect_reserva_tratamento` (quem, quando, por quê, chave da linha) e um movimento (`entregue`/`cancelamento`); o kardex de estoque registra sozinho.
+- **Ensaio com ROLLBACK, como Matheus, em itens reais:** projetista barrada; observação vazia, quantidade acima do saldo e entregar Entrega Futura recusados; entregue com baixa (geral 8→6, reservado 8→6, herança sem cliente 0→0); estoque já ajustado (geral 3→3, reservado 3→2); não será entregue (reservado 81→80, herança sem cliente 11→11); Entrega Futura cancelada (reservado 155→154, herança sem cliente 24→24); manter (nada muda); 5 tratamentos com observação, 4 movimentos, kardex registrou; **reimportar o lote tratado é recusado**; depois do ROLLBACK nada ficou.
+- **Tela (`separacao-parcial`, não commitada nem publicada):** na aba "Vendas parciais Connect", botão **Tratar** (só para quem tem a permissão) em cada item com Reserva ou Entrega Futura; diálogo com setor, 4 opções com o efeito no estoque escrito, quantidade e observação; e o bloco **"Tratamentos desta venda"** (quem, quando, o quê, por quê). Sem o botão para os demais; Trocar/Ajustar seguem escondidos na venda Connect. `tsc` e `vite build` ok.
+- **ATENÇÃO — ordem:** tratar muda saldos, então **depois do primeiro tratamento a reimportação das planilhas é recusada**. Usar a fase 2 só depois da importação final de 07/11.
 
 ### 2026-11-04 (XML APLICADO: migration 273 + importador `--aplicar`) — REGRA: XML também é herança e NÃO mexe em quantidade
 

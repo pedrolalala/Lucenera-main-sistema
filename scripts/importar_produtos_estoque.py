@@ -519,6 +519,11 @@ def main():
         "entradas de nota, as reservas e as movimentações de setor do sistema novo)",
     )
     args = parser.parse_args()
+    if args.incluir_estoque and not args.dry_run:
+        # SPEC-244: com a operação em paralelo iniciada, o estoque passa a ser do sistema novo
+        from sync_connect_common import exigir_sem_operacao_paralela
+
+        exigir_sem_operacao_paralela("Importar o estoque da Connect (--incluir-estoque)")
     if args.incluir_estoque:
         print("ATENÇÃO: --incluir-estoque sobrescreve estoque_itens (entradas de nota e reservas do sistema novo).")
     processar(args.dry_run, args.incluir_estoque)

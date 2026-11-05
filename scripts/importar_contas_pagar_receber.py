@@ -731,6 +731,11 @@ def main():
     parser = argparse.ArgumentParser(description="Sincroniza ContaPagar/ContaReceber com transacoes")
     parser.add_argument("--dry-run", action="store_true", help="Apenas mostra o que seria feito")
     args = parser.parse_args()
+    if not args.dry_run:
+        # SPEC-244: com a operação em paralelo iniciada, Contas a Pagar/Receber são lançadas nos dois sistemas pela equipe; importar da Connect não vale mais
+        from sync_connect_common import exigir_sem_operacao_paralela
+
+        exigir_sem_operacao_paralela("Importar o Contas a Pagar/Receber da Connect")
     processar(args.dry_run)
 
 

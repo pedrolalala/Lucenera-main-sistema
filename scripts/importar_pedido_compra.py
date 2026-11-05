@@ -371,6 +371,11 @@ def main():
     parser = argparse.ArgumentParser(description="Importa planilha PedidoCompra (Financeiro) para pedido_compra/staging_pedido_compra")
     parser.add_argument("--dry-run", action="store_true", help="Apenas mostra o que seria feito")
     args = parser.parse_args()
+    if not args.dry_run:
+        # SPEC-244: com a operação em paralelo iniciada, os pedidos de compra são feitos nos dois sistemas pela equipe; importar da Connect não vale mais
+        from sync_connect_common import exigir_sem_operacao_paralela
+
+        exigir_sem_operacao_paralela("Importar os pedidos de compra da Connect")
     processar(args.dry_run)
 
 

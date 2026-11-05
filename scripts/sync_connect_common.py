@@ -36,6 +36,32 @@ class ImportacaoAbortada(Exception):
     """Levantada por uma pre-validacao que falhou. O caller NAO deve tocar no banco."""
 
 
+def exigir_sem_operacao_paralela(o_que: str) -> None:
+    """SPEC-244: depois que a operação em paralelo com a Connect começa (tabela connect_operacao_paralela, migration 279), o sistema novo é quem
+    mexe no estoque e nos saldos da herança. Recarregar essas planilhas sobrescreveria o que foi feito aqui, então o script recusa."""
+    import sys
+
+    import psycopg2
+
+    from _supabase_client import SUPABASE_DB_URL, para_pooler
+
+    con = psycopg2.connect(para_pooler(SUPABASE_DB_URL), connect_timeout=30)
+    try:
+        cur = con.cursor()
+        cur.execute(
+            "SELECT CASE WHEN to_regclass('public.connect_operacao_paralela') IS NULL THEN NULL "
+            "ELSE (SELECT iniciada_em FROM public.connect_operacao_paralela LIMIT 1) END"
+        )
+        inicio = cur.fetchone()[0]
+    finally:
+        con.close()
+    if inicio is not None:
+        sys.exit(
+            f"RECUSADO: a operação em paralelo com a Connect começou em {inicio:%d/%m/%Y %H:%M}. "
+            f"{o_que} sobrescreveria o que o sistema novo já movimentou (estoque/saldos). Nada foi gravado."
+        )
+
+
 def descobrir_planilha_mais_recente(pasta: Path, prefixo: str, sufixo: str = ".xlsx") -> Path:
     """Encontra o arquivo `<prefixo>*<sufixo>` mais recente em `pasta`.
 

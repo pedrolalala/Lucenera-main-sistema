@@ -175,6 +175,11 @@ def main() -> None:
     ap.add_argument("--limite-venda-antiga", type=int, default=LIMITE_VENDA_ANTIGA)
     args = ap.parse_args()
     aplicar = args.aplicar
+    if aplicar:
+        # SPEC-244: com a operação em paralelo iniciada, a herança é operada no sistema novo e não pode mais ser recarregada
+        from sync_connect_common import exigir_sem_operacao_paralela
+
+        exigir_sem_operacao_paralela("Recarregar a Reserva e a Entrega Futura da Connect")
 
     print(f"Supabase: {SUPABASE_URL}")
     print(f"Modo:     {'GRAVAÇÃO REAL' if aplicar else 'DRY-RUN (roda tudo e desfaz no fim)'}\n")

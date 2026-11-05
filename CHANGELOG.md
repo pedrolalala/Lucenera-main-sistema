@@ -21,6 +21,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Itens do orçamento Connect (migration 271 APLICADA 04/11 + importador rodado): os 230 orçamentos agora têm `orcamento_itens` (3.299, com L em `custom_id`, preço da planilha) ligados aos `projeto_itens`; antes abriam vazios no sistema Orçamentos. A carga desvia o gatilho que reiniciaria a aprovação.
 - Clientes novos da Connect (04/11): `Clientes (1).xlsx` -> `scripts/importar_clientes_connect.py --aplicar` criou 251 clientes (6 sem documento por conflito de CPF/CNPJ); reimportação de Reserva/Entrega Futura passou de 191 para 230 orçamentos Connect e de 70% para 88% das linhas vinculadas.
 - Commit no repositório central (04/11): SPEC-243, migrations 264–270, script de importação, AGENTS.md, CHANGELOG e ponteiros `separacao-parcial` 2fba684 e `cadastro-lucenera` 9e5393f.
+- Compras / entrada de NF (SPEC-243 item I, 05/11): a Entrega Futura da Connect aparece na lista "para quem vai" com a etiqueta "Herança Connect", e só a Débora e a administração vinculam a chegada a ela (migration 275 APLICADA 05/11: `pode_vincular_heranca_connect`, trigger em `nota_fiscal_compra_vinculos` e coluna `origem` em `entregas_futuras_para_entrada`); quem vincula confirma antes de registrar. Não muda quantidade, estoque nem financeiro. Compras b4b00e9 (pushado; deploy pelo build do GitHub).
 
 ## 2026-10-29
 

@@ -89,7 +89,7 @@ O que **não** está redondo ou ainda não foi analisado:
 2. Escrever `scripts/conferir_contas_pagar_receber.py` (só leitura): compara as planilhas do dia com o banco e imprime **abertas, pagas e canceladas por empresa e tipo**, valores, diferenças de status e de valor, e as linhas só no banco. Gera um Excel em `scripts/logs/`. Rodar depois de cada carga (hoje o resultado seria o da seção 3).
 3. **Explicar as 667 diferenças e os 878 códigos repetidos do Receber** (acordos): listar, classificar (acordo legítimo, duplicata, valor ajustado) e decidir o tratamento. Sem mexer em dado sem a lista aprovada.
 4. Conferir na tela de **Contas a Receber** e de **Contas a Pagar** (os dois sistemas da SPEC-225) que a lista em aberto mostra os mesmos totais por empresa. Anotar o totalizador que o Filippo usa para conferir todo dia.
-5. Roteiro de carga diária (quem baixa a planilha, em que pasta, comando, conferência), em `03-Projeto/`.
+5. Roteiro de carga diária (quem baixa a planilha, em que pasta, comando, conferência): **ESCRITO em 05/11** em `03-Projeto/Planos de Ação/ROTEIRO_Carga_Diaria_Financeiro_Contas_Pagar_Receber.md` (5 passos, critério de aceite do dia, o que fazer se não fechar e como desfazer).
 
 **Fase B — pagamento fora do sistema e aprovação**
 6. Observação "já foi pago" e **registro do pagamento** conforme D2 (campo na condição de pagamento ou baixa em Contas a Receber).
@@ -122,6 +122,35 @@ O que **não** está redondo ou ainda não foi analisado:
 - 05/11 (fim da tarde): **auditoria campo a campo** (`auditar_financeiro_vs_planilha.py`) + **G12 corrigido** (`corrigir_campos_financeiro_planilha.py`): 94,1% das linhas 100% iguais nos 17 campos; valores, datas, status e pagamentos com 0 diferenças.
 - 05/11 (tarde): **D7/G9 aplicados** (empresa das negociações corrigida; importador usa a empresa da planilha para duplicata nova; conferência por empresa FECHA); achado G10 (Consultar Duplicatas lê `boletos`).
 - 05/11 (tarde): **D1 aplicada** (guarda retirada de `importar_contas_pagar_receber.py`); **`scripts/conferir_contas_pagar_receber.py` escrito** (só leitura; gera Excel em `scripts/logs/conferencia_financeiro/`); 9 boletos de teste apagados (backup em `backup._bkp_boletos_teste_20261105`); achado G9.
+
+## 14. Espelho da planilha no Supabase (G13, 05/11 — "o nome da pessoa está null; a planilha tem que ser um espelho")
+
+- **Problema:** o nome da pessoa vinha só do cadastro de contatos; sem contato ligado a tela mostrava vazio/"(sem contato vinculado)".
+- **Solução (migration 283 + scripts):** tabela **`connect_contas_espelho`** = cópia 1:1 das planilhas ContaReceber/ContaPagar (50 colunas, chave `tipo` + `cod_itens_duplicata`) e colunas **`negociacoes.nome_pessoa`/`razao_pessoa`** com o nome COMO A PLANILHA DIZ. As telas Contas em Aberto e Consultar Duplicatas mostram, nesta ordem: nome da planilha > cadastro > "Pessoa <código>" (nunca vazio). Carga: `scripts/carregar_espelho_contas_connect.py` (passo 1b do roteiro), com conferência de linhas e somas contra a planilha.
+- **Ensaio de 05/11 (dentro de transação desfeita):** espelho Receber 5.064 linhas (R$ 39.073.563,70; 459 em aberto · R$ 2.851.487,96) e Pagar 14.308 (R$ 46.791.596,03; 1.238 em aberto · R$ 4.082.025,35), **IGUAIS à planilha**; 10.569 negociações ganhariam o nome da planilha. Sem nome da planilha ficam só as antigas fora da planilha de hoje (1.022 Pagar e 2.436 Receber), das quais 475 também sem cadastro (mostram "Pessoa N").
+- **Ordem de publicação (importante):** (1) aplicar a **283**; (2) `carregar_espelho_contas_connect.py --aplicar`; (3) só então publicar as telas (elas leem as colunas novas; antes disso a consulta falharia). **Status: migration, script e telas PRONTOS, nada aplicado/publicado.**
+
+## 13. Mapa de ligações (ids) — o que cada coluna da planilha liga no Supabase e o que falta (05/11)
+
+**Pergunta do usuário:** o que precisamos para ligar por id as planilhas, para não sobrar informação sem vínculo. Medido contra ContaReceber/ContaPagar de 05/11 (Receber 5.064 linhas, 459 em aberto · R$ 2,85 mi; Pagar 14.308 linhas, 1.238 em aberto · R$ 4,08 mi).
+
+| Coluna da planilha (id da Connect) | Liga em (id do sistema novo) | Cobertura hoje | O que falta para fechar |
+|---|---|---|---|
+| `cod_duplicata`, `cod_itens_duplicata` | `negociacoes.cod_duplicata`, `transacoes.cod_itens_duplicata` | **100%** | — |
+| `cod_empresa`/`nm_empresa` | `negociacoes.empresa_id` | **100%** (corrigido hoje) | — |
+| `cod_pessoa` + `nome_pessoa`/`razao_pessoa` | `negociacoes.contato_id` | **~99%** (restam 501 negociações antigas pagas/canceladas) | **O número da pessoa da Connect não é único por tipo** (repete entre cliente e arquiteto, e os 357 fornecedores não têm `codigo_legado`). Gravar `codigo_legado` nos fornecedores a partir da planilha (código + nome únicos) para parar de depender só do nome. |
+| `cod_apropriacao` | `negociacoes.plano_contas_id` (via `plano_de_contas.codigo_connect`) | Receber **97%**, Pagar **96%** por código | Criar no plano de contas: 10000008 ALUGUEL SÃO PAULO, 10000009 CONDOMÍNIO - SÃO PAULO, 2060003 MANUTENÇÃO CONTA (D10). |
+| `nm_funcionario` | `negociacoes.funcionario_id` (via `funcionarios.nm_connect`) | Receber 96% | Funcionários ex-Connect sem cadastro (Katia, Ricardo). |
+| `cod_conta`/`desc_conta` (1 Caixa, 2 Bradesco Lucenera, 3 Bradesco Islight, 4 Bradesco Foco) | `transacoes.conta_id` (via `contas_bancarias.codigo_connect`, só 4 contas) | O código existe em **90% (Receber) e 96% (Pagar)** das linhas, mas `conta_id` está preenchido em só **10% e 26%** | **Não precisa de dado novo:** preencher `conta_id` pela planilha. Falta cadastrar `codigo_connect` das contas que não são essas 4. |
+| nome da pessoa começando com **código de projeto** (`26.245 NADIELE E JOÃO`) | `negociacoes.projeto_id` (via `projetos.codigo`) | Receber **37%** ligado hoje; o código do nome acha o projeto em **74%** (391 das 459 em aberto). Pagar 4% (despesa não é por projeto) | **Não precisa de dado novo:** ligar pelo código no nome (+1.943 linhas no Receber). O resto precisa do mapa venda → orçamento → projeto (abaixo). |
+| `cod_venda` | `negociacoes.cod_venda` → orçamento/venda do sistema novo | A planilha traz `cod_venda` em 94% das linhas do Receber (hoje guardado). Mas das **3.122 vendas** citadas no Receber **só 272** existem como orçamento no sistema novo (herança); **2.850 vendas ficaram sem destino** (3.457 negociações; 261 com parcela em aberto). Pagar: 6% das linhas têm venda e 1.079 em aberto não têm | **Precisa de uma exportação da Connect** que ligue **cod_venda ↔ cod_orçamento ↔ cod_cliente/projeto** (relatório de Vendas/Orçamentos aprovados). Hoje só as planilhas de Reserva/Entrega Futura trazem esse par (só para o que está em aberto) e o XML traz o orçamento e o cliente, mas **não** a venda. |
+| `num_nota` | `notas_fiscais_connect.numero` | Receber: 2.846 linhas com nota; **35%** existem nas notas importadas. Pagar: 2% | **Precisa de exportação das notas fiscais da Connect** do período que falta (a SPEC-204 importou só jan–set; faltam 2024–2025 e out–nov/2026). Sem o status de autorização por planilha (D4). |
+| `nosso_numero` / `n_documento` (boleto) | `boletos.nosso_numero` | Só 3 boletos no sistema (os de teste foram apagados) | Definir se o boleto da Connect entra aqui (retorno bancário) ou fica só na Connect. |
+
+**Ordem para fechar o "rombo":**
+1. **Sem dado novo (posso fazer agora, no mesmo padrão com ensaio e backup):** (a) preencher `transacoes.conta_id` pela planilha; (b) ligar o projeto pelo código no nome da pessoa (Receber); (c) gravar `codigo_legado` nos fornecedores a partir da planilha; (d) criar as 3 contas do plano (D10, com o OK).
+2. **Com exportação da Connect (precisa de você):** (e) relatório **Vendas × Orçamento × Cliente/Projeto** (liga as 2.850 vendas sem destino e os 261 recebíveis em aberto sem venda); (f) notas fiscais de 2024–2025 e out–nov/2026; (g) uma planilha antiga de Contas com nomes para as 501 negociações antigas sem pessoa.
+3. **Regra daqui para a frente:** incluir no `auditar_financeiro_vs_planilha.py` o **relatório de cobertura de ligações** (pessoa, conta, projeto, venda, nota) e exigir que **toda linha em aberto** tenha pessoa, empresa, conta e plano de contas.
 
 ## 12. Auditoria campo a campo e correção dos campos (G12, 05/11 — reunião 02, "confrontar a planilha com o que está no Supabase")
 

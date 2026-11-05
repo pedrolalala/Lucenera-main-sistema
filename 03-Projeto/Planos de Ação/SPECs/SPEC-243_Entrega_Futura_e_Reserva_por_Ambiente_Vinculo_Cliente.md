@@ -323,6 +323,23 @@ Prazo da reunião: planilha de teste imediata; data de virada a combinar (Connec
 
 ## Realizado
 
+### 2026-11-04 (itens do orçamento: migration 271)
+
+- **Defeito achado pelo usuário:** os orçamentos Connect abriam no sistema Orçamentos **sem produtos**. A carga só criava `projeto_itens` (o que a Venda Parcial lê); o Orçamentos lista `orcamento_itens`.
+- **Migration 271 APLICADA** (+ importador `--aplicar` rodado): a carga também cria `orcamento_itens` como a aprovação normal faz — peça, quantidade (Reserva + Entrega Futura), L em `custom_id`, descrição e **preço = valor da planilha ÷ quantidade** (só nos itens do orçamento) — e liga `projeto_itens.orcamento_item_id` a eles. `projeto_itens` segue com preço 0 (nunca mexe em `projetos.valor_total`).
+- **Cuidado tratado:** inserir ou apagar item de orçamento "Orçamento Aprovado" dispara `handle_orcamento_item_change_reset`, que voltaria o orçamento para `enviado_cliente` e geraria token e histórico. A carga e a remoção de lote usam `app.skip_approval_reset` (local à transação). `remover_connect_lote` agora apaga `orcamento_itens` antes do orçamento.
+- **Ensaio e resultado:** 230 de 230 orçamentos ainda "Orçamento Aprovado", 0 histórico de reinício de aprovação, 3.299 `orcamento_itens` = 3.299 `projeto_itens` (todos ligados, mesmo L e mesma quantidade), nenhum orçamento sem item. Estoque 31.966,70/25.453,70, transações 23.243, parcelas 387, boletos 12, vendas 263 e 28 projetos com valor: todos iguais a antes.
+- **Observação:** a soma dos preços dos itens (só as peças ainda em Reserva/Entrega Futura) é MENOR que o `valor_total` do orçamento (total da venda no Contas a Receber): são grandezas diferentes.
+
+### 2026-11-04 (clientes novos importados; reimportação: 230 orçamentos)
+
+- O usuário enviou `Clientes (1).xlsx` (export da Connect: 2.872 clientes; 251 ainda não existiam no sistema; **os 28 clientes que travavam as linhas de Reserva/Entrega Futura estavam todos nela**).
+- **Novo script `scripts/importar_clientes_connect.py`** (dry-run por padrão): só cria o que não existe (chave `contatos.codigo_legado`), tipo `cliente`, CPF/CNPJ só em dígitos; se o documento já é de outro contato ou repete na planilha, cria o cliente SEM documento (6 casos: 2857, 2859, 2912, 2967, 3013, 3043). 133 clientes vêm sem documento na própria planilha (cadastros "26.xxx NOME" de obra).
+- **Gravado (autorizado):** 251 clientes criados (contatos tipo cliente 2.642 → 2.893); em seguida `importar_reserva_entrega_futura_connect.py --aplicar` (lote anterior removido, espelho antigo em backup).
+- **Resultado:** **230 orçamentos Connect** (antes 191), 3.299 itens, **3.371 de 3.826 linhas vinculadas (88%, antes 70%)**; todas as linhas `cliente_nao_cadastrado` foram resolvidas. Saldos Connect: Reserva 15.315,7 e Entrega Futura 5.020,1; valor dos orçamentos R$ 13.308.743,43 (230 de 230 com valor). Por equipe: Thais 76, Marina 71, Thairine 69, Administração 14.
+- **Ainda só no espelho (455 linhas):** ~315 `nome_sem_codigo_projeto` (74 orçamentos; 18 têm cliente com um único projeto, listados na aba `sugestao_projeto` e NÃO aplicados), ~40 `empresa_nao_deduzida/venda_sem_titulo` (venda sem parcela no Contas a Receber/Pagar) e alguns `digitador_nao_encontrado` (Katia, Ricardo).
+- **Conferido depois (nada fora do escopo mudou):** estoque 31.966,70 / reservado 25.453,70, transações 23.243, parcelas 387, boletos 12, vendas 263, 28 projetos com valor_total; itens com preço 0. 1 peça com herança negativa (13653, −1 vinda da Connect).
+
 ### 2026-11-04 (269, reimportação e 270 aplicadas; Cadastro publicado)
 
 - **269 aplicada** e **importador `--aplicar` rodado** (lote anterior removido, 2.645 itens e 191 orçamentos recriados no lote `76b26f00-5d75-4500-9861-a79cb930a857`; espelho antigo em backup): 191 de 191 orçamentos com valor, soma R$ 12.136.545,94 (CNX-1264 = 80.000, CNX-1405 = 320.000, CNX-1351 = 5.800, CNX-1505 = 4.680, CNX-1641 = 8.868,53, CNX-1812 = 85.950). Conferido: itens com preço 0, estoque 31.966,70/25.453,70, transações 23.243, parcelas 387, boletos 12, vendas 263 e 28 projetos com valor — todos iguais a antes.

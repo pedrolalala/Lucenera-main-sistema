@@ -93,13 +93,15 @@ def main() -> None:
             g = (m.groupby("neg").agg(contato_atual=("contato_atual", "first"), cod_pessoa=("cod_pessoa", "first"), nome=("nome_pessoa", "first"),
                                       razao=("razao_pessoa", "first"), n1=("n1", "first"), n2=("n2", "first"), linhas=("cod", "size")).reset_index())
             g["contato_atual"] = g["contato_atual"].map(lambda v: v if isinstance(v, str) else None)
-            for r in g.itertuples():
-                nomes = {x for x in (r.n1, r.n2) if x and x != "NAN"}
+            def resolver(neg, cod_pessoa, nome, razao, n1, n2, contato_atual, linhas, origem):
+                """Decide o contato de UMA negociação pelo nome (mesma regra para a planilha de hoje e para a 2ª passada)."""
+                nonlocal sem_nome
+                nomes = {x for x in (n1, n2) if x and x != "NAN"}
                 if not nomes:
                     sem_nome += 1
-                    continue
-                if r.contato_atual and nome_do_contato.get(r.contato_atual, set()) & nomes:
-                    continue  # já está certo
+                    return
+                if contato_atual and nome_do_contato.get(contato_atual, set()) & nomes:
+                    return  # já está certo
                 cands = {}
                 for n in nomes:
                     for c in por_nome.get(n, []):
@@ -112,31 +114,54 @@ def main() -> None:
                             escolhido = doTipo[0].id
                             break
                         if len(doTipo) > 1:
-                            com_cod = [c for c in doTipo if pd.notna(c.cod) and pd.notna(r.cod_pessoa) and int(c.cod) == int(r.cod_pessoa)]
+                            com_cod = [c for c in doTipo if pd.notna(c.cod) and pd.notna(cod_pessoa) and int(c.cod) == int(cod_pessoa)]
                             if len(com_cod) == 1:
                                 escolhido = com_cod[0].id
                                 break
                             # mesmo nome em mais de um cadastro do mesmo tipo (duplicidade de cadastro): fica o MAIS ANTIGO. Deixar a ligação antiga
                             # (que costuma ser outra pessoa) seria pior do que escolher um dos cadastros do mesmo nome.
                             escolha = sorted(doTipo, key=lambda c: (c.criado, c.id))[0]
-                            ambiguas.append({"tipo": tipo, "negociacao": r.neg, "cod_pessoa": r.cod_pessoa, "nome": r.nome, "candidatos": len(doTipo),
-                                             "escolhido_mais_antigo": escolha.id})
+                            ambiguas.append({"tipo": tipo, "negociacao": neg, "cod_pessoa": cod_pessoa, "nome": nome, "candidatos": len(doTipo), "escolhido_mais_antigo": escolha.id})
                             escolhido = escolha.id
                             break
-                if escolhido == "AMBIGUO":
-                    continue
                 if escolhido is None:
-                    chave = (tipo_novo, norm(r.razao) or norm(r.nome))
+                    chave = (tipo_novo, norm(razao) or norm(nome))
                     if chave not in criar:
-                        cod = int(r.cod_pessoa) if pd.notna(r.cod_pessoa) else None
+                        cod = int(cod_pessoa) if pd.notna(cod_pessoa) else None
                         usar_cod = cod if (cod is not None and (cod, tipo_novo) not in usados and nomes_por_cod.get(cod, 0) == 1) else None
                         if usar_cod is not None:
                             usados.add((usar_cod, tipo_novo))
-                        criar[chave] = {"tipo": tipo_novo, "nome": str(r.nome).strip() if str(r.nome) != "nan" else str(r.razao).strip(),
-                                        "razao": str(r.razao).strip() if str(r.razao) != "nan" else str(r.nome).strip(), "cod_pessoa": cod, "codigo_legado": usar_cod, "negociacoes": 0}
+                        criar[chave] = {"tipo": tipo_novo, "nome": str(nome).strip() if str(nome) != "nan" else str(razao).strip(),
+                                        "razao": str(razao).strip() if str(razao) != "nan" else str(nome).strip(), "cod_pessoa": cod, "codigo_legado": usar_cod, "negociacoes": 0}
                     criar[chave]["negociacoes"] += 1
                     escolhido = ("NOVO", chave)
-                mudar.append({"tipo": tipo, "negociacao": r.neg, "contato_antes": r.contato_atual, "destino": escolhido, "cod_pessoa": r.cod_pessoa, "nome": r.nome, "linhas": int(r.linhas)})
+                mudar.append({"tipo": tipo, "negociacao": neg, "contato_antes": contato_atual, "destino": escolhido, "cod_pessoa": cod_pessoa, "nome": nome, "linhas": int(linhas), "origem": origem})
+
+            for r in g.itertuples():
+                resolver(r.neg, r.cod_pessoa, r.nome, r.razao, r.n1, r.n2, r.contato_atual, r.linhas, "planilha_de_hoje")
+
+            # 2ª PASSADA ("corrigir tudo", 05/11): negociações SEM contato que NÃO estão na planilha de hoje (duplicatas antigas, quase todas pagas).
+            #  (a) o código da pessoa tem UM só nome na planilha de hoje -> resolve por esse nome (cria pré-cadastro se faltar);
+            #  (b) Receber: cliente com o mesmo codigo_legado (os códigos de Receber conferem pelo nome em ~96% dos casos).
+            # Código com mais de um nome na planilha (ex.: 278 = Juliana e Stella no Pagar) NÃO é usado.
+            pares = d.dropna(subset=["cod_pessoa"])[["cod_pessoa", "nome_pessoa", "razao_pessoa", "n1", "n2"]].drop_duplicates()
+            por_codigo = {}
+            for cp, grp in pares.groupby("cod_pessoa"):
+                if len(grp) == 1:
+                    x = grp.iloc[0]
+                    por_codigo[int(cp)] = (x["nome_pessoa"], x["razao_pessoa"], x["n1"], x["n2"])
+            cur.execute("SELECT id::text, cod_pessoa FROM public.negociacoes WHERE tipo::text = %s AND contato_id IS NULL AND cod_pessoa IS NOT NULL", (tipo,))
+            ja_vistas = set(g["neg"])
+            clientes_por_cod = {int(r.cod): r.id for r in ct.itertuples() if r.tipo == "cliente" and pd.notna(r.cod)}
+            for neg, cp in cur.fetchall():
+                if neg in ja_vistas:
+                    continue
+                cp = int(cp)
+                if cp in por_codigo:
+                    nome, razao, n1, n2 = por_codigo[cp]
+                    resolver(neg, cp, nome, razao, n1, n2, None, 0, "codigo_com_nome_unico_na_planilha")
+                elif tipo == "receita" and cp in clientes_por_cod:
+                    mudar.append({"tipo": tipo, "negociacao": neg, "contato_antes": None, "destino": clientes_por_cod[cp], "cod_pessoa": cp, "nome": "", "linhas": 0, "origem": "cliente_de_mesmo_codigo"})
 
         dm = pd.DataFrame(mudar)
         antes_nulo = int(dm["contato_antes"].isna().sum()) if len(dm) else 0

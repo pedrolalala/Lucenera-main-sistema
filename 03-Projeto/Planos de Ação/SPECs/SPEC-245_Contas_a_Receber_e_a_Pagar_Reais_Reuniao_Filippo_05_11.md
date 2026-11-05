@@ -2,7 +2,7 @@
 titulo: "SPEC-245 — Contas a Receber e Contas a Pagar reais e diárias (reunião 42 com o Filippo, 05/11)"
 status: "EM ANDAMENTO — D1 decidida (importador do financeiro LIBERADO) e conferência escrita em 05/11; achado novo: a empresa por linha não bate com a planilha (G9)"
 data: 2026-11-05
-origem: "02-Reunioes/42. Lucenera (Filippo) - 05.11.2026_ ]filippo/01.Reunião"
+origem: "02-Reunioes/42. Lucenera (Filippo) - 05.11.2026_ ]filippo/01.Reunião e 02.Reunião"
 planilhas: "01-Documento/01 - Planilhas/ContaReceber_2026-11-05.xlsx e ContaPagar_2026-11-05.xlsx"
 relacionadas: SPEC-225 (Contas a Pagar / a Receber), SPEC-215 (entrada de NF e financeiro), SPEC-204 (notas fiscais da Connect), SPEC-244 (operação em paralelo), SPEC-195/197 (XML importado da Connect)
 ---
@@ -67,6 +67,7 @@ O que **não** está redondo ou ainda não foi analisado:
 | G9 | ~~A empresa por linha não bate~~ **CORRIGIDO em 05/11:** 3.437 negociações (6.182 parcelas) alinhadas à empresa da planilha (`scripts/corrigir_empresa_negociacoes_financeiro.py`, backup em `backup._bkp_negociacoes_empresa_20261105`); o importador passou a criar duplicata nova na empresa da planilha. Em aberto **fecha por empresa nos dois lados**. Sobram 4 negociações ambíguas e 2 que colidem com outra (abas `ambiguas_puladas`/`colisoes_puladas` do Excel de correção), 1 parcela em aberto divergente no Receber. | Ver seção 10. |
 | G10 | **"Consultar Duplicatas" não mostra as duplicatas da Connect.** Nos sistemas Contas a Receber/Pagar, **Consultar/Cadastrar/Baixar Duplicata** leem a tabela `boletos` (cadastro feito neste sistema; hoje 3 linhas `NFC-` do Compras); só **Contas em Aberto** lê `transacoes`, onde as planilhas são carregadas. As 5.064 duplicatas de Receber e 14.308 de Pagar das planilhas só aparecem em Contas em Aberto. | A tela que o Filippo conhece da Connect (Duplicata, Par., Tot., Venda, Fatura, Pessoa, Emissão, Vencimento, Atraso, Pagamento, Vl. Parcela, Vl. Pago) estaria vazia. Decisão D8. |
 | G11 | **Duplicatas com "Pessoa 464" e pessoa ERRADA.** 9.714 das 14.027 negociações estavam sem contato (a tela mostra "Pessoa <código>") e **1.609 das 2.330 despesas ligadas apontavam para outra pessoa** (ex.: despesa da Adriana Jabur ligada ao cliente "Benedito Gastronomia"). Causa: o importador ligava o contato só ao CRIAR a negociação e pelo `cod_pessoa` sem olhar o tipo (o número repete entre cliente e arquiteto; os 357 fornecedores não têm `codigo_legado`); as antigas nunca foram preenchidas. **CORRIGIDO em 05/11 (seção 11).** | Quem paga/recebe estava errado ou em branco na lista. |
+| G12 | **Campos do backend diferentes da planilha** (auditoria campo a campo, seção 12): conta (plano de contas) de 2.981 negociações de RECEBER copiada da despesa de mesmo número (ex.: receita "RT", "Compras - Revenda"), `cod_venda` vazio em 788 negociações de Receber, `total_parc` desatualizado em 349, forma de pagamento desatualizada em 1.858 parcelas (planilha "Pix", sistema "Duplicata Gerada"). **CORRIGIDO em 05/11** com `scripts/corrigir_campos_financeiro_planilha.py`. Resta ~6% das linhas com diferença (seção 12). | O Filippo olha a conta/categoria e a venda de cada duplicata. |
 
 ## 5. Decisões que dependem do Filippo e do Vinícius
 
@@ -79,6 +80,7 @@ O que **não** está redondo ou ainda não foi analisado:
 - **D7 — Empresa por linha: APROVADO e APLICADO em 05/11 (pelo usuário, "Sim").** Ver G9 e seção 10.
 - **D8 — Consultar Duplicatas (G10):** recomendação: a tela passar a ler `transacoes` (a mesma fonte de Contas em Aberto) com as colunas da Connect, mantendo `boletos` só para o que é emitido/baixado por aqui, em vez de copiar 19 mil linhas para `boletos`. Precisa do OK e de olhar como a tela cadastra/baixa para não perder essas funções.
 - **D9 — Pessoa das negociações antigas que não estão na planilha de hoje:** ligar as 2.089 de Receber pelo cliente de mesmo `codigo_legado` (~96% certo) ou deixar "Pessoa N" até haver planilha antiga com nomes? Recomendação: ligar só se o Filippo precisar do histórico antigo por pessoa.
+- **D10 — Contas que a planilha tem e o plano de contas não:** 10000008 ALUGUEL SÃO PAULO, 10000009 CONDOMÍNIO - SÃO PAULO e 2060003 MANUTENÇÃO CONTA (e o alias 10000007). Criar no plano de contas (precisa do grupo/subgrupo pai)? **D11 — Duplicatas com o mesmo número em mais de uma empresa (804 no Receber):** reprocessar caso a caso com o Vinícius. **D12 — Usuário de leitura para o Claudio** (opções na seção 12).
 
 ## 6. Proposta de entrega (em ordem)
 
@@ -117,8 +119,50 @@ O que **não** está redondo ou ainda não foi analisado:
 ## 9. Realizado
 
 - 05/11: reunião lida; conferência manual das listas em aberto; SPEC escrita.
+- 05/11 (fim da tarde): **auditoria campo a campo** (`auditar_financeiro_vs_planilha.py`) + **G12 corrigido** (`corrigir_campos_financeiro_planilha.py`): 94,1% das linhas 100% iguais nos 17 campos; valores, datas, status e pagamentos com 0 diferenças.
 - 05/11 (tarde): **D7/G9 aplicados** (empresa das negociações corrigida; importador usa a empresa da planilha para duplicata nova; conferência por empresa FECHA); achado G10 (Consultar Duplicatas lê `boletos`).
 - 05/11 (tarde): **D1 aplicada** (guarda retirada de `importar_contas_pagar_receber.py`); **`scripts/conferir_contas_pagar_receber.py` escrito** (só leitura; gera Excel em `scripts/logs/conferencia_financeiro/`); 9 boletos de teste apagados (backup em `backup._bkp_boletos_teste_20261105`); achado G9.
+
+## 12. Auditoria campo a campo e correção dos campos (G12, 05/11 — reunião 02, "confrontar a planilha com o que está no Supabase")
+
+**Como:** `scripts/auditar_financeiro_vs_planilha.py` (só leitura) compara CADA linha da planilha com o Supabase em 17 campos: status, valor da parcela, valor pago, desconto, juros, vencimento, emissão, pagamento, nº e total de parcelas, cod. da duplicata, cod. da venda, nº da nota, empresa, pessoa, plano de contas e forma de pagamento.
+
+**Resultado ANTES das correções** (Receber 5.064 linhas, Pagar 14.308; 0 linhas da planilha ausentes do sistema):
+
+| Campo | Receber | Pagar |
+|---|---|---|
+| status, valor da parcela, valor pago, desconto, juros, vencimento, emissão, pagamento, nº da parcela, cod. da duplicata, nº da nota | **0 diferenças** | **0 diferenças** |
+| plano de contas | 1.483 | 856 |
+| cod. da venda (sistema vazio) | 1.295 | 0 |
+| total de parcelas | 753 | 0 |
+| forma de pagamento | 95 | 1.763 |
+| pessoa diferente | 8 | 1 |
+| empresa | 1 | 0 |
+| **Linhas 100% iguais** | 3.523 (69,6%) | 11.738 (82,0%) |
+
+**Causas (por que não batia):**
+1. **Plano de contas:** 2.981 negociações de Receber carregavam a conta da DESPESA de mesmo número (cópia de 29/06/26 — o mesmo número de duplicata existe como despesa e como receita). Por isso uma receita aparecia como "RT", "Compras - Revenda", "Frete entrada", etc.
+2. **cod_venda:** o importador só gravava a venda ao CRIAR a negociação; as antigas ficaram em 0.
+3. **total_parc:** o sistema guardava o total de parcelas do dia em que a duplicata nasceu (acordos e parcelamentos mudam isso).
+4. **Forma de pagamento:** a planilha muda de "Duplicata Gerada/Boleto" para "Pix/Cartão" quando paga; o importador atualizava status e datas, mas não a forma.
+5. **Pessoa/empresa:** ver G9 e G11.
+
+**Correção (`scripts/corrigir_campos_financeiro_planilha.py --aplicar`, backup campo a campo em `backup._bkp_financeiro_campos_20261105_144330`):** 968 contas corrigidas no Receber e 6 no Pagar, 788 `cod_venda` preenchidos, 349 `total_parc`, 1.858 formas de pagamento. Transações, soma das parcelas, soma em aberto e soma paga ficaram idênticas antes e depois.
+
+**Resultado DEPOIS:** **94,1% das linhas 100% iguais nos 17 campos nos dois lados** (Receber 4.766 de 5.064; Pagar 13.459 de 14.308). Valores, datas, status e pagamentos continuam com 0 diferenças.
+
+**O que ainda difere (não corrigido, com causa):**
+- **Pagar, plano de contas (848 linhas):** quase tudo é **só o nome** da conta (a Connect renomeou: "DESP. OPERAC. MANOELLA" × "Despesa operacional", "DARF GPS" × "DARF/FGPS", "Taxis fretes adm" × "Taxis/Frete/Uber", "Viagens visitas" × "Viagens/Vistas"); o código bate (13.766 de 14.308 iguais por código; 13 pelo alias decidido em 22/09). Há 4 contas da planilha que **não existem no plano de contas** do sistema: 10000008 ALUGUEL SÃO PAULO (13 linhas), 10000009 CONDOMÍNIO - SÃO PAULO (12), 2060003 MANUTENÇÃO CONTA (1) e o código 1 sem nome (as DEV TROCA, tratadas como Devolução por decisão de 07/10). **Decisão D10:** criar essas contas no plano?
+- **Receber, plano de contas (153 linhas / 75 negociações), cod_venda (142), pessoa (8) e empresa (1):** concentram-se onde o **mesmo número de duplicata existe em mais de uma negociação/empresa** (804 negociações de Receber): o sistema escolhe uma vencedora e cancela as demais, e os dados da vencedora (conta, venda, pessoa) vêm da que nasceu primeiro. 104 `cod_venda` já tinham outro número no sistema (conflito, não sobrescrito). **Decisão D11:** reprocessar essas 804 duplicatas repetidas, caso a caso, com o Vinícius.
+- **Pessoa (9 linhas):** duplicatas 1539, 2072 e 2988 (o mesmo número usado por clientes diferentes) e 2226 (planilha sem nome).
+
+### Pontos da reunião 02 respondidos
+
+- **"Previsão de comissão no nome do Clóvis":** **não existe** "previsão de comissão" nem descrição parecida nas planilhas (Pagar e Receber) nem em `transacoes`/`plano_de_contas`. A conta que representa comissão do arquiteto é **"RT"** (1.116 linhas no Pagar; 58 em aberto, R$ 213.328,50), e na planilha ela vem **no nome do arquiteto/empresa** (Storrer Tamburus, Camila Strang…). Se na tela apareceu em nome de cliente, pode ser (a) uma **receita** com a conta "RT" copiada da despesa (bug de plano, corrigido nesta rodada) ou (b) outra tela. **Preciso do print/da tela** para confirmar.
+- **"Conta de R$ 118 no nome de Pessoa 25":** é a SAERP (água e esgoto de Ribeirão Preto), R$ 118,43, vence em 05/11/2026; estava sem contato; **corrigida em G11**.
+- **"Conta da Estela de R$ 2.400 no nome da Ana Maria Prudente":** hoje **não existe** parcela em aberto de R$ 2.400 no Pagar na planilha; as duas de R$ 2.400 em aberto no Receber (duplicata 3857) estão com o nome certo (26.250 Guilherme Corrêa). O erro era a ligação de pessoa por código (G11, corrigido).
+- **"Cristina × Figueiredo Nunes":** duplicata 7912, ISLIGHT, "COMPRAS - REVENDA", pago por Pix a parcela 1 (R$ 12.878,74, 21/09) e parcela 2 (R$ 12.669,33) vence em 05/11; **o credor é a Figueiredo Nunes Serviços** (a planilha), não a Cristina. Corrigido em G11.
+- **"Usuário só de leitura para o Claudio ver o Supabase":** **pendente, decisão D12.** Opções: (1) usuário do SISTEMA com acesso às telas Contas a Receber/Pagar (só consulta, sem Executar/Cadastrar) — mais simples e sem expor o banco; (2) papel de banco `leitura_financeiro` com SELECT apenas nas views/tabelas do financeiro, conectado pelo pooler (exige criar senha — não criei); (3) chave de API anon + um usuário de leitura com RLS. Recomendo (1) agora e (2) se ele precisar consultar o banco direto.
 
 ## 11. Correção das pessoas (G11, 05/11)
 

@@ -66,6 +66,7 @@ O que **não** está redondo ou ainda não foi analisado:
 | G8 | **Dados de teste no financeiro do sistema novo** ("eu tenho que apagar isso aqui"). | "Redonda e zerada." |
 | G9 | ~~A empresa por linha não bate~~ **CORRIGIDO em 05/11:** 3.437 negociações (6.182 parcelas) alinhadas à empresa da planilha (`scripts/corrigir_empresa_negociacoes_financeiro.py`, backup em `backup._bkp_negociacoes_empresa_20261105`); o importador passou a criar duplicata nova na empresa da planilha. Em aberto **fecha por empresa nos dois lados**. Sobram 4 negociações ambíguas e 2 que colidem com outra (abas `ambiguas_puladas`/`colisoes_puladas` do Excel de correção), 1 parcela em aberto divergente no Receber. | Ver seção 10. |
 | G10 | **"Consultar Duplicatas" não mostra as duplicatas da Connect.** Nos sistemas Contas a Receber/Pagar, **Consultar/Cadastrar/Baixar Duplicata** leem a tabela `boletos` (cadastro feito neste sistema; hoje 3 linhas `NFC-` do Compras); só **Contas em Aberto** lê `transacoes`, onde as planilhas são carregadas. As 5.064 duplicatas de Receber e 14.308 de Pagar das planilhas só aparecem em Contas em Aberto. | A tela que o Filippo conhece da Connect (Duplicata, Par., Tot., Venda, Fatura, Pessoa, Emissão, Vencimento, Atraso, Pagamento, Vl. Parcela, Vl. Pago) estaria vazia. Decisão D8. |
+| G11 | **Duplicatas com "Pessoa 464" e pessoa ERRADA.** 9.714 das 14.027 negociações estavam sem contato (a tela mostra "Pessoa <código>") e **1.609 das 2.330 despesas ligadas apontavam para outra pessoa** (ex.: despesa da Adriana Jabur ligada ao cliente "Benedito Gastronomia"). Causa: o importador ligava o contato só ao CRIAR a negociação e pelo `cod_pessoa` sem olhar o tipo (o número repete entre cliente e arquiteto; os 357 fornecedores não têm `codigo_legado`); as antigas nunca foram preenchidas. **CORRIGIDO em 05/11 (seção 11).** | Quem paga/recebe estava errado ou em branco na lista. |
 
 ## 5. Decisões que dependem do Filippo e do Vinícius
 
@@ -77,6 +78,7 @@ O que **não** está redondo ou ainda não foi analisado:
 - **D6 — Quem fecha as pontas:** o Filippo pediu que as reuniões do financeiro sejam com ele; agendar com o Vinícius.
 - **D7 — Empresa por linha: APROVADO e APLICADO em 05/11 (pelo usuário, "Sim").** Ver G9 e seção 10.
 - **D8 — Consultar Duplicatas (G10):** recomendação: a tela passar a ler `transacoes` (a mesma fonte de Contas em Aberto) com as colunas da Connect, mantendo `boletos` só para o que é emitido/baixado por aqui, em vez de copiar 19 mil linhas para `boletos`. Precisa do OK e de olhar como a tela cadastra/baixa para não perder essas funções.
+- **D9 — Pessoa das negociações antigas que não estão na planilha de hoje:** ligar as 2.089 de Receber pelo cliente de mesmo `codigo_legado` (~96% certo) ou deixar "Pessoa N" até haver planilha antiga com nomes? Recomendação: ligar só se o Filippo precisar do histórico antigo por pessoa.
 
 ## 6. Proposta de entrega (em ordem)
 
@@ -117,6 +119,13 @@ O que **não** está redondo ou ainda não foi analisado:
 - 05/11: reunião lida; conferência manual das listas em aberto; SPEC escrita.
 - 05/11 (tarde): **D7/G9 aplicados** (empresa das negociações corrigida; importador usa a empresa da planilha para duplicata nova; conferência por empresa FECHA); achado G10 (Consultar Duplicatas lê `boletos`).
 - 05/11 (tarde): **D1 aplicada** (guarda retirada de `importar_contas_pagar_receber.py`); **`scripts/conferir_contas_pagar_receber.py` escrito** (só leitura; gera Excel em `scripts/logs/conferencia_financeiro/`); 9 boletos de teste apagados (backup em `backup._bkp_boletos_teste_20261105`); achado G9.
+
+## 11. Correção das pessoas (G11, 05/11)
+
+- **`scripts/corrigir_pessoas_financeiro.py`** (ensaio e `--aplicar`; backups em `backup._bkp_negociacoes_contato_20261105` e `backup._bkp_contatos_precadastro_financeiro_20261105`): liga cada negociação ao contato pelo **NOME** da planilha (`nome_pessoa`/`razao_pessoa`, sem acento). Receber prefere cliente > arquiteto; Pagar prefere fornecedor > arquiteto > cliente. O que não existe vira **pré-cadastro** (Receber → cliente; Pagar → fornecedor) com nome e razão social da planilha e observação para completar CPF/CNPJ, contato e endereço.
+- **Resultado:** 7.873 negociações corrigidas (6.018 sem contato + 1.855 com a pessoa errada), **138 pré-cadastros** (121 fornecedores e 17 clientes), 308 ambíguas puladas (mesmo nome em mais de um cadastro do mesmo tipo; aba `ambiguas_puladas` do Excel). Transações, valores e estoque não mudaram.
+- **Ainda sem pessoa:** 2.454 negociações de Receber e 1.242 de Pagar que **não estão na planilha de hoje** (emitidas entre 2024 e 2026, pagas ou antigas): sem o nome não dá para ligar com segurança. 2.089 das de Receber têm um cliente com o mesmo código (96% dos códigos de Receber conferem pelo nome); ligar por esse código é a decisão D9.
+- **Importador:** `importar_contas_pagar_receber.py` deixou de ligar contato pelo `cod_pessoa` (era a causa do erro). **Roteiro diário:** depois de cada carga rodar `corrigir_pessoas_financeiro.py --aplicar` e `conferir_contas_pagar_receber.py`.
 
 ## 10. Resultado da conferência de 05/11 (`conferir_contas_pagar_receber.py`)
 

@@ -106,9 +106,8 @@ def main() -> None:
         if len(dm):
             cur.execute("SELECT (SELECT count(*) FROM public.transacoes), (SELECT count(*) FROM public.negociacoes), (SELECT coalesce(sum(vl_parcela),0) FROM public.transacoes)")
             antes = cur.fetchone()
-            tabela = f"_bkp_negociacoes_empresa_{datetime.now():%Y%m%d}"
+            tabela = f"_bkp_negociacoes_empresa_{datetime.now():%Y%m%d_%H%M%S}"  # com hora: nunca sobrescreve o backup da rodada anterior
             cur.execute("CREATE SCHEMA IF NOT EXISTS backup")
-            cur.execute(f"DROP TABLE IF EXISTS backup.{tabela}")
             cur.execute(f"CREATE TABLE backup.{tabela} (negociacao_id uuid PRIMARY KEY, tipo text, cod_duplicata integer, empresa_id_antes uuid, empresa_id_depois uuid, parcelas integer, criado_em timestamptz DEFAULT now())")
             psycopg2.extras.execute_values(
                 cur, f"INSERT INTO backup.{tabela} (negociacao_id, tipo, cod_duplicata, empresa_id_antes, empresa_id_depois, parcelas) VALUES %s",

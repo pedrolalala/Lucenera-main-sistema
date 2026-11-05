@@ -365,7 +365,10 @@ def processar(dry_run: bool) -> None:
         if plano_contas_id is None:
             sem_plano_contas += 1
         funcionario_id = func_map.get(row["nm_funcionario"]) if row["nm_funcionario"] else None
-        contato_id = contato_map.get(int(row["cod_pessoa"])) if pd.notna(row["cod_pessoa"]) else None
+        # SPEC-245 (G11): NÃO liga o contato pelo cod_pessoa aqui. O número da Connect repete entre cliente/arquiteto e os fornecedores não têm
+        # codigo_legado, então esse mapa ligava a PESSOA ERRADA (1.609 de 2.330 despesas). A pessoa é ligada pelo NOME da planilha por
+        # scripts/corrigir_pessoas_financeiro.py, que deve rodar depois de cada carga (ele cria pré-cadastro do que não existir).
+        contato_id = None
         novas_negociacoes.append(
             {
                 "empresa_id": EMPRESA_POR_NOME.get(str(row.get("nm_empresa") or "").strip().upper(), EMPRESA_LUCE_NERA_ID),

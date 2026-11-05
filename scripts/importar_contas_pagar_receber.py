@@ -743,6 +743,8 @@ def main():
     parser = argparse.ArgumentParser(description="Sincroniza ContaPagar/ContaReceber com transacoes")
     parser.add_argument("--dry-run", action="store_true", help="Apenas mostra o que seria feito")
     args = parser.parse_args()
+    from sync_connect_common import exigir_financeiro_aberto  # SPEC-246: financeiro encerrado em 05/11
+    exigir_financeiro_aberto('Esta carga/correção da planilha')
     # SPEC-245 (reunião 42, 05/11): o financeiro da Connect continua sendo carregado TODO DIA pelas planilhas ContaPagar/ContaReceber (é a fonte do que está
     # a pagar e a receber); por isso este script NÃO tem a guarda da operação em paralelo (SPEC-244), que vale só para estoque, herança e pedido de compra.
     # Depois de cada carga, rodar scripts/conferir_contas_pagar_receber.py.

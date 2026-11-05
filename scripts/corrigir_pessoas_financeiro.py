@@ -53,6 +53,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--aplicar", action="store_true")
     args = ap.parse_args()
+    from sync_connect_common import exigir_financeiro_aberto  # SPEC-246: financeiro encerrado em 05/11
+    exigir_financeiro_aberto('Esta carga/correção da planilha')
     hoje = f"{datetime.now():%Y%m%d_%H%M%S}"  # com hora: rodar de novo NUNCA apaga o backup da rodada anterior
 
     con = psycopg2.connect(para_pooler(SUPABASE_DB_URL), connect_timeout=30)

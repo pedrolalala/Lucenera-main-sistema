@@ -21,6 +21,19 @@
 3. As planilhas precisam ser a **exportação completa** (todos os períodos, pagos, abertos e cancelados), igual à de 05/11 (Receber ≈ 5 mil linhas, Pagar ≈ 14 mil). Planilha parcial pode cancelar duplicatas que não vieram. O importador recusa planilha com muito menos linhas que o esperado.
 4. Confirme que o arquivo `.env` existe na raiz (tem a conexão com o banco). Nunca copie o conteúdo dele para lugar nenhum.
 
+## 1b. ATALHO — um comando só (recomendado)
+
+Depois de colocar as duas planilhas do dia na pasta (passo 1 acima), rode **um comando** que executa toda a cadeia dos passos 1 a 4b e entrega o **relatório de uma página** (BATE / NÃO BATE):
+
+```
+python scripts/conferencia_diaria_financeiro.py --ensaio     # 1º: roda a cadeia em ENSAIO (nada é gravado) e confere
+python scripts/conferencia_diaria_financeiro.py --carregar   # 2º: roda a cadeia GRAVANDO e confere (rotina do dia)
+python scripts/conferencia_diaria_financeiro.py              # só confere (leitura), a qualquer hora
+```
+A cadeia (carga → espelho → empresa → pessoa → campos) **para no primeiro erro**. O relatório fica em `scripts/logs/conferencia_financeiro/relatorio_diario_*.md` e diz: veredito, em aberto por empresa (planilha × sistema), linhas ausentes, diferenças campo a campo, espelho, ligações das linhas em aberto e pendências. **O Filippo não precisa descobrir diferença depois: o relatório já diz se bate e o que não bate.** Códigos de saída: 0 = bate, 1 = não bate, 2 = a carga falhou.
+
+Os passos abaixo continuam valendo para quem quiser rodar um por um.
+
 ## 2. A ordem (não pule nem troque)
 
 Cada passo abaixo **primeiro em ensaio** (mostra o que faria e desfaz) e **depois gravando**. Só passe para o próximo quando o anterior terminar sem erro.

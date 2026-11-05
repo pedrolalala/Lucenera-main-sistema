@@ -36,6 +36,32 @@ class ImportacaoAbortada(Exception):
     """Levantada por uma pre-validacao que falhou. O caller NAO deve tocar no banco."""
 
 
+def exigir_financeiro_aberto(o_que: str) -> None:
+    """SPEC-246: depois do marco do financeiro (tabela connect_financeiro_encerrado, migration 284) a planilha de Contas a Pagar/Receber NÃO é mais
+    carregada: o financeiro é contabilizado pelo sistema novo. Carregar de novo sobrescreveria baixas e lançamentos feitos aqui. O script recusa."""
+    import sys
+
+    import psycopg2
+
+    from _supabase_client import SUPABASE_DB_URL, para_pooler
+
+    con = psycopg2.connect(para_pooler(SUPABASE_DB_URL), connect_timeout=30)
+    try:
+        cur = con.cursor()
+        cur.execute(
+            "SELECT CASE WHEN to_regclass('public.connect_financeiro_encerrado') IS NULL THEN NULL "
+            "ELSE (SELECT encerrado_em FROM public.connect_financeiro_encerrado LIMIT 1) END"
+        )
+        marco = cur.fetchone()[0]
+    finally:
+        con.close()
+    if marco is not None:
+        sys.exit(
+            f"RECUSADO: o financeiro da Connect foi encerrado em {marco:%d/%m/%Y %H:%M} (SPEC-246). "
+            f"{o_que} sobrescreveria o que o sistema novo já registrou. Nada foi gravado. Use a conferência de integridade (vw_financeiro_integridade)."
+        )
+
+
 def exigir_sem_operacao_paralela(o_que: str) -> None:
     """SPEC-244: depois que a operação em paralelo com a Connect começa (tabela connect_operacao_paralela, migration 279), o sistema novo é quem
     mexe no estoque e nos saldos da herança. Recarregar essas planilhas sobrescreveria o que foi feito aqui, então o script recusa."""

@@ -123,6 +123,70 @@ O que **não** está redondo ou ainda não foi analisado:
 - 05/11 (tarde): **D7/G9 aplicados** (empresa das negociações corrigida; importador usa a empresa da planilha para duplicata nova; conferência por empresa FECHA); achado G10 (Consultar Duplicatas lê `boletos`).
 - 05/11 (tarde): **D1 aplicada** (guarda retirada de `importar_contas_pagar_receber.py`); **`scripts/conferir_contas_pagar_receber.py` escrito** (só leitura; gera Excel em `scripts/logs/conferencia_financeiro/`); 9 boletos de teste apagados (backup em `backup._bkp_boletos_teste_20261105`); achado G9.
 
+## 16. Reunião 42, parte 04 (Filippo, 05/11 ~15h): o que foi dito e o que fazer
+
+**Decisões e pedidos do Filippo:**
+1. **Contas a Pagar = só o que ainda falta pagar (presente e futuro).** "Importar 13 mil não faz sentido agora; as planilhas históricas eu faço fora do sistema." → **desmembrar contas a pagar × contas pagas**: tudo que já está pago sai da lista de Contas a Pagar ("vai reduzir muito"); o histórico se ajusta depois. (**D15**)
+2. **O Contas a Pagar não tem ligação com pedido de compra** ("exceto 40 fornecedores em comum, mas não tem relação"). Ao fazer um pedido, ele deve gerar **previsão de pagamento** (ou ao menos a informação). (**G17**)
+3. **Cadê o nome / o contato / a pessoa / o destinatário** na lista de pagar. → resolvido (G11 e G13); falta o ID exato (G15).
+4. **Confiança e método:** "tem que baixar a planilha, conferir se bate com o que registrou, **já** — não preciso esperar o Vinícius dizer que há diferenças; essas coisas não podem chegar crus a mim." → **conferência automática e proativa a cada carga** (G18).
+5. **"Quando eu faço uma venda, está amarrado o cliente? Tem que ligar ao projeto? Vamos fazer uma máscara que visualiza tudo."** → visão única venda → cliente → projeto → financeiro → nota (G19).
+6. **Fluxo:** venda → financeiro → emissão de nota (integração **Focus NFe**); a "condição de pagamento errada" tem que ser entendida de ponta a ponta.
+7. **Pedidos de melhoria e erros** vão pela **Central de Solicitações** (fica documentado; ela já edita e anexa foto) — educar as pessoas a usá-la.
+8. **Compras (Débora):** (a) o **desconto da caixa fechada aparece em dois lugares — deixar só em um**; (b) o **pedido de compra da Alloy "do dia 30" não aparece**. (**G20**)
+9. **Contexto:** o Filippo diz estar inseguro e avalia contratar um consultor; cobra que o sistema funcione "completo, real", com conferências feitas por nós antes de chegar a ele.
+
+**O que verifiquei no banco (05/11):**
+- **Pedidos de compra × pagamentos:** dos **51 pedidos aprovados** (R$ 367.839,55), **só 16 têm parcelas de pagamento** (`pedido_compra_parcelas`: 55 parcelas, R$ 155.409,63, vencimentos até 25/12/2026); **35 não geram nenhuma previsão**. A tela Contas a Pagar **não lê** a view `vw_contas_pagar_pedidos_compra` (a previsão dos pedidos): por isso o Filippo não vê "o pedido virando pagamento". Fornecedores em comum entre pedidos e contas a pagar: **17 de 19** (depois da correção de pessoas; ele viu 40 antes de a ligação por nome existir para os fornecedores).
+- **Pedido da Alloy de 30/10: NÃO existe no banco.** Não há nenhum pedido criado entre 29 e 31/10; o único da Alloy é o `PC-LEGADO-1692` (08/07, R$ 451,65, sem itens). Ou não foi salvo (erro na tela?), ou foi cadastrado com outro fornecedor. **Preciso do número/print que a Débora mandou ("R$ 1,50").**
+- **Desconto da caixa fechada:** aparece no modal de gerar compra (`ModalGerarCompraItemOrcamento`) e em outro ponto do Compras; falta a Débora dizer qual manter.
+
+- **P1 (D15) FEITO em 05/11 — Contas a Pagar só com o que falta pagar:** na tela Consultar Duplicatas do **Contas a Pagar** a situação passou a ser "A pagar (em aberto)" (padrão), "Vencido" e "Pagas (histórico)"; **não existe mais "Todos"** e as pagas só carregam quando se escolhe o histórico (nada foi apagado: os relatórios financeiros dependem das pagas). O Contas a Receber manteve todas as situações. **Contas em Aberto** já mostrava só o que está em aberto.
+- **P2 (G18) FEITO em 05/11 — conferência diária automática:** `scripts/conferencia_diaria_financeiro.py` (`--ensaio`, `--carregar` ou só conferir) roda a cadeia de carga e entrega o relatório de uma página com o veredito BATE / NÃO BATE (em aberto por empresa, linhas ausentes, 6 campos críticos, espelho, ligações e pendências). Resultado de 05/11: **BATE** nos dois lados; nas linhas em aberto, conta bancária ligada em 11/459 (Receber) e 170/1.238 (Pagar) e 41 abertas do Pagar sem conta no plano de contas.
+
+**Plano de correção (ordem):**
+- **P1 — D15:** Contas a Pagar mostra só o que falta pagar; pagas viram "histórico" (aba/filtro separado, **sem apagar nada**: relatórios financeiros dependem das pagas).
+- **P2 — G18:** `scripts/conferencia_diaria_financeiro.py`: roda tudo (carga → espelho → correções → conferência/auditoria) e **entrega um relatório de uma página** (bate / não bate, o que mudou, o que precisa de decisão), para ninguém descobrir diferença depois.
+- **P3 — G17:** ligar pedido de compra ao Contas a Pagar: (a) exigir/gerar parcelas de pagamento no pedido aprovado (hoje 35 de 51 sem); (b) mostrar a previsão do pedido na tela Contas a Pagar, com a origem.
+- **P4 — G14/G15:** Info com os 50 campos, decisão da baixa (D13) e ID exato da pessoa (D14, pedir ao Sérgio).
+- **P5 — G20:** achar o pedido da Alloy e tirar a duplicidade do desconto da caixa fechada.
+- **P6 — G19:** tela "máscara": venda → cliente → projeto → financeiro → nota.
+
+## 15. Reunião 42, partes 02 e 03: o que foi pedido, o que está feito e o que falta (05/11, fim da tarde)
+
+> A parte 04 (preenchida às 15:13) está analisada na seção 16.
+
+**O que o Filippo pediu (02 e 03):**
+1. **Confrontar a planilha com o que está no Supabase**, dizer as diferenças e **por quê**. → feito (seções 3, 10 e 12).
+2. **"O back-end tem que alimentar corretamente"**: nomes errados (Pessoa 25, conta da Estela no nome da Ana Maria, Cristina × Figueiredo Nunes). → corrigido (G9, G11, G13).
+3. **"Não é só importar a planilha: é importar e conectar com o front-end, que tem que mostrar a planilha com TODAS as funcionalidades que o front-end dá."** → **parcial** (G14 abaixo).
+4. **"Na planilha tem que ter o ID de quem é o cliente/fornecedor: eu estou recebendo de quem? pagando quem? Não pode ser duplicação de nome; de lá puxa exatamente a pessoa; puxar do CRM."** → **parcial** (G15 abaixo).
+5. **"Entender se essa é mesmo a planilha e sempre atualizar, fazer o confronto e atualizar as informações reais; depois o ID para amarrar."** → o confronto está feito para a planilha que temos; falta **confirmar que a planilha é completa** (G16).
+6. **Usuário só de leitura para o Claudio** ver o Supabase. → pendente (D12).
+7. **Da reunião 01:** confirmação nas aprovações; RT do arquiteto; registrar pagamento feito por fora (Pix 8502); status da nota fiscal da Connect; apagar dados de teste. → ver quadro.
+
+| # | Pedido | Situação | Evidência / o que falta |
+|---|---|---|---|
+| 1 | Financeiro real, do dia, carga diária | **FEITO** | Importador liberado; roteiro escrito; em aberto fecha no total e por empresa. |
+| 2 | Confrontar planilha × Supabase | **FEITO** | Auditoria de 17 campos: valores, datas, status e pagamentos 0 diferenças; 94,1% das linhas 100% iguais. |
+| 3 | Nome da pessoa certo / nunca vazio | **FEITO** | 8.183 + 2.971 negociações ligadas; 139 pré-cadastros; espelho da planilha (283). |
+| 4 | Planilha no Supabase (espelho) | **FEITO** | `connect_contas_espelho` (50 colunas, igual à planilha em linhas e somas). |
+| 5 | Dados de teste do financeiro | **FEITO (parcial)** | 9 boletos de teste apagados (backup). Falta o Filippo confirmar se as 387 parcelas de projeto de 04/05 também são "teste". |
+| 6 | Front-end com todas as funcionalidades | **PARCIAL — G14** | Ver abaixo. |
+| 7 | ID exato da pessoa (sem depender de nome) | **PARCIAL — G15** | Ver abaixo. |
+| 8 | Planilha completa e igual ao que a Connect mostra | **ABERTO — G16** | Caso Figueiredo Nunes / Copélia R$ 12.872 venc. 10/11 não localizado na planilha. |
+| 9 | Registrar pagamento por fora (Pix 8502) | **ABERTO** | Fase B. |
+| 10 | Confirmação nas aprovações | **ABERTO** | Fase B. |
+| 11 | RT do arquiteto (tem / não tem) | **ABERTO** | Fase C. |
+| 12 | Status da nota fiscal da Connect | **ABERTO** | Planilha não traz; precisa de exportação (D4). |
+| 13 | Usuário de leitura para o Claudio | **ABERTO — D12** | Decisão. |
+
+**G14 — Front-end com todas as funcionalidades (o que a tela Consultar Duplicatas faz hoje com as duplicatas da Connect):** lista, filtros (empresa, perfil, situação, datas, venda, fatura, duplicata, boleto, pessoa) e totais: **sim**. **Executar (baixa), Editar e Exportar: bloqueados para a duplicata da Connect** (decisão minha de 05/11: "só consulta"); **Acordo: "ainda não implementado"** (já era assim); **Info:** mostra só os campos do boleto, **não** os 50 campos da planilha. Para o pedido do Filippo faltam: (a) **Info com todos os campos do espelho** (conta, venda, nota, acordo, dev/troca, forma de pagamento, observação, funcionário…); (b) **decidir a baixa** de duplicata da Connect feita aqui (D13); (c) **Acordo**.
+**G15 — ID da pessoa:** a planilha traz `cod_pessoa`, mas ele **não identifica a pessoa sozinho**: o mesmo número aparece como cliente e como arquiteto, e no Pagar 37 códigos têm mais de um nome (ex.: 278). A planilha **não traz o tipo da pessoa nem CPF/CNPJ**; no CRM os 357 fornecedores **não têm código da Connect**. Por isso a ligação ficou por **nome** (com pré-cadastro). **Para ter o ID exato (D14):** pedir ao Sérgio, que gera a planilha, que acrescente **o tipo da pessoa (cliente/fornecedor/arquiteto) e o CPF/CNPJ** (ou um id único), e exportar da Connect o **cadastro de Fornecedores** (código, nome, CNPJ) para gravar o código nos fornecedores do CRM.
+**G16 — A planilha é completa?** Caso levantado pelo Filippo: "conta de R$ 12.872, vencimento 10/11, a pagar à Figueiredo Nunes / Copélia". **Na planilha de 05/11 não existe parcela de R$ 12.872 com vencimento 10/11** (a mais próxima é a duplicata 7912, parcela 1 de R$ 12.878,74, **paga** em 21/09, e a parcela 2 de R$ 12.669,33 com vencimento 05/11). A duplicata 7912 é de **acordo (nº 743) e marcada dev/troca**: o original de R$ 27.179,41 (duplicata 6988) foi baixado em 08/09 por esse acordo e substituído por 2 parcelas. Ou o item que o Filippo viu não está nesta planilha (exportação incompleta), ou a Connect mostra outra data. **Precisa do print da tela da Connect desse lançamento** para confrontar. Além disso, **866 parcelas do Pagar têm vencimento anterior à emissão** (dado da Connect), o que pode ser o "vencimento puxou errado".
+
+**Decisões novas:** **D13** baixa de duplicata da Connect feita no sistema novo (hoje bloqueada): permitir e proteger da próxima carga até a Connect confirmar? **D14** pedir ao Sérgio tipo da pessoa + CPF/CNPJ na planilha e o cadastro de Fornecedores.
+
 ## 14. Espelho da planilha no Supabase (G13, 05/11 — "o nome da pessoa está null; a planilha tem que ser um espelho")
 
 - **Problema:** o nome da pessoa vinha só do cadastro de contatos; sem contato ligado a tela mostrava vazio/"(sem contato vinculado)".

@@ -97,6 +97,13 @@ COLUNAS_ESPERADAS = [
 # Se esse id mudar de novo (empresa recriada/renomeada), atualizar aqui —
 # mas o mapeamento LUCE NERA->MANOELLA em si NUNCA muda.
 EMPRESA_LUCE_NERA_ID = "9c877812-20e9-452c-bc65-5a542f67ff94"  # MANOELLA
+# SPEC-245 (G9, 05/11): a planilha de 05/11 traz a empresa de CADA linha (nm_empresa). Duplicata nova nasce na empresa da planilha; "LUCE NERA" = MANOELLA.
+EMPRESA_POR_NOME = {
+    "LUCE NERA": EMPRESA_LUCE_NERA_ID,
+    "MANOELLA": EMPRESA_LUCE_NERA_ID,
+    "ISLIGHT": "d8602441-2a4e-4334-a2eb-f0241782146a",
+    "FOCO ILUMINACAO": "436913c7-ebd3-44ac-a3b3-14e9b7fbd591",
+}
 
 BATCH_SIZE = 200
 PAGE_SIZE = 1000
@@ -139,6 +146,8 @@ def carregar_planilha(path: Path, tipo: str) -> pd.DataFrame:
 
     df = df_raw[COLUNAS_TRANSACAO].copy()
     df["tipo"] = tipo
+    # SPEC-245: empresa da linha (a coluna existe nas planilhas novas; se faltar, tudo cai na MANOELLA como antes)
+    df["nm_empresa"] = df_raw["nm_empresa"].astype(str).str.strip().str.upper() if "nm_empresa" in df_raw.columns else "LUCE NERA"
 
     for col in ["dt_emissao", "dt_vencimento", "dt_pagamento"]:
         df[col] = pd.to_datetime(df[col], dayfirst=True, errors="coerce")
@@ -359,7 +368,7 @@ def processar(dry_run: bool) -> None:
         contato_id = contato_map.get(int(row["cod_pessoa"])) if pd.notna(row["cod_pessoa"]) else None
         novas_negociacoes.append(
             {
-                "empresa_id": EMPRESA_LUCE_NERA_ID,
+                "empresa_id": EMPRESA_POR_NOME.get(str(row.get("nm_empresa") or "").strip().upper(), EMPRESA_LUCE_NERA_ID),
                 "contato_id": contato_id,
                 "funcionario_id": funcionario_id,
                 "plano_contas_id": plano_contas_id,
@@ -731,11 +740,9 @@ def main():
     parser = argparse.ArgumentParser(description="Sincroniza ContaPagar/ContaReceber com transacoes")
     parser.add_argument("--dry-run", action="store_true", help="Apenas mostra o que seria feito")
     args = parser.parse_args()
-    if not args.dry_run:
-        # SPEC-244: com a operação em paralelo iniciada, Contas a Pagar/Receber são lançadas nos dois sistemas pela equipe; importar da Connect não vale mais
-        from sync_connect_common import exigir_sem_operacao_paralela
-
-        exigir_sem_operacao_paralela("Importar o Contas a Pagar/Receber da Connect")
+    # SPEC-245 (reunião 42, 05/11): o financeiro da Connect continua sendo carregado TODO DIA pelas planilhas ContaPagar/ContaReceber (é a fonte do que está
+    # a pagar e a receber); por isso este script NÃO tem a guarda da operação em paralelo (SPEC-244), que vale só para estoque, herança e pedido de compra.
+    # Depois de cada carga, rodar scripts/conferir_contas_pagar_receber.py.
     processar(args.dry_run)
 
 

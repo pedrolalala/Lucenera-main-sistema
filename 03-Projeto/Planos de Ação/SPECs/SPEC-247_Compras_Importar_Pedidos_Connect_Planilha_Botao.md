@@ -18,12 +18,14 @@ sistemas_envolvidos:
 - [x] Migration 290 APLICADA no Supabase real (05/11, com aval do usuário).
 - [x] Botão "Importar da Connect (.xlsx)" na aba Pedidos do Compras: escolher arquivo → prévia → confirmar. Código pronto e compilando (`ImportarPedidosConnectDialog.tsx`, `services/importar-pedidos-connect.ts`, `PedidosCompra.tsx`, dependência `read-excel-file@9.3.14`); NÃO publicado (precisa da migration 290 aplicada antes, senão a prévia dá erro).
 - [x] Publicar o Compras (wrangler, build com as chaves de São Paulo) e conferir o bundle — NO AR 05/11 (deploy 5c02058f; bundle conferido em São Paulo e com o botão).
-- [ ] Fase 2 (fora desta entrega): ler o PDF do pedido da Connect para preencher os ITENS dos pedidos `N CONNECT` (precisa de PDFs reais de exemplo).
+- [x] Fase 2 — código pronto e testado, NÃO aplicado/publicado: botão "Importar pedido da Connect (PDF)" que lê o PDF do pedido (peças) e completa o `N CONNECT` sem itens ou cria o pedido. Migration 291 (`20261105_291_spec247_importar_pedido_connect_pdf`, função `importar_pedido_connect_pdf`), parser por posição (`src/lib/pedido-connect-parser.ts`), leitor `pdfjs-dist@4.10.38` (`src/lib/pdf-pedido-connect.ts`), janela `ImportarPdfPedidoConnectDialog.tsx`.
+- [x] Migration 291 APLICADA no Supabase real (05/11, com aval do usuário).
+- [x] Publicar o Compras com o botão de PDF — NO AR 05/11 (deploy 4ded0eb4; bundle em São Paulo, os 2 botões e o worker do pdf.js conferidos em produção).
 
 ### Passos manuais do usuário
 
 - [x] Aprovar a aplicação da migration 290.
-- [ ] Testar o botão com a planilha `PedidoCompra_…xlsx` mais recente.
+- [ ] Testar os botões na tela: planilha `PedidoCompra_…xlsx` e PDFs de pedido da Connect (com a conta da Marina).
 - [ ] Cadastrar no Cadastro os fornecedores que aparecerem em "sem cadastro" (hoje: Metalúrgica IL e Nordecor) e importar de novo.
 - [ ] Conferir qual dos dois cadastros de TENSOFLEX é o certo (e unificar o duplicado).
 - [ ] Pedir à Marina 2 ou 3 PDFs de pedido de compra da Connect (fornecedores diferentes, com mais de uma página) para a fase 2.
@@ -73,6 +75,22 @@ A Marina precisa achar, na Entrada de Nota Fiscal, os pedidos de compra que aind
 - Sem migration aplicada a janela mostra o erro da função (não quebra a tela).
 - Deploy: wrangler com `VITE_SUPABASE_URL`/`VITE_SUPABASE_PUBLISHABLE_KEY` de São Paulo no ambiente do build (o `.env` local do Compras ainda aponta para Ohio).
 
+### Fase 2 — PDF do pedido da Connect (com as peças)
+
+Layout lido (igual nos PDFs reais `1743 - STELLA - FOCO` e `1765 - ILUMINAR - ISLIGHT`, em `01-Documento/02 - Descritivo Connect/PDF/`): cabeçalho (empresa, Pedido, Fornecedor, Pagamento, Data Emissão/Entrega, "Referente a…") + tabela `Item | Produto | Referencia | Descrição | Qtd | UN | Vl. Unit. | Vl. Total` + rodapé (`BC ICMS`… `VL Total Nota`). **"Produto" = `produtos.codigo_produto`** (a referência do PDF = `produtos.referencia`, usada só para avisar divergência).
+
+- **Leitura no navegador** (`pdfjs-dist`, por posição das colunas; só a descrição quebra em 2+ linhas). O PDF não sai do computador; só os dados lidos vão para o banco. PDF sem texto (scan) = erro claro.
+- **Função `importar_pedido_connect_pdf(p_pedido jsonb, p_aplicar boolean)`** (SECURITY DEFINER, mesma permissão `necessidade-de-compra/criar`, sem `anon`):
+  - pedido `N CONNECT` existe **sem itens** (os da planilha) → `completar`: grava os itens e só preenche o que está vazio (entrega, condição de pagamento, empresa); **não troca valor, fornecedor nem status**;
+  - pedido não existe → `criar` (`N CONNECT`, aprovado, valor = Total da Nota, fornecedor pelo nome normalizado, empresa pelo nome; `LUCE NERA` = `MANOELLA`);
+  - pedido já tem itens, ou está cancelado/concluído → não grava;
+  - **peça sem cadastro bloqueia o pedido inteiro** (nada é gravado) e é listada para cadastrar;
+  - itens: `quantidade` e `custo_unitario` (= Vl. Unit.); sem parcelas nem Contas a Pagar.
+- **Tela**: vários PDFs de uma vez; uma ficha de prévia por pedido (ação, peças lidas, avisos) e só grava ao confirmar. Se o PDF não bate (soma dos itens ≠ Total da Nota, item ilegível) a ficha fica bloqueada: melhor não importar do que importar torto.
+- **Efeito de negócio (decidir/avisar):** `vw_necessidade_compra_pedidos_abertos`, `vw_necessidade_compra_pedido_detalhe` e `vw_necessidade_compra_item_orcamento` leem `pedido_compra_itens`. Os pedidos da Connect com peças passam a contar como **pedido em aberto/pendente de entrega** na Necessidade de Compra (evita comprar de novo o que já foi pedido na Connect). Ao dar entrada pela Entrada de NF o estoque do sistema novo sobe, como em qualquer pedido do sistema.
+- **Não coberto:** o PDF que o **próprio sistema novo** gera para o fornecedor ("Pedido de compra para…", SPEC-211/214) tem outro layout; esse pedido já está no banco e não precisa ser importado.
+- Rollback: `DROP FUNCTION` (ver `rollback.sql`; itens já gravados saem por `DELETE` conferido).
+
 ### Análise de ecossistema
 
 - Depende de `contatos`, `pedidos_compra`, `usuarios`/Hub (`hub_pode_executar`). Não toca `projetos`, `orcamentos`, `boletos`, estoque nem financeiro.
@@ -94,6 +112,7 @@ A Marina precisa achar, na Entrada de Nota Fiscal, os pedidos de compra que aind
 - Busca da Entrada de NF corrigida e publicada (Compras `efef826`); aviso de pedido sem itens.
 - 42 pedidos importados por script (R$ 251.551,89); 3 ficaram sem fornecedor cadastrado (1856, 1976 Metalúrgica IL; 1964 Nordecor).
 - SPEC criada. Migration 290 escrita (`up.sql`, `rollback.sql`, `dry_run.sql`) e testada no banco real em ROLLBACK: prévia não grava; grava e é idempotente; itens/parcelas/transações ficam iguais; sem permissão = 42501; `anon` bloqueado; valor negativo recusado. Critério de aceite 1 conferido com a planilha real (0 novos, 42 já existem, 3 sem cadastro: 1856, 1964, 1976). Migration NÃO aplicada.
+- Fase 2 (PDF) desenvolvida e testada; migration 291 APLICADA e Compras publicado (deploy 4ded0eb4) — falta o usuário testar na tela com PDFs de pedido: parser conferido nos 2 PDFs reais (12 peças = R$ 17.545,12; 4 peças = R$ 2.241,41); os 16 códigos de peça existem no cadastro (e as referências batem); migration 291 testada em ROLLBACK (11 casos: criar, completar sem mudar valor, já tem itens, peça sem cadastro, fornecedor sem cadastro, aviso de soma, sem permissão, `anon`) e ponta a ponta com os PDFs reais (pedidos criados com empresa, entrega e pagamento corretos). `tsc` sem erro nos arquivos novos e build ok (`pdf.js` em arquivo separado, só carrega ao usar o botão).
 - Migration 290 APLICADA e Compras publicado (deploy 5c02058f). Falta o usuário testar o botão na tela com a planilha.
 - Botão e janela de prévia feitos no Compras. `tsc` sem erro nos arquivos novos; build ok; leitura da planilha real conferida (código vem como texto, data `dd/mm/aaaa`, valor numérico).
 

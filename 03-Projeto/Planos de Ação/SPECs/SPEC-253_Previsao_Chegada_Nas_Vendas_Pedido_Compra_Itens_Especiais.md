@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-253 — Previsão de chegada nas vendas, pedido de compra ligado à venda e itens especiais por medida"
-status: não iniciado
+status: pendente
 data_ultima_modificacao: 2026-11-06
 sistemas_envolvidos:
   - Compras (04-Sistemas/compras-lucenera-3o23t98ee) — necessidade, pedidos, importação Connect (SPEC-247)
@@ -14,9 +14,9 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] A. Mostrar, ao lado da peça em **Entrega Futura** da venda (e na janela Transferir da SPEC-251), o **nº do pedido de compra** e a **data prevista de chegada**.
+- [x] A. Mostrar, ao lado da peça em **Entrega Futura** da venda (e na janela Transferir da SPEC-251), o **nº do pedido de compra** e a **data prevista de chegada** (por PEÇA; ver Realizado).
 - [ ] B. Quando a compra nasce da necessidade de uma venda (L), gravar o vínculo item do pedido ↔ venda/L; a previsão da venda sai desse vínculo. Peça avulsa: vincular depois, à mão.
-- [ ] C. Atualização da previsão: a Débora edita a data prevista do pedido quando o fornecedor avisa atraso (também depois de aprovado); a venda e a janela Transferir passam a mostrar a data nova. Guardar o histórico das datas.
+- [x] C. Atualização da previsão: a Débora edita a data prevista do pedido quando o fornecedor avisa atraso (também depois de aprovado); a venda e a janela Transferir passam a mostrar a data nova. Guardar o histórico das datas.
 - [ ] D. Regra de atendimento quando um pedido cobre só parte das vendas (ver Pendências).
 - [ ] E. **Itens especiais por medida** (ex.: Esteca, Linea, Versa): não importar o pedido da Connect por PDF; montar o pedido **manualmente** no sistema, escolhendo a venda/L de cada quantidade.
 - [ ] F. Aviso na importação do PDF (SPEC-247) quando o item for especial por medida.
@@ -24,6 +24,7 @@ sistemas_envolvidos:
 
 ### Passos manuais do usuário
 
+- [ ] Aplicar as migrations 292 e 293 e publicar Compras e Venda Parcial (aguarda o OK).
 - [ ] Débora: importar os pedidos normais da Connect pelo botão do PDF e conferir se saem da Necessidade de Compra.
 - [ ] Débora e Vinicius: listar quais produtos são "especiais por medida" (hoje não há marca no cadastro, a conferir).
 
@@ -63,10 +64,19 @@ Ordem de atendimento pela **data da venda** (mais antiga primeiro), podendo a D�
 
 ## Realizado
 
-Nada implementado nesta SPEC. O teste real de importação do PDF (reunião) passou: peças entraram no pedido, apareceram na entrada de NF e saíram da necessidade; o pedido existente é completado, sem duplicar.
+### 2026-11-06 (A e C — migrations 292 e 293 em rascunho com dry-run OK, NÃO aplicadas; código commitado, NÃO publicado)
+
+- **Migration 292 (`20261106_292_spec253_previsao_chegada_produto`)**: view só de leitura `vw_previsao_chegada_produto` (pedido aprovado ou parcialmente recebido com item ainda não recebido por inteiro: peça, nº do pedido, data prevista, quantidade pendente, projeto da solicitação quando houver). `security_invoker`, sem custo nem fornecedor, `REVOKE` de `anon`. Dry-run: 13 linhas/13 peças hoje (todas com data), `anon` barrado, `authenticated` lê.
+- **Migration 293 (`20261106_293_spec253_atualizar_previsao_pedido`)**: função `atualizar_previsao_pedido_compra(pedido, data, motivo)` — mesma permissão do "Voltar para edição" (`necessidade-de-compra`/`editar`), só pedido aprovado ou parcialmente recebido, motivo obrigatório, grava a data nova e uma linha na observação ("de dd/mm para dd/mm em …: motivo"); o histórico fica também no log de auditoria do pedido. Dry-run com ROLLBACK: compradora atualiza (30/11 → 10/12); sem motivo, pedido cancelado, projetista sem acesso a Compras e `anon` são recusados.
+- **Venda Parcial (commit a41915d, não publicado):** ao lado da quantidade em Entrega Futura aparece "Chega dd/mm" (verde), "Pedido sem data" (âmbar) ou "Sem compra" (cinza), com o detalhe dos pedidos no passar do mouse; a janela Transferir mostra "Compra em andamento desta peça" com os pedidos e as datas.
+- **Compras (commit 491e35a, não publicado):** botão **Previsão** nos pedidos aprovados/parcialmente recebidos; janela com a nova data e o motivo obrigatório; não desfaz a aprovação nem mexe no Contas a Pagar.
+- `tsc` sem erro novo nos dois; builds ok só com São Paulo.
+- **Limite desta versão:** a previsão é por **peça** (quando chega o que está a caminho), não por venda. O vínculo item do pedido ↔ venda existe só para pedidos feitos pela Necessidade de Compra (solicitação com projeto); os 42 pedidos importados da Connect não têm esse vínculo. Por isso o item B e a regra de atendimento (D) ficam pendentes. O teste real de importação do PDF (reunião) passou: peças entraram no pedido, apareceram na entrada de NF e saíram da necessidade; o pedido existente é completado, sem duplicar.
 
 ## Pendências
 
+- [ ] Aplicar 292 e 293 e publicar (aguarda o OK).
+- [ ] Débora: lembrar de preencher a data prevista dos pedidos importados da Connect (os 42 vieram sem data; hoje só 5 pedidos aprovados têm data). A planilha da Connect não traz previsão.
 - [ ] Definir como identificar item especial por medida (campo no produto, lista, categoria).
 - [ ] Confirmar a regra de atendimento (D) quando o pedido cobre parte das vendas.
 - [ ] Confirmar se a edição da previsão depois de "Aprovado" já existe no Compras (a conferir no código).

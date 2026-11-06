@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-253 — previsão de chegada nas vendas)
+
+- Migrations 292 (`20261106_292_spec253_previsao_chegada_produto`, view `vw_previsao_chegada_produto`, só leitura, sem custo) e 293 (`20261106_293_spec253_atualizar_previsao_pedido`, função `atualizar_previsao_pedido_compra`) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicadas (rollback.sql incluso). Venda Parcial (commit a41915d): "Chega dd/mm / Pedido sem data / Sem compra" ao lado da Entrega Futura e na janela Transferir. Compras (commit 491e35a): botão **Previsão** para atualizar só a data prevista de pedido aprovado, com motivo, sem desfazer a aprovação. Nada publicado ainda. A previsão é por peça (não por venda); itens especiais por medida e vínculo pedido↔venda seguem pendentes.
+
 ## 2026-11-06 (SPEC-252 — Venda Parcial: finalizadas e Separar tudo)
 
 - Venda Parcial (`04-Sistemas/separacao-parcial`, commit 2cfe4a1 pushado, sem migration; NO AR em separacao-lucenera.pages.dev, deploy 150ffcff por wrangler): vendas finalizadas esmaecidas com tag verde "Finalizado" na lista (Sistema e Connect) e botão **Separar tudo** (preenche a Reserva de cada item liberado; não envia). Remessa de transporte em aba separada (item B) não feita: o tipo ainda não existe no banco (SPEC-233/234). Estoque, financeiro e saldos não mudam.

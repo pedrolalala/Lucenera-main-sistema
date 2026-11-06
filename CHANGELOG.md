@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-256 — Logística: calendário agrupa as listas do mesmo cliente)
+
+- Logística (`04-Sistemas/lucenera-logistics-b7cd1`, commit be366a6, sem migration; NÃO publicado): no calendário e nos detalhes do dia, listas de separação do mesmo cliente + endereço + data contam e aparecem como UMA entrega ("N listas"); sem endereço não agrupa; nunca agrupa só pelo nome. Listas continuam separadas para editar, separar, baixar e imprimir. Pendente: Criar Rota (uma parada por lista) e contagens de painéis que leiam `separacoes` direto.
+
 ## 2026-11-06 (SPEC-255 — garantia e saídas sem cobrança sem revisão financeira)
 
 - Migrations 295 (`20261106_295_spec255_garantia_sem_revisao_financeira`: `equipe_aprovar_orcamento` conclui na hora garantia, bonificação, uso e consumo e demais saídas sem cobrança, sem passar pela revisão financeira) e 296 (`20261106_296_spec255_lista_venda_tipo_operacao`: duas colunas no fim de `vw_venda_parcial_lista`) APLICADAS 06/11 após dry-run com ROLLBACK (rollback.sql incluso; conferido: 316 linhas na view, 2 colunas novas, anon sem acesso, função com a regra). Orçamentos (commit 34879ac, deploy 6146f00d) e Venda Parcial (commit 93c6e79, deploy 9d23dde9, rótulo "Garantia" e código G0005): NO AR e pushados. Achado: a SPEC-234 A já estava no banco (sem parcela, boleto nem nº de venda); a SPEC-233 ganhou nota dizendo que a Fase 0 de bloqueio não deve ser aplicada.

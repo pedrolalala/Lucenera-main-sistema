@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-250 — relatório da reserva sem venda)
+
+- Relatório só de leitura (nada alterado no banco): `03-Projeto/Auditoria/SPEC-250_reserva_sem_venda_2026-11-06.csv`. 160 peças com reserva sem venda (2.884 un.), 12 delas com mais de 50 un. (1.285 un.); o 9988 tem 83 un. enquanto a lista de entrega citava 2, então "limpar tudo" não é seguro. A SPEC-250 propõe limpar por quantidade vinda das listas de entrega baixadas. Aguarda decisão.
+
 ## 2026-11-06 (SPEC-249 — chamados da reunião 43)
 
 - Vendas da Moara em "Administração" CORRIGIDAS (migration 297 `20261106_297_spec249_equipe_moara`, ajuste de dado APLICADO 06/11, backup em `backup.spec249_moara_*`, rollback.sql incluso): a funcionária estava sem equipe; agora Thairine, e os 26 orçamentos da Connect dela (474 linhas de reserva) saíram de Administração (43 → 17) para a Thairine; estoque, financeiro e saldos não mudaram. Demais chamados (só leitura): XML parado no 8514 é da Connect; boleto Figueiredo Nunes (dup. 7912, parcela 2, 05/11, R$ 12.669,33) já está no banco e a data/valor se corrige na Connect. Central de Solicitações (`04-Sistemas/central-de-solicitacoes`, commit c0396fe pushado, NO AR em solicitacoes-lucenera.pages.dev, deploy fbcfa460): busca por texto no painel para evitar pedido repetido. Detalhes na SPEC-249.

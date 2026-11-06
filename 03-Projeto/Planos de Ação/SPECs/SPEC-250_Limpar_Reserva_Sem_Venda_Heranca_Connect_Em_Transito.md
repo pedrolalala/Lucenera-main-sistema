@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-250 — Limpar a reserva sem venda (herança Connect) que ficou em trânsito e está inflando o Estoque Geral"
-status: não iniciado
+status: pendente
 data_ultima_modificacao: 2026-11-06
 sistemas_envolvidos:
   - Banco (Supabase SP) — saldos de estoque por setor, `connect_reserva_ambiente`, `connect_reserva_tratamento`
@@ -14,7 +14,7 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] A. Relatório (só leitura): por peça, a quantidade em "Reserva sem venda (herança Connect)", o Estoque Geral, a Separação e o Disponível, e a conta `Geral − (Separação + Reserva com venda + Disponível)`.
+- [x] A. Relatório (só leitura): por peça, a quantidade em "Reserva sem venda (herança Connect)", o Estoque Geral, a Separação e o Disponível — gerado em 06/11: `03-Projeto/Auditoria/SPEC-250_reserva_sem_venda_2026-11-06.csv` (ver Realizado).
 - [ ] B. Função `limpar_reserva_sem_venda_connect(p_itens, p_aplicar boolean default false)` (modo teste devolve o que faria; só a administração/Matheus aplica).
 - [ ] C. Log por peça (quem, quando, quantidade, saldo antes e depois). Nada é apagado: o setor fica oculto e o histórico consultável.
 - [ ] D. Tela: lista de conferência com botão "Aplicar nos itens marcados" (Cadastro ou Movimentação de Peças).
@@ -75,10 +75,18 @@ A SPEC-243 mediu 7.793 unidades de "reserva sem dono" (sem cliente na planilha).
 
 ## Realizado
 
-Nada implementado (SPEC criada em 06/11).
+### 2026-11-06 (A — relatório, só leitura; nada alterado no banco)
+
+- **Arquivo:** `03-Projeto/Auditoria/SPEC-250_reserva_sem_venda_2026-11-06.csv` (162 peças com "reserva sem venda" diferente de zero; ordenado do maior para o menor; coluna `obs` marca os itens de teste da reunião, os de muita quantidade e os negativos). Mesma conta do Cadastro (`estoque-sectors.ts`): reservado em `estoque_itens` menos (reserva + entrega futura + separação do sistema e da Connect).
+- **Totais:** **160 peças** com reserva sem venda positiva, somando **2.884 un.**; 2 peças negativas (−8 un., a tratar à parte). Faixas: 72 peças de 1 a 5 un. (179 un.), 76 peças de 6 a 50 un. (1.420 un.) e **12 peças com mais de 50 un. (1.285 un., 45% do total)**.
+- **Itens de teste da reunião:** 12757 → 1 un. (Geral 5, Disponível 4: bate com o caso "trânsito"); 9931 → 2 un. (Geral 6, Separação 4); 10614 → 4 un. (as 4 da Vânia); **9988 → 83 un.**, mas a lista de entrega citava só **2** — ou seja, a maior parte dessas 83 não é trânsito.
+- **Conclusão que muda o desenho:** "limpar tudo que está em reserva sem venda" **não é seguro**. A mesma conta mistura (a) peça em trânsito, que some do Geral quando o Matheus dá baixa na Connect, e (b) reserva legítima da Connect que só não tem cliente associado (a SPEC-243 já media 7.793 un. de "reserva sem dono" na herança). Limpar as 83 do 9988 zeraria reserva real e deixaria o Disponível maior que o verdadeiro.
+- **Desenho proposto no lugar do "limpar tudo" (aguarda o seu OK):** a função `limpar_reserva_sem_venda_connect` recebe **a quantidade por peça** vinda das **listas de entrega que o Matheus baixou** (ex.: 12757 → 1, 9931 → 2, 10614 → 4, 9988 → 2), nunca passa da "reserva sem venda" atual da peça e do Estoque Geral, e faz: reserva sem venda −q, Estoque Geral −q (kardex e log como no Tratar). Modo teste primeiro, depois aplicar. Assim a quantidade real vem da lista, e o que não está em lista não é tocado.
 
 ## Pendências
 
+- [ ] **Decidir o desenho** (limpeza por quantidade vinda das listas de entrega baixadas, como proposto acima, em vez de "limpar tudo").
+- [ ] Matheus/Vitória: entregar a lista de itens e quantidades das listas de entrega de 05/11 (para alimentar a função) e conferir ~10 peças depois.
 - [ ] Confirmar que "Reserva sem venda" = trânsito para **todas** as peças ou só para as que a conta do Geral mostra diferença (ver cuidado acima).
 - [ ] Decidir quem executa: só Matheus e administração (como o Tratar) ou também a Vitória.
 - [ ] Ajustar o texto da SPEC-243/244 (regra "herança sem cliente nunca muda") quando esta SPEC for aprovada.

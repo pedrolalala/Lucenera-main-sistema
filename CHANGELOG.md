@@ -4,7 +4,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-06 (SPEC-252 F — entregas antigas sem lista)
 
-- Venda Parcial (`04-Sistemas/separacao-parcial`, commit 1b2ea42, sem migration; NÃO publicado): decisão de tratar entrega antiga sem lista de entrega pelo Tratar existente, ação "o Estoque Geral já está certo" (só Matheus/admin); a janela do Tratar ganhou um aviso para não escolher a ação que baixa o Estoque Geral duas vezes.
+- Venda Parcial (`04-Sistemas/separacao-parcial`, commit 1b2ea42 pushado, sem migration; NO AR em separacao-lucenera.pages.dev, deploy cf7ad393 por wrangler): decisão de tratar entrega antiga sem lista de entrega pelo Tratar existente, ação "o Estoque Geral já está certo" (só Matheus/admin); a janela do Tratar ganhou um aviso para não escolher a ação que baixa o Estoque Geral duas vezes.
 
 ## 2026-11-06 (SPEC-251 — item da Connect que recebe transferência fica liberado)
 

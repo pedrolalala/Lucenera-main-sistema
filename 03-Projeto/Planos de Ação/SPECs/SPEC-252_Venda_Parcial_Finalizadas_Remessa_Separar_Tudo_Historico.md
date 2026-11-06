@@ -82,7 +82,7 @@ Critério para identificar: orçamento com tipo de operação "Outros → Remess
 - [ ] Confirmar com o Matheus se o histórico por parcial na Venda Parcial substitui a consulta em "Finalizados" da Logística ou só complementa.
 - [ ] Confirmar o tipo exato usado para identificar a remessa de transporte no banco.
 
-### 2026-11-06 (F — Tratar para entrega antiga sem lista; commit 1b2ea42 em `separacao-parcial`, NÃO publicado)
+### 2026-11-06 (F — Tratar para entrega antiga sem lista; commit 1b2ea42 pushado; NO AR em separacao-lucenera.pages.dev, deploy cf7ad393)
 
 - **Decisão (seguiu a proposta da SPEC):** vendas antigas já entregues que nunca tiveram lista de entrega no sistema são tratadas pelo **Tratar** (SPEC-243), ação **`entregue_estoque_ja_ajustado`**: Reservado −q, vai para Entregue, **Estoque Geral não muda** (a foto do estoque já é com a peça entregue). Só Matheus e administração (`pode_tratar_heranca_connect`); a Vitória confere, não trata. Nada de banco: a ação já existia e já estava testada em ROLLBACK na SPEC-243.
 - **Risco coberto:** a ação que vem marcada por padrão no Tratar é "já foi entregue — a peça saiu e o Estoque Geral ainda a conta" (tira do Estoque Geral). Num caso de entrega antiga isso tiraria a peça **duas vezes**. A janela agora mostra, ao tratar Reserva, o aviso: "Entrega antiga que nunca teve lista de entrega: se a peça já saiu e o Estoque Geral já está sem ela, escolha 'o Estoque Geral já está certo' ... Confira na Connect antes."

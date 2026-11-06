@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-258 Fase 2 — cópia do legado Connect, RASCUNHO NÃO APLICADO)
+
+- Migration `20261106_304_spec258_fase2_copia_legado_connect` (up/rollback/dry_run), dry-run limpo (~35 s), NÃO aplicada. Só copia (nada antigo muda): 10.403 títulos, 19.372 parcelas (18.316 ativas + 1.056 canceladas pela Connect), 16.724 baixas (2.717 recebimentos, 11.153 pagamentos, 105 abatimentos, 2.749 baixas internas), 129 pendências. Provas no ensaio: soma das parcelas ativas = R$ 75.203.769,77 (= baseline); dinheiro pago = R$ 57.635.911,13 (= view), 13.870 baixas de caixa (= view), 0 diferenças por empresa x natureza x mês; 16.619 quitadas e 1.697 abertas = view; situação coerente com o espelho da Connect; de-para 19.372 transacoes + 10.403 negociacoes; 15 regras de integridade com 0 violações. Não migram: extras fora da Connect e as 1.527 canceladas-com-pagamento sem origem (conferência do Financeiro).
+
 ## 2026-11-06 (SPEC-258 Fase 1B — porta única + views, APLICADA 06/11)
 
 - Migration `20261106_303_spec258_fase1b_porta_unica_views` (up/rollback/dry_run) com dry-run limpo, APLICADA no Supabase SP (6 views, funções; tabelas seguem vazias): funções `financeiro_criar_titulo`, `_confirmar_parcelas`, `_substituir_previsao`, `_cancelar_titulo`, `_baixar`, `_estornar`, pendências (abrir/resolver/aceitar), todas SECURITY DEFINER (anon barrado, permissão financeiro/RH); views `vw_financeiro_parcelas`, `vw_contas_a_receber`, `vw_contas_a_pagar`, `vw_historico_baixas`, `vw_fluxo_caixa` (folha somada sem nomes) e `vw_financeiro_novo_integridade` (15 regras). Nome `vw_financeiro_integridade` já é a view antiga do importador Connect: não foi tocada. Baseline inalterado (18.316 / R$ 75.203.769,77).

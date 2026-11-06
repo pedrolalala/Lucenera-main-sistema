@@ -4,7 +4,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-06 (SPEC-254 — comprovante na aprovação, XML e arquiteto)
 
-- Migration 294 (`20261106_294_spec254_orcamento_anexos`: tabela `orcamento_anexos` com RLS + bucket PRIVADO `orcamento-anexos`) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicada (rollback.sql incluso). Orçamentos (`04-Sistemas/gestao-financeira-clone-544cb (1)`, commit 57d201c, NÃO publicado): comprovante na janela da Aprovação da Equipe, anexos e clipe na revisão financeira, aviso de desconto/sinal/frete ao reimportar XML (o XML da Connect não traz esses campos) e aviso de arquiteto vindo do cadastro do projeto. Sinal já abatia antes do desconto. Cuidado ao publicar: `App.tsx`/`Login.tsx` com alterações da SPEC-242 C não commitadas ficam de fora do build.
+- Migration 294 (`20261106_294_spec254_orcamento_anexos`: tabela `orcamento_anexos` com RLS + bucket PRIVADO `orcamento-anexos`) APLICADA 06/11 após dry-run com ROLLBACK (rollback.sql incluso; conferido: RLS ligado, anon sem acesso, bucket privado). Orçamentos (`04-Sistemas/gestao-financeira-clone-544cb (1)`, commit 57d201c pushado junto com o 976976b da SPEC-246; NO AR em financeiro-lucenera.pages.dev, deploy 3f89962c por wrangler, bundle em São Paulo): comprovante na janela da Aprovação da Equipe, anexos e clipe na revisão financeira, aviso de desconto/sinal/frete ao reimportar XML (o XML da Connect não traz esses campos) e aviso de arquiteto vindo do cadastro do projeto. Sinal já abatia antes do desconto. `App.tsx`/`Login.tsx` com alterações da SPEC-242 C seguem não commitadas e fora do build.
 
 ## 2026-11-06 (SPEC-253 — previsão de chegada nas vendas)
 

@@ -4,7 +4,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-06 (SPEC-250 — relatório da reserva sem venda)
 
-- Relatório só de leitura (nada alterado no banco): `03-Projeto/Auditoria/SPEC-250_reserva_sem_venda_2026-11-06.csv`. 160 peças com reserva sem venda (2.884 un.), 12 delas com mais de 50 un. (1.285 un.); o 9988 tem 83 un. enquanto a lista de entrega citava 2, então "limpar tudo" não é seguro. A SPEC-250 propõe limpar por quantidade vinda das listas de entrega baixadas. Aguarda decisão.
+- Relatório só de leitura (nada alterado no banco): `03-Projeto/Auditoria/SPEC-250_reserva_sem_venda_2026-11-06.csv`. 160 peças com reserva sem venda (2.884 un.), 12 delas com mais de 50 un. (1.285 un.); o 9988 tem 83 un. enquanto a lista de entrega citava 2, então "limpar tudo" não é seguro. Desenho aprovado: limpar por quantidade vinda das listas de entrega baixadas. Migration 298 (`20261106_298_spec250_limpar_reserva_sem_venda`, função `limpar_reserva_sem_venda_connect`) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicada (rollback.sql incluso); aguarda a lista de peças/quantidades do Matheus e o OK para aplicar.
 
 ## 2026-11-06 (SPEC-249 — chamados da reunião 43)
 

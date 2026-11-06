@@ -15,13 +15,14 @@ sistemas_envolvidos:
 ## Checklist de Ação
 
 - [x] A. Relatório (só leitura): por peça, a quantidade em "Reserva sem venda (herança Connect)", o Estoque Geral, a Separação e o Disponível — gerado em 06/11: `03-Projeto/Auditoria/SPEC-250_reserva_sem_venda_2026-11-06.csv` (ver Realizado).
-- [ ] B. Função `limpar_reserva_sem_venda_connect(p_itens, p_aplicar boolean default false)` (modo teste devolve o que faria; só a administração/Matheus aplica).
-- [ ] C. Log por peça (quem, quando, quantidade, saldo antes e depois). Nada é apagado: o setor fica oculto e o histórico consultável.
+- [x] B. Função `limpar_reserva_sem_venda_connect(p_itens jsonb, p_aplicar boolean default false, p_motivo text)` — **rascunho com dry-run OK, NÃO aplicada** (migration 298). Recebe a quantidade POR PEÇA (vinda das listas de entrega), modo teste por padrão, só Matheus/administração.
+- [x] C. Log por peça (quem, quando, quantidade, saldo antes e depois): cada baixa grava um movimento em `movimentacoes_peca` (origem "Reserva sem venda (herança Connect)", destino "Baixa (entregue na Connect)", motivo obrigatório). Nada é apagado.
 - [ ] D. Tela: lista de conferência com botão "Aplicar nos itens marcados" (Cadastro ou Movimentação de Peças).
 - [ ] E. Conferência por amostra (Vitória): 10 peças comparadas com a Connect depois que o Matheus baixar as listas.
 
 ### Passos manuais do usuário
 
+- [ ] Aplicar a migration 298 (aguarda o OK e a lista do Matheus).
 - [ ] Matheus baixa na Connect as listas de entrega de 05/11 (só depois a Connect desce o Estoque Geral).
 - [ ] Vitória confere ~10 peças (itens de teste: 12757, 9931, 9988, 10614) entre os dois sistemas.
 - [ ] Responder as perguntas da seção Pendências.
@@ -85,9 +86,15 @@ A SPEC-243 mediu 7.793 unidades de "reserva sem dono" (sem cliente na planilha).
 
 ## Pendências
 
-- [ ] **Decidir o desenho** (limpeza por quantidade vinda das listas de entrega baixadas, como proposto acima, em vez de "limpar tudo").
+- [x] Desenho aprovado em 06/11 (limpeza por quantidade vinda das listas de entrega baixadas, em vez de "limpar tudo").
 - [ ] Matheus/Vitória: entregar a lista de itens e quantidades das listas de entrega de 05/11 (para alimentar a função) e conferir ~10 peças depois.
 - [ ] Confirmar que "Reserva sem venda" = trânsito para **todas** as peças ou só para as que a conta do Geral mostra diferença (ver cuidado acima).
 - [ ] Decidir quem executa: só Matheus e administração (como o Tratar) ou também a Vitória.
 - [ ] Ajustar o texto da SPEC-243/244 (regra "herança sem cliente nunca muda") quando esta SPEC for aprovada.
 - [ ] Definir se o relatório (A) vira tela permanente ("Divergências Connect × novo") para a conferência periódica.
+
+### 2026-11-06 (B e C — migration 298 em rascunho, dry-run OK, NÃO aplicada)
+
+- **Migration 298 (`20261106_298_spec250_limpar_reserva_sem_venda`):** função `limpar_reserva_sem_venda_connect(p_itens, p_aplicar, p_motivo)`. Entrada: `[{"codigo": 12757, "quantidade": 1}, ...]` (`codigo` = código da peça). Por peça: recusa se a quantidade passa da **reserva sem venda** (mesma conta do Cadastro) ou do **Estoque Geral**; ao aplicar, tira `q` do Estoque Geral e do reservado (o Disponível e a Separação não mudam) e registra o movimento. **Tudo ou nada** (uma peça com problema impede todas) e **motivo obrigatório** para aplicar. Modo teste devolve antes/depois por peça. Permissão: `pode_tratar_heranca_connect()` (Matheus e administração); `anon` sem execução.
+- **Dry-run com ROLLBACK, como Matheus:** modo teste não grava; 9988 pedindo 84 (tem 83) é recusado; uma boa + uma ruim com aplicar: nada muda; sem motivo recusa; aplicando 12757 (1), 9931 (2) e 10614 (4): Geral 5→4, 6→4 e 213,5→209,5, **Disponível igual**, 3 movimentos registrados, Estoque Geral e reservado totais caíram só 7 (= 1+2+4), financeiro, saldos e reservas por cliente iguais; projetista (Marina) barrada.
+- **Para aplicar de verdade falta:** a lista de peças e quantidades das listas de entrega de 05/11 (Matheus/Vitória), conferir ~10 peças e o seu OK para aplicar a 298. Rodar primeiro em modo teste com a lista inteira.

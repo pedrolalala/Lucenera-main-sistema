@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-252 — Venda Parcial: vendas finalizadas em destaque, remessa de transporte em aba separada, Separar tudo, histórico de entregas e entregas antigas sem lista"
-status: não iniciado
+status: pendente
 data_ultima_modificacao: 2026-11-06
 sistemas_envolvidos:
   - Venda Parcial (04-Sistemas/separacao-parcial)
@@ -14,13 +14,13 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] A. **Vendas finalizadas** (nada mais a entregar) continuam na mesma lista, mas **esmaecidas (cinza)** ou com **tag verde "Finalizado"**, no fim ou no mesmo lugar. Sem guia nova.
+- [x] A. **Vendas finalizadas** (nada mais a entregar) continuam na mesma lista, mas **esmaecidas (cinza)** ou com **tag verde "Finalizado"**, no fim ou no mesmo lugar. Sem guia nova.
 - [ ] B. **Remessa de transporte** (venda criada só para emitir NF de remessa, tipo "Outros → Remessa transporte") sai da lista das equipes e vai para uma **aba própria de consulta** (Matheus e Vinicius).
-- [ ] C. Botão **Separar tudo** na venda (pedido do Vinicius): preenche a quantidade de todos os itens com o que está em Reserva, respeitando o limite de cada item.
-- [ ] D. **Histórico de entregas dentro da venda**: cada parcial com data solicitada, data prevista e data entregue, e o acesso à lista (sem depender de salvar PDF em pasta).
+- [x] C. Botão **Separar tudo** na venda (pedido do Vinicius): preenche a quantidade de todos os itens com o que está em Reserva, respeitando o limite de cada item.
+- [x] D. **Histórico de entregas dentro da venda** (já existia: bloco "Parciais desta venda" com parcial, funcionário, data, status, entrega, "Ver itens"/reimprimir e "Estornar"; nada a mudar): cada parcial com data solicitada, data prevista e data entregue, e o acesso à lista (sem depender de salvar PDF em pasta).
 - [ ] E. Estorno parcial antes da entrega (já existe, com motivo): conferir que o item volta para Reserva e que o Matheus é avisado da lista corrigida.
 - [ ] F. **Entregas antigas sem lista de entrega** (ver abaixo): decisão e tratamento.
-- [ ] G. Venda pesquisada por cliente com várias vendas: ver rápido quais ainda têm pendência (efeito de A).
+- [x] G. Venda pesquisada por cliente com várias vendas: ver rápido quais ainda têm pendência (efeito de A).
 
 ### Passos manuais do usuário
 
@@ -68,10 +68,17 @@ Critério para identificar: orçamento com tipo de operação "Outros → Remess
 
 ## Realizado
 
-Nada implementado.
+### 2026-11-06 (A, C, D, G — só front, sem migration; commit 2cfe4a1 em `separacao-parcial`, NÃO publicado)
+
+- **A/G — Finalizadas:** a lista (abas Sistema e Connect) mostra a venda **esmaecida** com a tag verde **"Finalizado"** quando Reserva, Entrega Futura, Ag. separar e Separado estão zerados e há quantidade entregue; volta à cor normal ao passar o mouse. Mesma tela, sem guia nova. Hoje nenhuma das 316 vendas da lista cumpre essa regra (conferido no banco): a marca aparece conforme as entregas forem sendo finalizadas.
+- **C — Separar tudo:** botão ao lado de Separar que **preenche** a quantidade de todos os itens com a Reserva (nunca acima dela) e avisa quantos itens ficaram de fora; na venda da Connect só entram os itens **liberados** (SPEC-244). Não envia: a pessoa confere e clica em Separar. Botão "Limpar" ao lado.
+- **D:** o histórico por parcial já existia (ver item); não foi alterado.
+- `tsc`: 7 erros antes e depois (antigos); `vite build` ok, só com São Paulo.
 
 ## Pendências
 
+- [ ] **B — Remessa de transporte em aba separada: não feito.** Hoje o banco só tem `natureza_operacao` = `venda` (352) e `outros` (1), sem subtipo; a remessa de transporte (SPEC-233/234, item B "não iniciado") ainda não existe como tipo no sistema novo, e as vendas da Connect só entram na lista se têm Reserva/Entrega Futura (a remessa de transporte da Connect não entra). Fazer junto com a SPEC-233/234 ou quando a remessa for criada no sistema novo.
+- [ ] Publicar o Venda Parcial com A, C e G (aguarda o OK).
 - [ ] Decidir a regra do item F (usar Tratar `entregue_estoque_ja_ajustado` por Matheus × liberar para Vitória × outra).
 - [ ] Confirmar o aviso ao Matheus quando alguém estorna uma lista que ele já recebeu.
 - [ ] Confirmar com o Matheus se o histórico por parcial na Venda Parcial substitui a consulta em "Finalizados" da Logística ou só complementa.

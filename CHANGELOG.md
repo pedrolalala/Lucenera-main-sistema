@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-252 — Venda Parcial: finalizadas e Separar tudo)
+
+- Venda Parcial (`04-Sistemas/separacao-parcial`, commit 2cfe4a1, sem migration; NÃO publicado/pushado): vendas finalizadas esmaecidas com tag verde "Finalizado" na lista (Sistema e Connect) e botão **Separar tudo** (preenche a Reserva de cada item liberado; não envia). Remessa de transporte em aba separada (item B) não feita: o tipo ainda não existe no banco (SPEC-233/234). Estoque, financeiro e saldos não mudam.
+
 ## 2026-11-06 (SPEC-251 — Transferir entre vendas)
 
 - Venda Parcial (`04-Sistemas/separacao-parcial`, commit f792cdf pushado, sem migration; NO AR em separacao-lucenera.pages.dev, deploy 99151414 por wrangler, bundle conferido em São Paulo): botão **Transferir** (antes "Trocar") também nas vendas da Connect, janela com coluna Venda/Connect/equipe e motivo obrigatório, bloco "Transferências desta venda" nas duas vendas envolvidas e Log de Transferências geral com busca (visível a todos). Teste no banco como projetista em ROLLBACK: reserva/entrega futura de origem e destino trocadas, Estoque Geral igual, log gravado. Pendente: Matheus e Vitória não têm permissão para transferir (decisão), coluna de previsão (SPEC-253), aviso à equipe de origem. Ponteiro do submodule atualizado no central.

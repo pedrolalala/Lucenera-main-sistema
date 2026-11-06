@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-251 — Transferir entre vendas)
+
+- Venda Parcial (`04-Sistemas/separacao-parcial`, commit f792cdf pushado, sem migration; NO AR em separacao-lucenera.pages.dev, deploy 99151414 por wrangler, bundle conferido em São Paulo): botão **Transferir** (antes "Trocar") também nas vendas da Connect, janela com coluna Venda/Connect/equipe e motivo obrigatório, bloco "Transferências desta venda" nas duas vendas envolvidas e Log de Transferências geral com busca (visível a todos). Teste no banco como projetista em ROLLBACK: reserva/entrega futura de origem e destino trocadas, Estoque Geral igual, log gravado. Pendente: Matheus e Vitória não têm permissão para transferir (decisão), coluna de previsão (SPEC-253), aviso à equipe de origem. Ponteiro do submodule atualizado no central.
+
 ## 2026-11-06 (reunião 43 — sistema em geral: SPEC-249 a SPEC-256)
 
 - Reunião de 06/11 (~2h20, Vinicius, Pedro, Matheus, equipes de vendas e Débora) lida por inteiro: ata e decisões em `02-Reunioes/43. Lucenera (Vinicius TOdos) - 06.11.2026 sistema geral/02_ata_decisoes.md`. SPECs criadas (todas "não iniciado", nenhuma implementada, sem migration, sem alteração de sistema): SPEC-249 (regras da transição, chamados técnicos e índice), SPEC-250 (limpar a reserva sem venda/herança Connect em trânsito), SPEC-251 (Venda Parcial: Transferir para todas as equipes, vendas da Connect incluídas, log nas duas vendas e geral), SPEC-252 (Venda Parcial: finalizadas em cinza/tag, remessa de transporte em aba separada, Separar tudo, histórico, entregas antigas sem lista), SPEC-253 (previsão de chegada nas vendas, pedido de compra ligado à venda, itens especiais por medida), SPEC-254 (Orçamento: comprovante na aprovação, reimportar XML, arquiteto, sinal), SPEC-255 (garantia e saídas sem cobrança: sem revisão financeira, número G; ajusta a SPEC-233), SPEC-256 (Logística: agrupar entregas do mesmo cliente no calendário).

@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-251 — Venda Parcial: botão Transferir (pegar emprestado) para todas as equipes, vendas da Connect incluídas, com log por venda e geral"
-status: não iniciado
+status: pendente
 data_ultima_modificacao: 2026-11-06
 sistemas_envolvidos:
   - Venda Parcial (04-Sistemas/separacao-parcial)
@@ -15,18 +15,19 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] A. Mostrar o botão **Transferir** na Venda Parcial (vendas do sistema **e** vendas da Connect) para todas as equipes, em cada item que esteja em Entrega Futura.
-- [ ] B. Janela de transferência: lista **todas as vendas (de todas as equipes)** e todos os Ls que têm o item em Reserva; escolher a venda, a quantidade e concluir. Transferir também entre Ls do mesmo cliente.
-- [ ] C. Efeito: na venda que recebe, Entrega Futura → Reserva; na venda de origem, Reserva → Entrega Futura (o item "abre" entrega futura de novo). Estoque Geral não muda.
+- [x] A. Mostrar o botão **Transferir** na Venda Parcial (vendas do sistema **e** vendas da Connect) para todas as equipes, em cada item que esteja em Entrega Futura.
+- [x] B. Janela de transferência: lista **todas as vendas (de todas as equipes)** e todos os Ls que têm o item em Reserva; escolher a venda, a quantidade e concluir. Transferir também entre Ls do mesmo cliente.
+- [x] C. Efeito: na venda que recebe, Entrega Futura → Reserva; na venda de origem, Reserva → Entrega Futura (o item "abre" entrega futura de novo). Estoque Geral não muda.
 - [ ] D. Coluna na janela com **previsão de chegada** do item (pedido de compra em andamento e data prevista). Depende da SPEC-253.
-- [ ] E. Motivo obrigatório (texto curto) e registro de quem pediu, quem cedeu e a equipe de cada lado.
-- [ ] F. **Log por venda**: aparece nas **duas** vendas envolvidas (origem e destino) e em nenhuma outra. Mostrar nº das vendas, peça, quantidade, quem, quando, motivo.
-- [ ] G. **Log geral** (botão Log fora de uma venda) com busca/filtro (cliente, peça, pessoa, venda) e rolagem.
-- [ ] H. Manter a regra: a Venda Parcial lista por equipe; só a janela de transferir mostra todas.
+- [x] E. Motivo obrigatório (texto curto) e registro de quem pediu, quem cedeu e a equipe de cada lado.
+- [x] F. **Log por venda**: aparece nas **duas** vendas envolvidas (origem e destino) e em nenhuma outra. Mostrar nº das vendas, peça, quantidade, quem, quando, motivo.
+- [x] G. **Log geral** (botão Log fora de uma venda) com busca/filtro (cliente, peça, pessoa, venda) e rolagem.
+- [x] H. Manter a regra: a Venda Parcial lista por equipe; só a janela de transferir mostra todas.
 - [ ] I. (Depois) aviso para a equipe da venda de origem: "a venda X cedeu a peça Y para a venda Z, feito por W".
 
 ### Passos manuais do usuário
 
+- [x] Publicar o Venda Parcial — NO AR em separacao-lucenera.pages.dev (deploy 99151414 por wrangler, 06/11; bundle em São Paulo e texto novo conferidos em produção); commit f792cdf pushado.
 - [ ] Testar uma transferência real de 2 + 2 unidades (a reunião testou só 4 de uma vez).
 - [ ] Enquanto o aviso automático (I) não existe: continuar mandando o print do log no grupo de transferências.
 
@@ -72,10 +73,18 @@ Hoje o botão Transferir/Trocar fica escondido nas vendas da Connect e só o Tra
 
 ## Realizado
 
-Nada implementado.
+### 2026-11-06 (A, B, C, E, F, G, H — só front, sem migration; NO AR)
+
+- **Nenhuma migration:** a função `trocar_reserva_projetista` já trabalha por item de projeto e não olha a origem (sistema ou Connect). A lista de origem (`vw_cadastro_produto_reserva_detalhe`) e as tabelas de saldo já são lidas por todos os logados; o filtro por equipe existe só na lista de vendas. A permissão (`pode_trocar_reserva`) é por cargo, não por equipe: admin, gerente e Projetista.
+- **Teste no banco como projetista (Marina), em ROLLBACK:** transferência de 1 un. de uma venda do sistema para uma venda da Connect com Entrega Futura: destino Reserva 2→3 e Entrega Futura 3→2; origem Reserva 4→3 e Entrega Futura 0→1; Estoque Geral do produto 56→56; a transferência apareceu no log da venda de destino. Nada ficou gravado.
+- **Venda Parcial (`04-Sistemas/separacao-parcial`):** botão **Transferir** (antes "Trocar") também nas vendas da Connect; janela com coluna **Venda** (selo "Connect"), equipe, aviso "vendas de todas as equipes / faça também na Connect"; **motivo obrigatório**; bloco **"Transferências desta venda"** (cedeu/recebeu, quantidade, de/para qual venda, cliente, equipe, quem, motivo) que aparece nas duas vendas envolvidas e em nenhuma outra; **Log de Transferências** geral com **busca** (cliente, venda, peça, equipe, pessoa, motivo), nº da venda e equipe de cada lado, e o botão agora visível para todos. `tsc`: 7 erros antes e depois (antigos); `vite build` ok e só com São Paulo.
 
 ## Pendências
 
+- [ ] **Matheus (Líder de Logística) e Vitória (Assistente Administrativa) não conseguem transferir:** `pode_trocar_reserva()` e `aprovar_transferencia_estoque` só aceitam admin, gerente e Projetista, e a reunião mostra os dois fazendo transferências e garantias. Decidir se entram na regra (exige migration nas duas funções).
+- [ ] Item D (coluna de previsão de chegada) depende da SPEC-253.
+- [ ] Item I (aviso/pop-up para a equipe da venda de origem) fica para depois.
+- [ ] Destino Connect cuja peça tem data de entrega na Connect: a reserva recebida não poderá ser separada (SPEC-244, item "não liberado"). Decidir se a transferência para esse item deve ser recusada ou avisar.
 - [ ] Confirmar se a janela deve ocultar vendas com data de entrega marcada (para não pegar o que está de saída).
 - [ ] Definir o texto do aviso (item I) e para quem vai (equipe da venda de origem, grupo de transferências).
 - [ ] Decidir se a quantidade padrão sugere o que falta na venda de destino.

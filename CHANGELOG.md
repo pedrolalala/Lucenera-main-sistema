@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-248 item 3 — base de dados da Previsão)
+
+- Migration 301 (`20261106_301_spec248_previsao_transacoes`: `transacoes.previsao`, coluna `previsao` no fim de `v_financeiro_realizado` — só para parcela em aberto —, e função `definir_previsao_transacoes` para marcar/firmar) em RASCUNHO, dry-run com ROLLBACK OK (view com as mesmas linhas e soma), NÃO aplicada (rollback.sql incluso; substitui a view do dashboard, aguarda OK). Faltam o desenho da coluna, a tela do Fluxo Futuro e o cadastro nativo (SPEC-246, passo 4).
+
 ## 2026-11-06 (SPEC-248 item 3 — revisão da recomendação da Previsão)
 
 - Só documentação: com o sistema 100% em uso a opção A deixaria duas fontes permanentes no fluxo de caixa (`transacoes` e `boletos`); a recomendação passa a ser a opção B (gravar em `transacoes`, como parte do front nativo da SPEC-246). A objeção anterior (financeiro travado no marco de 05/11) não procede: o marco travou a importação, não a gravação nativa. Aguarda o usuário confirmar B e reenviar o desenho.

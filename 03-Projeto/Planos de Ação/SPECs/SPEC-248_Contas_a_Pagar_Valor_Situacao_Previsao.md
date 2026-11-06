@@ -19,7 +19,7 @@ sistemas_envolvidos:
 - [x] 1. "Dia" → **Valor da parcela (R$)** em `CadastrarDuplicata.tsx` (**só no modo Pagar**; a Contas a Receber mantém o "Dia", decisão de 06/11 — o formulário é o mesmo código nos 2 sistemas e o push publica nos dois) (cada parcela adicionada já vem com o valor; vencimentos seguintes no mesmo dia do mês do "Venc 1° Parc"; cabeçalho da tabela "Valor da Parcela (R$)").
 - [x] 2a. Situação só **Aberto / Pago / Cancelado** no cadastro do Contas a Pagar (Contas a Receber não mudou).
 - [x] 2b. **Cancelado** não aparece em "A pagar (em aberto)", em "Vencido" nem nos totais da consulta; nova opção "Canceladas" na consulta (Pagar); a baixa não lista nem aceita duplicata cancelada.
-- [ ] 3. Check **Previsão** + coluna própria no fluxo de caixa — **aguarda o desenho** e uma decisão de arquitetura (ver abaixo).
+- [~] 3. Check **Previsão** + coluna própria no fluxo de caixa — **opção B confirmada**; **base de dados pronta em rascunho** (migration 301, ver Realizado); faltam o desenho da coluna, a tela do Fluxo Futuro e o cadastro nativo (SPEC-246).
 - [x] Publicar o Contas a Pagar (wrangler, `build:pagar`, variáveis de São Paulo) — NO AR 06/11 (deploy 3bd83b2f; bundle em São Paulo e textos novos conferidos em produção).
 
 ### Passos manuais do usuário
@@ -78,7 +78,14 @@ Perguntas em aberto: (1) o desenho; (2) A ou B; (3) previsão pode ser desmarcad
 - Itens 1 e 2 implementados, compilando (sem migration) e PUBLICADOS no Contas a Pagar (deploy 3bd83b2f; bundle conferido em produção: São Paulo, "Valor da parcela", "Aberto", "Canceladas", "A pagar (em aberto)").
 - Levantamento do item 3 (fluxo de caixa não lê `boletos`; desenho não está no projeto).
 
+### 2026-11-06 (item 3 — base de dados da Previsão pela opção B; migration 301 em RASCUNHO, dry-run OK, NÃO aplicada)
+
+- **Migration 301 (`20261106_301_spec248_previsao_transacoes`):** (1) `transacoes.previsao` (boolean, padrão `false`: nada que já existe vira previsão); (2) `v_financeiro_realizado` ganha a coluna `previsao` no FIM — verdadeira **só para parcela em aberto** (`status_pago = 0`): Pago e Cancelado **nunca** aparecem como previsão, mesmo com a marca ligada (resposta à pergunta 4, conforme a sugestão); (3) função `definir_previsao_transacoes(ids, previsao, motivo)`: marca ou **desmarca** (a conta vira firme — pergunta 3: sim, pode) parcelas em aberto; recusa parcela paga/cancelada; quem pode = `pode_acessar_sistema('financeiro')`; `anon` sem execução; a auditoria da tabela registra antes/depois.
+- **Dry-run com ROLLBACK (como admin):** a view ganhou 1 coluna (`previsao`, a última) e as **mesmas linhas e a mesma soma** de antes; marcar 3 parcelas em aberto → 3 na view; pagar uma → 2 (o pago some mesmo com a marca ligada); firmar outra → 1; marcar parcela paga é recusado; auxiliar de estoque (sem financeiro) barrado; `anon` barrado.
+- **Importante:** as respostas às perguntas 3 e 4 acima são as **minhas sugestões**; o usuário ainda não as confirmou. Se mudar algo (ex.: Pago aparecer em outra coluna), é só ajustar a coluna da view.
+- **Falta para fechar o item 3:** o desenho da coluna no Fluxo Futuro; a tela do Fluxo Futuro (dashboard) com a coluna "Previsão"; o cadastro do Contas a Pagar gravando duplicata e parcelas em `negociacoes`/`transacoes` com a marca (passo 4 da SPEC-246, que ainda não foi aplicada).
+
 ## Pendências
 
-- [ ] Item 3: receber o desenho, decidir A ou B, escrever a migration (`previsao`) e a coluna no Fluxo Futuro.
+- [ ] Item 3: receber o desenho, aplicar a migration 301 (base de dados), fazer a coluna no Fluxo Futuro e o cadastro nativo (SPEC-246, passo 4).
 - [ ] Decidir se a Contas a Receber também deixa de contar boleto cancelado como aberto.

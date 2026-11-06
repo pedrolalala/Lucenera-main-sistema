@@ -4,7 +4,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-06 (SPEC-256 — Logística: calendário agrupa as listas do mesmo cliente)
 
-- Logística (`04-Sistemas/lucenera-logistics-b7cd1`, commit be366a6, sem migration; NÃO publicado): no calendário e nos detalhes do dia, listas de separação do mesmo cliente + endereço + data contam e aparecem como UMA entrega ("N listas"); sem endereço não agrupa; nunca agrupa só pelo nome. Listas continuam separadas para editar, separar, baixar e imprimir. Pendente: Criar Rota (uma parada por lista) e contagens de painéis que leiam `separacoes` direto.
+- Logística (`04-Sistemas/lucenera-logistics-b7cd1`, commit be366a6 pushado, sem migration; NO AR em logistica-lucenera.pages.dev, deploy 45346971 por wrangler, bundle em São Paulo): no calendário e nos detalhes do dia, listas de separação do mesmo cliente + endereço + data contam e aparecem como UMA entrega ("N listas"); sem endereço não agrupa; nunca agrupa só pelo nome. Listas continuam separadas para editar, separar, baixar e imprimir. Pendente: Criar Rota (uma parada por lista) e contagens de painéis que leiam `separacoes` direto.
 
 ## 2026-11-06 (SPEC-255 — garantia e saídas sem cobrança sem revisão financeira)
 

@@ -21,7 +21,7 @@ sistemas_envolvidos:
 
 ### Passos manuais do usuário
 
-- [ ] Publicar o Logística (aguarda o OK; sem migration).
+- [x] Logística publicado (06/11, deploy 45346971; sem migration).
 - [ ] Matheus: confirmar que o agrupamento ajuda (ou não muda nada) na rotina dele.
 
 ## Objetivo
@@ -48,7 +48,7 @@ No sistema novo cada pedido de separação cria uma lista própria. Quando o mes
 
 ## Realizado
 
-### 2026-11-06 (A–E — só front, sem migration; commit be366a6, NÃO publicado)
+### 2026-11-06 (A–E — só front, sem migration; commit be366a6 pushado; NO AR em logistica-lucenera.pages.dev, deploy 45346971)
 
 - **Regra de agrupamento (`lib/agrupar-entregas.ts`):** mesma data (a do dia do calendário) + mesmo **cliente** + mesmo **endereço**. Cliente = código (`cliente_id`) quando existe, senão o nome normalizado; endereço = `endereco` (ou `endereco_entrega`) sem acento, caixa nem pontuação. **Sem endereço, a lista fica sozinha**; nunca agrupa só pelo nome; lista com outra data fica em outro dia. Complexidade do grupo = a mais alta das listas.
 - **Teste da regra** (8 listas de exemplo): "Ana Souza / Rua A, 10 - Centro" e "ANA SOUZA / rua a 10 centro" juntaram; mesmo nome com outro endereço ficou separado; duas listas sem endereço não se juntaram; mesmo código de cliente e endereço juntou; outro código no mesmo endereço ficou separado.
@@ -59,7 +59,6 @@ No sistema novo cada pedido de separação cria uma lista própria. Quando o mes
 
 ## Pendências
 
-- [ ] Publicar o Logística (aguarda o OK).
 - [ ] **Criar Rota** continua usando as listas (uma parada por lista); confirmar com o Matheus se o grupo deve virar uma parada só.
 - [ ] Dashboard: se algum painel conta entregas pelas listas (`separacoes`), ele ainda mostra o número antigo; conferir e alinhar.
 - [ ] Confirmar com o Matheus se o grupo deve aparecer também na tela dele de separação.

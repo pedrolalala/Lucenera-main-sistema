@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-254 — comprovante na aprovação, XML e arquiteto)
+
+- Migration 294 (`20261106_294_spec254_orcamento_anexos`: tabela `orcamento_anexos` com RLS + bucket PRIVADO `orcamento-anexos`) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicada (rollback.sql incluso). Orçamentos (`04-Sistemas/gestao-financeira-clone-544cb (1)`, commit 57d201c, NÃO publicado): comprovante na janela da Aprovação da Equipe, anexos e clipe na revisão financeira, aviso de desconto/sinal/frete ao reimportar XML (o XML da Connect não traz esses campos) e aviso de arquiteto vindo do cadastro do projeto. Sinal já abatia antes do desconto. Cuidado ao publicar: `App.tsx`/`Login.tsx` com alterações da SPEC-242 C não commitadas ficam de fora do build.
+
 ## 2026-11-06 (SPEC-253 — previsão de chegada nas vendas)
 
 - Migrations 292 (`20261106_292_spec253_previsao_chegada_produto`, view `vw_previsao_chegada_produto`, só leitura, sem custo) e 293 (`20261106_293_spec253_atualizar_previsao_pedido`, função `atualizar_previsao_pedido_compra`) APLICADAS 06/11 após dry-run com ROLLBACK (rollback.sql incluso; conferido: anon sem acesso, authenticated com acesso, 13 linhas na view). Venda Parcial (commit a41915d): "Chega dd/mm / Pedido sem data / Sem compra" ao lado da Entrega Futura e na janela Transferir. Compras (commit 491e35a): botão **Previsão** para atualizar só a data prevista de pedido aprovado, com motivo, sem desfazer a aprovação. Compras NO AR (deploy 7d0a949e) e Venda Parcial NO AR (deploy 0e572112), ambos pushados. A previsão é por peça (não por venda); itens especiais por medida e vínculo pedido↔venda seguem pendentes.

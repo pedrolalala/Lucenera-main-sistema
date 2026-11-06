@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-248)
+
+- Contas a Pagar (`04-Sistemas/retorno-bancario-bradesco-5392a`, build `build:pagar`; NO AR em contas-pagar-lucenera.pages.dev, deploy 3bd83b2f por wrangler, bundle conferido em São Paulo; sem migration): "Dia" virou **Valor da parcela (R$)** no Gerar Parcelas (o "Dia" era o dia do mês dos vencimentos; agora seguem o dia do "Venc 1° Parc"); situação só **Aberto / Pago / Cancelado** no Pagar (Receber inalterado); **Cancelado** fora de "A pagar (em aberto)", "Vencido" e totais da consulta, nova opção "Canceladas", baixa recusa duplicata cancelada. Item "Previsão" (check + coluna no fluxo de caixa) pendente: o fluxo de caixa lê `transacoes`, não `boletos`, e o desenho enviado antes não está no projeto. SPEC-248. Atenção: o `.env` local deste sistema também aponta para Ohio; o build deve usar as variáveis de São Paulo do Cloudflare.
+
 ## 2026-11-05 (correções de orçamento e cadastro de empresas)
 
 - Desfazer Aprovação Financeira falhava com `estoque_movimentos_projeto_item_tipo_check`: a função `desfazer_aprovacao_financeira` grava o tipo `estorno_aprovacao_orcamento`, que a constraint não aceitava. Migration 286 (`20261105_286_fix_estorno_aprovacao_tipo_check`) APLICADA 05/11, só acrescenta o tipo à constraint (rollback.sql incluso).

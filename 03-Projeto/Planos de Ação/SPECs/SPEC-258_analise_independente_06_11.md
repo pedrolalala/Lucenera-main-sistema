@@ -44,3 +44,18 @@ Igual a 06/11 em todos os números (18.316 linhas / R$ 75.203.769,77 na `v_finan
 ## 5. Incertezas
 - A3 é hipótese; só a conciliação com o espelho confirma.
 - A8: os 305 pagamentos cruzados podem ser acordo legítimo (os scripts citam "empresa trocada para acordo de RT") ou erro de lançamento.
+
+## 6. Conciliação das 3.020 canceladas com pagamento (A3) — RESULTADO (06/11/2026, a pedido do usuário)
+
+Somente leitura; script reexecutável em `scripts/financeiro/conciliacao_canceladas_com_pagamento.sql`. Comparadas contra `connect_contas_espelho` (planilha de 05/11, a última carga) e contra as demais parcelas do banco. **A hipótese estava parcialmente certa: 54% são artefatos; 46% são um problema real.**
+
+| Classe | Parcelas | Valor pago | O que é | Migrar como baixa? |
+|---|---|---|---|---|
+| **C1** cópia cancelada de parcela com o **mesmo código** ativa | 807 (receita) | R$ 2.873.878 | A parcela ativa é a verdade: em 726 das 728 com gêmea paga, o valor da Connect é igual ao da gêmea (R$ 5,07 mi Connect × R$ 5,08 mi gêmea; a cópia cancelada tinha só R$ 2,55 mi). As outras 79 têm gêmea **aberta**, e a Connect também a vê aberta: o "pagamento" da cópia é fantasma. | **Não** |
+| **C4** substituída por parcela paga de mesmo valor (outra data) | 57 (56 despesa, 1 receita) | R$ 225.784 | A substituta existe e está **paga no banco** (57 de 57). Contar a cancelada seria receber/pagar em dobro. | **Não** |
+| **C6** a Connect também cancelou (`pago = 2`) | 12 (receita) | R$ 10.985 | Cancelamento legítimo com valor pago lançado. | Não (listar na fila) |
+| **C7** parcela removida, duplicata ainda existe na Connect | 617 (572 receita, 45 despesa) | R$ 1.962.721 | Para as 214 duplicatas envolvidas, o **total pago no banco é igual ao da Connect (diferença R$ 0)**: sem efeito no total. | **Não** |
+| **C8** **duplicata inteira ausente da Connect**, sem gêmea e sem pagamento igual em outra duplicata (mesma pessoa, valor e data) | **1.527 (receita)** | **R$ 4.291.065** | 1.502 em Pix (R$ 4,15 mi) e 25 em Dinheiro; pagas em 2025 (629, R$ 1,66 mi) e 2026 (898, R$ 2,63 mi). A Connect removeu a duplicata e **não há outro registro desse dinheiro**. Hoje ficam fora do fluxo (canceladas). | **Decisão do Financeiro** |
+| Total | **3.020** | **R$ 9.364.434** | | |
+
+**Conclusões:** (1) **R$ 5.073.368 (54%) são artefatos de renumeração/duplicidade da carga**: nenhuma dessas parcelas vira baixa; ficam como parcela cancelada, sem baixa (e sem entrar na receita realizada). Migrar 1:1 teria **inflado o realizado em R$ 5,07 mi**. (2) **R$ 4.291.065 (C8, 1.527 parcelas) é o único grupo que exige conferência humana:** pode ser receita real não contada (se o Pix entrou na conta) ou duplicata removida por erro na Connect. Lista para o Financeiro: `01-Documento/01 - Planilhas/CONFERIR_canceladas_com_pagamento_sem_origem.csv` (contém nomes de clientes: não enviar/commitar), a ser conferida com o extrato do banco. Na migração entram na **fila de pendências** (tipo `cancelada_com_pagamento_sem_origem`), sem criar baixa até a conferência. (3) O número do baseline (18.316 linhas; R$ 75.203.769,77) **não muda**, porque a view já exclui as canceladas.

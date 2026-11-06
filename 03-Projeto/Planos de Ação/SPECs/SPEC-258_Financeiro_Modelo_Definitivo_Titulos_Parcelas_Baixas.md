@@ -222,8 +222,11 @@ Plano de volta atrás em cada fase: `rollback.sql` por migration e o "antes" no 
 - Perguntas de negócio fechadas em `SPEC-258_perguntas_de_negocio.md` (38 perguntas, com recomendação).
 - **Respostas do usuário (06/11):** (1) criar planilha de % de RT — **criada** (`01-Documento/01 - Planilhas/RT_percentual_arquitetos.xlsx`, 867 arquitetos; a preencher); (5) emissão de NF pelo arquiteto — **a confirmar**; (22) "pago" com valor zero em Carteira = baixa por processo interno sem movimentação de parcela → tipo de baixa `baixa_interna` (sem caixa); (27) pagamentos com conta de outra empresa — "pode ser acordo entre empresas ou erro", **não confirmado** → marcados e na fila de pendências para o Financeiro classificar.
 
+- **Conciliação das 3.020 canceladas com pagamento (A3), concluída a pedido do usuário:** R$ 5,07 mi (54%) são artefatos (cópia cancelada de parcela ativa com o mesmo código, parcela substituída, ou parcela removida com o total por duplicata igual ao da Connect) e **não viram baixa**; **R$ 4,29 mi (1.527 receitas, 1.502 em Pix) são de duplicatas removidas da Connect, sem registro em outro lugar** → fila de pendências `cancelada_com_pagamento_sem_origem`, sem baixa até o Financeiro conferir com o extrato. **Regra de migração decorrente: parcela cancelada nunca vira baixa automaticamente.** Script: `scripts/financeiro/conciliacao_canceladas_com_pagamento.sql`; lista para o Financeiro: `01-Documento/01 - Planilhas/CONFERIR_canceladas_com_pagamento_sem_origem.csv` (nomes de clientes: não commitar).
+
 ## Pendências
 
+- [ ] Financeiro conferir as 1.527 parcelas (R$ 4,29 mi) com o extrato bancário (pergunta 23B).
 - [ ] Usuário preencher a planilha de RT e confirmar a emissão de nota fiscal.
 - [ ] Usuário responder as demais perguntas (ver `SPEC-258_perguntas_de_negocio.md`).
 - [ ] Conciliar as 3.020 canceladas com pagamento contra `connect_contas_espelho` (só leitura) — aguarda o OK do usuário.

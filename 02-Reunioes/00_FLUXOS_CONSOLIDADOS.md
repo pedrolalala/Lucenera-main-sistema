@@ -60,3 +60,18 @@ flowchart TD
     APROV --> HIST["Histórico audita produto, quantidade, de/para, solicitante e aprovador"]
     ORIG --> NEC["Necessidade de compra continua agregada por produto"]
 ```
+
+## Fluxo de transição com a Connect (reunião 43, 06/11/2026)
+
+```mermaid
+flowchart TD
+    CON["Orçamento montado na Connect"] --> XML["Importa o XML no sistema novo (reimportar atualiza o mesmo número)"]
+    XML --> PAG["Equipe completa datas de pagamento, sinal e comprovante"]
+    PAG --> APROV["Aprovação da equipe e revisão financeira"]
+    APROV --> NF["Nota fiscal e boleto só na Connect (até a virada fiscal)"]
+    APROV --> SEPC["Separa os itens na Connect"]
+    SEPC --> SEPN["Repete a separação no sistema novo (Venda Parcial)"]
+    SEPN --> LOG["Logística: entrega e baixa nos dois sistemas"]
+    SEPN --> TRANSF["Falta peça: Transferir de outra venda, com log nas duas vendas"]
+    GAR["Garantia / uso e consumo / bonificação"] --> EST["Só estoque, sem revisão financeira (SPEC-255)"]
+```

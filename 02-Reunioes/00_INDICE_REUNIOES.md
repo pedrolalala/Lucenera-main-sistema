@@ -12,6 +12,9 @@ Organização criada a partir das reuniões do tl;dv fornecidas pelo usuário. C
 | 06 | 2026-05-13 | 09:00 | Limpeza de dados e relacionamentos no Supabase | `06. Lucenera (Filippo) - 13.05.2026: Limpeza de dados e relacionamentos no Supabase` | https://tldv.io/app/meetings/6a0467ef097a350013b62060 |
 | 07 | 2026-06-09 | 14:00 | Fluxo orçamento estoque e financeiro | `07. Lucenera (Filippo) - 09.06.2026: Fluxo orçamento estoque e financeiro` | https://tldv.io/app/meetings/6a2846baebc00200127220aa |
 | 08 | 2026-07-06 | não informado | Gestão de estoque e transferência de materiais | `08. lucenera (Filippo) - 06.07.2026_Reunião sobre Gestão de Estoque e Transferência de Materiais` | não informado |
+| 43 | 2026-11-06 | não informado | Sistema em geral: transição com a Connect, Venda Parcial, transferência, garantia (SPEC-249 a 256) | `43. Lucenera (Vinicius TOdos) - 06.11.2026 sistema geral` | não informado |
+
+Observação: as reuniões 09 a 42 existem como pastas em `02-Reunioes/` mas ainda não estão listadas nesta tabela; a 43 foi acrescentada com a ata em `02_ata_decisoes.md`.
 
 ## Padrão de arquivos por reunião
 

@@ -24,7 +24,7 @@ sistemas_envolvidos:
 
 ### Passos manuais do usuário
 
-- [ ] Aplicar as migrations 295 e 296 e publicar Orçamentos e Venda Parcial (aguarda o OK).
+- [x] Migrations 295 e 296 APLICADAS e Orçamentos + Venda Parcial publicados (06/11).
 - [ ] Matheus e Vitória: lançar no sistema novo as garantias que já saíram na Connect (a de ontem: Rodrigo Motti, 4 un. da peça 11636, e as demais da véspera).
 
 ## Objetivo
@@ -64,18 +64,17 @@ Garantia, uso e consumo e bonificação não geram financeiro, portanto não dev
 
 ## Realizado
 
-### 2026-11-06 (A, B, C, D, E, F — migrations 295 e 296 em rascunho com dry-run OK, NÃO aplicadas; código commitado, NÃO publicado)
+### 2026-11-06 (A, B, C, D, E, F — migrations 295 e 296 APLICADAS; Orçamentos e Venda Parcial NO AR)
 
 - **Descoberta ao ler o banco:** a SPEC-234 A **já está no ar** (a SPEC-233 ficou "não iniciado" no papel): `aprovar_orcamento_financeiro` desvia Outros/SAC para `_aprovar_operacao_sem_financeiro` e `tipo_operacao_regra` classifica os tipos — **saída ao cliente** (GARANTIA, OUTRAS SAIDAS, BONIFICACAO, CASA COR SAIDA), **baixa direta** (USO E CONSUMO, DESCARTE) e **só nota** (REMESSA TRANSP, SAIDA INDUSTRIALIZACAO, REMESSA CONSERTO, DEV EM GARANTIA). Essas operações **não geram parcela, boleto nem número de venda** (o ORC-0005, garantia de teste, está aprovado sem número de venda). Por isso o item B já estava feito e o código "G" **não** vira `numero_venda`: um número de venda marcaria a garantia como venda efetivada e a deixaria virar origem de devolução (a regra de devolução exige `numero_venda`).
 - **Migration 295 (`20261106_295_spec255_garantia_sem_revisao_financeira`):** `equipe_aprovar_orcamento` passa a chamar `_aprovar_operacao_sem_financeiro` logo depois da aprovação da equipe quando a regra é saída ao cliente, baixa direta ou só nota. Venda, devolução, empréstimo e tipo sem regra seguem como antes. Falha da operação (ex.: baixa maior que o Estoque Geral) desfaz a aprovação inteira. Dry-run com ROLLBACK, como admin, numa cópia da garantia: foi direto para "Orçamento Aprovado" (histórico: Aprovação da Equipe → Aprovação Financeira → Orçamento Aprovado), 0 boletos, 1 item de projeto criado, sem número de venda; uma venda comum continuou indo para a Aprovação Financeira (`requer_revisao_financeira = true`).
 - **Migration 296 (`20261106_296_spec255_lista_venda_tipo_operacao`):** acrescenta `natureza_operacao` e `subgrupo` ao fim de `vw_venda_parcial_lista` (colunas antigas iguais; `security_invoker` e permissões mantidos; 316 linhas antes e depois).
-- **Orçamentos (commit 34879ac):** mensagem na aprovação da equipe: "Operação sem cobrança: não passa pela revisão financeira e não gera financeiro" quando a função devolve `sem_revisao_financeira`.
-- **Venda Parcial (commit 93c6e79):** rótulo amarelo com o tipo ("Garantia"...) e código **G0005** na lista e no cabeçalho da venda; venda comum não muda.
+- **Orçamentos (commit 34879ac, pushado; deploy 6146f00d):** mensagem na aprovação da equipe: "Operação sem cobrança: não passa pela revisão financeira e não gera financeiro" quando a função devolve `sem_revisao_financeira`.
+- **Venda Parcial (commit 93c6e79, pushado; deploy 9d23dde9):** rótulo amarelo com o tipo ("Garantia"...) e código **G0005** na lista e no cabeçalho da venda; venda comum não muda.
 - `tsc` sem erro novo; builds ok só com São Paulo.
 
 ## Pendências
 
-- [ ] Aplicar 295 e 296 e publicar (aguarda o OK). **Ordem:** a 296 antes de publicar a Venda Parcial (a tela lê as colunas novas).
 - [ ] Avisar o Matheus: a garantia aprovada por ele já nasce "Orçamento Aprovado" (sem fila do financeiro) e sai do Estoque na hora; para a regra de baixa direta (uso e consumo, descarte) a aprovação falha se o Estoque Geral não cobrir.
 - [ ] Item G (data retroativa): hoje o orçamento usa a data do dia; não foi alterado.
 - [ ] Vinicius confirmar quais tipos entram na classe sem revisão financeira: a 295 aplicou aos 3 grupos do banco (saída ao cliente, baixa direta, só nota); se algum deve continuar passando pela Lana/Carol, é só tirar da lista.

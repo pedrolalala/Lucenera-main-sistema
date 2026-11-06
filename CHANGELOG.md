@@ -4,7 +4,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-06 (SPEC-255 — garantia e saídas sem cobrança sem revisão financeira)
 
-- Migrations 295 (`20261106_295_spec255_garantia_sem_revisao_financeira`: `equipe_aprovar_orcamento` conclui na hora garantia, bonificação, uso e consumo e demais saídas sem cobrança, sem passar pela revisão financeira) e 296 (`20261106_296_spec255_lista_venda_tipo_operacao`: duas colunas no fim de `vw_venda_parcial_lista`) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicadas (rollback.sql incluso). Orçamentos (commit 34879ac) e Venda Parcial (commit 93c6e79, rótulo "Garantia" e código G0005): NÃO publicados. Achado: a SPEC-234 A já estava no banco (sem parcela, boleto nem nº de venda); a SPEC-233 ganhou nota dizendo que a Fase 0 de bloqueio não deve ser aplicada.
+- Migrations 295 (`20261106_295_spec255_garantia_sem_revisao_financeira`: `equipe_aprovar_orcamento` conclui na hora garantia, bonificação, uso e consumo e demais saídas sem cobrança, sem passar pela revisão financeira) e 296 (`20261106_296_spec255_lista_venda_tipo_operacao`: duas colunas no fim de `vw_venda_parcial_lista`) APLICADAS 06/11 após dry-run com ROLLBACK (rollback.sql incluso; conferido: 316 linhas na view, 2 colunas novas, anon sem acesso, função com a regra). Orçamentos (commit 34879ac, deploy 6146f00d) e Venda Parcial (commit 93c6e79, deploy 9d23dde9, rótulo "Garantia" e código G0005): NO AR e pushados. Achado: a SPEC-234 A já estava no banco (sem parcela, boleto nem nº de venda); a SPEC-233 ganhou nota dizendo que a Fase 0 de bloqueio não deve ser aplicada.
 
 ## 2026-11-06 (SPEC-254 — comprovante na aprovação, XML e arquiteto)
 

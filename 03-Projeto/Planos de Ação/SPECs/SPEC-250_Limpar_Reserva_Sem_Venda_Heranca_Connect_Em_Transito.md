@@ -87,7 +87,7 @@ A SPEC-243 mediu 7.793 unidades de "reserva sem dono" (sem cliente na planilha).
 ## Pendências
 
 - [x] Desenho aprovado em 06/11 (limpeza por quantidade vinda das listas de entrega baixadas, em vez de "limpar tudo").
-- [ ] Matheus/Vitória: entregar a lista de itens e quantidades das listas de entrega de 05/11 (para alimentar a função) e conferir ~10 peças depois.
+- [ ] **As listas de entrega de 05/11 são PDFs da Connect, não planilha** (resposta do usuário em 06/11). Falta 1 ou 2 PDFs de exemplo (do Matheus) para eu ler o formato (código da peça e quantidade) e fazer a leitura no navegador, no mesmo padrão do pedido de compra em PDF (SPEC-247): o Matheus escolhe os PDFs, vê a prévia somada por peça (modo teste da função da migration 298) e confirma. Depois, conferir ~10 peças com a Vitória e o OK para aplicar a 298.
 - [ ] Confirmar que "Reserva sem venda" = trânsito para **todas** as peças ou só para as que a conta do Geral mostra diferença (ver cuidado acima).
 - [ ] Decidir quem executa: só Matheus e administração (como o Tratar) ou também a Vitória.
 - [ ] Ajustar o texto da SPEC-243/244 (regra "herança sem cliente nunca muda") quando esta SPEC for aprovada.

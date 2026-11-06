@@ -216,8 +216,17 @@ Plano de volta atrás em cada fase: `rollback.sql` por migration e o "antes" no 
 - Correções registradas durante a análise: eram 12 lugares (não 7); a origem do título precisa de **chave estrangeira real por origem** (não um id genérico); RT total R$ 1,81 mi (R$ 1,38 mi só a contato arquiteto); "9.714 negociações sem pessoa" era de 05/11 de manhã — hoje 1, mas com 1.734 de tipo incompatível.
 - **Nada aplicado no banco além da migration 301 (já existente, intermediária).** Nada enviado ao GitHub depois do pedido de revisão do usuário.
 
+### 2026-11-06 (tarde) — segunda análise e respostas parciais
+
+- Análise independente (Opus 5.5) em `SPEC-258_analise_independente_06_11.md`: baseline idêntico; 15 achados novos (renegociação/acordo, "pagas" sem valor, canceladas com pagamento, 349 parcelas fora da view, expurgo de 12 meses da auditoria, escritores diretos, folha × fluxo, multiempresa, saldo bancário, de-para de ids…). O desenho v3 precisa: baixa com tipos (dinheiro, compensação, renegociação, abatimento, **baixa interna**, estorno), situação `renegociada` + tabela de renegociações, histórico financeiro permanente, tabela de de-para de ids, escrita direta proibida, folha agregada no fluxo, saldo bancário derivado.
+- Perguntas de negócio fechadas em `SPEC-258_perguntas_de_negocio.md` (38 perguntas, com recomendação).
+- **Respostas do usuário (06/11):** (1) criar planilha de % de RT — **criada** (`01-Documento/01 - Planilhas/RT_percentual_arquitetos.xlsx`, 867 arquitetos; a preencher); (5) emissão de NF pelo arquiteto — **a confirmar**; (22) "pago" com valor zero em Carteira = baixa por processo interno sem movimentação de parcela → tipo de baixa `baixa_interna` (sem caixa); (27) pagamentos com conta de outra empresa — "pode ser acordo entre empresas ou erro", **não confirmado** → marcados e na fila de pendências para o Financeiro classificar.
+
 ## Pendências
 
-- [ ] Nova análise independente do banco, com o modelo mais forte, antes de qualquer migration.
+- [ ] Usuário preencher a planilha de RT e confirmar a emissão de nota fiscal.
+- [ ] Usuário responder as demais perguntas (ver `SPEC-258_perguntas_de_negocio.md`).
+- [ ] Conciliar as 3.020 canceladas com pagamento contra `connect_contas_espelho` (só leitura) — aguarda o OK do usuário.
+- [ ] (Resolvida pela análise do Opus, concluída em 06/11) Nova análise independente do banco, com o modelo mais forte, antes de qualquer migration.
 - [ ] Respostas do usuário à seção 9 (RT, folha, comissão e demais).
 - [ ] Versão final da SPEC após a nova análise e as decisões.

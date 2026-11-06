@@ -19,7 +19,7 @@ sistemas_envolvidos:
 - [x] C. Botão **Separar tudo** na venda (pedido do Vinicius): preenche a quantidade de todos os itens com o que está em Reserva, respeitando o limite de cada item.
 - [x] D. **Histórico de entregas dentro da venda** (já existia: bloco "Parciais desta venda" com parcial, funcionário, data, status, entrega, "Ver itens"/reimprimir e "Estornar"; nada a mudar): cada parcial com data solicitada, data prevista e data entregue, e o acesso à lista (sem depender de salvar PDF em pasta).
 - [ ] E. Estorno parcial antes da entrega (já existe, com motivo): conferir que o item volta para Reserva e que o Matheus é avisado da lista corrigida.
-- [ ] F. **Entregas antigas sem lista de entrega** (ver abaixo): decisão e tratamento.
+- [x] F. **Entregas antigas sem lista de entrega**: tratamento pelo **Tratar** já existente (ação "Já foi entregue — o Estoque Geral já está certo", só Matheus/administração), com dica na tela (ver Realizado).
 - [x] G. Venda pesquisada por cliente com várias vendas: ver rápido quais ainda têm pendência (efeito de A).
 
 ### Passos manuais do usuário
@@ -78,7 +78,12 @@ Critério para identificar: orçamento com tipo de operação "Outros → Remess
 ## Pendências
 
 - [ ] **B — Remessa de transporte em aba separada: não feito.** Hoje o banco só tem `natureza_operacao` = `venda` (352) e `outros` (1), sem subtipo; a remessa de transporte (SPEC-233/234, item B "não iniciado") ainda não existe como tipo no sistema novo, e as vendas da Connect só entram na lista se têm Reserva/Entrega Futura (a remessa de transporte da Connect não entra). Fazer junto com a SPEC-233/234 ou quando a remessa for criada no sistema novo.
-- [ ] Decidir a regra do item F (usar Tratar `entregue_estoque_ja_ajustado` por Matheus × liberar para Vitória × outra).
 - [ ] Confirmar o aviso ao Matheus quando alguém estorna uma lista que ele já recebeu.
 - [ ] Confirmar com o Matheus se o histórico por parcial na Venda Parcial substitui a consulta em "Finalizados" da Logística ou só complementa.
 - [ ] Confirmar o tipo exato usado para identificar a remessa de transporte no banco.
+
+### 2026-11-06 (F — Tratar para entrega antiga sem lista; commit 1b2ea42 em `separacao-parcial`, NÃO publicado)
+
+- **Decisão (seguiu a proposta da SPEC):** vendas antigas já entregues que nunca tiveram lista de entrega no sistema são tratadas pelo **Tratar** (SPEC-243), ação **`entregue_estoque_ja_ajustado`**: Reservado −q, vai para Entregue, **Estoque Geral não muda** (a foto do estoque já é com a peça entregue). Só Matheus e administração (`pode_tratar_heranca_connect`); a Vitória confere, não trata. Nada de banco: a ação já existia e já estava testada em ROLLBACK na SPEC-243.
+- **Risco coberto:** a ação que vem marcada por padrão no Tratar é "já foi entregue — a peça saiu e o Estoque Geral ainda a conta" (tira do Estoque Geral). Num caso de entrega antiga isso tiraria a peça **duas vezes**. A janela agora mostra, ao tratar Reserva, o aviso: "Entrega antiga que nunca teve lista de entrega: se a peça já saiu e o Estoque Geral já está sem ela, escolha 'o Estoque Geral já está certo' ... Confira na Connect antes."
+- `tsc` sem erro novo; `vite build` ok só com São Paulo.

@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-252 F — entregas antigas sem lista)
+
+- Venda Parcial (`04-Sistemas/separacao-parcial`, commit 1b2ea42, sem migration; NÃO publicado): decisão de tratar entrega antiga sem lista de entrega pelo Tratar existente, ação "o Estoque Geral já está certo" (só Matheus/admin); a janela do Tratar ganhou um aviso para não escolher a ação que baixa o Estoque Geral duas vezes.
+
 ## 2026-11-06 (SPEC-251 — item da Connect que recebe transferência fica liberado)
 
 - Migration 300 (`20261106_300_spec251_transferencia_libera_item_connect`: `connect_item_liberado()` passa a aceitar também `transferencia_entrada`) APLICADA 06/11 após dry-run com ROLLBACK e OK do usuário (rollback.sql incluso; altera uma regra da SPEC-244). Resolve a pendência do destino da Connect: a peça recebida por Transferir pode ser separada (antes ficava travada por "data de entrega na Connect"). Sem publicar sistema.

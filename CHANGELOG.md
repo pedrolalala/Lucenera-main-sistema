@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-258 Fase 1A — núcleo financeiro APLICADO, tabelas vazias)
+
+- Migration `20261106_302_spec258_fase1a_nucleo_financeiro` aplicada no Supabase SP após dry-run limpo (o ensaio achou e corrigiu um bug: trigger de imutabilidade separado por tabela). Cria 9 tabelas novas vazias (`financeiro_titulos`, `_parcelas`, `_baixas`, `_cobrancas`, `_renegociacoes`, `_pendencias`, `_legado_ids`, `_eventos`, `_regras_repasse`), enums, gatilhos (baixa só em parcela firme, baixa imutável com estorno, liquidado calculado, ids da Connect imutáveis, histórico permanente) e RLS sem gravação direta. Nada existente mudou: `v_financeiro_realizado` = 18.316 linhas / R$ 75.203.769,77. Rollback só seguro enquanto vazias. Próximo: Fase 1B (funções de porta única, views, integridade), sempre com autorização.
+
 ## 2026-11-06 (SPEC-258 — financeiro: modelo definitivo, só planejamento)
 
 - **Revisão (versão 2):** modelo aprovado em princípio pelo usuário; SPEC reescrita como documento de retomada (seção 0) para a próxima sessão refazer a análise com outro modelo antes de aplicar. Achados novos: o dinheiro está em **12 lugares** (não 7: `vendas`, `pedido_compra` legado, `staging_pedido_compra`, `remessas`/`retornos_processados`, `projeto_sinal`); a origem do título precisa de **chave estrangeira real por origem**; o **RT histórico** (plano "RT": 1.168 títulos, R$ 1,81 mi) **nunca foi ligado à venda** (`cod_venda = 0`), então o percentual real não pode ser deduzido; a comissão dos funcionários é calculada em view mas `folha_pagamento.comissao` está zerada nas 771 folhas. Novos arquivos: `scripts/financeiro/baseline_spec258.sql` (linha de base só de leitura) e o anexo `SPEC-258_anexo_relatorio_visual_financeiro.html`. Nada aplicado no banco além da 301; nada enviado ao GitHub a pedido do usuário.

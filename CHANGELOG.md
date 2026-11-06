@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-257 — Cadastro: a busca respeita "Só com estoque")
+
+- Cadastro (`04-Sistemas/cadastro-lucenera-b86fe`, tela Peças e Produtos, sem migration; NÃO publicado): com "Só com estoque" ligado a busca agora mostra só peças com estoque (antes ignorava o filtro, por pedido do Filippo em 30/10; a regra foi invertida a pedido do usuário). Se a busca não acha nada com estoque, a tela avisa e oferece "Mostrar também as sem estoque". Aviso antigo removido. `tsc` sem erro novo, build só com São Paulo.
+
 ## 2026-11-06 (SPEC-248 item 3 — base de dados da Previsão)
 
 - Migration 301 (`20261106_301_spec248_previsao_transacoes`: `transacoes.previsao`, coluna `previsao` no fim de `v_financeiro_realizado` — só para parcela em aberto —, e função `definir_previsao_transacoes` para marcar/firmar) APLICADA 06/11 após dry-run com ROLLBACK e OK do usuário (rollback.sql incluso; conferido: view com 18.316 linhas e a mesma soma, 0 parcelas marcadas, anon sem acesso). Faltam o desenho da coluna, a tela do Fluxo Futuro e o cadastro nativo (SPEC-246, passo 4).

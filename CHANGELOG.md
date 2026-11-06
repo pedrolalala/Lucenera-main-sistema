@@ -4,7 +4,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-06 (SPEC-253 — previsão de chegada nas vendas)
 
-- Migrations 292 (`20261106_292_spec253_previsao_chegada_produto`, view `vw_previsao_chegada_produto`, só leitura, sem custo) e 293 (`20261106_293_spec253_atualizar_previsao_pedido`, função `atualizar_previsao_pedido_compra`) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicadas (rollback.sql incluso). Venda Parcial (commit a41915d): "Chega dd/mm / Pedido sem data / Sem compra" ao lado da Entrega Futura e na janela Transferir. Compras (commit 491e35a): botão **Previsão** para atualizar só a data prevista de pedido aprovado, com motivo, sem desfazer a aprovação. Nada publicado ainda. A previsão é por peça (não por venda); itens especiais por medida e vínculo pedido↔venda seguem pendentes.
+- Migrations 292 (`20261106_292_spec253_previsao_chegada_produto`, view `vw_previsao_chegada_produto`, só leitura, sem custo) e 293 (`20261106_293_spec253_atualizar_previsao_pedido`, função `atualizar_previsao_pedido_compra`) APLICADAS 06/11 após dry-run com ROLLBACK (rollback.sql incluso; conferido: anon sem acesso, authenticated com acesso, 13 linhas na view). Venda Parcial (commit a41915d): "Chega dd/mm / Pedido sem data / Sem compra" ao lado da Entrega Futura e na janela Transferir. Compras (commit 491e35a): botão **Previsão** para atualizar só a data prevista de pedido aprovado, com motivo, sem desfazer a aprovação. Compras NO AR (deploy 7d0a949e) e Venda Parcial NO AR (deploy 0e572112), ambos pushados. A previsão é por peça (não por venda); itens especiais por medida e vínculo pedido↔venda seguem pendentes.
 
 ## 2026-11-06 (SPEC-252 — Venda Parcial: finalizadas e Separar tudo)
 

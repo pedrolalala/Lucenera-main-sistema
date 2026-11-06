@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-248 item 3 — revisão da recomendação da Previsão)
+
+- Só documentação: com o sistema 100% em uso a opção A deixaria duas fontes permanentes no fluxo de caixa (`transacoes` e `boletos`); a recomendação passa a ser a opção B (gravar em `transacoes`, como parte do front nativo da SPEC-246). A objeção anterior (financeiro travado no marco de 05/11) não procede: o marco travou a importação, não a gravação nativa. Aguarda o usuário confirmar B e reenviar o desenho.
+
 ## 2026-11-06 (SPEC-252 F — entregas antigas sem lista)
 
 - Venda Parcial (`04-Sistemas/separacao-parcial`, commit 1b2ea42 pushado, sem migration; NO AR em separacao-lucenera.pages.dev, deploy cf7ad393 por wrangler): decisão de tratar entrega antiga sem lista de entrega pelo Tratar existente, ação "o Estoque Geral já está certo" (só Matheus/admin); a janela do Tratar ganhou um aviso para não escolher a ação que baixa o Estoque Geral duas vezes.

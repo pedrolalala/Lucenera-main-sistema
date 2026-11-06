@@ -62,6 +62,10 @@ sistemas_envolvidos:
 
 Perguntas em aberto: (1) o desenho; (2) A ou B; (3) previsão pode ser desmarcada depois (virar conta firme)? (4) "Cancelado"/"Pago" ainda aparecem como previsão? (sugestão: não).
 
+**Revisão em 06/11 (pergunta do usuário: "e quando o nosso sistema estiver 100% em uso?"):** pela SPEC-246, depois do marco toda baixa, lançamento e acordo nasce em `transacoes` (front nativo) e a carga da Connect termina. Com o sistema 100% em uso a **opção A deixaria duas fontes permanentes** no fluxo (`transacoes` e `boletos`), com risco de contar a mesma conta duas vezes (já há caminhos que criam boleto CP sozinhos, como a parcela de NF de compra, e as parcelas de pedido de compra entram como previsão) e com as contas lançadas à mão fora do financeiro nativo; seria um remendo a migrar depois. A **opção B é o destino da SPEC-246**. A objeção anterior à B ("mexe no financeiro travado em 05/11") **não procede**: o que o marco travou é a importação da planilha e os corretores dela; a gravação nativa é o que passa a ser exigido.
+
+**Recomendação atual: opção B**, como parte do passo 4 da SPEC-246 (front nativo): marca `previsao` em `transacoes`, coluna "Previsão" no Fluxo Futuro (que já lê `transacoes`), e o cadastro do Contas a Pagar gravando duplicata e parcelas em `transacoes` (ids próprios, `origem = sistema`); o boleto/CNAB segue para o banco. **Dependência:** a SPEC-246 ainda não foi aplicada (falta autorização de cada migration). A opção A só serviria como solução temporária, com custo de migração depois. Aguarda: confirmar B, reenviar o desenho e responder (3) e (4).
+
 ## Achados fora do pedido (não alterados)
 
 - No **Contas a Receber** o mesmo vazamento existe: `cancelar_orcamento` grava boleto como `cancelado` (minúsculo) e a consulta o conta como aberto. Fica para decidir se corrigimos lá também.

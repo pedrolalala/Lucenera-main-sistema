@@ -2,9 +2,9 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-06 (SPEC-258 Fase 3 passo 1 — view nova do realizado, RASCUNHO NÃO APLICADO)
+## 2026-11-06 (SPEC-258 Fase 3 passo 1 — view nova do realizado, APLICADA 06/11)
 
-- Migration `20261106_305_spec258_fase3_view_realizado_novo` (up/rollback/dry_run), dry-run limpo, NÃO aplicada: cria `v_financeiro_realizado_novo` (mesmas 18 colunas e regras da `v_financeiro_realizado`, lendo títulos/parcelas/baixas) e 3 colunas copiadas em `financeiro_parcelas` (emissao, descricao, desconto). Ensaio como Filippo: 18.316 = 18.316 linhas, 0 ids só de um lado, 0 diferenças em 16 colunas; única diferença: 5 `dt_pagamento` que a Connect não tem (o modelo novo usa o vencimento e já há pendência aberta). Sem permissão no dashboard-financeiro devolve 0; anon barrado. A view antiga não foi tocada; os sistemas só trocam de view depois.
+- Migration `20261106_305_spec258_fase3_view_realizado_novo` (up/rollback/dry_run), dry-run limpo, APLICADA no Supabase SP: cria `v_financeiro_realizado_novo` (mesmas 18 colunas e regras da `v_financeiro_realizado`, lendo títulos/parcelas/baixas) e 3 colunas copiadas em `financeiro_parcelas` (emissao, descricao, desconto). Ensaio como Filippo: 18.316 = 18.316 linhas, 0 ids só de um lado, 0 diferenças em 16 colunas; única diferença: 5 `dt_pagamento` que a Connect não tem (o modelo novo usa o vencimento e já há pendência aberta). Sem permissão no dashboard-financeiro devolve 0; anon barrado. A view antiga não foi tocada; os sistemas só trocam de view depois.
 
 ## 2026-11-06 (SPEC-258 Fase 2 — cópia do legado Connect, APLICADA 06/11)
 

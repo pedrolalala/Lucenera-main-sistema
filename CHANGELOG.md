@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-255 — garantia e saídas sem cobrança sem revisão financeira)
+
+- Migrations 295 (`20261106_295_spec255_garantia_sem_revisao_financeira`: `equipe_aprovar_orcamento` conclui na hora garantia, bonificação, uso e consumo e demais saídas sem cobrança, sem passar pela revisão financeira) e 296 (`20261106_296_spec255_lista_venda_tipo_operacao`: duas colunas no fim de `vw_venda_parcial_lista`) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicadas (rollback.sql incluso). Orçamentos (commit 34879ac) e Venda Parcial (commit 93c6e79, rótulo "Garantia" e código G0005): NÃO publicados. Achado: a SPEC-234 A já estava no banco (sem parcela, boleto nem nº de venda); a SPEC-233 ganhou nota dizendo que a Fase 0 de bloqueio não deve ser aplicada.
+
 ## 2026-11-06 (SPEC-254 — comprovante na aprovação, XML e arquiteto)
 
 - Migration 294 (`20261106_294_spec254_orcamento_anexos`: tabela `orcamento_anexos` com RLS + bucket PRIVADO `orcamento-anexos`) APLICADA 06/11 após dry-run com ROLLBACK (rollback.sql incluso; conferido: RLS ligado, anon sem acesso, bucket privado). Orçamentos (`04-Sistemas/gestao-financeira-clone-544cb (1)`, commit 57d201c pushado junto com o 976976b da SPEC-246; NO AR em financeiro-lucenera.pages.dev, deploy 3f89962c por wrangler, bundle em São Paulo): comprovante na janela da Aprovação da Equipe, anexos e clipe na revisão financeira, aviso de desconto/sinal/frete ao reimportar XML (o XML da Connect não traz esses campos) e aviso de arquiteto vindo do cadastro do projeto. Sinal já abatia antes do desconto. `App.tsx`/`Login.tsx` com alterações da SPEC-242 C seguem não commitadas e fora do build.

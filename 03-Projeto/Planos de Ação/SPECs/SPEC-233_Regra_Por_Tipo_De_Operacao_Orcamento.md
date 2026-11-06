@@ -14,6 +14,8 @@ sistemas_envolvidos:
 
 # SPEC-233 — Regra própria para cada Tipo de Operação do orçamento
 
+> **Nota de 06/11/2026 (SPEC-255):** a regra por tipo de operação **já está no banco** desde a SPEC-234 A (`tipo_operacao_regra`, `_aprovar_operacao_sem_financeiro`): GARANTIA, BONIFICAÇÃO, USO E CONSUMO e demais saídas sem cobrança **não geram financeiro nem número de venda** e, desde a migration 295, **não passam pela revisão financeira**. A "Fase 0 — Trava" abaixo (bloquear a aprovação de Outros/SAC) **não deve ser aplicada**: quebraria a garantia que a equipe usa. Os status deste arquivo estão desatualizados; a fonte é a SPEC-234 A e a SPEC-255.
+
 > Origem: pergunta do usuário em 26/10/2026 ("o que cada tipo de venda faz no sistema") → levantamento mostrou que
 > só Venda, Devolução e Empréstimo têm regra; todo o resto vira venda na aprovação financeira.
 > **27/10/2026: a matriz foi respondida na reunião com o Vinicius — ver SPEC-234 (seção A).** A coluna "Confirmado"

@@ -81,7 +81,7 @@ Hoje o botão Transferir/Trocar fica escondido nas vendas da Connect e só o Tra
 
 ## Pendências
 
-- [ ] **Matheus e Vitória:** migration 299 (`20261106_299_spec251_matheus_vitoria_transferir`) em RASCUNHO, dry-run OK, **NÃO aplicada** (aguarda o OK explícito, porque mexe em permissão). Ver Realizado.
+- [x] **Matheus e Vitória:** migration 299 (`20261106_299_spec251_matheus_vitoria_transferir`) APLICADA em 06/11 com OK do usuário. Ver Realizado.
 - [ ] Item D (coluna de previsão de chegada) depende da SPEC-253.
 - [ ] Item I (aviso/pop-up para a equipe da venda de origem) fica para depois.
 - [ ] Destino Connect cuja peça tem data de entrega na Connect: a reserva recebida não poderá ser separada (SPEC-244, item "não liberado"). Decidir se a transferência para esse item deve ser recusada ou avisar.
@@ -89,8 +89,9 @@ Hoje o botão Transferir/Trocar fica escondido nas vendas da Connect e só o Tra
 - [ ] Definir o texto do aviso (item I) e para quem vai (equipe da venda de origem, grupo de transferências).
 - [ ] Decidir se a quantidade padrão sugere o que falta na venda de destino.
 
-### 2026-11-06 (migration 299 — permissão de Matheus e Vitória; rascunho, dry-run OK, NÃO aplicada)
+### 2026-11-06 (migration 299 — permissão de Matheus e Vitória; APLICADA)
 
 - **Como:** em vez de fixar cargo no código, usa o mecanismo de exceção individual do Acesso a Sistemas (o mesmo do ajuste de reserva da SPEC-235 e do Tratar da SPEC-243): módulo novo `transferir_reserva` do sistema `separacao-parcial` e exceção "conceder" para o **Matheus** e a **Vitória**; a administração concede ou tira depois pela Central, sem migration. `pode_trocar_reserva()` passa a aceitar admin, gerente, Projetista (como antes) **ou** a exceção; `aprovar_transferencia_estoque` deixa de repetir a regra à mão e chama `pode_trocar_reserva()`. De quebra, `pode_trocar_reserva()` perde o acesso do `anon` (ele podia executar; devolvia falso).
 - **Dry-run com ROLLBACK:** antes — Matheus e Vitória: não; Marina (projetista): sim; Débora (assistente administrativa) e Antônio (auxiliar de estoque): não. Depois — Matheus e Vitória: **sim**; Marina: sim; Débora e Antônio continuam **não**. A Vitória fez uma transferência real (venda do sistema → venda da Connect): aprovada, a reserva do destino subiu 1 e o Estoque Geral ficou igual. O Antônio, na mesma transferência, foi barrado com a mensagem nova; `anon` barrado.
 - **Para a tela não precisa publicar nada:** o botão Transferir já usa `pode_trocar_reserva()`; assim que a 299 for aplicada, Matheus e Vitória passam a vê-lo.
+- **Aplicada e conferida:** módulo `transferir_reserva` criado, 2 exceções "conceder" (Matheus e Vitória), `anon` sem execução de `pode_trocar_reserva()`, `authenticated` com execução, `aprovar_transferencia_estoque` usando `pode_trocar_reserva()`.

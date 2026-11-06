@@ -4,7 +4,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-06 (SPEC-251 — Matheus e Vitória podem transferir)
 
-- Migration 299 (`20261106_299_spec251_matheus_vitoria_transferir`: módulo `transferir_reserva` + exceção "conceder" para Matheus e Vitória; `pode_trocar_reserva()` e `aprovar_transferencia_estoque` passam a aceitar a exceção; `anon` sem execução) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicada (rollback.sql incluso; mexe em permissão, aguarda OK). Não exige publicar nenhum sistema: o botão Transferir já usa `pode_trocar_reserva()`.
+- Migration 299 (`20261106_299_spec251_matheus_vitoria_transferir`: módulo `transferir_reserva` + exceção "conceder" para Matheus e Vitória; `pode_trocar_reserva()` e `aprovar_transferencia_estoque` passam a aceitar a exceção; `anon` sem execução) APLICADA 06/11 após dry-run com ROLLBACK e OK do usuário (rollback.sql incluso; conferido: módulo, 2 exceções, anon sem execução). Não exige publicar nenhum sistema: o botão Transferir já usa `pode_trocar_reserva()`.
 
 ## 2026-11-06 (SPEC-250 — relatório da reserva sem venda)
 

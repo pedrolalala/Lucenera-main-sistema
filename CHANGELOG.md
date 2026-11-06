@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-251 — Matheus e Vitória podem transferir)
+
+- Migration 299 (`20261106_299_spec251_matheus_vitoria_transferir`: módulo `transferir_reserva` + exceção "conceder" para Matheus e Vitória; `pode_trocar_reserva()` e `aprovar_transferencia_estoque` passam a aceitar a exceção; `anon` sem execução) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicada (rollback.sql incluso; mexe em permissão, aguarda OK). Não exige publicar nenhum sistema: o botão Transferir já usa `pode_trocar_reserva()`.
+
 ## 2026-11-06 (SPEC-250 — relatório da reserva sem venda)
 
 - Relatório só de leitura (nada alterado no banco): `03-Projeto/Auditoria/SPEC-250_reserva_sem_venda_2026-11-06.csv`. 160 peças com reserva sem venda (2.884 un.), 12 delas com mais de 50 un. (1.285 un.); o 9988 tem 83 un. enquanto a lista de entrega citava 2, então "limpar tudo" não é seguro. Desenho aprovado: limpar por quantidade vinda das listas de entrega baixadas. Migration 298 (`20261106_298_spec250_limpar_reserva_sem_venda`, função `limpar_reserva_sem_venda_connect`) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicada (rollback.sql incluso); aguarda a lista de peças/quantidades do Matheus e o OK para aplicar.

@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-258 — financeiro: modelo definitivo, só planejamento)
+
+- SPEC-258 escrita (`03-Projeto/Planos de Ação/SPECs/SPEC-258_Financeiro_Modelo_Definitivo_Titulos_Parcelas_Baixas.md`), nada aplicado: substitui `negociacoes`/`transacoes` por títulos, parcelas, baixas e cobranças (uma fonte de verdade; o "pago" só nas baixas; natureza a receber/a pagar × situação prevista/firme/liquidada/cancelada; porta única por funções; legado da Connect no mesmo modelo). Diagnóstico: 7 estruturas paralelas guardando dinheiro (uma venda fica em 3 lugares). Migração em fases com views de compatibilidade e prova por totais (baseline: 18.316 linhas, R$ 75.203.769,77, 16.968 pagamentos). Aguarda as decisões de negócio da seção 10.
+
 ## 2026-11-06 (SPEC-257 — Cadastro: a busca respeita "Só com estoque")
 
 - Cadastro (`04-Sistemas/cadastro-lucenera-b86fe`, tela Peças e Produtos, commit 75ac9bf pushado, sem migration; NO AR em cadastro-lucenera.pages.dev, deploy 7b75d58f por wrangler, bundle em São Paulo): com "Só com estoque" ligado a busca agora mostra só peças com estoque (antes ignorava o filtro, por pedido do Filippo em 30/10; a regra foi invertida a pedido do usuário). Se a busca não acha nada com estoque, a tela avisa e oferece "Mostrar também as sem estoque". Aviso antigo removido. `tsc` sem erro novo, build só com São Paulo.

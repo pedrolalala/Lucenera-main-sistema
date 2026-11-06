@@ -4,7 +4,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-06 (SPEC-252 — Venda Parcial: finalizadas e Separar tudo)
 
-- Venda Parcial (`04-Sistemas/separacao-parcial`, commit 2cfe4a1, sem migration; NÃO publicado/pushado): vendas finalizadas esmaecidas com tag verde "Finalizado" na lista (Sistema e Connect) e botão **Separar tudo** (preenche a Reserva de cada item liberado; não envia). Remessa de transporte em aba separada (item B) não feita: o tipo ainda não existe no banco (SPEC-233/234). Estoque, financeiro e saldos não mudam.
+- Venda Parcial (`04-Sistemas/separacao-parcial`, commit 2cfe4a1 pushado, sem migration; NO AR em separacao-lucenera.pages.dev, deploy 150ffcff por wrangler): vendas finalizadas esmaecidas com tag verde "Finalizado" na lista (Sistema e Connect) e botão **Separar tudo** (preenche a Reserva de cada item liberado; não envia). Remessa de transporte em aba separada (item B) não feita: o tipo ainda não existe no banco (SPEC-233/234). Estoque, financeiro e saldos não mudam.
 
 ## 2026-11-06 (SPEC-251 — Transferir entre vendas)
 

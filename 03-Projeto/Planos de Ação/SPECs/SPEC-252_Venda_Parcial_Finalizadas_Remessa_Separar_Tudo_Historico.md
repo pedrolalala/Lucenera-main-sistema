@@ -68,7 +68,7 @@ Critério para identificar: orçamento com tipo de operação "Outros → Remess
 
 ## Realizado
 
-### 2026-11-06 (A, C, D, G — só front, sem migration; commit 2cfe4a1 em `separacao-parcial`, NÃO publicado)
+### 2026-11-06 (A, C, D, G — só front, sem migration; commit 2cfe4a1 pushado; NO AR em separacao-lucenera.pages.dev, deploy 150ffcff por wrangler, 06/11)
 
 - **A/G — Finalizadas:** a lista (abas Sistema e Connect) mostra a venda **esmaecida** com a tag verde **"Finalizado"** quando Reserva, Entrega Futura, Ag. separar e Separado estão zerados e há quantidade entregue; volta à cor normal ao passar o mouse. Mesma tela, sem guia nova. Hoje nenhuma das 316 vendas da lista cumpre essa regra (conferido no banco): a marca aparece conforme as entregas forem sendo finalizadas.
 - **C — Separar tudo:** botão ao lado de Separar que **preenche** a quantidade de todos os itens com a Reserva (nunca acima dela) e avisa quantos itens ficaram de fora; na venda da Connect só entram os itens **liberados** (SPEC-244). Não envia: a pessoa confere e clica em Separar. Botão "Limpar" ao lado.
@@ -78,7 +78,6 @@ Critério para identificar: orçamento com tipo de operação "Outros → Remess
 ## Pendências
 
 - [ ] **B — Remessa de transporte em aba separada: não feito.** Hoje o banco só tem `natureza_operacao` = `venda` (352) e `outros` (1), sem subtipo; a remessa de transporte (SPEC-233/234, item B "não iniciado") ainda não existe como tipo no sistema novo, e as vendas da Connect só entram na lista se têm Reserva/Entrega Futura (a remessa de transporte da Connect não entra). Fazer junto com a SPEC-233/234 ou quando a remessa for criada no sistema novo.
-- [ ] Publicar o Venda Parcial com A, C e G (aguarda o OK).
 - [ ] Decidir a regra do item F (usar Tratar `entregue_estoque_ja_ajustado` por Matheus × liberar para Vitória × outra).
 - [ ] Confirmar o aviso ao Matheus quando alguém estorna uma lista que ele já recebeu.
 - [ ] Confirmar com o Matheus se o histórico por parcial na Venda Parcial substitui a consulta em "Finalizados" da Logística ou só complementa.

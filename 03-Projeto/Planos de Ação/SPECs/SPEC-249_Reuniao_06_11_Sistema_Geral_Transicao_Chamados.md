@@ -15,7 +15,7 @@ sistemas_envolvidos:
 ## Checklist de Ação
 
 - [ ] Registrar a ata e as decisões (feito nesta data, ver `02_ata_decisoes.md`).
-- [x] Investigar o chamado 1 (vendas da Moara não aparecem para a equipe) — causa achada; correção aguarda a equipe da Moara (ver Realizado).
+- [x] Investigar o chamado 1 (vendas da Moara não aparecem para a equipe) — CORRIGIDO em 06/11 (migration 297, ver Realizado).
 - [x] Investigar o chamado 2 (XML da Connect parou no orçamento 8514) — fica fora do nosso banco (ver Realizado).
 - [x] Investigar o chamado 3 (boleto Figueiredo Nunes: data/valor) — conferido; ajuste é na Connect (ver Realizado).
 - [x] Chamado 4 (erro de quantidade depois de devolução na Connect): sem causa nova; fica a ideia de edição com observação (SPEC-254, item G).
@@ -75,10 +75,10 @@ Reunir num lugar só tudo o que foi combinado em 06/11 sobre a convivência Conn
 
 ### 2026-11-06 (investigação dos chamados)
 
-- **Chamado 1 — Moara (causa achada, correção pendente):** a venda 5921 é o orçamento `CNX-8428` (número de venda `CNX-5921`, cliente CK2), hoje na equipe **Thais**. Quem aparecia em "Administração" são as vendas da **vendedora Moara** (funcionária "Moara Bonato de Araujo Valente", Assistente Projetista, `nm_connect = MOARA`): ela está **sem equipe** no cadastro (`funcionarios.equipe_id` vazio) e a carga da Connect joga quem não tem equipe em "Administração". São **26 orçamentos da Connect** nessa situação, e nenhuma equipe de projetistas os enxerga (o RLS por equipe da SPEC-200 esconde). Outros funcionários sem equipe que digitaram na Connect: Teresinha (4 vendas), Matheus (3), Mariane (2), Vitória (1), Débora (1) e Filippo (1) — são pessoas fora das equipes de vendas e continuam em Administração. **Correção proposta (aguarda você dizer a equipe da Moara):** definir a equipe da Moara no cadastro e mover os 26 orçamentos dela para a mesma equipe (a conversa da reunião indica Thairine).
+- **Chamado 1 — Moara (CORRIGIDO):** a venda 5921 é o orçamento `CNX-8428` (número de venda `CNX-5921`, cliente CK2), hoje na equipe **Thais**. Quem aparecia em "Administração" são as vendas da **vendedora Moara** (funcionária "Moara Bonato de Araujo Valente", Assistente Projetista, `nm_connect = MOARA`): ela está **sem equipe** no cadastro (`funcionarios.equipe_id` vazio) e a carga da Connect joga quem não tem equipe em "Administração". São **26 orçamentos da Connect** nessa situação, e nenhuma equipe de projetistas os enxerga (o RLS por equipe da SPEC-200 esconde). Outros funcionários sem equipe que digitaram na Connect: Teresinha (4 vendas), Matheus (3), Mariane (2), Vitória (1), Débora (1) e Filippo (1) — são pessoas fora das equipes de vendas e continuam em Administração. **Correção aplicada (confirmada pelo usuário: Moara era da equipe Thairine e saiu da empresa, mas as vendas dela precisam aparecer para a equipe):** migration 297 (`20261106_297_spec249_equipe_moara`, ajuste de dado, APLICADA 06/11 após dry-run com ROLLBACK) definiu a equipe da Moara = Thairine e moveu os **26 orçamentos** e as **474 linhas** de Reserva × Ambiente dela de Administração para Thairine. Backup do antes em `backup.spec249_moara_*` e `rollback.sql` restaura. Conferido: Administração caiu de 43 para 17 vendas da Connect; a Thairine passou a enxergar as 26 (teste como usuária Thairine); orçamentos, estoque, financeiro e saldos iguais antes e depois.
 - **Chamado 2 — XML parado no 8514:** é a tela de baixar XML da própria Connect (fora do nosso banco). Não há o que corrigir aqui; fica com o Sérgio. Como contorno, a equipe pode usar a exportação do orçamento direto pela Connect do Pedro.
 - **Chamado 3 — Figueiredo Nunes:** no banco, a duplicata 7912, **parcela 2, vence 05/11/2026, R$ 12.669,33, em aberto** (`status_pago = 0`), já está carregada (a SPEC-245 carrega o financeiro todo dia; na hora da reunião ainda não tinha aparecido). O boleto que chegou vence **09/11** e é um pouco maior: a correção de data e valor é feita **na Connect** (Carol/Lana) e entra na próxima carga diária; não alterei dado financeiro.
-- **Chamado 5 — Central de Solicitações:** todos os logados já enxergam todas as solicitações (kanban com filtros de classificação e tipo). Acrescentei **busca por texto** (título, descrição, sistema, autor) no painel para conferir se já existe pedido igual antes de abrir outro. Código no commit c0396fe de `central-de-solicitacoes` (build ok só com São Paulo; **NÃO publicado**).
+- **Chamado 5 — Central de Solicitações:** todos os logados já enxergam todas as solicitações (kanban com filtros de classificação e tipo). Acrescentei **busca por texto** (título, descrição, sistema, autor) no painel para conferir se já existe pedido igual antes de abrir outro. Código no commit c0396fe de `central-de-solicitacoes` (build ok só com São Paulo; pushado e **NO AR** em solicitacoes-lucenera.pages.dev, deploy fbcfa460).
 
 ### 2026-11-06
 
@@ -87,9 +87,7 @@ Reunir num lugar só tudo o que foi combinado em 06/11 sobre a convivência Conn
 
 ## Pendências
 
-- [ ] Chamado 1: dizer a equipe da Moara e então ajustar o cadastro e os 26 orçamentos (dado, não código).
 - [ ] Chamado 2: acionar o Sérgio (Connect).
 - [ ] Chamado 3: Carol/Lana corrigirem data/valor do boleto na Connect.
-- [ ] Publicar a busca da Central de Solicitações (aguarda o OK).
 - [ ] Atualizar o índice e os fluxos consolidados de reuniões.
 - [ ] Definir a conferência periódica de estoque entre Connect e sistema novo: quem faz e quando.

@@ -4,7 +4,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-06 (SPEC-249 — chamados da reunião 43)
 
-- Investigação (só leitura, nada de dado alterado): vendas da Moara em "Administração" porque a funcionária está sem equipe no cadastro (26 orçamentos da Connect; falta definir a equipe); XML parado no 8514 é da Connect; boleto Figueiredo Nunes (dup. 7912, parcela 2, 05/11, R$ 12.669,33) já está no banco e a data/valor se corrige na Connect. Central de Solicitações (`04-Sistemas/central-de-solicitacoes`, commit c0396fe, NÃO publicado): busca por texto no painel para evitar pedido repetido. Detalhes na SPEC-249.
+- Vendas da Moara em "Administração" CORRIGIDAS (migration 297 `20261106_297_spec249_equipe_moara`, ajuste de dado APLICADO 06/11, backup em `backup.spec249_moara_*`, rollback.sql incluso): a funcionária estava sem equipe; agora Thairine, e os 26 orçamentos da Connect dela (474 linhas de reserva) saíram de Administração (43 → 17) para a Thairine; estoque, financeiro e saldos não mudaram. Demais chamados (só leitura): XML parado no 8514 é da Connect; boleto Figueiredo Nunes (dup. 7912, parcela 2, 05/11, R$ 12.669,33) já está no banco e a data/valor se corrige na Connect. Central de Solicitações (`04-Sistemas/central-de-solicitacoes`, commit c0396fe pushado, NO AR em solicitacoes-lucenera.pages.dev, deploy fbcfa460): busca por texto no painel para evitar pedido repetido. Detalhes na SPEC-249.
 
 ## 2026-11-06 (SPEC-256 — Logística: calendário agrupa as listas do mesmo cliente)
 

@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-251 — item da Connect que recebe transferência fica liberado)
+
+- Migration 300 (`20261106_300_spec251_transferencia_libera_item_connect`: `connect_item_liberado()` passa a aceitar também `transferencia_entrada`) em RASCUNHO, dry-run com ROLLBACK OK, NÃO aplicada (rollback.sql incluso; altera uma regra da SPEC-244, aguarda OK). Resolve a pendência do destino da Connect: a peça recebida por Transferir pode ser separada (antes ficava travada por "data de entrega na Connect"). Sem publicar sistema.
+
 ## 2026-11-06 (SPEC-251 — Matheus e Vitória podem transferir)
 
 - Migration 299 (`20261106_299_spec251_matheus_vitoria_transferir`: módulo `transferir_reserva` + exceção "conceder" para Matheus e Vitória; `pode_trocar_reserva()` e `aprovar_transferencia_estoque` passam a aceitar a exceção; `anon` sem execução) APLICADA 06/11 após dry-run com ROLLBACK e OK do usuário (rollback.sql incluso; conferido: módulo, 2 exceções, anon sem execução). Não exige publicar nenhum sistema: o botão Transferir já usa `pode_trocar_reserva()`.

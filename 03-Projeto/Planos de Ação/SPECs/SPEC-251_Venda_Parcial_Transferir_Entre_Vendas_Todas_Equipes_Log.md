@@ -84,7 +84,7 @@ Hoje o botão Transferir/Trocar fica escondido nas vendas da Connect e só o Tra
 - [x] **Matheus e Vitória:** migration 299 (`20261106_299_spec251_matheus_vitoria_transferir`) APLICADA em 06/11 com OK do usuário. Ver Realizado.
 - [ ] Item D (coluna de previsão de chegada) depende da SPEC-253.
 - [ ] Item I (aviso/pop-up para a equipe da venda de origem) fica para depois.
-- [ ] Destino Connect cuja peça tem data de entrega na Connect: a reserva recebida não poderá ser separada (SPEC-244, item "não liberado"). Decidir se a transferência para esse item deve ser recusada ou avisar.
+- [ ] Destino Connect (SPEC-244, item "não liberado"): em vez de recusar ou só avisar, a migration 300 (`20261106_300_spec251_transferencia_libera_item_connect`) **libera para separar** o item da Connect que recebe peça por transferência. Em RASCUNHO, dry-run OK, **NÃO aplicada** (muda uma regra da SPEC-244; aguarda o OK). Ver Realizado.
 - [ ] Confirmar se a janela deve ocultar vendas com data de entrega marcada (para não pegar o que está de saída).
 - [ ] Definir o texto do aviso (item I) e para quem vai (equipe da venda de origem, grupo de transferências).
 - [ ] Decidir se a quantidade padrão sugere o que falta na venda de destino.
@@ -95,3 +95,10 @@ Hoje o botão Transferir/Trocar fica escondido nas vendas da Connect e só o Tra
 - **Dry-run com ROLLBACK:** antes — Matheus e Vitória: não; Marina (projetista): sim; Débora (assistente administrativa) e Antônio (auxiliar de estoque): não. Depois — Matheus e Vitória: **sim**; Marina: sim; Débora e Antônio continuam **não**. A Vitória fez uma transferência real (venda do sistema → venda da Connect): aprovada, a reserva do destino subiu 1 e o Estoque Geral ficou igual. O Antônio, na mesma transferência, foi barrado com a mensagem nova; `anon` barrado.
 - **Para a tela não precisa publicar nada:** o botão Transferir já usa `pode_trocar_reserva()`; assim que a 299 for aplicada, Matheus e Vitória passam a vê-lo.
 - **Aplicada e conferida:** módulo `transferir_reserva` criado, 2 exceções "conceder" (Matheus e Vitória), `anon` sem execução de `pode_trocar_reserva()`, `authenticated` com execução, `aprovar_transferencia_estoque` usando `pode_trocar_reserva()`.
+
+### 2026-11-06 (migration 300 — item da Connect que recebe peça por transferência fica liberado; rascunho, dry-run OK, NÃO aplicada)
+
+- **Problema real:** a regra da SPEC-244 só libera para separar o item da Connect com Reserva "sem data" ou que já recebeu pela nota (`recebimento_para_reserva`). Uma venda da Connect só com Entrega Futura que recebia a peça por Transferir ficava com a Reserva **travada** ("tem data de entrega definida na Connect"): a equipe pegava a peça e não conseguia separá-la. Recusar a transferência ou só avisar não resolveria o uso principal.
+- **Solução:** `connect_item_liberado()` passa a considerar também o movimento `transferencia_entrada` (a peça que chega por transferência é estoque físico do sistema, igual à que chega pela NF). Mesma aproximação da SPEC-244: se o item é liberado, toda a Reserva dele fica liberada.
+- **Dry-run com ROLLBACK:** item da Connect só com Entrega Futura: antes **não** liberado; a Marina transferiu 1 un. (aprovada); depois **liberado**, e **só ele** (nenhum outro item passou a ser liberado); a Marina separou a unidade recebida (aceito pela trava da SPEC-244); outro item da Connect com Reserva com data, que não recebeu nada, **continua recusado** com a mensagem de antes.
+- **Não exige publicar nenhum sistema:** a tela lê `connect_itens_liberados`; depois de aplicar, o campo de quantidade aparece quando a venda é aberta de novo.

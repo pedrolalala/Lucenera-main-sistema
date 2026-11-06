@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-258 Fase 3 passo 1 — view nova do realizado, RASCUNHO NÃO APLICADO)
+
+- Migration `20261106_305_spec258_fase3_view_realizado_novo` (up/rollback/dry_run), dry-run limpo, NÃO aplicada: cria `v_financeiro_realizado_novo` (mesmas 18 colunas e regras da `v_financeiro_realizado`, lendo títulos/parcelas/baixas) e 3 colunas copiadas em `financeiro_parcelas` (emissao, descricao, desconto). Ensaio como Filippo: 18.316 = 18.316 linhas, 0 ids só de um lado, 0 diferenças em 16 colunas; única diferença: 5 `dt_pagamento` que a Connect não tem (o modelo novo usa o vencimento e já há pendência aberta). Sem permissão no dashboard-financeiro devolve 0; anon barrado. A view antiga não foi tocada; os sistemas só trocam de view depois.
+
 ## 2026-11-06 (SPEC-258 Fase 2 — cópia do legado Connect, APLICADA 06/11)
 
 - Migration `20261106_304_spec258_fase2_copia_legado_connect` (up/rollback/dry_run), dry-run limpo (~35 s), APLICADA no Supabase SP (conferido: 10.403 títulos, 19.372 parcelas, 16.724 baixas, 129 pendências, 63.352 eventos). Só copia (nada antigo muda): 10.403 títulos, 19.372 parcelas (18.316 ativas + 1.056 canceladas pela Connect), 16.724 baixas (2.717 recebimentos, 11.153 pagamentos, 105 abatimentos, 2.749 baixas internas), 129 pendências. Provas no ensaio: soma das parcelas ativas = R$ 75.203.769,77 (= baseline); dinheiro pago = R$ 57.635.911,13 (= view), 13.870 baixas de caixa (= view), 0 diferenças por empresa x natureza x mês; 16.619 quitadas e 1.697 abertas = view; situação coerente com o espelho da Connect; de-para 19.372 transacoes + 10.403 negociacoes; 15 regras de integridade com 0 violações. Não migram: extras fora da Connect e as 1.527 canceladas-com-pagamento sem origem (conferência do Financeiro).

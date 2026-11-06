@@ -2,9 +2,9 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-06 (SPEC-258 Fase 1B — porta única + views, RASCUNHO NÃO APLICADO)
+## 2026-11-06 (SPEC-258 Fase 1B — porta única + views, APLICADA 06/11)
 
-- Migration `20261106_303_spec258_fase1b_porta_unica_views` (up/rollback/dry_run) com dry-run limpo, NÃO aplicada: funções `financeiro_criar_titulo`, `_confirmar_parcelas`, `_substituir_previsao`, `_cancelar_titulo`, `_baixar`, `_estornar`, pendências (abrir/resolver/aceitar), todas SECURITY DEFINER (anon barrado, permissão financeiro/RH); views `vw_financeiro_parcelas`, `vw_contas_a_receber`, `vw_contas_a_pagar`, `vw_historico_baixas`, `vw_fluxo_caixa` (folha somada sem nomes) e `vw_financeiro_novo_integridade` (15 regras). Nome `vw_financeiro_integridade` já é a view antiga do importador Connect: não foi tocada. Baseline inalterado (18.316 / R$ 75.203.769,77).
+- Migration `20261106_303_spec258_fase1b_porta_unica_views` (up/rollback/dry_run) com dry-run limpo, APLICADA no Supabase SP (6 views, funções; tabelas seguem vazias): funções `financeiro_criar_titulo`, `_confirmar_parcelas`, `_substituir_previsao`, `_cancelar_titulo`, `_baixar`, `_estornar`, pendências (abrir/resolver/aceitar), todas SECURITY DEFINER (anon barrado, permissão financeiro/RH); views `vw_financeiro_parcelas`, `vw_contas_a_receber`, `vw_contas_a_pagar`, `vw_historico_baixas`, `vw_fluxo_caixa` (folha somada sem nomes) e `vw_financeiro_novo_integridade` (15 regras). Nome `vw_financeiro_integridade` já é a view antiga do importador Connect: não foi tocada. Baseline inalterado (18.316 / R$ 75.203.769,77).
 
 ## 2026-11-06 (SPEC-258 Fase 1A — núcleo financeiro APLICADO, tabelas vazias)
 

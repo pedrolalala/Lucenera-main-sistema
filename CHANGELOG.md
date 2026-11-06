@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-258 Fase 1B — porta única + views, RASCUNHO NÃO APLICADO)
+
+- Migration `20261106_303_spec258_fase1b_porta_unica_views` (up/rollback/dry_run) com dry-run limpo, NÃO aplicada: funções `financeiro_criar_titulo`, `_confirmar_parcelas`, `_substituir_previsao`, `_cancelar_titulo`, `_baixar`, `_estornar`, pendências (abrir/resolver/aceitar), todas SECURITY DEFINER (anon barrado, permissão financeiro/RH); views `vw_financeiro_parcelas`, `vw_contas_a_receber`, `vw_contas_a_pagar`, `vw_historico_baixas`, `vw_fluxo_caixa` (folha somada sem nomes) e `vw_financeiro_novo_integridade` (15 regras). Nome `vw_financeiro_integridade` já é a view antiga do importador Connect: não foi tocada. Baseline inalterado (18.316 / R$ 75.203.769,77).
+
 ## 2026-11-06 (SPEC-258 Fase 1A — núcleo financeiro APLICADO, tabelas vazias)
 
 - Migration `20261106_302_spec258_fase1a_nucleo_financeiro` aplicada no Supabase SP após dry-run limpo (o ensaio achou e corrigiu um bug: trigger de imutabilidade separado por tabela). Cria 9 tabelas novas vazias (`financeiro_titulos`, `_parcelas`, `_baixas`, `_cobrancas`, `_renegociacoes`, `_pendencias`, `_legado_ids`, `_eventos`, `_regras_repasse`), enums, gatilhos (baixa só em parcela firme, baixa imutável com estorno, liquidado calculado, ids da Connect imutáveis, histórico permanente) e RLS sem gravação direta. Nada existente mudou: `v_financeiro_realizado` = 18.316 linhas / R$ 75.203.769,77. Rollback só seguro enquanto vazias. Próximo: Fase 1B (funções de porta única, views, integridade), sempre com autorização.

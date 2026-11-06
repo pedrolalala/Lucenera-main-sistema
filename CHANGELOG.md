@@ -4,7 +4,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-06 (SPEC-257 — Cadastro: a busca respeita "Só com estoque")
 
-- Cadastro (`04-Sistemas/cadastro-lucenera-b86fe`, tela Peças e Produtos, sem migration; NÃO publicado): com "Só com estoque" ligado a busca agora mostra só peças com estoque (antes ignorava o filtro, por pedido do Filippo em 30/10; a regra foi invertida a pedido do usuário). Se a busca não acha nada com estoque, a tela avisa e oferece "Mostrar também as sem estoque". Aviso antigo removido. `tsc` sem erro novo, build só com São Paulo.
+- Cadastro (`04-Sistemas/cadastro-lucenera-b86fe`, tela Peças e Produtos, commit 75ac9bf pushado, sem migration; NO AR em cadastro-lucenera.pages.dev, deploy 7b75d58f por wrangler, bundle em São Paulo): com "Só com estoque" ligado a busca agora mostra só peças com estoque (antes ignorava o filtro, por pedido do Filippo em 30/10; a regra foi invertida a pedido do usuário). Se a busca não acha nada com estoque, a tela avisa e oferece "Mostrar também as sem estoque". Aviso antigo removido. `tsc` sem erro novo, build só com São Paulo.
 
 ## 2026-11-06 (SPEC-248 item 3 — base de dados da Previsão)
 

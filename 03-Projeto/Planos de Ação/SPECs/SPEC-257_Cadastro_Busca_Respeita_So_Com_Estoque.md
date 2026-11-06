@@ -15,7 +15,7 @@ sistemas_envolvidos:
 - [x] A. Com "Só com estoque" ligado, a busca por texto passa a mostrar **só as peças com estoque** (antes ignorava o filtro).
 - [x] B. Tirar o aviso "(na busca aparecem também as peças sem estoque)", que deixa de ser verdade.
 - [x] C. Se a busca não achar nada com estoque, a tela explica e oferece **"Mostrar também as sem estoque"** (desliga o filtro), para a peça não "sumir" sem explicação.
-- [ ] D. Publicar o Cadastro (aguarda o OK).
+- [x] D. Cadastro publicado (06/11, deploy 7b75d58f; commit 75ac9bf pushado).
 
 ### Passos manuais do usuário
 
@@ -52,5 +52,4 @@ Com "Só com estoque" ligado, quem busca uma peça espera ver só o que tem esto
 
 ## Pendências
 
-- [ ] Publicar o Cadastro (aguarda o OK).
 - [ ] Avisar o Filippo da mudança de regra.

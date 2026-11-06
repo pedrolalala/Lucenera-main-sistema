@@ -16,7 +16,7 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [x] 1. "Dia" → **Valor da parcela (R$)** em `CadastrarDuplicata.tsx` (cada parcela adicionada já vem com o valor; vencimentos seguintes no mesmo dia do mês do "Venc 1° Parc"; cabeçalho da tabela "Valor da Parcela (R$)").
+- [x] 1. "Dia" → **Valor da parcela (R$)** em `CadastrarDuplicata.tsx` (**só no modo Pagar**; a Contas a Receber mantém o "Dia", decisão de 06/11 — o formulário é o mesmo código nos 2 sistemas e o push publica nos dois) (cada parcela adicionada já vem com o valor; vencimentos seguintes no mesmo dia do mês do "Venc 1° Parc"; cabeçalho da tabela "Valor da Parcela (R$)").
 - [x] 2a. Situação só **Aberto / Pago / Cancelado** no cadastro do Contas a Pagar (Contas a Receber não mudou).
 - [x] 2b. **Cancelado** não aparece em "A pagar (em aberto)", em "Vencido" nem nos totais da consulta; nova opção "Canceladas" na consulta (Pagar); a baixa não lista nem aceita duplicata cancelada.
 - [ ] 3. Check **Previsão** + coluna própria no fluxo de caixa — **aguarda o desenho** e uma decisão de arquitetura (ver abaixo).
@@ -30,7 +30,7 @@ sistemas_envolvidos:
 
 ## Decisões aprovadas (06/11/2026)
 
-- "Dia" vira **Valor da parcela (R$)** (e não valor total dividido, nem campo extra). O "dia do mês" dos vencimentos deixa de ser digitado: segue o dia do "Venc 1° Parc" (31 em mês curto cai no último dia do mês).
+- "Dia" vira **Valor da parcela (R$)** (e não valor total dividido, nem campo extra), **só no Contas a Pagar** (`EH_PAGAR`); a Contas a Receber continua com "Dia". O "dia do mês" dos vencimentos deixa de ser digitado: segue o dia do "Venc 1° Parc" (31 em mês curto cai no último dia do mês).
 - A lista **Aberto / Pago / Cancelado vale só para o Contas a Pagar**; o Contas a Receber mantém Pendente / Pendente Registro / Remessa Enviada / Pago / Cancelado (fluxo de boleto e CNAB).
 
 ## Definição da SPEC

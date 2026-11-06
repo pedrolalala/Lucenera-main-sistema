@@ -2,9 +2,9 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-06 (SPEC-258 Fase 2 — cópia do legado Connect, RASCUNHO NÃO APLICADO)
+## 2026-11-06 (SPEC-258 Fase 2 — cópia do legado Connect, APLICADA 06/11)
 
-- Migration `20261106_304_spec258_fase2_copia_legado_connect` (up/rollback/dry_run), dry-run limpo (~35 s), NÃO aplicada. Só copia (nada antigo muda): 10.403 títulos, 19.372 parcelas (18.316 ativas + 1.056 canceladas pela Connect), 16.724 baixas (2.717 recebimentos, 11.153 pagamentos, 105 abatimentos, 2.749 baixas internas), 129 pendências. Provas no ensaio: soma das parcelas ativas = R$ 75.203.769,77 (= baseline); dinheiro pago = R$ 57.635.911,13 (= view), 13.870 baixas de caixa (= view), 0 diferenças por empresa x natureza x mês; 16.619 quitadas e 1.697 abertas = view; situação coerente com o espelho da Connect; de-para 19.372 transacoes + 10.403 negociacoes; 15 regras de integridade com 0 violações. Não migram: extras fora da Connect e as 1.527 canceladas-com-pagamento sem origem (conferência do Financeiro).
+- Migration `20261106_304_spec258_fase2_copia_legado_connect` (up/rollback/dry_run), dry-run limpo (~35 s), APLICADA no Supabase SP (conferido: 10.403 títulos, 19.372 parcelas, 16.724 baixas, 129 pendências, 63.352 eventos). Só copia (nada antigo muda): 10.403 títulos, 19.372 parcelas (18.316 ativas + 1.056 canceladas pela Connect), 16.724 baixas (2.717 recebimentos, 11.153 pagamentos, 105 abatimentos, 2.749 baixas internas), 129 pendências. Provas no ensaio: soma das parcelas ativas = R$ 75.203.769,77 (= baseline); dinheiro pago = R$ 57.635.911,13 (= view), 13.870 baixas de caixa (= view), 0 diferenças por empresa x natureza x mês; 16.619 quitadas e 1.697 abertas = view; situação coerente com o espelho da Connect; de-para 19.372 transacoes + 10.403 negociacoes; 15 regras de integridade com 0 violações. Não migram: extras fora da Connect e as 1.527 canceladas-com-pagamento sem origem (conferência do Financeiro).
 
 ## 2026-11-06 (SPEC-258 Fase 1B — porta única + views, APLICADA 06/11)
 

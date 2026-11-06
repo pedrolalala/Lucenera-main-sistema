@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-06 (SPEC-249 — chamados da reunião 43)
+
+- Investigação (só leitura, nada de dado alterado): vendas da Moara em "Administração" porque a funcionária está sem equipe no cadastro (26 orçamentos da Connect; falta definir a equipe); XML parado no 8514 é da Connect; boleto Figueiredo Nunes (dup. 7912, parcela 2, 05/11, R$ 12.669,33) já está no banco e a data/valor se corrige na Connect. Central de Solicitações (`04-Sistemas/central-de-solicitacoes`, commit c0396fe, NÃO publicado): busca por texto no painel para evitar pedido repetido. Detalhes na SPEC-249.
+
 ## 2026-11-06 (SPEC-256 — Logística: calendário agrupa as listas do mesmo cliente)
 
 - Logística (`04-Sistemas/lucenera-logistics-b7cd1`, commit be366a6 pushado, sem migration; NO AR em logistica-lucenera.pages.dev, deploy 45346971 por wrangler, bundle em São Paulo): no calendário e nos detalhes do dia, listas de separação do mesmo cliente + endereço + data contam e aparecem como UMA entrega ("N listas"); sem endereço não agrupa; nunca agrupa só pelo nome. Listas continuam separadas para editar, separar, baixar e imprimir. Pendente: Criar Rota (uma parada por lista) e contagens de painéis que leiam `separacoes` direto.

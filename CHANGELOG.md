@@ -2,9 +2,9 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-07 (SPEC-258 Fase 4a — orçamento aprovado → título a receber, RASCUNHO NÃO APLICADO)
+## 2026-11-07 (SPEC-258 Fase 4a — orçamento aprovado → título a receber, APLICADA 07/11)
 
-- Migration `20261107_306_spec258_fase4a_orcamento_aprovado_titulo` (up/rollback/dry_run), dry-run limpo, NÃO aplicada. Em vez de reescrever `aprovar_orcamento_financeiro` (555 linhas), espelha o funil que ele já usa (`projeto_parcelas` → `negociacoes`/`transacoes` nativas): gatilho `trg_transacoes_financeiro_ponte` + função `financeiro_ponte_transacao` criam título (origem orcamento), parcela firme, baixa (recebimento/abatimento/baixa interna) e estorno (pagamento desfeito) no modelo novo, na mesma transação; falha do espelho NÃO bloqueia a operação antiga: vai para `financeiro_ponte_falhas` e `vw_financeiro_ponte_integridade` acusa (4 regras, todas 0 no ensaio). Origem de baixa nova `ponte` (conta pode faltar → pendência). Ensaio com aprovação real de ORC-0001/ORC-0003 + recebimento + desfazer + cancelar: título/parcelas/baixas/estorno corretos; `v_financeiro_realizado` x `_novo` com linhas nativas: 0 diferenças.
+- Migration `20261107_306_spec258_fase4a_orcamento_aprovado_titulo` (up/rollback/dry_run), dry-run limpo, APLICADA no Supabase SP. Em vez de reescrever `aprovar_orcamento_financeiro` (555 linhas), espelha o funil que ele já usa (`projeto_parcelas` → `negociacoes`/`transacoes` nativas): gatilho `trg_transacoes_financeiro_ponte` + função `financeiro_ponte_transacao` criam título (origem orcamento), parcela firme, baixa (recebimento/abatimento/baixa interna) e estorno (pagamento desfeito) no modelo novo, na mesma transação; falha do espelho NÃO bloqueia a operação antiga: vai para `financeiro_ponte_falhas` e `vw_financeiro_ponte_integridade` acusa (4 regras, todas 0 no ensaio). Origem de baixa nova `ponte` (conta pode faltar → pendência). Ensaio com aprovação real de ORC-0001/ORC-0003 + recebimento + desfazer + cancelar: título/parcelas/baixas/estorno corretos; `v_financeiro_realizado` x `_novo` com linhas nativas: 0 diferenças.
 
 ## 2026-11-06 (SPEC-258 Fase 3 passo 1 — view nova do realizado, APLICADA 06/11)
 

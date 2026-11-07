@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-07 (SPEC-258 Fase 4a — orçamento aprovado → título a receber, RASCUNHO NÃO APLICADO)
+
+- Migration `20261107_306_spec258_fase4a_orcamento_aprovado_titulo` (up/rollback/dry_run), dry-run limpo, NÃO aplicada. Em vez de reescrever `aprovar_orcamento_financeiro` (555 linhas), espelha o funil que ele já usa (`projeto_parcelas` → `negociacoes`/`transacoes` nativas): gatilho `trg_transacoes_financeiro_ponte` + função `financeiro_ponte_transacao` criam título (origem orcamento), parcela firme, baixa (recebimento/abatimento/baixa interna) e estorno (pagamento desfeito) no modelo novo, na mesma transação; falha do espelho NÃO bloqueia a operação antiga: vai para `financeiro_ponte_falhas` e `vw_financeiro_ponte_integridade` acusa (4 regras, todas 0 no ensaio). Origem de baixa nova `ponte` (conta pode faltar → pendência). Ensaio com aprovação real de ORC-0001/ORC-0003 + recebimento + desfazer + cancelar: título/parcelas/baixas/estorno corretos; `v_financeiro_realizado` x `_novo` com linhas nativas: 0 diferenças.
+
 ## 2026-11-06 (SPEC-258 Fase 3 passo 1 — view nova do realizado, APLICADA 06/11)
 
 - Migration `20261106_305_spec258_fase3_view_realizado_novo` (up/rollback/dry_run), dry-run limpo, APLICADA no Supabase SP: cria `v_financeiro_realizado_novo` (mesmas 18 colunas e regras da `v_financeiro_realizado`, lendo títulos/parcelas/baixas) e 3 colunas copiadas em `financeiro_parcelas` (emissao, descricao, desconto). Ensaio como Filippo: 18.316 = 18.316 linhas, 0 ids só de um lado, 0 diferenças em 16 colunas; única diferença: 5 `dt_pagamento` que a Connect não tem (o modelo novo usa o vencimento e já há pendência aberta). Sem permissão no dashboard-financeiro devolve 0; anon barrado. A view antiga não foi tocada; os sistemas só trocam de view depois.

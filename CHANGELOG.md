@@ -2,9 +2,9 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-07 (SPEC-258 Fase 5b — boleto_id na view de duplicatas, RASCUNHO NÃO APLICADO)
+## 2026-11-07 (SPEC-258 Fase 5b — boleto_id na view de duplicatas, APLICADA 07/11)
 
-- Migration `20261107_309_spec258_fase5b_duplicatas_boleto_id` (up/rollback/dry_run), dry-run limpo, NÃO aplicada: `vw_financeiro_duplicatas` ganha a coluna `boleto_id` (qual boleto representa a parcela: boleto de venda aprovada via `parcela_id`, boleto da nota via `NFC-`+id da parcela) para as telas Contas a Pagar/Receber não mostrarem a mesma conta duas vezes e a baixa atualizar o boleto E o modelo novo; índice em `financeiro_legado_ids(id_novo)`. Ensaio: 19.409 linhas em 0,27 s; aprovação de ORC-0003 e nota de entrada apontam para o boleto certo; legado sem boleto; nenhum boleto em duas linhas; aux estoque 0, anon barrado.
+- Migration `20261107_309_spec258_fase5b_duplicatas_boleto_id` (up/rollback/dry_run), dry-run limpo, APLICADA no Supabase SP: `vw_financeiro_duplicatas` ganha a coluna `boleto_id` (qual boleto representa a parcela: boleto de venda aprovada via `parcela_id`, boleto da nota via `NFC-`+id da parcela) para as telas Contas a Pagar/Receber não mostrarem a mesma conta duas vezes e a baixa atualizar o boleto E o modelo novo; índice em `financeiro_legado_ids(id_novo)`. Ensaio: 19.409 linhas em 0,27 s; aprovação de ORC-0003 e nota de entrada apontam para o boleto certo; legado sem boleto; nenhum boleto em duas linhas; aux estoque 0, anon barrado.
 
 ## 2026-11-07 (SPEC-258 Fase 5a — view de duplicatas e baixa em lote, APLICADA 07/11)
 

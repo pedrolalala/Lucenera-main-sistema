@@ -9,6 +9,8 @@ sistemas_envolvidos:
 
 # SPEC-258 — Financeiro: modelo definitivo
 
+> **Atenção à numeração (07/11/2026):** existem DUAS SPECs com o número 258: esta (**SPEC-258 Financeiro**: títulos/parcelas/baixas, migrations 302 a 307 de `*_spec258_fase*`) e a do Filippo (**SPEC-258 Tipos de contato**: arquiteto pode ser cliente, migrations 302/303 de `*_spec258_tipos_contato*` e `*_spec258_arquitetos_duplicados*`, branch `fix/tipos-contato-arquiteto-cliente`). Decisão do usuário: manter os números; distinguir sempre pelo nome entre parênteses.
+
 > **Estado em 06/11/2026: modelo APROVADO EM PRINCÍPIO pelo usuário; NADA aplicado no banco.** O usuário pediu: (1) criar esta SPEC com todas as informações; (2) trocar para um modelo mais forte de IA; (3) **refazer a análise do banco do zero** com esse modelo; (4) só depois aplicar o banco novo. Antes de revisar, **nada deve ser enviado ao GitHub** sobre este assunto.
 > Anexo visual (para o usuário ler): `03-Projeto/Planos de Ação/SPECs/SPEC-258_anexo_relatorio_visual_financeiro.html` (cópia para abrir fácil: `03-Projeto/Relatorio_Financeiro_Nova_Estrutura.html`).
 > Linha de base reexecutável (só leitura): `scripts/financeiro/baseline_spec258.sql`.

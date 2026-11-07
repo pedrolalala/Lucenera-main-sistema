@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-07 (SPEC-258 Fase 5c — telas Contas a Pagar/Receber no modelo novo, commit local, NÃO publicada)
+
+- Front `retorno-bancario-bradesco-5392a` (commit 035bc9e, sem push/deploy): a grade lê `vw_financeiro_duplicatas` (legado Connect + nativas sem boleto), Executar usa `financeiro_baixar_lote` (pede conta bancária; boleto também vira Pago) e novo modal Estornar (`financeiro_estornar`, motivo obrigatório). Testado no navegador contra o banco SP em uma parcela real de R$ 25,48 (baixa com juros 2 e desconto 1 → valor pago R$ 26,48; estorno → pendente, valor pago 0; caixa líquido zero pelas views de realizado/duplicatas). Achado: coluna `desconto` da view fica 0 quando o desconto vira abatimento. Falta: deploy (wrangler) e remoção das estruturas antigas após período sem leitura.
+
 ## 2026-11-07 (SPEC-258 Fase 5b — boleto_id na view de duplicatas, APLICADA 07/11)
 
 - Migration `20261107_309_spec258_fase5b_duplicatas_boleto_id` (up/rollback/dry_run), dry-run limpo, APLICADA no Supabase SP: `vw_financeiro_duplicatas` ganha a coluna `boleto_id` (qual boleto representa a parcela: boleto de venda aprovada via `parcela_id`, boleto da nota via `NFC-`+id da parcela) para as telas Contas a Pagar/Receber não mostrarem a mesma conta duas vezes e a baixa atualizar o boleto E o modelo novo; índice em `financeiro_legado_ids(id_novo)`. Ensaio: 19.409 linhas em 0,27 s; aprovação de ORC-0003 e nota de entrada apontam para o boleto certo; legado sem boleto; nenhum boleto em duas linhas; aux estoque 0, anon barrado.

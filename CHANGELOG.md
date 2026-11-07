@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-07 (SPEC-258 Fase 5c — deploy das telas + migration 310 rascunho, NÃO aplicada)
+
+- **No ar** (wrangler, build com URL de São Paulo conferida no bundle): Contas a Receber (deploy a7980e3d, contas-receber-lucenera.pages.dev) e Contas a Pagar (50322a19, contas-pagar-lucenera.pages.dev) com leitura de `vw_financeiro_duplicatas`, baixa em lote e estorno. Testado em tela só no Receber; Pagar usa o mesmo código (view tem 1.238 CP pendentes). `adm-bancaria-lucenera` é só a página de escolha: sem deploy. Atenção: o `.env` local do `retorno-bancario` aponta para o projeto ANTIGO (vcvcwz…); build de deploy precisa das variáveis de São Paulo por ambiente.
+- Migration `20261107_310_spec258_fase5c_duplicatas_desconto` (up/rollback/dry_run), dry-run limpo, **não aplicada**: a coluna `desconto` da view passa a ser o maior entre `parcelas.desconto` e o abatimento ativo (baixa nativa com desconto mostrava 0; no legado o desconto está nos dois lugares, 105 parcelas, por isso nunca soma). Ensaio: 19.409 linhas iguais, status e valor pago intactos, 0 mudanças no legado, baixa com desconto 1 → 1,00 e estorno → 0,00, anon sem acesso.
+
 ## 2026-11-07 (SPEC-258 Fase 5c — telas Contas a Pagar/Receber no modelo novo, commit local, NÃO publicada)
 
 - Front `retorno-bancario-bradesco-5392a` (commit 035bc9e, sem push/deploy): a grade lê `vw_financeiro_duplicatas` (legado Connect + nativas sem boleto), Executar usa `financeiro_baixar_lote` (pede conta bancária; boleto também vira Pago) e novo modal Estornar (`financeiro_estornar`, motivo obrigatório). Testado no navegador contra o banco SP em uma parcela real de R$ 25,48 (baixa com juros 2 e desconto 1 → valor pago R$ 26,48; estorno → pendente, valor pago 0; caixa líquido zero pelas views de realizado/duplicatas). Achado: coluna `desconto` da view fica 0 quando o desconto vira abatimento. Falta: deploy (wrangler) e remoção das estruturas antigas após período sem leitura.

@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-07 (SPEC-258 Fase 5b — boleto_id na view de duplicatas, RASCUNHO NÃO APLICADO)
+
+- Migration `20261107_309_spec258_fase5b_duplicatas_boleto_id` (up/rollback/dry_run), dry-run limpo, NÃO aplicada: `vw_financeiro_duplicatas` ganha a coluna `boleto_id` (qual boleto representa a parcela: boleto de venda aprovada via `parcela_id`, boleto da nota via `NFC-`+id da parcela) para as telas Contas a Pagar/Receber não mostrarem a mesma conta duas vezes e a baixa atualizar o boleto E o modelo novo; índice em `financeiro_legado_ids(id_novo)`. Ensaio: 19.409 linhas em 0,27 s; aprovação de ORC-0003 e nota de entrada apontam para o boleto certo; legado sem boleto; nenhum boleto em duas linhas; aux estoque 0, anon barrado.
+
 ## 2026-11-07 (SPEC-258 Fase 5a — view de duplicatas e baixa em lote, APLICADA 07/11)
 
 - Migration `20261107_308_spec258_fase5a_duplicatas_e_baixa_em_lote` (up/rollback/dry_run), dry-run limpo, APLICADA no Supabase SP. Achado que motivou: nas telas Contas a Pagar/Receber as duplicatas da Connect eram "só consulta" (a baixa vinha da planilha do dia) e a carga de 05/11 foi a última; hoje NENHUMA tela dá baixa nas 1.697 parcelas abertas do legado (BaixarDuplicata/ExecutarBaixaModal só atualizam `boletos`, que tem 4 linhas). Cria `vw_financeiro_duplicatas` (legado + nativo no formato que as telas montam juntando boletos + transacoes; contagens por tipo/situação batem com o legado; 0 diferenças em vencimento, valor, nome do pagador, fatura, valor pago e empresa) e `financeiro_baixar_lote(parcelas, data, forma, conta, juros, desconto, comprovante, obs)`: tudo ou nada, valor pago = parcela − desconto + juros (igual à tela atual), desconto vira abatimento, conta de outra empresa grava `empresa_pagadora_id` em vez de recusar, recusa quitada/cancelada/prevista/sem conta/sem permissão. Estorno pelas funções existentes devolve a parcela para pendente. Telas ainda NÃO alteradas.

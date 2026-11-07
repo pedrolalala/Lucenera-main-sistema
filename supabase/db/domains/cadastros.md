@@ -104,6 +104,14 @@ Triggers relacionadas:
 - Ver `04-Sistemas/showroom-qtq8er2dk/supabase/AI_DB_CONTEXT.md` para o detalhamento completo
   de tabelas/RPCs/Storage deste domínio (arquivo novo, criado pela SPEC-148).
 
+## Tipos de contato: principal + extras (SPEC-258, 07/11/2026)
+
+- `contatos.tipo` / `contatos.tipo_principal_id` = QUEM a pessoa é (um só). `contato_tipos` (com `tipo_id` → `tipos_contato`: 1 cliente, 2 arquiteto, 3 engenheiro, 4 eletricista, 5 fornecedor, 6 construtora, 7 escritório de arquitetura, 8 incorporadora, 9 funcionário, 10 outro, 11 escritório de engenharia) = todos os tipos, inclusive extras. `vw_contatos_tipos` mostra código e nome lado a lado.
+- O papel num negócio vem do vínculo: quem está em `projetos.cliente_id` / `orcamentos.cliente_id` / nota é o cliente daquele negócio, mesmo com cadastro de arquiteto.
+- `sync_contact_type_on_budget` só ACRESCENTA 'cliente' em `contato_tipos`; nunca mais troca o tipo principal.
+- Ao checar "é cliente" no banco, usar `c.tipo = 'cliente' OR EXISTS (contato_tipos tipo_id = 1)`. Os apps (CRM, Orçamentos) ainda filtram pelo tipo principal até a Fase 4.
+- Duplicados: `canonical_id` aponta para o cadastro principal. Quando um par cliente/arquiteto é a mesma pessoa, o principal é o de ARQUITETO (decisão do usuário). Há índice único de CPF/CNPJ só entre principais — ao inverter uma junção, marcar a duplicata antes de liberar o principal.
+
 ## Ação a ser realizada
 
 Quando consolidar o schema, preservar a distinção entre `empresas` como empresas do grupo Lucenera e `contatos.empresa_id` como empresa/PJ vinculada a um contato. Depois, registrar nas telas e integrações esse significado para evitar conciliação incorreta. No frontend da SPEC-018/SPEC-053, reaproveitar `public.criar_produto_orcamento(p_payload jsonb)`, manter validações cadastrais de produto (`sku`, marca, categoria e fornecedor — `codigo_produto` agora é gerado por sequence, não mais validado a partir do payload) e impedir que a criação pelo Orçamentos escreva dados operacionais de estoque/compras.

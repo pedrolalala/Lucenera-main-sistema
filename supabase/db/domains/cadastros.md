@@ -104,7 +104,7 @@ Triggers relacionadas:
 - Ver `04-Sistemas/showroom-qtq8er2dk/supabase/AI_DB_CONTEXT.md` para o detalhamento completo
   de tabelas/RPCs/Storage deste domínio (arquivo novo, criado pela SPEC-148).
 
-## Tipos de contato: principal + extras (SPEC-258, 07/11/2026)
+## Tipos de contato: principal + extras (SPEC-259, 07/11/2026)
 
 - `contatos.tipo` / `contatos.tipo_principal_id` = QUEM a pessoa é (um só). `contato_tipos` (com `tipo_id` → `tipos_contato`: 1 cliente, 2 arquiteto, 3 engenheiro, 4 eletricista, 5 fornecedor, 6 construtora, 7 escritório de arquitetura, 8 incorporadora, 9 funcionário, 10 outro, 11 escritório de engenharia) = todos os tipos, inclusive extras. `vw_contatos_tipos` mostra código e nome lado a lado.
 - O papel num negócio vem do vínculo: quem está em `projetos.cliente_id` / `orcamentos.cliente_id` / nota é o cliente daquele negócio, mesmo com cadastro de arquiteto.

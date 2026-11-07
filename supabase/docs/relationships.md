@@ -81,8 +81,8 @@ contatos.canonical_id       -> contatos.id
 contatos.empresa_id         -> contatos.id
 
 contato_tipos.contato_id             -> contatos.id
-contato_tipos.tipo_id                -> tipos_contato.id   (SPEC-258; catálogo de tipos)
-contatos.tipo_principal_id           -> tipos_contato.id   (SPEC-258)
+contato_tipos.tipo_id                -> tipos_contato.id   (SPEC-259; catálogo de tipos)
+contatos.tipo_principal_id           -> tipos_contato.id   (SPEC-259)
 contato_origens.contato_id           -> contatos.id
 contatos_revisao.id_a                -> contatos.id
 contatos_revisao.id_b                -> contatos.id

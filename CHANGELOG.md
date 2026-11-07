@@ -2,12 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-07 (SPEC-258 — arquiteto pode ser cliente sem perder a identidade)
+## 2026-11-07 (SPEC-259 — arquiteto pode ser cliente sem perder a identidade)
 
 - Banco: migration 302 (`20261106_302_spec258_tipos_contato_arquiteto_cliente`) APLICADA após dry-run com ROLLBACK e OK do usuário: o gatilho `sync_contact_type_on_budget` não troca mais `contatos.tipo` para cliente (só acrescenta 'cliente' em `contato_tipos`); `vw_financeiro_projetos`, `vw_projetos_pipeline`, `showroom_emp_buscar_cliente`, `showroom_emp_criar` e a permuta de `aprovar_orcamento_financeiro` aceitam também "tem o tipo cliente" (views idênticas no teste). rollback.sql incluso.
 - Edge Function `sharepoint-projetos-pull` publicada (versão 5): a coluna "Arquiteto" do SharePoint só casa com contato que tem o tipo arquiteto, ativo e não duplicado, lendo todos os contatos (antes: qualquer contato, só os 1.000 primeiros — ligava o cadastro de CLIENTE homônimo como arquiteto em 281 projetos).
 - Banco: migration 303 (`20261106_303_spec258_arquitetos_duplicados_dados`) APLICADA após dry-run: 23 cadastros duplicados corrigidos (cadastro de arquiteto vira o principal; 13 junções anteriores invertidas), 120 projetos com `arquiteto_id` corrigido, 27 listas `projeto_arquitetos` vazias preenchidas a 100%, 19 contatos com o tipo extra 'cliente'. Backup em `backup._bkp_spec258_*`, rollback.sql incluso, sem push para o SharePoint.
-- Fases 0–1 dos tipos de contato (`tipos_contato`, `contato_tipos.tipo_id`, `contatos.tipo_principal_id`, `vw_contatos_tipos`) já estavam aplicadas no banco em 06/11 fora do repositório; conferidas e registradas na SPEC-258.
+- Fases 0–1 dos tipos de contato (`tipos_contato`, `contato_tipos.tipo_id`, `contatos.tipo_principal_id`, `vw_contatos_tipos`) já estavam aplicadas no banco em 06/11 fora do repositório; conferidas e registradas na SPEC-259.
+- SPEC renumerada de 258 para 259 (o número 258 ficou com o Financeiro do Pedro); pastas das migrations, backups `backup._bkp_spec258_*` e comentários já aplicados mantêm `spec258`.
 - Pendente: grupos B e C (15 cadastros, 161 projetos) aguardam decisão do usuário; Fase 4 (telas do CRM/Orçamentos lerem `contato_tipos`).
 - Repositórios: só o central (branch `fix/tipos-contato-arquiteto-cliente`); nenhum sistema publicado.
 

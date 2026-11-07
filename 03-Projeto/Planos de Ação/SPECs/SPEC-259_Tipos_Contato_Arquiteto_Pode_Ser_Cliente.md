@@ -1,5 +1,5 @@
 ---
-titulo: "SPEC-258 — Tipos de contato: arquiteto pode ser cliente sem perder a identidade"
+titulo: "SPEC-259 — Tipos de contato: arquiteto pode ser cliente sem perder a identidade"
 status: pendente
 data_ultima_modificacao: 2026-11-07
 sistemas_envolvidos:
@@ -10,7 +10,9 @@ sistemas_envolvidos:
   - Sincronização SharePoint (sharepoint-projetos-pull)
 ---
 
-# SPEC-258 — Tipos de contato: arquiteto pode ser cliente sem perder a identidade
+# SPEC-259 — Tipos de contato: arquiteto pode ser cliente sem perder a identidade
+
+> **Renumerada em 07/11/2026:** esta SPEC nasceu como SPEC-258, número que o Pedro também usou para o trabalho do Financeiro (pop-up "as parcelas deste pedido já foram pagas?" no Compras). Os nomes já aplicados no banco continuam com `spec258`: pastas das migrations 302/303, histórico do Supabase (`schema_migrations`), tabelas `backup._bkp_spec258_*` e os comentários dos arquivos .sql e da Edge Function `sharepoint-projetos-pull` (v5). Não foram renomeados para não divergir do que está aplicado.
 
 ## Checklist de Ação
 
@@ -70,8 +72,8 @@ Correção: só contatos com tipo arquiteto (`contato_tipos.tipo_id = 2`), ativo
 
 ## Pendências
 
-- [ ] Grupo B (SPEC-258) — cadastro "cliente" usado como arquiteto cujo arquiteto com o mesmo código Connect tem outro nome; o usuário precisa dizer se é a mesma pessoa: ANDRE CALIL (~ANDRÉ CALIL DE SALLES), ISABELLA CURY (~ISABELLA COSTA PICCIRILO CURY), CRISTINA SALOMAO (~MARIA CRISTINA SALOMAO), ELOISA BONINI (~ELOISA W REBEY, 105 projetos), ANDREA ESTEVES (~ANDREA ESTEVES PROJETOS LTDA), MG ARQUITETURA (~NA MATA PROJETOS PAISAGÍSTICOS LTDA, 22 projetos), RENATA DEL BIANCO (~CRIS BERMUDEZ PAISAGISMO LTDA).
-- [ ] Grupo C (SPEC-258) — cadastro "cliente" único usado como arquiteto, sem cadastro de arquiteto: LUCIANA BERNASCONI, MAURICIO SIQUEIRA, RUBEN RIVITI, VANESSA CHIEREGATO, PAOLA CIMARELLI e PAOLA CIMARELLI LANDGRAF (provável mesma pessoa), JULIA (cliente em 4 projetos, arquiteta em 1 — provável vínculo errado), FILIPPO GIORGI (teste?). Decidir se o tipo principal vira arquiteto.
-- [ ] Inconsistência geral (SPEC-258) — além destes, há projetos em que `projetos.arquiteto_id` (campo antigo) é diferente da lista oficial `projeto_arquitetos` (556 antes da correção) e projetos vindos do SharePoint com a lista oficial vazia; o pull só grava o campo antigo. Definir se o pull deve preencher a lista oficial.
-- [ ] Fase 4 (SPEC-258) — CRM e Orçamentos: listas e seletores lerem `contato_tipos` (arquiteto-cliente nas duas listas), cadastro com vários tipos, CNPJ obrigatório para escritório de engenharia.
-- [ ] Snapshot (SPEC-258) — reextrair `supabase/db/current/` (migrations 302 e 303 e Fases 0–1 ainda não refletidas).
+- [ ] Grupo B (SPEC-259) — cadastro "cliente" usado como arquiteto cujo arquiteto com o mesmo código Connect tem outro nome; o usuário precisa dizer se é a mesma pessoa: ANDRE CALIL (~ANDRÉ CALIL DE SALLES), ISABELLA CURY (~ISABELLA COSTA PICCIRILO CURY), CRISTINA SALOMAO (~MARIA CRISTINA SALOMAO), ELOISA BONINI (~ELOISA W REBEY, 105 projetos), ANDREA ESTEVES (~ANDREA ESTEVES PROJETOS LTDA), MG ARQUITETURA (~NA MATA PROJETOS PAISAGÍSTICOS LTDA, 22 projetos), RENATA DEL BIANCO (~CRIS BERMUDEZ PAISAGISMO LTDA).
+- [ ] Grupo C (SPEC-259) — cadastro "cliente" único usado como arquiteto, sem cadastro de arquiteto: LUCIANA BERNASCONI, MAURICIO SIQUEIRA, RUBEN RIVITI, VANESSA CHIEREGATO, PAOLA CIMARELLI e PAOLA CIMARELLI LANDGRAF (provável mesma pessoa), JULIA (cliente em 4 projetos, arquiteta em 1 — provável vínculo errado), FILIPPO GIORGI (teste?). Decidir se o tipo principal vira arquiteto.
+- [ ] Inconsistência geral (SPEC-259) — além destes, há projetos em que `projetos.arquiteto_id` (campo antigo) é diferente da lista oficial `projeto_arquitetos` (556 antes da correção) e projetos vindos do SharePoint com a lista oficial vazia; o pull só grava o campo antigo. Definir se o pull deve preencher a lista oficial.
+- [ ] Fase 4 (SPEC-259) — CRM e Orçamentos: listas e seletores lerem `contato_tipos` (arquiteto-cliente nas duas listas), cadastro com vários tipos, CNPJ obrigatório para escritório de engenharia.
+- [ ] Snapshot (SPEC-259) — reextrair `supabase/db/current/` (migrations 302 e 303 e Fases 0–1 ainda não refletidas).

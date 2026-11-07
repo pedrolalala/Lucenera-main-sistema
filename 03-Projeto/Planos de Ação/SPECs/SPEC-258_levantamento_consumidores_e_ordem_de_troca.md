@@ -48,3 +48,10 @@ Escolher entre (A) seguir a ordem acima (recomendada: sem risco de dado sumir) o
 5. Prova: `vw_contas_a_pagar` x `vw_contas_pagar_pedidos_compra` + boletos CP = 0 diferenças; integridade da ponte estendida.
 
 **Decisões do negócio que preciso confirmar antes de aplicar:** (a) a previsão do pedido deve mesmo diminuir quando a nota entra (como a view de hoje faz)? (b) quando a nota é paga e o pedido ainda tem restante, o restante continua previsto? (c) pedido "recebido" mantém parcelas previstas?
+
+## 7. Fase 4c — levantamento de RT, comissão e folha (07/11/2026, só leitura)
+- **Planilha de RT** (`RT_percentual_arquitetos.xlsx`): 0 de 867 arquitetos com percentual, base de cálculo, momento de pagamento ou vigência. Sem isso não há regra de RT para ligar. A pergunta da nota fiscal do arquiteto também segue em aberto.
+- **Comissão**: 13 funcionários têm percentual em `funcionarios_financeiro` (de 0,15% a 5,5%; equipes Thairine, Marina, Thais; Lana e Vinicius sem equipe). Hoje a `vw_comissao_mensal` calcula pelo valor do projeto no mês de entrada; `folha_pagamento.comissao` está zerada nas 771 linhas. Não existe regra de quando a comissão é paga (proporcional ao recebido, venda quitada ou aprovação).
+- **Volume nativo é mínimo**: 1 venda aprovada nativa (1 título de orçamento) e 30 projetos com valor; só 1 com equipe e 1 com arquiteto. RT e comissão automáticos hoje gerariam praticamente nada.
+- **Folha**: `folha_pagamento` tem 771 linhas (26 funcionários, geradas até 08/2030, salário igual todo mês = projeção). O legado da Connect JÁ tem "COM PESSOAL" em aberto programado: R$ 270 mil vencendo em 11/2026 (92 parcelas), R$ 268 mil em 12/2026, R$ 123 mil em 01/2027, e cauda até 2030. Gerar título da folha para esses meses duplicaria. Dentro de "COM PESSOAL" no legado: SALARIOS E ORDENADOS (R$ 3,08 mi, 870 parcelas) e RT (R$ 1,80 mi, 929 parcelas) já pagos.
+- **Risco principal**: dupla contagem entre a folha nativa e o "COM PESSOAL" programado pela Connect. O fluxo de caixa precisa decidir de onde vem cada mês.

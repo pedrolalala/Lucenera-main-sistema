@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-08 (SPEC-258 Fase 5 — Fluxo Futuro em 4 colunas, commit local, NÃO publicado)
+
+- Layout escolhido pelo usuário (08/11): **receita realizada | receita prevista | despesa realizada | despesa prevista + saldo do mês**, por mês. Realizada = baixas por mês de pagamento (últimos 3 meses); prevista = tudo que ainda vai entrar/sair (firme em aberto + previsão) por mês de vencimento, vencidas na linha "Vencido"; cada célula prevista mostra "dos quais R$ X em previsão" (flag `previsao` da view nova; atende o item 3 do SPEC-248); pendência 31/12 fora; segue Perfil e Horizonte. Sem migration: `dashboard-lucenera-b02z85wa3` (commit 0d39749; `services/cash-flow.ts` `computeFluxoQuatroColunas` + tabela em `FluxoFuturo.tsx`). Conferido em tela contra o banco de SP (vencido, ago a mar/2027 e as previsões: todos iguais). Observações: despesa realizada inclui distribuição de lucro (é caixa); dez/2026 mostra R$ 670 "realizados" por 1 parcela paga com data futura (defeito de data do legado). Numeração: SPEC-258 e SPEC-262/263 usaram em paralelo os prefixos 312 e 313 (pastas de nomes diferentes, todas aplicadas; sem registro de migration por número).
+
 ## 2026-11-08 (SPEC-258 Fase 5d — retorno bancário no modelo novo, migration 314 APLICADA 08/11)
 
 - Achados: não há boleto a receber nem arquivo de retorno processado hoje (fluxo limpo na virada); `processar_retorno_bancario` atualiza boletos + parcela de projeto e a ponte da 4a já criava a baixa, mas como origem `ponte`, sem conta bancária (gerava pendência) e sem ligação com cobrança (`financeiro_cobrancas` vazia). Contas bancárias não têm agência/número (conta resolvida pelo Bradesco da empresa do título).

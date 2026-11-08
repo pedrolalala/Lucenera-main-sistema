@@ -3724,3 +3724,7 @@ Testado ao vivo: `ORC-0005` (aprovado, real) salva com sucesso, itens/parcelas/s
 - Sistemas com repositorio proprio devem ser registrados como submodules dentro de `04-Sistemas/`.
 - O `.env` geral deve existir apenas localmente e nao deve ser commitado.
 - O banco consolidado em `supabase/` e a fonte de verdade tecnica; migrations antigas dentro de sistemas sao historico, nao definicao final.
+
+## 2026-11-08 — SPEC-260 Papel assistente_administrativa (Caroline)
+- Area: Hub/permissoes. Papel proprio no lugar do papel admin da Caroline; mantem administracao_comercial.
+- Banco: migration 20261108_311 (papeis, papel_permissoes, usuario_papeis). Docs: SPEC-260. Commit so no repo central.

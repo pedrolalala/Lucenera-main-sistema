@@ -2,10 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-07 (SPEC-258 Fase 5c — deploy das telas + migration 310 rascunho, NÃO aplicada)
+## 2026-11-07 (SPEC-258 Fase 5c — deploy das telas + migration 310 APLICADA 08/11)
 
 - **No ar** (wrangler, build com URL de São Paulo conferida no bundle): Contas a Receber (deploy a7980e3d, contas-receber-lucenera.pages.dev) e Contas a Pagar (50322a19, contas-pagar-lucenera.pages.dev) com leitura de `vw_financeiro_duplicatas`, baixa em lote e estorno. Testado em tela só no Receber; Pagar usa o mesmo código (view tem 1.238 CP pendentes). `adm-bancaria-lucenera` é só a página de escolha: sem deploy. Atenção: o `.env` local do `retorno-bancario` aponta para o projeto ANTIGO (vcvcwz…); build de deploy precisa das variáveis de São Paulo por ambiente.
-- Migration `20261107_310_spec258_fase5c_duplicatas_desconto` (up/rollback/dry_run), dry-run limpo, **não aplicada**: a coluna `desconto` da view passa a ser o maior entre `parcelas.desconto` e o abatimento ativo (baixa nativa com desconto mostrava 0; no legado o desconto está nos dois lugares, 105 parcelas, por isso nunca soma). Ensaio: 19.409 linhas iguais, status e valor pago intactos, 0 mudanças no legado, baixa com desconto 1 → 1,00 e estorno → 0,00, anon sem acesso.
+- Migration `20261107_310_spec258_fase5c_duplicatas_desconto` (up/rollback/dry_run), dry-run limpo, **APLICADA no Supabase SP (08/11; conferido: 19.409 linhas, 106 com desconto, anon sem acesso)**: a coluna `desconto` da view passa a ser o maior entre `parcelas.desconto` e o abatimento ativo (baixa nativa com desconto mostrava 0; no legado o desconto está nos dois lugares, 105 parcelas, por isso nunca soma). Ensaio: 19.409 linhas iguais, status e valor pago intactos, 0 mudanças no legado, baixa com desconto 1 → 1,00 e estorno → 0,00, anon sem acesso.
 
 ## 2026-11-07 (SPEC-258 Fase 5c — telas Contas a Pagar/Receber no modelo novo, commit local, NÃO publicada)
 

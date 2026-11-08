@@ -6,7 +6,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 - Decisão do usuário (08/11): o RT dos arquitetos é definido em **aba nova dentro de Contas a Pagar** (não no CRM nem no Cadastro).
 - Migration `20261108_312_spec258_fase4c_regras_rt_tela` (up/rollback/dry_run; número 311 já era da SPEC-260), dry-run limpo, **APLICADA no Supabase SP (08/11)**: `financeiro_definir_rt` (grava/troca/remove a regra de um arquiteto ou a padrão; troca em outro dia encerra a anterior, no mesmo dia edita no lugar; auditoria pelo trigger existente), `financeiro_definir_rt_lote(jsonb)` (para carregar a planilha de RT) e `vw_financeiro_rt_arquitetos` (867 arquitetos + regra ativa). Só grava a REGRA em `financeiro_regras_repasse`; o motor que calcula/lança o RT continua pendente (decisões de base/gatilho/NF). Acesso = sistema `financeiro`; anon sem acesso; gravação direta na tabela continua barrada.
-- Front (`retorno-bancario-bradesco-5392a`, só modo Pagar, rota `/regras-rt`, commit local, sem deploy): busca, filtro com/sem RT, RT padrão, % + base + quando paga + emite NF + observação, salvar/remover por linha.
+- Front (`retorno-bancario-bradesco-5392a`, só modo Pagar, rota `/regras-rt`, commit local; NO AR em contas-pagar-lucenera.pages.dev, deploy 77b19b18 por wrangler, 08/11): busca, filtro com/sem RT, RT padrão, % + base + quando paga + emite NF + observação, salvar/remover por linha.
 
 ## 2026-11-07 (SPEC-258 Fase 5c — deploy das telas + migration 310 APLICADA 08/11)
 

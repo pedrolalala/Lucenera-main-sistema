@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-08 (SPEC-258 Fase 4c parte 1 — tela Regras de RT em Contas a Pagar, migration 312 rascunho, NÃO aplicada)
+
+- Decisão do usuário (08/11): o RT dos arquitetos é definido em **aba nova dentro de Contas a Pagar** (não no CRM nem no Cadastro).
+- Migration `20261108_312_spec258_fase4c_regras_rt_tela` (up/rollback/dry_run; número 311 já era da SPEC-260), dry-run limpo, **não aplicada**: `financeiro_definir_rt` (grava/troca/remove a regra de um arquiteto ou a padrão; troca em outro dia encerra a anterior, no mesmo dia edita no lugar; auditoria pelo trigger existente), `financeiro_definir_rt_lote(jsonb)` (para carregar a planilha de RT) e `vw_financeiro_rt_arquitetos` (867 arquitetos + regra ativa). Só grava a REGRA em `financeiro_regras_repasse`; o motor que calcula/lança o RT continua pendente (decisões de base/gatilho/NF). Acesso = sistema `financeiro`; anon sem acesso; gravação direta na tabela continua barrada.
+- Front (`retorno-bancario-bradesco-5392a`, só modo Pagar, rota `/regras-rt`, commit local, sem deploy): busca, filtro com/sem RT, RT padrão, % + base + quando paga + emite NF + observação, salvar/remover por linha.
+
 ## 2026-11-07 (SPEC-258 Fase 5c — deploy das telas + migration 310 APLICADA 08/11)
 
 - **No ar** (wrangler, build com URL de São Paulo conferida no bundle): Contas a Receber (deploy a7980e3d, contas-receber-lucenera.pages.dev) e Contas a Pagar (50322a19, contas-pagar-lucenera.pages.dev) com leitura de `vw_financeiro_duplicatas`, baixa em lote e estorno. Testado em tela só no Receber; Pagar usa o mesmo código (view tem 1.238 CP pendentes). `adm-bancaria-lucenera` é só a página de escolha: sem deploy. Atenção: o `.env` local do `retorno-bancario` aponta para o projeto ANTIGO (vcvcwz…); build de deploy precisa das variáveis de São Paulo por ambiente.

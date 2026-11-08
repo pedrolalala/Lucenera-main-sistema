@@ -3752,3 +3752,6 @@ Testado ao vivo: `ORC-0005` (aprovado, real) salva com sucesso, itens/parcelas/s
 - Banco: migration 312 (plano_contas_criar) APLICADA apos dry-run com ROLLBACK. Front Contas a Pagar/Receber (retorno-bancario-bradesco-5392a, commit local, sem push): botao + Novo em Grupo/Sub grupo/Apropriacao. Build:pagar conferido; deploy aguardando autorizacao. Docs: SPEC-262.
 
 - Deploy: Contas a Pagar NO AR em contas-pagar-lucenera.pages.dev (deploy 001665da por wrangler); push do repo administra--o-bancaria feito (f3a2a1c..1f39da1).
+
+## 2026-11-08 — SPEC-263 Compras (itens na edicao, valor negociado, ST/IPI por marca)
+- Migration 313 RASCUNHO testada em dry-run com ROLLBACK, NAO aplicada (bloqueio de permissao). Front Compras (04-Sistemas/compras-lucenera-3o23t98ee) commitado local, sem push/deploy. Docs: SPEC-263.

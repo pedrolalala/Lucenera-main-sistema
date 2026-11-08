@@ -3761,3 +3761,5 @@ Testado ao vivo: `ORC-0005` (aprovado, real) salva com sucesso, itens/parcelas/s
 
 ## 2026-11-08 — SPEC-263 Compras (itens na edicao, valor negociado, ST/IPI por marca)
 - Migration 313 RASCUNHO testada em dry-run com ROLLBACK, NAO aplicada (bloqueio de permissao). Front Compras (04-Sistemas/compras-lucenera-3o23t98ee) commitado local, sem push/deploy. Docs: SPEC-263.
+
+- SPEC-263: migration 313 APLICADA e Compras NO AR em compras-lucenera.pages.dev (deploy 571497d2 por wrangler, bundle em Sao Paulo). Falta teste em tela.

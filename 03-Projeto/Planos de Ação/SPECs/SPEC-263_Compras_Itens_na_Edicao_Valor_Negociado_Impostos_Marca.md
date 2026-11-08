@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-263 — Compras: incluir itens ao editar pedido, valor final negociado e ST/IPI em lote por marca"
-status: implementada_sem_aplicar
+status: aplicada
 ---
 
 # SPEC-263 — Necessidade de Compra: 3 pedidos da Central (06/11/2026)
@@ -18,8 +18,8 @@ status: implementada_sem_aplicar
 ## Feito
 - [x] Migration 313 (`20261108_313_spec263_compras_itens_negociado_impostos_marca`): rascunho **testado em dry-run com ROLLBACK** como Débora e Thais: item novo cria solicitação + item, total 800→749,63 com negociado, negociado acima do bruto recusado, peça repetida recusada, volta ao desconto % ao apagar o negociado; impostos: prévia não grava, Thais barrada, aplicar na Dessine → 160 peças com ST, 161 com IPI, peça sem ST preservada. rollback.sql incluso (recria a função de 8 parâmetros).
 - [x] Front Compras (commit local): janela Editar pedido com busca "Incluir peça", selo "Nova", campo "Valor final negociado (R$)"; lista de pedidos com tabela × negociado; página Marcas com botão **Impostos** (janela com prévia e confirmação). `tsc` 6 erros antes e depois (dívida antiga); build só com São Paulo.
-- [ ] **Aplicar a migration 313** (aguarda autorização — o sistema bloqueou a aplicação em produção).
-- [ ] Publicar o Compras (`compras-lucenera`, wrangler) depois da migration.
+- [x] Migration 313 APLICADA 08/11 (conferido: 1 versão de cada função, anon sem execução, colunas criadas, sem sobra do pedido de teste).
+- [x] Compras publicado 08/11 (wrangler, deploy 571497d2, bundle em São Paulo).
 - [ ] Teste em tela: incluir peça num pedido aguardando aprovar; preencher o valor negociado; ajustar uma marca pequena.
 
 ## Observações

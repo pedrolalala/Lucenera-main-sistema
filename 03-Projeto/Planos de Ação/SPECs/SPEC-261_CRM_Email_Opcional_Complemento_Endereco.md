@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-261 — CRM: e-mail do cliente opcional + complemento nos 3 endereços da ficha"
-status: implementada_sem_deploy
+status: aplicada
 ---
 
 # SPEC-261 — CRM: e-mail opcional e complemento de endereço
@@ -17,7 +17,7 @@ status: implementada_sem_deploy
 - [x] Sem mudança de banco. Typecheck e build ok.
 
 ## Pendente / observação
-- [ ] Publicar o CRM (deploy) e confirmar em tela.
+- [x] CRM publicado 08/11 (commit a220825 pushado; deploy c50c9e26 por wrangler, bundle em São Paulo). Falta só conferir em tela.
 - O Cadastro (`cadastro-lucenera`, `ClienteModal`) tem número de entrega mas não complemento; Logística/pedido de compra já leem `complemento_entrega`. Fora deste escopo — decidir se quer o complemento lá também.
 
 ## Rollback

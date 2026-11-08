@@ -1,0 +1,1 @@
+-- Rodar com o roteiro de teste (BEGIN; up.sql; testes como usuario; ROLLBACK).

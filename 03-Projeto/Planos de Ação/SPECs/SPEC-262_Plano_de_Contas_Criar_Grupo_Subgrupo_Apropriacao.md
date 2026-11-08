@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-262 — Criar Grupo / Subgrupo / Apropriação do plano de contas pela tela"
-status: implementada_sem_deploy
+status: aplicada
 ---
 
 # SPEC-262 — Criar Grupo, Subgrupo e Apropriação
@@ -14,7 +14,7 @@ status: implementada_sem_deploy
 ## Feito
 - [x] Migration 312 **APLICADA** (08/11, dry-run com ROLLBACK testado como Caroline, Débora e anon): função `plano_contas_criar(nome, nivel, parent_id, tipo)` SECURITY DEFINER. Exige login + permissão `criar` no financeiro (`hub_pode_executar`); nome em MAIÚSCULAS; sem duplicar no mesmo pai; pai um nível acima e ativo; grupo exige tipo existente, os demais herdam o tipo do pai; `codigo_connect` na faixa 800.000.001+ (Connect vai até 90.000.035). anon sem execução; insert direto continua bloqueado por RLS.
 - [x] Front (Contas a Pagar/Receber, `CadastrarDuplicata`): botão "+ Novo" em Grupo, Sub grupo e Apropriação (os dois últimos só depois de escolher o pai); janela pede o nome (e o tipo, no grupo); recarrega a lista e já seleciona o item criado. Commit local, `tsc` 41 erros antes e depois (dívida antiga).
-- [ ] **Deploy do Contas a Pagar** (`build:pagar`, projeto `contas-pagar-lucenera`): build conferido (São Paulo, sem banco antigo, função presente), **não publicado** — aguarda autorização.
+- [x] Contas a Pagar publicado 08/11 (wrangler, deploy 001665da, bundle em São Paulo; commit 1f39da1 pushado junto com a Fase 5 da SPEC-258).
 - [ ] Teste em tela pela Caroline (criar "Obra São Paulo" como subgrupo de Despesas).
 
 ## Observações

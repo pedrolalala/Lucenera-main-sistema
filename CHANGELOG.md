@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-09 (SPEC-264 — preço de venda do Orçamento diferente da Consulta voltou)
+
+- Causa: `importar_produtos_estoque.py` grava `valor_venda` com os triggers de preço desligados, então `preco_venda` (Orçamento) ficou atrás do `valor_venda` (Consulta). 56 peças divergentes (lotes 04/11 e 05/11), ex.: 11412 182,47 × 184,49. 369 peças sem `valor_venda` não divergem na tela.
+- Script corrigido (grava `preco_venda = valor_venda` na mesma UPDATE). Migration 317 (backup + acerto das 56, rollback) com dry-run limpo, APLICADA em SP (56 no backup, 0 divergentes, 11412 = 184,49).
+- Docs: `SPEC-264_Preco_Venda_Volta_a_Divergir_Importador.md`. Repositório: central.
+
 ## 2026-11-09 (Compras — apropriação editável na entrada da nota)
 
 - Compras (`04-Sistemas/compras-lucenera-3o23t98ee`, commit 18caadc pushado; NO AR em compras-lucenera.pages.dev, deploy por wrangler, bundle em São Paulo): na Entrada de NF o campo "Apropriação" era texto fixo "COMPRAS - REVENDA". Agora é lista editável com COMPRAS - REVENDA (padrão, 2050001), INDUSTRIALIZAÇÃO (2050010) e GARANTIA (2050003); a escolha vai em `plano_contas_id` da nota e segue para o título a pagar. Sem migration (a RPC `registrar_entrada_nota_compra` já aceitava). Falta teste em tela.

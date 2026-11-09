@@ -413,7 +413,7 @@ def processar(dry_run: bool, incluir_estoque: bool = False) -> None:
     print(f"Produtos já sincronizados:           {inalterados}")
     print(f"CodProduto da planilha sem match no banco: {len(sem_match)}")
     print("(estoque_itens é atualizado automaticamente pelo trigger em produtos)")
-    print("(preco_venda NÃO muda — os 2 triggers de preço ficam desligados durante a gravação)")
+    print("(preco_venda só muda para acompanhar valor_venda > 0 — SPEC-264; os 2 triggers de preço ficam desligados)")
     if sem_match:
         print(f"  Exemplos: {sem_match[:15]}")
 
@@ -459,7 +459,13 @@ def processar(dry_run: bool, incluir_estoque: bool = False) -> None:
             cur.execute(f"ALTER TABLE public.produtos DISABLE TRIGGER {trg}")
 
         total_ok = 0
+        esperado_preco = {}
         for rec in updates_produtos:
+            # SPEC-264: com os triggers desligados o preco_venda não acompanha o valor_venda (SPEC-230).
+            # Quando a Connect manda valor_venda > 0, grava preco_venda igual na mesma UPDATE.
+            if (rec.get("valor_venda") or 0) > 0:
+                rec = {**rec, "preco_venda": rec["valor_venda"]}
+                esperado_preco[rec["id"]] = rec["valor_venda"]
             cols = [k for k in rec if k != "id"]
             set_clause = ", ".join(f"{c} = %s" for c in cols)
             cur.execute(
@@ -483,7 +489,7 @@ def processar(dry_run: bool, incluir_estoque: bool = False) -> None:
         mudou_preco = [
             pid
             for pid in ids_afetados
-            if not close_enough(preco_venda_antes.get(pid), preco_venda_depois.get(pid))
+            if not close_enough(esperado_preco.get(pid, preco_venda_antes.get(pid)), preco_venda_depois.get(pid))
         ]
         if mudou_preco:
             print(

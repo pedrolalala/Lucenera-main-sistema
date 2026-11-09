@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-09 (SPEC-267 — liberação manual das vendas 4907 e 4908 para separar)
+
+- Migration 320 APLICADA em SP (autorizada): tabela `connect_item_liberacao_manual` (RLS, motivo obrigatório, quem/quando), 3ª via em `connect_item_liberado()` e função `liberar_vendas_connect(vendas, motivo, aplicar)` (só Matheus/administração). Ensaio com ROLLBACK antes: estoque, reservado, financeiro, Reserva e Ag. separar iguais; projetista e anon barrados.
+- Executada como Matheus: vendas Connect 4907 (10009 ×8) e 4908 (10450 ×21, 11488 ×2, 11562 ×42) liberadas para a Equipe de projetos pedir a separação. Estoque e saldos não mudaram (conferido antes×depois dentro da transação). Sem código de sistema alterado. Falta a conferência visual na Venda Parcial e avisar o Matheus.
+- Botão **Liberar para separar** na Venda Parcial (`04-Sistemas/separacao-parcial`, commit c1b62cb pushado, sem migration; NO AR em separacao-lucenera.pages.dev, deploy e80cb0b1 por wrangler, bundle em São Paulo conferido): aparece só para Matheus/administração em venda Connect com item bloqueado; pede motivo e chama `liberar_vendas_connect`. Não testado em tela.
+
 ## 2026-11-09 (SPEC-265/266 — Débora: cadastro de peça e permissões)
 
 - SPEC-265 (migration 318 APLICADA em SP): `funcionario` não conseguia criar peça — o trigger `fn_sync_estoque_itens_from_produtos` (SECURITY INVOKER) era barrado pela RLS `estoque_insert` (só admin/gerente/operador) e o formulário mostrava só "Falha ao salvar". Função passou a SECURITY DEFINER. Rollback: `ALTER FUNCTION ... SECURITY INVOKER`.

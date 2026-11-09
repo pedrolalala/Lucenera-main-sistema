@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-265 — Débora não consegue cadastrar peça nova (Falha ao salvar): trigger de estoque_itens bloqueado pela RLS"
-status: migration 318 pronta (dry-run ok), NAO aplicada
+status: migration 318 APLICADA em SP (09/11)
 data_ultima_modificacao: 2026-11-09
 sistemas_envolvidos:
   - Banco (produtos, estoque_itens, trigger fn_sync_estoque_itens_from_produtos)
@@ -25,5 +25,5 @@ sistemas_envolvidos:
 
 ## Checklist
 - [x] Reproduzido como Débora; dry-run da 318: INSERT OK e linha em estoque_itens criada
-- [ ] Aplicar a 318
+- [x] Aplicar a 318 (INSERT da Débora testado em ROLLBACK)
 - [ ] Débora refazer o cadastro

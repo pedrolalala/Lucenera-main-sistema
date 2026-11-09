@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-09 (SPEC-265/266 — Débora: cadastro de peça e permissões)
+
+- SPEC-265 (migration 318 APLICADA em SP): `funcionario` não conseguia criar peça — o trigger `fn_sync_estoque_itens_from_produtos` (SECURITY INVOKER) era barrado pela RLS `estoque_insert` (só admin/gerente/operador) e o formulário mostrava só "Falha ao salvar". Função passou a SECURITY DEFINER. Rollback: `ALTER FUNCTION ... SECURITY INVOKER`.
+- SPEC-266 (migration 319 APLICADA em SP; CRM 166e719 pushado, NO AR em crm-lucenera.pages.dev, deploy 6d4567c6 por wrangler, bundle em São Paulo): papel `compras_cadastro_fornecedores` no lugar de `funcionario` + `compras_e_entregas` só para a Débora (Cadastro criar/editar; Necessidade de Compra tudo; Entregas só ver; Produção/Garantia ver; Solicitações criar/ver; Venda Parcial como estava). CRM: novo módulo `crm.fornecedores`; quem só tem ele vê apenas a aba Fornecedores (leitura de contatos/projetos segue aberta a qualquer logado — limite documentado na SPEC). Falta a Débora conferir cada sistema.
+
 ## 2026-11-09 (Separação Parcial — endereço de entrega, pedido da Adriana na Central)
 
 - Separação Parcial (`04-Sistemas/separacao-parcial`, commit local, sem migration; **NÃO pushado nem publicado** — falta push, build e deploy): o campo "Endereço de entrega" da Nova Separação vinha do endereço principal do cliente (`contatos.endereco`). Agora usa o endereço de ENTREGA do cadastro (`endereco_entrega`, número, complemento, bairro, cidade, estado); sem ele, cai no principal (só 24 de 2.802 contatos têm entrega). A lista impressa passa a mostrar o endereço gravado na separação. Resumo da venda na tela segue com o principal. Exemplo: venda 2299, cliente Paratella (Av. São João, 170 × Rua 16, 352).

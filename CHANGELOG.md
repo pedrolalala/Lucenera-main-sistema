@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-09 (Compras — apropriação editável na entrada da nota)
+
+- Compras (`04-Sistemas/compras-lucenera-3o23t98ee`, commit 18caadc pushado; NO AR em compras-lucenera.pages.dev, deploy por wrangler, bundle em São Paulo): na Entrada de NF o campo "Apropriação" era texto fixo "COMPRAS - REVENDA". Agora é lista editável com COMPRAS - REVENDA (padrão, 2050001), INDUSTRIALIZAÇÃO (2050010) e GARANTIA (2050003); a escolha vai em `plano_contas_id` da nota e segue para o título a pagar. Sem migration (a RPC `registrar_entrada_nota_compra` já aceitava). Falta teste em tela.
+
 ## 2026-11-09 (Reunião 44 — ajuste manual de estoque das peças 9923 e 10106, banco SP)
 
 - Origem: `02-Reunioes/44. Lucenera (Vinicius) - 09.11.2026_ batendo informações com a Connect/Reunião.02`. Só o que foi falado nela.

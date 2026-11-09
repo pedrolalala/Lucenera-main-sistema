@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-09 (CRM — Data de Entrada não aceitava hoje)
+
+- CRM (`04-Sistemas/lucenera-crm-3bd29`, commit 2192911 pushado, sem migration; NO AR em crm-lucenera.pages.dev, deploy cb5c4c3f por wrangler, bundle em São Paulo): em Registro de Novo Projeto a data de hoje já vem marcada e clicar nela desmarcava o campo ("Invalid input"). Calendário agora não desmarca (`required`) e a mensagem fica em português (zod 4 usa `error`, não `required_error`). Causa não reproduzida em tela; falta confirmação do usuário.
+
 ## 2026-11-09 (SPEC-264 — preço de venda do Orçamento diferente da Consulta voltou)
 
 - Causa: `importar_produtos_estoque.py` grava `valor_venda` com os triggers de preço desligados, então `preco_venda` (Orçamento) ficou atrás do `valor_venda` (Consulta). 56 peças divergentes (lotes 04/11 e 05/11), ex.: 11412 182,47 × 184,49. 369 peças sem `valor_venda` não divergem na tela.

@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-09 (Separação Parcial — endereço de entrega, pedido da Adriana na Central)
+
+- Separação Parcial (`04-Sistemas/separacao-parcial`, commit local, sem migration; **NÃO pushado nem publicado** — falta push, build e deploy): o campo "Endereço de entrega" da Nova Separação vinha do endereço principal do cliente (`contatos.endereco`). Agora usa o endereço de ENTREGA do cadastro (`endereco_entrega`, número, complemento, bairro, cidade, estado); sem ele, cai no principal (só 24 de 2.802 contatos têm entrega). A lista impressa passa a mostrar o endereço gravado na separação. Resumo da venda na tela segue com o principal. Exemplo: venda 2299, cliente Paratella (Av. São João, 170 × Rua 16, 352).
+
 ## 2026-11-09 (CRM — Data de Entrada não aceitava hoje)
 
 - CRM (`04-Sistemas/lucenera-crm-3bd29`, commit 2192911 pushado, sem migration; NO AR em crm-lucenera.pages.dev, deploy cb5c4c3f por wrangler, bundle em São Paulo): em Registro de Novo Projeto a data de hoje já vem marcada e clicar nela desmarcava o campo ("Invalid input"). Calendário agora não desmarca (`required`) e a mensagem fica em português (zod 4 usa `error`, não `required_error`). Causa não reproduzida em tela; falta confirmação do usuário.

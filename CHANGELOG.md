@@ -2,7 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-08 (SPEC-258 Fase 5 — Fluxo Futuro em 4 colunas, commit local, NÃO publicado)
+## 2026-11-09 (SPEC-258 Fase 5 — Fluxo Futuro publicado e teste de baixa/estorno em Contas a Pagar)
+
+- **Publicado 09/11:** push do Dashboard (`b48b0af..0d39749`) e do repositório principal (`8982166..8a284b8`); build do Cloudflare conferido: o chunk `FluxoFuturo` no ar traz "Fluxo por mês: realizado e previsto", lê `v_financeiro_realizado_novo` e o cliente aponta para o Supabase de São Paulo (sem referência ao projeto antigo vcvcwz).
+- **Teste de baixa e estorno em Contas a Pagar (tela real, banco SP, 09/11):** o modal Executar baixa abre com total correto e as contas Bradesco Foco/Islight/Luce Nera e Caixa Empresa. Dry-run no banco (ROLLBACK, juros 3 e desconto 1): `financeiro_baixar_lote` gerou pagamento R$ 2.165,67 (movimenta caixa) + abatimento R$ 1,00 (não movimenta), duplicata "Pago" R$ 2.168,67; `financeiro_estornar` (por baixa) gerou dois estornos e a duplicata voltou a "Pendente"; integridade 0 violações. Teste real pela tela: duplicata 6648 parcela 8/9 (DocuSign, Manoella, R$ 13,07, Boleto, Bradesco Luce Nera) baixada e estornada com motivo "teste"; ficaram no histórico (imutável) a baixa de 12:22 e o estorno de 12:24 (parcela `8d20a5f0-16e1-4d2a-831f-b639e5fa2d55`), duplicata de volta a "Pendente", integridade 0.
+- Observações: o modal de baixa não tem campo de observação (só o estorno tem motivo); o filtro "Pagas (histórico)" mostra só as primeiras 500 linhas (filtrar pelo número da duplicata). O `psql` direto (`db.…supabase.co`, só IPv6) não conecta em rede sem IPv6; funcionou pelo pooler `aws-1-sa-east-1`. Sem alteração de código nem migration.
+
+## 2026-11-08 (SPEC-258 Fase 5 — Fluxo Futuro em 4 colunas, PUBLICADO 09/11)
 
 - Layout escolhido pelo usuário (08/11): **receita realizada | receita prevista | despesa realizada | despesa prevista + saldo do mês**, por mês. Realizada = baixas por mês de pagamento (últimos 3 meses); prevista = tudo que ainda vai entrar/sair (firme em aberto + previsão) por mês de vencimento, vencidas na linha "Vencido"; cada célula prevista mostra "dos quais R$ X em previsão" (flag `previsao` da view nova; atende o item 3 do SPEC-248); pendência 31/12 fora; segue Perfil e Horizonte. Sem migration: `dashboard-lucenera-b02z85wa3` (commit 0d39749; `services/cash-flow.ts` `computeFluxoQuatroColunas` + tabela em `FluxoFuturo.tsx`). Conferido em tela contra o banco de SP (vencido, ago a mar/2027 e as previsões: todos iguais). Observações: despesa realizada inclui distribuição de lucro (é caixa); dez/2026 mostra R$ 670 "realizados" por 1 parcela paga com data futura (defeito de data do legado). Numeração: SPEC-258 e SPEC-262/263 usaram em paralelo os prefixos 312 e 313 (pastas de nomes diferentes, todas aplicadas; sem registro de migration por número).
 

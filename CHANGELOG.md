@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-09 (Reunião 44 — ajuste manual de estoque das peças 9923 e 10106, banco SP)
+
+- Origem: `02-Reunioes/44. Lucenera (Vinicius) - 09.11.2026_ batendo informações com a Connect/Reunião.02`. Só o que foi falado nela.
+- **Peça 9923** (3649-FE-S-PX): estoque geral 82 → 81 (a exclusão da venda de garantia não tinha baixado) e `quantidade_reservada` (reservado Connect) 116 → 115, de modo que a "Reserva sem venda (herança Connect)" do Cadastro passou de 11 para 10 (105 já atribuídos a clientes: 71 reserva + 34 entrega futura). Disponível mantido em −34.
+- **Peça 10106** (EKPF32): estoque geral 174 → 178 (+4); disponível −19 → −15; reservado Connect inalterado (193).
+- Feito por UPDATE em `estoque_itens` (local `Estoque`) numa transação, com trava nos valores antigos; kardex e auditoria registraram sozinhos. Nenhum importador de estoque rodado (SPEC-244). Sem migration nem código.
+- Fora deste ajuste (ditos na reunião, sem ação ainda): lista de entrega da venda 2299 igual à da Connect (Adriana, depois dos ajustes); apagar a herança "sem venda" e fazer a saída desse material baixar também o estoque geral (regra nova, precisa de SPEC); pergunta sem resposta se a Movimentação de Peças precisa de ajuste.
+
 ## 2026-11-09 (SPEC-258 Fase 5 — Fluxo Futuro publicado e teste de baixa/estorno em Contas a Pagar)
 
 - **Publicado 09/11:** push do Dashboard (`b48b0af..0d39749`) e do repositório principal (`8982166..8a284b8`); build do Cloudflare conferido: o chunk `FluxoFuturo` no ar traz "Fluxo por mês: realizado e previsto", lê `v_financeiro_realizado_novo` e o cliente aponta para o Supabase de São Paulo (sem referência ao projeto antigo vcvcwz).

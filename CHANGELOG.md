@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-10 (correções pedidas pela análise do Filippo: clientes da herança, importador, .env, sumário)
+
+- Dados (SP, sem migration): 12 orçamentos da herança Connect (vendas 47, 211, 1189, 1414, 1641, 2620, 3062, 3380, 3794, 5300, 5921, 6011) estavam ligados ao cadastro tipo arquiteto; passaram para o cadastro tipo cliente de mesmo código da Connect (orçamento + 144 linhas de `connect_reserva_ambiente`). Ensaio com ROLLBACK; antes×depois igual em orçamentos, valores, financeiro, saldos e reservado. Notas fiscais da Connect não foram tocadas.
+- `scripts/importar_reserva_entrega_futura_connect.py` prefere o cadastro tipo cliente ao resolver o código da Connect.
+- `.env` locais de 12 sistemas passaram de Ohio para São Paulo (o da Separação Parcial é versionado: alteração pendente de commit no repositório do sistema). Criado `04-Sistemas/00 - Sumario Sistemas.md`.
+- Resposta completa em `02-Reunioes/46 Lucenera (Filippo) - 10.11.2026_ Questões IA Filippo/02 Resposta para a IA do Filippo.md`. Pendentes: ORC repetido (MANOELLA ORC-0004 ×2, ORC-0005 ×3) e Metalúrgica IL sem fornecedor.
+
+## 2026-11-10 (SPEC-258 Fase 4c-2 — motor de RT do arquiteto, migration 321 APLICADA no Supabase SP; relatório visual atualizado)
+
+- Decisões da reunião 45 registradas na SPEC-258 (RT só LUMINARIA, 10% líquido proporcional ao pago, mês seguinte, NR não recebe, divisão entre arquitetos, estorno, RT manual). Migration `20261110_321_spec258_fase4c2_motor_rt` (up/rollback/dry_run): dry-run limpo em ROLLBACK no Supabase SP (R$ 862,69 = 10.000 × 86,27% × 10%; 2 arquitetos 10%/12% divididos; NR e inativo sem RT; idempotente; estorno cancela ou gera parcela negativa; RT manual; relatório e previsto por venda; aux de estoque e anon barrados; banco conferido depois: 10.424 títulos / 19.439 parcelas / 16.731 baixas / 18.316 na view antiga, sem objetos novos). Decisões confirmadas: dia 10, divisão entre TODOS os arquitetos da venda (a parte do NR/inativo não é paga: arquiteto + NR = metade), fração por valor dos itens. O ensaio achou e corrigiu um bug (índice único por baixa impedia 2 arquitetos na mesma baixa); valores do ensaio refeitos com a divisão nova (R$ 431,34 com NR; 287,56 e 345,07 com 3 arquitetos). Aguarda autorização para aplicar. Repo: central.
+
 ## 2026-11-10 (ajuste de estoque 12761 / 12395 / 12135 para bater com a Connect, direto no banco SP, sem migration)
 
 - Prints da Connect (Consultar Produtos + lista "Necessidade suprida — itens devolvidos/ajustados" de 10/11) como fonte. Estoque geral: 12761 7→8; 12395 562→598 (reservado 580→581); 12135 154→123. Na 12135 também passaram 30 un. de Reserva para Entrega Futura (13 itens: vendas 5882, 4865 e 5619, por L) pela função `ajustar_reserva_venda` (ensaio com ROLLBACK antes; movimentos registrados; financeiro igual). Resultado = Connect: 12135 geral 123/Reserva 107/EF 31/"separação" 16 (= sem venda daqui)/disp −31; 12395 geral 598/Reserva 510 (492+18 EF)/separação 71 (13+58)/disp 17; 12761 geral 8/Reserva 4/separação 1/disp 3.

@@ -225,7 +225,13 @@ def main() -> None:
         produtos = dict(cur.fetchall())
 
         cod_cli = sorted({parse_int(x) for x in todas["cliente"] if parse_int(x) is not None})
-        cur.execute("select codigo_legado, id from public.contatos where codigo_legado = any(%s)", (cod_cli,))
+        # SPEC-267 (10/11): a Connect numera cliente e fornecedor/arquiteto em separado (o código 2010 é a cliente Josimara e a arquiteta
+        # Kally). Procurar só pelo número pegava um dos dois. Agora prefere o cadastro tipo 'cliente'; só cai no outro tipo se não houver.
+        cur.execute(
+            "select codigo_legado, id from public.contatos where codigo_legado = any(%s) "
+            "order by (tipo::text = 'cliente') asc, created_at desc",  # o último escrito no dict vence: cliente por último
+            (cod_cli,),
+        )
         clientes = dict(cur.fetchall())
 
         cur.execute("select codigo, id::text from public.projetos where codigo is not null")

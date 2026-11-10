@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-10 (SPEC-273 — Revisão Financeira Pendente liberada para quem trabalha no financeiro, ex.: Caroline)
+
+- Orçamentos (`04-Sistemas/gestao-financeira-clone-544cb (1)`, commit ae17dee pushado, sem migration; **NO AR** em financeiro-lucenera.pages.dev — deploy 17f3f563 feito sozinho pelo Cloudflare Pages ao receber o push, bundle em São Paulo e hook conferidos em produção; as mudanças soltas de outras sessões em `App.tsx`/`Login.tsx`/`devolucoesService.ts` NÃO entraram): a aba "Revisão Financeira Pendente", "Ver/Editar", aprovar/devolver e o botão "Aprovar Financeiro" do orçamento só apareciam para `usuarios.role` admin/gerente. Agora valem para admin, gerente **ou** quem tem o acesso `financeiro` (hook novo `use-revisao-financeira.ts`; `Budgets.tsx`, `FinancialApprovalTab.tsx`, `BudgetFormPage.tsx`). Não usa `can_approve_quotes` (também libera as etapas de cliente e equipe).
+- Banco já liberava: testado como a Caroline em transação revertida (aprovar completo, devolver, editar itens; ORC-0001 conferido intacto depois). Docs: SPEC-273.
+
 ## 2026-11-10 (SPEC-271 e SPEC-272 — bugs da Central de Solicitações; aba "No financeiro"; assinatura LUCENERA no e-mail)
 
 - **SPEC-271** (Murillo/Debora): migration `20261110_322_spec271_criar_produto_orcamento_funcionario` **APLICADA** em SP — `criar_produto_orcamento` aceita `funcionario` (24 contas barradas pelo teste de role legado); testada como Murillo e Debora em ROLLBACK, viewer segue barrado. Compras: rascunho persistente do pedido em montagem (`src/lib/rascunho-pedido.ts`) e aviso na busca vazia da Necessidade apontando o Pedido avulso (peça 4349 não era bug).

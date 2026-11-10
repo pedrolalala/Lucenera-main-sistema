@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-270 — Nova modalidade \"Antecipação de pagamento\" em Contas a Receber e Contas a Pagar"
-status: não iniciado
+status: pendente — Fase 1 (Receber) APLICADA e NO AR em 10/11/2026; Fases 2–4 e Pagar aguardam respostas
 data_ultima_modificacao: 2026-11-10
 sistemas_envolvidos:
   - Contas a Receber / Contas a Pagar (04-Sistemas/retorno-bancario-bradesco-5392a) — Cadastrar Duplicatas e Consultar Duplicatas
@@ -19,13 +19,13 @@ sistemas_envolvidos:
 
 **Fase 0 — antes de codar**
 - [ ] 0.1 Confirmar com a Carol/Vinicius as perguntas P1–P7 (abaixo)
-- [ ] 0.2 Confirmar o caminho de gravação real da tela Cadastrar Duplicatas (hoje grava em `boletos`, legado) e como `vw_financeiro_duplicatas` enxerga o lançamento novo
+- [x] 0.2 Verificado: Cadastrar Duplicatas grava em `boletos` (legado) e a grade junta `boletos` + `vw_financeiro_duplicatas` (modelo novo). A antecipação nativa entra pela view, nasce paga (fora do "em aberto") e aparece em Consultar Duplicatas com filtro Todos/Pago
 
 **Fase 1 — lançar a antecipação (Receber e Pagar)**
-- [ ] 1.1 Banco: lançamento de antecipação no modelo novo (espécie `adiantamento`), com saldo a compensar
-- [ ] 1.2 Cadastrar Duplicatas: seletor "Duplicata | Antecipação de pagamento" e formulário reduzido
-- [ ] 1.3 Consultar Duplicatas: selo "Antecipada" e saldo; fora de Contas em Aberto / vencimentos do dia
-- [ ] 1.4 Contas a Pagar: unificar com `pagamentos_antecipados` da SPEC-215 (sem duas portas diferentes)
+- [x] 1.1 Banco (**só Receber**): `financeiro_lancar_antecipacao` + `financeiro_cancelar_antecipacao` + coluna `financeiro_titulos.responsavel_id` — migration 325 **APLICADA** 10/11/2026 (dry-run limpo em ROLLBACK antes)
+- [x] 1.2 Cadastrar Duplicatas (**só Receber**): seletor "Duplicata | Antecipação de pagamento" e formulário reduzido (`AntecipacaoForm.tsx`) — **NO AR** em contas-receber-lucenera.pages.dev (deploy c909a4fa)
+- [x] 1.3 Consultar Duplicatas: selo "AT" (antecipada) na coluna de tipo; fora de Contas em Aberto porque nasce paga. Falta a coluna de saldo a compensar (Fase 2)
+- [ ] 1.4 Contas a Pagar: unificar com `pagamentos_antecipados` da SPEC-215 (sem duas portas diferentes) — **adiado até P5**: lançar nos dois lugares contaria em dobro (Compras e dashboard leem `pagamentos_antecipados`); a função recusa `pagar` com mensagem clara
 
 **Fase 2 — usar a antecipação na Aprovação Financeira (Receber)**
 - [ ] 2.1 Banco: função que lista as antecipações do cliente e função que compensa (baixa `compensacao`) contra as parcelas da venda
@@ -137,7 +137,13 @@ Cada fase em migration própria com `rollback.sql`; front é aditivo (seletor de
 CHANGELOG; esta SPEC; `supabase/docs` (modelo financeiro: uso da espécie `adiantamento` e da baixa `compensacao`); `AI_DB_CONTEXT.md` do sistema Contas a Pagar/Receber e do Orçamentos; relacionamento com SPEC-215, SPEC-258 e SPEC-110 (sinal padrão).
 
 ## Realizado
-(nada ainda — SPEC criada em 10/11/2026 a partir da reunião 48)
+
+### 2026-11-10
+- Reunião 48 lida e SPEC criada.
+- Fase 0.2 verificada (ver checklist).
+- Fase 1 (só Contas a Receber) implementada em código e **testada em dry-run** (transação com ROLLBACK, como a Caroline): lança, cai na lista como Pago/fora do aberto, cancela, recusa responsável = quem lança, `pagar`, data futura, sem conta e valor zero; integridade (`vw_financeiro_novo_integridade` 129 = baseline, `vw_financeiro_ponte_integridade` 0) igual antes e depois; `anon` sem execução; rollback testado.
+- Decisões **assumidas** (recomendadas, a Carol ainda não respondeu): P2 nasce recebida na data do pagamento (exige conta bancária); P7 responsável = equipe do orçamento e nunca quem está lançando (a tela tira o usuário logado da lista e o banco recusa); P1 o cliente é o dono da antecipação, sem projeto por enquanto.
+- Migration 325 `20261110_325_spec270_antecipacao_fase1_receber` (up/rollback) e front em `retorno-bancario-bradesco-5392a` (`AntecipacaoForm.tsx`, `CadastrarDuplicata.tsx`, `ConsultarDuplicatas.tsx`, `financeiro-novo.ts`) prontos; **depois aplicado e publicado no mesmo dia** (migration 325 em SP; Contas a Receber, deploy c909a4fa, commit do sistema pushado). Falta o teste real da Carol.
 
 ## Pendências
 - [ ] Responder as perguntas P1–P7 com a Carol (P1–P5, P7) e com Vinicius/Filippo (P6, P4) — sem isso as Fases 2–4 não começam.

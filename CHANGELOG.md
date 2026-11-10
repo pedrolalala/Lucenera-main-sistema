@@ -2,11 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-10 (SPEC-270 Fase 1 — Antecipação de pagamento em Contas a Receber, PRONTA, NÃO aplicada nem publicada)
+## 2026-11-10 (SPEC-270 Fase 1 — Antecipação de pagamento em Contas a Receber, APLICADA e NO AR)
 
-- Reunião 48 (Carol) virou a SPEC-270. Fase 1 só no Receber: migration `20261110_325_spec270_antecipacao_fase1_receber` (up/rollback; `financeiro_lancar_antecipacao`, `financeiro_cancelar_antecipacao`, coluna `financeiro_titulos.responsavel_id`). Dry-run em ROLLBACK limpo como a Caroline (integridade inalterada). Pagar fica para depois (P5: evitar contar em dobro com o pagamento antecipado de fornecedor da SPEC-215).
-- Front (`retorno-bancario-bradesco-5392a`, só local, sem commit/deploy; build receber e pagar ok): seletor Duplicata | Antecipação de pagamento no Cadastrar (só Receber, novo cadastro), `AntecipacaoForm.tsx`, selo "AT" na consulta.
-- Assumido até a Carol responder: nasce recebida na data do pagamento; responsável nunca é quem lança. Aplicar a migration só junto com o deploy do Receber.
+- Reunião 48 (Carol) virou a SPEC-270. Fase 1 só no Receber: migration `20261110_325_spec270_antecipacao_fase1_receber` (up/rollback; `financeiro_lancar_antecipacao`, `financeiro_cancelar_antecipacao`, coluna `financeiro_titulos.responsavel_id`). **Migration 325 APLICADA** em SP após dry-run em ROLLBACK limpo como a Caroline (integridade inalterada; 0 antecipações existentes). Pagar fica para depois (P5: evitar contar em dobro com o pagamento antecipado de fornecedor da SPEC-215).
+- Front (`retorno-bancario-bradesco-5392a`, commit pushado; **NO AR** em contas-receber-lucenera.pages.dev, deploy c909a4fa por wrangler, bundle em São Paulo conferido e chunk da antecipação presente em produção; o Contas a Pagar não foi republicado): seletor Duplicata | Antecipação de pagamento no Cadastrar (só Receber, novo cadastro), `AntecipacaoForm.tsx`, selo "AT" na consulta.
+- Assumido até a Carol responder: nasce recebida na data do pagamento; responsável nunca é quem lança. Pendente: teste real da Carol (lançar, ver na consulta com filtro Todos/Pago) e as respostas P1–P7.
 
 ## 2026-11-10 (SPEC-274 — data de início do pagamento retroativa para o financeiro)
 

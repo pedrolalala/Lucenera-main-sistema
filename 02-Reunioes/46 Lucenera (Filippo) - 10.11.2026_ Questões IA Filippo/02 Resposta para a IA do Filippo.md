@@ -2,6 +2,10 @@
 
 Para: Filippo e a IA dele. De: Pedro. Base: a análise de 09/11 (arquivo `01.IA`), conferida de novo no banco de São Paulo e no repositório em 10/11. Marquei **Confere** quando reconferi, **Parcial** quando o número ou a leitura difere, e **A conferir** quando não consegui verificar.
 
+## Resumo executivo
+
+A análise acertou no essencial: **tudo que foi apontado como erro objetivo existe de fato** e foi corrigido ou virou decisão. Em 10/11 foram corrigidos 5 itens (12 vendas com cliente errado, o bug do importador, `.env` em Ohio em 12 sistemas, sumário de sistemas inexistente e cópias velhas de funções em 10 sistemas). Os ajustes de estoque de 12761, 12395 e 12135 e a liberação das vendas 4907 e 4908 também entram nesta lista. Ficam 2 erros confirmados aguardando decisão (numeração de orçamento repetida e fornecedor Metalúrgica IL) e 6 decisões de arquitetura. Dois pontos da análise estavam incompletos e estão corrigidos abaixo (Logística e RH).
+
 ## O que era erro e já foi corrigido (10/11)
 
 | # | Erro confirmado | O que foi feito | Como conferir |
@@ -45,13 +49,13 @@ Dois erros confirmados que **ainda não corrigi**, porque mexem em numeração o
 ### Seção 2 — Mesma informação em mais de um lugar
 | Informação | Situação | Resposta |
 |---|---|---|
-| Funcionários (`funcionarios` 37 × `funcionarios_novo` 27) | **Confere.** | O RH nasceu como sistema à parte, com tabela própria. Não tenho registro de uma decisão que justifique manter duas; é uma lacuna real. Concordo com o lugar oficial `funcionarios`, com o RH gravando ali e `funcionarios_novo` virando complemento. **Decisão: Filippo/Vinicius** (dado de RH tem sensibilidade própria). |
+| Funcionários (`funcionarios` 37 × `funcionarios_novo` 27) | **Confere, com ressalva:** o RH usa **as duas** (lê/grava `funcionarios_novo` em 2 arquivos e `funcionarios` em 10 pontos), então não é "só o RH em `funcionarios_novo`". | O RH nasceu como sistema à parte, com tabela própria. Não tenho registro de uma decisão que justifique manter duas; é uma lacuna real. Concordo com o lugar oficial `funcionarios`, com o RH gravando ali e `funcionarios_novo` virando complemento. **Decisão: Filippo/Vinicius** (dado de RH tem sensibilidade própria). |
 | Acesso (`user_system_access` 268, Hub, `user_roles_separacao` 22, `usuarios.role`) | **Confere.** | Foram camadas sucessivas (SPEC-069 papéis, SPEC-183 acesso a sistemas, SPEC-242 segurança). Moara confirmada: 0 acessos e 0 papéis. Concordo com o Hub como oficial e os outros derivados. |
-| Pedido de compra (247 × 109) | **Confere.** | Origens diferentes: um é cópia da Connect, o outro é o fluxo novo. A diferença nos dados vem de os pedidos da Connect entrarem sem itens (ver item 5). |
+| Pedido de compra (247 × 109) | **Confere.** O Dashboard lê `pedido_compra` na tela de pedidos futuros (`pedidos-compra-futuro.ts`) e o Compras usa `pedidos_compra`. | Origens diferentes: um é cópia da Connect, o outro é o fluxo novo. A diferença nos dados vem de os pedidos da Connect entrarem sem itens (ver item 5). |
 | Contas a pagar/receber | **Confere.** | Ver seção 1. Falta definir de onde o Dashboard lê depois da virada: concordo que deve ser do modelo novo. |
 | Cobranças/boletos | **Parcial** (`boletos` 6, `financeiro_cobrancas` 1, `projeto_parcelas` 387). | Três lugares é verdade. Os dois primeiros quase não têm volume; a unificação deve acompanhar a SPEC-258. |
 | Notas fiscais | **Confere** (`notas_fiscais` 0, `_connect` 599, `_compra` 7). | Venda e entrada separadas é intencional. NF de venda em duas tabelas: aceito, resolve quando a emissão vier para cá (SPEC-154, Focus NFe). |
-| Entregas (`separacoes` 1.000, `entregas_finalizadas` 427, `entregas_pendentes` 0, `entregas` 0) | **Confere.** | As tabelas da Logística têm origem anterior; `separacoes` é o fluxo atual. **A conferir** com a Logística se `entregas_finalizadas` ainda recebe gravação. |
+| Entregas (`separacoes` 1.000, `entregas_finalizadas` 427, `entregas_pendentes` 0, `entregas` 0) | **Confere nas contagens; correção na leitura:** a Logística **ainda grava** em `entregas_finalizadas` (o botão Finalizar Entrega insere ali, `useFinalizarEntrega.ts`). Não é só histórico: é o registro de quem concluiu a entrega na Logística. | Decisão pendente: manter `separacoes` como fonte única e fazer a Logística gravar a conclusão nela, ou manter as duas com regra clara. Hoje a Venda Parcial não enxerga o que a Logística finalizou. `entregas` e `entregas_pendentes` estão vazias e sem uso. |
 | Fornecedores (`fornecedores` vazia) | **Confere.** | Oficial é `contatos` tipo fornecedor. Concordo: `fornecedores` sai. As 4 views que a leem precisam ser revisadas antes. |
 | Devoluções | **Parcial.** | Devolução é frequente e tem hoje três caminhos. Concordo que precisa de um caminho único. Já há regras próprias para devolução vinculada a venda (SPEC-178/179/181/182). **Decisão: Vinicius.** |
 

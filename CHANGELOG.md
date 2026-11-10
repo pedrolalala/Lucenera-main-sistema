@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-10 (limpeza das cópias de Edge Functions dos sistemas — risco de publicação apontado pelo Filippo)
+
+- 112 pastas de `supabase/functions/` retiradas de 10 sistemas (Cadastro, Catálogo Ubiqua, Central, Compras, Dashboard, RH, Orçamentos, CRM, Logística e Administração Bancária/Contas a Pagar e Receber), com commit e push em cada repositório. Antes, **35 versões distintas** foram arquivadas em `supabase/functions_copias_arquivadas_2026-11-10/` (commit 9b3775d, com `MANIFESTO.md` dizendo qual sistema tinha cada versão): nenhuma cópia era igual ao central, e algumas tinham código que o central não tem (ex.: `generate-report` do Orçamentos, +623 linhas).
+- **Ficaram de propósito** (só existem dentro de sistemas, retirar perderia a única fonte): `sync-sharepoint` (9 cópias), `sync-fechamentos-automatica` (6), `cadastro-ubiqua`, `excluir-conta-ubiqua`, `gerar-pdf-orcamento-ubiqua`, `functions` (RH), e as do Vendas (`emitir-nota-fiscal`, `focus-nfe-webhook`, `verificar-notas-pendentes`), com o `_shared` de cada um. Vendas não foi tocado.
+- Não consegui confirmar qual versão está no ar: o token da Management API (`SUPABASE_ACCESS_TOKEN`) está inválido. **Pendente:** renovar o token, listar as funções publicadas em SP e trazer para o central o que só existir nas versões arquivadas, antes de publicar qualquer função.
+
 ## 2026-11-10 (correções pedidas pela análise do Filippo: clientes da herança, importador, .env, sumário)
 
 - Dados (SP, sem migration): 12 orçamentos da herança Connect (vendas 47, 211, 1189, 1414, 1641, 2620, 3062, 3380, 3794, 5300, 5921, 6011) estavam ligados ao cadastro tipo arquiteto; passaram para o cadastro tipo cliente de mesmo código da Connect (orçamento + 144 linhas de `connect_reserva_ambiente`). Ensaio com ROLLBACK; antes×depois igual em orçamentos, valores, financeiro, saldos e reservado. Notas fiscais da Connect não foram tocadas.

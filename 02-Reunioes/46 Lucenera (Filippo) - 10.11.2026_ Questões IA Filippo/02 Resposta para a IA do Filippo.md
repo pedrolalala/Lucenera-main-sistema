@@ -11,6 +11,10 @@ Para: Filippo e a IA dele. De: Pedro. Base: a análise de 09/11 (arquivo `01.IA`
 | 3 | **`.env` apontando para Ohio** (seção 1 e pauta 11). Eram **12 sistemas**, não só Compras e Dashboard: Cadastro, Catálogo Ubiqua, Central, Garantia, Produção, Logística, Retorno Bancário, Separação Parcial, Showroom, Vendas, Compras e Dashboard. | Todos os `.env` locais passaram para São Paulo. Conferi um a um: nenhum aponta mais para Ohio. | `grep vcvcwzmbiftcawncibke 04-Sistemas/*/.env` não retorna nada. |
 | 4 | **"Sumário Sistemas" inexistente** (seção 4). | Criado `04-Sistemas/00 - Sumario Sistemas.md` com os 20 sistemas do Hub, pasta, repositório e endereço, tirados da tabela `systems`. | Abrir o arquivo. |
 
+| 5 | **Cópias velhas das funções de servidor em 10 sistemas** (seção 4, risco alto). | 112 pastas retiradas dos sistemas (commit e push em cada repositório). Antes, guardei **35 versões distintas** em `supabase/functions_copias_arquivadas_2026-11-10/` com manifesto, porque nenhuma cópia era idêntica ao central e algumas tinham código que o central não tem. Ficaram, de propósito, as funções que só existem dentro de sistemas (`sync-sharepoint`, `sync-fechamentos-automatica`, as do Catálogo Ubiqua e do Vendas, a do RH). | `MANIFESTO.md` na pasta de arquivo; `git log` de cada sistema. |
+
+**Atenção:** não consegui confirmar qual versão de cada função está publicada hoje (o token da API do Supabase está inválido). Antes de publicar qualquer função, comparar o que está no ar com o central e com o arquivo. Isso é a próxima ação.
+
 Dois erros confirmados que **ainda não corrigi**, porque mexem em numeração ou em financeiro e merecem decisão:
 - **Número de orçamento repetido** (pauta 8): confirmado, e é pior do que o apontado. Dentro da MANOELLA há **ORC-0004 duas vezes e ORC-0005 três vezes**. É falha na geração do número; corrigir exige migration e decidir como renumerar os existentes.
 - **Metalúrgica IL sem cadastro de fornecedor** (pauta 3): confirmado, não existe contato com esse nome. Criar o cadastro e religar 133 duplicatas é alteração de financeiro; só com aprovação.

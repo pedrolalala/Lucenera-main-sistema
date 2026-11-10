@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-10 (SPEC-270 Fase 1 — Antecipação de pagamento em Contas a Receber, PRONTA, NÃO aplicada nem publicada)
+
+- Reunião 48 (Carol) virou a SPEC-270. Fase 1 só no Receber: migration `20261110_325_spec270_antecipacao_fase1_receber` (up/rollback; `financeiro_lancar_antecipacao`, `financeiro_cancelar_antecipacao`, coluna `financeiro_titulos.responsavel_id`). Dry-run em ROLLBACK limpo como a Caroline (integridade inalterada). Pagar fica para depois (P5: evitar contar em dobro com o pagamento antecipado de fornecedor da SPEC-215).
+- Front (`retorno-bancario-bradesco-5392a`, só local, sem commit/deploy; build receber e pagar ok): seletor Duplicata | Antecipação de pagamento no Cadastrar (só Receber, novo cadastro), `AntecipacaoForm.tsx`, selo "AT" na consulta.
+- Assumido até a Carol responder: nasce recebida na data do pagamento; responsável nunca é quem lança. Aplicar a migration só junto com o deploy do Receber.
+
+## 2026-11-10 (SPEC-274 — data de início do pagamento retroativa para o financeiro)
+
+- Orçamentos (`04-Sistemas/gestao-financeira-clone-544cb (1)`, só `BudgetFormPage.tsx`, sem migration): calendário e validação do campo "Data de Início do Pagamento" deixam de barrar data passada para admin/gerente/acesso `financeiro` (`usePodeRevisaoFinanceira`); demais usuários seguem só com hoje ou futuro. Banco já aceitava offset negativo (`data_base + dias_offset`); `prazo_inicio_cobranca_dias` (CHECK >= 0) segue gravado com 0. Pendente: teste em tela. Docs: SPEC-274.
+
 ## 2026-11-10 (SPEC-273 — Revisão Financeira Pendente liberada para quem trabalha no financeiro, ex.: Caroline)
 
 - Orçamentos (`04-Sistemas/gestao-financeira-clone-544cb (1)`, commit ae17dee pushado, sem migration; **NO AR** em financeiro-lucenera.pages.dev — deploy 17f3f563 feito sozinho pelo Cloudflare Pages ao receber o push, bundle em São Paulo e hook conferidos em produção; as mudanças soltas de outras sessões em `App.tsx`/`Login.tsx`/`devolucoesService.ts` NÃO entraram): a aba "Revisão Financeira Pendente", "Ver/Editar", aprovar/devolver e o botão "Aprovar Financeiro" do orçamento só apareciam para `usuarios.role` admin/gerente. Agora valem para admin, gerente **ou** quem tem o acesso `financeiro` (hook novo `use-revisao-financeira.ts`; `Budgets.tsx`, `FinancialApprovalTab.tsx`, `BudgetFormPage.tsx`). Não usa `can_approve_quotes` (também libera as etapas de cliente e equipe).

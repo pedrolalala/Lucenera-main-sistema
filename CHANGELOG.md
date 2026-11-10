@@ -2,6 +2,25 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-10 (SPEC-268 — número de orçamento repetido: migration 321 APLICADA em SP)
+
+- Causa: `set_orcamento_numero()` calculava MAX()+1 como o usuário, e a RLS por equipe (SPEC-200) escondia orçamentos de outras equipes (a Marina via ORC-0009 e gerava ORC-0010 com o máximo real em ORC-0014). Agora a função é SECURITY DEFINER (search_path fixo) com `pg_advisory_xact_lock`. Conferido no banco depois de aplicar e com ROLLBACK: a inserção de uma projetista gera o máximo real + 1. **Não** renumera os 19 orçamentos já repetidos (9 números, ORC-0001 a ORC-0009): decisão pendente do usuário; índice único só depois dela.
+
+## 2026-11-10 (SPEC-269 — regras de acesso da Caroline: consulta de produto, sem emitir LT/comissão)
+
+- Migration `20261110_323_spec269_carol_acessos_reuniao_10_11` (up/rollback) **APLICADA** em transação única. Dry-run em ROLLBACK (inclui teste do rollback: as 4 funções voltam idênticas) + revisão do agente revisor, sem achado crítico.
+- Papel `assistente_administrativa`: entra Venda Parcial (tudo) e Showroom (visualizar); Cadastro vira só `visualizar`; saem Necessidade de Compra, Garantia e Produção. Acesso a Sistemas da Caroline acompanha. Papel `administracao_comercial` removido só dela (Filippo e financeiro@ mantêm) — ela perde edição de caixa fechada.
+- Acesso novo `financeiro-rt-comissao` (sem card no Hub; 4 usuários: Pedro, Filippo, Vinicius, financeiro@). Exigido por `financeiro_exige_rt()` (nova), usada em `financeiro_rt_lancar_manual`, `financeiro_rt_definir_ativo`, `financeiro_definir_rt` e na criação de título RT em `financeiro_criar_titulo`; views `vw_financeiro_rt_arquitetos/relatorio/previsto_venda` e política `rt_config_leitura` trocam o portão. `financeiro_exige` não mudou: ela continua baixando/pagando título de RT já gerado e o gatilho automático do RT segue rodando.
+- Limites aceitos (SPEC-269): a política de `produtos` ainda aceita editar/criar via `orcamentos` (bloqueio só na tela do Cadastro); a leitura dos percentuais em `financeiro_regras_repasse` segue liberada por `financeiro`/`rh`.
+- Front (só local, não publicado): `retorno-bancario-bradesco-5392a` esconde o menu e bloqueia a rota "Regras de RT" sem o acesso `financeiro-rt-comissao` (`src/hooks/use-pode-emitir-rt.ts`, `App.tsx`, `Layout.tsx`). Pendente: publicar Contas a Pagar e teste real da Caroline.
+- Documentos: SPEC-269. Repositórios que precisam de commit: Administração Bancária/Contas a Pagar (3 arquivos) e central (SPEC-269, migration 323, CHANGELOG).
+
+## 2026-11-10 (SPEC-268 — 3 bugs da Central de Solicitações: produto no orçamento, peça 4349, quantidades que somem)
+
+- Migration `20261110_322_spec268_criar_produto_orcamento_funcionario` (up/rollback): `criar_produto_orcamento` aceita `funcionario` (24 contas barradas pelo teste de role legado). Dry-run em ROLLBACK ok; **NÃO aplicada**.
+- Compras (só local): rascunho persistente do pedido em montagem (`src/lib/rascunho-pedido.ts`, carrinho + edições do modal) e aviso na busca vazia da Necessidade apontando o Pedido avulso. Peça 4349 não era bug (sem necessidade, não entra na lista).
+- Repositórios que precisam de commit: Compras (3 arquivos) e central (SPEC-268, migration 322, CHANGELOG).
+
 ## 2026-11-10 (limpeza das cópias de Edge Functions dos sistemas — risco de publicação apontado pelo Filippo)
 
 - 112 pastas de `supabase/functions/` retiradas de 10 sistemas (Cadastro, Catálogo Ubiqua, Central, Compras, Dashboard, RH, Orçamentos, CRM, Logística e Administração Bancária/Contas a Pagar e Receber), com commit e push em cada repositório. Antes, **35 versões distintas** foram arquivadas em `supabase/functions_copias_arquivadas_2026-11-10/` (commit 9b3775d, com `MANIFESTO.md` dizendo qual sistema tinha cada versão): nenhuma cópia era igual ao central, e algumas tinham código que o central não tem (ex.: `generate-report` do Orçamentos, +623 linhas).

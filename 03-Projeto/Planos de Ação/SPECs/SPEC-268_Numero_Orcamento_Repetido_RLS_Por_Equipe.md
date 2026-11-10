@@ -14,13 +14,13 @@ sistemas_envolvidos:
 - [x] Causa confirmada e reproduzida com ROLLBACK (10/11).
 - [x] Migration **321** redigida: `set_orcamento_numero()` passa a `SECURITY DEFINER` com `pg_advisory_xact_lock`.
 - [x] Ensaio com ROLLBACK: antes, a Marina (projetista) gerou ORC-0010 com o maior real em ORC-0014; depois, gerou ORC-0015. Número informado à mão continua respeitado; anon barrado.
-- [ ] Aplicar a migration 321 no banco de São Paulo (autorização do usuário).
+- [x] Aplicar a migration 321 no banco de São Paulo (autorizada e aplicada em 10/11).
 - [ ] Decidir o que fazer com os 19 orçamentos com número repetido (9 números) (ver Pendências).
 - [ ] Depois de resolver os repetidos: índice único em `orcamentos(numero)` onde `origem = 'sistema'` (ou por empresa, conforme decisão).
 
 ### Passos manuais do usuário
 
-- [ ] Autorizar a aplicação da migration 321.
+- [x] Autorizar a aplicação da migration 321.
 - [ ] Decidir a regra dos duplicados existentes.
 
 ## Objetivo
@@ -43,10 +43,10 @@ Acabar com orçamentos do sistema com o mesmo número (hoje MANOELLA tem ORC-000
 
 ### 2026-11-10
 
-- SPEC criada; causa reproduzida; migration 321 redigida e ensaiada com ROLLBACK (nada aplicado).
+- SPEC criada; causa reproduzida; migration 321 ensaiada com ROLLBACK e APLICADA (autorizada). Conferido: função SECURITY DEFINER com search_path; inserção da Marina (ROLLBACK) gerou o máximo real + 1 (ORC-0016, depois de alguém criar o ORC-0015 no meio). Duplicados existentes não alterados.
 
 ## Pendências
 
-- [ ] Aplicar a migration 321 — aguarda autorização.
+- [x] (feito) Migration 321 aplicada em 10/11.
 - [ ] Os orçamentos já repetidos (19 orçamentos em 9 números, ORC-0001 a ORC-0009): renumerar os mais novos (o número aparece em PDF, XML e exportações) ou manter e só impedir novos? Decisão do usuário.
 - [ ] Índice único depois da decisão acima.

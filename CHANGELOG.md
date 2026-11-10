@@ -2,12 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-10 (SPEC-269 — aba "No financeiro" nos Orçamentos e assinatura LUCENERA no e-mail ao fornecedor; solicitações da Central reorganizadas)
+## 2026-11-10 (SPEC-271 e SPEC-272 — bugs da Central de Solicitações; aba "No financeiro"; assinatura LUCENERA no e-mail)
 
-- Orçamentos (local, não publicado): aba somente leitura "No financeiro (N)" para quem não é admin/gerente. Compras (local): e-mail ao fornecedor termina com a linha LUCENERA; texto configurável em `compras_config.assinatura_email`.
-- Migration `20261110_323_spec269_compras_config_assinatura_email` (up/rollback), **NÃO aplicada**; precisa ir antes do deploy do Compras.
-- Central de Solicitações (SP): "Itens com saldo errado" (venda 874) → concluído a pedido do usuário; 3 bugs da SPEC-268 → em desenvolvimento.
-- Repositórios que precisam de commit: Compras, Orçamentos e central.
+- **SPEC-271** (Murillo/Debora): migration `20261110_322_spec271_criar_produto_orcamento_funcionario` **APLICADA** em SP — `criar_produto_orcamento` aceita `funcionario` (24 contas barradas pelo teste de role legado); testada como Murillo e Debora em ROLLBACK, viewer segue barrado. Compras: rascunho persistente do pedido em montagem (`src/lib/rascunho-pedido.ts`) e aviso na busca vazia da Necessidade apontando o Pedido avulso (peça 4349 não era bug).
+- **SPEC-272**: Orçamentos — aba somente leitura "No financeiro (N)" para quem não é admin/gerente. Compras — e-mail ao fornecedor termina com LUCENERA; texto configurável em `compras_config.assinatura_email`. Migration `20261110_324_spec272_compras_config_assinatura_email` **APLICADA**.
+- Renumeradas por colisão com a sessão paralela (que usou SPEC-268/269 e migration 323). Commits locais dos sistemas (Compras 646f978, Orçamentos a22b510) usam os números antigos nas mensagens.
+- Central de Solicitações (SP): "Itens com saldo errado" (venda 874) → concluído a pedido do usuário; os 3 bugs → em desenvolvimento (SPEC-271).
+- **Pendente:** deploy do Compras (compras-lucenera) e dos Orçamentos (financeiro-lucenera) por wrangler (build feito, deploy bloqueado nesta sessão); push dos sistemas e ponteiros dos submodules.
 
 ## 2026-11-10 (SPEC-268 — número de orçamento repetido: migration 321 APLICADA em SP)
 
@@ -21,12 +22,6 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Limites aceitos (SPEC-269): a política de `produtos` ainda aceita editar/criar via `orcamentos` (bloqueio só na tela do Cadastro); a leitura dos percentuais em `financeiro_regras_repasse` segue liberada por `financeiro`/`rh`.
 - Front (`retorno-bancario-bradesco-5392a`, commit 001a6da pushado, sem migration; NO AR em contas-pagar-lucenera.pages.dev, deploy 8d7209fe por wrangler, bundle em São Paulo conferido e trava presente no JS de produção): menu e rota "Regras de RT" só para quem tem o acesso `financeiro-rt-comissao` (`src/hooks/use-pode-emitir-rt.ts`, `App.tsx`, `Layout.tsx`). Pendente: teste real da Caroline.
 - Documentos: SPEC-269. Repositórios que precisam de commit: central (SPEC-269, migration 323, CHANGELOG, ponteiro do submodule) (SPEC-269, migration 323, CHANGELOG).
-
-## 2026-11-10 (SPEC-268 — 3 bugs da Central de Solicitações: produto no orçamento, peça 4349, quantidades que somem)
-
-- Migration `20261110_322_spec268_criar_produto_orcamento_funcionario` (up/rollback): `criar_produto_orcamento` aceita `funcionario` (24 contas barradas pelo teste de role legado). Dry-run em ROLLBACK ok; **NÃO aplicada**.
-- Compras (só local): rascunho persistente do pedido em montagem (`src/lib/rascunho-pedido.ts`, carrinho + edições do modal) e aviso na busca vazia da Necessidade apontando o Pedido avulso. Peça 4349 não era bug (sem necessidade, não entra na lista).
-- Repositórios que precisam de commit: Compras (3 arquivos) e central (SPEC-268, migration 322, CHANGELOG).
 
 ## 2026-11-10 (limpeza das cópias de Edge Functions dos sistemas — risco de publicação apontado pelo Filippo)
 

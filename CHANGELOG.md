@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-10 (ajuste de estoque 12761 / 12395 / 12135 para bater com a Connect, direto no banco SP, sem migration)
+
+- Prints da Connect (Consultar Produtos + lista "Necessidade suprida — itens devolvidos/ajustados" de 10/11) como fonte. Estoque geral: 12761 7→8; 12395 562→598 (reservado 580→581); 12135 154→123. Na 12135 também passaram 30 un. de Reserva para Entrega Futura (13 itens: vendas 5882, 4865 e 5619, por L) pela função `ajustar_reserva_venda` (ensaio com ROLLBACK antes; movimentos registrados; financeiro igual). Resultado = Connect: 12135 geral 123/Reserva 107/EF 31/"separação" 16 (= sem venda daqui)/disp −31; 12395 geral 598/Reserva 510 (492+18 EF)/separação 71 (13+58)/disp 17; 12761 geral 8/Reserva 4/separação 1/disp 3.
+
 ## 2026-11-09 (SPEC-267 — liberação manual das vendas 4907 e 4908 para separar)
 
 - Migration 320 APLICADA em SP (autorizada): tabela `connect_item_liberacao_manual` (RLS, motivo obrigatório, quem/quando), 3ª via em `connect_item_liberado()` e função `liberar_vendas_connect(vendas, motivo, aplicar)` (só Matheus/administração). Ensaio com ROLLBACK antes: estoque, reservado, financeiro, Reserva e Ag. separar iguais; projetista e anon barrados.

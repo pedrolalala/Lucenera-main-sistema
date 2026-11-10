@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-10 (SPEC-270 — aba "Antecipações" em Contas a Pagar e Contas a Receber; código commitado, NÃO publicado)
+
+- Pedido: a antecipação precisa de um campo/aba visível nos dois sistemas (o orçamento já tem o sinal). Nova aba **Antecipações** no menu e rota `/antecipacoes` (`retorno-bancario-bradesco-5392a`, commit pushado, sem migration; builds receber e pagar ok).
+- **Contas a Pagar:** a aba mostra o painel de pagamento antecipado de fornecedor (SPEC-215) — o mesmo que só existia dentro de Contas em Aberto (`PagamentosAntecipadosPainel`, extraído do diálogo; o diálogo continua funcionando). Segue gravando em `pagamentos_antecipados`, de onde a Entrada de NF (Compras) lê. Não tem os campos da reunião (emissão, apropriação, conta, responsável): a tabela não os guarda; fica para a P5.
+- **Contas a Receber:** a aba lista as antecipações de clientes (título `adiantamento`, via `vw_financeiro_duplicatas`) com valor, saldo a compensar, responsável e situação; botão **Nova antecipação** (`/antecipacoes/nova`) e **Cancelar** (`financeiro_cancelar_antecipacao`). O seletor dentro de Cadastrar Duplicatas continua.
+- **Publicação bloqueada** pelo classificador de permissões (deploy de produção): Contas a Pagar e Contas a Receber ainda estão sem a aba até alguém autorizar o `wrangler pages deploy`.
+
 ## 2026-11-10 (SPEC-270 Fase 1 — Antecipação de pagamento em Contas a Receber, APLICADA e NO AR)
 
 - Reunião 48 (Carol) virou a SPEC-270. Fase 1 só no Receber: migration `20261110_325_spec270_antecipacao_fase1_receber` (up/rollback; `financeiro_lancar_antecipacao`, `financeiro_cancelar_antecipacao`, coluna `financeiro_titulos.responsavel_id`). **Migration 325 APLICADA** em SP após dry-run em ROLLBACK limpo como a Caroline (integridade inalterada; 0 antecipações existentes). Pagar fica para depois (P5: evitar contar em dobro com o pagamento antecipado de fornecedor da SPEC-215).

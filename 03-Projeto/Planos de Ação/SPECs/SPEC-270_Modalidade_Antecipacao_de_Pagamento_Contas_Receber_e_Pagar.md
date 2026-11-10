@@ -145,6 +145,10 @@ CHANGELOG; esta SPEC; `supabase/docs` (modelo financeiro: uso da espécie `adian
 - Decisões **assumidas** (recomendadas, a Carol ainda não respondeu): P2 nasce recebida na data do pagamento (exige conta bancária); P7 responsável = equipe do orçamento e nunca quem está lançando (a tela tira o usuário logado da lista e o banco recusa); P1 o cliente é o dono da antecipação, sem projeto por enquanto.
 - Migration 325 `20261110_325_spec270_antecipacao_fase1_receber` (up/rollback) e front em `retorno-bancario-bradesco-5392a` (`AntecipacaoForm.tsx`, `CadastrarDuplicata.tsx`, `ConsultarDuplicatas.tsx`, `financeiro-novo.ts`) prontos; **depois aplicado e publicado no mesmo dia** (migration 325 em SP; Contas a Receber, deploy c909a4fa, commit do sistema pushado). Falta o teste real da Carol.
 
+### 2026-11-10 (aba Antecipações)
+- Esclarecimento do usuário: o sinal do orçamento já existe; o que faltava era um campo/aba **visível** em Contas a Pagar e Contas a Receber. Criada a aba **Antecipações** nos dois (menu + `/antecipacoes`): Pagar reaproveita o painel de pagamento antecipado de fornecedor (SPEC-215, tabela `pagamentos_antecipados`, sem mexer no banco nem no vínculo com a Entrada de NF); Receber lista as antecipações de clientes com lançar e cancelar. Código commitado e pushado; **publicação aguardando autorização** (o deploy foi bloqueado).
+- Gap conhecido no Pagar: o formulário não tem emissão, apropriação, conta bancária nem responsável (a tabela não guarda); a antecipação de fornecedor segue só em `pagamentos_antecipados` e não aparece em Consultar Duplicatas do Pagar. Decidir na P5.
+
 ## Pendências
 - [ ] Responder as perguntas P1–P7 com a Carol (P1–P5, P7) e com Vinicius/Filippo (P6, P4) — sem isso as Fases 2–4 não começam.
 - [ ] Fase 0.2: confirmar como a tela Cadastrar Duplicatas grava hoje e como a lista de duplicatas enxerga o novo lançamento.

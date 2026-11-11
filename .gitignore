@@ -43,3 +43,18 @@ scripts/logs/
 __pycache__/
 *.pyc
 backup_out/
+
+# --- Dados confidenciais: ficam so no computador, nunca no GitHub (repositorio publico) ---
+/01-Documento/
+/02-Reunioes/
+*.xlsx
+*.xls
+*.csv
+*.docx
+*.pdf
+*.ofx
+*.rem
+*.ret
+*.xml
+.wrangler/
+/idx.js

@@ -3,6 +3,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { PDFDocument, StandardFonts } from 'npm:pdf-lib@1.17.1'
 import { encodeBase64 } from 'jsr:@std/encoding/base64'
 import nodemailer from 'npm:nodemailer@6.9.14'
+import { exigirUsuario } from '../_shared/exigir-usuario.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,6 +17,10 @@ const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD')
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  // SPEC-242: só logado (Catálogo Ubiqua chama depois de salvar o orçamento)
+  const chamador = await exigirUsuario(req, corsHeaders)
+  if (chamador instanceof Response) return chamador
 
   try {
     let body
@@ -37,6 +42,23 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: 'O ID do orçamento (quote_id) é obrigatório.' }),
         {
           status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      )
+    }
+
+    // SPEC-242: o orçamento tem que ser visível para quem chamou (RLS dele); senão qualquer logado gerava o PDF
+    // (com CPF/CNPJ do cliente) de qualquer orçamento.
+    const { data: visivel } = await chamador.cliente
+      .from('orcamentos_revenda_ubiqua')
+      .select('id')
+      .eq('id', quote_id)
+      .maybeSingle()
+    if (!visivel) {
+      return new Response(
+        JSON.stringify({ error: 'Orçamento não encontrado no banco de dados.' }),
+        {
+          status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         },
       )
@@ -185,9 +207,12 @@ Deno.serve(async (req: Request) => {
       throw new Error(`Failed to upload to storage: ${uploadError.message}`)
     }
 
-    // Get public URL
-    const { data: publicUrlData } = supabase.storage.from('orcamentos').getPublicUrl(fileName)
-    const fileUrl = publicUrlData.publicUrl
+    // SPEC-242: link com prazo (7 dias) em vez de público — o bucket `orcamentos` passa a ser privado (migration 263)
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from('orcamentos')
+      .createSignedUrl(fileName, 60 * 60 * 24 * 7)
+    if (signedError || !signedData) throw new Error(`Falha ao gerar link do PDF: ${signedError?.message}`)
+    const fileUrl = signedData.signedUrl
 
     // Send Email (via Gmail SMTP)
     if (GMAIL_USER && GMAIL_APP_PASSWORD) {

@@ -4,6 +4,7 @@
 // deixa `classificacao_ia` como null, pra ser reclassificado depois.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
+import { exigirUsuario } from '../_shared/exigir-usuario.ts'
 
 const SYSTEM_INSTRUCTION = `Você classifica pedidos internos de bug ou alteração de sistema para a
 empresa Lucenera. Sua única tarefa é decidir se o pedido é ESTRUTURAL ou
@@ -95,10 +96,84 @@ async function classificarComGemini(userMessage: string): Promise<ClassificacaoR
   }
 }
 
+// SPEC-229: aviso no Teams de pedido novo. Webhook de um fluxo "Workflows" do
+// Teams (secret TEAMS_WEBHOOK_SOLICITACOES). Só avisa uma vez por pedido
+// (avisado_teams_em) e só pedido criado há menos de 1 hora — editar pedido
+// chama esta mesma função e não deve avisar de novo. Falha aqui nunca derruba
+// a classificação.
+const CENTRAL_URL = 'https://solicitacoes-lucenera.pages.dev'
+
+async function avisarTeams(
+  supabase: ReturnType<typeof createClient>,
+  solicitacaoId: string,
+  resultado: ClassificacaoResultado | null,
+) {
+  const webhookUrl = Deno.env.get('TEAMS_WEBHOOK_SOLICITACOES')
+  if (!webhookUrl) return
+
+  try {
+    // Marca antes de enviar: se duas chamadas chegarem juntas, só uma ganha.
+    const umaHoraAtras = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const { data: marcado } = await supabase
+      .from('solicitacoes')
+      .update({ avisado_teams_em: new Date().toISOString() })
+      .eq('id', solicitacaoId)
+      .is('avisado_teams_em', null)
+      .gte('criado_em', umaHoraAtras)
+      .select('titulo, descricao, tipo, systems(name), usuarios(nome)')
+      .maybeSingle()
+    if (!marcado) return
+
+    const p = marcado as any
+    const descricao = p.descricao.length > 300 ? p.descricao.slice(0, 300) + '…' : p.descricao
+    const fatos = [
+      { title: 'Quem pediu', value: p.usuarios?.nome || '—' },
+      { title: 'Tipo', value: p.tipo === 'bug' ? 'Bug' : 'Pedido de alteração' },
+      { title: 'Sistema', value: p.systems?.name || 'não informado' },
+    ]
+    if (resultado) {
+      fatos.push({
+        title: 'IA',
+        value: resultado.classificacao === 'estrutural' ? 'Estrutural' : 'Pontual',
+      })
+    }
+
+    const resp = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'message',
+        attachments: [{
+          contentType: 'application/vnd.microsoft.card.adaptive',
+          content: {
+            $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+            type: 'AdaptiveCard',
+            version: '1.4',
+            body: [
+              { type: 'TextBlock', text: 'Nova solicitação na Central', weight: 'Bolder', size: 'Medium' },
+              { type: 'TextBlock', text: p.titulo, weight: 'Bolder', wrap: true },
+              { type: 'FactSet', facts: fatos },
+              { type: 'TextBlock', text: descricao, wrap: true, isSubtle: true },
+            ],
+            actions: [{ type: 'Action.OpenUrl', title: 'Abrir na Central', url: CENTRAL_URL }],
+          },
+        }],
+      }),
+    })
+    if (!resp.ok) console.error('Aviso Teams falhou:', resp.status, await resp.text())
+  } catch (error) {
+    console.error('Erro ao avisar Teams:', error)
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
+
+  // SPEC-242: só logado (a tela chama logo depois de salvar o pedido)
+  const chamador = await exigirUsuario(req, corsHeaders)
+  if (chamador instanceof Response) return chamador
 
   try {
     const { solicitacao_id } = await req.json()
@@ -144,6 +219,8 @@ Descrição: ${solicitacao.descricao}`
         })
         .eq('id', solicitacao_id)
     }
+
+    await avisarTeams(supabase, solicitacao_id, resultado)
 
     return new Response(JSON.stringify({ success: true, resultado }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

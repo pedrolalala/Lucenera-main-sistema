@@ -40,6 +40,32 @@ function extrairData(v: unknown): string | null {
   return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10)
 }
 
+// SPEC-258: o PostgREST devolve no máximo 1.000 linhas por consulta — lê página por página até acabar.
+async function lerTodos(consulta: (de: number, ate: number) => any): Promise<any[]> {
+  const tamanho = 1000
+  const todos: any[] = []
+  for (let de = 0; ; de += tamanho) {
+    const { data, error } = await consulta(de, de + tamanho - 1)
+    if (error) throw new Error(`Falha ao carregar cadastro: ${error.message}`)
+    todos.push(...(data ?? []))
+    if (!data || data.length < tamanho) return todos
+  }
+}
+
+// SPEC-258: nome -> id só quando o nome é único; nome repetido entre arquitetos não casa com nenhum.
+function mapaPorNomeUnico(linhas: any[]): Map<string, string> {
+  const mapa = new Map<string, string>()
+  const repetidos = new Set<string>()
+  for (const l of linhas) {
+    if (!l.nome) continue
+    const chave = String(l.nome).trim().toLowerCase()
+    if (mapa.has(chave) && mapa.get(chave) !== l.id) repetidos.add(chave)
+    else mapa.set(chave, l.id)
+  }
+  for (const chave of repetidos) mapa.delete(chave)
+  return mapa
+}
+
 async function sha256(texto: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto))
   return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('')
@@ -94,10 +120,23 @@ Deno.serve(async (req: Request) => {
     const { siteId, listId } = await resolveSiteAndList(supabase, accessToken)
 
     // --- mapas de nome -> id, carregados uma vez por execução ---
-    const { data: contatos } = await supabase.from('contatos').select('id, nome')
-    const { data: usuarios } = await supabase.from('usuarios').select('id, nome')
-    const mapaContatos = new Map((contatos ?? []).map((c: any) => [c.nome.trim().toLowerCase(), c.id]))
-    const mapaUsuarios = new Map((usuarios ?? []).map((u: any) => [u.nome.trim().toLowerCase(), u.id]))
+    // SPEC-258: a coluna "Arquiteto" do SharePoint só pode casar com contato que TEM o tipo arquiteto
+    // (contato_tipos.tipo_id = 2), não é duplicata (canonical_id nulo) e está ativo. Antes casava com
+    // qualquer contato (inclusive cadastro de cliente com o mesmo nome) e lia só os primeiros 1.000.
+    // Nome que bate com mais de um arquiteto fica ambíguo: não casa (o projeto mantém o arquiteto atual).
+    const arquitetos = await lerTodos((de, ate) =>
+      supabase
+        .from('contatos')
+        .select('id, nome, contato_tipos!inner(tipo_id)')
+        .eq('contato_tipos.tipo_id', 2)
+        .is('canonical_id', null)
+        .eq('ativo', true)
+        .order('id')
+        .range(de, ate),
+    )
+    const usuarios = await lerTodos((de, ate) => supabase.from('usuarios').select('id, nome').order('id').range(de, ate))
+    const mapaContatos = mapaPorNomeUnico(arquitetos)
+    const mapaUsuarios = new Map(usuarios.filter((u: any) => u.nome).map((u: any) => [u.nome.trim().toLowerCase(), u.id]))
 
     const { data: statusMapRows } = await supabase.from('sharepoint_status_map').select('*')
     const mapaStatusReverso = new Map(

@@ -81,11 +81,12 @@ contatos.canonical_id       -> contatos.id
 contatos.empresa_id         -> contatos.id
 
 contato_tipos.contato_id             -> contatos.id
+contato_tipos.tipo_id                -> tipos_contato.id   (SPEC-259; catálogo de tipos)
+contatos.tipo_principal_id           -> tipos_contato.id   (SPEC-259)
 contato_origens.contato_id           -> contatos.id
 contatos_revisao.id_a                -> contatos.id
 contatos_revisao.id_b                -> contatos.id
 projetos.cliente_id                  -> contatos.id
-projetos.client_id                   -> contatos.id
 projetos.arquiteto_id                -> contatos.id
 projetos.responsavel_obra_id         -> contatos.id
 orcamentos.cliente_id                -> contatos.id
@@ -152,7 +153,6 @@ Ação a ser realizada: em novas integrações, preferir `contatos` como cadastr
 
 ```text
 projetos.cliente_id          -> contatos.id
-projetos.client_id           -> contatos.id
 projetos.arquiteto_id        -> contatos.id
 projetos.responsavel_obra_id -> contatos.id
 projetos.responsavel_id      -> usuarios.id

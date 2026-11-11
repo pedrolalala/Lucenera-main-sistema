@@ -77,8 +77,14 @@ def dump_sp():
         t = re.sub(r"^ALTER TABLE .* (DISABLE|ENABLE) TRIGGER ALL;$", "", t, flags=re.M)
         open(p(dst), "w", encoding="utf-8").write(
             "SET session_replication_role = replica;\n" + t + "\nSET session_replication_role = origin;\n")
-    chk = re.search(r'ALTER TABLE "public"\."orcamentos"\s+ADD CONSTRAINT "orcamentos_data_inicio_pagamento_check"'
-                    r'[^;]*;', schema).group(0)
+    # A regra de data de início do pagamento foi retirada do banco (data retroativa liberada). Sem ela o
+    # re.search devolvia None e o backup parava desde 20/10/2026. Agora: se a regra existir, ela é tirada antes
+    # dos dados e recriada depois; se não existir, segue sem ela.
+    m = re.search(r'ALTER TABLE "public"\."orcamentos"\s+ADD CONSTRAINT "orcamentos_data_inicio_pagamento_check"'
+                  r'[^;]*;', schema)
+    chk = m.group(0) if m else "-- (sem orcamentos_data_inicio_pagamento_check)"
+    drop_chk = ('ALTER TABLE "public"."orcamentos" DROP CONSTRAINT "orcamentos_data_inicio_pagamento_check";'
+                if m else "-- (sem orcamentos_data_inicio_pagamento_check)")
 
     # políticas de storage (dependem de funções de public e somem no DROP CASCADE)
     c = psycopg2.connect(SP_DB, connect_timeout=30)
@@ -110,7 +116,7 @@ def dump_sp():
         "CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA public;",
         "CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public;",
         inc("schema_x.sql"),
-        'ALTER TABLE "public"."orcamentos" DROP CONSTRAINT "orcamentos_data_inicio_pagamento_check";',
+        drop_chk,
         "TRUNCATE auth.users CASCADE;",
         "TRUNCATE supabase_migrations.schema_migrations;",
         inc("d1.sql"),

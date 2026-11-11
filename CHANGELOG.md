@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-11 (SPEC-283 — Orçamento: Pix/Dinheiro não mostra Boleto no Plano de Parcelas)
+
+- Problema: com Pix e data de início, a parcela aparecia como Boleto (padrão antigo guardado na linha). Agora Pix/Dinheiro fazem a parcela seguir a forma de cima, sem seletor por parcela; também vale ao salvar. Sem mudança de banco.
+- Sistema: Orçamentos (`BudgetFormPage.tsx`); SPEC `SPEC-283_Orcamento_Pix_Dinheiro_Sem_Boleto_no_Plano_de_Parcelas.md`. Commit no repo do sistema + ponteiro do submodule.
+
 ## 2026-11-11 (SPEC-251 complemento — equipes passam a ver o Transferir na Venda Parcial; migration 328 APLICADA)
 
 - Problema: a tela do Transferir foi aberta a todas as equipes em 06/11, mas `pode_trocar_reserva()` seguia por cargo (admin, gerente, Projetista, exceção individual) e as vendedoras não viam o botão.

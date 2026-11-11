@@ -36,6 +36,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Reunião 49 (Carol): ORC-0008 de 09/11 (equipe Marina, R$ 490,69) entrou como venda, mas é Outros / BONIFICACAO. Decisão: só a revisão financeira pode trocar o Tipo de Operação.
 - Orçamentos (`BudgetFormPage.tsx`): `podeTrocarOperacao` libera Venda/Outros/SAC e o campo Tipo para quem tem revisão financeira, com o orçamento em Aprovação Financeira. Devolução, empréstimo e vínculo Connect seguem travados. Sem mudança de banco; tsc sem erro no arquivo. Falta commit/push no repo do Orçamentos, publicar e a Carol fazer a troca.
 
+## 2026-11-11 (SPEC-282 — preço das peças: regra dos 10 dias explícita, reajuste e correção; SPEC criada)
+
+- SPEC consolidada `SPEC-282_Reajuste_de_Precos_de_Pecas.md`: A) regras do orçamento (validade e aviso de preço; hoje o 10 está fixo em 5 pontos do código) numa tabela editável; B) reajuste por peça/marca/marca+categoria com prévia, lote, histórico e desfazer; C) correção dos preços dos orçamentos existentes (proposta: só rascunho e Aprovação da Equipe); D) pop-up de preço também quando a peça foi reajustada.
+- Parte D feita no Orçamentos (commit `f5ec0b3`, só local, não publicado). Sem migration ainda. 7 perguntas abertas na seção 9.
+
 ## 2026-11-11 (SPEC-277 — PDF da venda lê as parcelas do financeiro; só na main, NÃO publicado)
 
 - Pedido da Caroline (VENDA-8508): PDF saía com vencimentos 21/11, 15/12, 15/01 enquanto o Contas a Receber tinha 16/11, 10/12, 10/01. Causa: `generate-report` usava `orcamentos.plano_parcelas` (fixado na aprovação), que não acompanha correções da venda.

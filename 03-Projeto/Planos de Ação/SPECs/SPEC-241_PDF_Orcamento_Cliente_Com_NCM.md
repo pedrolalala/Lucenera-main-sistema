@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-241 — PDF do orçamento para o cliente com NCM (reforma tributária)"
-status: pendente
-data_ultima_modificacao: 2026-11-03
+status: publicada
+data_ultima_modificacao: 2026-11-11
 sistemas_envolvidos:
   - Orçamentos (gestao-financeira-clone-544cb (1)) — menu de impressão em BudgetTableRow.tsx
   - Edge Function generate-report (código no repositório do Orçamentos, supabase/functions/generate-report/index.ts)
@@ -24,13 +24,13 @@ sistemas_envolvidos:
 - [x] Aviso curto logo abaixo da tabela, no modelo novo: "NCM conforme cadastro do produto. A classificação fiscal definitiva é a da nota fiscal."
 - [x] Orçamentos: 3ª opção no menu da impressora — **"PDF para o cliente com NCM"**
 - [ ] Testar os 3 modelos com um orçamento real (layout não pode quebrar com descrição longa)
-- [ ] Publicar a Edge Function e o Orçamentos
+- [x] Publicar a Edge Function e o Orçamentos (Orçamentos já estava no ar com o menu; Edge Function `generate-report` publicada em 11/11 a partir da main)
 
 ### Passos manuais do usuário
 
 - [x] Responder as perguntas da seção "Para decidir" (03/11)
-- [ ] Rodar `supabase login` (o token do `.env` dá 401) para publicar a Edge Function
-- [ ] Autorizar a publicação da Edge Function `generate-report` (vale para todos os PDFs de orçamento)
+- [x] ~~Rodar `supabase login`~~ (não foi preciso: publicação feita pela conexão do Claude com o Supabase)
+- [x] Autorizar a publicação da Edge Function `generate-report` (Filippo, 11/11)
 - [ ] Vinicius testar mandando para um cliente PJ que pediu o NCM
 
 ## Objetivo

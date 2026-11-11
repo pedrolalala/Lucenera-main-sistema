@@ -86,9 +86,7 @@ function calcularParcelasPdf(
       ? new Date(budget.created_at)
       : new Date()
 
-  const plano = Array.isArray(budget.plano_parcelas)
-    ? budget.plano_parcelas
-    : null
+  const plano = Array.isArray(budget.plano_parcelas) ? budget.plano_parcelas : null
   if (plano && plano.length > 0) {
     return [...plano]
       .sort((a: any, b: any) => (a?.numero ?? 0) - (b?.numero ?? 0))
@@ -185,6 +183,8 @@ Deno.serve(async (req: Request) => {
       // SPEC-109: "cliente" (padrão, sem referência) ou "interno" (mostra
       // Referência além do Código real — útil quando o item não tem
       // cadastro e o código sai "0").
+      // SPEC-241: "cliente_ncm" = modelo do cliente + coluna NCM (clientes PJ
+      // pedem por causa da reforma tributária — IBS/CBS por item parte do NCM).
       const { id, logoBase64, modelo = 'cliente' } = filters || {}
 
       if (!id) {
@@ -213,7 +213,7 @@ Deno.serve(async (req: Request) => {
           projeto:projetos!orcamentos_projeto_id_fkey(codigo),
           itens:orcamento_itens(
             id, produto_id, quantidade, preco_unitario, desconto, descricao, custom_id,
-            produto:produtos(nome, referencia, sku, codigo_produto)
+            produto:produtos(nome, referencia, sku, codigo_produto, ncm)
           )
         `,
         )
@@ -586,21 +586,28 @@ Deno.serve(async (req: Request) => {
       // Referência — útil quando o item não tem cadastro (código sai "0",
       // a referência ajuda a achar a peça pra cadastrar depois).
       const isInterno = modelo === 'interno'
+      // SPEC-241: mesmas posições do interno, com NCM no lugar da Referência.
+      const comNcm = modelo === 'cliente_ncm'
       const headersList = isInterno
-        ? [
-            'L',
-            'Código',
-            'Referência',
-            'Descrição',
-            'Qtd.',
-            'Vl. Unit.',
-            'Subtotal',
-          ]
-        : ['L', 'Código', 'Descrição', 'Qtd.', 'Vl. Unit.', 'Subtotal']
-      const xOffsets = isInterno
-        ? [40, 65, 100, 195, 385, 420, 470]
-        : [40, 70, 115, 385, 420, 470]
-      const descMaxLen = isInterno ? 35 : 45
+        ? ['L', 'Código', 'Referência', 'Descrição', 'Qtd.', 'Vl. Unit.', 'Subtotal']
+        : comNcm
+          ? ['L', 'Código', 'NCM', 'Descrição', 'Qtd.', 'Vl. Unit.', 'Subtotal']
+          : ['L', 'Código', 'Descrição', 'Qtd.', 'Vl. Unit.', 'Subtotal']
+      const xOffsets =
+        isInterno || comNcm
+          ? [40, 65, 100, 195, 385, 420, 470]
+          : [40, 70, 115, 385, 420, 470]
+      const descMaxLen = isInterno || comNcm ? 35 : 45
+
+      // SPEC-241: 8 dígitos saem 9405.19.90; fora do formato sai como está.
+      function formatarNcm(ncm: string | null | undefined): string {
+        const bruto = String(ncm ?? '').trim()
+        if (!bruto) return '-'
+        const digitos = bruto.replace(/\D/g, '')
+        return digitos.length === 8
+          ? `${digitos.slice(0, 4)}.${digitos.slice(4, 6)}.${digitos.slice(6)}`
+          : bruto
+      }
 
       headersList.forEach((h, i) => {
         page.drawText(h, { x: xOffsets[i], y, size: 9, font: boldFont })
@@ -619,9 +626,7 @@ Deno.serve(async (req: Request) => {
       // ordenar "L2" antes de "L10" (ordem alfabética pura erraria isso).
       // Itens sem L (avulsos sem circuito) vão pro final, na ordem que já
       // vieram do banco.
-      function extractCircuitNumber(
-        customId: string | null | undefined,
-      ): number {
+      function extractCircuitNumber(customId: string | null | undefined): number {
         if (!customId) return Number.MAX_SAFE_INTEGER
         const match = String(customId).match(/\d+/)
         return match ? parseInt(match[0], 10) : Number.MAX_SAFE_INTEGER
@@ -675,7 +680,9 @@ Deno.serve(async (req: Request) => {
 
         const cols = isInterno
           ? [lFixo, codReal, referencia, desc, qtd, fmtPreco, fmtFinalVal]
-          : [lFixo, codReal, desc, qtd, fmtPreco, fmtFinalVal]
+          : comNcm
+            ? [lFixo, codReal, formatarNcm(item.produto?.ncm), desc, qtd, fmtPreco, fmtFinalVal]
+            : [lFixo, codReal, desc, qtd, fmtPreco, fmtFinalVal]
         cols.forEach((val, i) => {
           page.drawText(val, {
             x: xOffsets[i],
@@ -687,6 +694,19 @@ Deno.serve(async (req: Request) => {
 
         y -= 15
       })
+
+      // SPEC-241: aviso logo abaixo da tabela, só no modelo com NCM.
+      if (comNcm) {
+        if (y < 60) {
+          page = pdfDoc.addPage()
+          y = height - 50
+        }
+        page.drawText(
+          'NCM conforme cadastro do produto. A classificação fiscal definitiva é a da nota fiscal.',
+          { x: 40, y, size: 7, font, color: rgb(0.35, 0.35, 0.35) },
+        )
+        y -= 15
+      }
 
       y -= 5
 

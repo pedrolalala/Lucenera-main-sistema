@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Financeiro — nova estrutura do banco (proposta para decisão)</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --txt:#1c2330; --mut:#5b6573; --line:#cfd5de;
+    --novo:#dbeafe; --novo-b:#2563eb;      /* tabela nova */
+    --atual:#e5e7eb; --atual-b:#6b7280;    /* tabela atual */
+    --vem:#dcfce7; --vem-b:#16a34a;        /* vem do nosso sistema */
+    --dec:#fef3c7; --dec-b:#d97706;        /* decisão pendente */
+    --risco:#fee2e2; --risco-b:#dc2626;    /* ponta solta / risco */
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#10141b; --card:#171d27; --txt:#e6e9ef; --mut:#9aa5b5; --line:#2c3646;
+      --novo:#12264a; --atual:#252c38; --vem:#12301f; --dec:#3a2d0c; --risco:#3b1414; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:17px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px}
+  header{padding:18px 16px 4px}
+  h1{font-size:28px;margin:0 0 6px}
+  h2{font-size:23px;margin:40px 0 10px;padding-top:10px;border-top:3px solid var(--line)}
+  h3{font-size:18px;margin:22px 0 6px}
+  p{margin:8px 0}
+  .mut{color:var(--mut)}
+  .faixa{background:var(--dec);border:2px solid var(--dec-b);border-radius:10px;padding:10px 14px;margin:10px 0}
+  nav{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:8px 16px;z-index:5;font-size:14px}
+  nav a{margin-right:12px;color:var(--novo-b);text-decoration:none;white-space:nowrap;display:inline-block;padding:2px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .box{border:2px solid var(--atual-b);background:var(--atual);border-radius:8px;padding:6px 10px;margin:6px 0;font-size:15px}
+  .box.novo{border-color:var(--novo-b);background:var(--novo)}
+  .box.vem{border-color:var(--vem-b);background:var(--vem)}
+  .box.dec{border-color:var(--dec-b);background:var(--dec)}
+  .box.risco{border-color:var(--risco-b);background:var(--risco)}
+  .tag{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:0 7px;font-size:13px;margin:0 2px;background:var(--card)}
+  table{border-collapse:collapse;width:100%;margin:8px 0;font-size:15px;background:var(--card)}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:var(--atual)}
+  .scroll{overflow-x:auto}
+  .grid5{display:grid;grid-template-columns:1.1fr 0.15fr 1fr 0.15fr 1fr 0.15fr 0.9fr;gap:6px;align-items:start}
+  .col h4{margin:0 0 6px;font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+  .arrow{align-self:center;text-align:center;font-size:28px;color:var(--mut)}
+  .mat td,.mat th{text-align:center;font-size:16px}
+  .mat td b{display:block}
+  ul{margin:6px 0 6px 20px;padding:0}
+  li{margin:3px 0}
+  .dec-item{border:2px solid var(--dec-b);background:var(--dec);border-radius:10px;padding:10px 14px;margin:12px 0}
+  .dec-item h3{margin-top:0}
+  .opt{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 10px;margin:6px 0}
+  .rec{border-color:var(--vem-b)}
+  .resp{border-top:1px dashed var(--dec-b);margin-top:8px;padding-top:6px;font-weight:600}
+  code{background:var(--atual);border-radius:4px;padding:0 4px;font-size:14px}
+  .ok{color:var(--vem-b);font-weight:700}
+  @media (max-width:900px){
+    .grid5{grid-template-columns:1fr}
+    .arrow{transform:rotate(90deg);font-size:24px}
+  }
+  @media print{ nav{display:none} .card,.box{break-inside:avoid} }
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <h1>Financeiro — nova estrutura do banco de dados</h1>
+  <div class="mut">Relatório visual para decisão · gerado em 06/11/2026 · referência técnica: SPEC-258</div>
+  <div class="faixa"><b>Rascunho.</b> Nada foi aplicado no banco, nada foi enviado ao GitHub e este arquivo não foi publicado em lugar nenhum. É só para você ler, comentar e decidir junto comigo.</div>
+</header>
+
+<nav>
+  <a href="#resumo">1 Resumo</a><a href="#hoje">2 Como está hoje</a><a href="#mapa">3 Mapa geral</a><a href="#tabelas">4 As tabelas</a><a href="#vinculos">4B IDs e vínculos</a>
+  <a href="#nomes">5 Os 4 nomes</a><a href="#origens">6 De onde vem</a><a href="#rt">7 RT e comissões</a><a href="#regras">8 Regras</a>
+  <a href="#migracao">9 Migração</a><a href="#decisoes">10 Decisões</a><a href="#glossario">11 Glossário</a>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ LEGENDA ============ -->
+<div class="card">
+  <b>Cores usadas neste relatório</b>
+  <div class="box novo">Azul = tabela ou função NOVA (ainda não existe)</div>
+  <div class="box">Cinza = o que existe hoje no banco</div>
+  <div class="box vem">Verde = informação que nasce no nosso sistema (de onde vem o dinheiro)</div>
+  <div class="box dec">Amarelo = decisão sua pendente</div>
+  <div class="box risco">Vermelho = ponta solta ou risco que precisa ser fechado antes de migrar</div>
+</div>
+
+<!-- ============ 1 RESUMO ============ -->
+<h2 id="resumo">1. Resumo em poucas linhas</h2>
+<div class="card">
+  <ol>
+    <li><b>Hoje</b> o dinheiro está espalhado em <b>12 lugares</b> do banco (7 principais + 5 de legado, apoio e sinal), cada um com o seu próprio "pago" e <b>quase nenhum ligado ao outro por id</b>. Uma venda aprovada fica guardada em 3 lugares ao mesmo tempo.</li>
+    <li><b>Proposta:</b> um só núcleo, com <b>4 tabelas</b>: <b>Títulos</b> (a conta), <b>Parcelas</b> (a agenda), <b>Baixas</b> (o pagamento de verdade) e <b>Cobranças</b> (boleto/Pix/cartão), mais <b>2 de apoio</b>: regras de repasse (RT e comissão) e <b>fila de pendências</b>. <b>Todo dado tem id e toda ligação é chave estrangeira real</b> (seção 4B).</li>
+    <li>Tudo é a receber <b>ou</b> a pagar (<i>natureza</i>) e está <b>prevista, firme, liquidada ou cancelada</b> (<i>situação</i>). Disso saem os 4 nomes que você pediu: receita prevista, receita realizada, despesa prevista, despesa realizada.</li>
+    <li>Todo dinheiro nasce por <b>uma porta única</b> (funções do banco), vindo de: orçamento, compra, NF, adiantamento, custo recorrente, folha, RT de arquiteto, comissão de funcionário e lançamento manual. O legado da Connect entra uma vez só.</li>
+    <li><b>Duas pontas soltas grandes</b> encontradas: o <b>percentual de RT do arquiteto não existe</b> no banco, e a <b>comissão dos funcionários é calculada mas nunca é paga pela folha</b> (seção 7).</li>
+  </ol>
+</div>
+
+<!-- ============ 2 HOJE ============ -->
+<h2 id="hoje">2. Como está hoje (o problema)</h2>
+<div class="card scroll">
+  <table>
+    <tr><th>Onde o dinheiro está guardado</th><th>O que é</th><th>Linhas</th><th>Tem "pago" próprio?</th></tr>
+    <tr><td><code>negociacoes</code> + <code>transacoes</code></td><td>duplicata e parcela (Connect até 05/11; nosso depois)</td><td>14.028 / 23.338</td><td>sim</td></tr>
+    <tr><td><code>projeto_parcelas</code></td><td>parcela da venda gerada pelo orçamento</td><td>387</td><td>sim</td></tr>
+    <tr><td><code>boletos</code></td><td>cobrança bancária <i>e</i> contas a pagar cadastradas à mão</td><td>4</td><td>sim</td></tr>
+    <tr><td><code>pedido_compra_parcelas</code></td><td>parcela do pedido de compra</td><td>70</td><td>status próprio</td></tr>
+    <tr><td><code>nota_fiscal_compra_parcelas</code></td><td>parcela da NF de compra</td><td>3</td><td>não (vira boleto)</td></tr>
+    <tr><td><code>custos_recorrentes_lancamentos</code></td><td>custo fixo mensal (aluguel etc.)</td><td>0</td><td>sim (com juros, multa e desconto)</td></tr>
+    <tr><td><code>folha_pagamento</code></td><td>salário líquido do mês por funcionário</td><td>771</td><td>não</td></tr>
+    <tr><td><code>vendas</code> <span class="tag">legado Connect</span></td><td>venda importada, com valor pago e pendente</td><td>263 (R$ 7,54 mi pago · R$ 637 mil pendente)</td><td>sim</td></tr>
+    <tr><td><code>pedido_compra</code> <span class="tag">legado Connect</span></td><td>pedido de compra importado, com parcela e vencimento</td><td>247 (45 vigentes)</td><td>status próprio</td></tr>
+    <tr><td><code>staging_pedido_compra</code> <span class="tag">carga bruta</span></td><td>planilha de pedidos como veio da Connect</td><td>435</td><td>—</td></tr>
+    <tr><td><code>remessas</code> + <code>retornos_processados</code></td><td>pagamento de fornecedor por boleto/CNAB e log dos arquivos de retorno</td><td>0 / 2</td><td>sim (valor pago e data)</td></tr>
+    <tr><td><code>projeto_sinal</code></td><td>a entrada (sinal) paga pelo cliente, com comprovante</td><td>0</td><td>sim (data e status)</td></tr>
+  </table>
+  <div class="box risco"><b>Correção:</b> eu tinha falado em 7 lugares. Ao procurar tudo que guarda valor ou "pago", achei mais 5 (as cinco últimas linhas; a <code>projeto_sinal</code> apareceu pelas chaves estrangeiras). Todos entram no de-para da seção 9.</div>
+  <div class="box risco"><b>Consequência real:</b> quando um orçamento é aprovado, o banco cria <code>projeto_parcelas</code> + <code>boletos</code> e um gatilho ainda cria <code>negociacoes</code> + <code>transacoes</code>. São 3 cópias do mesmo valor com 3 "pagos" diferentes. Na compra o caminho é outro, e na folha nem existe pagamento.</div>
+  <div class="box risco"><b>Limites do desenho atual:</b> só cabe 1 pagamento por parcela (pagamento parcial, estorno e histórico de baixas não existem) · "prevista" não existe · "receita/despesa" mistura dois assuntos · os nomes <i>negociação</i> e <i>transação</i> vêm da Connect e não dizem o que são.</div>
+</div>
+
+<!-- ============ 3 MAPA ============ -->
+<h2 id="mapa">3. Mapa geral — de onde vem e para onde vai</h2>
+<p class="mut">Leia da esquerda para a direita. A coluna do meio (porta única) é a regra de ouro: <b>nenhum sistema grava direto nas tabelas</b>, todos chamam as funções.</p>
+<div class="card">
+  <div class="grid5">
+    <div class="col">
+      <h4>1 · De onde vem (nosso sistema)</h4>
+      <div class="box vem"><b>Orçamento aprovado</b> → a receber</div>
+      <div class="box vem">Devolução → crédito</div>
+      <div class="box vem">Permuta → contrapartida</div>
+      <div class="box vem"><b>Necessidade de compra</b> → a pagar prevista</div>
+      <div class="box vem"><b>Pedido de compra</b> → a pagar prevista</div>
+      <div class="box vem"><b>NF de entrada</b> → a pagar firme</div>
+      <div class="box vem">Adiantamento a fornecedor</div>
+      <div class="box vem">Custo recorrente (aluguel…)</div>
+      <div class="box vem">Folha (RH)</div>
+      <div class="box vem"><b>RT do arquiteto</b> ⚠ regra a definir</div>
+      <div class="box vem"><b>Comissão do funcionário</b> ⚠ regra a definir</div>
+      <div class="box vem">Lançamento manual</div>
+      <div class="box">Legado Connect (importado 1 vez)</div>
+    </div>
+    <div class="arrow">➜</div>
+    <div class="col">
+      <h4>2 · Porta única (funções)</h4>
+      <div class="box novo">
+        <b>financeiro_criar_titulo</b><br>
+        financeiro_confirmar_parcelas<br>
+        financeiro_substituir_previsao<br>
+        financeiro_baixar_parcela<br>
+        financeiro_estornar_baixa<br>
+        financeiro_cancelar_titulo<br>
+        <hr>
+        Confere: empresa · pessoa · natureza × origem · plano de contas · duplicidade · permissão
+      </div>
+    </div>
+    <div class="arrow">➜</div>
+    <div class="col">
+      <h4>3 · Núcleo (fonte de verdade)</h4>
+      <div class="box novo"><b>① TÍTULOS</b><br>a conta: quem deve a quem e por quê</div>
+      <div style="text-align:center">⬇</div>
+      <div class="box novo"><b>② PARCELAS</b><br>a agenda: vencimento, valor e situação</div>
+      <div style="text-align:center">⬇</div>
+      <div class="box novo"><b>③ BAIXAS</b><br>o pagamento/recebimento de verdade (único lugar do "pago")</div>
+    </div>
+    <div class="arrow">⇄</div>
+    <div class="col">
+      <h4>4 · Banco e cobrança</h4>
+      <div class="box novo"><b>④ COBRANÇAS</b><br>boleto · Pix · cartão · depósito<br>(aqui ficam CNAB e nosso número)</div>
+      <div class="box">Retorno do banco → <b>gera uma baixa</b></div>
+      <div class="box">Comprovante anexado → baixa já com comprovante</div>
+    </div>
+    <div class="arrow">➜</div>
+    <div class="col">
+      <h4>5 · O que as telas enxergam</h4>
+      <div class="box novo">vw_contas_a_receber</div>
+      <div class="box novo">vw_contas_a_pagar</div>
+      <div class="box novo">vw_historico_baixas<br><span class="mut">(contas pagas/recebidas)</span></div>
+      <div class="box novo">vw_fluxo_caixa<br><span class="mut">(4 colunas)</span></div>
+      <div class="box novo">vw_financeiro_integridade</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 4 TABELAS ============ -->
+<h2 id="tabelas">4. As 4 tabelas, campo por campo</h2>
+
+<div class="card">
+  <h3>① <code>financeiro_titulos</code> — a conta <span class="tag">substitui negociacoes</span></h3>
+  <p class="mut">Uma linha por obrigação: "o cliente X deve R$ Y por esta venda", "devemos R$ Z ao fornecedor W por esta NF".</p>
+  <div class="scroll"><table>
+    <tr><th>Campo</th><th>Para que serve</th></tr>
+    <tr><td><code>natureza</code></td><td><b>receber</b> ou <b>pagar</b></td></tr>
+    <tr><td><code>origem_tipo</code> + uma chave estrangeira <b>real</b> por origem (<code>orcamento_id</code> · <code>pedido_compra_id</code> · <code>nota_fiscal_compra_id</code> · <code>folha_pagamento_id</code> · <code>custo_recorrente_id</code> · <code>regra_repasse_id</code>)</td><td>o que gerou. O banco exige que <b>exatamente uma</b> esteja preenchida e que combine com o tipo. <b>Único</b>: o mesmo orçamento/pedido/NF não gera duas vezes (ver 4B)</td></tr>
+    <tr><td><code>especie</code></td><td>venda · crédito de devolução · compra · nota de compra · adiantamento · despesa · salário · comissão · RT arquiteto</td></tr>
+    <tr><td><code>empresa_id</code> (obrigatório) · <code>perfil</code></td><td>MANOELLA / FOCO / ISLIGHT · Ribeirão ou São Paulo</td></tr>
+    <tr><td><code>contato_id</code> ou <code>funcionario_id</code></td><td>a pessoa (cliente, fornecedor, arquiteto ou funcionário), com tipo coerente</td></tr>
+    <tr><td><code>plano_contas_id</code></td><td>a classificação contábil (aqui mora "receita" e "despesa" de verdade)</td></tr>
+    <tr><td><code>projeto_id</code> · <code>orcamento_id</code> · <code>pedido_compra_id</code> · <code>nota_fiscal_compra_id</code></td><td>ligações diretas para achar a origem sem adivinhar</td></tr>
+    <tr><td><code>documento</code> · <code>descricao</code></td><td>nº da NF/venda e texto livre</td></tr>
+    <tr><td><code>substitui_titulo_id</code></td><td>a NF firme aponta para a previsão do pedido que ela substitui (não conta duas vezes)</td></tr>
+    <tr><td><code>cancelado_em/por/motivo</code></td><td>nada é apagado: cancela-se com motivo</td></tr>
+    <tr><td><code>legado_cod_duplicata</code></td><td>número da Connect, <b>imutável</b>, só para rastrear</td></tr>
+  </table></div>
+</div>
+
+<div class="card">
+  <h3>② <code>financeiro_parcelas</code> — a agenda <span class="tag">substitui a "agenda" de transacoes, projeto_parcelas, pedido_compra_parcelas, nota_fiscal_compra_parcelas, custos_recorrentes_lancamentos</span></h3>
+  <div class="scroll"><table>
+    <tr><th>Campo</th><th>Para que serve</th></tr>
+    <tr><td><code>titulo_id</code> + <code>numero</code></td><td>parcela 1, 2, 3… do título (único)</td></tr>
+    <tr><td><code>vencimento</code> · <code>valor</code></td><td>quando e quanto</td></tr>
+    <tr><td><code>situacao</code></td><td><b>prevista</b> · <b>firme</b> · <b>cancelada</b> · <b>substituida</b></td></tr>
+    <tr><td><code>confirmada_em/por</code></td><td>quando a prevista virou firme</td></tr>
+    <tr><td><code>forma_prevista</code></td><td>boleto, Pix, cartão, carteira, permuta…</td></tr>
+    <tr><td><code>valor_baixado</code></td><td>soma das baixas (mantida pelo banco, ninguém digita)</td></tr>
+    <tr><td><code>legado_cod_itens_duplicata</code></td><td>id da parcela na Connect, <b>imutável</b></td></tr>
+  </table></div>
+  <div class="box novo"><b>Liquidada</b>, <b>parcial</b> e <b>vencida</b> <u>não são digitadas</u>: o banco calcula. Liquidada = baixas cobrem o valor. Parcial = baixas menores que o valor. Vencida = firme, vencimento passou e ainda há saldo.</div>
+</div>
+
+<div class="card">
+  <h3>③ <code>financeiro_baixas</code> — o pagamento de verdade <span class="tag">NOVA · substitui a parte "pago" de transacoes, projeto_parcelas e boletos</span></h3>
+  <p class="mut">Cada vez que dinheiro entra ou sai gera <b>uma linha</b>. Esta é a tabela do <b>histórico de contas pagas e recebidas</b>.</p>
+  <div class="scroll"><table>
+    <tr><th>Campo</th><th>Para que serve</th></tr>
+    <tr><td><code>parcela_id</code></td><td>qual parcela foi paga (pode ter várias baixas: pagamento parcial)</td></tr>
+    <tr><td><code>tipo</code></td><td>pagamento · recebimento · compensação (adiantamento, crédito) · estorno</td></tr>
+    <tr><td><code>data</code> · <code>valor</code> · <code>juros</code> · <code>multa</code> · <code>desconto</code></td><td>o que realmente aconteceu</td></tr>
+    <tr><td><code>forma</code> · <code>conta_bancaria_id</code></td><td>Pix, boleto, dinheiro… e em qual das 4 contas (Caixa, Bradesco Luce Nera, Islight, Foco)</td></tr>
+    <tr><td><code>cobranca_id</code> · <code>comprovante_url</code></td><td>boleto que foi pago e o comprovante (SPEC-254)</td></tr>
+    <tr><td><code>origem_baixa</code></td><td>manual · retorno bancário · antecipação · legado</td></tr>
+    <tr><td><code>estorno_de</code></td><td>uma baixa errada é estornada, nunca apagada</td></tr>
+  </table></div>
+</div>
+
+<div class="card">
+  <h3>④ <code>financeiro_cobrancas</code> — boleto, Pix, cartão <span class="tag">substitui boletos</span></h3>
+  <div class="scroll"><table>
+    <tr><th>Campo</th><th>Para que serve</th></tr>
+    <tr><td><code>parcela_id</code> · <code>meio</code></td><td>qual parcela está sendo cobrada e como (boleto, Pix, cartão, depósito, carteira)</td></tr>
+    <tr><td><code>nosso_numero</code> · <code>linha_digitavel</code> · <code>remessa_sequencial</code></td><td>tudo do CNAB fica aqui</td></tr>
+    <tr><td><code>status_banco</code></td><td>pendente de registro · registrado · pago · baixado · protestado</td></tr>
+  </table></div>
+  <div class="box novo">A cobrança <b>não</b> é fonte do valor nem do "pago". Quando o banco avisa que pagou (arquivo de retorno), o sistema cria uma <b>baixa</b>.</div>
+</div>
+
+
+<!-- ============ 4B VÍNCULOS ============ -->
+<h2 id="vinculos">4B. Identidade, vínculos e sincronização — nada solto</h2>
+<p class="mut">Esta seção responde ao requisito: <b>tudo com id, tudo ligado, tudo sincronizado, nada aberto, sem erro</b>. Ela também corrige um ponto do meu primeiro rascunho (ver 4B.3).</p>
+
+<div class="card">
+  <h3>4B.1 As 6 regras de identidade</h3>
+  <ol>
+    <li><b>Toda linha de toda tabela tem um id próprio</b> (<code>uuid</code>), nosso e imutável. O número da Connect nunca é a chave: fica numa coluna <code>legado_*</code> só para rastrear. <i>(Hoje as chaves da Connect não servem: há 2.768 códigos de parcela repetidos entre contas não canceladas.)</i></li>
+    <li><b>Toda ligação é chave estrangeira real</b> do banco (<code>FOREIGN KEY</code>): o banco recusa apontar para algo que não existe. Nada de "id solto", de texto ou de dedução por nome.</li>
+    <li><b>Cada fato tem um único dono.</b> O "pago" só mora em <code>baixas</code>; a agenda só em <code>parcelas</code>; a cobrança bancária só em <code>cobrancas</code>. Tudo o mais é <b>calculado</b> por view ou gatilho, nunca digitado em dois lugares.</li>
+    <li><b>Os sistemas leem views, nunca cópias.</b> Sem espelho que possa ficar diferente do original.</li>
+    <li><b>Nada em branco por acaso.</b> Para tudo o que nasce no sistema novo, as colunas obrigatórias são <code>NOT NULL</code>. No legado, o que não puder ser ligado vai para a <b>fila de pendências</b> (4B.7), nunca fica vazio em silêncio.</li>
+    <li><b>Nada é apagado:</b> cancela-se com motivo; estorna-se. A auditoria do banco guarda o antes e o depois.</li>
+  </ol>
+</div>
+
+<div class="card scroll">
+  <h3>4B.2 Mapa de ids — cada informação, o id que a identifica e onde ela é ligada</h3>
+  <table>
+    <tr><th>Informação</th><th>Id que a identifica</th><th>É ligada por (chave estrangeira em…)</th><th>Obrigatório?</th></tr>
+    <tr><td>Título (a conta)</td><td><code>financeiro_titulos.id</code></td><td><code>parcelas.titulo_id</code></td><td>—</td></tr>
+    <tr><td>Parcela</td><td><code>financeiro_parcelas.id</code></td><td><code>baixas.parcela_id</code> · <code>cobrancas.parcela_id</code></td><td>—</td></tr>
+    <tr><td>Baixa (pagamento real)</td><td><code>financeiro_baixas.id</code></td><td><code>baixas.estorno_de</code> (estorno aponta para a baixa errada)</td><td>—</td></tr>
+    <tr><td>Cobrança</td><td><code>financeiro_cobrancas.id</code></td><td><code>baixas.cobranca_id</code> · retorno bancário → cobrança</td><td>—</td></tr>
+    <tr><td>Pessoa (cliente, fornecedor, arquiteto)</td><td><code>contatos.id</code></td><td><code>titulos.contato_id</code></td><td>sempre, exceto folha</td></tr>
+    <tr><td>Funcionário</td><td><code>funcionarios.id</code></td><td><code>titulos.funcionario_id</code></td><td>folha e comissão</td></tr>
+    <tr><td>Empresa (MANOELLA/FOCO/ISLIGHT)</td><td><code>empresas.id</code></td><td><code>titulos.empresa_id</code></td><td><b>sempre</b></td></tr>
+    <tr><td>Conta bancária</td><td><code>contas_bancarias.id</code></td><td><code>baixas.conta_bancaria_id</code></td><td><b>toda baixa</b></td></tr>
+    <tr><td>Plano de contas</td><td><code>plano_de_contas.id</code></td><td><code>titulos.plano_contas_id</code></td><td><b>sempre</b></td></tr>
+    <tr><td>Projeto</td><td><code>projetos.id</code></td><td><code>titulos.projeto_id</code></td><td>venda, RT e comissão</td></tr>
+    <tr><td>Venda = orçamento aprovado</td><td><code>orcamentos.id</code></td><td><code>titulos.orcamento_id</code></td><td>origem da receita</td></tr>
+    <tr><td>Pedido de compra</td><td><code>pedidos_compra.id</code></td><td><code>titulos.pedido_compra_id</code></td><td>origem da despesa prevista</td></tr>
+    <tr><td>NF de compra</td><td><code>notas_fiscais_compra.id</code></td><td><code>titulos.nota_fiscal_compra_id</code></td><td>origem da despesa firme</td></tr>
+    <tr><td>Folha do mês</td><td><code>folha_pagamento.id</code></td><td><code>titulos.folha_pagamento_id</code></td><td>origem do salário</td></tr>
+    <tr><td>Custo recorrente</td><td><code>custos_recorrentes.id</code></td><td><code>titulos.custo_recorrente_id</code></td><td>origem do custo fixo</td></tr>
+    <tr><td>Regra de RT / comissão</td><td><code>financeiro_regras_repasse.id</code></td><td><code>titulos.regra_repasse_id</code> + <code>titulos.titulo_base_id</code> (a <b>venda</b> que gerou o RT)</td><td>RT e comissão</td></tr>
+    <tr><td>Previsão substituída pela NF</td><td><code>titulos.id</code></td><td><code>titulos.substitui_titulo_id</code></td><td>NF que veio de pedido</td></tr>
+    <tr><td>Crédito de devolução</td><td><code>titulos.id</code></td><td><code>titulos.titulo_compensado_id</code> (a venda de origem)</td><td>devolução</td></tr>
+    <tr><td>Pessoa da Connect (código)</td><td>(espaço, <code>cod_connect</code>)</td><td><code>contato_legado_ids</code> → <code>contatos.id</code></td><td>só legado</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>4B.3 Correção do meu rascunho: a "origem" precisa de chave estrangeira real</h3>
+  <div class="box risco">No primeiro desenho eu usei <code>origem_tipo</code> + um <code>origem_id</code> genérico. Um id genérico <b>não é chave estrangeira</b>: o banco não impede apontar para um orçamento que não existe ou foi apagado. Isso seria exatamente uma ponta solta.</div>
+  <div class="box novo"><b>Agora:</b> uma coluna para cada origem, cada uma com <code>FOREIGN KEY</code>, e uma regra do banco (<code>CHECK</code>) que exige <b>exatamente uma preenchida</b> e igual ao <code>origem_tipo</code>. Um índice único por origem impede gerar o mesmo orçamento, pedido, NF, folha-mês ou regra duas vezes.</div>
+</div>
+
+<div class="card scroll">
+  <h3>4B.4 Sincronização — quando acontece algo, o que o banco faz sozinho</h3>
+  <p class="mut">Tudo na <b>mesma transação</b>: ou acontece por inteiro ou não acontece nada (nunca "pela metade").</p>
+  <table>
+    <tr><th>Quando…</th><th>O banco faz, sem ninguém lembrar…</th></tr>
+    <tr><td>uma <b>baixa</b> é registrada</td><td>recalcula o valor baixado da parcela e a situação derivada (liquidada ou parcial); grava a auditoria</td></tr>
+    <tr><td>uma baixa é <b>estornada</b></td><td>cria uma baixa de estorno (nunca apaga) e recalcula a parcela</td></tr>
+    <tr><td>o <b>orçamento é aprovado</b> financeiramente</td><td>cria o título, as parcelas firmes e as cobranças juntos; se algo falhar, nada é criado</td></tr>
+    <tr><td>o orçamento é <b>cancelado</b> ou a aprovação é desfeita</td><td>cancela título, parcelas e cobranças; <b>se já houver baixa, bloqueia</b> até estornar</td></tr>
+    <tr><td>o <b>pedido de compra</b> é aprovado, editado ou volta para edição</td><td>cria ou recalcula as parcelas previstas; depois que uma NF foi ligada, bloqueia a edição</td></tr>
+    <tr><td>a <b>NF de entrada</b> é lançada</td><td>cria o título firme e marca a prevista do pedido como <i>substituída</i> (na mesma operação)</td></tr>
+    <tr><td>a NF é <b>cancelada</b></td><td>cancela o título da NF e <b>reativa</b> a prevista do pedido</td></tr>
+    <tr><td>o <b>banco devolve o retorno</b> (CNAB)</td><td>cria a baixa ligada à cobrança; a mesma liquidação <b>não entra duas vezes</b></td></tr>
+    <tr><td>uma parcela da venda é <b>recebida</b></td><td>libera o RT e a comissão proporcionais (a regra de repasse): de prevista para firme</td></tr>
+    <tr><td>uma <b>devolução</b> é aprovada</td><td>cria o crédito ligado à venda e ajusta RT e comissão proporcionalmente</td></tr>
+    <tr><td>a <b>folha</b> do mês é gerada</td><td>cria um título por funcionário (firme), só visível ao RH</td></tr>
+    <tr><td>qualquer coisa <b>fere uma regra</b></td><td>a operação inteira é recusada com mensagem clara</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>4B.5 Tolerância zero: os 15 testes que precisam dar "0 problemas"</h3>
+  <p class="mut">Ficam na <code>vw_financeiro_integridade</code> e rodam todo dia. A migração <b>só segue</b> se todos estiverem em zero (ou explicitamente aceitos na fila de pendências).</p>
+  <div class="grid5" style="grid-template-columns:1fr 1fr;gap:10px">
+    <div>
+      <b>Para frente — todo registro tem origem e vínculos</b>
+      <ol>
+        <li>título sem <b>exatamente uma</b> origem válida</li>
+        <li>título sem empresa, pessoa ou plano de contas</li>
+        <li>parcela sem título (órfã) · título sem parcela ativa</li>
+        <li>soma das parcelas ativas ≠ total do título</li>
+        <li>baixa sem conta bancária · baixa em parcela cancelada ou substituída</li>
+        <li>valor baixado da parcela ≠ soma das baixas dela</li>
+        <li>cobrança sem parcela · baixa por retorno sem cobrança</li>
+        <li>pessoa com tipo incompatível (despesa a "cliente", salário a "arquiteto"…)</li>
+      </ol>
+    </div>
+    <div>
+      <b>Para trás — todo fato do negócio gerou dinheiro</b>
+      <ol start="9">
+        <li><b>orçamento aprovado sem título a receber</b></li>
+        <li><b>pedido de compra aprovado sem despesa prevista</b></li>
+        <li><b>NF de compra sem título</b> · folha-mês sem título</li>
+        <li><b>venda recebida sem RT/comissão gerado</b> (quando a regra existe)</li>
+      </ol>
+      <b>Coerência e legado</b>
+      <ol start="13">
+        <li>origem cancelada mas título ainda ativo</li>
+        <li>prevista vencida há muito tempo · substituída sem substituta</li>
+        <li>legado: total por tipo, situação, mês, empresa e perfil <b>diferente do banco antigo</b></li>
+      </ol>
+    </div>
+  </div>
+  <div class="box novo">São dois sentidos de propósito: o primeiro garante que <b>nenhum dinheiro existe sem dono</b>; o segundo garante que <b>nenhum fato que deveria gerar dinheiro ficou de fora</b>. Sem o segundo, uma venda aprovada poderia ficar sem conta a receber e ninguém perceberia.</div>
+</div>
+
+<div class="card scroll">
+  <h3>4B.6 O que hoje quebra os vínculos (medido no banco em 06/11/2026) e como cada caso é tratado</h3>
+  <table>
+    <tr><th>Problema encontrado</th><th>Quantidade</th><th>Tratamento na migração</th></tr>
+    <tr><td>Títulos <b>sem plano de contas</b></td><td>245</td><td>fila de pendências (Financeiro classifica)</td></tr>
+    <tr><td>Pagamentos <b>sem conta bancária</b></td><td>982 pagas (1.923 parcelas no total)</td><td>fila de pendências: não invento a conta</td></tr>
+    <tr><td>Despesa ligada a contato do tipo <b>"cliente"</b> / receita ligada a <b>"fornecedor"</b></td><td>1.723 / 11</td><td>fila: pode ser legítimo (reembolso a cliente) ou erro de pessoa</td></tr>
+    <tr><td><b>RT lançado como receita</b> (plano "RT" dentro de duplicata de receita) e RT pago a contato que não é arquiteto</td><td>20 títulos (R$ 107 mil) · 171 títulos (R$ 432 mil)</td><td>fila: reclassificar para despesa de RT e religar a pessoa</td></tr>
+    <tr><td>Funcionários ligados a contato do tipo <b>"arquiteto"</b> (salário, vale-transporte, férias, 13º)</td><td>pelo menos 14 títulos</td><td>fila: religar para o funcionário certo</td></tr>
+    <tr><td><b>RT sem venda</b>: o histórico do RT nunca foi ligado à venda que o gerou</td><td>1.168 títulos (R$ 1,81 mi); 956 com <code>cod_venda = 0</code>, 212 vazio, <b>0 com projeto</b></td><td>entra como legado "RT sem venda" (aceito, com motivo). <b>De agora em diante RT é sempre ligado à venda</b></td></tr>
+    <tr><td>Títulos <b>sem orçamento</b> no sistema novo</td><td>14.027 (todo o legado)</td><td>usa o <code>cod_venda</code> da Connect (13.318 têm); só 272 vendas existem no sistema novo</td></tr>
+    <tr><td>Títulos <b>sem projeto</b></td><td>10.566</td><td>só vira pendência quando a espécie exige projeto (despesa geral não exige)</td></tr>
+    <tr><td>Parcelas de projeto de 04/05: <b>sem orçamento e sem título</b></td><td>387</td><td>entram como legado sem vínculo (aceito pelo usuário em 05/11)</td></tr>
+    <tr><td>Boletos <b>sem parcela</b> (contas a pagar à mão)</td><td>4</td><td>a migração cria o título + a cobrança e liga</td></tr>
+    <tr><td>Parcelas de pedido e de NF <b>sem nenhuma ligação</b> com o financeiro</td><td>70 + 3</td><td>a migração cria a ligação</td></tr>
+    <tr><td>Datas com defeito (paga com data futura · vencimento de ano absurdo · paga sem data)</td><td>1 · 22 · 5</td><td>fila: marcadas "inconsistente" sem alterar o valor</td></tr>
+    <tr><td>Tabela legada <code>vendas</code> com valor pago e pendente</td><td>263 (R$ 7,54 mi pago)</td><td>reconciliar com os títulos de venda legados e mostrar a diferença antes de aposentar</td></tr>
+    <tr><td><code>transacoes.categoria_id</code> nunca usada</td><td>23.338 vazios</td><td>não migra (campo morto)</td></tr>
+    <tr><td>Códigos de parcela da Connect repetidos</td><td>2.768</td><td>sem problema: usamos o id próprio; o código vira só informação de legado</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>4B.7 A fila de pendências — como "nada fica aberto"</h3>
+  <p>Tabela de apoio <code>financeiro_pendencias</code>: cada problema do legado vira <b>uma linha com id</b>, ligada ao título, parcela ou baixa que tem o problema.</p>
+  <div class="scroll"><table>
+    <tr><th>Campo</th><th>Para que serve</th></tr>
+    <tr><td><code>titulo_id</code> / <code>parcela_id</code> / <code>baixa_id</code></td><td>o registro com o problema (chave estrangeira real)</td></tr>
+    <tr><td><code>tipo</code></td><td>sem plano de contas · sem conta bancária · pessoa incompatível · data inválida · RT sem venda · legado sem vínculo…</td></tr>
+    <tr><td><code>status</code></td><td><b>aberta</b> · <b>resolvida</b> (corrigida) · <b>aceita</b> (ficará assim, de propósito)</td></tr>
+    <tr><td><code>motivo_aceite</code> · <code>aceita_por/em</code></td><td>só o administrador aceita, e <b>sempre com motivo</b> (auditável)</td></tr>
+    <tr><td><code>responsavel</code> · <code>resolvida_por/em</code></td><td>quem vai corrigir e quem corrigiu</td></tr>
+  </table></div>
+  <div class="box novo"><b>Regra de ouro:</b> a migração só é dada como concluída quando <b>não restar nenhuma pendência "aberta"</b>: tudo está <i>resolvido</i> ou <i>aceito com motivo</i>. Os 15 testes da 4B.5 ficam em zero e a fila é o único lugar onde uma exceção pode existir.</div>
+</div>
+
+<!-- ============ 5 NOMES ============ -->
+<h2 id="nomes">5. Os 4 nomes que a empresa usa</h2>
+<div class="card">
+  <table class="mat">
+    <tr><th></th><th>PREVISTA<br><span class="mut">valor/data podem mudar</span></th><th>FIRME<br><span class="mut">conta real, ainda não paga</span></th><th>LIQUIDADA<br><span class="mut">já entrou/saiu dinheiro</span></th></tr>
+    <tr><th>A RECEBER</th><td style="background:var(--novo)"><b>RECEITA PREVISTA</b></td><td>a receber</td><td style="background:var(--vem)"><b>RECEITA REALIZADA</b></td></tr>
+    <tr><th>A PAGAR</th><td style="background:var(--novo)"><b>DESPESA PREVISTA</b></td><td>a pagar</td><td style="background:var(--vem)"><b>DESPESA REALIZADA</b></td></tr>
+  </table>
+  <p>"Receita" e "despesa" no sentido contábil (de qual grupo do plano de contas) é a <b>classificação</b> do título; a <b>natureza</b> (a receber/a pagar) diz se o dinheiro entra ou sai. Cancelada fica fora de todos os relatórios.</p>
+  <div class="box">A <b>coluna "Previsão"</b> do Fluxo Futuro que você pediu é simplesmente a soma das parcelas <i>previstas</i> do mês. Não é um remendo: é parte do modelo.</div>
+</div>
+
+<!-- ============ 6 ORIGENS ============ -->
+<h2 id="origens">6. De onde vem cada informação (todas as origens)</h2>
+<div class="card scroll">
+  <table>
+    <tr><th>#</th><th>Origem</th><th>Quando nasce</th><th>Natureza</th><th>Situação ao nascer</th><th>Quando muda</th><th>Hoje fica em…</th></tr>
+    <tr><td>1</td><td><b>Orçamento (venda)</b></td><td>aprovação da equipe</td><td>receber</td><td>prevista</td><td>vira <b>firme</b> na aprovação financeira; cobranças são criadas</td><td><code>projeto_parcelas</code> + <code>boletos</code> + <code>transacoes</code></td></tr>
+    <tr><td>2</td><td><b>Pagamento no ato</b> (Pix, comprovante)</td><td>aprovação, com anexo</td><td>receber</td><td>—</td><td>nasce uma <b>baixa</b> já com o comprovante</td><td>não existe (só o anexo, SPEC-254)</td></tr>
+    <tr><td>3</td><td>Devolução</td><td>aprovação do orçamento de devolução</td><td>receber</td><td>firme</td><td>título de <b>crédito</b> (valor negativo) que compensa a venda de origem</td><td><code>projeto_parcelas</code> com valor negativo + boleto "Nota de Crédito"</td></tr>
+    <tr><td>4</td><td>Permuta</td><td>aprovação da venda com parcela em permuta</td><td>pagar</td><td>firme</td><td>contrapartida ligada à venda</td><td><code>boletos</code> (tipo CP)</td></tr>
+    <tr><td>5</td><td><b>Necessidade de compra</b></td><td>necessidade gera compra</td><td>pagar</td><td>prevista</td><td>some quando o pedido é aprovado (a prevista do pedido assume)</td><td>não existe</td></tr>
+    <tr><td>6</td><td><b>Pedido de compra</b></td><td>aprovação do pedido</td><td>pagar</td><td>prevista</td><td>é <b>substituída</b> quando a NF entra</td><td><code>pedido_compra_parcelas</code> (+ view de previsão)</td></tr>
+    <tr><td>7</td><td><b>NF de entrada</b></td><td>lançamento da NF</td><td>pagar</td><td><b>firme</b></td><td>baixa quando pagar; substitui a prevista do pedido</td><td><code>nota_fiscal_compra_parcelas</code> → <code>boletos</code></td></tr>
+    <tr><td>8</td><td>Adiantamento a fornecedor</td><td>pagamento antes da NF</td><td>pagar</td><td>liquidada</td><td>uma <b>compensação</b> abate a NF quando ela entrar</td><td><code>pagamentos_antecipados</code> (vazia)</td></tr>
+    <tr><td>9</td><td>Custo recorrente</td><td>todo mês, a partir do cadastro</td><td>pagar</td><td>prevista</td><td>firme no vencimento/confirmação; baixa quando paga</td><td><code>custos_recorrentes_lancamentos</code> (vazia)</td></tr>
+    <tr><td>10</td><td>Folha de pagamento</td><td>geração da folha do mês</td><td>pagar</td><td>firme</td><td>baixa no pagamento; pessoa = funcionário</td><td><code>folha_pagamento</code> (771 linhas, sem pagamento)</td></tr>
+    <tr class="x"><td>11</td><td><b>RT do arquiteto</b></td><td>⚠ a definir (seção 7)</td><td>pagar</td><td>prevista</td><td>⚠ a definir</td><td>não existe</td></tr>
+    <tr class="x"><td>12</td><td><b>Comissão do funcionário</b></td><td>⚠ a definir (seção 7)</td><td>pagar</td><td>prevista</td><td>⚠ a definir</td><td>calculada em view, nunca paga</td></tr>
+    <tr><td>13</td><td>Lançamento manual</td><td>quando alguém cadastra (imposto, despesa avulsa…)</td><td>pagar ou receber</td><td>prevista (se marcar) ou firme</td><td>baixa quando pagar</td><td><code>boletos</code> (CP) pela tela do Contas a Pagar</td></tr>
+    <tr><td>14</td><td>Legado Connect</td><td>migração única</td><td>conforme estava</td><td>firme / liquidada / cancelada</td><td>não muda; ids da Connect imutáveis</td><td><code>negociacoes</code> + <code>transacoes</code></td></tr>
+  </table>
+  <div class="box risco"><b>Regra anti-duplicidade (a mais importante da compra):</b> pedido aprovado cria a prevista; quando a NF de entrada é lançada, o título da NF (firme) aponta para o do pedido em <code>substitui_titulo_id</code> e as parcelas do pedido passam a <i>substituídas</i>. Os relatórios somam só prevista + firme, nunca as duas versões.</div>
+</div>
+
+<!-- ============ 7 RT ============ -->
+<h2 id="rt">7. RT dos arquitetos e comissão dos funcionários</h2>
+<p class="mut">Esta é a parte com mais risco de erro. Abaixo: o que existe hoje (medido no banco), o que <b>não</b> existe e o que proponho.</p>
+
+<div class="card">
+  <h3>7.1 RT do arquiteto</h3>
+  <div class="box"><b>O que existe hoje:</b>
+    <ul>
+      <li><code>projeto_arquitetos</code> — <b>2.276 vínculos</b>, 633 arquitetos diferentes. Guarda <b>só a divisão</b> entre arquitetos do mesmo projeto (soma 100%). Hoje <b>todos estão em 100%</b>, ou seja, 1 arquiteto por projeto.</li>
+      <li><code>orcamento_arquitetos</code> — 1 linha, mesma ideia.</li>
+      <li>O orçamento mostra o arquiteto vindo do vínculo do projeto (e a equipe confere se a venda tem RT, SPEC-254 D).</li>
+      <li><b>O RT histórico já existe como conta a pagar comum:</b> no plano de contas "RT" há <b>1.168 títulos (R$ 1,81 mi)</b>. Desses, 762 (R$ 1,38 mi) foram pagos a pessoas do tipo arquiteto (ex.: um mesmo arquiteto com 70 títulos, outro com 60); <b>93 (R$ 305 mil) a contatos cadastrados como fornecedor e 78 (R$ 127 mil) como cliente</b> (cadastro da pessoa inconsistente), e <b>20 títulos (R$ 107 mil) foram lançados como receita</b> por engano. Foi assim que a Connect controlava o RT.</li>
+    </ul>
+  </div>
+  <div class="box risco"><b>Achado importante:</b> nesses 1.168 títulos de RT, <b>nenhum está ligado à venda ou ao projeto que gerou o RT</b> (956 têm <code>cod_venda = 0</code>, 212 vazio, 0 com projeto, 0 com orçamento). Por isso <b>não dá para calcular o percentual real de RT a partir do histórico</b> e não dá para saber, venda a venda, o que já foi repassado. No sistema novo o RT passa a nascer <b>ligado à venda por chave estrangeira</b> (<code>titulo_base_id</code>); o histórico entra como "RT sem venda" na fila de pendências.</div>
+  <div class="box risco"><b>O que NÃO existe no banco (pontas soltas):</b>
+    <ul>
+      <li>O <b>percentual de RT</b> (quanto da venda vai para o arquiteto) — não está cadastrado em lugar nenhum.</li>
+      <li>A <b>base de cálculo</b> (valor bruto? líquido? sem frete? só o que foi recebido?).</li>
+      <li><b>Quando</b> o RT é devido e pago (na venda? a cada parcela recebida? só depois de tudo recebido?).</li>
+      <li>O <b>pagamento</b> do RT: nenhuma conta a pagar é gerada hoje. Não há controle do que já foi repassado.</li>
+      <li>Se é <b>por arquiteto</b> (acordo fixo), <b>por venda</b> (negociado caso a caso) ou <b>por projeto</b>.</li>
+    </ul>
+  </div>
+  <h3>Como ficaria no modelo novo</h3>
+  <div class="box novo">Nova tabela <b>financeiro_regras_repasse</b> (regra de RT): quem recebe (arquiteto), percentual, base de cálculo, gatilho, prazo, vigência. Quando a regra dispara, a porta única cria um <b>título a pagar</b> (<code>origem_tipo = rt_arquiteto</code>) ligado à venda e à parcela recebida que o liberou, com pessoa = o arquiteto.</div>
+  <p><b>Opções de gatilho</b> (decisão 3 na seção 10):</p>
+  <div class="opt rec"><b>A (recomendada) — RT proporcional ao recebimento:</b> na aprovação nasce o RT <i>previsto</i> (valor total). Cada parcela da venda que for recebida torna <i>firme</i> a parte proporcional do RT. O arquiteto só é pago do que o cliente já pagou. Protege o caixa e dá a previsão correta.</div>
+  <div class="opt"><b>B — RT só quando a venda estiver 100% recebida:</b> mais simples, mas atrasa o pagamento do arquiteto e some da previsão até o fim.</div>
+  <div class="opt"><b>C — RT total na aprovação:</b> o arquiteto é pago antes do cliente. Risco de caixa se a venda for cancelada ou devolvida.</div>
+  <div class="box risco"><b>Devolução e cancelamento:</b> o RT já gerado precisa ser <b>reduzido/estornado</b> proporcionalmente à devolução (regra a confirmar: o arquiteto devolve o RT?). Sem isso, o sistema pagaria RT sobre venda que não existe mais.</div>
+</div>
+
+<div class="card">
+  <h3>7.2 Comissão e salário dos funcionários</h3>
+  <div class="box"><b>O que existe hoje:</b>
+    <ul>
+      <li><code>funcionarios_financeiro.comissao_percentual</code> — <b>13 funcionários</b> com comissão, de até 5,5%, ligada à <b>equipe</b>.</li>
+      <li><code>vw_comissao_mensal</code> — <b>calcula</b> a comissão = percentual × valor total dos projetos da equipe no <b>mês de entrada do projeto</b> (data de entrada, não de recebimento).</li>
+      <li><code>folha_pagamento</code> — 771 folhas em 49 meses, salário líquido total de R$ 6,18 mi. A coluna <code>comissao</code> está <b>zerada em todas</b>.</li>
+    </ul>
+  </div>
+  <div class="box risco"><b>Pontas soltas:</b>
+    <ul>
+      <li>A comissão é <b>calculada, mas nunca paga</b> pela folha (R$ 0 em 771 folhas): hoje ninguém sabe o que foi ou não pago.</li>
+      <li>A base é o <b>valor vendido no mês de entrada</b>. Precisa decidir se continua assim ou passa a ser <b>sobre o recebido</b>.</li>
+      <li>A folha <b>não gera conta a pagar</b>: o pagamento dos salários não aparece no fluxo de caixa nem tem baixa.</li>
+      <li>Existe um campo de salário <b>"por fora"</b> em <code>funcionarios_financeiro</code>. É dado sensível: no modelo novo, folha e comissão devem ficar <b>visíveis só para o RH</b> e nunca nas visões financeiras gerais.</li>
+    </ul>
+  </div>
+  <h3>Como ficaria no modelo novo</h3>
+  <div class="box novo"><b>Folha</b> gera, por funcionário e por mês, um título a pagar <code>especie = salario</code> (firme). <b>Comissão</b> gera outro título, <code>especie = comissao</code>, calculado pela mesma <b>financeiro_regras_repasse</b> (regra: funcionário ou equipe, percentual, base e gatilho). Quando a folha é paga, nasce a <b>baixa</b>.</div>
+  <div class="opt rec"><b>Comissão sobre o recebido (recomendada):</b> cada parcela da venda recebida libera a comissão proporcional. Alinha com o RT e com o caixa.</div>
+  <div class="opt"><b>Comissão sobre o vendido (como hoje):</b> nasce na aprovação/entrada do projeto, independente do cliente ter pago.</div>
+  <div class="box dec">Decisão 4 e 5 (seção 10): salário e comissão entram como contas a pagar? Sobre o vendido ou sobre o recebido?</div>
+</div>
+
+<!-- ============ 8 REGRAS ============ -->
+<h2 id="regras">8. Regras e travas que o banco vai impor</h2>
+<div class="card">
+  <ul>
+    <li><b>Idempotência:</b> o mesmo orçamento, pedido, NF, folha-mês ou regra de RT nunca gera dois títulos (índice único por origem).</li>
+    <li><b>Natureza coerente com a origem:</b> venda → a receber; compra, NF, folha, recorrente, RT e comissão → a pagar.</li>
+    <li><b>Empresa obrigatória</b> e pessoa com <b>tipo compatível</b> (cliente na venda, fornecedor na NF, funcionário na folha, arquiteto no RT).</li>
+    <li><b>Valor maior que zero</b> (só o título de crédito de devolução pode ser negativo).</li>
+    <li>Baixa <b>não entra</b> em parcela cancelada ou substituída; <b>soma das baixas</b> controlada pelo banco; baixa errada é <b>estornada</b>, nunca apagada.</li>
+    <li><b>Nada é apagado:</b> cancela-se com motivo; a auditoria do banco guarda o antes e o depois.</li>
+    <li>Campos <code>legado_*</code> da Connect são <b>imutáveis</b> (um gatilho bloqueia alteração).</li>
+    <li><b>Plano de contas:</b> coerência é <u>alerta</u> para o legado (a Connect misturou) e <u>trava</u> para tudo o que for criado no sistema novo.</li>
+    <li><b>Permissão:</b> funções exigem acesso ao financeiro; folha e comissão só RH; todas as tabelas com RLS ligado e <code>anon</code> sem acesso.</li>
+  </ul>
+</div>
+
+<!-- ============ 9 MIGRAÇÃO ============ -->
+<h2 id="migracao">9. Migração — de-para completo e sem pontas soltas</h2>
+
+<h3>9.1 De onde cada tabela de hoje vai</h3>
+<div class="card scroll">
+  <table>
+    <tr><th>Hoje</th><th>Linhas</th><th>Vai para</th><th>Como</th></tr>
+    <tr><td><code>negociacoes</code></td><td>14.028</td><td>títulos</td><td>1 título por duplicata; guarda <code>legado_cod_duplicata</code>; origem = legado Connect (14.027) ou orçamento (1 nativa)</td></tr>
+    <tr><td><code>transacoes</code></td><td>23.338</td><td>parcelas + baixas</td><td>1 parcela por linha; <b>paga</b> (16.968) gera também 1 baixa (data, valor pago, juros, desconto, forma); <b>cancelada</b> → cancelada; <b>aberta</b> → firme</td></tr>
+    <tr><td><code>projeto_parcelas</code></td><td>387</td><td>parcelas</td><td>as que têm orçamento viram parcelas da venda; as demais (inclusive as 387 de 04/05, que o usuário confirmou em 05/11 <b>não serem teste</b>) entram como legado. <b>Nada é apagado</b></td></tr>
+    <tr><td><code>boletos</code></td><td>4</td><td>cobranças (e títulos, se forem contas a pagar manuais)</td><td>os 4 são contas a pagar cadastradas à mão → viram título a pagar + cobrança</td></tr>
+    <tr><td><code>pedido_compra_parcelas</code></td><td>70</td><td>parcelas (previstas)</td><td>o pedido guarda só a condição de pagamento; o dinheiro vive no financeiro</td></tr>
+    <tr><td><code>nota_fiscal_compra_parcelas</code></td><td>3</td><td>parcelas (firmes)</td><td>com a regra de substituição da prevista do pedido</td></tr>
+    <tr><td><code>custos_recorrentes_lancamentos</code></td><td>0</td><td>parcelas (previstas)</td><td>tabela vazia: só o cadastro de recorrência passa a gerar pela porta única</td></tr>
+    <tr><td><code>folha_pagamento</code></td><td>771</td><td>títulos (salário)</td><td>ver pergunta: quais meses migrar e se já foram pagos (decisão 4)</td></tr>
+    <tr><td><code>pagamentos_antecipados</code> + vínculos</td><td>0</td><td>baixa/compensação</td><td>tabelas vazias</td></tr>
+    <tr><td><code>projeto_sinal</code></td><td>0</td><td>baixa na parcela de entrada da venda</td><td>tabela vazia; o sinal pago vira <b>baixa</b> com o comprovante (SPEC-254)</td></tr>
+    <tr><td><code>remessas</code> + <code>retornos_processados</code></td><td>0 / 2</td><td>cobrança (pagamento a fornecedor) e baixa</td><td>o retorno do banco passa a gerar baixa ligada à cobrança</td></tr>
+    <tr><td><code>vendas</code> / <code>pedido_compra</code> / <code>staging_pedido_compra</code> (legado Connect)</td><td>263 / 247 / 435</td><td>—</td><td>reconciliar com os títulos legados e arquivar (ver 4B.6); a carga bruta fica congelada</td></tr>
+    <tr><td><code>connect_contas_espelho</code></td><td>19.372</td><td>—</td><td>fica <b>congelada</b> como arquivo da última carga (só leitura)</td></tr>
+    <tr><td><code>stg_duplicatas_vigentes</code></td><td>10.403</td><td>—</td><td>deixa de ser necessária depois da migração (a lista das vigentes vira a situação de cada parcela)</td></tr>
+    <tr><td><code>notas_fiscais_connect_duplicatas</code></td><td>809</td><td>ligação NF ↔ parcela</td><td>o vínculo vira <code>documento</code>/<code>nota</code> do título de venda (690 casam por vencimento + valor)</td></tr>
+    <tr><td><code>financeiro_posicao_diaria</code></td><td>18.667</td><td>—</td><td>foto do dia 05/11: fica como está (referência de auditoria)</td></tr>
+  </table>
+</div>
+
+<h3>9.2 Quem depende dos nomes de hoje (tudo que precisa ser religado)</h3>
+<div class="card">
+  <div class="box risco"><b>2 sistemas · 4 telas</b><br>
+    Dashboard: <code>Transacoes.tsx</code>, <code>services/cash-flow.ts</code> · Retorno bancário (Contas a Pagar/Receber): <code>ConsultarDuplicatas.tsx</code>, <code>ContasEmAberto.tsx</code>.</div>
+  <div class="box risco"><b>Sistemas que leem boletos / parcelas do projeto / parcelas do pedido</b> (13 arquivos em 4 sistemas): retorno-bancario (9), compras (2), CRM (1), separação parcial (1). O dashboard é o 5º sistema, lendo <code>transacoes</code> (4 telas acima).</div>
+  <div class="box risco"><b>11 funções que citam negociacoes/transacoes:</b><br>
+    <code>_valor_venda_connect</code>, <code>aplicar_xml_connect_orcamentos</code>, <code>carregar_connect_reserva_ambiente</code>, <code>congelar_posicao_financeira</code>, <code>criar_transacao_da_parcela_projeto</code>, <code>definir_previsao_transacoes</code>, <code>desfazer_aprovacao_financeira</code>, <code>get_dashboard_kpi</code>, <code>ligar_projeto_connect</code>, <code>processar_retorno_bancario</code>, <code>trg_projeto_parcela_financeiro</code></div>
+  <div class="box risco"><b>21 funções que tocam parcelas/boletos/folha/pedido de compra:</b><br>
+    <code>aprovar_orcamento_financeiro</code>, <code>aprovar_orcamento_financeiro_base_spec001</code>, <code>cancelar_orcamento</code>, <code>desfazer_aprovacao_financeira</code>, <code>aprovar_pedido_compra</code>, <code>cancelar_pedido_compra</code>, <code>editar_pedido_compra</code>, <code>gerar_parcelas_pedido_compra</code>, <code>atualizar_parcela_pedido_compra</code>, <code>voltar_pedido_compra_para_edicao</code>, <code>fn_nota_compra_parcela_gera_contas_pagar</code>, <code>fn_nota_compra_parcela_remove_contas_pagar</code>, <code>processar_retorno_bancario</code>, <code>reservar_remessa_cnab</code>, <code>criar_transacao_da_parcela_projeto</code>, <code>get_dashboard_crm_by_closing</code>, <code>auditoria_registrar_acao</code>, <code>aplicar_xml_connect_orcamentos</code>, <code>carregar_connect_reserva_ambiente</code>, <code>desvincular_orcamento_connect</code>, <code>ligar_projeto_connect</code>.</div>
+  <div class="box risco"><b>6 views:</b> <code>v_cash_flow_lucenera</code>, <code>v_financeiro_realizado</code>, <code>vw_conferencia_financeira</code>, <code>vw_contas_pagar_pedidos_compra</code>, <code>vw_financeiro_integridade</code>, <code>vw_transacoes_completas</code> Mais 2 que leem parcelas: <code>vw_fluxo_caixa_projetado</code> e <code>vw_orcamentos_aprovacao_financeira_auditoria</code>. E a <code>vw_comissao_mensal</code>, da comissão (seção 7).</div>
+  <div class="box risco"><b>16 scripts Python</b> (importação/conferência/correção da planilha da Connect): <code>importar_contas_pagar_receber</code>, <code>conferencia_diaria_financeiro</code>, <code>bater_supabase_financeiro</code>, <code>auditar_financeiro_vs_planilha</code>, <code>carregar_espelho_contas_connect</code>, <code>corrigir_*</code> (5), <code>preencher_conta_projeto_financeiro</code>, <code>classificar_perfil_sao_paulo</code> e outros. Os de importação e correção da planilha <b>deixam de existir</b>; os de conferência viram a conferência de integridade do sistema novo.</div>
+</div>
+
+<h3>9.2B Regras do legado que a migração precisa respeitar (já valem hoje, vêm de decisões anteriores)</h3>
+<div class="card">
+  <ul>
+    <li><b>Nunca apagar:</b> o que sai da planilha da Connect é <b>cancelado</b> (<code>status_pago = 2</code>), nunca excluído. O <code>retorno_bancario_registros</code> aponta para <code>transacoes</code> sem apagar em cascata: apagar destruiria o histórico de conciliação.</li>
+    <li><b>Empresa:</b> <code>LUCE NERA</code> = <code>MANOELLA</code> (mapeamento permanente).</li>
+    <li><b>DEV TROCA = devolução</b> (decisão de 07/10): despesas com esse tipo entram na categoria DEVOLUÇÃO (505 títulos, R$ 1,79 mi já reclassificados).</li>
+    <li><b>Duplicata em mais de uma empresa:</b> vale a MANOELLA/mais antiga (regra <code>rn = 1</code> da view). Pular não é permitido: são recebimentos reais.</li>
+    <li><b>Marco:</b> depois de 05/11/2026 19h01 o importador da planilha e os corretores estão travados.</li>
+    <li><b>Tabelas que apontam para as antigas por chave estrangeira</b> (precisam ser religadas ou migradas junto): <code>retorno_bancario_registros</code> (→ boletos, projeto_parcelas, transacoes), <code>notas_fiscais</code> (→ boletos), <code>boletos</code> (→ projeto_parcelas), <code>transacoes</code> (→ negociacoes, projeto_parcelas), <code>projeto_parcelas</code> (→ transacoes), <code>projeto_sinal</code> (→ transacoes), <code>custos_recorrentes_lancamentos</code> (→ transacoes).</li>
+  </ul>
+</div>
+
+<h3>9.3 Como provamos que nada mudou (números de hoje, 06/11/2026)</h3>
+<div class="card scroll">
+  <table>
+    <tr><th>Conferência</th><th>Valor de hoje (antes da migração)</th><th>Depois tem que dar</th></tr>
+    <tr><td>Linhas da view do fluxo (<code>v_financeiro_realizado</code>)</td><td><b>18.316</b></td><td>exatamente igual</td></tr>
+    <tr><td>Soma das parcelas dessa view</td><td><b>R$ 75.203.769,77</b></td><td>exatamente igual</td></tr>
+    <tr><td>Receitas: abertas / pagas / canceladas</td><td>459 / 4.592 / 3.602</td><td>igual (aberta = firme; paga = liquidada)</td></tr>
+    <tr><td>Despesas: abertas / pagas / canceladas</td><td>1.238 / 12.376 / 1.071</td><td>igual</td></tr>
+    <tr><td>Histórico de pagamentos</td><td><b>16.968</b> (16/08/2024 a hoje)</td><td>16.968 baixas</td></tr>
+    <tr><td>Valor pago: receitas / despesas</td><td>R$ 35,67 mi / R$ 33,95 mi</td><td>igual por mês, empresa e perfil</td></tr>
+    <tr><td>Contas em aberto: receitas / despesas</td><td>R$ 2,85 mi / R$ 4,08 mi</td><td>igual</td></tr>
+  </table>
+  <div class="box risco"><b>Dados com defeito encontrados hoje</b> (a migração precisa tratá-los, não esconder): 1 parcela paga com data de pagamento <b>no futuro</b> (19/12/2026) · 22 parcelas com vencimento de <b>ano absurdo</b> (ex.: 0204) · 5 parcelas pagas <b>sem data de pagamento</b>. Entram na migração marcadas como <i>inconsistentes</i> e aparecem na tela de integridade para corrigir.</div>
+</div>
+
+<h3>9.4 Fases (cada uma só roda com a sua autorização)</h3>
+<div class="card">
+  <ol>
+    <li><b>Fase 0 — Decidir</b> os pontos da seção 10 e aprovar a SPEC.</li>
+    <li><b>Fase 1 — Criar</b> as tabelas, funções e views novas <b>vazias</b>; ensaio completo com ROLLBACK; nada muda para ninguém.</li>
+    <li><b>Fase 2 — Copiar o legado</b> para o modelo novo, com <b>backup</b> antes e a conferência da tabela 9.3 (por tipo, situação, mês, empresa e perfil). Se qualquer número divergir, <b>não segue</b>.</li>
+    <li><b>Fase 3 — Compatibilidade:</b> as tabelas antigas viram <b>views com os mesmos nomes</b>; os sistemas e funções são religados um por vez, sempre conferindo os números.</li>
+    <li><b>Fase 4 — Ligar as origens nativas:</b> orçamento (troca o destino do gatilho de hoje), compra/NF, manual, recorrentes, folha, RT e comissão.</li>
+    <li><b>Fase 5 — Telas novas</b> (Fluxo Futuro com as 4 colunas) e remoção das estruturas antigas, só depois de um período sem leitura.</li>
+  </ol>
+  <div class="box">Plano de volta atrás em cada fase: cada migration tem <code>rollback.sql</code> e o "antes" fica guardado no schema <code>backup</code>.</div>
+</div>
+
+<!-- ============ 10 DECISÕES ============ -->
+<h2 id="decisoes">10. Pontas soltas e decisões (para decidirmos juntos)</h2>
+<p class="mut">Cada item tem as opções, a minha recomendação e um espaço para a sua resposta.</p>
+
+<div class="dec-item"><h3>1 · Quando a receita é "prevista" e quando é "firme"?</h3>
+  <div class="opt rec"><b>Recomendo:</b> prevista na <i>aprovação da equipe</i>; firme na <i>aprovação financeira</i> (quando os boletos são criados).</div>
+  <div class="opt">Alternativa: já nasce firme na aprovação da equipe (sem previsão de venda).</div>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<div class="dec-item"><h3>2 · Despesa de compra: prevista → firme</h3>
+  <div class="opt rec"><b>Recomendo:</b> necessidade de compra = prevista; pedido aprovado = prevista; NF de entrada = <b>firme</b> e <b>substitui</b> a do pedido (sem contar duas vezes).</div>
+  <div class="opt">Alternativa: pedido aprovado já conta como firme (o fluxo some a previsão mais cedo).</div>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<div class="dec-item"><h3>3 · RT do arquiteto (a maior ponta solta)</h3>
+  <ul>
+    <li>Qual o <b>percentual</b> e onde ele fica: por arquiteto, por venda ou por projeto?</li>
+    <li>Qual a <b>base</b>: valor bruto, líquido, sem frete, só o recebido?</li>
+    <li><b>Quando paga</b>: opção A (proporcional ao recebimento, recomendada), B (só com a venda 100% recebida) ou C (total na aprovação)?</li>
+    <li>Na <b>devolução ou cancelamento</b>, o RT é reduzido/estornado proporcionalmente?</li>
+    <li>O RT é pago com <b>nota fiscal</b> do arquiteto?</li>
+  </ul>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<div class="dec-item"><h3>4 · Folha entra como conta a pagar?</h3>
+  <div class="opt rec"><b>Recomendo:</b> sim — um título a pagar por funcionário e por mês, só visível ao RH. Dúvida: migrar as 49 folhas antigas como já pagas ou começar do mês atual?</div>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<div class="dec-item"><h3>5 · Comissão do funcionário</h3>
+  <div class="opt rec"><b>Recomendo:</b> comissão sobre o <b>recebido</b>, proporcional a cada parcela, gerada como título a pagar e paga pela folha.</div>
+  <div class="opt">Alternativa: manter sobre o <b>vendido</b> no mês de entrada do projeto (como a view faz hoje).</div>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<div class="dec-item"><h3>6 · Uma tabela de títulos ou duas?</h3>
+  <div class="opt rec"><b>Recomendo:</b> uma só tabela (<code>financeiro_titulos</code>) com a coluna <i>natureza</i> e duas views com nome claro (a receber e a pagar). Reaproveita todas as regras e evita código duplicado.</div>
+  <div class="opt">Alternativa: duas tabelas separadas (<code>contas_a_receber</code> e <code>contas_a_pagar</code>): separação física, mas regras e código dobrados.</div>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<div class="dec-item"><h3>7 · Legado da Connect</h3>
+  <div class="opt rec"><b>Recomendo:</b> migrar tudo para o modelo novo (ids da Connect guardados como "legado", imutáveis). Histórico de pagas e abertas num lugar só.</div>
+  <div class="opt">Alternativa: deixar nas tabelas antigas só para consulta (histórico fica em dois lugares).</div>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<div class="dec-item"><h3>8 · Crédito de devolução</h3>
+  <div class="opt rec"><b>Recomendo:</b> título a receber com valor <b>negativo</b> (espécie crédito) ligado à venda de origem, compensado por uma baixa do tipo "compensação".</div>
+  <div class="opt">Alternativa: abater direto nas parcelas da venda de origem (some o rastro do crédito).</div>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<div class="dec-item"><h3>9 · Dados com defeito do legado</h3>
+  <p>1 paga com data futura, 22 vencimentos com ano absurdo, 5 pagas sem data de pagamento.</p>
+  <div class="opt rec"><b>Recomendo:</b> migrar marcando como <i>inconsistente</i> (sem alterar o valor) e listar na tela de integridade para você/Financeiro corrigir.</div>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<div class="dec-item"><h3>10 · Outras saídas e entradas que não são conta a pagar/receber</h3>
+  <p>Retirada de lucro, aporte e transferência entre as 4 contas bancárias. Hoje a retirada aparece como "distribuição de lucro" dentro das despesas.</p>
+  <div class="opt rec"><b>Recomendo:</b> tratar retirada de lucro como despesa com classificação própria (como hoje) e deixar transferência entre contas e conciliação bancária (extrato) para uma fase posterior.</div>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<div class="dec-item"><h3>11 · Pendências do legado: resolver tudo antes ou aceitar algumas?</h3>
+  <p>As pendências da 4B.6 (245 sem plano de contas, 982 pagamentos sem conta bancária, 1.734 pessoas de tipo incompatível, 1.168 RT sem venda, 387 parcelas de abril…) precisam de um destino.</p>
+  <div class="opt rec"><b>Recomendo:</b> migrar tudo, com cada exceção na <b>fila de pendências</b>; o Financeiro resolve as que tiverem solução (plano de contas, conta bancária, pessoa) e o administrador <b>aceita com motivo</b> as que não têm (RT sem venda, parcelas de abril). A migração só é "fechada" com zero pendências abertas.</div>
+  <div class="opt">Alternativa: só migrar depois de resolver todas (mais seguro, mas atrasa a virada porque algumas, como o RT sem venda, não têm como ser resolvidas).</div>
+  <div class="resp">Sua decisão: ______________________</div></div>
+
+<!-- ============ 11 GLOSSÁRIO ============ -->
+<h2 id="glossario">11. Glossário</h2>
+<div class="card scroll">
+  <table>
+    <tr><th>Termo</th><th>Significa</th></tr>
+    <tr><td>Título</td><td>a conta inteira (a duplicata): quem deve a quem e por quê</td></tr>
+    <tr><td>Parcela</td><td>cada vencimento do título</td></tr>
+    <tr><td>Baixa</td><td>cada pagamento ou recebimento que realmente aconteceu</td></tr>
+    <tr><td>Cobrança</td><td>o meio de receber: boleto, Pix, cartão, depósito</td></tr>
+    <tr><td>Natureza</td><td>a receber (entra dinheiro) ou a pagar (sai dinheiro)</td></tr>
+    <tr><td>Prevista</td><td>conta que ainda pode mudar de valor ou de data (visão prévia)</td></tr>
+    <tr><td>Firme</td><td>conta real, ainda não paga</td></tr>
+    <tr><td>Liquidada</td><td>conta totalmente paga ou recebida (calculada pelas baixas)</td></tr>
+    <tr><td>Substituída</td><td>previsão que deixou de valer porque a conta real (NF) entrou no lugar</td></tr>
+    <tr><td>Porta única</td><td>as funções do banco pelas quais todo dinheiro precisa passar</td></tr>
+    <tr><td>Legado</td><td>o que veio da Connect até 05/11/2026</td></tr>
+    <tr><td>RT</td><td>valor repassado ao arquiteto pela venda (regra ainda a definir)</td></tr>
+    <tr><td>Marco</td><td>05/11/2026, 19h01: última carga da planilha da Connect; depois o financeiro é do sistema novo</td></tr>
+  </table>
+</div>
+
+<p class="mut" style="margin:36px 0 60px">Fim do relatório. Responda os itens da seção 10 (pode ser só os números e a opção) e eu escrevo a versão final da SPEC-258, ainda sem aplicar nada.</p>
+</main>
+</body>
+</html>

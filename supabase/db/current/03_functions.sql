@@ -3704,3 +3704,16 @@ END;
 $function$
 
 ;
+
+-- 20261109_316: apropriacoes permitidas na entrada da NF (Compras)
+CREATE OR REPLACE FUNCTION public.compras_apropriacoes_nota()
+ RETURNS TABLE(id uuid, codigo_connect integer, nome text)
+ LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+  SELECT p.id, p.codigo_connect::integer, p.nome
+    FROM public.plano_de_contas p
+   WHERE p.codigo_connect IN (2050001, 2050010, 2050003)
+     AND ((SELECT public.pode_acessar_sistema('necessidade-de-compra')) OR (SELECT public.pode_acessar_sistema('financeiro')))
+   ORDER BY CASE p.codigo_connect WHEN 2050001 THEN 1 WHEN 2050010 THEN 2 ELSE 3 END
+$function$
+;

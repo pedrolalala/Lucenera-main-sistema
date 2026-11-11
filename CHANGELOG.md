@@ -36,6 +36,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Pedido da Caroline (VENDA-8508): PDF saía com vencimentos 21/11, 15/12, 15/01 enquanto o Contas a Receber tinha 16/11, 10/12, 10/01. Causa: `generate-report` usava `orcamentos.plano_parcelas` (fixado na aprovação), que não acompanha correções da venda.
 - Correção em `supabase/functions/generate-report/index.ts`: lê `financeiro_titulos`/`financeiro_parcelas` (origem orçamento, título ativo); sem título cai no plano. Sem mudança de banco. Falta publicar em SP (autorização do Filippo) e a Caroline reimprimir.
 
+## 2026-11-11 (SPEC-277 — código interno da peça segue a Connect; APLICADA)
+
+- Migration `20261111_327_spec277_codigo_produto_segue_connect` aplicada em São Paulo: peça 4349 passou de 1547271 para **13798** e P883 de 1547276 para **13799** (nada as referenciava). `produtos.codigo_produto` agora usa `proximo_codigo_produto()` = maior código < 1.000.000 + 1 (próximo: **13800**); trava advisory contra duplicidade. Produtos de teste 1547255/1547260 ficaram como estão.
+- Rollback em `rollback.sql` da mesma pasta. Sem mudança de código nos sistemas.
+
 ## 2026-11-11 (SPEC-276 — Cadastro: mensagem de referência em uso; NO AR)
 
 - Pedido da Débora: peça sem cadastro entra no orçamento com a referência só como identificação; ao cadastrar, a tela mostrava apenas "Em uso". Não há trava única no banco (`produtos.referencia` só tem índice comum); a checagem é da tela (`PecaForm.tsx`).

@@ -1,4 +1,4 @@
-# SPEC-280 — Reajuste de preços de peças (em massa e por peça)
+# SPEC-282 — Reajuste de preços de peças (em massa e por peça)
 
 **Data:** 11/11/2026 · **Status:** RASCUNHO — aguarda respostas do usuário (seção 6). Nada implementado.
 **Origem:** diferença de valor entre orçamento e Connect (peça 11412).

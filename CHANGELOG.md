@@ -36,6 +36,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Reunião 49 (Carol): ORC-0008 de 09/11 (equipe Marina, R$ 490,69) entrou como venda, mas é Outros / BONIFICACAO. Decisão: só a revisão financeira pode trocar o Tipo de Operação.
 - Orçamentos (`BudgetFormPage.tsx`): `podeTrocarOperacao` libera Venda/Outros/SAC e o campo Tipo para quem tem revisão financeira, com o orçamento em Aprovação Financeira. Devolução, empréstimo e vínculo Connect seguem travados. Sem mudança de banco; tsc sem erro no arquivo. Falta commit/push no repo do Orçamentos, publicar e a Carol fazer a troca.
 
+## 2026-11-11 (SPEC-282 — histórico de preço da peça; migration 335 NÃO aplicada ainda)
+
+- Migration `20261111_335_spec282_historico_preco_peca` (testada em ROLLBACK): tabela `produto_preco_historico` (valores antes/depois de custo, ST, IPI, frete, despesas, desconto, lucro, BDI, custo total e preços), gatilho em `produtos` que registra quem/quando/origem (edição manual, reajuste em lote, importação/script, SQL direto), leitura só para quem pode ver custo (`pode_ver_custo_produto`). `reajuste_aplicar`/`reajuste_desfazer` passam a marcar a origem. Retroativo: as 153 peças alinhadas à Connect em 11/11. A auditoria geral continua escondendo custo/ST como ***.
+- Cadastro: botão "Histórico de preço" no formulário da peça (só com acesso a custo). Commit local; falta aplicar a 335 e publicar.
+
 ## 2026-11-11 (SPEC-282 Parte A — regras do orçamento editáveis; migration 334 APLICADA, Orçamentos publicado)
 
 - Migration `20261111_334_spec282_orcamento_regras` (testada em ROLLBACK: admin salva e valida, não-admin e anon barrados): tabela `orcamento_regras` (validade_dias=10, aviso_preco_dias=10, aviso_preco_quando_mudou=ligado, status_que_avisam) + funções `orcamento_regra_salvar` e `pode_editar_regras_orcamento` (só admin). Valores iniciais = comportamento de hoje.

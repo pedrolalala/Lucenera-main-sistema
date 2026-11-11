@@ -27,7 +27,12 @@ async function toPDF(data: any[], title: string) {
   const { height } = page.getSize()
   let y = height - 50
 
-  page.drawText(`Relatorio: ${title.toUpperCase()}`, { x: 40, y, size: 16, font })
+  page.drawText(`Relatorio: ${title.toUpperCase()}`, {
+    x: 40,
+    y,
+    size: 16,
+    font,
+  })
   y -= 30
 
   if (!data || !data.length) {
@@ -36,7 +41,13 @@ async function toPDF(data: any[], title: string) {
   }
 
   const headers = Object.keys(data[0])
-  page.drawText(headers.join(' | '), { x: 40, y, size: 9, font, color: rgb(0.3, 0.3, 0.3) })
+  page.drawText(headers.join(' | '), {
+    x: 40,
+    y,
+    size: 9,
+    font,
+    color: rgb(0.3, 0.3, 0.3),
+  })
   y -= 20
 
   for (const row of data) {
@@ -54,8 +65,65 @@ async function toPDF(data: any[], title: string) {
   return await pdfDoc.save()
 }
 
+// SPEC-152 (item 7): tabela de parcelas do orçamento (número, vencimento
+// absoluto, valor) em vez da string "condicoes_pagamento" (contagem de
+// dias, ex. "14/44/75" -- Vinícius reagiu com "14 dias de quando?" na
+// reunião de 16/09). Reaproveita orcamentos.plano_parcelas (SPEC-152 item
+// 5/7) quando presente; senão cai no cálculo legado de divisão igual a
+// partir de prazo_pagamento_dias -- mesma lógica de
+// src/lib/budget-financial-summary.ts (calcularResumoFinanceiro), mas
+// duplicada aqui porque esta Edge Function roda isolada (Deno, sem acesso
+// ao bundle do frontend) e usa data_inicio_pagamento (data negociada com o
+// cliente) como base, não "hoje" (que só faz sentido pra pré-visualização
+// antes da aprovação, não pro documento impresso).
+function calcularParcelasPdf(
+  budget: any,
+  valorTotalFinal: number,
+): { numero: number; valor: number; vencimento: Date }[] {
+  const dataBase = budget.data_inicio_pagamento
+    ? new Date(`${budget.data_inicio_pagamento}T00:00:00`)
+    : budget.created_at
+      ? new Date(budget.created_at)
+      : new Date()
+
+  const plano = Array.isArray(budget.plano_parcelas)
+    ? budget.plano_parcelas
+    : null
+  if (plano && plano.length > 0) {
+    return [...plano]
+      .sort((a: any, b: any) => (a?.numero ?? 0) - (b?.numero ?? 0))
+      .map((p: any) => {
+        const vencimento = new Date(dataBase)
+        vencimento.setDate(vencimento.getDate() + (Number(p?.dias_offset) || 0))
+        return {
+          numero: Number(p?.numero) || 0,
+          valor: Number(p?.valor) || 0,
+          vencimento,
+        }
+      })
+  }
+
+  const prazos: number[] = Array.isArray(budget.prazo_pagamento_dias)
+    ? budget.prazo_pagamento_dias
+    : []
+  const qtd = Math.max(1, prazos.length)
+  const base = Math.round((valorTotalFinal / qtd) * 100) / 100
+  let acumulado = 0
+  return Array.from({ length: qtd }, (_, i) => {
+    const isUltima = i === qtd - 1
+    const valor = isUltima
+      ? Math.round((valorTotalFinal - acumulado) * 100) / 100
+      : base
+    if (!isUltima) acumulado += valor
+    const vencimento = new Date(dataBase)
+    vencimento.setDate(vencimento.getDate() + (prazos[i] ?? 0))
+    return { numero: i + 1, valor, vencimento }
+  })
+}
+
 Deno.serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  if (req.method === 'OPTIONS')
+    return new Response('ok', { headers: corsHeaders })
 
   try {
     const { reportType, format, filters } = await req.json()
@@ -69,18 +137,25 @@ Deno.serve(async (req: Request) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    const supabaseAdminKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader } },
     })
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseAdminKey)
 
     const {
       data: { user },
     } = await supabase.auth.getUser()
     if (!user) {
-      return new Response(JSON.stringify({ error: 'Usuário não autenticado.' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      return new Response(
+        JSON.stringify({ error: 'Usuário não autenticado.' }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      )
     }
 
     const { data: profile } = await supabase
@@ -89,10 +164,15 @@ Deno.serve(async (req: Request) => {
       .eq('id', user.id)
       .single()
 
-    if (reportType !== 'orcamento' && profile?.role !== 'admin' && profile?.role !== 'gerente') {
+    if (
+      reportType !== 'orcamento' &&
+      profile?.role !== 'admin' &&
+      profile?.role !== 'gerente'
+    ) {
       return new Response(
         JSON.stringify({
-          error: 'Acesso negado. Apenas administradores e gerentes podem gerar relatórios.',
+          error:
+            'Acesso negado. Apenas administradores e gerentes podem gerar relatórios.',
         }),
         {
           status: 403,
@@ -102,35 +182,91 @@ Deno.serve(async (req: Request) => {
     }
 
     if (reportType === 'orcamento') {
-      const { id, logoBase64 } = filters || {}
+      // SPEC-109: "cliente" (padrão, sem referência) ou "interno" (mostra
+      // Referência além do Código real — útil quando o item não tem
+      // cadastro e o código sai "0").
+      const { id, logoBase64, modelo = 'cliente' } = filters || {}
 
       if (!id) {
-        return new Response(JSON.stringify({ error: 'ID do orçamento não fornecido.' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
+        return new Response(
+          JSON.stringify({ error: 'ID do orçamento não fornecido.' }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          },
+        )
       }
 
-      const { data: budget, error: budgetError } = await supabase
+      let budget: any = null
+
+      const { data: orcData } = await supabaseAdmin
         .from('orcamentos')
-        .select(`
+        .select(
+          `
           *,
-          cliente:contatos!orcamentos_cliente_id_fkey(nome, email, telefone, cpf_cnpj),
+          cliente:contatos!orcamentos_cliente_id_fkey(nome, razao_social, email, telefone, cpf_cnpj, endereco, cep, cidade, estado),
           empresa:empresas!orcamentos_empresa_id_fkey(nome, razao_social, logradouro, numero, bairro, cidade, estado, cep, cnpj),
           vendedor:funcionarios!orcamentos_vendedor_id_fkey(nome),
+          digitador:usuarios!orcamentos_digitado_por_fkey(nome),
+          arquiteto:contatos!orcamentos_arquiteto_id_fkey(nome),
+          arquitetos:orcamento_arquitetos(percentual, arquiteto:contatos!orcamento_arquitetos_arquiteto_id_fkey(nome)),
+          projeto:projetos!orcamentos_projeto_id_fkey(codigo),
           itens:orcamento_itens(
             id, produto_id, quantidade, preco_unitario, desconto, descricao, custom_id,
             produto:produtos(nome, referencia, sku, codigo_produto)
           )
-        `)
+        `,
+        )
         .eq('id', id)
-        .single()
+        .maybeSingle()
 
-      if (budgetError || !budget) {
-        return new Response(JSON.stringify({ error: 'Orçamento não encontrado.' }), {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
+      if (orcData) {
+        budget = orcData
+      } else {
+        const { data: ubiquaData } = await supabaseAdmin
+          .from('orcamentos_revenda_ubiqua')
+          .select(
+            `
+            *,
+            cliente:informacoes_cliente_ubiqua!orcamentos_revenda_ubiqua_cliente_id_fkey(nome, email, telefone, cpf_cnpj),
+            itens:itens_orcamento_ubiqua(
+              id, produto_id, quantidade, valor_unitario, valor_total, desconto_item, referencia_snapshot, descricao_snapshot, observacao_item, ordem
+            )
+          `,
+          )
+          .eq('id', id)
+          .maybeSingle()
+
+        if (ubiquaData) {
+          budget = ubiquaData
+          const { data: empUbiqua } = await supabaseAdmin
+            .from('empresa_ubiqua')
+            .select('*')
+            .limit(1)
+            .maybeSingle()
+          budget.empresa = empUbiqua || {}
+          budget.numero = ubiquaData.numero_orcamento
+          budget.desconto_global = ubiquaData.valor_desconto
+          budget.itens = (ubiquaData.itens || []).map((i: any) => ({
+            id: i.id,
+            produto_id: i.produto_id,
+            quantidade: i.quantidade,
+            preco_unitario: i.valor_unitario,
+            desconto: i.desconto_item,
+            descricao: i.descricao_snapshot,
+            custom_id: i.referencia_snapshot,
+          }))
+        }
+      }
+
+      if (!budget) {
+        return new Response(
+          JSON.stringify({ error: 'Orçamento não encontrado.' }),
+          {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          },
+        )
       }
 
       const pdfDoc = await PDFDocument.create()
@@ -138,31 +274,41 @@ Deno.serve(async (req: Request) => {
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
       let page = pdfDoc.addPage()
       const { width, height } = page.getSize()
-      let y = height - 50
 
-      let logoBottomY = height - 40
+      let logoBottomY = height - 15
       let headerTextX = 40
-      const maxLogoWidth = 140
-      const maxLogoHeight = 80
+      const maxLogoWidth = 110
+      const maxLogoHeight = 50
+      let textY = height - 15
 
       if (logoBase64) {
         try {
-          const base64Data = logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, '')
-          const imageBytes = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0))
+          const base64Data = logoBase64.replace(
+            /^data:image\/(png|jpeg|jpg);base64,/,
+            '',
+          )
+          const imageBytes = Uint8Array.from(atob(base64Data), (c) =>
+            c.charCodeAt(0),
+          )
           let image
-          if (logoBase64.includes('image/jpeg') || logoBase64.includes('image/jpg')) {
+          if (
+            logoBase64.includes('image/jpeg') ||
+            logoBase64.includes('image/jpg')
+          ) {
             image = await pdfDoc.embedJpg(imageBytes)
           } else {
             image = await pdfDoc.embedPng(imageBytes)
           }
 
-          const scale = Math.min(maxLogoWidth / image.width, maxLogoHeight / image.height)
+          const scale = Math.min(
+            maxLogoWidth / image.width,
+            maxLogoHeight / image.height,
+          )
           const imgWidth = image.width * scale
           const imgHeight = image.height * scale
 
-          const containerX = 40
-          const logoX = containerX + (maxLogoWidth - imgWidth) / 2
-          const logoY = height - 40 - imgHeight
+          const logoX = 40
+          const logoY = height - 15 - imgHeight // tighter top margin
 
           page.drawImage(image, {
             x: logoX,
@@ -171,73 +317,214 @@ Deno.serve(async (req: Request) => {
             height: imgHeight,
           })
 
-          headerTextX = containerX + maxLogoWidth + 20
-          logoBottomY = height - 40
+          logoBottomY = logoY
+          // `drawText` posiciona a BASE do texto em `y` — a letra visível
+          // sobe a partir daí pelo ascent da fonte (~7-8pt numa fonte
+          // bold de 10pt). Um espaçamento de só 5pt entre a borda
+          // inferior do logo e essa base garantia sobreposição visual
+          // (a letra ficava mais alta que a borda do logo); 14pt deixa
+          // uma folga real.
+          textY = logoBottomY - 14
         } catch (e) {
           console.error('Error embedding logo:', e)
         }
       }
 
       const empresa = budget.empresa || {}
-      const empresaNomeLogo = empresa.nome || 'Luce Nera'
-      const empresaNomeAssinatura = empresa.nome || 'Lucenera'
+      const empresaNomeLogo =
+        empresa.nome_fantasia || empresa.nome || 'Luce Nera'
+      const empresaNomeAssinatura =
+        empresa.nome_fantasia || empresa.nome || 'Lucenera'
       const empresaRazao = empresa.razao_social || 'Manoella Zauith Leite Lopes'
       const empresaEnd = `${empresa.cep || '14.025-270'} ${empresa.logradouro || 'Rua Ayrton Roxo'} ${empresa.numero || '867'}`
       const empresaCidade = `${empresa.bairro || 'Alto Da Boa Vista'}, ${empresa.cidade || 'Ribeirao Preto'}/${empresa.estado || 'SP'}`
 
-      let textY = logoBottomY - 14
-      page.drawText(empresaNomeLogo, { x: headerTextX, y: textY, size: 14, font: boldFont })
-      page.drawText(empresaRazao, { x: headerTextX, y: textY - 15, size: 9, font })
-      page.drawText(empresaEnd, { x: headerTextX, y: textY - 27, size: 9, font })
-      page.drawText(empresaCidade, { x: headerTextX, y: textY - 39, size: 9, font })
-      page.drawText('(16) 3442 - 3545', { x: headerTextX, y: textY - 51, size: 9, font })
+      page.drawText(empresaNomeLogo, {
+        x: headerTextX,
+        y: textY,
+        size: 10,
+        font: boldFont,
+      })
+      page.drawText(empresaRazao, {
+        x: headerTextX,
+        y: textY - 10,
+        size: 8,
+        font,
+      })
+      page.drawText(empresaEnd, {
+        x: headerTextX,
+        y: textY - 20,
+        size: 8,
+        font,
+      })
+      page.drawText(empresaCidade, {
+        x: headerTextX,
+        y: textY - 30,
+        size: 8,
+        font,
+      })
+      page.drawText('(16) 3442 - 3545', {
+        x: headerTextX,
+        y: textY - 40,
+        size: 8,
+        font,
+      })
 
-      page.drawText('1 de 1', { x: width - 60, y: textY, size: 9, font: boldFont })
+      const companyTextBottomY = textY - 40
+
+      // Right Side - Approval Section
+      // Moved approval section up to align with the top of the page rather than below the logo
+      // This prevents overlap and uses the white space on the top right
+      const rightSectionTopY = height - 15
+      page.drawText('1 de 1', {
+        x: width - 60,
+        y: rightSectionTopY,
+        size: 9,
+        font: boldFont,
+      })
+
+      const approvalY = rightSectionTopY - 25 // fixed position relative to page top
       page.drawLine({
-        start: { x: width - 200, y: textY - 20 },
-        end: { x: width - 40, y: textY - 20 },
+        start: { x: width - 200, y: approvalY },
+        end: { x: width - 40, y: approvalY },
         thickness: 1,
       })
-      page.drawText('Aprovação do Cliente', { x: width - 195, y: textY - 15, size: 8, font })
+      page.drawText('Aprovação do Cliente', {
+        x: width - 195,
+        y: approvalY + 3,
+        size: 8,
+        font,
+      })
 
+      const signatureY = approvalY - 25
       page.drawLine({
-        start: { x: width - 200, y: textY - 50 },
-        end: { x: width - 40, y: textY - 50 },
+        start: { x: width - 200, y: signatureY },
+        end: { x: width - 40, y: signatureY },
         thickness: 1,
       })
-      page.drawText(empresaNomeAssinatura, { x: width - 195, y: textY - 45, size: 8, font })
+      page.drawText(empresaNomeAssinatura, {
+        x: width - 195,
+        y: signatureY + 3,
+        size: 8,
+        font,
+      })
 
+      const dateY = signatureY - 10
       page.drawText(
         `Data Impressão ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`,
-        { x: width - 150, y: textY - 62, size: 6, font, color: rgb(0.4, 0.4, 0.4) },
+        { x: width - 150, y: dateY, size: 6, font, color: rgb(0.4, 0.4, 0.4) },
       )
 
-      y = textY - maxLogoHeight - 10
-      page.drawLine({ start: { x: 40, y }, end: { x: width - 40, y }, thickness: 2 })
+      // SPEC-109: "Data de Emissão" (criação do orçamento) além da "Data
+      // Impressão" (momento de gerar este PDF) — sem hora, só a data.
+      const emissaoY = dateY - 9
+      const dataEmissaoStr = budget.created_at
+        ? new Date(budget.created_at).toLocaleDateString('pt-BR', {
+            timeZone: 'America/Sao_Paulo',
+          })
+        : '-'
+      page.drawText(`Data Emissão ${dataEmissaoStr}`, {
+        x: width - 150,
+        y: emissaoY,
+        size: 6,
+        font,
+        color: rgb(0.4, 0.4, 0.4),
+      })
+
+      // Calculate Lowest Y coordinate between Left (Company Info) and Right (Approval Section)
+      const lowestHeaderY = Math.min(companyTextBottomY, emissaoY)
+
+      // Add safe vertical margin below the lowest header element
+      let y = lowestHeaderY - 15
+      page.drawLine({
+        start: { x: 40, y },
+        end: { x: width - 40, y },
+        thickness: 2,
+      })
 
       y -= 25
       page.drawText('Orçamento para', { x: 40, y, size: 11, font })
 
-      const projName = budget.cliente?.nome || 'CLIENTE NÃO INFORMADO'
-      page.drawText(projName.toUpperCase(), { x: 40, y: y - 18, size: 13, font: boldFont })
-
-      page.drawText(`CPF/CNPJ: ${budget.cliente?.cpf_cnpj || '-'}`, {
+      const clienteNomeBase = budget.cliente?.nome || 'CLIENTE NÃO INFORMADO'
+      const codigoProjeto = budget.projeto?.codigo
+      // Alguns clientes legados já têm o código do projeto embutido no
+      // próprio nome (import antigo do Connect) — evita duplicar.
+      const jaTemCodigo =
+        codigoProjeto && clienteNomeBase.trim().startsWith(codigoProjeto)
+      const projName =
+        codigoProjeto && !jaTemCodigo
+          ? `${codigoProjeto} ${clienteNomeBase}`
+          : clienteNomeBase
+      page.drawText(projName.toUpperCase(), {
         x: 40,
-        y: y - 35,
-        size: 9,
-        font,
-      })
-      page.drawText(`TEL: ${budget.cliente?.telefone || '-'}`, { x: 40, y: y - 47, size: 9, font })
-
-      page.drawText('Orçamento', { x: width - 120, y, size: 11, font })
-      page.drawText(`${budget.numero || budget.id.split('-')[0].toUpperCase()}`, {
-        x: width - 120,
         y: y - 18,
         size: 13,
         font: boldFont,
       })
 
-      y -= 75
+      // SPEC-084: bloco de endereço do cliente, no mesmo formato do fluxo
+      // Connect — razão social (quando diferente do nome), endereço, CEP +
+      // cidade/UF e telefone, todos vindos do cadastro do cliente
+      // (contatos). Cada linha só é desenhada se o dado existir, então o
+      // bloco encolhe/estica conforme o cadastro do cliente.
+      const clienteRazao = budget.cliente?.razao_social
+      let clienteLineY = y - 33
+      if (clienteRazao && clienteRazao !== clienteNomeBase) {
+        page.drawText(clienteRazao, { x: 40, y: clienteLineY, size: 9, font })
+        clienteLineY -= 12
+      }
+      if (budget.cliente?.endereco) {
+        page.drawText(budget.cliente.endereco, {
+          x: 40,
+          y: clienteLineY,
+          size: 9,
+          font,
+        })
+        clienteLineY -= 12
+      }
+      if (budget.cliente?.cep || budget.cliente?.cidade) {
+        const cepLinha = [
+          budget.cliente?.cep ? `CEP: ${budget.cliente.cep}` : null,
+          budget.cliente?.cidade
+            ? `${budget.cliente.cidade}${budget.cliente?.estado ? `/${budget.cliente.estado}` : ''}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(' - ')
+        page.drawText(cepLinha, { x: 40, y: clienteLineY, size: 9, font })
+        clienteLineY -= 12
+      }
+      page.drawText(`TEL: ${budget.cliente?.telefone || '-'}`, {
+        x: 40,
+        y: clienteLineY,
+        size: 9,
+        font,
+      })
+      clienteLineY -= 12
+
+      // SPEC-164: orçamento já aprovado (virou venda, tem numero_venda da
+      // SPEC-136) sai com o número da VENDA no canto superior direito, igual
+      // ao Connect -- "ele já foi aprovado". Orçamento ainda não aprovado (e
+      // revenda Ubiqua, que não tem numero_venda) continua com o número do
+      // orçamento.
+      const numeroVenda: string | null = budget.numero_venda || null
+      page.drawText(numeroVenda ? 'Venda' : 'Orçamento', {
+        x: width - 120,
+        y,
+        size: 11,
+        font,
+      })
+      page.drawText(
+        `${numeroVenda || budget.numero || budget.id.split('-')[0].toUpperCase()}`,
+        {
+          x: width - 120,
+          y: y - 18,
+          size: 13,
+          font: boldFont,
+        },
+      )
+
+      y = clienteLineY - 15
 
       page.drawText('Vendedor', { x: 40, y, size: 9, font })
 
@@ -248,30 +535,110 @@ Deno.serve(async (req: Request) => {
 
       page.drawText(vendedorNome, { x: 40, y: y - 12, size: 9, font: boldFont })
 
+      // SPEC-109: quando o orçamento tem 2+ arquitetos cadastrados
+      // (orcamento_arquitetos, SPEC-077), mostra todos, separados por " / ";
+      // senão cai no arquiteto único legado (orcamentos.arquiteto_id).
+      const arquitetosMultiplos = (budget.arquitetos || [])
+        .filter((a: any) => a.arquiteto?.nome)
+        .map((a: any) => a.arquiteto.nome)
+      const arquitetoTextoCompleto =
+        arquitetosMultiplos.length > 0
+          ? arquitetosMultiplos.join(' / ')
+          : budget.arquiteto?.nome || '-'
+      // SPEC-158 (P2.3): achado do revisor -- sem truncar, 2+ arquitetos de
+      // nome médio/longo (join " / ") estouram a faixa reservada (x=220 até
+      // x=400, onde agora começa a coluna "Digitador") e sobrepõem
+      // visualmente o texto. Mesmo padrão de corte já usado na descrição do
+      // item (descMaxLen/substring), aqui com "..." pra indicar corte.
+      const arquitetoTexto =
+        arquitetoTextoCompleto.length > 30
+          ? `${arquitetoTextoCompleto.substring(0, 30)}...`
+          : arquitetoTextoCompleto
+
+      page.drawText('Arquiteto Externo', { x: 220, y, size: 9, font })
+      page.drawText(arquitetoTexto, {
+        x: 220,
+        y: y - 12,
+        size: 9,
+        font: boldFont,
+      })
+
+      // SPEC-158 (P2.3): "digitador" -- quem de fato criou o orçamento,
+      // capturado do login na criação (distinto do vendedor, que é sempre
+      // uma das 5 pessoas fixas da SPEC-140). Pedido do usuário: aparecer
+      // no layout do orçamento enviado pro cliente aprovar.
+      if (budget.digitador?.nome) {
+        page.drawText('Digitador', { x: 400, y, size: 9, font })
+        page.drawText(budget.digitador.nome, {
+          x: 400,
+          y: y - 12,
+          size: 9,
+          font: boldFont,
+        })
+      }
+
       y -= 30
 
-      const headersList = ['Código', 'Descrição', 'Qtd.', 'Vl. Unit.', 'Subtotal']
-      const xOffsets = [40, 90, 390, 430, 490]
+      // SPEC-109: "Código" passa a ser o código real do produto
+      // (produtos.codigo_produto), nunca mais o L ou a referência — "L"
+      // (custom_id) vira coluna própria, sempre visível (é o identificador
+      // que o cliente/instalador usa em campo). Modelo "interno" acrescenta
+      // Referência — útil quando o item não tem cadastro (código sai "0",
+      // a referência ajuda a achar a peça pra cadastrar depois).
+      const isInterno = modelo === 'interno'
+      const headersList = isInterno
+        ? [
+            'L',
+            'Código',
+            'Referência',
+            'Descrição',
+            'Qtd.',
+            'Vl. Unit.',
+            'Subtotal',
+          ]
+        : ['L', 'Código', 'Descrição', 'Qtd.', 'Vl. Unit.', 'Subtotal']
+      const xOffsets = isInterno
+        ? [40, 65, 100, 195, 385, 420, 470]
+        : [40, 70, 115, 385, 420, 470]
+      const descMaxLen = isInterno ? 35 : 45
 
       headersList.forEach((h, i) => {
         page.drawText(h, { x: xOffsets[i], y, size: 9, font: boldFont })
       })
       y -= 10
-      page.drawLine({ start: { x: 40, y }, end: { x: width - 40, y }, thickness: 1 })
+      page.drawLine({
+        start: { x: 40, y },
+        end: { x: width - 40, y },
+        thickness: 1,
+      })
       y -= 15
 
       let subtotal = 0
 
-      // Devolução gera crédito ao cliente, não cobrança — orcamentos.valor_total
-      // é sempre salvo positivo no banco (a RPC de aprovação exige > 0), então o
-      // sinal negativo é só de exibição aqui no PDF (mesmo critério aplicado no
-      // sistema, ver getDisplayValorTotal em src/lib/budget-status.ts).
-      const isDevolucao = budget.natureza_operacao === 'devolucao'
-      const signed = (v: number) => (isDevolucao ? -Math.abs(v) : v)
-
+      // SPEC-109: ordena por L (custom_id) — extrai a parte numérica pra
+      // ordenar "L2" antes de "L10" (ordem alfabética pura erraria isso).
+      // Itens sem L (avulsos sem circuito) vão pro final, na ordem que já
+      // vieram do banco.
+      function extractCircuitNumber(
+        customId: string | null | undefined,
+      ): number {
+        if (!customId) return Number.MAX_SAFE_INTEGER
+        const match = String(customId).match(/\d+/)
+        return match ? parseInt(match[0], 10) : Number.MAX_SAFE_INTEGER
+      }
       const items = (budget.itens || []).sort((a: any, b: any) => {
+        const na = extractCircuitNumber(a.custom_id)
+        const nb = extractCircuitNumber(b.custom_id)
+        if (na !== nb) return na - nb
         return a.id > b.id ? 1 : -1
       })
+
+      // Devolução já é tratada como negativo/crédito no banco (ver
+      // budget-status.ts no frontend) — o PDF precisa refletir o mesmo
+      // sinal na tabela de itens e nos totais, sem alterar o valor
+      // armazenado (valor_total continua positivo, só a exibição muda).
+      const isDevolucao = budget.natureza_operacao === 'devolucao'
+      const signed = (v: number) => (isDevolucao ? -Math.abs(v) : v)
 
       items.forEach((item: any) => {
         if (y < 60) {
@@ -279,11 +646,15 @@ Deno.serve(async (req: Request) => {
           y = height - 50
         }
 
-        const cod = item.custom_id || item.produto?.referencia || '-'
-        let desc = String(item.descricao || item.produto?.nome || 'Produto sem nome').substring(
-          0,
-          55,
-        )
+        const lFixo = item.custom_id || '-'
+        const codReal =
+          item.produto?.codigo_produto != null
+            ? String(item.produto.codigo_produto)
+            : '0'
+        const referencia = item.produto?.referencia || '-'
+        let desc = String(
+          item.descricao || item.produto?.nome || 'Produto sem nome',
+        ).substring(0, descMaxLen)
 
         const qtd = String(item.quantidade || 1)
         const preco = Number(item.preco_unitario || 0)
@@ -293,10 +664,6 @@ Deno.serve(async (req: Request) => {
 
         subtotal += finalVal
 
-        page.drawText(cod, { x: xOffsets[0], y, size: 8, font: boldFont })
-        page.drawText(desc, { x: xOffsets[1], y, size: 8, font })
-        page.drawText(qtd, { x: xOffsets[2], y, size: 8, font })
-
         const fmtPreco = new Intl.NumberFormat('pt-BR', {
           style: 'currency',
           currency: 'BRL',
@@ -305,94 +672,52 @@ Deno.serve(async (req: Request) => {
           style: 'currency',
           currency: 'BRL',
         }).format(signed(finalVal))
-        page.drawText(fmtPreco, { x: xOffsets[3], y, size: 8, font })
-        page.drawText(fmtFinalVal, { x: xOffsets[4], y, size: 8, font })
+
+        const cols = isInterno
+          ? [lFixo, codReal, referencia, desc, qtd, fmtPreco, fmtFinalVal]
+          : [lFixo, codReal, desc, qtd, fmtPreco, fmtFinalVal]
+        cols.forEach((val, i) => {
+          page.drawText(val, {
+            x: xOffsets[i],
+            y,
+            size: 8,
+            font: i <= 1 ? boldFont : font,
+          })
+        })
 
         y -= 15
       })
 
       y -= 5
 
-      // SPEC-118: observações do orçamento (ex. instruções de instalação
-      // como "L5 e L6 fixado na laje") -- o campo já vinha do banco
-      // (select '*' acima) mas nunca era desenhado no PDF, então
-      // informação crítica pra produção se perdia entre a venda e quem
-      // fabrica. Bloco com fundo destacado pra "saltar aos olhos", como
-      // pedido na reunião 21/08 -- não confundir com o bloco fixo
-      // "OBSERVAÇÕES: POLÍTICA DE TROCA / DEVOLUÇÃO" mais abaixo, que é
-      // texto padrão do orçamento, não o campo livre do vendedor.
-      if (budget.observacoes && String(budget.observacoes).trim()) {
-        const obsText = String(budget.observacoes).trim()
-        const obsFontSize = 9
-        const obsMaxWidth = width - 100
+      // SPEC-078 (Bug 4): mesma ordem/fórmula do frontend e da RPC de
+      // aprovação — subtotal -> sinal -> desconto. Desconto pode ser fixo
+      // (R$) ou percentual (desconto_tipo); quando percentual, incide sobre
+      // o subtotal já com o sinal deduzido, nunca sobre o subtotal cru.
+      const valorSinalPdf = Number(budget.valor_sinal || 0)
+      const valorAposSinalPdf = Math.max(0, subtotal - valorSinalPdf)
+      const globalDescRaw = Number(budget.desconto_global || 0)
+      const globalDesc =
+        budget.desconto_tipo === 'valor'
+          ? Math.min(Math.max(globalDescRaw, 0), valorAposSinalPdf)
+          : valorAposSinalPdf * (Math.min(globalDescRaw, 100) / 100)
+      const finalTotal = Number(
+        budget.valor_total ?? valorAposSinalPdf - globalDesc,
+      )
 
-        const words = obsText.split(/\s+/)
-        const wrappedLines: string[] = []
-        let currentLine = ''
-        for (const word of words) {
-          const testLine = currentLine ? `${currentLine} ${word}` : word
-          if (font.widthOfTextAtSize(testLine, obsFontSize) > obsMaxWidth && currentLine) {
-            wrappedLines.push(currentLine)
-            currentLine = word
-          } else {
-            currentLine = testLine
-          }
-        }
-        if (currentLine) wrappedLines.push(currentLine)
-
-        const boxHeight = 22 + wrappedLines.length * 12
-
-        if (y - boxHeight < 40) {
-          page = pdfDoc.addPage()
-          y = height - 50
-        }
-
-        page.drawRectangle({
-          x: 40,
-          y: y - boxHeight,
-          width: width - 80,
-          height: boxHeight,
-          color: rgb(1, 0.95, 0.8),
-          borderColor: rgb(0.9, 0.55, 0),
-          borderWidth: 1.5,
-        })
-
-        page.drawText('ATENÇÃO - OBSERVAÇÕES DO PEDIDO:', {
-          x: 50,
-          y: y - 15,
-          size: obsFontSize,
-          font: boldFont,
-          color: rgb(0.6, 0.35, 0),
-        })
-
-        let obsY = y - 29
-        wrappedLines.forEach((line) => {
-          page.drawText(line, {
-            x: 50,
-            y: obsY,
-            size: obsFontSize,
-            font,
-            color: rgb(0.2, 0.2, 0.2),
-          })
-          obsY -= 12
-        })
-
-        y -= boxHeight + 15
-      }
-
-      const globalDesc = Number(budget.desconto_global || 0)
-      const finalTotal = Number(budget.valor_total || subtotal - globalDesc)
-
-      if (y < 200) {
+      if (y < 220) {
         page = pdfDoc.addPage()
         y = height - 50
       }
 
+      const hasSinalLine = valorSinalPdf > 0
+      const boxHeight = hasSinalLine ? 85 : 70
+
       page.drawRectangle({
         x: width - 270,
-        y: y - 60,
+        y: y - boxHeight + 10,
         width: 230,
-        height: 70,
+        height: boxHeight,
         color: rgb(0.95, 0.95, 0.95),
       })
 
@@ -400,6 +725,10 @@ Deno.serve(async (req: Request) => {
         style: 'currency',
         currency: 'BRL',
       }).format(signed(subtotal))
+      const fmtSinal = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(valorSinalPdf)
       const fmtGlobalDesc = new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
@@ -410,42 +739,93 @@ Deno.serve(async (req: Request) => {
       }).format(signed(finalTotal))
 
       const rightPadX = width - 56
+      let rowY = y - 15
 
-      page.drawText(`SubTotal:`, { x: width - 250, y: y - 15, size: 10, font })
+      page.drawText(`SubTotal:`, { x: width - 250, y: rowY, size: 10, font })
       page.drawText(fmtSubtotal, {
         x: rightPadX - font.widthOfTextAtSize(fmtSubtotal, 10),
-        y: y - 15,
+        y: rowY,
         size: 10,
         font,
       })
+      rowY -= 15
 
-      page.drawText(`Desconto:`, { x: width - 250, y: y - 30, size: 10, font })
+      if (hasSinalLine) {
+        page.drawText(`Sinal:`, { x: width - 250, y: rowY, size: 10, font })
+        page.drawText(fmtSinal, {
+          x: rightPadX - font.widthOfTextAtSize(fmtSinal, 10),
+          y: rowY,
+          size: 10,
+          font,
+        })
+        rowY -= 15
+      }
+
+      page.drawText(`Desconto:`, { x: width - 250, y: rowY, size: 10, font })
       page.drawText(fmtGlobalDesc, {
         x: rightPadX - font.widthOfTextAtSize(fmtGlobalDesc, 10),
-        y: y - 30,
+        y: rowY,
         size: 10,
         font,
       })
+      rowY -= 18
 
-      page.drawText(`Valor Total:`, { x: width - 250, y: y - 48, size: 12, font: boldFont })
+      page.drawText(`Valor Total:`, {
+        x: width - 250,
+        y: rowY,
+        size: 12,
+        font: boldFont,
+      })
       page.drawText(fmtFinalTotal, {
         x: rightPadX - boldFont.widthOfTextAtSize(fmtFinalTotal, 12),
-        y: y - 48,
+        y: rowY,
         size: 12,
         font: boldFont,
       })
 
-      y -= 80
-      page.drawText('Condições de Pagamento:', { x: width - 250, y, size: 8, font })
-
-      page.drawText(budget.condicoes_pagamento || 'A Combinar', {
+      y -= boxHeight + 10
+      page.drawText('Condições de Pagamento:', {
         x: width - 250,
-        y: y - 12,
-        size: 9,
-        font: boldFont,
+        y,
+        size: 8,
+        font,
       })
+      y -= 14
 
-      y -= 40
+      // SPEC-152: tabela de parcelas (número, vencimento absoluto, valor)
+      // em vez da string de dias corridos -- ver calcularParcelasPdf acima.
+      const parcelasPdf = calcularParcelasPdf(budget, finalTotal)
+      if (parcelasPdf.length <= 1) {
+        page.drawText('À vista', {
+          x: width - 250,
+          y,
+          size: 9,
+          font: boldFont,
+        })
+        y -= 15
+      } else {
+        for (const p of parcelasPdf) {
+          if (y < 60) {
+            page = pdfDoc.addPage()
+            y = height - 50
+          }
+          const vencStr = p.vencimento.toLocaleDateString('pt-BR', {
+            timeZone: 'UTC',
+          })
+          const valorStr = new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          }).format(p.valor)
+          page.drawText(`Parcela ${p.numero}: ${vencStr} — ${valorStr}`, {
+            x: width - 250,
+            y,
+            size: 9,
+            font: boldFont,
+          })
+          y -= 13
+        }
+      }
+      y -= 15
       page.drawText('OBSERVAÇÕES: POLÍTICA DE TROCA / DEVOLUÇÃO:', {
         x: 40,
         y,
@@ -456,8 +836,13 @@ Deno.serve(async (req: Request) => {
 
       const validadeDate = budget.validade
         ? new Date(budget.validade)
-        : new Date(new Date(budget.created_at || new Date()).getTime() + 10 * 24 * 60 * 60 * 1000)
-      const validadeStr = validadeDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' })
+        : new Date(
+            new Date(budget.created_at || new Date()).getTime() +
+              10 * 24 * 60 * 60 * 1000,
+          )
+      const validadeStr = validadeDate.toLocaleDateString('pt-BR', {
+        timeZone: 'UTC',
+      })
 
       // Dynamic Policy Filtering: Include only specific items (originally 1, 4, 6) renumbered to 1, 2, 3
       const obsLines = [
@@ -475,13 +860,16 @@ Deno.serve(async (req: Request) => {
         y -= 12
       })
 
-      page.drawText('Connect Systems Enterprise Technologies, Inc. All rights reserved.', {
-        x: width / 2 - 120,
-        y: 20,
-        size: 7,
-        font,
-        color: rgb(0.5, 0.5, 0.5),
-      })
+      page.drawText(
+        'Connect Systems Enterprise Technologies, Inc. All rights reserved.',
+        {
+          x: width / 2 - 120,
+          y: 20,
+          size: 7,
+          font,
+          color: rgb(0.5, 0.5, 0.5),
+        },
+      )
 
       const pdfBytes = await pdfDoc.save()
       return new Response(pdfBytes, {
@@ -495,11 +883,16 @@ Deno.serve(async (req: Request) => {
     if (reportType === 'ferias') {
       query = supabase
         .from('ferias')
-        .select('*, funcionarios_rh!inner(nome, departamento_id, departamentos_rh(nome))')
-      if (filters.deptId) query = query.eq('funcionarios_rh.departamento_id', filters.deptId)
+        .select(
+          '*, funcionarios_rh!inner(nome, departamento_id, departamentos_rh(nome))',
+        )
+      if (filters.deptId)
+        query = query.eq('funcionarios_rh.departamento_id', filters.deptId)
       if (filters.empId) query = query.eq('funcionario_id', filters.empId)
-      if (filters.startDate) query = query.gte('data_inicio', filters.startDate.split('T')[0])
-      if (filters.endDate) query = query.lte('data_fim', filters.endDate.split('T')[0])
+      if (filters.startDate)
+        query = query.gte('data_inicio', filters.startDate.split('T')[0])
+      if (filters.endDate)
+        query = query.lte('data_fim', filters.endDate.split('T')[0])
 
       const { data } = await query
       flatData = (data || []).map((d: any) => ({
@@ -513,8 +906,11 @@ Deno.serve(async (req: Request) => {
     } else if (reportType === 'folha') {
       query = supabase
         .from('folha_pagamento')
-        .select('*, funcionarios_rh!inner(nome, departamento_id, departamentos_rh(nome))')
-      if (filters.deptId) query = query.eq('funcionarios_rh.departamento_id', filters.deptId)
+        .select(
+          '*, funcionarios_rh!inner(nome, departamento_id, departamentos_rh(nome))',
+        )
+      if (filters.deptId)
+        query = query.eq('funcionarios_rh.departamento_id', filters.deptId)
       if (filters.empId) query = query.eq('funcionario_id', filters.empId)
       if (filters.month) query = query.eq('mes', filters.month)
       if (filters.year) query = query.eq('ano', filters.year)
@@ -531,10 +927,14 @@ Deno.serve(async (req: Request) => {
     } else if (reportType === 'avaliacoes') {
       query = supabase
         .from('avaliacoes')
-        .select('*, funcionarios_rh!inner(nome, departamento_id, departamentos_rh(nome))')
-      if (filters.deptId) query = query.eq('funcionarios_rh.departamento_id', filters.deptId)
+        .select(
+          '*, funcionarios_rh!inner(nome, departamento_id, departamentos_rh(nome))',
+        )
+      if (filters.deptId)
+        query = query.eq('funcionarios_rh.departamento_id', filters.deptId)
       if (filters.empId) query = query.eq('funcionario_id', filters.empId)
-      if (filters.startDate) query = query.gte('data_avaliacao', filters.startDate)
+      if (filters.startDate)
+        query = query.gte('data_avaliacao', filters.startDate)
       if (filters.endDate) query = query.lte('data_avaliacao', filters.endDate)
 
       const { data } = await query
@@ -550,12 +950,19 @@ Deno.serve(async (req: Request) => {
     } else if (reportType === 'ponto') {
       query = supabase
         .from('controle_ponto')
-        .select('*, funcionarios_rh!inner(nome, departamento_id, departamentos_rh(nome))')
-      if (filters.deptId) query = query.eq('funcionarios_rh.departamento_id', filters.deptId)
+        .select(
+          '*, funcionarios_rh!inner(nome, departamento_id, departamentos_rh(nome))',
+        )
+      if (filters.deptId)
+        query = query.eq('funcionarios_rh.departamento_id', filters.deptId)
       if (filters.empId) query = query.eq('funcionario_id', filters.empId)
       if (filters.month && filters.year) {
-        const start = new Date(filters.year, filters.month - 1, 1).toISOString().split('T')[0]
-        const end = new Date(filters.year, filters.month, 0).toISOString().split('T')[0]
+        const start = new Date(filters.year, filters.month - 1, 1)
+          .toISOString()
+          .split('T')[0]
+        const end = new Date(filters.year, filters.month, 0)
+          .toISOString()
+          .split('T')[0]
         query = query.gte('data', start).lte('data', end)
       }
 
@@ -573,7 +980,9 @@ Deno.serve(async (req: Request) => {
 
     if (format === 'csv') {
       const csvStr = toCSV(flatData)
-      return new Response(csvStr, { headers: { ...corsHeaders, 'Content-Type': 'text/csv' } })
+      return new Response(csvStr, {
+        headers: { ...corsHeaders, 'Content-Type': 'text/csv' },
+      })
     } else {
       const pdfBytes = await toPDF(flatData, reportType)
       return new Response(pdfBytes, {

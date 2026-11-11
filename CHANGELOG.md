@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-11 (main = no ar: Edge Functions)
+
+- Regra decidida pelo Filippo em 10/11: o que está no ar no Supabase de São Paulo sai da main do central; nunca publicar da pasta de um sistema; registrar aqui cada publicação; conferência "no ar × main" toda quinta-feira (nos primeiros dias, com mais frequência).
+- Conferência de 10/11 (26 funções no ar × main): 3 divergências. (1) `sharepoint-projetos-pull`: no ar a versão SPEC-259, que estava só no PR #1, agora juntado (11/11). (2) `generate-report`: no ar a versão completa do PDF do orçamento (SPEC-109/152/158/164), mas a main tinha a de agosto. (3) `process-budget-pdf` (Ubiqua): no ar a versão antiga (Resend) e na main a versão Gmail SMTP (SPEC-037), pendente de republicar depois de confirmar os secrets `GMAIL_*` em SP.
+- `supabase/functions/generate-report/index.ts` passa a ser a versão que está no ar (cópia arquivada `functions_copias_arquivadas_2026-11-10/generate-report/8b8b528933`, que veio do Catálogo e do Compras). **Nada publicado**: a função no ar não mudou.
+- Atenção: a cópia do Orçamentos (`184e48edf8`) tem a mais o modelo "PDF para o cliente com NCM" (SPEC-241, status pendente), que **nunca foi publicado**. O menu do Orçamentos já oferece essa opção, e hoje ela sai sem a coluna NCM. Trazer a SPEC-241 para a main e publicar é um passo à parte.
+
 ## 2026-11-10 (SPEC-270 — aba "Antecipações" em Contas a Pagar e Contas a Receber; NO AR)
 
 - Pedido: a antecipação precisa de um campo/aba visível nos dois sistemas (o orçamento já tem o sinal). Nova aba **Antecipações** no menu e rota `/antecipacoes` (`retorno-bancario-bradesco-5392a`, commit pushado, sem migration; builds receber e pagar ok).

@@ -8,9 +8,27 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Migration `20261111_328_spec251_transferir_liberado_equipes`: `pode_trocar_reserva()` aceita também o papel `equipe_projetos` (aprovação da transferência usa a mesma função). Sem mudança de tela, nada a publicar.
 - Dry-run em ROLLBACK: 12 pessoas de equipe sem cargo de Projetista passaram de não para sim; Débora e Antônio (estoque) seguem não; `anon` sem execução. Aplicada e conferida em produção. Rollback: `rollback.sql` da pasta.
 
+## 2026-11-11 (SPEC-268 — orçamentos renumerados pela ordem de criação; migration 330 APLICADA em SP)
+
+- Decisão do usuário: orçamento tem número sequencial único para todas as equipes, **na ordem de data e hora de criação** (a Administração, o estoque e a logística tratam como um só). O gerador já é global desde 10/11 (migration 321); faltava resolver os orçamentos antigos que repetem número (ORC-0001 a ORC-0009).
+- Migration `20261111_330_spec268_renumerar_orcamentos_repetidos` (up/rollback): renumera todos os ORC-… pela ordem de criação (39 dos 40 mudam); atualiza por id boletos pendentes, título financeiro, legado do projeto, negociações, separações e histórico de estoque; de/para em `backup.spec268_renumeracao_orcamentos`; índice único `orcamentos_numero_uidx`. Ensaio em ROLLBACK em SP ok (0 duplicados depois, rollback idêntico, produção intacta). VENDA-8508 passaria a ORC-0007. Relatório do que aconteceu com as peças e as parciais em `03-Projeto/Auditoria/Relatorio_Numero_Orcamento_e_Venda_Parcial_2026-11-11.html` (local). **APLICADA** ("vamos renomear tudo"): uma transação com conferências antes do COMMIT; 40 dos 41 números trocados, 0 repetidos, ordem cronológica exata, índice único ativo, de/para em `backup.spec268_renumeracao_orcamentos`. Falta avisar as equipes dos números novos e publicar a Separação Parcial/Logística (SPEC-280). Visibilidade por equipe conferida: já era por `equipe_id`, sem depender do número.
+
+## 2026-11-11 (SPEC-280 — Venda Parcial misturava vendas com o mesmo número de orçamento; código local, NÃO publicado)
+
+- Regra mantida e conferida (11/11): cada equipe vê só as próprias vendas na Venda Parcial, mas transfere peça de qualquer equipe. Falha achada: reservas de outras equipes vinham sem equipe/nº da venda na lista do Transferir. Migration `20261111_331_spec280_reserva_dados_vendas_outras_equipes` (função `reserva_dados_vendas`, só adiciona) **APLICADA em SP** (autorizada) e conferida; `separacaoParcialService.ts` usa a função com fallback. Falta publicar a Separação Parcial.
+
+- Reunião 49 (parte 2): bonificação ORC-0005 (Thairine) junto da garantia ORC-0005 (Marina); itens da VENDA-8508 dentro da VENDA-8506. Causa: o número do orçamento se repete entre equipes (3 × ORC-0005, 2 × ORC-0001..0009) e a tela buscava por texto. Dados íntegros (nenhuma separação mistura orçamentos).
+- Separação Parcial: venda identificada por `orcamentoId` (itens, parciais, previsão, chave da lista); Logística (`pedido-separacao.ts`): busca do orçamento e das parciais irmãs filtra também pelo cliente. Sem mudança de banco; tsc sem erro. Falta commit/push, publicar e a Carol conferir as 17 vendas parciais.
+
+## 2026-11-11 (SPEC-279 — sem financeiro passa pela Revisão Financeira; uso e consumo na Venda Parcial; rascunho, NADA aplicado)
+
+- Pedido (reunião 49): garantia, uso e consumo e bonificação sumiam da Revisão Financeira Pendente (SPEC-255 A aprovava no mesmo segundo da equipe) e o uso e consumo (ORC-0012, Filippo) não aparecia na Venda Parcial. Decisões: esperar o financeiro aprovar; uso e consumo entra na Venda Parcial como registro.
+- Migration `20261111_329_spec279_sem_financeiro_na_revisao` (up/rollback/dry_run) **só rascunho**: `equipe_aprovar_orcamento` sem aprovação automática; `vw_venda_parcial_lista` com parte de baixa direta. Dry-run em ROLLBACK em SP ok (333 → 334 linhas, produção intacta). Orçamentos: diálogo/mensagem de aprovação de Outros/SAC sem parcelas. Os 12 já aprovados ficam como estão.
+- Número: migration 327 `spec277_codigo_produto…` (outra sessão) repete o número da SPEC-277 do PDF da venda — renumerar.
+
 ## 2026-11-11 (SPEC-278 — revisão financeira troca o Tipo de Operação; código local, NÃO publicado)
 
-- Reunião 49 (Carol): ORC-0008 (André e Ana Luisa, R$ 490,69) entrou como venda, mas é Outros / BONIFICACAO. Decisão: só a revisão financeira pode trocar o Tipo de Operação.
+- Reunião 49 (Carol): ORC-0008 de 09/11 (equipe Marina, R$ 490,69) entrou como venda, mas é Outros / BONIFICACAO. Decisão: só a revisão financeira pode trocar o Tipo de Operação.
 - Orçamentos (`BudgetFormPage.tsx`): `podeTrocarOperacao` libera Venda/Outros/SAC e o campo Tipo para quem tem revisão financeira, com o orçamento em Aprovação Financeira. Devolução, empréstimo e vínculo Connect seguem travados. Sem mudança de banco; tsc sem erro no arquivo. Falta commit/push no repo do Orçamentos, publicar e a Carol fazer a troca.
 
 ## 2026-11-11 (SPEC-277 — PDF da venda lê as parcelas do financeiro; só na main, NÃO publicado)

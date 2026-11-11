@@ -58,3 +58,6 @@ backup_out/
 *.xml
 .wrangler/
 /idx.js
+
+# Relatorios de auditoria com nome de cliente (repositorio publico)
+/03-Projeto/Auditoria/Relatorio_*.html

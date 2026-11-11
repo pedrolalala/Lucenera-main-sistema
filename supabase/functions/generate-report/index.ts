@@ -119,6 +119,35 @@ function calcularParcelasPdf(
   })
 }
 
+// SPEC-277: parcelas reais da venda (financeiro_titulos/financeiro_parcelas,
+// origem 'orcamento'). Ignora título cancelado e parcela cancelada,
+// substituída ou renegociada. Devolve null se não houver (orçamento não
+// aprovado) para o PDF usar o plano do orçamento.
+async function buscarParcelasFinanceiro(
+  admin: any,
+  orcamentoId: string | undefined,
+): Promise<{ numero: number; valor: number; vencimento: Date }[] | null> {
+  if (!orcamentoId) return null
+  const { data, error } = await admin
+    .from('financeiro_titulos')
+    .select('parcelas:financeiro_parcelas(numero, vencimento, valor, situacao)')
+    .eq('orcamento_id', orcamentoId)
+    .eq('natureza', 'receber')
+    .eq('origem_tipo', 'orcamento')
+    .is('cancelado_em', null)
+  if (error || !data) return null
+  const ativas = data
+    .flatMap((t: any) => t.parcelas ?? [])
+    .filter((p: any) => !['cancelada', 'substituida', 'renegociada'].includes(p.situacao))
+    .sort((a: any, b: any) => (a.numero ?? 0) - (b.numero ?? 0))
+  if (ativas.length === 0) return null
+  return ativas.map((p: any, i: number) => ({
+    numero: i + 1,
+    valor: Number(p.valor) || 0,
+    vencimento: new Date(`${p.vencimento}T00:00:00Z`),
+  }))
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS')
     return new Response('ok', { headers: corsHeaders })
@@ -814,7 +843,11 @@ Deno.serve(async (req: Request) => {
 
       // SPEC-152: tabela de parcelas (número, vencimento absoluto, valor)
       // em vez da string de dias corridos -- ver calcularParcelasPdf acima.
-      const parcelasPdf = calcularParcelasPdf(budget, finalTotal)
+      // SPEC-277: depois da aprovação a fonte da verdade é o financeiro (a
+      // Carol corrige datas/valores lá e o plano do orçamento não acompanha).
+      // Só orçamento ainda sem título cai no cálculo pelo plano.
+      let parcelasPdf = await buscarParcelasFinanceiro(supabaseAdmin, budget?.id)
+      if (!parcelasPdf) parcelasPdf = calcularParcelasPdf(budget, finalTotal)
       if (parcelasPdf.length <= 1) {
         page.drawText('À vista', {
           x: width - 250,

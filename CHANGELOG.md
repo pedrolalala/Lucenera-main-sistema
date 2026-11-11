@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-11 (SPEC-277 — PDF da venda lê as parcelas do financeiro; só na main, NÃO publicado)
+
+- Pedido da Caroline (VENDA-8508): PDF saía com vencimentos 21/11, 15/12, 15/01 enquanto o Contas a Receber tinha 16/11, 10/12, 10/01. Causa: `generate-report` usava `orcamentos.plano_parcelas` (fixado na aprovação), que não acompanha correções da venda.
+- Correção em `supabase/functions/generate-report/index.ts`: lê `financeiro_titulos`/`financeiro_parcelas` (origem orçamento, título ativo); sem título cai no plano. Sem mudança de banco. Falta publicar em SP (autorização do Filippo) e a Caroline reimprimir.
+
 ## 2026-11-11 (SPEC-276 — Cadastro: mensagem de referência em uso; NO AR)
 
 - Pedido da Débora: peça sem cadastro entra no orçamento com a referência só como identificação; ao cadastrar, a tela mostrava apenas "Em uso". Não há trava única no banco (`produtos.referencia` só tem índice comum); a checagem é da tela (`PecaForm.tsx`).

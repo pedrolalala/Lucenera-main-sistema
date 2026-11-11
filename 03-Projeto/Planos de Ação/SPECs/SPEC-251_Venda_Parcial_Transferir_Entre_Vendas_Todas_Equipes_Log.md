@@ -102,3 +102,9 @@ Hoje o botão Transferir/Trocar fica escondido nas vendas da Connect e só o Tra
 - **Solução:** `connect_item_liberado()` passa a considerar também o movimento `transferencia_entrada` (a peça que chega por transferência é estoque físico do sistema, igual à que chega pela NF). Mesma aproximação da SPEC-244: se o item é liberado, toda a Reserva dele fica liberada.
 - **Dry-run com ROLLBACK:** item da Connect só com Entrega Futura: antes **não** liberado; a Marina transferiu 1 un. (aprovada); depois **liberado**, e **só ele** (nenhum outro item passou a ser liberado); a Marina separou a unidade recebida (aceito pela trava da SPEC-244); outro item da Connect com Reserva com data, que não recebeu nada, **continua recusado** com a mensagem de antes.
 - **Não exige publicar nenhum sistema:** a tela lê `connect_itens_liberados`; depois de aplicar, o campo de quantidade aparece quando a venda é aberta de novo.
+
+### 2026-11-11 (migration 328 — equipes passam a ver o Transferir; APLICADA)
+
+- **Problema:** a SPEC aprovou "todas as equipes", mas só a tela foi aberta; `pode_trocar_reserva()` continuou por cargo e as vendedoras (papel `equipe_projetos` sem cargo Projetista) não viam o botão.
+- **Solução:** `pode_trocar_reserva()` aceita também o papel `equipe_projetos`. Quem é só do estoque (Antônio) ou administrativo sem equipe (Débora) continua sem.
+- **Dry-run com ROLLBACK e aplicação:** Adriana, Beatriz, Giovana, Giovanna, Helena, Isabella, Ketlyn, Murillo, Rafaela, Tricia: não → sim; Débora e Antônio: não → não; `anon` sem execução. Conferido em produção. Não precisa publicar a tela (basta recarregar).

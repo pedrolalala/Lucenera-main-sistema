@@ -2,6 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-11 (SPEC-251 complemento — equipes passam a ver o Transferir na Venda Parcial; migration 328 APLICADA)
+
+- Problema: a tela do Transferir foi aberta a todas as equipes em 06/11, mas `pode_trocar_reserva()` seguia por cargo (admin, gerente, Projetista, exceção individual) e as vendedoras não viam o botão.
+- Migration `20261111_328_spec251_transferir_liberado_equipes`: `pode_trocar_reserva()` aceita também o papel `equipe_projetos` (aprovação da transferência usa a mesma função). Sem mudança de tela, nada a publicar.
+- Dry-run em ROLLBACK: 12 pessoas de equipe sem cargo de Projetista passaram de não para sim; Débora e Antônio (estoque) seguem não; `anon` sem execução. Aplicada e conferida em produção. Rollback: `rollback.sql` da pasta.
+
+## 2026-11-11 (SPEC-278 — revisão financeira troca o Tipo de Operação; código local, NÃO publicado)
+
+- Reunião 49 (Carol): ORC-0008 (André e Ana Luisa, R$ 490,69) entrou como venda, mas é Outros / BONIFICACAO. Decisão: só a revisão financeira pode trocar o Tipo de Operação.
+- Orçamentos (`BudgetFormPage.tsx`): `podeTrocarOperacao` libera Venda/Outros/SAC e o campo Tipo para quem tem revisão financeira, com o orçamento em Aprovação Financeira. Devolução, empréstimo e vínculo Connect seguem travados. Sem mudança de banco; tsc sem erro no arquivo. Falta commit/push no repo do Orçamentos, publicar e a Carol fazer a troca.
+
 ## 2026-11-11 (SPEC-277 — PDF da venda lê as parcelas do financeiro; só na main, NÃO publicado)
 
 - Pedido da Caroline (VENDA-8508): PDF saía com vencimentos 21/11, 15/12, 15/01 enquanto o Contas a Receber tinha 16/11, 10/12, 10/01. Causa: `generate-report` usava `orcamentos.plano_parcelas` (fixado na aprovação), que não acompanha correções da venda.

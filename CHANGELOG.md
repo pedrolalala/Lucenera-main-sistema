@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-11 (SPEC-276 — Cadastro: mensagem de referência em uso; NO AR)
+
+- Pedido da Débora: peça sem cadastro entra no orçamento com a referência só como identificação; ao cadastrar, a tela mostrava apenas "Em uso". Não há trava única no banco (`produtos.referencia` só tem índice comum); a checagem é da tela (`PecaForm.tsx`).
+- Caso P883: já existia a peça 1547276 (criada 11/11 13:39). A mensagem agora diz qual peça usa a referência (`findPecaPorReferencia` em `services/produtos.ts`). Cadastro publicado (wrangler, `cadastro-lucenera`), commit `fa7fe97` local, sem push.
+- Pendente: causa exata confirmada com a Débora; vínculo automático referência do orçamento → peça cadastrada (não existe hoje), precisa de SPEC.
+
 ## 2026-11-11 (SPEC-241 — PDF do orçamento para o cliente com NCM; NO AR)
 
 - Edge Function `generate-report` **publicada em São Paulo (versão 5)** a partir da main (PR #3), com autorização do Filippo. Acrescenta o modelo `cliente_ncm`: coluna NCM depois de "Código", NCM formatado `9405.19.90`, aviso "NCM conforme cadastro do produto…". Os modelos "cliente" e "interno" não mudaram. O Orçamentos já estava no ar com a 3ª opção no menu da impressora; até hoje ela saía sem NCM.

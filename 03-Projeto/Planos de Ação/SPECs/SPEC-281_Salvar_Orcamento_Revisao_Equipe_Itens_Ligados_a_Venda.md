@@ -88,8 +88,18 @@ Fica em aberto de onde o item LUC91 entra no orçamento ao abrir a edição (se 
 - Removido só o LUC91 de `orcamento_itens` (autorizado pelo usuário), em transação com conferência: status, total e desconto idênticos antes/depois, 2 itens restantes, 2 `projeto_itens` intactos. Cópia do item em `backup._bkp_spec281_orcamento_itens_cnx5154`.
 - Migration 332 APLICADA em SP (autorizada pelo usuário) após ensaio em ROLLBACK: itens idênticos = no-op; remover item ligado = erro claro; adicionar/remover item novo mantém os ids; `anon` sem execução.
 
+### 2026-11-11 (aprovação financeira do CNX-5154)
+
+- Aprovar financeiramente dava "processamento parcial inconsistente: itens 2, parcelas 0, boletos 0": a função cria itens/parcelas/boletos, e os 2 itens já existiam (herança Connect); os 313 CNX aprovados têm itens e 0 parcelas em `projeto_parcelas`.
+- A parcela em aberto em Contas a Receber é da Connect (duplicata 4088, venda 6007, R$ 12.650,26, venc. 25/12/2026, planilha ContaReceber_2026-11-05) — aprovar de novo duplicaria a cobrança.
+- O orçamento voltou ao ciclo porque o 1º salvamento gravou os dados do orçamento e falhou nos itens (não atômico; histórico 11/11 14:57 "ciclo reiniciado").
+- Decisão do usuário: voltar o CNX-5154 a "Orçamento Aprovado" sem gerar parcela/boleto. Feito em transação com conferência (totais e contagens idênticos); cópia do orçamento em `backup._bkp_spec281_orcamento_cnx5154`; histórico registrado.
+
 ## Pendências
 
+- [ ] Plano de parcelas do CNX-5154 ainda tem vencimento 15/12/2026; a Connect tem 25/12/2026 (não alterado, aguardando decisão do usuário).
+- [ ] `updateBudget` grava `orcamentos` e só depois os itens (não atômico): erro nos itens deixa o orçamento salvo pela metade e reinicia o ciclo de aprovação. Avaliar tornar atômico.
+- [ ] `aprovar_orcamento_financeiro` não trata orçamento herdado da Connect (itens existentes, sem parcelas): decidir se deve só marcar como aprovado.
 - [ ] Rodar o dry-run da migration 332 em ROLLBACK e aplicar em SP com autorização do usuário.
 - [ ] Descobrir se o LUC91 já está gravado em `orcamento_itens` do CNX-5154 ou se a tela o adiciona ao abrir (precisa de acesso ao banco); se for a tela, corrigir para não reinserir.
 - [ ] Atualizar snapshot `supabase/db/current/03_functions.sql` e `CHANGELOG.md` após aplicar.

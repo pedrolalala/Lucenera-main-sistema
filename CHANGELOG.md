@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-11 (SPEC-281 — salvar orçamento com itens ligados à venda; migration 332 APLICADA)
+
+- Problema: salvar o CNX-5154 (venda CNX-6007) dava `violates foreign key constraint projeto_itens_orcamento_item_id_fkey` porque `replace_orcamento_itens` apagava e recriava todos os itens.
+- Migration `20261111_332_spec281_replace_orcamento_itens_preserva_vinculos`: a função atualiza no lugar os itens que continuam (mantém id e vínculos), insere os novos e só apaga os removidos; removido com venda/nota ligada dá mensagem clara. Sem mudança de assinatura/permissão. Ensaio em ROLLBACK ok (idêntico, remover item ligado, adicionar/remover item novo; `anon` sem execução); aplicada e conferida em SP. Rollback: `rollback.sql`.
+- Dado: item LUC91 (peça nova em cotação, fora da venda) removido do CNX-5154; cópia em `backup._bkp_spec281_orcamento_itens_cnx5154`.
+- Spec: `SPEC-281_Salvar_Orcamento_Revisao_Equipe_Itens_Ligados_a_Venda.md`. Sem mudança de código de sistema. Pendente: atualizar o snapshot `supabase/db/current/03_functions.sql`.
+
 ## 2026-11-11 (SPEC-283 — Orçamento: Pix/Dinheiro não mostra Boleto no Plano de Parcelas)
 
 - Problema: com Pix e data de início, a parcela aparecia como Boleto (padrão antigo guardado na linha). Agora Pix/Dinheiro fazem a parcela seguir a forma de cima, sem seletor por parcela; também vale ao salvar. Sem mudança de banco.

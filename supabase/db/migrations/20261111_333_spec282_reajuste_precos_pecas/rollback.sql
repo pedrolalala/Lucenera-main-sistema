@@ -1,0 +1,10 @@
+BEGIN;
+DROP FUNCTION IF EXISTS public.reajuste_desfazer(uuid);
+DROP FUNCTION IF EXISTS public.reajuste_aplicar(jsonb, jsonb, text);
+DROP FUNCTION IF EXISTS public.reajuste_previa(jsonb, jsonb, integer);
+DROP FUNCTION IF EXISTS public._reajuste_calcular(jsonb, jsonb);
+DROP FUNCTION IF EXISTS public._reaj_valor(numeric, jsonb, text);
+DROP TABLE IF EXISTS public.produto_reajuste_item;
+DROP TABLE IF EXISTS public.produto_reajuste_lote;
+DROP FUNCTION IF EXISTS public.pode_reajustar_precos();
+COMMIT;

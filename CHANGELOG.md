@@ -36,6 +36,12 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Reunião 49 (Carol): ORC-0008 de 09/11 (equipe Marina, R$ 490,69) entrou como venda, mas é Outros / BONIFICACAO. Decisão: só a revisão financeira pode trocar o Tipo de Operação.
 - Orçamentos (`BudgetFormPage.tsx`): `podeTrocarOperacao` libera Venda/Outros/SAC e o campo Tipo para quem tem revisão financeira, com o orçamento em Aprovação Financeira. Devolução, empréstimo e vínculo Connect seguem travados. Sem mudança de banco; tsc sem erro no arquivo. Falta commit/push no repo do Orçamentos, publicar e a Carol fazer a troca.
 
+## 2026-11-11 (SPEC-282 — reajuste em lote de peças: migration 333 e tela; ainda NÃO aplicada/publicada)
+
+- 8 rascunhos corrigidos ao preço do cadastro (CNX-7325, 8244, 8286, 8290, 8321, 8378, ORC-0012, ORC-0030; total e parcela única ajustados pela diferença). Cópias em `backup.orcamento_itens_preco_antes_20261111` e `backup.orcamentos_total_antes_20261111`. Ficaram para decisão: CNX-2464 (enviado), CNX-8275, 8322, 8323.
+- Migration `20261111_333_spec282_reajuste_precos_pecas` (rascunho testado em ROLLBACK como admin, usuário comum e anon): tabelas `produto_reajuste_lote/item`, funções `reajuste_previa`, `reajuste_aplicar`, `reajuste_desfazer`, `pode_reajustar_precos` (só admin). Conta igual à do PecaForm; escopo por marca/categoria/fornecedor/códigos; "manter lucro" ou "manter venda".
+- Cadastro: tela `/reajuste` (botão "Reajuste de preços" para admin). Commit local, sem push. Falta: aplicar a 333, publicar, e as Partes A (regras do orçamento) e histórico de edição manual.
+
 ## 2026-11-11 (SPEC-282 — 153 peças alinhadas ao ST da Connect; APLICADO)
 
 - Planilha `Produtos__2026-11-11.xlsx` x banco: 156 peças com preço diferente; 153 eram só o % ST reajustado na Connect. Atualizados `porc_st`, `porc_bdi`, `custo_total`, `valor_venda` e `preco_venda` dessas 153 (triggers de preço desligados na transação e religados; conferência: 0 divergentes). Cópia dos valores antigos em `backup.produtos_preco_antes_sync_20261111`.

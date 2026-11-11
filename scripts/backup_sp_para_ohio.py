@@ -58,12 +58,12 @@ def trancar(on):
 
 def dump_sp():
     # arquivos para guardar (pg_restore): -n e -t não se misturam no mesmo pg_dump
-    run(["pg_dump", SP_DB, "-Fc", "--no-owner", "-n", "public", "-n", "memoria", "-f", p("lucenera_sp.dump")])
+    run(["pg_dump", SP_DB, "-Fc", "--no-owner", "-n", "public", "-n", "memoria", "-n", "auditoria", "-f", p("lucenera_sp.dump")])
     run(["pg_dump", SP_DB, "-Fc", "--no-owner", "-t", "auth.users", "-t", "auth.identities",
          "-t", "supabase_migrations.schema_migrations", "-f", p("lucenera_sp_auth.dump")])
-    run(["pg_dump", SP_DB, "--schema-only", "--quote-all-identifiers", "--no-owner", "-n", "public", "-n", "memoria",
+    run(["pg_dump", SP_DB, "--schema-only", "--quote-all-identifiers", "--no-owner", "-n", "public", "-n", "memoria", "-n", "auditoria",
          "-f", p("schema.sql")])
-    run(["pg_dump", SP_DB, "--data-only", "--quote-all-identifiers", "--no-owner", "-n", "public", "-n", "memoria",
+    run(["pg_dump", SP_DB, "--data-only", "--quote-all-identifiers", "--no-owner", "-n", "public", "-n", "memoria", "-n", "auditoria",
          "--disable-triggers", "-f", p("data_public.sql")])
     run(["pg_dump", SP_DB, "--data-only", "--quote-all-identifiers", "--no-owner", "-t", "auth.users",
          "-t", "auth.identities", "-t", "supabase_migrations.schema_migrations", "--disable-triggers",
@@ -124,6 +124,7 @@ def dump_sp():
         "    execute format('drop policy %I on storage.objects', r.policyname); end loop; end $$;",
         "DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;",
         "DROP SCHEMA IF EXISTS memoria CASCADE;",
+        "DROP SCHEMA IF EXISTS auditoria CASCADE;  -- registro de auditoria (SPEC-242): copiado junto, 11/11/2026",
         "DROP SCHEMA public CASCADE;",
         "CREATE SCHEMA public;",
         "ALTER SCHEMA public OWNER TO pg_database_owner;",

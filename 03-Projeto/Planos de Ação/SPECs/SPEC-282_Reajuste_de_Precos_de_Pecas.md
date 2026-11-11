@@ -56,14 +56,19 @@ A: alterar `validade_dias`/`aviso_preco_dias` na tela muda o comportamento sem d
 ## 8. Ordem e rollback
 Ordem: publicar D → A (banco + tela + leitura) → C com prévia → B (Cadastro). Rollback: A) drop da tabela e volta aos 10 fixos (commit anterior); B) desfazer por lote + drop das tabelas/funções; C) restaurar do backup; D) reverter `f5ec0b3`.
 
-## 9. Perguntas ao usuário
-1. Parte C: confirma o escopo (só rascunho e Aprovação da Equipe)? Enviado ao cliente entra?
-2. Quem manda no preço: o sistema novo ou a Connect? Quem replica um reajuste na Connect?
-3. Rascunho: atualizar sozinho ao abrir ou só avisar (hoje: só avisa e o vendedor confirma)?
-4. Quem altera as regras do orçamento (Parte A) e quem reajusta (Parte B) além do Vinicius?
-5. Reajuste de custo mantém o % de lucro (venda muda) ou mantém a venda?
-6. Mudar os dias de validade vale só para orçamentos novos ou também para os abertos?
-7. Desfazer lote: só até a próxima edição manual da peça?
+## 9. Decisões do usuário (11/11)
+1. Parte C vale para **rascunho, Aprovação da Equipe e enviado ao cliente** (respondido "Sim"). Aprovação Financeira e Aprovado continuam fora.
+2. **A fonte do preço é a planilha de consulta de produtos da Connect.** Todos os sistemas têm de ler do mesmo lugar (`produtos.preco_venda`, fallback `valor_venda`); divergência com a planilha = erro. Ver seção 11.
+3. Rascunho **só avisa e pergunta** quando alguma peça mudou de valor (já é a Parte D).
+4. Regras do orçamento e reajuste: **só Admin** (e o Vinicius, conforme o pedido anterior para o reajuste).
+5. Reajuste de custo: manter lucro ou manter venda — **em aberto** (usuário vai conferir).
+6. Mudar dias de validade vale **só para orçamentos novos**.
+7. "Desfazer" = desfazer um lote de reajuste aplicado por engano (voltar os preços ao valor de antes). Sem pergunta pendente: vale até a peça ser editada de novo; depois disso a peça é pulada e avisada.
+
+## 11. Auditoria da fonte do preço (11/11)
+- Leitura: todos os sistemas leem `produtos.preco_venda` (ou `valor_venda`); nenhuma peça tem os dois preenchidos e diferentes. 369 peças têm só `preco_venda` (o `valor_venda` é 0): as telas tratam com fallback; o ordenar por preço em `Pecas.tsx` (`??`) trata essas como 0 (corrigir). O orçamento é a exceção: guarda cópia do preço.
+- Planilha `Produtos__2026-11-11.xlsx` x banco: 4.568 peças casam; **156 com preço diferente**: **153 por causa do % ST** (Connect reajustou, ex.: 13722 ST 30,96 na Connect x 30,92 aqui; preço 385,12 x 385,00); **3 por custo**, e essas 3 foram editadas aqui hoje (12405/P863 e 12406/P878 com custo 808,19/976,56 aqui x 638,88/771,98 na Connect; 13587/ML-0181). 1 peça da planilha não existe no banco.
+- Ação: alinhar as 153 ao ST/preço da planilha (atualização pontual, com cópia dos valores antigos); as 3 de custo só depois de o usuário dizer qual valor vale.
 
 ## 10. Documentos a atualizar
 CHANGELOG, `AI_DB_CONTEXT.md` do Orçamentos e do Cadastro, `supabase/db/current/` (tabelas novas), Hub (ações novas).

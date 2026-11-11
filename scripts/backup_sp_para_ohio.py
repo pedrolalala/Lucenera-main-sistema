@@ -71,6 +71,20 @@ def dump_sp():
 
     schema = open(p("schema.sql"), encoding="utf-8").read().replace('CREATE SCHEMA "public";', "-- (public criado antes)")
     schema = re.sub(r'^ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin".*$', "-- (supabase_admin)", schema, flags=re.M)
+    # Views que leem o schema "backup" (que não é copiado) quebravam a carga em Ohio (11/11/2026:
+    # vw_staging_resumo -> backup.staging_conta_pagar/receber). Ficam de fora da reserva, junto com os
+    # GRANT/COMMENT delas; o resto da cópia segue igual.
+    fora = []
+    for m in list(re.finditer(r'^CREATE VIEW "public"\."([^"]+)" AS\n.*?;\n', schema, flags=re.M | re.S)):
+        if '"backup".' in m.group(0):
+            fora.append(m.group(1))
+    for nome in fora:
+        schema = re.sub(r'^CREATE VIEW "public"\."' + re.escape(nome) + r'" AS\n.*?;\n',
+                        f"-- (view {nome} fora: lê o schema backup)\n", schema, flags=re.M | re.S)
+        schema = re.sub(r'^(GRANT|REVOKE|COMMENT|ALTER)[^\n]*"public"\."' + re.escape(nome) + r'"[^\n]*;$',
+                        "", schema, flags=re.M)
+    if fora:
+        print("views fora da reserva (leem o schema backup):", ", ".join(fora))
     open(p("schema_x.sql"), "w", encoding="utf-8").write(schema)
     for src, dst in (("data_auth.sql", "d1.sql"), ("data_public.sql", "d2.sql")):
         t = open(p(src), encoding="utf-8").read()

@@ -1,5 +1,5 @@
 ---
-titulo: "SPEC-259 — Preço da herança Connect para a devolução sair com valor"
+titulo: "SPEC-275 — Preço da herança Connect para a devolução sair com valor"
 status: pendente
 data_ultima_modificacao: 2026-11-06
 sistemas_envolvidos:
@@ -7,20 +7,20 @@ sistemas_envolvidos:
   - Banco (projeto_itens)
 ---
 
-# SPEC-259 — Preço da herança Connect para a devolução sair com valor
+# SPEC-275 — Preço da herança Connect para a devolução sair com valor
 
 ## Checklist de Ação
 
 - [x] Diagnosticar por que a devolução sai com valor R$ 0 (06/11)
-- [x] Redigir migration 303 (up, dry_run, rollback) — só copia preço/desconto
+- [x] Redigir migration 326 (up, dry_run, rollback) — só copia preço/desconto
 - [x] Dry-run em transação com ROLLBACK (3.719 de 3.720 itens recebem preço; 1 fica sem)
-- [x] Aplicar migration 303 no Supabase real (07/11)
+- [x] Aplicar migration 326 no Supabase real (07/11)
 - [x] Ajustar `devolucoesService.ts` (feito no código, NÃO publicado): para venda `origem = 'connect'`, converter o desconto global (R$) em % usando o subtotal de `orcamento_itens` (e não o de `projeto_itens`)
 - [ ] Testar uma devolução de venda CNX com a Giovanna e publicar o sistema Orçamentos
 
 ### Passos manuais do usuário
 
-- [ ] Autorizar a aplicação da migration 303
+- [ ] Autorizar a aplicação da migration 326
 - [ ] Informar a venda/peça que a Giovanna tentou devolver, para o teste real
 
 ## Objetivo
@@ -42,10 +42,10 @@ A devolução usa o preço de `projeto_itens`. As vendas da Connect (CNX-xxxx, 3
 
 ### 2026-11-06
 
-- Diagnóstico, migration 303 redigida e dry-run feito (rollback confirmado, banco intacto). Nada aplicado.
+- Diagnóstico, migration 326 redigida e dry-run feito (rollback confirmado, banco intacto). Nada aplicado.
 
 ## Pendências
 
-- [ ] Aplicar a migration 303 depois da autorização do usuário.
+- [ ] Aplicar a migration 326 depois da autorização do usuário.
 - [ ] Ajustar o cálculo do desconto no serviço de devolução (venda Connect) e publicar.
 - [ ] 1 item da herança continua com preço 0 (sem preço no orçamento de origem) — conferir se importa.

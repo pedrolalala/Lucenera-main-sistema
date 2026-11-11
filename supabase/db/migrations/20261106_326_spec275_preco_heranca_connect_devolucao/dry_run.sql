@@ -1,4 +1,4 @@
--- SPEC-259: roda up.sql dentro de transação, mostra o resultado e DESFAZ (ROLLBACK).
+-- SPEC-275: roda up.sql dentro de transação, mostra o resultado e DESFAZ (ROLLBACK).
 BEGIN;
 \i up.sql
 SELECT count(*) FILTER (WHERE coalesce(pi.preco_unitario,0) = 0) AS ainda_zerados, count(*) AS total_connect

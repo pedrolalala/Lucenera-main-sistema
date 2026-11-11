@@ -36,6 +36,11 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Reunião 49 (Carol): ORC-0008 de 09/11 (equipe Marina, R$ 490,69) entrou como venda, mas é Outros / BONIFICACAO. Decisão: só a revisão financeira pode trocar o Tipo de Operação.
 - Orçamentos (`BudgetFormPage.tsx`): `podeTrocarOperacao` libera Venda/Outros/SAC e o campo Tipo para quem tem revisão financeira, com o orçamento em Aprovação Financeira. Devolução, empréstimo e vínculo Connect seguem travados. Sem mudança de banco; tsc sem erro no arquivo. Falta commit/push no repo do Orçamentos, publicar e a Carol fazer a troca.
 
+## 2026-11-11 (SPEC-282 — 153 peças alinhadas ao ST da Connect; APLICADO)
+
+- Planilha `Produtos__2026-11-11.xlsx` x banco: 156 peças com preço diferente; 153 eram só o % ST reajustado na Connect. Atualizados `porc_st`, `porc_bdi`, `custo_total`, `valor_venda` e `preco_venda` dessas 153 (triggers de preço desligados na transação e religados; conferência: 0 divergentes). Cópia dos valores antigos em `backup.produtos_preco_antes_sync_20261111`.
+- Ficaram de fora 12405 (P863), 12406 (P878) e 13587 (ML-0181): custo editado no sistema hoje; aguardam decisão do usuário. Próximo: Parte C (orçamentos) com prévia.
+
 ## 2026-11-11 (SPEC-282 — preço das peças: regra dos 10 dias explícita, reajuste e correção; SPEC criada)
 
 - SPEC consolidada `SPEC-282_Reajuste_de_Precos_de_Pecas.md`: A) regras do orçamento (validade e aviso de preço; hoje o 10 está fixo em 5 pontos do código) numa tabela editável; B) reajuste por peça/marca/marca+categoria com prévia, lote, histórico e desfazer; C) correção dos preços dos orçamentos existentes (proposta: só rascunho e Aprovação da Equipe); D) pop-up de preço também quando a peça foi reajustada.

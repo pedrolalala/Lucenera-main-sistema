@@ -36,7 +36,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Reunião 49 (Carol): ORC-0008 de 09/11 (equipe Marina, R$ 490,69) entrou como venda, mas é Outros / BONIFICACAO. Decisão: só a revisão financeira pode trocar o Tipo de Operação.
 - Orçamentos (`BudgetFormPage.tsx`): `podeTrocarOperacao` libera Venda/Outros/SAC e o campo Tipo para quem tem revisão financeira, com o orçamento em Aprovação Financeira. Devolução, empréstimo e vínculo Connect seguem travados. Sem mudança de banco; tsc sem erro no arquivo. Falta commit/push no repo do Orçamentos, publicar e a Carol fazer a troca.
 
-## 2026-11-11 (SPEC-282 Parte A — regras do orçamento editáveis; migration 334 NÃO aplicada ainda)
+## 2026-11-11 (SPEC-282 Parte A — regras do orçamento editáveis; migration 334 APLICADA, Orçamentos publicado)
 
 - Migration `20261111_334_spec282_orcamento_regras` (testada em ROLLBACK: admin salva e valida, não-admin e anon barrados): tabela `orcamento_regras` (validade_dias=10, aviso_preco_dias=10, aviso_preco_quando_mudou=ligado, status_que_avisam) + funções `orcamento_regra_salvar` e `pode_editar_regras_orcamento` (só admin). Valores iniciais = comportamento de hoje.
 - Orçamentos: `budget-regras.ts` lê a tabela (padrão 10 se falhar); `budget-expiration.ts`, `BudgetFormPage`, `TeamApprovalTab` e os 2 diálogos usam as regras; tela `/regras-orcamento` (ícone no cabeçalho, só admin). O aviso agora abre por vencimento OU mais de N dias, só nos status da lista. Mudar `validade_dias` vale só para novos (antigos sem validade usam o valor anterior). Commit local, sem push nem deploy.

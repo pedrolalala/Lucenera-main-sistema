@@ -1,0 +1,417 @@
+[00:00] As coisas estão corridas aí, rapaz. Do Neida. Meu Deus, Felipe me ligando. Pera aí. Oi, Felipe. Alô? Oi.
+
+[01:21] Calma aí que ficou, parece que você tá distante. Você vai me ligar depois?
+
+[01:26] E o meu descer para ver um negócio lá?
+
+[01:28] Não, de boa, vai lá.
+
+[01:34] As correções que eu tinha pedido, bora, porque aí dali eu sigo dando, entendeu?
+
+[01:41] Sim.
+
+[01:43] Pera aí, eu abro o sistema, né, aqui melhor.
+
+[01:47] É, pode ir fazendo por aí, eu acho melhor também.
+
+[02:59] Da Ubíqua, você finalizou ou não?
+
+[03:01] Só ficou faltando aquela parte lá do que você me pediu agora, para colocar o email junto com anexo do PDF, mas o resto tá tudo como você tinha me pedido.
+
+[03:19] Eu vou bater aqui, você vai me falando qualquer coisa, tá? Tá. Ah, isso aqui já foi, então deixa eu fechar a porta. A questão de colocar o engenheiro no lugar do responsável obra.
+
+[03:47] Engenheiro, sim, é isso, é dentro do orçamento. Isso, em adicionar, não é novo rascunho ali?
+
+[04:01] Ó, deixa eu te perguntar uma coisa, se tem como. Eu tô falando assim por usabilidade, tá? Usabilidade, que eu acho que vai ser um pedido. Exemplo, tô aqui no CRM, certo?
+
+[04:17] Sim.
+
+[04:19] Se eu clico em orçamento, não abre uma outra guia? É possível isso?
+
+[04:25] É possível. Ele tava desse jeito, mas como abriu o campo aqui do lado com todos os sistemas, eu achei melhor deixar tudo concentrado em um lugar só, porque depende de como vai ser a pessoa que vai usar. Porque se ela for abrindo muito, muito, muito, vai ficar cheio de navegador em cima.
+
+[04:44] Cheio não, mas no mínimo uns 3, 4 vai trabalhar, entendeu? Por exemplo, tá aqui no orçamento ou tá numa consulta de produto, tá cadastrando um projeto, sabe?
+
+[04:54] O que que eu faço? Eu duplico a aba ali em cima e vou trabalhando no coisa. Mas eu posso fazer desse jeito, aí toda vez que aperta em um novo botão ele vai jogar para uma nova aba.
+
+[05:06] Uma nova aba, tá? Não tem problema, eu faço desse jeito que vai ser mais didático para todo mundo até.
+
+[05:13] Beleza.
+
+[05:14] E aqui você pode, aqui eu acho que pode deixar, é, não, do lado.
+
+[05:17] Sim, aí a pessoa vai, ela só que ela tem que estar ciente que quando ela apertar ali naquele local vai ser dentro daquela aba que ela tá.
+
+[05:27] Exato, tá, então tá bom, beleza. Até porque, por exemplo, se a gente clicar aqui, o que que vai acontecer? Central. Aí de repente a gente, de repente pode até mudar o nome aqui, tipo painel central, painel principal, não sei, alguma coisa. Clicou em orçamento, vai abrir uma aba de orçamento. Clicou em sistema de entrega, vai abrir uma aba de sistema de entrega. Aí quando a pessoa quer uma outra coisa, aí tipo esse sistema de entrega provavelmente vai ficar aberto o dia todo, sabe? Porque vai acontecendo as coisas, vai lá naquela aba, já faz, sabe?
+
+[06:03] Sim.
+
+[06:04] E quer alguma coisa nova, aí vem aqui na no painel principal e abre uma outra aba. Enfim, eu acho mais fácil, tá bom, mais dinâmica, sabe?
+
+[06:16] Ele tava assim, é que quando colocou esse painelzinho ali do lado eu achei melhor, porque senão imagina toda hora que a gente fizesse reunião ia ficar todas as abas que a gente entrou indo e voltando. Mas beleza, eu vou fazer desse jeito.
+
+[06:31] É, no dia a dia eu acho que vai ser melhor a usabilidade mesmo. Nossa, que dor de cabeça que eu tô hoje.
+
+[06:39] Foda. Tem enxaqueca?
+
+[06:41] Não tenho, eu não sei por que que eu tô com dor de cabeça, mano.
+
+[06:45] Enxaqueca é foda. Aqui no maiszinho aqui do código de projeto, era aqui, né? Aí, beleza.
+
+[06:51] Então vou riscar. Acho que eu vou até jogar fora já essa folha. Não, vou pôr um OK aqui, vai. OK. Essa é a etapa da aprovação financeira, a etapa de faturar. Eu simulei uma alteração que foi mudada a data de pagamento para terça. Ah, isso de não voltar resolveu, né? Lá na aprovação financeira resolveu.
+
+[07:13] Aí previsão de entrega, que era outra coisa que você tinha pedido, que já tá aqui também.
+
+[07:18] Ah, tá logo aqui embaixo, aqui, ó.
+
+[07:21] Previsão de entrega, data de emissão e previsão de entrega.
+
+[07:24] Aqui, isso. Tá, isso daqui tá aparecendo em algum outro lugar?
+
+[07:32] Como assim?
+
+[07:33] É isso, é por isso que eu pedi, tá? Exemplo, não vai ter nenhum lugar, mas seria interessante. É esse dado? Seria não, é Esse dado de previsão aí, que nem eu dupliquei, aí ele não duplica na principal, né? Aí eu tenho que vir aqui. Acho que vai ficar melhor aqui. É importante na necessidade.
+
+[08:13] Então essa informação seguir até o final. Porque vai aparecer aqui no produto selecionado a necessidade de compra, a previsão de entrega.
+
+[08:26] Exato. É que esses daqui não tem, você não limpou, né, as vendas que a gente testou não, né? Não, só para saber que aí não, não, não, não, beleza, não limpei, tá?
+
+[08:51] Baixar. Aí agora vai estar como venda, tá? Eu justamente, você já quiser colocar um checkzinho ali, 6654.
+
+[09:08] Aí então aqui acho que tem uma coisa que ainda não arrumou. Aqui tá buscando por mim, é minha S4. É, tem que buscar por código aqui, tá?
+
+[09:15] Em necessidade de compra não tá buscando pelo código, pelo código interno. É, o código interno tem que ser sempre o primeiro da lista, né, da prioridade de busca. Depois referência, depois o produto. Pega o nome dele.
+
+[09:32] O que que é a referência aqui? Eu tinha na minha cabeça era 4427. É 4427.
+
+[09:41] Pesquisa pelo nome então.
+
+[10:07] Por exemplo, esse tipo de pesquisa aqui é importante acontecer. Exemplo: aros 4427, aros iluminar, um exemplo, ou perfil. Isso, eu pesquiso muito. Por exemplo, aqui, ó, eu faço, eu faço muito esse tipo de pesquisa assim, ó: arandela estela. Sim, que que me puxa? Tudo que tá cadastrado na descrição. Arandela que é da marca Stella. Se eu tirar Stella, pronto, aí já expande, né, o resultado. Vai para todas as marcas, vai aparecer tudo. Então esse tipo de pesquisa aqui é muito usual para todo mundo. Então, ah, quero uma arandela da Alloy. Arandela aloe, porque senão fica mais— então aqui, ó.
+
+[11:03] Não, sim, eu vou, eu vou puxar o mesmo, mesmo formato de busca do orçamento, que ali ele já tá redondinho. Entra na venda ali e pega o nome certinho da peça, aros plafom. Aí eu acho que aí vai pesquisar, mas tava pesquisando com a referência.
+
+[11:25] Ai, que esquisito.
+
+[11:28] Só se não tiver necessidade de compra, mas pera aí, eu acho que é isso.
+
+[11:35] Então vamos pegar outro aqui, pera aí. Vai nessa 16, porque aí se tiver, só se for isso, mas eu baixei aqui. É porque com código não tá indo ainda, né?
+
+[11:53] A gente não sabe, né? Às vezes a gente tava pesquisando um que não tem.
+
+[11:56] Pegar aqui outro. É porque eu acho que eu não finalizei o processo de compra, então por isso que eu— meu Deus, por isso que eu acho que tinha. Pegar esse aqui, é a 9801.
+
+[12:12] Só para mim testar pelo código também.
+
+[12:19] É pelo código, não pela referência também não.
+
+[12:27] Essa tem necessidade de compra, era para ter porque eu fiz ela com necessidade.
+
+[12:33] Vamos ver se a gente acha ela aqui agora. 9801. Não, não tem, porque aqui não vai ter venda vinculada, né? Então não vou conseguir.
+
+[13:00] Procura algum que tenha venda vinculada.
+
+[13:03] Então, exatamente. Deixa eu ver na venda parcial lá melhor. Na separação parcial lá vai ter, a gente vai conseguir ver.
+
+[13:13] A separação parcial aparece as que tem a necessidade, é a entrega futura.
+
+[13:21] Mas a entrega futura vai estar aparecendo aqui, era para estar, era para estar buscando lá, a não ser que tem algum pedido em aberto. Beleza, que acho que foi esse que eu fiz o pedido. Esse que eu fiz o pedido de teste. Deixa eu pegar a primeira venda aqui, essa aqui, ó. Vamos pegar esses daqui então. Entrega futura, entrega futura tem que estar na necessidade de compra. Então vamos pegar aqui, ó, 10/18. É, vamos ver pela, pelo código 7947. Tá puxando certinho.
+
+[14:18] Aí já entra ali, vê a questão do rastreio, clica em cima dela.
+
+[14:27] O que você fala? Ah, aqui, ó.
+
+[14:29] É aí mesmo.
+
+[14:37] Isso aqui seria importante trazer a previsão de entrega, porque que que eu, porque que que eu ando fazendo, principalmente com Interlight? Interlight, se eu pegar um embutido de solo aqui, por exemplo, só para você entender a lógica, esse produto aqui, ó, eu tô com 195 negativo. Eu segurei compra mais de um mês dele porque Porque eu tinha muito em reserva. Quantos?
+
+[15:25] 500.
+
+[15:25] Então não fazia sentido ir comprando de 30, 40, 50. Então o que eu fiz? Segurei a compra para poder fazer uma compra melhor com fornecedor, poder pleitear. E foi o que eu consegui, 7% de desconto a mais, entendeu?
+
+[15:45] No caso, até tentar fechar uma caixa só dessa peça.
+
+[15:49] Não, aí só compra de caixa fechada. E mas eu consegui um desconto a mais por conta do volume. E só que se ficar visível qual é a previsão de entrega daquele cliente, eu consigo ter uma filtragem ainda maior. Não, aqui, ó, vai, eu vou segurando, vou segurando, vou segurando, porque a previsão de entrega daqui 3 meses. Não, então vou esperar 2 meses para comprar, porque é o prazo que vai atender. Esse sistema do Sérgio, ele tem isso, só que as meninas não preenchem. Qual que é o detalhe da questão da previsão de entrega? Desculpa, não é que não preenche, fica errado. Um exemplo: cliente veio aqui em março, Aí em março começou o rolê, em março a previsão de entrega. Aí ali de cabeça elas pega e coloca, vai, 60 dias para entregar em maio, por exemplo, mas não fecha em março. Aí fecha em maio e não muda a data de entrega, entendeu? Então uma venda de maio para entregar em maio não existe.
+
+[17:09] Então, pensando aqui, só deve ser contabilizado essa data a partir da venda finalizada?
+
+[17:18] Da venda finalizada, é, tem que— eu tô achando que é melhor ter um pop-up pensando nisso.
+
+[17:33] Que aí seria uma espécie de notificação.
+
+[17:37] É tipo assim, na hora que elas forem fechar o orçamento para poder mandar para nós, para poder ter aprovação, tudo lá, pedir a data prevista de entrega, igual aparece quando é aprovar ali, que você tem que escrever aprovar. Isso, tá. Porque aí a gente elimina, porque vai ser natural isso mesmo. Faz o orçamento, preenche uma data de entrega, E aí pode passar, não alterar essa data. Agora, se for um mecanismo na hora do fechamento, na hora do salvamento do orçamento, por exemplo, pedir uma previsão de data de entrega, acho que a gente vai conseguir eliminar.
+
+[18:18] Então, no momento em que as meninas aprovam, que é a aprovação de projeto da equipe, Calma aí, deixa eu ver a nomenclatura certa.
+
+[18:29] É, pensa.
+
+[18:35] Tô abrindo o orçamento aqui. Na hora da aprovação da equipe, necessariamente abrir um pop-up com a necessidade, a necessidade não, a data prevista de entrega, tá? Então na hora que elas forem aprovar aqui, aparecer o carguezinho com as informações, quando que é a data de entrega. Beleza.
+
+[19:02] Ó, vou te dar um exemplo que eu acho que esse já é um exemplo que tá preenchido errado, digamos assim. Essa venda aqui, ó, tá na entrega futura, certo? Porque eu não tenho a peça, tô com 190 negativo. Agora eu tenho compra para chegar, tem 300 que eu comprei. Essa venda Olha a data prevista de entrega, 25/09, certo? Que foi sexta-feira. Vamos ver o dia que foi feita essa venda. É a venda 5750. No dia 25, entendeu? A venda foi efetivada no dia 25 e tá para entrega dia 29. Dia 25, no mesmo dia. O porquê disso? Talvez esse orçamento tenha sido feito há 2 meses atrás, só que fechou agora. Entendi. Parece banal, mas isso é onde a gente consegue planejar compras, né? Quer ver? O detalhe é esse aqui, ó, que ela, que é feito, né? Vou pegar um orçamento antigo aqui, ó, sei lá, um pequeno, né? Senão vai demorar uma vida para carregar. Aqui não tá preenchido, aí também Sacanagem. Uma coisa que eu vi, bati o olho, isso aqui tem que ter, tá? Ó, vou pegar um orçamento que tá aqui já, vou pegar um antigo para poder aparecer a data. Isso aqui, tá? Esse aqui vai de 17. Provavelmente mexeram nesse orçamento. Pera, pegar um bem antigo.
+
+[21:30] Vai ali, eu tenho uns 24. É, não é que você tá vendo pela data, né?
+
+[21:36] É, eu tô vendo pela data, tava vendo pelo nome. Tem uns que é 12/08. Ó, isso, deseja atualizar o orçamento? Você precisa ver como implantar isso por conta da alteração de preço da peça. É que pode ser custo, pode ser margem, pode ser imposto, pode ser N fatores. E aí Quando que tem que pedir isso? Oi, pode falar. Tô com Pedro, monitor. Não tô sabendo, ah, eu não sei o que que gastaram. Nem fiquei sabendo, cara. Nem passou por mim não também. Eu acho que não. Com a gente para fazer negócio de comportamento. Ai meu Deus do céu, eu imagino. Eu não sei, eu não sei, eu só tô sabendo do treinamento. Ô Pedro, quando é necessário? Olha, a gente entrou para falar uma coisa, né, para ver o Word, né. Quando é necessário aparecer na teoria, né, quando é necessário aparecer essa coisa de atualização de preço de orçamento?
+
+[23:13] 10 dias depois do orçamento. Exato, eu lembro de ter escutado isso.
+
+[23:20] É, eu fiz o orçamento hoje, amanhã o fornecedor mudou o preço, mano, não dá para repassar para o cliente. Aí eu tenho que brigar com fornecedor, meu amigo, eu tava com orçamento aberto, tal, se vira, dá um jeito. Então 10 dias depois vem a—
+
+[23:38] isso tem que ter também no orçamento quando manda para o cliente. Sim, que tem 10 dias. A validade de 10 dias. É, eu depois eu vou até ver se tá, se tá na descriçãozinha que tem embaixo.
+
+[23:55] Isso tem que deixar explícito, porque todo orçamento, qualquer um, de qualquer coisa que você for pedir, tem validade. Isso tem que ter lá. Então pronto, isso aqui já é um negócio para você pensar, tá? Como fazer? Então aqui eu não vou atualizar, tal. Para ver. Mas basicamente é isso, ó, elas preenchem essa data aqui, é tipo com uma data que nem foi aqui mês 8. Aí vamos supor que era alguma coisinha que de repente tinha estoque e tal, sabia que ia ter, aí preenche aqui. Não, isso aqui chega em 20 dias, por exemplo. Aí ia colocar aqui para 1/09, um exemplo. Só que aí a cliente tipo fecha dia 10/09 e não altera essa data, aí tipo já vira uma venda com data prevista atrasada, entendeu? Então se a gente botar lá no tipo pop-up na hora de salvar, tipo assim, a gente for salvar aqui, ele pedir a data prevista de entrega.
+
+[24:57] O salvar na teoria seria a aprovação da equipe. Isso, no nosso sistema ali.
+
+[25:04] Isso, beleza. Acho que fica bom.
+
+[25:07] É porque aí não tem erro, velho. Tá registrado lá, colocou a data, é isso que tá, que tá vigente. A gente vai ter que fazer com base no que tá escrito lá.
+
+[25:19] E sempre que for, eu colocaria assim, sempre que for salvar o orçamento lá da aprovação da equipe, pede a data. Alterou, pede a data e deixar como obrigatório, igual você pediu lá o aprovar, que é para administração financeira. Isso, tá.
+
+[25:38] E aí, ele é só uma coisa que eu pensei: tem algum, alguma data que demora para o financeiro aprovar um orçamento?
+
+[25:51] Não, mano. Tipo, se as meninas— é a regra aqui comigo e com a Carol, né, que eu passei para ela. A não ser que se eu ficar sozinho, talvez eu demoro, mas a Carol vai soltando, mano, vai batendo no email dela lá, ela já vai no mesmo dia.
+
+[26:05] No mesmo dia, tá.
+
+[26:05] Beleza.
+
+[26:07] É só isso que eu precisava saber, porque aí ele pode alterar essa data também, né?
+
+[26:14] Sim, no máximo, velho, no máximo é no dia seguinte.
+
+[26:18] Beleza.
+
+[26:19] Não, a não ser que aconteceu alguma coisa, vai ter que esperar, sei lá. Mas na teoria, no mesmo dia segue o baile.
+
+[26:31] Beleza.
+
+[26:34] Esse negócio da atualização de Isso a gente não tinha falado e é mega importante. Aqui por ali a questão da venda, de gerar a venda, fechou. Aqui é o próximo tópico que eu tinha aqui anotado. Orçamento, venda, fica numeração de venda, orçamento, ok. Eu vi que gerou a venda, depois nós vamos testar de novo. Ah, você conseguiu deixar mais nítido as referências?
+
+[27:09] Deixei tudo preto também, como se fosse um sistema mesmo, para não— porque eu acho que tava um pouco, sei lá, aquelas cores na hora de adicionar uma peça nova tava ficando estranho. Vê o que que você acha. Eu deixei a referência Preta com um fundo um pouco laranja, mas tá bem visível.
+
+[27:35] Eu deixaria assim, o laranja eu nem vejo na minha tela. Não, não, na minha tela não vejo. Então depende da tela mesmo, vai depender da tela. Só se clica.
+
+[27:50] É, não, mas na minha tela eu vejo o laranjinha no fundo.
+
+[27:57] Ó, eu aqui, tá, eu tô com a primeira selecionada, aí ela tá amarelinha. Eu gosto disso, pode até deixar mais forte, tipo assim, porque aí eu sei que é ela que eu tô vendo essas informações aqui. Que nem eu vou clicar em outra aqui, ó.
+
+[28:17] Então deixar essa visualização um pouco mais forte da do card.
+
+[28:23] Ela fica um amarelinho aqui, ó, aqui na referência, que mostrando que é ela que tá selecionada para que eu tô enxergando esses dados aqui.
+
+[28:34] Ela fica inteira amarelo.
+
+[28:37] Sim, não é possível. Você não é um pouco daltônico? A descrição, tudo é, ele fica no geral, ele fica ali inteira amarelo. Você tá vendo assim?
+
+[28:51] Sim.
+
+[28:54] Oi, tô te falando, para mim tá aparecendo só na referência.
+
+[28:59] Provavelmente é o monitor. É, não, ele fica—
+
+[29:06] não, então tá, hein. Depois eu vou testar no meu notebook. Amanhã eu vou ficar em casa à tarde para mexer com isso, né? Tá, eu vou ver. Para mim tá só a linha, mas beleza então.
+
+[29:18] Mas eu vou deixar um pouco mais forte.
+
+[29:21] Beleza.
+
+[29:21] Entra em nova peça ali também, que eu troquei. E aí tem uma outra coisa que eu quero te mostrar.
+
+[29:27] Isso aqui agora é melhor, bem melhor também.
+
+[29:31] Eu também achei.
+
+[29:33] Nossa, é aquilo que eu tava te falando, né? Tava confuso, eu tava, eu ficava tonto para poder. Bem melhor.
+
+[29:39] Não, então aí fecha ali em cima. Entra, pesquisa aqui Stella, qualquer marca aí, não importa. Eu só falei Stella porque foi a primeira coisa que veio na minha cabeça. Seleciona qualquer uma das peças aí que você quer.
+
+[30:02] Ó, só uma coisa, só para a gente poder tentar entender. Por exemplo, Stella veio tipo Artémide e Interlight.
+
+[30:12] Clica em cima de marca aqui, da marca. Não, não, não, em cima disso. Então, porque aperta de novo, aperta de novo.
+
+[30:24] Aí, ó, Zafferano, tem Soflex.
+
+[30:29] Quando você escreve Stella, teoricamente aqui você vai colocando qual que você quer que seja a principal da busca, entendeu? Teoricamente era para aparecer só Stella aqui no começo, né? Mas eu vou entender também.
+
+[30:48] Eu entenderia se de repente tivesse na descrição e exatamente assim, Stella, sabe, alguma coisa. Mas não tem. Vamos pôr Stella Tech mesmo, que é igual que é a marca mesmo. Vamos ver, Stella Tech. Aí filtra 100% e a filtra 100%, tá?
+
+[31:12] Seleciona qualquer uma só para te mostrar a funcionalidade. Aperta ali em editar. Aí tá vendo aqui que tem excluir, copiar, salvar?
+
+[31:24] Ótimo.
+
+[31:25] Se você apertar em copiar aqui, ele vai abrir um novo, um novo campo.
+
+[31:31] Ó, deixa eu só te falar, o salvar tá cortado. É, tá cortado.
+
+[31:40] Acho que você pode trazer para cá isso aqui um pouquinho, o tamanho do estoque integrado.
+
+[31:52] É porque aqui eu não sei, tem mais informações aqui ou é O setor atual e reserva. Tem mais coisas aqui?
+
+[32:01] Não, só esses 3.
+
+[32:05] Mas e se fosse um item que tivesse mais setores? Por exemplo, vou dar um exemplo aqui. No caso, showroom é um exemplo, mas vamos pegar um 3649 aqui. É que não vai ter, né? Não veio o histórico, né? Não tem o histórico das vendas.
+
+[32:25] Não, isso que é foda.
+
+[32:27] É, mas eu acho, Pedro, que tem que vir as informações, porque se nós estamos meio que clonando mesmo essa questão dos setores, não estamos?
+
+[32:37] A gente pode fazer do jeito que a gente quiser isso. Eu acho que a gente não precisa ficar preso ao que tem atualmente no sistema, né?
+
+[32:46] Mas eu traria, ó.
+
+[32:48] O setor tem estoque geral, showroom. Ele vai de—
+
+[32:53] deixa eu pegar onde ele vai na vertical, né? É, aí entraria aqui, ó, entendeu?
+
+[32:59] Em vez de ficar na horizontal igual tá agora, fica na vertical.
+
+[33:04] Deixa eu pegar aqui um produto, porque é na consulta de produto mesmo que a gente vai ver essas coisas. Ah, um detalhe, né, mega importante. Aí depois nós vamos ter que dar acessos, né? Então, por exemplo, consultar produto. Beleza, todo mundo pode consultar, todo mundo pode fazer esta consulta, mas ninguém só, não é todo mundo que pode editar.
+
+[33:49] Inclusive, se você quiser dar uma olhadinha agora, eu não sei como você tá de tempo aí, você falou que tinha uma reunião agora, 5:30. Então, mas amanhã você vai estar tranquilo, né?
+
+[34:00] De manhã não, depois do almoço eu vou ficar em casa para mexer.
+
+[34:04] Então a gente se liga para conversar, eu te mostro, me lembra de de mostrar isso, porque eu tenho, além da visualização do que a pessoa pode ver na central, tem também o que a pessoa pode fazer em cada sistema. Então cada pessoa tem um nível de poder, de acesso dentro do sistema. Você, eu e você, no caso eu, Filipe, total acesso, consegue visualizar tudo, consegue mexer em tudo. Só que aí cada pessoa dentro de cada sistema ela vai ter um nível de acesso. Então vamos supor que a Mari, um exemplo, a Mari ela pode editar a peça, só que a Mari ela não pode entrar no dash, a Mari não pode mexer na aprovação financeira do orçamento. E tipo, a gente consegue determinar o que que cada pessoa pode fazer dentro do sistema sem problema nenhum. Ok, então isso a gente, isso é uma coisa tranquila, dá para fazer de boa.
+
+[35:16] Eu vou, tem bastante coisa, é importante. Deixa, eu quero te explicar uma coisa aqui para internamente, como você vai Organizar isso daí. Aí eu vou pôr setinha, tá melhor.
+
+[35:43] Beleza, nos que usa, né?
+
+[35:46] Isso.
+
+[35:56] Fatura, que é aquilo que a gente tava fazendo na necessidade, na necessidade não, na separação parcial, né?
+
+[36:04] Isso. Então, para uma coisa importante aqui, só para você entender a lógica do rolê, o que que é o— vou escrever, depois eu apago. O que que é o estoque geral? O que que é o estoque geral? O estoque geral é a soma da reserva mais a separação. E depois também o estoque geral. Aí vamos pensar se nós vamos pegar o estoque de garantia e e o estoque cada cor? Acho que não. Acho que ele tem que ficar visível só, não somar aqui. Por quê? Por que que eu tô falando isso? Quando a gente vende, então vamos supor, se a gente tem 500, quando a gente vende 500 no estoque geral, né? Então por que que tá negativo? Porque a soma da separação e da reserva bate o estoque geral. E aí tem um monte de venda que tá na entrega futura, ó. Essa entrega futura bate com a quantidade disponível. Por que que quantidade disponível 195, sendo que tem 571 no estoque? Porque 571 tá vendido. Então disponível mesmo, se a gente for parar para pensar, não tem. Se todos os clientes pedir para entregar amanhã, tipo, não vai acontecer, entendeu?
+
+[37:49] Sim, mas aí vai ficar negativo 195.
+
+[37:52] Exato. Agora, a questão do estoque garantia e estoque casa-cor, eu não, não soma aqui, porque se somar aqui, vamos a partir desse princípio. Vamos supor que aí tem um estoque casa-cor, que é uma peça usada, tudo. Geralmente a gente vai vender com desconto. E ela tiver somada aqui e alguém faz uma venda normal sem ver que é de estoque casa-cor, ele vai reservar uma peça de casa-cor. Ou seja, vai reservar uma peça que o cliente pagou cheio e nós vamos estar entregando uma peça, uma peça de prateleira, que digamos assim Que geralmente é mais barato porque ela tá à mostra. É, tá à mostra, ou nem isso. Tipo, a amostra vai estar aqui no showroom, né? Ela vai, ela foi usada, então ela tem tipo risco, sabe, essas coisas assim. E aí ela fica visível se vender esse material de casa cor for uma necessidade, ó, um cliente e tal quer baratear, ele vai usar as peças de casa cor. Beleza, aí a gente transfere, pega esse estoque de casa cor, joga para o estoque geral, e aí faz a venda, vai reservar normal, e ali imediatamente já pega aquele material e já coloca o nome daquele cliente, daquela venda específica, entendeu?
+
+[39:23] E como que faz com relação ao preço?
+
+[39:26] Aí vai no desconto, dá o desconto, que aí foi acordado internamente tudo, entendeu? Aí vai no desconto.
+
+[39:34] Eu só queria saber porque às vezes eu ia ter que abrir um novo campo para alterar preço da peça, mas não, desconto é mais fácil mesmo.
+
+[39:42] No desconto é.
+
+[39:44] Aí aqui, e tem só uma outra pergunta aqui para entender, tem uma quantidade que já tá reservada para Casa Cor? Tipo umas peças, já sabe essa peça que é casa cor.
+
+[40:00] Então tem, só que a gente não tem isso no sistema que o Matheus não conseguiu fazer. Ele tem num Excel lá, e aí é isso que eu não quero mais. Vai ter que estar carregado aqui dentro.
+
+[40:10] Tá, beleza. Isso é bom saber, porque aí eu já começo a preparar justamente o estoque casa cor, que vai ser só uma opção de de visualização, e que no caso a gente pode, em vez de jogar para o estoque geral, a gente já pega direto do estoque casa-cor.
+
+[40:32] Isso pode ser. E beleza, aí vai chegar a hora que eu for testar a entrada de nota, que eu vou ver como tá, porque tem que determinar o setor que vai entrar o material. Mas beleza, é papo para outra coisa. Mas aqui quero te chamar atenção para uma coisa. Vou mandar aqui, tá, para a gente. A atenção que eu quero chamar é para isso aqui, ó, que parece que não, mas se a gente tiver Oi, tô em reunião. Beleza, uma breve— por que que aqui tem estoque, lutineira, slide e foco? E não aparece nada nunca, porque internamente lá no banco de dados do Sérgio, tudo, que é uma coisa que vai ter que ter aí, eu também não quero que apareça. Só que se eu vendo pela Manuela, saiu o estoque da Manuela. Se eu vendo pela Foco, saiu o estoque da Foco. Se eu vendo pela Slide, saiu da Slide. Se eu compro pela Slide, entra no estoque da Slide. Enfim, hoje já fiz muito, hoje não faço mais, né? Evito bem por conta do volume. Dificilmente. O nosso problema é que a gente vende sem ter o material, né? Então a gente evita de vender pela Manoela e comprar pela Foco, por exemplo. Antigamente até fazia um pouco mais, mas hoje não. Então é muito raro quando isso acontece. Vendeu pela Manuela e aí eventualmente, tipo, aquele, aquela marca não tá dando pedido pela Manuela, vai e compra pela Foco, um exemplo. Mas isso não é bom, então a gente evita de fazer. Exemplo: importação da Ubiqua, eu importo pela Slide, não pode vender pela Manuela e nem pela Foco. Só pode vender pela slide. Por que que isso é importante? Se der uma bucha e precisar levantar o estoque de cada empresa, uma bucha, eu tô falando bucha grande, sei lá, bateu a Secretaria da Fazenda, sabe, alguma coisa assim. Com empresa do Simples Nacional vai ser difícil, mas lucro presumido, eventualmente amanhã depois tenha um lucro real. É esse controle, é bem chato, entendeu? Então internamente, tipo assim, pelo final, na visualização não muda nada para vocês. Na visualização não, na visualização eu quero ver isso aqui, ó, quero ver a soma. Só que lá intrínseco no banco de dados ele vai trabalhando o estoque mesmo, sabe, de empresa por empresa. Ó, vendeu pela Manoela, entrou pela Manoela, vendeu pela Foco, entrou pela Foco. Eu não sei como vai ser isso. A gente não pode tratar como uma coisa única, porque amanhã ou depois, se tiver algum tipo de fiscalização, alguma coisa que precise levantar esses dados, e se a gente não tiver isso já no sistema, zeda, entendeu? Aí tem que levantar nota, aí tem levantar nota de venda, nota de compra. Nossa, não dá. Então assim, a base, o sistema precisa trabalhar assim: vendeu pela Manuela, aí vai entrar aquela nota na Manuela e não num geral, entendeu? Sim, a visualização é geral. Aqui, por exemplo, hoje, se eu pedir para o Sérgio, Sérgio, eu tô vendo aqui o estoque geral, Mas eu quero saber quanto que eu tenho de estoque desse produto no estoque Lutineira, no estoque Foco, no estoque Slide. Aí ele vai puxar lá no banco de dados e vai me fornecer, entendeu?
+
+[45:02] Entendi, eu entendi. Inclusive, eu tô tentando entrar no banco de dados aqui no Superbase porque eu acho que o Sérgio já exporta com a empresa.
+
+[45:15] Ah, é, é, você vê, porque eu tô falando mesmo então.
+
+[45:20] Porque aí, beleza, a gente já tem, já tem toda a estrutura. Inclusive na Ubíqua já tá estruturado isso que você me falou. Justamente que a Mari me falou, ah, eu não tô conseguindo colocar as 14 peças, só tô conseguindo colocar 7. O que que tava acontecendo?
+
+[45:39] Era 7 da slide, Manoela, e 7 na slide.
+
+[45:42] Era isso. Aí eu fui lá, vi, falei, não, beleza, vou corrigir. Aí o que que eu fiz na visualização lá depois? Na hora de pedir, você pede tudo de uma vez. Aí no orçamento aparece lá que um tá na Manoela e o outro tá na Slide. Deixa eu ver aqui, eu tô entrando em produtos. Aí eu já te falo, porque se a gente já tiver isso rastreado, beleza, mano, não tem problema nenhum, vai continuar do jeito que a gente tá visualizando daquela forma. A única coisa que vai mudar é realmente nas entrelinhas, que é o que é importante.
+
+[46:17] Exato, é exatamente essa palavra, nas entrelinhas. E tipo assim, não pode— como a gente trabalha assim com estoque negativo, né, assim, estoque negativo, mas tem muita coisa em estoque, né, não pode impedir. O que eu quero dizer Vamos supor, nas entrelinhas a gente tem 10 no estoque Lutineira e 5 no estoque da Foco, por exemplo. Aí tá fazendo uma venda na Lutineira de 15, o sistema tem que deixar vender, entendeu? Segue o baile, eu vou atender porque ali eu vou fazendo a manobra, vender, aí depois eu compro de outra e vai. No final vai dar certo.
+
+[46:57] Mas quando é nesse caso, você pega e vende e compra mais. Vamos supor, vendeu pela Manuela lá 150 peças, tem 30 em estoque. Aí só comprar pela Manuela, aí você compra pela Manuela. Não, beleza, só para ter um entendimento das coisas.
+
+[47:17] Ó, só para você entender, vou te falar uma coisa aqui, como que tipo tudo eu já faço pensando em vender pelas 3 empresas. Eu tenho 195 negativo aqui. Desse 195 negativo tem venda pela Slide, pela Foco, pela Manuela. Então o que que a gente fez? Tem 3 pedidos, olha. Então nesse pedido, o que que eu tô fazendo? Atendendo a necessidade da Foco e comprando um pouco de estoque. E aqui a mesma coisa, entendeu? Porque eu não, eu, ah, 195, eu não, vamos, eu não, né, se eu, se a gente não fosse atento com essas coisas, ah, vou comprar tudo 195 numa empresa só e fazer o estoque em outra. Não, mano, vai dar bucha, vai dar merda. Não, que eu faço aqui, porque que o pedido da Foco é maior? Porque a necessidade da Foco aqui era maior, tipo o negativo da Foco, entendeu? Sim, é que aqui não aparece a empresa, mas o negativo da Foco era maior, então tem um pedido maior. Então aqui a gente atendeu necessidade, comprou estoque, atendeu necessidade, comprou estoque, atendeu necessidade, comprou estoque. Com isso, o que que eu tô fazendo, né, nas entrelinhas? Eu tô atendendo todas as vendas de acordo com a empresa que foi faturada, e eu já tô fazendo um pouquinho de estoque em cada empresa para poder vender também, entendeu? Mesmo que eu não veja, tudo bem. Amanhã ou depois, se quiser ter uma visualização muito mais analítica com relação a isso, para, né, A gente vai conseguir ter porque vai ter isso, mas tipo na manha eu já vou, eu vou fazendo esse esse rolê aí.
+
+[49:25] Não beleza, eu tô vendo aqui não tem.
+
+[49:30] A não ser que eu porque por exemplo quando a gente for migrar vai ter que fazer um balanço e aí Eu vou pedir os relatórios para o Sérgio por empresa, porque senão a gente vai— porque aí eu já quero fazer as entradas por empresa, entendeu? Sei lá, no momento do balanço eu vou ter aqui 100 positivo. Eu quero saber se 100 positivo, ok, é do estoque geral, mas o 100 positivo é 50 da Foco, 20 da Slide, 30 da Manuela. Beleza, a gente já faz a entrada no sistema novo dessa forma, tá?
+
+[50:16] Você consegue pedir para o Sérgio mandar essas 3 planilhas?
+
+[50:22] Vou pedir para ele ver se ele gera. Sabe por quê?
+
+[50:26] Porque se eu conseguir estruturar, o quanto antes eu conseguir estruturar isso, melhor.
+
+[50:31] Isso é uma parte chata, complexa, mas é importante para a gente evitar qualquer tipo de problema, se eventualmente tiver, tá?
+
+[50:37] Por isso que eu tô falando que aí eu quero já deixar meio que isso pré-pronto. Na hora que ele mandar o balanço geral lá, a gente já tá com isso pronto, só coloca, beleza, tá funcionando, bola para frente, vamos continuar. E aí, além disso, eu quero já começar a fazer uns testes, ver se a venda ela justamente influencia dentro da marca.
+
+[51:00] Enfim, então para o ano que vem, mano, para o ano que vem vai ficar muito mais complexo. Talvez o ano que vem não, porque é o primeiro ano da reforma, mas eu acho que vai chegar um ano, não sei o ano que vem ou 2028, que vão ter marcas. Só te adiantando um problema, né? Vão ter marcas que a gente só vai comprar e vender por uma única empresa. Por exemplo, se eu tenho uma, se eu tenho uma empresa que me dá crédito de ICMS, não faz sentido nenhum eu comprar pela Simples Nacional porque eu não aproveito desse crédito. E aí só faz sentido eu comprar pela Lucro Presumido porque eu faço aproveitamento do crédito, entendeu? Então eu acho que nós vamos ter que chegar no momento acho que o ano que vem ainda não, né? Vamos ver como vai ser tudo. Que as meninas vão lá, tipo, vamos fazer um orçamento, e na hora de fazer essa venda, vá, às vezes vai ter que ter uma venda com 2 ou 3 notas, tipo uma nota de alguns produtos na Manuela, uma nota— mas isso aí a gente vai ter que mudar a estrutura de cadastro, tudo. Tô viajando, mas não é um negócio fora da realidade não, tá?
+
+[52:22] Tá, não, eu dei uma estudada quando você começou a falar de reforma tributária. Eu tinha estudado com a minha namorada para ela passar na OAB, e aí eu dei uma outra estudada que eu vi aparentemente conforme até 2030 vai mudar. Então vai ser uma mudança gradual, e aí chegando em 2030 eu acho que quando tiver uma peça que vale a venda tem que ser feita pela Slide. A gente faz tudo pela Slide.
+
+[52:58] E aí tem que deixar tudo pré-determinado.
+
+[53:01] No meu ponto de vista, assim, essa empresa aqui, Interlight, por exemplo, a Interlight, ela, ela tá, tem o desconto com a Slide. Toda venda que tiver Interlight, automaticamente só Slide.
+
+[53:14] Exato.
+
+[53:15] Aí já puxa para Slide, deixa a Slide, é a empresa teoricamente maior, né?
+
+[53:23] É, não é aqui, não tem limite de faturamento, né?
+
+[53:27] É que não tá no Simples Nacional.
+
+[53:29] Exato, é a do presumido. Mas hoje, hoje eu equilibro, né, o faturamento. Então é quase é 33, 33, mas a slide, lógico, acaba faturando mais mesmo.
+
+[53:42] Vai chegar uma hora que vai ser difícil ficar fazendo isso também, né?
+
+[53:47] Mas se, né, vamos falar da reforma, né, se a gente tiver muitos fornecedores que fazem, dão o crédito, né, do ICMS, não é nem desconto, que a gente vai poder fazer aproveitamento do crédito, eu dificilmente vou faturar, vai diminuir muito o faturamento da Simples, entendeu? Aí, por exemplo, aí só tem um fornecedor que não dá crédito de ICMS, aí não faz sentido eu comprar pela Slide, porque aí eu pago ICMS, entendeu? Sim, eu tô pagando ICMS, mas não tô creditando. Não, então vou vender pela Simples, porque na Simples eu não pago o ICMS por fora, tipo, ele tá dentro da alíquota da Simples Nacional, entendeu? É complexo, velho.
+
+[54:41] Não é fácil não.
+
+[54:45] Ou a gente continua amanhã porque já tem 3 me mandando mensagem aqui.
+
+[54:50] Beleza.
+
+[54:50] Não sei, acho que tem alguma, não sei. Ah, mas você viu? Produção e garantia.
+
+[54:57] Quer ver rapidinho? Vai, porque tudo que você tinha me passado lá eu já fiz. Ele tá dentro do Muita coisa para fazer, cara. Eu coloquei dentro da central lá. Agora pela central você consegue, você consegue acessar. A central tá até um monstro ali. O Felipe olhou, falou, nossa, mas quanta coisa!
+
+[55:23] Tô descendo, 5 minutos, tô finalizando com o Pedro. Controle de produção. Gosto, gosto. Prazo urgente e tal.
+
+[55:58] Isso foi o que você me pediu.
+
+[56:02] Opa, isso é porque tem que cadastrar.
+
+[56:06] Isso eu ia te falar, ainda não tenho cadastro. Depois eu vou pegar o email de todos, a gente faz esse cadastro e vai ficar registrado. Fez alguma movimentação interna ali, vai ficar tudo na entrelinha, no log, né? Eu posso até deixar o log para a gente visualizar, só para administrador. Vamos abrir um novo campo aqui do lado, log. Aí você não precisa nem me perguntar. Eu acho até mais fácil no dia a dia, você virou, ah, preciso saber quem que fez isso, tá lá. Aqui, ó, já ficou já. Vinícius, dia 1/10, às 3:41.
+
+[56:48] Aonde você tá vendo isso?
+
+[56:50] Aqui, ó, desenho pedido, ó, desenho errado.
+
+[56:54] Traz aqui, eu que escrevi.
+
+[56:56] É porque você tem o cadastro aí, fica registrado, né?
+
+[57:02] Gostei, achei que ficou bom. Isso aqui é o resolvido a ocorrência, né? Consigo pôr outra?
+
+[57:11] Consegue.
+
+[57:26] Ah, ficou da hora, hein? Legal, né?
+
+[57:31] Também achei que ficou bom.
+
+[57:33] E aí aqui fecha, né? Ótimo, ficou bom. Eu acho que aqui agora é usar para ver o que que melhora.
+
+[57:47] Tá, depois eu vou mandar mensagem para o Mateus para ele me passar o email de todo mundo.
+
+[57:56] Aqui falta, aqui tá faltando status, né, que a gente precisa.
+
+[58:03] Eu tinha mandado pedido de produção, agora não tá aparecendo.
+
+[58:08] É, tá faltando.
+
+[58:09] É, não, não tá faltando, tá vendo que aqui embaixo tem todos os status?
+
+[58:13] Aqui, né, tem todos os estados a ser.
+
+[58:17] Enfim, eu vou colocar, não tá preciso.
+
+[58:20] É, então tá bom, beleza. Depois eu olho o da garantia então, tá?
+
+[58:25] Vai lá.
+
+[58:26] Desculpa, Pedro.
+
+[58:27] Não, relaxa, tô ligado. Valeu, tá, as coisas aí.
+
+[58:30] Valeu, tamo junto, até mais, um abraço.

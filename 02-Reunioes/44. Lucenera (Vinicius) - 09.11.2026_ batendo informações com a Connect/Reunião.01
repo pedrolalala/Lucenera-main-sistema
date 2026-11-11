@@ -1,0 +1,411 @@
+[00:01] E aí, se eu puxo da reserva de alguém, é gerada uma entrega futura para esse cliente de quem eu peguei. Que tal funcionar?
+
+[00:09] Então é assim, é, não é que eu tinha, eu tinha colocado o prompt para alterar, então vai manter dessa mesma forma. Aqui tá certo, ó. No caso, a gente precisa até conferir isso, mas aparentemente é isso, tá pegando reservado, reservado, reservado, reservado. Então tá certo. Ah, uma coisa que só vai aparecer em alguns casos, não vão ser todos os casos que vai aparecer.
+
+[00:37] Uma coisa que as meninas falaram, que aí eu acho que teria que fazer mais uma vez. Vai lá no, uma que tem bastante reserva lá, aquele. Não, sobe aquele que você clicou mesmo.
+
+[00:52] Só tem, você sabe qual?
+
+[00:55] Pensa aí, deixa eu ver um produto. Não, só vai nesse perfil rígido aí, por exemplo. Aí, qual que era uma possibilidade? Vamos supor, vou dar um exemplo, né, que quisesse pegar tipo 2 desse e 2 desse, aí tem que fazer 2 vezes, não teria como tipo clicar em um, entendeu? Que, por exemplo, vou pegar 2 da Leda aqui. Tipo, ele vai colocar o motivo, vai deixar fazer, mas aí teria que ser 2 e outro. Se você clicar esse, perde a seleção.
+
+[01:42] Vamos fazer desse jeito por enquanto? A pessoa faz 2 vezes, porque senão a gente abre uma possibilidade da pessoa errar, tá? Aí eu acho que assim fica mais confiável, até porque, vamos supor, a pessoa selecionou aqui, ela não viu da Tairine, selecionou depois da Marina, vai ficar os dois aqui. Ela pediu dois de cada, duplicou o tanto que ela precisava, como exemplo, e ela colocou o motivo aqui, passou.
+
+[02:12] Beleza, pode ser.
+
+[02:13] Aí caso ela precise realmente pegar da Marina e da Tairine, aí faz dois pedidos e fica registrado certinho. Que aí a gente tem um log e tal.
+
+[02:23] Inclusive, uma coisa que eu preciso ver, esse aqui, o log só na venda, né? Aí, Pedro, uma coisa que a Débora passou lá, que a gente precisa ter um caminho para a gente poder fazer as alterações sem depender de você. Por exemplo, quero mudar a ST da Decine, um exemplo, fazer um ajuste lá de 30,92 para 30,96 a ST de todos os produtos da Connect, igual da que você tinha me falado da Citel.
+
+[02:54] É, lembra que eu fiz?
+
+[02:55] É que nem hoje na Connect Systems tem como, mas eu sou dependente do Sérgio e eu não, tipo, a gente não pode ficar dependente assim, entendeu? Eu posso de repente fazer um ajuste linear de preço que recebeu da tabela, aumente 10% na tabela de preço, no preço de custo. Aí tem que se ajustar o preço de custo, ajusta o preço de custo indireto, que são os resultados dos impostos, ajusta o preço de venda, ajusta tudo, entendeu? É uma cadeia, tá? Porque isso tem que ser, tem que ser assim. A gente usa muito Eu vou pensar certinho como fazer isso.
+
+[03:55] Eu vou ter que fazer um sistema só para isso, ou na movimentação de peças.
+
+[04:02] O que que você acha? Pode ser que aí além eu faço um, não é movimentação de peça, é uma alteração de preço, né? É alteração de preço na Citel.
+
+[04:22] Como que era? Era um sistema só para isso?
+
+[04:29] Tem que ser possível, por exemplo, vamos supor, teve uma alteração de IPI ou de ST que seja, ou fornecedor alterou 10% no preço de custo de tudo. Tem que ficar disponível para nós podermos fazer essa alteração sem depender do Pedro. Entrar lá, um exemplo, falar, preciso que aumente 10% do preço de custo de todos os produtos da Iluminar, ou exemplo, da Decinium.
+
+[04:56] Ó, eu te falo só uma coisa, tá tudo certinho aqui, não é? Mas de início a gente pega aqui também, é, tem que ver, atualiza mesmo. Falei, ó, não dá essa planilha aqui, você vai mesmo através do cloud para fazer isso.
+
+[05:13] Não, tudo bem, é só, é, não, a gente pode fazer, vamos fazer.
+
+[05:17] Agora, uma coisa assim importante, realmente Levamos sempre tudo que é, que vamos ver que são ideias que nós temos de melhoria do sistema, mas que não são funcionais a trabalhar agora, que agora existe uma situação quase de emergência, que é uso e conferir tudo. E lá agora estamos aqui, né? Estamos como com a criança que começou a andar, agora estamos aqui. Agora programar depois para que escola vamos colocar, etc. Vamos já pensar nisso, entendeu? Sim, o que eu tô falando aqui então tá ótimo. Não, mas pode chegar amanhã essa solicitação. Não é preocupante, porque fazer isso é fácil, né? Então, que é aquilo que falava também da central de solicitações, de colocar as coisas, colocar isso aqui, se tem que transar, que é urgente, porque não está funcionando.
+
+[06:16] A própria central já faz uma análise do pedido e determina se é um bug ou se é um Ótimo, ótimo.
+
+[06:23] Essas alterações estão fazendo com uma certa calma para ter entendimento, para ter ênfase. E essas duas estão juntas. Então vamos já fazer que o pedido se alinhe essas duas, né? Porque são duas que estão conectadas entre elas. Você não faz uma, depois tem que fazer no outro, que ele nega alguma coisa dizendo. Então é uma certa programação, mas Eu acho que realmente agora fora eu não sei, os contas a pagar, por exemplo, tem outras coisas que são super fundamentais, mas que nesse momento não vou pedir. O banco e contas a pagar tem que se enxergar, ou seja, aí tem que ter uma visualização do banco. Não sei bem como é, mas vou ter que fazer.
+
+[07:11] Eu vou ter que entrar em contato com com gerente da ponta, justamente para a gente começar a organizar isso, que é o gerar remessa e para mandar para o banco. Isso não faz mais sentido porque tem uma sincronização com o sistema que faz isso automático.
+
+[07:30] Caiu uma conta de operar no aplicativo do banco, eu acho que eu ainda mantenho, com certeza. Só que realmente, dentro do sistema, já tipo, ele vai operar e tem a lista já pronta lá. Hoje como é, por exemplo? Hoje como é a questão de fazer os pagamentos?
+
+[07:52] Não, os boletos caem tudo no DDA do banco hoje.
+
+[07:57] Então você paga automático?
+
+[07:59] É, só autoriza.
+
+[08:01] A pessoa autoriza?
+
+[08:03] É. Ok, a gente faz uma conta.
+
+[08:05] Mas então pode ter a conferência do que era para ser, do que cai.
+
+[08:09] É, o que que a gente faz? A gente abre o contas a pagar do sistema e abre o DDA do banco, né? Aí vai conferindo, vai batendo isso para ver se não tem nada de errado também. Às vezes alguém lança um DDA errado, tem tudo isso.
+
+[08:25] Tem aqueles DDA que são lançados fraudulentos, né?
+
+[08:29] Até de sindicato mesmo, né? Então a gente faz essa conferência e depois autoriza.
+
+[08:35] E essa conferência praticamente já pode ser já a prefeita pegar, e a pessoa logicamente não vai assim, olha que a IA tenha feito, sabe que, né, ainda mais, cada vez mais no começo, né, ainda mais no começo, nós temos que conferir tudo que é feito pela IA. Ok, beleza, então aprova. Você não vai nem fazer ganhar tanto tempo, que na verdade é quase a mesma coisa, mas é uma coisa a mais, e Depois de 2 anos que você tá fazendo aquilo mecanicamente todo santo dia, que nunca deu uma coisa diferente, talvez você poderia até soltar automático, né? Sabe, o certo é certo. Toda vez que teve uma coisa errada, ele sempre sinalizava, não ia aprovar, sabe? Dá de repente, mas dá. Hoje é claro, não vai ter como fazer pelo sistema nosso, então É, mas a questão é que é uma coisa compensada. Agora vamos fazer, sabemos que lá no final, na ponta final, tem ainda alguma coisa que pode ter pontas soltas, né? Tem que uma coisa que depois eu vou querer entender melhor é como fazer o máximo possível de tudo que, porque agora temos que entender como gerenciar. Tem projetos que estão na Comete que a gente importou, mas que não amarra. Tem um problema grande, né, tanto pagamentos não amarra para o cliente, né. Tem coisas que não amarra. Então isso aqui tem só que entender como esses dados, na medida, o que já falamos, chegar um momento que talvez sobra poucos e amarramos manualmente, não sei mais nada.
+
+[10:30] Vamos trabalhar que muitas das opções eu tô liberando com um cardzinho falando assim, ó, essa conta não tá amarrada. Por exemplo, em necessidade de compra, toda vez que entra aqui aparece.
+
+[10:48] Ô Pedro, pode falar, teve uma Giovana Nari falou com você ou não?
+
+[10:54] Ela mandou no grupo.
+
+[10:56] Central, o que ela tava fazendo.
+
+[11:00] Então é uma coisa que eu preciso, inclusive depois eu posso até falar com o pessoal, eu preciso que coloque uma central.
+
+[11:06] Acho que não dá para ficar mandando no Teams porque aí vai, mas eu pedi para ela esperar para ela falar com você, poder te explicar o que acontece. Ela seguiu os passos lá, ela fez, é uma aquisição e uma devolução. Então ela fez aquisição, fez a devolução lá na Connect, beleza. Aí ela fez aquisição no sistema do Teneza, beleza. Aí ela fez do jeito que você orientou a questão, ela puxou o orçamento antigo, tal, conseguiu fazer a devolução, só que veio zerado.
+
+[11:35] É, veio zerado porque como a gente importou da Connect sem as informações, sem o valor, que foi justamente isso que eu falei assim, tudo que importar a partir de agora tem que ser com valor zero para não vincular e não gerar Necessidade de compra ou qualquer coisa que seja. E aí, quando ela fez a devolução, ele puxou com as informações zeradas. Aí eu já corrigi, falei assim, ó, a partir de agora, mesmo que seja uma devolução com vínculo da Conect, ela tem que vir com o valor, independente se veio zerado do histórico.
+
+[12:16] E é importante que venha calculado o desconto, com desconto. For negociado, tá?
+
+[12:21] E a gente tem essa informação lá, os pontos.
+
+[12:24] O último é o orçamento fechado, né? Já vem com desconto, tá?
+
+[12:29] Então, na verdade, então teoricamente é para ali.
+
+[12:34] Parece que não tava bem não, tem bastante diferenças. Já temos que indagar, informar, de repente pegar o produto para entender. Produzir mais determinadas coisas, já viu, né? 10 peças com som diferente, interconecte.
+
+[12:58] Por exemplo, 10, aí tem aqui, né? 10.458, 10.992, pegar e entender.
+
+[13:13] E agora essa parte mais importante, diariamente. Agora esqueceu de colocar na conexão. Daí dá uma coisa, já dá para entender, lógico. Então tem que entender que o problema pode ser de hoje, né? Ou o diário humano ou o Gigi possa sangrar demais.
+
+[13:41] Pedido de compra. Pedido de compra é o que a Débora tá fazendo.
+
+[13:45] É, o pedido de compra tá importando todas as informações. Pega, copia isso ali.
+
+[13:51] Deixa eu tirar uma foto aqui, ó. Ah, me manda. Posso fazer os orçamentos lá com a Carol, né? Pode ver se vai dar certo.
+
+[14:11] Se quiser, eu até subo lá para a gente fazer junto. Então, saindo, aonde está?
+
+[14:15] Você me manda esse negócio no WhatsApp, eu pegar o produto e conferir, bater item.
+
+[14:23] É só colar, eu já copiei já. Que se quiser eu até subo lá para a gente já começar a bater essas informações.
+
+[14:42] Não, só atualizado aí. Agora não é tudo, é depois vai terminar a indagem, entender. São 4 coisas. Mano, com calma, o certo é eu checar as coisas.
+
+[15:10] Eu subo lá, a gente já faz junto, não vai zoar. Que às vezes eu consigo até puxar informação daqui. Vamos supor, tem uma peça que, um exemplo, a 1048 lá que tava aparecendo, pode ter sido alguma solicitação de entrega. Então a gente já vê isso e bate com as informações do que foi feito essa semana, até para a gente ver, ah, tá faltando, né?
+
+[15:34] Quando a gente importou tudo foi terça, não foi quinta que refez, foi terça para quarta.
+
+[15:41] Aí quinta-feira a gente fez a última atualização, que foi essa atualização que eu falei para não mexer.
+
+[15:47] Tem que considerar essa de quinta, no caso.
+
+[15:49] É, a gente considera nas movimentações, né? É porque fala os produtos estão certinhos, iguais, a quantidade de produto, né? Os itens. Então o que que muda são as quantidades, mas aqui são as movimentações. Com certeza tem que entender o que é, né?
+
+[16:12] Ah, teve coisa sexta-feira que não passou para dentro, que não fez? Você pediu para segurar alguma coisa, mas aí não fez nenhuma.
+
+[16:21] Não fez nenhum sistema. Beleza, porque senão ia—
+
+[16:24] não, beleza. Então vamos subir lá para ele me avisar. Você mandou, Felipe? Någon ska tråkigt och bygga kassetten.
+
+[20:56] Você gerou aquele quantitativo para o Mateus? Desculpa, aquele quantitativo é para a gente poder conferir lá os que tava em reserva sem vir. Com venda, para a gente poder zerar. Lembra que você ganhou o Nelson Mateus?
+
+[21:14] Não lembro, preciso conferir se eu fiz. Eu fiz tanta coisa, hein?
+
+[21:22] Foi sábado, menino.
+
+[21:25] Não sei nem mais o que eu fiz, o que eu não fiz. Tem algumas perguntas aqui que até bom você responder comigo.
+
+[21:56] Oi, Sara, bom dia, tudo bem? Bem, também deixa eu te perguntar, deu certo o arquivo que eu enviei?
+
+[22:07] Tá certo.
+
+[22:31] Beleza, nós não entramos no caso de armazenagem ainda, né?
+
+[22:36] Sério?
+
+[22:38] Quanto? Tá lá embaixo. E aí, como é que fica?
+
+[22:50] Ah, então ele saiu, eu acho.
+
+[22:55] Não, tá. Entendi, tá.
+
+[23:42] Então tá, valeu, obrigado, viu? Um abraço, tchau tchau.
+
+[24:19] Vamos ver se aqui, ó, 10, 4, 5, 8.
+
+[24:42] Espero, só se alguém deu entrada.
+
+[25:25] Alguém deu entrada.
+
+[25:51] A gente for bater aqui, ó, deu entrada aqui, ó, são 14 de diferença, 14, certo? Aí o que que acontece aqui, ó, essa entrega futura tava com 11 e aqui no sistema nosso com 25. Se eu tirar 14 daqui, né, Vai ficar 11, e aí vai entrar 14 aqui. Então forma uma entrada de 14. 89 mais 14, 103. Tem que dar uma segurada lá nas entradas lá.
+
+[26:33] Pode deixar, a gente faz, a gente vai fazer em paralelo.
+
+[26:36] A gente pega, mas tem que, tipo, eu não posso que a gente faça aqui. A Vitória precisa aprender a fazer. Tá, então ela faz, ele já ligou para o Mateus, ele me mandou mensagem hoje. Aí você faz de um, já tem que fazer do outro, senão a gente fica maluco.
+
+[26:57] E agora o Felipe tendo as informações, ele vai, ele vai estar sempre vendo, né? E aí a gente—
+
+[27:04] ou vão— bom dia, bom dia. Bom, deixa eu te falar, Você tá na mesa? Ó, que que acontece? Acho que a Vitória é a Vitória que tá dando entrada em produção, não é?
+
+[27:20] Até então sim.
+
+[27:22] É, então, porque de quinta para cá a gente tava, pegou, deu um comando aqui para identificar algum que tava muito diferente entre um sistema e outro. Aí, por exemplo, aí a gente identificou a primeira peça que a gente pegou aqui. Para ver, tá? Que teve uma entrada de tocha na Connect que não foi feito no sistema Lutineira. Então precisa, tipo, aprender a fazer para poder fazer junto ao mesmo tempo, porque senão a gente vai ficar maluco aqui. Não, não sei o dia, vou olhar aqui. Pera aí, 10/04. É o espeto. 5 do 11 é na quinta, né? Esse pedido, o que que tem nele? Só isso? Qual que é o código da Fiore para eu ver se tá batendo, mesmo que é a mesma informação aqui que eu tô imaginando?
+
+[28:37] Pera aí, deixa eu ver se a 10992 apareceu aqui no—
+
+[28:43] apareceu também, ó, Pedro. É tudo, é tudo, é esses dois aqui, ó. Pera aí, tá, Matheus? E esse aqui, ó, 4, não é? Do 10992. Aqui a mesma coisa, Pedro. Aqui, ó, tinha 4 na entrega futura, negativo. Aí aqui, ó, provavelmente estava 4 na entrega futura, aí deu a entrada, dei 4 para reserva e 4 para o estoque geral. A hora que der entrada vai ficar igual, entendeu?
+
+[29:40] O Mateus me dá O número desse pedido aí é o mesmo pedido?
+
+[29:53] Mesmo pedido, os dois.
+
+[29:56] Pergunta se ele tem mais duas peças.
+
+[29:59] Deixa eu achar o problema. 1969. Deixa eu ver uma outra. Hoje ela fez alguma entrada? Deixa eu ver um outro aqui, pera aí.
+
+[30:14] 11, 6, 3, 6.
+
+[30:23] É aqui, deixa eu entender. Mas aí fez uma empresa, fez só na rotineira. Pera aí, calma aí, Matheus, deixa eu analisar. É esse daqui, 47, 47. 18, 18, 5, 5, 4. Mateus, é 80. Desculpa, a gente fez do Rodrigo Motti em qual empresa? Perdão, em qual empresa não, em qual sistema?
+
+[31:22] Nos dois, tá.
+
+[31:26] Só que não fez a lista de entrega ainda do Rodrigo Motti, né? No sistema rotineiro. É, fazendo a entrega do sistema rotineiro, vai ficar tudo certo. Deixa eu te explicar, só para você entender. Ó, pera aí, vou falar com o Pedro aqui, tá? Ó, 47 sem herança, que é o que a gente tá falando para zerar, lembra? Que aí a gente zerava isso. É, mas você ia tirar, na verdade você ia tirar um relatório de todos os produtos que estavam nesse setor para a gente poder conferir antes de zerar. Então, por exemplo, isso daqui é esses daqui, tá? Os 18, os 18, os 18 na entrega futura. Os 5 da Herança Connect é os 5 que tá em reserva aqui, tá certo? Aí a gente fez 4 de garantia para o Rodrigo Motti, que saiu 4 do estoque geral, ó, saiu 4 do estoque geral. Só que aqui no sistema da engenheira já fez a entrega. O sistema da Connect, perdão, já matou, já fez.
+
+[32:34] Aí ficou 52, ali tá 56, e teoricamente na hora que der baixa vai para 52.
+
+[32:40] É, se você sabe fazer, não, deixa eu fazer aqui só para a gente ver. Mas na verdade é isso.
+
+[32:47] Inclusive, Matheus, dá uma olhada, eu liberei o sistema para você, eu não sei se você chegou a ver. Isso, depois acessa e me fala se tá tudo certo.
+
+[33:07] Da garantia do Rodrigo Motos, aí vai bater. Pera aí, não fez, né, essa entrega, né? Você tá com ela na tela onde você fala? Você sabe pedir? É, vai, é, faz aí, clica aí no separar, aí ele vai abrir o, ele vai abrir a solicitação, é. Qual que é responsável? Ah, é a única que tá aqui. Só para a gente ver se vai matar eles. E baixa, viu? Dá como entrega.
+
+[34:30] Já entregou?
+
+[34:32] Mas já entregou? Na Connect já marcou tudo, né, o processo? Fala para a Vi. A Vi tem que fazer tudo duplicado. Só vamos entender, organizar a questão do pegar emprestado, tá? Porque o da Connect, ela, as meninas passam para você, e o do sistema rotineiro elas mesmas podem fazer. De repente esse primeiro momento a gente deixa só para Vitória fazer.
+
+[35:00] Se a Vitória quiser também, tiver alguma dúvida, pode me ligar que a gente conversa.
+
+[35:06] É para finalizar aqui nesse, já vai diretamente para o logística.
+
+[35:20] Eu não sei se você abriu aí, você viu que apareceu a mesma coisa para separar?
+
+[35:25] Não, Matheus tá falando assim, a hora que ele finalizar lá no logística, finaliza tudo, finaliza tudo de uma vez só, é só lá.
+
+[35:41] Se puder anexar a imagem também, até para a gente ver se tá tudo certinho, porque nem tinha, nem tinha criado essa entrega no logística, né? Não, estava sem, não, avulso.
+
+[35:59] Pelo aparelho, entendeu?
+
+[36:04] Só se as meninas tiverem alguma dúvida.
+
+[36:13] Não, né?
+
+[36:20] Ah, mas tem que dar um refresh, né? Não, tá, mas ele vai baixar. Aí, aqui foi, aqui já finalizou. Tá, pera aí, deixa eu ver aqui.
+
+[36:53] Não tem problema, tá? Não, não, pode ficar tranquilo quanto a isso, Matheus. Por enquanto a gente tá só batendo histórico de peça e tudo mais.
+
+[37:06] O Matheus, entrada, você quer que ensina Vitória? Que aí eu vou pegar esse, vou pegar esse de exemplo aqui, vou pedir para Débora vincular ele, se não tiver vinculado. Programado, e aí a gente já faz. Tipo, não precisa ser agora, agora, entendeu? Eu vou pedir para Débora vincular primeiro. Não sei se tá vinculado.
+
+[37:33] Tá, quer que eu já fale qual que é o número?
+
+[37:35] O 1969. Deixa eu ver um outro código aqui, ó, 7365. Nós estamos pegando os que deram diferença, tá? 7365 é o 3927. É quinta, foi o dia que começou. Ó, vamos lá, que que tá de diferente aqui que eu tô vendo? Entregou 2, né? Fez uma venda de 2. Que que é, garantia também? Tem que, na Connect está baixado, tem que fazer o pedido, tem que fazer tudo, fazer o pedido de garantia da marca Marx. Então Dá como entrega, tudo bonitinho. Pera aí, tem mais outros 2 itens aqui. Pera aí, é 19,69, é isso. Pera aí, Matheus. Então, 7365 tem que fazer aí depois de 8952. 8952 é um 5, é a mesma situação? Tá, deixa eu ver aqui se tá batendo. Bom dia.
+
+[39:28] Não. Largaram as últimas páginas só.
+
+[39:33] Fui eu não, o cara lá. Nós já vamos pegar os orçamentos, tá? Aguenta aí.
+
+[39:36] Tá pronto, tá separado ali.
+
+[39:38] Mandaram mais algum?
+
+[39:39] Acho que tem mais um só que mandaram.
+
+[39:44] Ó, Matheus, é isso aí mesmo. Um, porque tá dando disponível 25 na Lutianeira e 94 na Connect, e os outros setores batem. Do 5, faz na mesma, né? Faz junto, né? Da Marta. Marta também tenho aqui o 12395. Vamos ver, é dela também. Garantia também não passará a venda então. Espera aí, que dia que foi? Fez a venda no dia cinco.
+
+[40:52] Tá, pera aí, pera aí.
+
+[41:02] Esse aqui tá um pouquinho mais complexo entender. E moveu de quem? Moveu de quem você falou? Mas espera aí, ó. Esse aqui tá mais complicadinho, mas essa venda não tem o sistema lutineiro ainda. Qual que é o nome? Pera aí. Venda. Que número? Joyce Filipe.
+
+[42:17] Quando foi feito?
+
+[42:27] Na quarta.
+
+[42:35] Foi aquele gap que—
+
+[42:42] Joyce Ivan. Não, mas fala o número da venda de novo. Ó, aqui não sei como é que ele vai resolver. Ó, vamos lá, a venda da Joyce Ivan, Mateus, tá no sistema da rotineira. Importado lá no sistema, venda parcial das vendas importadas da Connect. Só que tá de tipo, tem uma diferença. Se ela tá, não deveria ter essa diferença, porque Se a gente for bater o produto, o estoque geral da Lutianeira tá 563 e o estoque geral da Connect tá 562. E tem uma peça lá na entrega futura. Já fez, já fez na Connect, né? Então pera aí, deixa eu pegar aqui. Pegou de quem então? Não, eu acho que— ah, pera aí, tem como pesquisar ainda aqui?
+
+[44:40] Vou colocar isso.
+
+[44:45] Não, pera aí, Laís, deixa eu achar aqui.
+
+[44:54] Dentro de transferir peça tem um lugar para buscar a venda, o nome do cliente, o código também do projeto, né?
+
+[45:05] Beleza.
+
+[45:06] Pera aí, Matheus, eu quero transferir para ver se vai bater, tá? Aí você já mata a entrega aí também. De qual L pegou o TPO? Entra na venda parcial. Sim, é venda, né?
+
+[46:08] Agora lá na consulta tem uma agonia que você dá o refresh assim e aí perde tudo, né?
+
+[46:21] Mas do jeito, do outro jeito também perde tudo, né?
+
+[46:23] Não, sim, é que é só apertar um botão. É mais agonia, velho. E eu posso ver alguma forma, só tô pensando pela lógica do HTTPS. Quando dá o refresh, ele vai dar o refresh na página inteira.
+
+[46:42] Mateus, faz a entrega aí, fazendo favor, da Laís, da Joyce.
+
+[46:51] Mas bateu aí. Pera aí, 52, 62, tá ali.
+
+[47:04] É, tem que fazer a entrega primeiro para ver, mas eu acho que ainda vai estar errado, tá? Pera aí, deixa eu ver uma coisa aqui.
+
+[47:17] Reserva não foi não, é melhor aqui.
+
+[47:20] Da herança. Pera aí que aqui a gente achou um probleminha aqui.
+
+[47:36] Vai, faz a entrega. Deixa eu ver se vai bater.
+
+[47:54] Quanto que tá no geral aí?
+
+[47:56] 561 disponível, menos de 19, menos de 18. Então eu acho que vai, vamos ver se sair do estoque geral, aí vai ter também que tocar.
+
+[48:13] A gente precisa zerar isso aqui urgente, confundiu as contas, não fecha da herança, da reserva. Vamos fazer o seguinte, a gente finaliza isso que o Felipe passou, vendo que tá tudo certo no sistema, a gente responde as perguntas que tem. Tem algumas perguntas que eu te mandei, respondendo as perguntas eu já faço o relatório, a gente abate tudo.
+
+[48:40] E segura as vendas? Não, aqui que eu tô com a Carol, posso sentar aqui com ela e fazer.
+
+[48:47] Pode, a gente já vai liberando tudo justamente para não ter nada fazendo na Connect e ficar—
+
+[48:55] ela nem fez, não, eu sei, mas também para não segurar trampo dela, né?
+
+[49:00] Vamos tudo É melhor a gente ficar careca agora do que no desenho.
+
+[00:00] Você já finalizou tudo? Então aqui, ó, aqui a gente precisa entender aonde que tá o erro, na verdade, porque Na Connect bate 562,562. O disponível que não tá batendo na Connect tá dando menos de 19
+
+[00:34] por conta da herança.
+
+[00:37] Não é, a entrega futura bate, tá vendo? A entrega futura bate 18,18.
+
+[00:53] Aí, por que que na Connect tá dando -19?
+
+[00:57] É, então é isso que nós estamos tentando entender. Tem algum erro aqui que não pode estar na entrega futura 18 e -19.
+
+[01:06] Então o erro é na Connect.
+
+[01:16] 95 mais 68, 163. Reserva mais reparação para 163.
+
+[01:26] Aonde?
+
+[01:30] Em teoria Peraí.
+
+[02:08] Tá dando 563, o reserva mais o separação, né?
+
+[02:22] Isso, o separação, as coisas estão em separação. Esse W da Vânia ela entregou, mas eu acho que foi É que
+
+[02:57] teve mais separação aí, né? Porque, por exemplo, ó, O que tá em separação na conexão tá dando 68, e o que tá em separação aqui da rotineira tem 57, que é aquele lá que tem que zerar, que é sem vínculo, e 4 que provavelmente é da Chu, né? E aí dá 59.
+
+[03:28] Da Patrícia
+
+[03:39] já tá até baixado, né? Não entregue. Então será que ela tá, Patrícia? Não tá constando em separação da Patrícia aqui.
+
+[00:04] Mais assim, ó.
+
+[00:34] Será que não cancelaram essa lista da Patrícia?
+
+[00:42] Não.
+
+[00:55] Patrícia, o quê? Tem duas vendas dela, né? Você sabe de qual venda que é?
+
+[01:27] Tem que fazer a busca aí pela peça também, né?
+
+[01:32] Seria interessante porque aí vai aparecer todos os produtos de todos os tempos. Ah, tá aqui, tá solicitado. Qual que eu posso ter? 12.395. Não, não tem essa peça nessa solicitação aqui, essa 12395. É, não, verança. Eu tô olhando. Ah, tá. Aí por isso que não veio. Cara, esse eu acho que tem que ajustar na Connect, nem é no sistema Lutineira, né?
+
+[02:24] Então no nosso tá certo?
+
+[02:28] Parece que tá, mano, parece bom. Não, assim, nós vamos ter que fazer um ajuste, não tem como. E aí vai monitorando. O ajuste tem que fazer um ajuste de estoque lá, mas o estoque geral tem que manter o 562. Alguém que tá em reserva de alguém, só que aí vai abrir, mas a entrega futura tem que permanecer 18, né? Porque a conta bate. Os 18, entendeu? Ó, 4 mais 3 mais 9 mais 2.
+
+[03:28] Mm-hmm.
+
+[03:58] Ó, aqui uma é Luca, mas provavelmente tá pegando algum nome. Ah, Ana Clara e Luca, Maria Júlia, Amostra, Laís Souza.
+
+[04:12] Essa aba aí, quer mostrar para ele, explicar para ele como chegamos no lugar?
+
+[04:18] Não, acho que ele sabe, que ele tá olhando aqui, ó. Beleza, ó, dá uma pensada aí. Vamos deixar esse aqui de lado por enquanto, senão a gente perde meia hora aqui. Não, eu anotei aqui para monitorar ele. Deixa eu ver o outro aqui, ó. Pera aí, 10. Ó, então o que que você tem que fazer aí? Ficou, tá? A garantia da marca Marx, ok? O pedido de compra que eu vou ver aqui para fazer. De repente já ensina a vitória.
+
+[05:24] 1076.
+
+[05:40] É que deu uma notícia aqui, vou ver aqui, pera aí. É, não bate também. Por exemplo, ó, KPF32 tá dando -23 na Connect e -19 na lutineira. O estoque geral bate. Aí tem a entrega futura de 15, bate. A reserva Herança Conect com a outra reserva não bate. Vai ter uma diferença de 4, que é, não sei, o histórico de Movimentação da peça.
+
+[07:02] A partir daí a gente já vai conseguir ver de onde tá vindo a diferença.
+
+[07:25] Tem uma entrada e tal. É, mas não é uma aplicação. Ah, pera aí, deixa eu ver uma coisa. Pera aí, pera aí, acho que eu sei que pode ser. Pera aí, já sei. É, Pedro, aqui, ó, vem cá.
+
+[08:00] Que foi que a Giovana me mandou?
+
+[08:02] Não, Adriana. Adriana é aqui que tá dando a diferença. O que que acontece? Ó, deixa eu te explicar aqui os bugs que o sistema dava. Aí ela, o Sérgio ajustou. Aí eu não sei se você fez o ajuste, como a gente vai fazer. Deixa eu só te explicar essa situação aqui. Mas aí não bate, tá? Que que acontece, ó, só para você entender aqui o bug que de vez em quando dá com esse sistema aqui. Essa peça aqui é a que a gente tá vendo aqui, tá? Vendeu 14 nesse caso aqui, aí devolveu 4, ou seja, a quantidade da venda são 10 para entregar, aí só tava constando 6 na reserva. Mais nada. Só que é uma venda aqui, já tinha tudo na reserva, entendeu? Era para estar 10, era para estar 10. Aí o que que o server fez? O server ajustou a reserva 10 aqui. E aqui nesses 3 itens é a mesma coisa, ó. Vendeu 6, devolveu 2, teria que ter 4 aqui. E aqui mesma coisa, ó, 5, devolveu 1, teria que ter 4 aqui também, entendeu? Esse é o bug. Aí a Adriana te mandou, não, aqui é o que ela mandou para o Sérgio, né?
+
+[09:21] Aí eu sei que ela mandou lá no grupo, eu lembro de ter alterado, só que eu não sei o que que ela pode ter feito na peça.
+
+[09:29] Vamos pegar agora essa, vamos pegar essa venda para ver como tá no sistema da Daqui é a venda 2299.
+
+[09:46] Já registra no PDF, no Word lá, que é um bug da Connect.
+
+[09:53] E aí veio, aí o bug veio junto, entendeu? Sim, veio bugado. Então, ó, que venda é o L4. É, aqui ficou certo, tipo, ajustou aqui, mas não ajustou aqui, provavelmente, entendeu? Tá, então ajustou na Só que aqui, Matheus, fazer uma conta aqui, tá?
+
+[10:31] Pera aí, desculpa.
+
+[10:33] 174, fazer a conta aqui na rotineira. 174 no estoque geral menos 137 que tá na reserva Herança Connect e menos 41 que tá aqui do sem herança. É a diferença de 4. O disponível, menos 19. Essa, deixa eu ver, entrega futura 15. Pera aí, entrega futura. 15 na entrega futura da Connect. A única que tem entrega futura é uma venda do Luca, da Luca, sei lá se é homem, se é mulher essa porra. É só os 15, né? Então na verdade aqui tem que aumentar 4, só que esse produto na Connect Tá quanto negativo? Tá errado, tem que ser só 15. Tipo, tá errado, é a quantidade disponível, o ajuste que ele fez piorou, entendeu? E aqui tá errado, ajustou a reserva, mas teria que dar, teria que ficar 15, ou seja, teria que ter 178 aqui, porque aí, porque 178, que é 137, 137 da reserva Herança Conecte mais 41 que tá no trânsito, que é aquele separação lá, 41, 178, que aí fica para 15, desconto menos 15, que esses 15 é os 15 aqui.
+
+[12:39] Tá, mas não bate, tá 23, não tá?
+
+[12:56] Tem que zerar isso aqui o mais rápido possível, sem conferir. Esse era o nosso Conect, tem que ser. Só que ela não fez essa entrega aqui, né? Tem que fazer. Tá tudo em reserva, né?
+
+[13:25] Pediu tudo, Matheus? Foi pedido tudo para separar?
+
+[13:40] É, ela tem que fazer aqui, tá? Ó, pera aí, esses, o 12395 tem que monitorar a gente poder entender. Ou é que esse, essa lista de entrega eu já tinha importado, então ela nem tá caindo em trânsito. Em trânsito que eu falo é o separação, né? A venda também, o produto 10, 106, 111. 50 e o 12.395 é da venda da Patrícia que tem que ajustar. Só que você tem que fazer o ajuste aí, o teu ajuste tem que ser maior até. De repente pode, de repente, finalizar a entrega primeiro para Porque aqui, ó, aqui nesse sistema tem que, aqui na lixadeira tem que pôr as resoluções aqui. O 10, 106 tem que pôr mais 4 no estoque geral e o seu tem que tirar Que a conta sua aí não bate, né? Aonde é?
+
+[15:29] Vai aumentar 5, né? 19 vai cair para 15.
+
+[15:33] É, o da lutineira tem que aumentar 4 e o seu tem que aumentar 8. É o seu, você ajusta aí, tá? O 11, o 111,50, que é a mesma situação, que é tudo dessa, desse ajuste que o Sérgio fez. Deixa eu, entrega futura são 8, tá certo aqui. Aí os setores Tem 339. Vamos somar aqui. Teria que ser 262 mais 77, 339. É isso aqui, bate. Isso aqui tá certo.
+
+[16:26] Na Connect tá dando quanto?
+
+[16:32] É, você tem que aumentar 2 aí. Subir 2 no estoque geral.
+
+[16:41] Esse aqui tá certo, aparentemente tá no nosso, tá mais certo do que no da Conex, né? Só foi questão de importação.
+
+[16:58] Pegar o outro aqui, ó, 12.395, tá? Que é lá do rolê da coisa também, tá? -18. A gente já viu esse, é a fonte também. 4, que é o que a gente tinha que monitorar, né? Por isso que tá bugando. 4, 10, 18. Aqui deixa eu fazer uma soma aqui. 501, 4, 57, 560. Aqui tá certo, mano. O 12, 390. Na conexão 19, lá tá errado.
+
+[17:58] É isso, tem mais alguma peça?
+
+[18:29] Ó, fala para mim o que tem de entrega futura aí desse, desse aí. Canta aí a bola. Quantos tem na entrega futura?
+
+[18:50] Certo, certo, certo.
+
+[19:04] Tem alguma outra venda bugada, eu acho.
+
+[19:12] Eu acho que alguma coisa, alguma devolução do estoque ficou errada e teria que ter tirado esse um do entrega, do reserva, e passado para o entrega futura, em teoria, antes de mandar para o sistema direto, para onde puxasse, puxar certo. Como foi muito rápido, O sistema gera um show, temperatura 18, que tá batendo certinho com o foco do produto. Só que na verdade a temperatura tinha que ser 19, em teoria, para o vestido tirar água. Se fosse uma situação normal, o que eu faria, né? Eu entraria aqui na reserva, pegaria qualquer venda 1, aqui na nossa artefato, tira 1 da reserva e manda para temperatura. Claro, se puder montar o vestido novamente, mas tem que se combinar 2.
+
+[20:06] Então vai, vou anotar aqui para contar o estoque antes de ajustar. Não, perfil só ajusta, entra com 4 aí, com 8 vai dar certo. O perfil pode entrar com 8 aí que vai dar certo, tá? Deixa eu ver se tem mais algum aqui. O 10106, o 10542, e tem mais um aqui, tem o 9923. Ó, 10.106, 111.50 e 12.395.
+
+[21:26] É a mesma.
+
+[21:35] Como que tá o seu aí da Connect?
+
+[21:45] 34 disponível, 33 menos, né, negativo. Aí quer dizer, teria que tirar um da reserva passando para entrega futura.
+
+[21:55] E o estoque geral?
+
+[21:57] Mas sabe o que que foi isso? Foi 82. 82 no estoque geral. Quantos está no estoque geral?
+
+[22:03] 82. E tá batendo, 71 mais 11.
+
+[22:11] O disponível tá certo. Aí eu dei entrada no serviço da Casa Cor, suprindo já a necessidade da venda. Matou, beleza, agora eu vou emitir. Acabou que certinho, as garantias estavam erradas, a cliente passou errado. Na hora que ela vê que não era o embutido número 1923, era só o 7365, tá na foto ali como parecia ali. Aí que aconteceu, se tornou a venda, excluiu a venda, refez a garantia, excluiu a venda original da garantia e refez o processo. Quando refez o processo, esse 1 do artigo 993, ele não é uma peça do exporto mesmo, ele é uma peça de garantia.

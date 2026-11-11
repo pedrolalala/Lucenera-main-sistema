@@ -1,0 +1,347 @@
+[00:00] Então tudo que tiver, por exemplo, tudo que tá como arquiteto externo no grupo, porque o grupo é arquiteto externo, ok? Aqui que é a descrição tem pleno e tem sênior, porque eu tenho uma arquiteta que é a CK2, que ela é negociado 12%, ela exigiu os 12%, exigiu os 12%, então Para, foi criado isso para quê? Então o que acontece, essa determinação está no cadastro do arquiteto. Então quando o arquiteto entra na venda, o sistema reconhece que aquele arquiteto tem 10% em cima de todos os produtos que estão na categoria luminária, com o nome luminária, e aí vai aplicar os 10%. Se Eu tenho 2 com 10%, por exemplo, vai dividir sim para um, 5 para o outro. Precisa fazer essa conta.
+
+[01:00] É, isso já tá pré-definido ali naquela parte do orçamento, 50% para cada, 33%, e aí por aí.
+
+[01:07] Agora, aonde tá definido a porcentagem do cara e de onde pega?
+
+[01:12] Vai em contas a pagar. Atualmente eu fiz dessa forma, tá? A gente pode mudar, mas E aí depois, ali, ó, regras de RT, ali em cima.
+
+[01:25] Ah, tá. Aqui tem todos os arquitetos.
+
+[01:29] Isso.
+
+[01:30] Aqui tem que definir a porcentagem, é isso? Tudo bem, pode ser assim, tá ótimo, não tem problema. Eu posso só arquiteto aqui mesmo? Eu acho que tem coisa que não é arquiteto aqui. Ou tipo, depende, eu tenho como ativar e inativar.
+
+[01:53] A gente pode colocar essa opção aí.
+
+[01:56] Aqui eu vou pedir para Luana preencher.
+
+[01:58] Não, é só aquela outra empresa, aquela, só aquela, tá?
+
+[02:04] Então beleza, eu vou colocar, o que que eu vou fazer?
+
+[02:07] Eu vou fazer por padrão, vou colocar 10% para todos, e aí a gente entra, filtra ali, buscar arquiteto, e coloca 12% para aquela, entendeu? Eu já vou fazer dessa forma, vai ficar tudo preenchido. Mas caso aconteça de algum outro arquiteto falar, não, meu negócio é 15%, a gente vem aqui que já coloca.
+
+[02:25] Não tem 867 arquitetos, entra no CRM. Por isso que não tá batendo.
+
+[02:33] Entra no CRM, é o primeiro. Bem, arquiteto cadastrado, parceiros ali, ó. Em parceiro você já consegue ver que tem 800.
+
+[02:53] Não, parceiro é uma coisa, arquiteto é outra.
+
+[02:57] Tá, é no dash. O dash tem todas as informações ali, ó, parceiros, arquitetos e engenheiro. De jeito nenhum, tô te falando.
+
+[03:08] Não, tá errado.
+
+[03:10] É que tem arquiteto que tá duplicado, tem Aí, ó, tá vendo C4 ali? Você viu o tanto de C4 que tem?
+
+[03:21] Só se for isso, Cacau, Cacau, Cacau. É, mas aí a gente tem que ver o Cacau Ribeiro e Vórtico aqui, já era.
+
+[03:28] Então isso aí não é para ter, entendeu? Porque agora a gente criou no nosso sistema a possibilidade de adicionar mais de um arquiteto, só que isso vai precisar, demanda tempo, e a gente tá com pouco tempo.
+
+[03:41] Vamos focar na minha cabeça. Tem que pegar aqui o ativo e o inativo, certo? Sim, criar aqui ativo e inativo aí dentro da regra de RT. Dentro da regra de RT eu faria duas coisas, tá? Bota tudo 10 e coloca ativo e inativo, certo? Primeiro ponto. Aí que nós vamos fazer, você vai colocar tudo ativo e inativo, aí você deixa tudo preenchido. Isso aqui, se for fazer algum orçamento, vai dar bug se deixar tudo inativo? Vai.
+
+[04:19] Sabe por quê? Ó, pensa comigo, pode ter os 800 arquitetos registrados, a gente usa 5, um exemplo. Foda-se os outros, os outros, os outros 800 encaralhados. Tipo, não importa, eles estão como registro aí e depois vai inativando. Depois a gente pega e vai mexendo nisso, mas não vamos prender a Uma coisa que é só, você coloca 10 em tudo, vou colocar 10 em tudo e cria o ativo e inativo, tá? Aí depois a gente vai ativando e inativando o que que é arquiteto que tá dentro. E depois também ver aquela questão de ter a Cacau, ter Cacau Ribeiro com outra pessoa.
+
+[04:59] Aí nem precisa, né? Agora nesse sistema novo não precisa mais.
+
+[05:10] Arquitetos estão aparecendo como cliente do projeto. Estranho que depois não— vamos procurar essa informação, porque isso aqui de repente vamos arrumar.
+
+[05:22] Desculpa. Não, aí aqui a base de cálculo tem que— aí essa é a regra, que teria que ser a luminária, né?
+
+[05:29] É, aí eu vou colocar. Então é com base no valor recebido, certo?
+
+[05:36] Com base é aqui quando paga, proporcional ao que o cliente paga. Aqui tá certo, tá?
+
+[05:41] Aí eu vou colocar mais um campo que é a categoria luminária. Qual é a peça em específico? Um exemplo, qual peça que vai ter o RT?
+
+[05:56] Aí só incide em cima dos produtos que estão na categoria luminária. Vamos ver se é categoria mesmo que você tá falando.
+
+[06:08] Categoria.
+
+[06:09] Cadê? Ali. Aqui.
+
+[06:11] Entendeu?
+
+[06:12] Só aqui. Aí o que eu tô te perguntando é o seguinte, né? Você vai configurar isso ainda, certo? Mas a gente vai estar fazendo alguns orçamentos. Ele vai puxar retroativo desses orçamentos que a gente fizer sem ter essa configuração ainda?
+
+[06:25] Sim, se tiver o arquiteto selecionado, vai.
+
+[06:28] Só para não ficar amarrado, tá?
+
+[06:30] É, não, mas é justamente para isso que eu tô falando, para a gente não excluir tudo, entendeu? Para a gente deixar o que tem e conforme a gente for progredindo a gente vai eliminando os arquitetos.
+
+[06:43] Eu tô querendo o seguinte, porque nós vamos, estamos definindo, aí eu vou fazer uns orçamentos aqui com a Carol, mas tá sem a regra. Depois a regra vai entender que foi feito um orçamento e vai puxar.
+
+[06:56] Ele tem que puxar as informações dos orçamentos. Aqui você pode tirar, aqui na verdade, bota aí já, é ter porcentagem, vai jogar para todos 10%.
+
+[07:05] Aqui tem que ser o valor líquido, beleza, que é o valor líquido da venda, que aí que é proporcional ao que o cliente paga. E aí aqui é proporcional quando o cliente paga.
+
+[07:21] Arquiteto emite nota fiscal do MP?
+
+[07:23] Alguns sim, outros não.
+
+[07:24] Então aí a gente vai ter que ir ali na coisa, tá? Beleza, salva primeiro isso.
+
+[07:29] Aí aqui, ó, Pedro, tá, vou deixar assim por enquanto.
+
+[07:33] Só que aí não foi, é, não preencheu para todos não.
+
+[07:48] Tá, beleza, beleza. Só que aí, beleza, é ok, a gente colocou a regra, mas tem que deixar permitir aqui. É o, como é que eu vou explicar? Tem que ver. E como a gente puxa o relatório para saber o que eu tenho que pagar para aquele arquiteto no mês?
+
+[08:07] Vai estar em contas em aberto, ele vai gerar automático, vai.
+
+[08:14] Tipo, mas qual é a regra que você—
+
+[08:16] a regra é o que tá estipulado aí, com base no que o cliente foi pago, proporcional, entendeu?
+
+[08:24] Tá, mas tem que— não, tem que mudar. Tem que— um exemplo: se um arquiteto tá com 5 vendas em andamento, vai gerar 5 parcelas, é ruim. Tem que ser unificado, centralizado.
+
+[08:45] Não, beleza, mas tendo as 5 parcelas, a gente pode fazer dentro do contas a pagar um negócio para unificar as parcelas.
+
+[08:56] Para ter um relatório, tem que ter um recibo, eu tenho que mostrar para o arquiteto de quem que é que ele tá recebendo, tem que ter.
+
+[09:03] Por isso que as contas vão vir diferentes na contas a pagar, aí você consegue tipo particular de qual conta aquele pagamento é.
+
+[09:13] Eu sei, mas como eu mostro? Não posso abrir o sistema para o cara, tem que ter um relatório. Tá bom, é isso que eu tô falando. Ó, se eu for tirar aqui a RT, por exemplo, eu posso tirar aqui, ó, da slide. Se eu colocar aqui, ó, projeto slide, por exemplo, aí eu vou colocar uma data aqui. Isso aqui é para eu puxar o relatório, que agora, mês, semana que vem, eu tenho que puxar, pagar os arquitetos de tudo que a gente recebeu em outubro. Então, 1/10 a 31/10. Grupo de funcionário: arquiteto externo. Aí eu tenho que selecionar pleno e sênior, certo? Desse jeito aqui. Tipo de comissão: por liquidez. Por que por liquidez? Porque é quando recebe. Se eu deixar desse jeito aqui, ele vai— e eu dar um maiszinho aqui, ele vai me apresentar todos os arquitetos. E você viu que eu selecionei uma empresa, né? Então só vai aparecer da Smart. Ó, aí eu vou olhar aqui, então, por exemplo. Aí que a gente vai fazer?
+
+[10:25] Por que que tá zero?
+
+[10:26] Porque não tem.
+
+[10:28] Aí, tipo do André Calil, aí eu tenho quantidade, filtrar os que não, aqui não, tá?
+
+[10:35] Então eu tenho do André Calil, tenho da Adriana Esteves, por exemplo. Eu posso imprimir aqui, tem que selecionar o que que a Lana faz, né? Seleciona todos que tem, certo? Imprime o relatório. De todos que tem que pagar. Aí ela vai entrando um por um. Então vou pegar essa aqui, ó, por exemplo. Ah, tem um outro detalhe, tá? Eu vou te explicar. Vou pegar essa aqui, ó, por exemplo, da Mavi. A Mavi é o código 1968. Então vou vir aqui, ó, 1968. Apareceu dela aqui. A gente vai dar dois cliques, tal, imprimir. Beleza? Porque ó, aí aqui me aparece ó, a data da venda, a data que foi pago, o número da nota, a parcela. Tem que ter essas informações porque o cara pergunta parcela um de cinco, dois de cinco, entendeu? O cliente, o valor total daquela parcela e aquela comissão que foi gerada. Tá, aí aquele, essa porcentagem, ah, mas não é 10%? É 10% em cima de luminária. Isso daqui é proporcional, ou seja, 344 é 5,62% da parcela, entendeu? Ele faz proporcional aqui. Então média, então vai ter venda que só vendeu luminária, isso aqui vai ser 10%, entendeu?
+
+[12:12] Ele faz proporcional, faz a proporção de quanto que foi com base na venda total e quantas luminárias tem.
+
+[12:19] É, aqui é o valor que gerou, isso daqui gerou.
+
+[12:22] Então teoricamente 50% dessa venda aí foi luminária, mais de 50%, 56, é tipo isso em valores, né?
+
+[12:30] Que é 5,6, teoricamente era para ser 10 aqui da venda, foi luminária em valor, não em quantidade. Então beleza, então aí aqui que a gente vai fazer, a Lana vai imprimir duas vias nesse caso desse recibo, desse recibo. Porque se o cliente, se o arquiteto emite nota fiscal, nada, ela vai gerar uma via em PDF, vai mandar para o cara, o cara vai ver de qual empresa é para poder emitir a nota fiscal para a Slide. E aí a gente vai pagar pela Slide, ou senão a gente vai fazer o cheque, a pessoa vai vir receber, vai assinar aqui, pronto. Quando ela fecha Se ela salvar aqui, por exemplo, aí ela vai gerar o financeiro agrupado. Se aqui tivesse 10 clientes, por exemplo, ela pode ter essa mesma Mavi, pode ter lá na Foco e pode ter lá na Manuela. Então ela teria 3 relatórios e tem que ser separado, tá?
+
+[13:32] Tem que separar por empresa.
+
+[13:35] Se aqui tivesse 10 clientes, ia aparecer os 10. Por isso que eu tô te falando. Então de repente gerar um relatório Porque dependendo, se gera uma comissão aqui, às vezes um arquiteto do nada gerou tipo 3, 4, gera tipo R$50, nem paga, entendeu? Se eu falar para ele vir receber R$50, ele me xinga, nem paga, entendeu? Ou então gerou R$200, guarda para o mês que vem, vai, entendeu? Vai fazendo isso.
+
+[14:08] Então eu, Vinícius, tá, prefiro ter essa, que aí seria um relatório de comissão, um sistema só para relatório de comissão.
+
+[14:20] Pode ser uma aba dentro ali do ERP, pode apagar, pode apagar, e ter a opção também, porque muitos acontecem assim, o cara acabou de fechar a venda, dividiu em 10 vezes, Aí o arquiteto já liga: ai, quanto gerou de RT? Nada. Não gerou, mas ele vai receber no futuro. Tipo, eu não sei, eu tenho que calcular na mão. Vamos supor, o cara fechou hoje e a primeira para daqui o mês que vem, um exemplo. Eu só vou saber o primeiro da primeira parcela depois que ele pagar a primeira, que aí você consegue ver o quanto que vai gerar a primeira parcela. Vou Aí tipo é igual dividir proporcional, R$1.000, ó, então deu R$10.000 de RT, mas o cliente pagou, vai pagar em 10 vezes, a gente vai receber R$1.000 por mês. Então ter uma opção para visualizar tudo, tudo que gerou daquela venda, tá bom, de RT. Aí não é por liquidez, né, é no valor líquido da venda, mas sem ter o cliente pago, ter as duas opções, entendeu? Desculpa, ter as duas opções de visualizar o relatório, a liquidez e pela venda, tá? Entendeu? A gente faz teste, tá?
+
+[15:38] Porque isso aqui demorou a vida para ajustar, mas já tá meio, pelo tanto que a gente conversou em reunião, já tá meio que estipulado. Ele só não tava a questão de quantos por cento, que era uma coisa que não, porque você vê até a regra é isso. Isso, até a regra já tava pré-definida e tal. É, isso vai ser a regra. Agora vamos lá para as perguntas.
+
+[16:00] Tá muito alto, né? Tá muito. Essa aqui é a regra, tá? Aqui tem que ajustar, beleza. E aí você pode, sei lá, criar aqui, ou eu vou criar aí dentro.
+
+[16:16] Em vez de regra de RT, vai ser RT. Aí vai ter uma aba aqui do lado de regras. Aí, aí vai entrar para essa aba aí que só vai ter as informações das regras. A gente vai ter tudo, todos os RT certinho. As perguntas ali não nem tá aí também, bem começando. Ah, tá. E aqui é isso que a gente já falou, né? Tá, já pode passar. Base de cálculo da RT já foi. Quanto paga aqui?
+
+[16:55] Precisa falar aqui?
+
+[16:58] É, não, não, né? Porque a gente deu abate, então pode escrever. Até porque senão a gente vai ter que ficar falando aqui. Não, eu acho que você não tinha liberado habilitar.
+
+[18:01] On descend cette ligne. Só que isso aqui só acontece se matou o processo, entendeu?
+
+[18:46] Devolução e cancelamento, tá bom.
+
+[18:49] Só acontece se matou o processo. Que que eu quero dizer? Ah, teve uma devolução, mas ficou em aberto lá para o final de janeiro, as pendentes que a gente fala, não entra porque não baixou aquela conta, entendeu? Tá, você vai entender, né?
+
+[19:25] Aqui.
+
+[19:32] Aí essa questão do arquiteto depende. E sim, né, a nota vira origem do pagamento.
+
+[19:45] Regularizar essa coisa, né, está em rascunho e eu mando para frente, né. Então tem que passar pelo envio para cliente, né.
+
+[19:56] Ah, mas você não vai mandar, tudo bem.
+
+[20:00] Então, enviado para cliente. Ah, tudo bem, eu já enviar para cliente. Só que, só que eu simplesmente cliquei, mas não enviei para cliente.
+
+[20:12] Não, mas aí beleza.
+
+[20:15] Tem também uma coisinha que lá você vai ver, que os status estão um pouco, tem duas nomenclaturas diferentes, né, de status que corresponde a mesma coisa. Vai dar uma olhada, que a gente que faz bagunça, depois essa bagunça fica escondida, né?
+
+[20:33] Agora enviado para o cliente, enviado para o cliente aprovar manualmente.
+
+[00:04] Fala, aqui folha entra como conta a pagar, um título por funcionário por mês visível ao RH. Sim, vocês estão já trabalhando na lista aqui das coisas? Não, acho que não, né? Isso aqui é o relatório?
+
+[00:27] Não, não, não, não tem nada a ver com isso. É umas perguntas que eu tinha para o Vinícius.
+
+[00:32] Depois é bom verificar para evitar que hoje não dê as mesmas coisas. Tá, é, não, mas faz aquilo, desculpa, você não pode delegar então enquanto isso ele trabalha? Manda ele se preparar para dar umas respostas.
+
+[00:46] Vou fazer, já vai respondendo aí que eu vou fazer.
+
+[00:49] É porque tem umas coisas aqui que eu não entendo, mas bom, vai lá.
+
+[00:51] Pode falar, não, pode falar.
+
+[00:52] Vamos matar aqui rapidinho.
+
+[00:53] Prazer, professor.
+
+[00:56] É, vou matar. Quem, quando você faz, não solta as folhas? Ó, as 49 folhas antigas migrar como já pagas, aqui tem que analisar, tá? Não fazer ainda, vamos entender o que que é.
+
+[01:12] Número 7, analisar, tá? Que aí eu faço um relatório maior.
+
+[01:18] E aqui, tipo, eu tô muito no escuro para responder isso aqui. Comissão funcionária sobre o recebido proporcional pela parcela.
+
+[01:27] Isso, só que aí aquela questão de definir as comissões é só depois do, é no mês seguinte, né? Igual, da mesma, da mesma forma do sobre a liquidez no mês subsequente.
+
+[01:46] Como é compensado quem aplica baixo na venda na origem? Crédito de devolução, como é compensado quem aplica? Não entendi. A devolução, se tiver devolução também, a devolução já, a devolução de cliente que Baixada, que eu quero dizer, o cara devolveu, um exemplo, tá? O cara devolveu R$1.000 e aí ele tá comprando R$2.000, certo? Vai fazer, tem que fazer um acordo, precisa ver depois até no sistema se isso tá liberado. Vai fazer um acordo para gerar uma duplicata de R$1.000. O tanto funcionário quanto, vamos supor que fosse uma luminária, vai, vamos falar do arquiteto. Devolveu uma luminária que custa mil, tá comprando uma luminária que custa dois mil, certo? Mas o cliente vai pagar quanto?
+
+[02:47] Mil.
+
+[02:48] A comissão do cara é cem, não duzentos, porque entra cem de devolução aqui negativo para ele, para o arquiteto, e entra duzentos que ele teria que receber. Duzentos menos cem, cem. E o funcionário é a mesma coisa. Vamos fazer a mesma coisa, vai. Conta de 10%, entra aqui abatendo da comissão e aqui entra somando, subtrai, tá? E se for uma devolução, vai fazer um monte de devolução, devolução que vai ficar lá para janeiro, por exemplo. Aí chegou no final da obra, o cara tem R$5.000 de devolução, um exemplo. E vamos falar do funcionário, tá? Porque o funcionário é em cima da parcela. R$5.000 de devolução, R$5.000 de aquisição, 0 a 0, não recebe, não abate nada.
+
+[03:38] Tá, e se for negativo, tiver que voltar para o cliente?
+
+[03:42] Isso vai acontecer uma ou duas vezes no ano, aí você entra descontando também.
+
+[03:48] Tá, mas isso aí, então teoricamente o RT vai ficar negativo?
+
+[03:52] É, vai negativo assim, se naquele mês ele tem tipo R$1.000 para receber de um outro cliente e tem R$100 negativo, em vez de receber R$1.000 vai receber R$900. Tá, entendeu? Defeitos de data do legado, que eu vejo isso num monte de lugar.
+
+[04:22] Legado é, como que eu vou te explicar, legado, tudo que tá interligado, é a melhor forma que eu consigo Você entendeu? Aqui também analisar, porque senão eu vou ter que fazer uma explicação de 100% forma sistemática.
+
+[04:50] Parcelas canceladas com pagamento financeiro, já recebeu a planilha? Se tá cancelada, é cancelada mesmo, pode ignorar. Se cancelada É cancelado mesmo.
+
+[05:04] É, pode fazer desse jeito.
+
+[05:06] Aqui eu coloquei analisar. 129 pendências em aberto. Não, preciso, a gente precisa entender. Providência sem solução. RT sem venda. Parcela de abril. Analisar também. Não consigo entender aqui. Confirmar o efeito pela recomendação. Receita prevista na aprovação de equipe, firme na aprovação financeira. Compra pedido aprovado, previsto nota de entrada. Tem nada aqui. Entrada de lucro serve como despesa com classificação própria. Transferência entre contas e conciliação por externo. Não tô entendendo. Receita prevista na aprovação da equipe.
+
+[05:59] Você quer que eu faça um relatório melhor disso aí, mas de uma forma explicada melhor? Então vamos pôr assim que você tá. Até porque eu vou colocar as duas reuniões que a gente teve aqui e vou juntar com as respostas.
+
+[06:16] Percentual de RT, validar a planilha RT percentual. Aqui já resolvemos, né?
+
+[06:25] Sim, que é a porcentagem, né?
+
+[06:28] Validar.
+
+[06:32] Tá resolvido. 10% tirando.
+
+[07:39] Deixa eu explicar isso aqui.
+
+[07:55] Aqui tem MR, não recebe como isso.
+
+[07:59] É, o MR é justamente não RT. Mas por que que ele existe, tá? Eu tive que criar isso de repente, não sei, pode não tá. Caramuru, tá vendo aqui, ó? NR Fabíola Caramuru, NR Fernanda, NR Kali, NR Rúbia. O que que acontece? A Fabíola Caramuru, eu acho que ela tem os dois cadastros, NR Quando ela traz um cliente e ela fala, não, não vou pegar RT ou alguma coisa dela, a gente coloca nesse o arquiteto como NR. Por que que a gente preenche como NR? Vai sair no relatório, a Lana vai ver o NR, não vai gerar o contas a pagar, vai ignorar, certo? Mas por que que põe o NR? Para que amanhã ou depois a gente for tirar um relatório, ah, vamos ver tudo que a Fabíola Caramuru trouxe de venda para nós esse ano. E se não tiver o arquiteto lá no orçamento, a gente não vai conseguir visualizar o que ela trouxe. Então, por exemplo, a Fabíola Caramuru é um caso. Tirei o relatório dela do ano, então eu tenho que olhar os dois cadastros. É a soma do que ela trouxe do NR, tipo cliente que ela não pegou RT, e cliente que ela pegou RT, entendeu? Então, por exemplo, NR aqui, ó, e eu acho que tem um cadastro dela também normal. Aqui, ó, Fabíola Afonso de Ansã de Caramuru. Ou seja, ocasiões diferentes. Numa ocasião ela pegou RT, em outra ocasião não. Então por isso que tem SNR, tá? Para pessoa poder colocar lá. Aí não sei se a gente vai tratar, tentar fazer de alguma outra forma. Não vejo muito outra, muita outra saída.
+
+[10:17] É, eu também amo.
+
+[10:19] Tem que ficar criando um monte de regra.
+
+[10:21] É melhor duplicar o cadastro e colocar SNR, que aí fica uma forma de visualização.
+
+[10:26] Às vezes o que a gente pode fazer é, vai estar tudo ali, como vai estar tudo preenchido como RD, a gente vai lá e zera esses. Sim. Ah, falamos, né? Falei aqui, né?
+
+[10:46] Que qual que é a pergunta ali da divisão?
+
+[10:49] Arquitetos na mesma venda, a comissão deve ser dividida.
+
+[10:54] Pode copiar, mas não precisa apagar.
+
+[10:57] Certo, certo. 93 RTs foram pagos, contatos cadastrados como fornecedor e 78 como cliente. Aqui acho que você pode ignorar, porque aqui que ele tá falando, ó, Tem cara que pagou RT, mas ele tem cadastro como cliente, então normal.
+
+[11:16] Que aí é o que o Felipe tava corrigindo.
+
+[11:23] Vou pôr aqui normal, mas analisar.
+
+[11:29] Por que que é normal 22? Porque tem arquiteto que também é cliente.
+
+[11:34] É uma, por exemplo, ela é arquiteta, mas ela é cliente. RT já pago, antigos não tem venda ligada, o RT novo vale só daqui para frente. Não entendi.
+
+[11:47] Analisar o que falta pagar.
+
+[11:49] Sim, pera aí. Os 100.700 antigos não tem venda ligada, o RT novo vale só daqui para frente, ou financeiro reconstitui o que falta pagar. Vou colocar assim, mas analisar para ver como que O sistema vai tratar isso.
+
+[12:06] Tá, no 23.
+
+[12:09] Começamos, 3 funcionários com percentual. Não, aqui tem que virar regra a partir de qual mês a folha de pagamento. Acho que pode entrar regra a partir— é que vai ter coisa que não vai entrar esse mês porque fez venda na Connect. Que nem a data, a gente tem que tratar aqui a nossa data com, que foi quando a gente começou, foi aqui, né? Que as vendas daqui não vai entrar aqui, mas regra a partir já de 5, já de 5, de 11, mas analisar e determinar as porcentagens. Aplicar é melhor, acho. Analisar. Você precisa? Não, quero falar igual você, tipo, já tá. O que que é isso? Meses à frente. Eu sei que você vai ter como fazer aqui depois, a gente tá analisando. Entendi, tá. Perfil Ribeirão dos custos.
+
+[13:41] Ah, custo recorrente. Como que a gente vai premeditar essa questão para análise de dados?
+
+[13:50] Como assim? Dá um exemplo.
+
+[13:59] Wi-Fi, papelaria, energia, carro, tá?
+
+[14:05] Tem algumas despesas fixas no carro, né?
+
+[14:09] Isso, que na realidade fixas, mas recorrentes, não fixas, recorrentes.
+
+[14:14] É porque assim, ó, vamos lá, conceito de fixo e variável, tá? Fixo é o que tem todo mês, independente do valor. Conta de energia fixa, fixa porque é todo mês. É, por exemplo, eu tenho a Iluminar todo mês? Tenho, porque eu compro. Mas ela não é fixa, ela é variável, porque se eu vendo, se eu compro, eu pago, senão não. É isso, entendeu? O conceito é esse, não é a questão de variação de valor, é aquilo que Vendendo ou não vendendo, vai ter que pagar.
+
+[14:54] A papelaria cai como custo fixo?
+
+[14:57] Não, para mim é variável, que eu não tenho todo mês. Às vezes tem, às vezes não tem, entendeu? Mas geralmente tem, então pode até deixar.
+
+[15:13] É que é um exemplo que fica assim, né?
+
+[15:16] É um exemplo que fica flutuando, né? É como o Ronaldo Gaúcho.
+
+[15:21] É justamente isso.
+
+[15:24] Mas é um caso, né, que vai ter um, dois. Por exemplo, se eu tenho um financiamento da Tracker, por exemplo, eu considero como fixa até— é que não é despesa, é investimento, mas é um investimento fixo até acabar as parcelas, entendeu?
+
+[15:41] Que aí vai determinar com base na parcela. É que eu tô organizando isso aí, é só para você entender. O nosso banco de dados tava armazenando em 7 planilhas diferentes, aí eu tô juntando em 3 ou 4. Por isso que eu tô tendo que fazer todas essas perguntas para tipo bater tudo certinho, senão não vai conseguir juntar as informações.
+
+[16:07] Consórcio empréstimo fora da carga são contratos com fim. Cadastrar depois com data de fim? Sim. Acho que pode deixar do jeito que tiver e a gente determina a data do fim. Pode deixar. Impostos mensais das DARF, o valor varia. Aqui tem que ser preenchido, cara. Eu, a gente determina uma média, mas Tem que ser preenchido por nós, não fazer automático.
+
+[17:03] Então coloca assim: a gente estima uma média, mas vamos ter que determinar por—
+
+[17:16] pode ser assim? Tela de cadastro de custos recorrentes para o financeiro incluir, pausar e editar. Ordem para religar sistema ao modelo novo. Que isso?
+
+[17:37] Isso aí é da compra separação CRM.
+
+[17:42] Não entendi o que eu tenho que responder.
+
+[17:46] Compra separação parcial, que é venda parcial, no caso.
+
+[17:53] Ordem para religar o sistema do modelo novo. Não, compra, não entendi. Separação parcial não tem nada a ver com a compra, tipo, tem, mas não tem. Confuso. E tem o CRM, que é o início de tudo.
+
+[18:11] Tá confuso mesmo. Eu vou, eu vou reestipular o 33, remover as estruturas antigas.
+
+[18:21] Vou falar nada.
+
+[18:23] Lançamento, isso aí é mais, é mais com relação ao que eu tenho que fazer, tá?
+
+[18:28] Lançamento manual e adiantamento ao fornecedor. Financeiro lança hoje pela tela de cadastrar duplicatas. O adiantamento ainda precisa de fluxo próprio. Não, pode ser, pode ser pelo cadastrar duplicatas, mas ter uma marcação de que é um adiantamento, que quando for dar entrada na mercadoria é que ele Preferir no momento da entrada mostrar que existe um pagamento antecipado para ser feito no final da See. Depende de qué carta, ¿está? Che pato! Para. Tela antiga grava boleto direto, não entendi. Pode ser desligado. Eu vou colocar aqui, tá? Na aprovação financeira, não gerar boleto. Nem nota. O boleto e nota deve ser gerado na estrutura de venda.
+
+[22:18] Coloca nota porque o boleto lá, o boleto já vai direto para contas a receber.
+
+[22:28] Vai gerar o boleto lá, porque aqui eu deixaria aqui, ó.
+
+[22:32] Ver boleto, ele vai te jogar para a conta a receber.
+
+[22:36] Não, aí vai jogar aqui. Aí beleza, aí eu tenho que selecionar, é isso?
+
+[22:42] É.
+
+[22:42] E como eu emito o boleto?
+
+[22:43] Executar.
+
+[22:45] Não vai gerar, né, porque não tá tudo.
+
+[22:49] Teoricamente vai gerar.
+
+[22:51] Executar. Por que executar aqui? Para mim eu tô E aí, como que é atualmente na Connect na hora da emissão da nota? Eu emito a nota, ele vai falar: deseja gerar os boletos da nota? Sim. Deseja gerar remessa? Sim. Então tá bom, entendeu?
+
+[23:14] Entendi.
+
+[23:14] Esquece, contas a receber não pode. Aquele executar ali tem que ser alguma coisa relacionada a baixar uma duplicata. Não emitiu um boleto.
+
+[23:22] É, dá baixa da duplicata.
+
+[23:23] É, baixa é uma coisa, emitir o boleto é outra. Baixa porque a parcela foi paga, entendeu?
+
+[23:29] Tá.
+
+[23:30] Então deixa aqui na estrutura da venda.
+
+[23:32] Na estrutura da venda.
+
+[23:33] E eu posso poder emitir um boleto sem ter a nota também, tá? Um exemplo, pode acontecer, tá? Eu geralmente não faço, mas aqui eu não emiti a nota, mas eu quero emitir o boleto. Beleza, pode deixar, tá? Aí isso aqui a gente tem que trabalhar, a gente vai organizar isso.
+
+[23:55] Mas é bom que a gente já começa a estipular isso porque depois não vai ficar tanta coisa para fazer.
+
+[24:01] Então remessa e retorno ainda não tem, remessa e retorno para fornecedor não existe. Campo de observação no modal de baixa. Hoje o sol estorna sem motivo. Adicionar. Adicionar, ou ele só estorna, não tem motivo.
+
+[24:50] Provavelmente aquele pop-up lá, estornar motivo, cancelar motivo.
+
+[25:06] O que mais? Editar. Não sei lá, edita o valor, edita tanta coisa, acho que não precisa. Acho que estornar e cancelar só, tá? Mas vai implicar até ter algum lugar. Deixa eu salvar agora, vou te mandar. Você salvou? Salvei, pô, acho que sim.

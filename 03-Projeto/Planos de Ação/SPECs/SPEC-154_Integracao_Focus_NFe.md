@@ -207,3 +207,18 @@ Substituir a pendência crônica "decidir ferramenta/API de emissão de nota fis
 - [ ] Confirmar cobertura real de `produtos.ncm` (percentual de produtos com valor preenchido) — verificação manual, não posso rodar como planner/implementador sem acesso amplo de leitura.
 - [x] Frontend desta SPEC (modal "Emitir Nota Fiscal" com o botão "Confirmar e Emitir via Focus NFe", status em tempo real, tela "Pendências de Nota Fiscal", `statusNota` refletindo `status_emissao`) — implementado 2026-09-21 (tarefa separada). Falta só o teste ao vivo (ponta a ponta em homologação, depois de todos os passos manuais de banco/secrets/deploy) e a publicação no Skip.
 - [ ] Exatidão do schema exato de payload da Focus NFe (nomes de campo do `POST /v2/nfe`) não foi validada contra a documentação oficial nem contra um ambiente de homologação real — montada com base em conhecimento geral da API pública da Focus; testar ponta a ponta em homologação é obrigatório antes de qualquer uso real, e pode exigir ajustes pontuais em `_shared/montar-payload-nfe.ts`.
+
+## Atualização 2026-10-15 — dados fiscais levantados
+
+- [x] **Regime tributário informado pelo usuário e gravado em `empresas.regime_tributario`** (banco SP, UPDATE de 3 linhas, `empresas` não tem trigger): FOCO ILUMINACAO = `Simples Nacional` (CRT 1, usa CSOSN), MANOELLA = `Simples Nacional` (CRT 1, CSOSN), ISLIGHT = `Lucro Presumido` (CRT 3, usa CST; PIS/COFINS cumulativo). `crtDoRegime` reconhece os textos. Conferido na Receita (ReceitaWS, 15/10): FOCO e MANOELLA optantes do Simples, ISLIGHT não.
+- [x] Endereço (Receita) + `codigo_municipio_ibge = '3543402'` (Ribeirão Preto) gravados nas 3 empresas: ISLIGHT e MANOELLA na Rua Ayrton Roxo, 867 (ISLIGHT complemento "Anexo"), Alto da Boa Vista, 14025-270; FOCO na Rua Doutor Hugo Fortes, 1010, Parque Industrial Lagoinha, 14095-260.
+- [ ] **Inscrição Estadual das 3 empresas** — não está na Receita federal; pedir ao usuário/contador.
+- [ ] Razão social no banco difere da Receita (FOCO: banco "EIRELI – ME", Receita "FOCO ILUMINACAO LTDA"; ISLIGHT e MANOELLA com sufixo "ME" a mais) — não alterado, decidir com o usuário.
+- Cobertura medida em 15/10 (4.918 produtos): NCM 4.907; **CST 0** (bloqueia toda emissão); CEST 1.326 vs 3.005 com % ST; unidade 100%; origem do ICMS não modelada (default `0`).
+- Proposta a validar com o contador: CST/CSOSN derivado de (regime da empresa × `tem_st`) em vez de cadastro peça a peça — ex. Simples: 500 com ST / 102 sem ST; Normal: 60 com ST / 00 sem ST.
+- **Checagem contra a doc oficial da Focus (15/10, doc.focusnfe.com.br):**
+  - Pré-requisitos por empresa: IE ativa, credenciamento de emissor NF-e na SEFAZ-SP, certificado A1 (e-CNPJ) na Focus; cadastro na Focus com `habilita_nfe`, `serie_nfe_producao/homologacao`, `proximo_numero_nfe_producao` (continuar a numeração do Connect), `regime_tributario` (1 Simples / 3 Normal).
+  - Supabase SP: as 3 Edge Functions estão deployadas, mas **nenhum secret FOCUS_* configurado** (token, cron secret, webhook).
+  - Gap de código: CST 00 (ISLIGHT sem ST) exige `icms_modalidade_base_calculo`, `icms_base_calculo`, `icms_aliquota`, `icms_valor` — payload hoje só manda origem + CST. CSOSN 102/500 e CST 60 bastam origem + situação (grupo ST retido é opcional, mas se enviado tem que ir completo).
+  - Gap de código: PIS/COFINS vão fixos "99"; ISLIGHT (Presumido) deve ir CST 01 com base/alíquota 0,65%/3% (validar com contador); Simples normalmente 49/99.
+  - IBS/CBS: Simples = facultativo em 2026; regime normal (ISLIGHT) deve ter o grupo (`ibs_cbs_situacao_tributaria`, `ibs_cbs_classificacao_tributaria`, `cbs_aliquota` 0,9, `ibs_uf_aliquota` 0,1…). Payload não envia.

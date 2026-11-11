@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Financeiro - perguntas para decisão</title>
+<style>
+  @page { size: A4; margin: 7mm; }
+  :root { --ink:#1a1a1a; --mut:#555; --line:#cfcfcf; --acc:#b0173a; --bg:#fff; --soft:#f5f5f5; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:10px 14px; font:9px/1.28 "Segoe UI", Arial, sans-serif; color:var(--ink); background:var(--bg); }
+  h1 { font-size:14px; margin:0 0 1px; }
+  .sub { color:var(--mut); margin:0 0 6px; font-size:8.5px; }
+  .cols { column-count:2; column-gap:12px; }
+  h2 { font-size:10px; margin:7px 0 3px; padding:2px 5px; background:var(--acc); color:#fff; break-after:avoid; }
+  h2:first-child { margin-top:0; }
+  .q { break-inside:avoid; border-bottom:1px solid var(--line); padding:3px 0 4px; }
+  .q b.n { display:inline-block; min-width:20px; color:var(--acc); }
+  .q .rec { color:var(--mut); font-size:8.5px; }
+  .q .rec i { font-style:normal; font-weight:600; color:#1b6e3a; }
+  .ans { display:block; margin-top:2px; border-bottom:1px dotted #888; height:11px; color:var(--mut); font-size:8px; }
+  .ck { margin-top:1px; font-size:8.5px; }
+  .ck span { margin-right:9px; white-space:nowrap; }
+  .note { background:var(--soft); padding:3px 5px; margin:2px 0 4px; font-size:8.5px; break-inside:avoid; }
+  @media (max-width: 700px) { .cols { column-count:1; } body { font-size:12px; } }
+  @media print { body { padding:0; } }
+</style>
+</head>
+<body>
+<h1>Financeiro (nova estrutura) — perguntas para decisão</h1>
+<p class="sub">Reunião com o Vinicius · 09/11/2026 · referência: SPEC-258 e Relatório_Financeiro_Nova_Estrutura. “Rec.” = a recomendação. Marque ☐ ou escreva a resposta na linha.</p>
+
+<div class="cols">
+
+<h2>1. Decisões do relatório ainda abertas</h2>
+
+<div class="q"><b class="n">1</b><b>RT — onde fica o percentual?</b> Por arquiteto, por venda ou por projeto? <span class="rec">Rec.: <i>por arquiteto</i>, com exceção por venda.</span><div class="ck"><span>☐ Por arquiteto</span><span>☐ Por venda</span><span>☐ Por projeto</span></div></div>
+<div class="q"><b class="n">2</b><b>RT — base de cálculo.</b> <div class="ck"><span>☐ Bruto</span><span>☐ Líquido</span><span>☐ Sem frete</span><span>☐ Só o recebido</span></div><span class="ans"></span></div>
+<div class="q"><b class="n">3</b><b>RT — quando paga?</b> <span class="rec">Rec.: <i>A</i>.</span><div class="ck"><span>☐ A: proporcional ao recebimento</span><span>☐ B: só com a venda 100% recebida</span><span>☐ C: total na aprovação</span></div></div>
+<div class="q"><b class="n">4</b><b>RT — devolução ou cancelamento:</b> o RT é reduzido/estornado proporcionalmente? O arquiteto devolve o RT? <span class="rec">Rec.: <i>sim</i>.</span><span class="ans"></span></div>
+<div class="q"><b class="n">5</b><b>RT — o arquiteto emite nota fiscal?</b> Se sim, a nota vira a origem do pagamento.<div class="ck"><span>☐ Sim</span><span>☐ Não</span><span>☐ Depende</span></div></div>
+<div class="q"><b class="n">6</b><b>Folha entra como conta a pagar?</b> Um título por funcionário e por mês, visível só ao RH. <span class="rec">Rec.: <i>sim</i>.</span><div class="ck"><span>☐ Sim</span><span>☐ Não</span></div></div>
+<div class="q"><b class="n">7</b><b>As 49 folhas antigas (R$ 6,18 mi):</b> migrar como já pagas ou começar do mês atual? <span class="rec">Rec.: <i>mês atual</i>.</span><div class="ck"><span>☐ Já pagas</span><span>☐ Mês atual</span></div></div>
+<div class="q"><b class="n">8</b><b>Comissão do funcionário.</b> <span class="rec">Rec.: <i>sobre o recebido</i>, proporcional a cada parcela, paga pela folha.</span><div class="ck"><span>☐ Sobre o recebido</span><span>☐ Sobre o vendido (como hoje)</span></div></div>
+<div class="q"><b class="n">9</b><b>Crédito de devolução:</b> como é compensado? Quem aplica? <span class="rec">Rec.: <i>baixa do tipo “compensação”</i> na venda de origem, aplicada pelo Financeiro.</span><span class="ans"></span></div>
+<div class="q"><b class="n">10</b><b>Defeitos de data do legado</b> (1 paga com data futura, 22 vencimentos com ano absurdo, 5 pagas sem data): o Financeiro corrige pela tela de integridade? Prazo?<span class="ans"></span></div>
+<div class="q"><b class="n">11</b><b>129 pendências abertas:</b> quem do Financeiro resolve e até quando? A migração só fecha com zero abertas.<span class="ans"></span></div>
+<div class="q"><b class="n">12</b><b>1.527 parcelas canceladas com pagamento (R$ 4,29 mi):</b> o Financeiro já recebeu a planilha de conferência? Prazo?<span class="ans"></span></div>
+<div class="q"><b class="n">13</b><b>Pendências sem solução</b> (RT sem venda, parcelas de abril): o administrador aceita com motivo? <span class="rec">Rec.: <i>sim</i>.</span><div class="ck"><span>☐ Sim</span><span>☐ Não</span></div></div>
+
+<h2>2. Confirmar (já feito pela recomendação)</h2>
+<div class="note">☐ <b>14</b> Receita prevista na aprovação da equipe, firme na aprovação financeira. &nbsp;☐ <b>15</b> Compra: pedido aprovado = previsto; nota de entrada = firme e substitui. &nbsp;☐ <b>16</b> Uma só tabela de títulos (natureza a receber/a pagar). &nbsp;☐ <b>17</b> Legado da Connect migrado para o modelo novo. &nbsp;☐ <b>18</b> Retirada de lucro segue como despesa com classificação própria; transferência entre contas e conciliação por extrato ficam para depois.</div>
+
+<h2>3. Dados que o Vinicius precisa trazer</h2>
+<div class="q"><b class="n">19</b><b>Percentuais de RT:</b> validar a planilha <i>RT_percentual_arquitetos_com_sugestao.xlsx</i>, arquiteto por arquiteto. Posso carregá-la depois da validação?<span class="ans"></span></div>
+<div class="q"><b class="n">20</b><b>Divisão entre arquitetos:</b> hoje todos os 2.276 vínculos estão em 100%. Vai haver projeto com mais de um arquiteto dividindo o RT?<span class="ans"></span></div>
+<div class="q"><b class="n">21</b><b>Cadastro de arquitetos:</b> 93 RT foram pagos a contatos cadastrados como fornecedor e 78 como cliente. Quem corrige e até quando?<span class="ans"></span></div>
+<div class="q"><b class="n">22</b><b>RT já pago:</b> os 1.168 títulos antigos não têm venda ligada. O RT novo vale só daqui para frente ou o Financeiro reconstitui o que falta pagar?<span class="ans"></span></div>
+<div class="q"><b class="n">23</b><b>Comissão:</b> os 13 funcionários com percentual (até 5,5%, por equipe) estão corretos para virar regra? A partir de qual mês a folha paga comissão?<span class="ans"></span></div>
+<div class="q"><b class="n">24</b><b>RH no sistema:</b> quais usuários veem folha, comissão e salário “por fora”?<span class="ans"></span></div>
+<div class="q"><b class="n">25</b><b>Prêmio de vendas</b> (R$ 84 mil/mês no histórico) e <b>vale transporte:</b> são comissão, folha ou outro fluxo? <span class="rec">Rec.: <i>ambos na folha</i>.</span><span class="ans"></span></div>
+
+<h2>4. Custos recorrentes (migration 315 pronta, não aplicada)</h2>
+<div class="q"><b class="n">26</b><b>Aplicar a migration 315?</b> 38 custos, R$ 73,1 mil/mês; previsões de jan a mai/2027 (o a pagar previsto sobe R$ 58 a 73 mil/mês). <span class="rec">Rec.: <i>aplicar</i>.</span><div class="ck"><span>☐ Aplicar</span><span>☐ Revisar a lista antes</span></div></div>
+<div class="q"><b class="n">27</b><b>Meses à frente:</b> <span class="rec">Rec.: <i>6</i>.</span><div class="ck"><span>☐ 3</span><span>☐ 6</span><span>☐ 12</span></div></div>
+<div class="q"><b class="n">28</b><b>Perfil (Ribeirão/São Paulo) dos custos:</b> <span class="rec">Rec.: <i>vazio</i>, como o legado.</span><div class="ck"><span>☐ Vazio</span><span>☐ Por empresa</span><span>☐ Um a um</span></div></div>
+<div class="q"><b class="n">29</b><b>Consórcio e empréstimo</b> (fora da carga, são contratos com fim): cadastrar depois com data de fim? Qual a data de fim de cada um?<span class="ans"></span></div>
+<div class="q"><b class="n">30</b><b>Impostos mensais</b> (DAS, DARE, COFINS, PIS, DARF, FGTS; valor varia 50-80%): <span class="rec">Rec.: <i>fora</i> do custo recorrente.</span><div class="ck"><span>☐ Fora</span><span>☐ Estimar pela mediana</span></div></div>
+<div class="q"><b class="n">31</b><b>Tela de cadastro de custos recorrentes</b> para o Financeiro incluir, pausar e editar: <span class="rec">Rec.: <i>fazer depois</i> da migration.</span><div class="ck"><span>☐ Sim</span><span>☐ Só pelo banco</span></div></div>
+
+<h2>5. Virada e operação</h2>
+<div class="q"><b class="n">32</b><b>Ordem para religar os sistemas ao modelo novo.</b> <span class="rec">Rec.: <i>Compras, Separação, CRM</i>.</span><span class="ans"></span></div>
+<div class="q"><b class="n">33</b><b>Remover as estruturas antigas</b> só depois de quanto tempo sem leitura? <span class="rec">Rec.: <i>30 dias</i>.</span><span class="ans"></span></div>
+<div class="q"><b class="n">34</b><b>Lançamento manual e adiantamento a fornecedor:</b> o Financeiro lança hoje pela tela de Cadastrar Duplicatas? O adiantamento ainda precisa de fluxo próprio?<span class="ans"></span></div>
+<div class="q"><b class="n">35</b><b>Tela antiga <i>/antigo-retorno</i></b> (grava boleto direto): pode ser desligada?<div class="ck"><span>☐ Sim</span><span>☐ Não</span></div></div>
+<div class="q"><b class="n">36</b><b>Remessa e retorno de fornecedor</b> (Contas a Pagar), ainda não tocados: é prioridade?<div class="ck"><span>☐ Sim</span><span>☐ Depois</span></div></div>
+<div class="q"><b class="n">37</b><b>Campo de observação no modal de baixa</b> (hoje só o estorno tem motivo): adicionar?<div class="ck"><span>☐ Sim</span><span>☐ Não</span></div></div>
+
+</div>
+</body>
+</html>

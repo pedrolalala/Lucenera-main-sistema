@@ -1,0 +1,77 @@
+[00:00] É, vamos deixar isso da produção para depois, que aí eu vi realmente é bem mais complexo do que eu esperava. Você quer voltar aos testes que a gente tava fazendo ontem ou me passar uma coisa?
+
+[00:13] Não, te passar mais uma. Eu quero também ter um controle de garantia, por exemplo, solicitações de garantia. O que acontece, por exemplo, como é feito? Vamos supor, você vai lá, você é um cliente, de repente ele até já avisou aqui as meninas, ó, tô com embutido de solo queimado e tá dentro da garantia tal.
+
+[00:41] Aí acontece, garantia média 3 anos, né?
+
+[00:44] Da Interlight são 5, tá? Tem coisa que é 2, da Interlight é 5, mas tem fornecedor que é 2, fornecedor que é 1. Então, por exemplo, aí vamos supor, o cliente foi lá. Então a regra, em regra, se atende garantia de imediato. Então vamos supor, o cara foi lá, levou uma peça com defeito, a gente já pega do nosso estoque e atende o cliente. Aí que vai acontecendo, vai juntando um pouco esse material, juntando, juntando. É hora que tem um volume abre uma solicitação de garantia com o fornecedor. A outra possibilidade é se chegar um cliente que já tem um histórico de problema, de muitas peças queimadas, e chega com muita coisa, aí a gente não atende de imediato. Aí fala, ó, é estranho isso ter acontecido, tal, tem uma conversa. Nós vamos mandar para análise. Aí nesse caso já dá andamento no processo de garantia para o fornecedor para análise, porque não atendemos o cliente de imediato. O fornecedor vai analisar e vai ver se vai atender a garantia. Se atender, ele vai mandar as peças novas ou vai consertar, e a gente repõe o cliente. Só uma coisa para eu entender, qual que é o caso que teve que o cara veio com várias peças Que surto, dá um surto lá na rede elétrica, o cara até fala, ó, tive um surto lá, caiu um raio, chega com 30 peças queimadas. Outra coisa é recorrência. O cara veio cada 3 meses, veio 2 vezes trocar a mesma peça, já tem coisa errada. Na rede elétrica, não pode, entendeu?
+
+[02:39] Por exemplo, a gente tem um caso, geralmente é problema na estrutura elétrica da casa do que da peça em si.
+
+[02:48] Não acontece, por exemplo, teve um caso aí de uma peça da Interlight que cagava, aí beleza, foi cagada da Interlight, mas na maioria das vezes é problema elétrico.
+
+[02:59] Não tem, só para eu conseguir entender, não tem DPS, porque às vezes é bom a gente obviamente A gente vai ter que ter o controle disso. Só que é bom ter também, tem os dois casos na verdade, tá? Uma pessoa que faça análise quando é só fornecedor.
+
+[03:19] A gente não pode abrir a peça, tem como o cara vai entregar lá, tipo, dependendo da situação a gente vai ver a peça tipo estourada, teve sobrecarga, a gente vai ter que falar, tá vendo, sobrecarga, mas eu não posso dar o laudo, quem dá o laudo é o fornecedor, entendeu? Aí falou, tá vendo, é um tipo de, chegar uma peça estourada, por exemplo, é o tipo de peça que não atende de imediato, vai mandar para o fornecedor. Ele, se ele acatar a garantia, a gente entrega. Se ele não acatar, a gente tem que comprar outra.
+
+[03:51] E como tá hoje essa questão da garantia? Tipo, vamos supor, uma pessoa que comprou uma peça da Interlight, ou da Interlight, que são 5 anos, Se ele comprou há 5 anos atrás, tem esse controle, esse registro?
+
+[04:12] Vai puxar a venda, nota fiscal, tudo, né? Puxar o nome do cliente, ver quando vendeu.
+
+[04:22] E o que importa na garantia é quando a gente vendeu, não quando a gente comprou.
+
+[04:28] Para o cliente é quando eu vou, quando a gente vendeu. Para o fornecedor é quando eu comprei.
+
+[04:33] E se fizer, e se tiver uma, não tiver na garantia para gente, mas tiver na garantia, eu uso outra nota, eu uso uma nota mais recente.
+
+[04:44] Não, beleza, era só para pegar o que que eu uso, uma nota mais recente. Mas o controle de garantia que eu quero nem é para isso, tá? Eu quero o seguinte, então, por exemplo, vamos supor, você for lá no estoque, tem um canto lá cheio de coisas pedir garantia. Então, o que eu quero? Então, por exemplo, algumas garantias quem anda é a Débora e algumas é a Vitória, por conta de complexidade na emissão da nota fiscal para o fornecedor. Então, mas a maioria a Vitória que tá tocando e as outras é a Débora. Acho que só a Interlight, a Débora agora, e a Iluminar. Basicamente o que a gente tava querendo é o seguinte, vamos supor, aí o que que acontece também, vamos supor, tem uma peça queimada lá no cliente, aí as meninas mandam email: favor adiantar a garantia da peça tal, tal, tal, tal para o cliente. Por quê? Porque ele não quer pagar o eletricista duas vezes. Ele, aí a gente entrega a peça nova, o eletricista vai lá, tira a queimada, instala nova, e aí a gente tem que recuperar essa peça queimada. Alguns eletricistas levam para nós, ou a gente tem que buscar o cliente trazer, mas meio que fica, tem que ter essa gestão. Então o aplicativo é basicamente isso: chegou um cliente lá para atender a garantia, beleza, vai fazer, vai dar a saída do material no sistema, tudo isso eu tô falando que nem tá usando o sistema aqui, depois pode estar tudo linkado, entendeu? Depois é tudo muito mais fácil assim.
+
+[06:29] Na Connect hoje não tem esse controle.
+
+[06:31] Não, o Matheus faz a saída do produto em garantia, aí ele fica com isso lá, ele vai meio que alimentando uma planilha, entendeu? Vai alimentando uma planilha, uma planilha de garantia. E aí eu não quero mais isso, ter no sistema. Então tem um aplicativo, então beleza, ó. Interlight, chegou isso aqui para pedir garantia. E aí vai, beleza, vai tendo essa planilha, alimentando essa planilha. Fechou planilha, não, né, o sistema. Fechou um bloco, viu que tem uma certa quantidade de produtos para pedir, aí beleza, aquele é um bloco. E aí ali começa um processo de garantia. Então aquele bloco de produto vai virar um protocolo de garantia. Que ali vai ter os status que a gente pode falar: em contato com fornecedor, nota fiscal emitida, material enviado, aguardando análise, material recebido, finalizou. Onde todo mundo pode ver como tá os processos de garantia. Quando é isso, eu falei de um, esse material, vamos supor, esse, tô falando de um material que já foi atendido o cliente. Então tem um bloco de material que todos os clientes já foram atendidos. Então tudo que chega é nosso, repõe o estoque. Agora tem os casos, surto, o cara trouxe 30 peças. Aí é onde pega que as meninas ficam cobrando esse processo. Então entrou lá, garantia, resolver de imediato, já vai cair para Débora aqui um exemplo, com a Vitória. E aí ali as meninas conseguem acompanhar o status também. Caiu esse bloco de garantia que precisa resolver já com fornecedor, que o cliente não foi atendido, aí já coloca em contato com fornecedor, emissão de nota, produto enviado, e as meninas vão acompanhando como tá esse processo. E rapidinho, rapidinho, para eu não perder, e a gente vai ter um histórico compilado de tudo que Tá sendo de garantia, tá?
+
+[08:39] E o desfecho, duas coisas que eu preciso perguntar: o hélio, a peça é vinculada com hélio, nem precisa mais, nem precisa mais. É uma coisa que a gente pode eliminar, que não importa. Geralmente, qual que é a finalização com a empresa, com a Interlight, por exemplo? Eles vão mandar peças novas ou eles retornam?
+
+[09:05] Beleza, com a Interlight eles vão mandar peças novas. Eventualmente, mas muito raro, eles vão corrigir uma peça, é consertar, né? E é isso, pode colocar lá como foi solucionado, né? Por exemplo, ou eles podem não acatar a garantia, pode acontecer, normal.
+
+[09:30] Não acatar a garantia é literalmente falar assim, ah não, um problema não é nosso.
+
+[09:34] Exato, não foi. Vou dar um exemplo: a gente solicitou uma garantia da Lenca, mas o cara tipo cortou, tipo que entrou água, mas o cara cortou o plástico, ou seja, ele foi mau uso. Aí o fornecedor não vai atender garantia. Chegou lá uma placa de LED queimada, um exemplo, no laudo ele vai ver, ó, teve surto, então Então teve uma sobrecarga de energia, ele não vai atender. Ele vai atender só se for problema técnico.
+
+[10:09] E a luthineira sempre atende?
+
+[10:12] Não, se o fornecedor não atendeu, nós não vamos atender. O cliente vai ter que cobrar, vai ter que cobrar do cliente.
+
+[10:20] Tá, beleza.
+
+[10:22] Aí é isso. Então tem, aí vamos pôr, sabe esses casos que adianta a peça sem ter a peça com defeito também alimentar garantia adiantada, um exemplo, né? E aí ela fica em pendência aguardando o retorno da peça queimada para a gente poder ter essa gestão. Sei lá, semanalmente a gente cobra as meninas, ó, esse material precisa voltar para dar andamento em garantia para o fornecedor e tal, entendeu?
+
+[10:53] Completo? Não, eu acho que esse é um, é mais de boa. Deixa eu ver rapidinho, deixa eu ver onde tá a planilha de garantia.
+
+[11:20] Mas qual comando você notifica? Ah, comando do email. Mas deixa eu dar uma lida aqui, a gente tinha, não tinha? Ah, vou dar baixa. Não, depois eu vou imprimir, vou só estar para você montar. É, nem tem planilha mais.
+
+[14:00] Eu vi você falando, não, mas beleza, não tem.
+
+[14:04] Se a gente vai ter que refazer de alguma outra forma, mas tipo, aí como aplicativo vai ser a planilha, né? Vai ser a planilha. Vou condicionar o Matheus não deixar acumular, ele vai Chegou, já alimenta.
+
+[14:19] Tem algum, você quer mais para frente a gente determina, mas a gente pode determinar um limite já na Interlight. Spot pode ter só 100, um exemplo.
+
+[14:32] A gente pode, chegou Interlight, juntou 15 peças, pedir garantia. Beleza, entendeu? Tipo assim, porque hoje a maioria das garantias da Interlight EvoLED tinha, mas EvoLED quase não trabalha mais.
+
+[14:51] E Stella, geralmente é spot que dá problema, ou não?
+
+[14:57] Não, é driver, driver que é o que alimenta, né, que alimenta a fita, lâmpada, luminária com LED integrado, né, que é os embutidos de sol, essas coisas que é da Interlight.
+
+[15:12] Então é sempre, vai ser sempre 3 marcas, a grande maioria, umas 6 marcas.
+
+[15:21] A Stella que faz os drivers, tem garantia geralmente a Stella, Iluminar, que às vezes é um processo de garantia que nem é nada queimado, é uma produção errada. Por exemplo, a Iluminar, a gente comprou as dueto É que é um plafom lá, eles mandaram sem as molduras. Tipo, tem que abrir um processo de garantia com eles, entendeu? Não posso comprar as molduras, eles não mandaram as molduras. Então é um processo de garantia, é um saque com eles, mas é para eles mandarem as molduras. Tipo, nem sempre a garantia é porque queimou alguma coisa.
+
+[16:03] Entendeu? Pode ser tipo um envio errado, pode ser às vezes uma deve troca que a gente fala, né?
+
+[16:10] Um envio errado, sei lá. Esses dias produziram, a Interlight produziu, matando o processo deve ter umas 3 semanas, 300 e quase 400 embutidos de solo que era para vir com ângulo aberto e mandaram com ângulo médio, tipo era para vir 30 graus, mandaram 20. É tipo caixa com etiqueta certa, tudo certo, só o ângulo, a peça, tipo a lente dentro da peça, colocaram uma lente que tá fora de linha, que é o ângulo de 20 graus.
+
+[16:48] É, tá, eu entendi. Esse é o outro sistema que você falou, né?
+
+[16:54] É, dos dois são os dois mais fáceis assim.
+
+[16:57] Aí acho que o outro, de repente, a gente pensa, a gente vai ter que pensar melhor. Então vou pausar aqui, vamos

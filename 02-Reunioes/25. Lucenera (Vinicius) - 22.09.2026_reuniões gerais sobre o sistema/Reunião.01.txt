@@ -1,0 +1,387 @@
+[00:00] E vamos ver, você vai me mostrar alguma coisa ou vamos?
+
+[00:08] Eu acho que agora é a gente revisar o que tinha sido passado. Se você quiser, eu até vou falar o que eu fiz, ó.
+
+[00:15] Eu peguei lá porque eu tava, eu tava meio perdido, tipo, do que tinha sido feito ou não. Aí eu meio que Gerei um arquivo aqui, eu até imprimi, que eu ainda gosto das coisas impressas, para ir ticando. Por exemplo, aquele campo que eu tinha colocado, qual a diferença de arquiteto e responsável obra? Aí a gente tinha comentado de deixar responsável obra como engenheiro. Matou?
+
+[00:50] Belíssima pergunta.
+
+[00:51] Isso na criação do projeto, dentro do orçamento, na criação direto dentro do orçamento, tá?
+
+[01:02] Eu acho que não foi corrigido.
+
+[01:04] Deixa eu ver aqui, pera aí, muito específico. E aí eu deixo de lá, aí o que der ok aqui eu já dou ok, já tiro fora aqui, porque senão eu vou me perder. Deixa eu ver se foi, se era aqui, ó.
+
+[01:18] Acho que era em orçamento, sim, eu lembro disso.
+
+[01:31] Acho que era aqui, ó, no novo orçamento. Aí Era aqui, ó, aqui, colocar, buscar engenheiro. Mas pode mudar aqui, ó, engenheiro, igual tem aqui, ó, arquiteto. Vou deixar como um ponto de exclamação aqui, tá, para a gente. Beleza, não vou dar como ok.
+
+[02:04] Sim, trocar responsável de obra. Por engenheiro.
+
+[02:18] Aquela questão lá de quando tem a revisão financeira lá, que muda uma data, muda alguma coisa, que volta tudo.
+
+[02:28] A gente, eu lembro, sim, sim, eu lembro. Eu acho que eu corrigi isso.
+
+[02:37] Para não voltar mais, né? Tipo, as meninas mandou, tipo, acabou ali a responsabilidade delas, aí é a nossa.
+
+[02:47] Só confirma na—
+
+[02:49] tem um, seria aqui, ó. A gente poderia tipo editar aqui e aí não pode voltar mais para cá.
+
+[02:58] Já faz uma edição aí rapidão que eu lembro de Disso foi uma das coisas que eu alterei.
+
+[03:13] Sei lá, vou mudar o quê? A data.
+
+[03:32] Voltou para aprovação do cliente, voltou para aprovação do cliente, tá. Então toda vez que tiver em revisão financeira não é para voltar. Eu já vou ter que ver onde que tá essa porra desse código aí, vou apagar isso tudo.
+
+[03:58] Beleza, beleza. Aí tinha um negocinho, deixa eu ver aqui se a gente tem na conversa aqui.
+
+[04:05] Pera aí, tinha um que eu lembro que você tinha falado com relação ao valor.
+
+[04:14] É, então aqui, ó, pera aí, que foi na sequência que eu fui vendo. Aqui, ó, o que seria essa condição de pagamento? Tirou, né? Aí aqui eu tinha colocado várias coisas, já foi adicionado, pode dar OK.
+
+[04:36] Isso eu tenho certeza.
+
+[04:38] Então tá, quero o valor com desconto, tal, né? Então beleza, esse aqui, OK.
+
+[04:44] Se quiser até inclusive abrir Eu vi que tinha lá o valor, as parcelas, um outro que eu fiz já foi feito também. A parcela, agora quando você coloca a parcela, a primeira parcela, ele divide as outras parcelas pelo montante total, o restante, né, pelo restante, para não ficar em aberto, tá?
+
+[05:08] Aquela questão do de deixar seguir com peça sem cadastro. Não passa, não passa mais, não, não passa.
+
+[05:20] Mas se você quiser até confirmar, vamos fazer aqui, então já pega nele aí.
+
+[05:25] Vou meditar esse aqui, aqui não.
+
+[05:44] Criar um novo produto ali em cima.
+
+[06:03] Bem, eu tô falando mais visual aqui, tá? Porque a gente vai fazer muito. Tem como, tipo, por exemplo, botar uma borda? Porque tem 3 blocos de dados para preencher, que é aqui, aqui e aqui. Tipo, colocar uma borda aqui em volta. Na minha tela não tá aparecendo, tá? Não sei se já tem uma borda aqui, entendeu? Separando os blocos para não ficar confuso.
+
+[06:34] Tem o dado, os dados básicos com um cardzinho em volta, ou Custo e preço com cardzinho em volta, fiscal e comercial com card. Tem, tem, vou fazer isso dentro de buscar produtos dentro de orçamento.
+
+[06:53] Beleza, acho que qualquer cadastro de produto vai abrir essa tela então.
+
+[07:05] A marca vai ser obrigatório, você vai ter que colocar.
+
+[07:22] Pode trazer isso aqui zerado, tá?
+
+[07:27] Também a gente tinha conversado para deixar isso como um padrão. 150%, mas para tipo visualização, vamos supor, ah, o preço de custo a gente já sabe que é 300, e aí ele vai estipular mais ou menos um preço de venda.
+
+[07:46] Tá, mas isso vai interferir lá naquele negócio que eu pedi de peça sem cadastro.
+
+[07:51] Sim. Ah, então tá, porque coloca o preço de custo ali só para você entender mais ou menos.
+
+[08:06] Aí, ó, já tá fazendo pisnada.
+
+[08:15] Como assim sumiu? Vai ali no— aqui é esse aqui, é esse, é apertinho editar aqui.
+
+[08:27] Nossa, mas que loucura!
+
+[08:30] É do lado da onde exclui.
+
+[08:33] Então, mas aí tipo, que tava fazendo perdeu.
+
+[08:37] Não sei, vamos ver.
+
+[08:43] É, não sei, tipo, já aconteceu algumas outras vezes. Meio que atualizou a página, mano.
+
+[09:07] Eu não sei por quê, mas alguma coisa do seu PC é bugado com o orçamento, velho.
+
+[09:13] Ô Pedro, mas aqui, ó, vem cá, ele não deixa pôr o preço de venda, tem que pôr o preço de custo. As meninas nunca vão saber esse preço de custo aqui nesse negócio aqui, porque não sei se a gente ainda vai continuar usando simulador tudo, né? Mas o preço, elas não têm o cálculo, porque elas pegam o preço de custo da tabela, joga no simulador, a fórmula tá tipo oculta nas coisas lá, e o risco delas colocarem aqui errado é muito grande. Então eu prefiro que elas coloquem o preço de venda que elas extraíram do simulador.
+
+[09:50] Tá, preço de venda não tá dando para colocar, não deixa aqui, ó.
+
+[09:56] Eu vou colocar um preço de— aí é isso, tipo, quando for um item sem cadastro, por isso que isso aqui não faz— se fizer sentido por conta disso que eu vou falar, beleza, mas senão não. Sempre quando tiver um preço de custo, é, perdão, colocar um produto sem cadastro e eu colocar tipo R$100 de venda aquela margem que aparece naquela consulta que eu faço para ver a margem, tudo tem que ser sempre 50% dos itens sem cadastro, entendeu? Que é uma média, tá? Eu não sei se lá tá 50 ou 100%, mas tipo assim, colocou 100 aqui no preço de venda, meio que considerar que custo é 50, colocou 1000, considera que o custo é 500.
+
+[10:47] Ele tá ao contrário. Coloca 100 ali no preço de custo para você ver, vai dar 150, 250.
+
+[10:56] É porque tá com a margem, né? Então por isso que aqui as meninas vão usar ao contrário, só colocar o preço de venda.
+
+[11:05] É, tá.
+
+[11:06] Nossa, mano, tem um negócio aqui Urgente que a gente não tem, não, que eu não te falei e tem que ser feito. Que é aqui mesmo. Essa tela é a mesma tela se for direto lá no cadastro de produto? Sim, é a mesma tela. Minutinho, tá?
+
+[11:35] Beleza.
+
+[11:50] Como que chama ele? O Felipe falou com quem? Com o dono? Que é o dono? Explica para ele falar, o Felipe. É, o Filipe conversou. Isso é melhor. Ô Pedro, tem um detalhe que precisa criar aqui, mano. É isso aqui, ó. Mostrar aqui. Eu difícil, a gente dificilmente vai criar um produto do zero, do zero, zero, zero. Então se a gente for criar um produto da Evoled, da Interlight, por exemplo, um outro embutido de solo, eu vou vir aqui, ó, 3649, e vou copiar. O que que eu vou copiar? Eu vou criar um outro produto idêntico a esse com outro código interno, código interno da sequência. Por que isso? Porque eu já pego todas as informações, informação de imposto, o NCM, talvez eu tenha que mudar, mas eu já pego a estrutura do cadastro de produto. Sempre foi assim, na Citel a gente tinha isso, aqui tem isso. Então a gente pega toda a estrutura e faz as alterações que precisam ser feitas. Por exemplo, a marca já vai estar preenchida, o fornecedor vai estar preenchido, a categoria. Então eu nunca vou cadastrar uma lâmpada pegando uma luminária de herança, entendeu? E aí tem que ter isso, tá, para ter a herança de um produto, tá?
+
+[13:33] Eu vou fazer isso só dentro do cadastro, tá?
+
+[13:37] Do cadastro, sem ser aqui dentro, sem ser dentro do orçamento. Não tem problema, porque aí a gente fica até bom então. Aí, sendo assim, pode simplificar isso daqui, meu amigo. Sendo assim, simplifica isso, não bota nada. O que nós vamos fazer? Porque as meninas vão preencher nada disso. O que você vai colocar de obrigatório aqui? Tira isso, tira isso, tira tudo, deixa Só os dados básicos, dados muito básicos, ó, porque aí a Débora cadastra bonitinho. Que nós vamos deixar aqui referência, que aí pode sair no orçamento, a Débora vai, já vai aparecer na linha, entendeu? Sim, é o nome do produto. Ok, pode deixar, mesmo que seja básico. A marca e o preço de venda, beleza, só. E aí a gente, aí para quê? Aí você pode até mudar essa nomenclatura aqui, é adicionar um item sem cadastro, de repente.
+
+[15:01] Sim, em vez de criar um novo produto, adicionar um item sem cadastro.
+
+[15:06] Isso, ó, ADD. Vou mandar isso aqui, item sem CAD. Aí, e beleza. E aí você cria aquela configuração lá no cadastro de produto, tá?
+
+[15:32] E aí vai dentro do do produto. Essa é a lógica, né? Vai dentro do produto, abre ele, aí na hora que abriu ele você aperta copiar, ele vai abrir um novo produto com código, um novo produto, isso. E aí você só muda o que for necessário, mas vai estar ali, o campo tá aberto para alterar todas as informações.
+
+[15:55] Isso. Eu vou dar um exemplo banal. Às vezes eu tenho um embutido, saiu um embutido de solo novo aí, vai, sei lá, A gente foi, cadastrou ele, só que só vendeu o ângulo fechado. Aí surgiu a necessidade de vender um aberto. Tá pronto o cadastro, a gente copia, vai mudar uma sigla que é o ano, vai mudar só o ângulo porque o preço é o mesmo, entendeu? E aí uma que diminui muito tempo e é muito mais simples e diminui muito erro. Tá, tá bom. Aqui eu vou colocar um item sem cadastro só para já ter adicionar item não cadastrado. Você mudou agora já?
+
+[16:36] Não, é que ele aparece a nomenclatura depois, ele vai apertar ali adicionar item não cadastrado. Mas que loucura, você pediu, já tá pronto. Já tava, já era. É que tem como fazer desses dois jeitos. Então desce ali, já aproveita e faz desse jeito.
+
+[17:04] Não, mano, mas nem tinha aqui.
+
+[17:06] Eu tinha que vir aqui e entrou em cadastrar, em adicionar novo.
+
+[17:11] Ah, eu vim aqui, tira, tirar, criar novo produto.
+
+[17:17] Beleza.
+
+[17:17] E aí a gente vem aqui direto. Aí só traz isso. A questão do L, né, tem que manter a descrição, tá?
+
+[17:26] Descrição, no caso, é o nome, né, do produto, a referência e a marca.
+
+[17:33] Falta que a marca não vai aparecer aqui, né? Preço unitário, 500, o L.
+
+[17:50] Eu acho que é isso.
+
+[17:51] Só falta colocar aí dentro preço, referência e marca. Preço tem, ó.
+
+[17:57] É, tem que ver se é o preço.
+
+[18:02] Aqui é o preço de venda, ó.
+
+[18:04] Será? É aquele automaticamente coloca o preço de venda como preço de custo também.
+
+[18:12] É, agora aqui, ó, vamos supor, se eu quiser ver lá a margem, cadê? Aonde que é?
+
+[18:18] Aí dentro é só o preço de venda, é verdade.
+
+[18:22] É, agora onde que é?
+
+[18:24] É ali em cima para ver a margem de lucro, em cima, 3 pontinhos aqui, ó, do lado de XML, gerenciamento.
+
+[18:36] Mas eu coloquei 500, né? Colocou 500. Ah, ele deve estar pegando desconto já. Ah, tá, ele já tá pegando 10% de desconto, R$50. Por isso que apareceu R$450 lá. Aqui não pode, aqui tá errado. Ó, vamos lá. Se a gente, se a gente colocou aqui, tá certo, tá certo assim. Quer ver? Fazer uma coisa aqui. Grava. Venda com desconto, certo? Aqui tá tudo com desconto já, né? Tá tudo preço com desconto. Então, ó, R$450, que eu coloquei R$500 e virou R$450 com desconto. E aí tá me dando quanto de margem? R$50. Vou tirar o desconto. Manteve os 50. Percebeu que aqui mudou? Aqui tava 55. Esse aqui não pode, se ele tem que acatar então também o desconto, tá? Entendeu? Ó, vou botar o desconto de novo, ó. 60, 60, 50, 10%.
+
+[20:28] Dá para colocar por ali, viu?
+
+[20:30] Volta lá aqui na peça, né?
+
+[20:31] Não, não, vai ali em cima no gerenciamento adicional.
+
+[20:35] Ó, tem 5 aqui.
+
+[20:37] É, vai no gerenciamento ali.
+
+[20:38] Ah, tá, tá.
+
+[20:40] Aqui, ó, desconto simulado. Aí, 10%, que era que tava.
+
+[20:46] Quero fazer até outro teste. Pera aí, desculpa, que aqui tá com desconto adicional que eu coloquei. Deixa eu ver se vai mudar lá também. Tirei de uma peça, as duas tava com 60, lembra? Aí já tem alguma coisa também que precisa ver, não pode, entendeu? É o desconto no item. Não tá sendo considerado aqui, tá, nessa margem, no gerenciamento de orçamento. É, ele tipo, ele faz o cálculo, mas só não aparece na porcentagem. É, não tá reconhecendo aqui na porcentagem, tá? Porque se eu colocar aqui 10, ó, beleza, mudou aqui, vendo? Mudou, só não mudou É, só tem uma coisa, tá, que eu tô achando que tá esquisito aqui. Essa margem não tá legal porque não tem como esse aro estar na mesma margem da lâmpada. Esse cálculo não tá certo. Vou dar um exemplo, tá? Vou dar um exemplo não, vou olhar lá no sistema. Então vamos lá, 6654 e 9801. 9801, não é a mesma margem. 6654, o do aro está certo para mim, tá? Vamos fazer diferente, vamos fazer aqui no orçamento mesmo. Pus uma peça só, só para Independente da quantidade, a margem é a mesma. Agora o Sérgio colocou, não tinha aqui. Colocar desconto aqui. Ó, vamos lá. Aqui talvez seja arredondamento, né? Deu 61 e, ó, 52.
+
+[23:20] Tá, então ele tá puxando uma margem já padronizada. Ele não tá fazendo o cálculo da margem, não tá fazendo o cálculo, tá? Ele tá já colocando como padrão tudo por 50%. Eu já tinha visto isso, tinha corrigido em outro sistema, mas como tem os sistemas são separados, eu vou ter que, eu vou fazer um backup geral e modificar tudo que tiver percentagem de lucro.
+
+[23:50] Nossa, um detalhezinho que a gente, você vê, tipo, vai fuçando, vai fuçando, vai achando.
+
+[23:58] Porque tipo, vamos supor, eu nunca vou reparar que aqui o plafom e a luz não tem a mesma margem de lucro, entendeu? Não é uma coisa que eu tô no dia a dia aqui pensando, vendo.
+
+[24:11] E eu ainda não, eu acho que eu tinha acessado Mas eu não tinha reparado.
+
+[24:19] Ah, essas coisas só vai reparar com o tempo. Por isso que eu falo que a questão é usar mesmo para a gente começar a encontrar essas dificuldades e os problemas do sistema.
+
+[24:31] Mas isso, tipo, se a gente solta o sistema assim, seria um mega problema, tipo, estaria mega mascarado a margem. Aqui, ó, beleza. Ó, mesma coisa. Vamos ver aqui se o Sérgio ele vai deixar agora. É, tem ali, mas não tem como preencher, né? Aqui aí não deixa, nem aqui não tem opção aqui de colocar o desconto, nem aqui embaixo, nada. Não tem opção, tem ali, mas não tem opção, só tem o campo. É, só tem o campo. Então tá, então é outra coisa. Você quer? Ah, vamos botar o produto lá mesmo assim, sem cadastro, para ver se ele vai, para já fazer o teste. Finalmente chegamos nele, tá? Salvar. Vou falar, tá, que as meninas vão pedir: traz esse salvar aqui para baixo também.
+
+[25:48] Eu já imaginava já que isso seria uma pauta. Vai estar na aprovação do cliente.
+
+[26:02] Aqui direto, né? Aprovar. Não é possível aprovar, não tem produto cadastrado, peça sem código interno. Beleza, ótimo. A gente tira muitos problemas com isso.
+
+[26:30] Aí o valor da parcela, permuta, desconto.
+
+[26:36] A permuta até tem aqui que eu anotei, depois a gente vai chegar lá. Beleza, acho que aqui é isso. Você quer mexer com essas coisas e a gente continua? De repente a gente pode fazer outra amanhã.
+
+[26:54] Uai, você que sabe, Vini. Tem outras coisas, outras observações de outros sistemas que tem. Pera aí, tem pendente. Eu fiz a vendas também.
+
+[27:03] Vendas, você quer me mostrar?
+
+[27:05] Tá dentro da central aqui, ó.
+
+[27:09] Pera aí, aqui deixa eu dar um OK. Que é a questão do produto, o produto sem cadastro, faturamento. Isso aqui é do vendas, acho que vai entrar. Pera aí, aqui é a questão do vendas, orçamento. Deixa eu só ver. Aqui tá me dando é fome já.
+
+[27:34] Então eu tô pensando nisso. Vai estar para baixo. Foi?
+
+[27:45] É, não quero ver um negócio aqui.
+
+[27:46] Ah, tá.
+
+[28:05] Aqui de deixar mais visível, tá?
+
+[28:12] Peças e produtos, referência, ter a cor preta, deixar tudo preto mesmo. Como se fosse um, como se fosse um padrão sistema, né?
+
+[28:28] Os responsáveis, você arrumou da onde? Acho que sim, né? Tinha visto que sim. Aqui, quando for criar um orçamento aqui, do responsável ser só aquelas 3 pessoas. É, e aí eu tinha pedido para colocar o digitador também, né? Quando fosse aparecer lá no orçamento, ia aparecer o vendedor, que são as 3, e o digitador, que poderia ser o pessoal da equipe.
+
+[29:13] Então tem que ter, tem que abrir um campo a mais, né?
+
+[29:17] Teoricamente é, ou vai, ou pega do login, né? Que cada um não vai ter login, ou pega do login que aí já vai estar fixo, a pessoa não consegue alterar. É porque aqui é o arquiteto externo, aqui é o vendedor. Então, por exemplo, aqui vai a Tairine. Aí no orçamento vai aparecer só até a Irene, mas não é a Thaírene que tá fazendo. Então pode ser Adriana, tudo, entendeu? Ter a corresponsável, digamos assim, tá?
+
+[29:51] Sei lá, ou bota aqui, é, já deixar registrado quem foi a pessoa que fez o orçamento.
+
+[30:02] Já vai extrair direto do login.
+
+[30:06] Tá, eu acho que é direto do login, que é o seu melhor, porque senão aqui qualquer um pode pôr qualquer um, que aí não vai ter, não vai ter a possibilidade da pessoa colocar. Isso já vai vir direto na hora que ela fizer o orçamento.
+
+[30:20] E aí vem lá do, e aparece depois no layout, no orçamento.
+
+[30:30] Quando for mandar para o cliente aprovar.
+
+[30:35] A coisa de venda, né? Vamos lá na coisa de venda.
+
+[30:39] Vai na central ali no lado, aqui do— acho que já foi vendas.
+
+[30:51] Então é depois, aqui vem tudo que aprovou o financeiro lá. Isso, garoto, esse aqui, emitir nota fiscal e ver boletos. Consigo imprimir?
+
+[31:02] Podia, posso colocar, mas vê, aperta emitir nota fiscal para você ver. Tá, aí o que que eu fiz? Eu já, eu rastrei lá, entrei no Focus NFE. Aí vi toda a documentação deles e vi o que que precisa para já deixar pronto. Então, a partir do momento que a gente fizer o login no NFE para já começar os testes, é só eu fazer o cadastro aqui dentro e fazer o link de API. E aí ele já tá pré-definido para o Focus NFE.
+
+[31:45] Beleza. E aí a gente vai conseguir mexer alguma coisa, alguma coisa aqui, né?
+
+[31:50] É. Então eu lembro que a gente tinha conversado, o negócio é É o nome da razão social e poder alterar o tanto de peça para emissão de nota, não é?
+
+[32:00] É. E de repente é conferir também, por exemplo, se tiver frete, colocar a transportadora, entendeu? Tem várias coisinhas.
+
+[32:11] Quais são as informações que estão faltando aí que você tá vendo de abrir o espelho?
+
+[32:19] Pera aí que de cabeça Por exemplo, esse aqui abre o espelho. Tipo, tem que— então pera aí, tô tentando achar a palavra aqui. A gente vai usar essa questão da base de cálculo de CMS e tal. De ST, por exemplo, a base de cálculo de ICMS, valor de ICMS, é que vai ter que deixar pronta essa estrutura, mas só vai aparecer quando for venda do lucro presumido. Quando a gente tiver venda também para uma revenda, que é do material da Ubico que eu importo, vai ter aqui também provavelmente valor de ICMS ST, entendeu? Então isso aqui é bom, tá vendo? Aí ele vem aqui, ó, Ele expande, tipo, é porque isso aqui é toda a estrutura fiscal, né, que isso aqui depois vai estar tudo dentro do XML e tal. Mas tá vendo, aqui já tem, ó, tem até valor de IBS, CBS aqui já, que a gente não tá pagando ainda isso. Isso tá só notificando porque tá em teste por conta da reforma tributária, né. Aqui tem várias, mas acho que talvez mude aquela visualização do espelho depois que fizer a API. Talvez vai abrir em algum outro, sabe, em alguma outra estrutura que seja a estrutura deles e que já vai vir de acordo com o que tem que vir mesmo, sabe? Isso aqui é tudo parte fiscal. Mas o que me pega depois, né, o que precisa ter, mas volta a falar, eu acho que depois que fizer API isso vai ser, vai ter isso já, que é essa questão, tipo, se eu quiser colocar um, se é um frete remetente ou eu colocar aqui uma transportadora, entendeu? Colocar uma quantidade de volume aqui, ó, 5.
+
+[34:37] Enfim, aí tem faturamento também como submódulo, dados adicionais, nota, impostos.
+
+[34:45] Faturamento vai ser os dados financeiros mesmo, tipo se vai ter boletos, tal, né? Dados adicionais, aqui acontece, vamos supor, às vezes você vai vender para empresa e eles pedem para colocar E eles geram pedido de compra. Então vai colocar aqui, ó, venda, um exemplo, tá, referente ao pedido de compra XXX, sabe? Isso aí que vai sair aqui, ó.
+
+[35:26] Um exemplo, né, que é esse campo aqui, ó, dados adicionais, que vai lá para baixo na hora da emissão.
+
+[35:36] É bem aqui.
+
+[35:39] Quais outros campos?
+
+[35:41] Aí tem aqui notas de referência. Por exemplo, se é uma nota fiscal de devolução, então vai estar referenciada a nota. E-mail aqui vem até automático. É que eu não consigo fazer nada. Ah, até consigo. Cacete, fechei! Ah, não acredito! E-mails, nota fiscal eletrônica.
+
+[36:09] Aqui acho que é XML resposta, NFI dados, resultado, mas não tem nada para aparecer nada aqui.
+
+[36:17] Eu acho que conforme vai mudando Beleza.
+
+[36:20] Aí produtos ali, né, produtos que são todas as informações da nota. Aí a parte endereço, entrega, retirada ali em cima.
+
+[36:32] É, se quisesse colocar alguma coisa aqui, ó, que aí adicionar o endereço de entrega. Se eu colocar isso aqui, isso aqui provavelmente esse, os dados que colocar vai lá para as informações adicionais. Tá, mas não faz sentido colocar aqui. Pode colocar lá, que a gente não faz, a gente não usa, tá? Vamos lá, hoje o que a gente usa, isso aqui fica do jeito que tá. Ah, é para colocar entrega em outro lugar, dados adicionais, tá? Beleza, que a gente usa hoje. Se eventualmente precisa fazer algum ajuste aqui de boleto, Isso. E aqui, aí os dados adicionais, vai, você precisa colocar alguma coisa aqui. E aqui é, a gente dificilmente mexe aqui nessa estrutura de imposto, desconto. É, a gente vai mexer aqui na transportadora, tal, essas coisas, tá? É que eu acho que essa parte vai vir da API já, tá?
+
+[37:34] Mas não, eu não sei se a gente vai ter que fazer isso aqui. Aqui não se aplica saída normal, o que que são os campos que abre aqui, ó, em cima, bem do lado de Manuela Zawicz?
+
+[37:47] Aqui? Então aqui, porque é uma nota de não se aplica. Deixa eu ver, não sei o que que é. Ah, presencial, internet. Então é aqui, é sempre não se aplica, tá?
+
+[38:01] Porque é um produto ali, pelo que eu entendi, às vezes é nota fiscal de Como que chama?
+
+[38:09] Internet, teleatendimento, entrega domicílio, sei lá. Saída, entrada. E aí, quando você vai fazer um pedido, é que nem é uma nota de venda, então é saída. Entrada, por exemplo, aqui já é aquela questão da importação. Sim, que aí eu estaria emitindo uma nota de entrada. Ou de devolução. Se eu tô emitindo uma nota de devolução, é uma entrada. E aí aqui, só que isso eu não mudo aqui, isso aqui vem, aqui é normal, complementar, ajuste, devolução. Só que isso daqui geralmente a gente não muda.
+
+[38:50] Da saída, da saída, quais outros campos que tem? Vamos ver se são os mesmos. Beleza.
+
+[38:57] É, aí aqui depois, aqui é natureza da operação. Aqui vai, aqui tem opção de venda. O que acontece, venda é venda, mas pode ser tipo venda entrega futura, uma venda de entrega futura, só que muda o CFOP, muda um monte de coisa. O que que é isso? Uma venda de entrega futura, ela não tem, ela tem tem valor fiscal, só que eu não pago imposto ainda. Eu vou, se eu fizer uma nota fiscal de entrega futura, depois eu tenho que efetivar ela. Exemplo, eu não uso aqui porque dá mó bucha e porque faz muita, vai, não faz uma entrega de uma coisa só. Você for comprar qualquer coisa na internet, por exemplo, que for demorar tipo 60 dias e o cara lá precisa emitir a nota, provavelmente vai ser uma nota fiscal de entrega futura. Ou seja, o cara tá emitindo uma nota fiscal de venda com a promessa de entrega futura. Quando ele for te entregar esse material, ele vai efetivar aquela nota fiscal de entrega futura, vai chamar uma nota fiscal de entrega efetiva, que aí no final das contas ele vai ter que emitir duas notas fiscais para uma coisa só. Ele fecha a operação, entendeu? Eu faço uma nota fiscal de entrega futura, no momento que eu entrego eu efetivo.
+
+[40:36] A rotineira não usa isso, só uso se for, se o cliente pedir, tá?
+
+[40:42] Então tem que ter esse campo, mas vai ser É, aí eu não gosto de repetir como a gente trabalha, tá? A gente vendeu, emite a nota fiscal. A maioria dos nossos clientes são de Ribeirão Preto, então eu não emito nota fiscal de entrega, entendeu? Porque não tem, não tem trâmite, não tem transportador. Estamos falando de Ribeirão Preto, tá? Não tem transportadora, não tem nada. Beleza. Agora vamos no caso que é venda. Fiz uma venda lá para Inhotim, igual a gente faz lá do Claro. Eu faço a nota fiscal de venda a maioria das vezes. É que eles mudaram um pouco a política, mas vamos, por exemplo, uma vez eles pediram nota fiscal de entrega futura, deu uma bucha para fechar o fiscal. Entendeu? É mó treta porque você não entrega tudo de uma vez. Se for entregar tudo de uma vez, beleza. Agora, as entregas picadas, você tem que ir fazendo essa gestão para fechar tudo. Então é complicado. Então, como a gente faz? Vende, faz a nota fiscal de venda. Quando precisa entregar a mercadoria faz uma nota fiscal de simples remessa, que é só para transporte, entendeu? Aí é isso que precisa ser implantado lá também. De repente lá, que que nós vamos ter que fazer? De uma separação ou várias separações poder emitir uma nota fiscal de simples remessa. Aí nós vamos ter que ver Hoje, como é feito, tá? Se o Matheus precisa emitir, se a gente precisa emitir uma nota fiscal de simples remessa, ele tem que meio que digitar um orçamento fake, que é isso aqui, ó, orçamento. A gente pode melhorar isso, tá? Outros, outras saídas, entendeu?
+
+[43:08] Tá, eu acho que a gente já tem isso no—
+
+[43:10] é, só que tipo, a gente tem que tirar isso, esse retrabalho. Então, da separação da solicitação de entrega Não me importa. Vamos supor, às vezes vai ter uma situação lá que o cara, que as meninas, tipo, para efeito de gestão, numa entrega só tirou tipo 3 separação separada. Não tem problema emitir 3 notas, entendeu? Ok, a gente vai pagar por nota, né? Tem aquela questão lá que paga por nota, mas tipo, vai ser raro essa questão. Então da separação, se for um material que precisa ir por transportadora e precisa emitir uma nota fiscal de simples remessa, da separação a gente poder emitir a nota, entendeu? Tá, para não ter que ficar digitando tudo de novo, porque lá já tem todas as informações. Complexo, né?
+
+[44:09] É complexo, mas é bom que a gente fica um tempinho nessa parte, que é o que é Se isso aqui não tiver funcionando, nada funciona, nada funciona.
+
+[44:20] Então são essas peculiaridades, né, tipo, do andamento do rolê que acontece. É o que eu te falei, quando é em Ribeirão Preto, beleza, mano, a gente faz a nota fiscal de venda e a gente vai fazendo a gestão lá da entrega pelas listas de entrega, morreu. Agora, ah, vendi para São Paulo, Tem duas opções, tem algumas situações. Vendi para São Paulo e o cara tá de boa, vai esperar chegar todo o material. A gente, se a nota fiscal de venda ainda estiver válida, matou, vai com a nota fiscal de venda. A gente faz uma carta de correção com a questão dos volumes, tudo, né, e segue o baile. A nota fiscal venceu, para transporte. E aí tem que emitir uma nota fiscal de Simples Remessa para poder ir todo o material. Ou vai ter a situação que mesmo a venda sendo de São Paulo vai ter, sei lá, 2 ou 3 entregas. Até às vezes o cliente tá arcando com essa entrega, né? Então, de acordo com o que tá indo, que no caso já é a separação, que é a solicitação de entrega, daquele dado a gente poder emitir uma nota fiscal de simples remessa.
+
+[45:40] Beleza.
+
+[45:54] Pera aí, Pedro, rapidinho aí. Acho que não tá chovendo. Deixa eu ver se tá chovendo aqui, porque a Andresa quer vir me buscar. Rapaz, tava apertado para ir no banheiro, aproveitei.
+
+[48:17] Já fui colocar também um negócio para o forno.
+
+[48:24] Beleza, por enquanto beleza, é isso. Nem sei, cara, onde a gente tava. Volta para o navegador lá que a gente tava na parte da nossa Continuar para emissão. Beleza, aqui não tem jeito. Ver boletos.
+
+[48:38] Aí ver boletos vai abrir a remessa e retorno bancário. Ele volta lá, que a administração, no final das contas, né, ele vai cair todo o processo de boleto, tá?
+
+[48:54] Aqui eu preciso pegar para dar uma olhada, tá?
+
+[49:01] Aí conforme você for mexendo, tem contas em aberto ali que eu fiz justamente ali do lado. Isso eu fiz justamente para a gente visualizar o que que tá em aberto, tá?
+
+[49:15] Sem baixar, né?
+
+[49:16] Você fala sem baixar. Isso, se tiver coisa passada, tem como colocar data de vencimento, data de início e tal. E eu tentei pegar, fazer o mais próximo da Connect, porque vocês já estão acostumados com isso, né?
+
+[49:30] Tá aqui, esse valor é vencido ou não, né?
+
+[49:49] É, eu acho não.
+
+[49:52] Ou é só, é porque, por exemplo, 25/09 não foi ainda.
+
+[49:59] Aqui coloca vencimento final ali, o filtro. Vamos ver se muda.
+
+[50:06] Coloca para hoje, não muda. Então é o apagar mesmo, é tipo independente. Pode falar, aguenta aí um pouquinho. Aguenta um pouquinho aqui. Então é vencido ou não, né?
+
+[50:27] Ele só mudou o a vencer. Será que tá ao contrário? Que ele mudou a vencer.
+
+[50:38] Limpar a data. Ó, cadê?
+
+[50:42] Aqui. Ah, tá.
+
+[50:44] Pera aí. Vencido. Tá falando que tem tipo 1 milhão vencido.
+
+[50:50] É que aquela vez que a gente conversou, lembra que deu, que a gente conversou que tava com 500 mil em aberto, que não sei o quê, do ano de 2020?
+
+[51:03] Nossa, tem esquisito isso aqui, vencimento 2030, que tá errado. Então, só que a Carol tirou tudo de 2025, jogou tudo para 26, ou não, tirou de 24, jogou para 25. Ai, agora não lembro.
+
+[51:27] É, mas era um negócio assim, foi por isso, até por isso que eu fiz esse campo.
+
+[51:33] É só, tá meio confuso aqui.
+
+[51:35] É, eu vou dar uma averiguada melhor, mas é bom que você sabe, sabe que tem isso. Depois dá uma olhada também.
+
+[51:44] É, eu não peguei ainda na parte aqui do financeiro, nós temos que mexer, né? Mas eu vou olhar. Mas teoricamente isso é o total que tá em aberto, independente de vencido ou não, né? Nossa, isso aqui, esqueleto isso aqui.
+
+[52:06] Depois tem que entrar lá para ver se tá registrado até 2030.
+
+[52:10] Mas eu vi que tem uns registros até, até eu acho que 2020, as previsões, né?
+
+[52:17] Eu acho que o que tá em vermelho ali é o tempo que passou o pagamento, é atrasado, 120 dias.
+
+[52:28] É, tem umas coisas aqui, acho que não, devolução. 31/12 de 25. É porque é um número que tipo você clica e olha, tipo impacta, entendeu? Mas eu já vi que tem bastante coisa aqui que não condiz. Mas aí eu vou pegar para dar uma atenção aqui, porque tudo isso daqui depois reflete no Dash, né?
+
+[52:58] Sim, inclusive eu vou ver o Dash aqui como tá. Faz tempo que eu não entro, não sei se deu uma duplicação de informação aqui.
+
+[53:15] Nota fiscal, a gente falou de vai tirar, né, isso aqui. Que que era mesmo? MS vincular. Boleto era para registrar uma nota, né? A gente falou não, não dá para ser assim.
+
+[53:34] É que aí, aí é onde vincula o orçamento. Eu vou ter que trocar essa nomenclatura, nota fiscal, porque tá vendo aqui o boleto buscar por cliente e tal? Não, aqui um pouco para cima. Boleto vinculado. Isso é por aqui que você puxa o boleto para vincular. Eu não sei se precisa disso também, às vezes esse campo nem precisa, a gente já pula ele.
+
+[54:18] É, não sei, tá meio confuso aqui para mim. Deixa eu atender o Andrés aqui, tá?
+
+[54:25] Pode atender.
+
+[55:14] E essa parte tá meio confusa, tá, para mim. Aí aqui, ó, gerar remessa. Tá, deixa eu estudar essa parte melhor. Nós vamos ter que mexer legalzinho aqui, tá? Deixa eu Porque aqui tá nessa, tudo isso daqui tá nessa parte aqui, né? Administração bancária, né?
+
+[56:10] Tá tudo aí dentro, tá?
+
+[56:18] Eu vou, quando você vai mexendo nessas coisas, amanhã eu vou ver se eu pego para dar uma olhada nessa parte aqui. Do zero, que tudo depois, tipo, o quantas, a entrada de fornecedor, tudo vai refletir aqui, né? Mas vou dar uma olhada na visualização aqui para entender, porque tem uns números, tipo, não sei como puxou, não sei entender. Vou confirmar aquele negócio da Carol dos, do final do ano também, se a gente jogou só para 2025. Que era as pendências lá.
+
+[56:55] Eu não lembro, acho que jogou, mas aparentemente aqui com relação ao Dash tá coeso os números, né? O mês passado foi 115 mil de déficit.
+
+[57:17] É, preciso pegar para conferir. Porque tava, tinha umas coisas que não, a questão das previsões dá uma bagunçada, né? Eu até deixei anotado aqui para começar a ver. Dash financeiro, despesa fixa, porcentagem de caixa, tudo aqui, tá? Então beleza, tem que pegar aí tipo 2, por que que tem uma data de 2030, tipo, entendeu? Vou até pegar aquele cara lá, é Felipe Tancini. Deixa eu ver.
+
+[57:46] Tava como salário, alguma coisa assim.
+
+[57:50] Então nem tem esse cara como salário, e era um apagar, né? Não, Felipe Tancini tem que ser cliente. Que pode ser erro de digitação. Não tem nada.
+
+[58:17] Vai, você tá a receber, vai apagar.
+
+[58:24] Ai, não filtrei. Em nada. Deixa eu ver fornecedor. Nem tem ele cadastrado como fornecedor, entendeu? Ó, o filtro que eu fiz aqui, só para você entender: apagar fornecedor, ele nem existe. Funcionário, com certeza também não. Tancini, não tem. Beleza, então como cliente, que é a única possibilidade. Tancini, por isso que o número é foda. Tancini, Felipe. Aí aqui o filtro que eu coloquei, todos, é qualquer situação, pago, não pago, tudo. E vencimento não importa porque eu coloquei todos aqui, entendeu? Que não tem o que colocar aqui, não tem nada. Se a gente botar para receber cliente Tancini, todos também não tem nada, tipo, não tem nada cadastrado, não tem nenhum registro dele, não tem nenhum registro dele.
+
+[59:56] Mas em algum momento, algum momento apareceu o nome desse cara.
+
+[60:00] Então aí não precisa saber da onde.
+
+[60:03] É, então eu acho que foi em algum momento eu fiz a atualização para dentro do sistema e ele não tá apagando histórico.
+
+[60:12] Aí, então aí esse é um problema, entendeu?
+
+[60:16] É, mas aí quando, quando você falar para mim assim, ó, eu vou fazer a revisão, eu vou pegar a planilha do Sérgio Não, já faz então, senão eu vou revisar amanhã perdido. Então beleza, eu já vou fazer isso agora. Eu vou pegar a planilha do Sérgio, entrar lá, fala assim, ó, essa planilha é o que manda. Tipo, se não tiver igual isso e isso, pode apagar de dentro do nosso banco de dados, porque o que manda é aqui dentro. Só que aí, só uma coisa complementando aqui, os orçamentos, esse tipo de coisa Ele geralmente apaga por conta disso, mas eu vou falar para deixar essa parte tudo que foi feita dentro dos testes que a gente fez.
+
+[61:00] Não tem problema, mano, a gente testa de novo. É até melhor que a gente tá fazendo teste, teste. Quanto mais testar, beleza. Pode tipo limpar e traz os dados de novo, porque senão eu vou pegar, eu vou ficar maluco.
+
+[61:16] Tá bom, já vou fazer isso agora, vou deixar como prioridade, que aí eu já, eu já deixo para você amanhã fazer isso. E aí amanhã, conforme for andando, vou fazer. Que que você acha a maior prioridade? A parte do estoque para a gente já liberar e entregar isso?
+
+[61:37] Pode ser, é você fazendo isso daí, né, a prioridade por conta do sistema, sei lá. Eu acho que a parte do, do, porque como eu tenho que visualizar isso daí ainda, é, de repente você carrega a planilha. Eu acho que assim, a planilha que você me mandou, é, não, eu acho que você atualiza essa questão aqui do que você falou que vai fazer agora, vai gerar as informações do Sérgio. Isso, que aí você meio que libera para eu continuar, para eu fazer essa. É que a gente vai perder aqueles testes lá, mas não tem problema, a gente testa de novo. Não, isso aí beleza, porque aí que acontece, você não fica amarrado, você faz isso, aí eu fico livre para continuar os testes. E aí você vai fazendo, tipo, não sei, aqui tanto essa parte, a parte do sistema, das coisas que a gente viu agora, Quanto do— vai fazendo aí, vê o que que você acha. Eu acho que a parte do estoque, da garantia, né, produção e garantia, se a gente botar para rodar semana que vem, tá bom.
+
+[62:55] Beleza.

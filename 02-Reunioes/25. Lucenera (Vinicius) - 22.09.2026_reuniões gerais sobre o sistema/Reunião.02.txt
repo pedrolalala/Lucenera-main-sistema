@@ -1,0 +1,137 @@
+[00:00] Precisa da autenticação, provavelmente. Será que ela fez isso?
+
+[00:05] Não, não tem lá, é tipo, esqueci, não tem a opção esqueci minha senha, por exemplo.
+
+[00:12] Mas ela chegou a colocar a senha?
+
+[00:14] É, acho que sim. Tá, quer ver? Ela me mandou assim, ó: criei a conta e não consigo acessar, diz que errei a senha, mas não tem onde ir para recuperar.
+
+[00:26] Vou colocar aqui para ter a recuperação de senha, alterar na realidade, né?
+
+[00:35] É, alterar, recuperar. Aí que nós vamos, que a gente ia ver mesmo, ia repassar. Você quer me mostrar esse da produção aqui?
+
+[00:47] É, a gente pode ver tanto da produção quanto eu te mandei dois, né? Os dois que você pediu, de produção e o de garantia. De garantia. Aí, de garantia, eu preciso que a gente defina a nomenclatura, como que vai ser usado.
+
+[01:06] Vou compartilhar aqui já.
+
+[01:12] Visível?
+
+[01:23] Aqui também, deixar tudo fechado, senão também vamos ver controle de produção aqui.
+
+[01:41] Esse é a sua conta, vai estar linkado com tudo.
+
+[02:44] Vou só simular aqui, tá? É, acho que a prioridade alta, acho que eu deixaria só normal e urgente, tá? Tá, senão vai fazer confusão lá com os meninos. Deixa só normal e urgente. Aí aqui a gente falou de não colocar por enquanto, é isso? PDF é que ia ficar tipo um volume muito grande de arquivo.
+
+[03:53] É, a gente pode ou não colocar o Fica meio a critério do que a gente vai fazer, porque penso eu que daqui um tempo a gente vai ter que realmente pegar os papéis. Talvez, talvez seria viável começar a adicionar. Pode testar, testar se quiser adicionar. Se não quiser também, só cria o pedido, tá?
+
+[04:22] É, depois a gente vê o que que pegar qualquer besteira aqui.
+
+[04:51] Da. Aí a gente tem que definir os status, né, que foi justamente uma coisa que a gente chegou a conversar.
+
+[05:21] Isso aqui, se clicar, nossa, se conseguir deixar vai ficar bom, hein.
+
+[05:30] Mas é isso que eu pensei mesmo, desenho, aí vai abrir o outro PDF que foi anexado.
+
+[05:34] O que a gente pode, o que a gente pode também tentar adotar um padrão Que geralmente, vamos supor, as meninas geram um arquivo por L, entendeu? Aí vamos supor, vai um, vai mandar uma pancada lá, vai ter tipo 6 arquivos, por exemplo. Ou carregar os 6 ou fazer um agrupamento e um arquivo só, entendeu?
+
+[06:04] Não, calma aí que eu não entendi.
+
+[06:06] Fazer um, por exemplo, as meninas mandam no email 6 desenhos, Então tem 6 PDFs, 6 pedidos.
+
+[06:14] Teoricamente teria que ser do jeito que tá, teriam que ser 6 pedidos diferentes.
+
+[06:20] É pedido mesmo, mas teriam 6 desenhos, 6 arquivos de desenhos. Aí, aí é o detalhe, ou carrega assim os 6 arquivos, pedido vai ser um só, 6 arquivos de desenho, ou faz um I Love PDF junta para ter um arquivo só com 6 folhas.
+
+[06:45] Tá, eu vou ver qual que é a melhor opção, qual que é a mais viável de fazer. Se é a gente ter que criar todos os 6 pedidos de novo, mesmo sendo o mesmo número, mesmo.
+
+[06:57] Eu falo assim que seria tipo assim, vamos supor que nem eu anexei um, aí eu teria que ir anexando todos, tudo aqui nessa mesma linha. Por exemplo, deixa eu ver se tem algum aqui.
+
+[07:10] A questão é só do storage, como que eu vou fazer o link.
+
+[07:15] Então, e às vezes para às vezes os meninos não comer bola de não imprimir algum também, né? Sim, quer ver? Vamos pegar um exemplo aqui, ó. Às vezes vem muito, sabe? Tudo bem, hoje é hoje, manda todos tudo separado lá no No WhatsApp, mas, ó, por exemplo, aqui, ó, nessa solicitação aqui, ó, tem 5 desenhos. Aí teria que anexar esses 5 arquivos mais o pedido de produção, ou pega tudo e faz um um arquivo só, um PDF só. O que que você acha melhor?
+
+[08:07] É, eu vou ter que ver a questão estrutural do banco de dados. Eu vou dar uma estudada e te volto com a resposta, pode ser? Porque senão, no pior dos cenários, a gente vai ter que replicar o pedido, tipo deixar um embaixo do outro, fazer 6 vezes aquele processo.
+
+[08:29] Não, mas aí vai ficar ruim. Não, mas lá não poderia anexar mais aqui? Acho que sim. Tem como editar depois que era bom, que nem adicionei aqui, certo? Aí quero editar, poderia, tem que deixar editar. Não vai ser para todos assim, ok? Aqui o status liberado para algumas pessoas. Agora editar o pedido Tem que deixar, porque às vezes pode ter uma atualização de desenho e aí ter que tirar um desenho e colocar outro, entendeu? Sim, porque aqui, ó, ele deixaria, por exemplo, escolher mais de um. Ó, coloquei um, aperta, ele não deixa. É, eu tô apertando, ele não deixa. Mas vamos pôr um aqui. É, tem que ver. Ele não sei se vai pegar os dois, né, os três, ou ele tá substituindo.
+
+[09:33] Ele tá substituindo.
+
+[09:35] É, tem que deixar colocar mais, mas tem que ficar na mesma linha, tá?
+
+[09:43] Tá. É que isso pode ser, eu acho que é um pouco mais complexo do que parece, mas beleza, vou tentar fazer Desse jeito.
+
+[09:52] Entendi. Porque se eu tiver que criar 6, aí vira nossa, vai virar um trabalho desnecessário, tá? Entendi que é. Então aí, por isso que eu falei a questão de de repente fazer um aqui, nós aqui fazer um arquivo só em vez de 6 arquivos.
+
+[10:15] É, beleza. Vamos fazer assim, por enquanto a gente faz os 6 arquivos, os 6 desenhos em um arquivo. Eu vou estudar e eu volto com a resposta amanhã. Às vezes amanhã eu já libero.
+
+[10:28] É, não, nem vou usar agora, deixa, vamos afinar. Mas pensando, sei lá, acho que seria mais viável, até por essa questão de às vezes trocar o desenho, poder anexar separadamente mesmo, tá? Editar, editar e anexar. Mandou 6 desenhos, 6 anexos.
+
+[10:53] Beleza, tá.
+
+[10:56] E deixar editar, né, tem que poder editar aqui. Agora, a questão dos status. Então, qual é o detalhe? Adicionar esse status, tipo assim, o João aqui é a Débora que vai adicionar, tá, ou a Vitória, ou organizar. Mas essa questão do status aqui, o que que é aqui? Deixa eu entender. A handoff, o que que é? Boa! Quem entregue, tá? Aí vai estar só as pessoas internamente aqui, né? Sim, tá aqui. Então, por exemplo, entregue pelo Manuel.
+
+[11:44] É que não vai ter porque ele não tem o cadastro ainda. Isso é só de quem tá cadastrado.
+
+[11:50] Então vai entregue pelo Manuel, recebido por quem, tá?
+
+[11:54] Ok. Aí recebido pode ser, pode ser recebido por pessoas externas, tá? É isso, né?
+
+[12:02] Não, não, aqui não. Aqui é recebido internamente só, tá?
+
+[12:06] Beleza.
+
+[12:07] Então aqui basicamente a gente vai ter 3 pessoas que podem entregar, que é o Manuel, o João e o Cláudio. Manuel, João e Cláudio que podem entregar, ou seja, são os 3 que estão na produção. E aí eles podem entregar para mais 5 pessoas, pode até colocar 6, eu também no caso, que aí no caso é o Mateus e a Vitória, o Alexandre, Leandro Antônio e eu, tá? É as pessoas que podem receber o pedido pronto. Aqui de repente colocar alguma coisa aqui interno, não sei.
+
+[12:50] E dois, duas separações, um campo, você fala que dentro, no meio de PDF, ação, colocar interno.
+
+[12:56] É um cabeçalho aqui, ó. Sei lá, não sei que nome pôr. Andamento interno, não sei, tá?
+
+[13:08] Alguma coisa relacionada a isso.
+
+[13:11] E aí aqui a gente tem dois status, né? Eu usaria esse status aqui. Aqui tem que pôr a data de quando ficou pronto, certo? Eu usaria aqui esse status Para colocar pronto. Sempre quando fizer, vai colocar em andamento. Beleza, em andamento, em andamento. Aqui vai colocar, vai mudar a opção aqui, é mudar para pronto e a data. Esse status aqui, deixa eu ver, ele é o mesmo desse.
+
+[13:54] Porque é só forma de trocar, né?
+
+[13:59] Aí outra coisa também, sabe aquela observação que eu coloquei lá? É fixado na laje, tem que aparecer aqui em algum lugar também. Sim, senão eles não vão conseguir visualizar a observação.
+
+[14:19] Tem que aparecer também.
+
+[14:21] É, tem que aparecer, que seja aqui alguma setinha, observação, e abrir, sabe, alguma coisa. Tá, eu jogaria os arquivos aqui para o final, entendeu? Ter um campo de observação é para poder aparecer a observação. E agora o status. Não, esse status aqui a gente tem que definir.
+
+[15:00] É em andamento, pronto.
+
+[15:03] E mas eu falo, eu tô pensando aqui como definir o status assim, tipo aguardando o material chegar, que é observação do status, por exemplo.
+
+[15:17] Não, então é aguardando o material chegar, em andamento, status. Então aguardando o material chegar, acho que eu colocaria, deixa eu pensar, calma aí, vamos começar com o status pedido, pedido de produção. Que aí a primeira fase, quando foi pedido, ele aí vai ter a data registrada com o pedido de produção. Aí eles vão fazer, ver lá que foi pedido, vai fazer o pedido das peças, aguardando o material. Aí a pessoa vai lá e troca para aguardando o material. Aí quando chegar o material e ela começar a mexer Em andamento, após a finalização, é produção finalizada, e depois pronto para ser entregue, alguma coisa assim separado.
+
+[16:25] Ó, pera aí, é porque eu tô tentando trazer para a realidade do que acontece, né? Eu colocaria então no status, status em produção. Depois a gente coloca uma legenda se precisar. A ordem não importa, né?
+
+[18:22] Depende, tipo assim, ou aguardando o material vai estar sempre em primeiro, né?
+
+[18:27] É tipo, é a situação mais crítica, digamos assim. Vai, vamos fazer então assim, vai.
+
+[18:42] Produção com terceiro seria uma empresa que pode estar produzindo um material.
+
+[18:50] É o mesmo exemplo, por exemplo, as arandelas clássicas. A gente não tem nada, geralmente a gente não fica com estoque. Então se sair uma venda, algum pedido, e não tiver nenhuma disponível para entregar, que às vezes pode acontecer de ter uma ou outra, mas vamos supor, saiu uma venda de 10 arandela clássica, a gente não vai ter. Então tem um terceiro que vai produzir. Esse em produção nós vamos em montagem, que aí já é com o Cláudio. Produção com o terceiro, então o cara vai estar lá fazendo, produzindo a estrutura, depois vai colocar no No, vai colocar o vidro, entendeu? Ô caçamba, apertei editar. Aí é isso, eu colocaria assim, tá? E aqui poderia ter onde de repente, né, sei lá, acho que não.
+
+[20:00] Acho que não precisa por enquanto, pensando que é mais a visualização para eles se organizarem. Não sei, eu acho que não tem tanta peça sendo produzida assim ao mesmo tempo, né?
+
+[20:15] Não, antes tinha mais. Aqui, ó, tem que ser de repente editável se precisar.
+
+[20:25] Eu vou abrir um campo quando você clicar duas vezes em cima, que ele abre o campo para editar tudo. Tá.
+
+[20:32] E aí então, e o pronto? Aí o pronto, né? Finalizado, finalizado. Cadê o pronto aqui? E pôr a data também, tá? É a data de alteração de cada um deles, é a data de alteração, a data que ficou pronto também. Porque tipo, o prazo é dia 31, mas pode ter, pode ficar antes ou depois, até para ter um registro, um controle. Aí, Pedro, sabe o que eu ia te falar? Vamos supor, a gente veio e determinou aqui um prazo, certo, de entrega. Aí sei lá, deu algum B.O. e não vai poder, não vai ficar pronto. Aí vai pegar, vai alterar. Se alterar esse prazo de entrega aqui, pode até escrever aqui prazo de entrega. Se alterar esse prazo de entrega, teria a partir, não sei, tá, se eu tô viajando. Se alterou o prazo de entrega, tem que pedir uma, o porquê que tá alterando o prazo de entrega. Aí beleza, aí mudou aqui para o dia 12/08, 12/09, e a justificativa. Faltando material, por exemplo. Aí, se alterou o prazo de entrega, ter tipo uma exclamaçãozinha aqui dentro de um triangulozinho. E aí a pessoa vai falar: isso significa que o prazo de entrega foi alterado. Aí vai passar o mouse ou clicar aqui o porquê que foi alterado, tá? Entendeu mais ou menos?
+
+[22:16] É a mesma, o mesmo sentido do sistema de entrega, de separação, garantia, esse tipo de coisa que a gente fez a visualização diferente.
+
+[22:26] Exato, tá. Mas aí eu acho que é isso. Bom, a gente falou, aí você tem que recapitular depois na— tá gravando, não tá?
+
+[22:36] Tá.
+
+[22:36] Então aí depois tem que recapitular aí o que que a gente falou, tá?
+
+[22:40] Desse daqui vai ser isso então? É só por enquanto, enquanto tá.
+
+[22:44] Vou parar que aí a gente veja novamente como vai ficar e ver se tem que fazer mais alguma coisa.
+
+[22:51] Beleza, eu

@@ -1,0 +1,33 @@
+[00:04] Ah, tá,
+
+[00:04] entendeu? Um pouco confuso, mas aí, como a gente não sabia que essa peça era normal, né, ao fazer a exclusão da venda de garantia tinha que ter diminuído para 81.
+
+[00:18] Tá, pera aí, aqui eu tenho— calma, respira, eu já entendi. O seu sistema tá certo então, né? Então você vai baixar o estoque geral para 81 e o disponível vai ficar -34. Pode fazer aqui, eu vou, tá? Pode fazer isso aqui. O nosso, a gente tem que fazer o seguinte, Pedro, antes de zerar tudo, né? Na verdade,
+
+[00:46] aqui você
+
+[00:46] pode fazer, aqui você vai fazer o seguinte, ó. Porque bugou. Então você tem aqui, você vai fazer o seguinte, você vai -34, né? Qual que
+
+[01:01] é o código? 99 da peça, 9923.
+
+[01:10] O estoque geral tem que ficar 81 e esse reserva sem herança você traz para 10. O disponível vai manter os -34, entendeu? Aí depois a gente zera, é só para ajustar esse.
+
+[01:25] Na movimentação não tem nada a ver?
+
+[01:27] Não. Aonde você fala?
+
+[01:29] Aquele sistema que eu fiz de movimentação de peça não vai bater? Tem que excluir uma peça ali?
+
+[01:36] Aqui você tem que trazer o estoque geral para 81 e o reserva 100. Herança para 10, só momentaneamente agora. Depois a gente tem que deletar isso aqui, isso aqui tá confundindo a gente, tá? Deletar assim, quando sair esse material daqui tem que sair do estoque geral também,
+
+[01:57] tá? Calma aí, é a reserva.
+
+[01:59] Mas calma, um passo cada vez. Primeira coisa é para ajustar esse item, reserva sem herança Connect fica 10, no estoque geral Och det är det ju.
+
+[00:00] Pode falar. Ah, espera. Ah, casa 10, certo. Luciana Guado, 8, certo. Cardineto, 8, certo. Manoel de Mateus, 1, certo. Vinícius Fazan, 3, tá certo. Foi
+
+[00:28] esse um de
+
+[00:28] gap mesmo, que tinha que ter dado saída, só que aí como importou, deu certo.
+
+[00:33] Então a gente, e aqui Pedro, e o 10.106 tem que aumentar 4 no estoque geral, tá? Pera aí, 5 vendas não batem, todas as outras estão iguais, mas essas 5 deve ser tudo desses rolê aqui que a gente tá vendo. 2299 é número de venda. Esquece, nem vou olhar, que é o rolo que a gente tava fazendo aqui. Como chama lá a coisa aquela Adriana tem que fazer? A venda 2299 tem que fazer a lista de entrega. Adriana, mas tem que ajustar primeiro, tá? Senão não vai dar certo. A lista de entrega igual da Connect, igual Connect. É isso por enquanto, é isso.

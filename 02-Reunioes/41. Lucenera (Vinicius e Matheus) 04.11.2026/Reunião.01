@@ -1,0 +1,863 @@
+[00:00] que seja um dia a gente poder fazer o teste. É amanhã, tipo, essa planilha vai ser meio que teste, mas amanhã a gente meio que colocar uma data, sabe? Por exemplo, a planilha de segunda, um exemplo, tá? Mas Felipe tá um pouco ansioso para isso, mas se a gente, se não estruturar e a gente testar se vai dar vazão, tudo bonitinho, não adianta ir com os dois juntos, concorda?
+
+[00:26] Sim.
+
+[00:27] Beleza, só tem um ponto. Deixa eu fechar a porta, pera aí, porque eu converso muito alto. Tem um ponto que eu tava conversando com o Mateus aqui, conversei com Mateus ontem, e depois que o Sérgio mandou as planilhas, eu Fui dar uma olhada e tava trocando uma ideia com o Matheus. Que que acontece? É exemplos, tá? Eu acho que nem, acho não, né? Tem algumas coisas que vão estar na planilha que não deveriam estar. Vou dar um exemplo, tá? Cliente com dor de barriga mandou o orçamento para o Matheus entregar uma, fez tudo ao contrário, tá? Isso acontece, pode ter diminuído um pouco, mas acontecia muito mais, mas acontece frequentemente. Tipo assim, é dor de barriga, cliente nem aprovou a venda, forma de pagamento, nem aprovou nada tal, mas precisa entregar o material. Beleza, que que faz? Manda o orçamento para o Mateus sem fazer a venda no sistema. O orçamento não tem saída de estoque, não tem nada, tá? Seria só o rascunho, por exemplo, no nosso, pensando teoricamente o rascunho, manda para o Mateus e fala assim: Mateus, eletricista tá indo aí pegar daqui 20 minutos. Beleza. Aí o Mateus vai, separa esse material, entrega para o cara. Ou seja, ficamos com estoque errado. Então um produto que constava 10, entregou 5, já não tem mais. Nesse gap, se alguém fizer uma consulta e precisar vender os 10, fodeu.
+
+[02:18] Beleza.
+
+[02:19] Aí beleza. Aí o que pode acontecer? Não passa no mesmo dia, às vezes não passa nem no outro, nem no outro, nem no outro. Acontece. É errado, mas acontece. E o Mateus não tem o que fazer. Alguém precisa. Eu tô dando um exemplo, mas acontece várias coisas, tá? Aí beleza. Aí quando passa a venda, a gente aqui, a Carol, que seja Só faz a venda. Se não vier tipo a informação de que aquele material já foi entregue, o que que acontece? Fez a venda, o material, vamos pôr, tinha estoque, o material já foi entregue e ele fica no reserva ad eterno até algum dia que vai fazer alguma checagem e fala: nossa, mas isso já foi entregue. Tô dando um exemplo. Ou pode acontecer com entrega futura. Exemplo, tipo, vendeu o material lá. Isso com entrega futura vai acontecer muito com peça especial lutheneira, por exemplo, ou ponte, sei lá. Acontece aqui, é, vou dar um exemplo de esteca. Tipo, vendeu a esteca lá, tal, aí Rolo de obra tal, não precisou, não passou devolução, a obra já acabou faz um ano e meio e ficou lá na entrega futura, entendeu? Então o que eu tinha pensado, essa planilha, tipo assim, é um trampo e talvez nós não teríamos tempo hábil para que o Mateus fizesse, porque o Mateus não pode algumas coisas, ele vai poder matar porque talvez ele vai lembrar. Mas outras coisas ele não pode matar por conta própria. Teria que pegar, consultar a equipe, falar: esse cliente aqui já acabou? Como é que tá? Não, já acabou, já entregou tudo tal, mas tem alguma coisa lá no reserva, entendeu? Teria que matar. Por exemplo, se tá no reserva, tem um material no estoque e já acabou, Matheus tem que fazer uma entrega Dá como entrega aquele material e fazer uma entrada no estoque, se realmente tiver o material, né, Matheus?
+
+[04:40] Sim, sim.
+
+[04:41] Porque senão o estoque fica errado, que é um material que foi vendido, era para ser entregue, não entregou, acabou a obra, tipo, ficou elas por elas e boa. A entrega futura, o Matheus matar uma entrega futura, se não fizer uma devolução, mas a obra já acabou, acabou, não vai ter devolução, porque senão vai gerar um crédito para o cara que nem é para ter o crédito, entendeu? Exato. Mateus tem que fazer uma entrada, uma entrada fake para aquele material ir para o reserva, para ele poder fazer a entrega, abaixa a saída, a saída, entendeu? Tipo, é complexo, é complexo e trabalhoso.
+
+[05:23] Então aí o que que eu pensei? Como isso vai sempre vindo do Mateus, teoricamente, né? Tudo que sai do estoque sai do diretamente com o Matheus, a gente pode fazer naquela aba, naquele sistema que a gente tem atual, fazer uma nova aba que vai representar peças com esse caso de exceção, que não foi vendido, não foi mexido no sistema, mas o cliente tá indo buscar. E aí, no caso, o Matheus coloca lá, saiu Deixa eu finalizar.
+
+[06:01] Não entendi.
+
+[06:02] Saiu 5 peças da Interlight para um cliente X. Vamos falar que esse cliente não tá registrado, mais difícil ainda. A gente vai lá, tá?
+
+[06:15] Pera aí, calma aí. Você tá pensando numa vida nova, eu tô pensando em tentar resolver o problema agora de trazer informações. Perfeito. Desculpa te interromper, tá? Eu acho, eu entendi, ter uma maneira de uma, do Mateus registrar que o material tá sendo entregue sem ter a venda. Beleza. Depois você pode pensar. Eu tô pensando agora para a gente poder andar com o negócio. É, a minha preocupação é trazer um monte de informação desnecessária.
+
+[06:50] Não, mas aí um exemplo que dá para a gente fazer agora, pegar o sistema que eu já implementei tudo aquilo que a gente conversou na última reunião, tá pronto. Só precisa pegar as informações, passar para dentro dele, trocar o HTTP, então trocar o link do site e começar a usar ele. E aí, a partir disso, eu crio uma nova aba que vai ser onde o Matheus vai registrar essas peças que saíram sem a venda.
+
+[07:17] Tipo assim, a gente traz tudo e aí a gente vai matando nos dois sistemas, é isso?
+
+[07:22] Não, ó, o sistema do Sérgio não tem como a gente mexer.
+
+[07:26] Não tem, tipo, não tem. A gente vai fazer do nosso, entendeu?
+
+[07:31] Mas aí, um exemplo, é ficar registrado, porque aí fica registrado no nosso sistema de entrega. Aí a partir disso, ah, tá lá, tá diferente, a gente tá vendo que tá diferente. Por quê? Ah, o Matheus deu baixa na peça tal que é para o cliente X que foi buscar o material. Ah, mas esse cliente nem tá registrado, mas tá o nome dele lá.
+
+[07:55] Calma, gato, você tá pensando na vida nova. Eu tô pensando agora, pera aí. Eu tô preocupado com as informações dessa. Você tá vendo minha tela ou não?
+
+[08:06] Tô vendo a gente conversando.
+
+[08:09] Eu tô preocupado com essa informação.
+
+[08:12] O caso, Vini, vou te dar um exemplo de conversar.
+
+[08:14] A minha preocupação é trazer para o sistema novo um monte de coisa que não precisa trazer mais, o material que não precisa entregar mais. Esquece aquele exemplo que eu te falei, aquilo lá é vida nova. Tipo, amanhã começamos a usar o sistema novo, precisou dessa situação, beleza, a gente cria uma rotina, uma ferramenta para ter o controle. Eu tô pensando nos dados que tá sendo importado do Sérgio e levar para o nosso sistema desnecessariamente. Vou te dar um exemplo, ó. Olha aqui essa venda aqui, ó, porque aqui veio tudo do jeito que eu pedi para o Sérgio, ó: orçamento, número de venda, o cliente, produto, referência, tudo tá ótimo, tá perfeito, tá? O, são os mesmos dados da reserva e da entrega futura, ok? Beleza. Tá vendo essa venda aqui, ó, 207? Essa venda é do primeiro mês que a gente tava utilizando o sistema da Connect. Ela tá constando para mim que tem esse produto aqui, uma unidade em reserva, tá? É a exportação do Sérgio, ok? Se eu vier aqui no sistema e eu consultar aqui na consulta de produto consta uma em reserva da Carmen, tá? Mas se eu olho a separação parcial, que é onde controla a venda, por exemplo, não tem mais, já foi entregue esse material. Ó, aqui tem um bug.
+
+[09:55] Ah não, então é isso, é uma coisa que é isso que eu tô tentando te falar.
+
+[10:01] Esquece aquilo que eu te falei, aquilo lá é vida nova. É isso aí que você tá pensando, é no problema novo. Eu tô pensando trazendo, resolver o problema velho. Esse é um exemplo, ó, tá vendo aqui? Matou, tipo, não tem mais. Aí a gente tava olhando, a gente não ficou fritando cabeça o que aconteceu, porque fazem 2 anos, não tem como saber o que aconteceu. Provavelmente implantou o sistema e a gente fez muito ajuste porque tinha coisas que não funcionava. Esse negócio de setor era novo, foi desenvolvido para nós, dava um monte de problema, entendeu? Mas, por exemplo, Essa é uma situação que aquela venda da Carmen, por exemplo, que tá na planilha, não precisa ir para o sistema novo. Ela, porque senão, se ela for e a gente não fizer essa checagem, ela nunca vai sair dali, entendeu? Então por isso que eu tô falando, é uma verificação que Se a gente fosse seguir o caminho correto, teoricamente teria que fazer toda essa filtragem de tudo que tá pendente, que não vai ser entregue mais, enfim, para poder matar. Por exemplo, essa é uma situação que o Mateus mesmo não consegue resolver. Aqui eu teria que pedir para o Sérgio, mas eu vou dar um outro exemplo. Uma venda do Murilo, que eu peguei o Murilo aqui de cobaia. Quer ver? Ó, Murilo, só para ficar mais fácil. O cliente é Lian, aqui, ó, Natália e Rafael Lian. Ó, veja bem, eu tô na reserva, tá? Então tá falando que tem aqui Uma venda, 200, tal, tem uma fonte dessa do L10 em reserva, venda 2096. Se eu vier aqui na consulta de produto, te mostrar todos os passos, tá? 11300, essa, esse produto 11300, meu Deus, esse era uma bucha atrás da outra.
+
+[12:21] Enfim, que rolou com esse número mesmo?
+
+[12:24] Se eu vier aqui, ó, ele tá aqui, ó. Pera aí, vou achar só para poder te mostrar. E aí eu vou te explicar a situação, tá? Natália, pera aí, parará. Aqui, ó, Natália e Rafael, ó, tá constando aqui no reserva.
+
+[12:47] Reserva.
+
+[12:48] Beleza. Agora eu vou puxar a venda. Que número que é a venda?
+
+[12:51] 2096.
+
+[12:53] 2096. 2096. Puxei a venda. Aqui bate, entendeu? Aqui tá certo, ó. Consta um no reserva. Mas eu vou te explicar o que que aconteceu aqui. Tipo, essa tela eu consigo ler imaginar o que aconteceu, tá vendo? Essa venda tem mais de um ano porque foi feita uma lista de entrega dia 27/05 do ano passado, tá, que foi entregue no dia 03/06 de 2025. E vendo aqui a tela, eu posso tentar prever o que aconteceu aqui. Quando ele foi pedir a entrega Só constava dois no reserva desse produto. Constava dois do doze trezentos e noventa e cinco e constava dois do onze trezentos. Por que constava dois? Porque aqui tem o dedo duro que foi transferido para alguém, certo? Aí ele foi, fez a lista de entrega, um dois para cada, ó, dois para cada. Aí O material chegou, reservou, e o eletricista fez milagre lá de repente, entendeu? Conseguiu, conseguiu instalar tudo com os drivers que tinha, e aqui ficou na reserva. Porque você concorda comigo que se tivesse precisando desse material, esse material não tava mais na reserva depois de um ano e meio? Beleza. Aí aqui o Matheus tem que matar, teoricamente. Ele tem que, teria, por exemplo, essa é uma situação que não precisa ir para o sistema novo, entendeu? Mas vai à toa, vai ficar lá se a gente não olhar.
+
+[14:45] Eu sei, mas e aí, como que a gente vai fazer? Porque tem obras que são de 2 anos atrás, teoricamente estão rolando até hoje.
+
+[14:53] Então é isso que eu te falei, que por exemplo tem que pegar as mais antigas. Mateus teria que pegar as mais antigas Por exemplo, um caso desse aqui, mesmo esse caso não poderia matar sozinho. De repente teria que: Murilo, tem uma venda aqui da Natália Elian, tal, de maio de 2025, uma coisa. Não, isso aí já acabou. Joga, dá como entregue, faz a entrada, pronto, matou, entendeu? Tipo, tem um trabalho grande Para verificar esses probleminhas, entendeu? Só que demanda tempo para fazer isso. Aí esse que é o ponto, entendeu? Que tô trocando uma ideia para a gente ver como nós vamos tratar isso, ok? Que você vai ter aqui inteligência artificial, programação, você vai tratar isso muito Talvez vai fazer a estrutura rápido para fazer. A gente não vai ter o tempo de tratar tudo para ter um relatório bom, com certeza. Isso sem dúvida, entendeu? Isso aqui, cara, tipo, porque não dá para ficar o dia inteiro, entendeu, nisso. Mas isso aqui, no fluxo de trabalho que a gente tem, se for pegar de repente um meio período para fazer, é uns 20 dias, porque não dá para ter foco 100% nisso.
+
+[16:20] Entendeu?
+
+[16:21] E aí beleza, não dá para esperar. Não sei se eu tô falando besteira aqui em questão de tempo, Matheus, porque vai ter dia, dependendo da situação, que não vai conseguir pôr a mão.
+
+[16:28] Nem pôr a mão, eu super entendo. Deixa eu perguntar uma coisa com relação a essa planilha. Você dividir essa planilha pelo arquiteto e a gente pedir talvez uma ajuda para as equipes, você acha que rola ou não? Você acha que isso tem que ser Eu, você chegando aqui, tipo, eu acho que a gente tem que pedir ajuda.
+
+[16:51] E eu faria um filtro aqui, por exemplo, um filtro. Qual seria o filtro que eu faria aqui? Seria mais ou menos isso aqui, ó. Eu tenho, preciso rolar para baixo aqui, tá? Senão eu não consigo. Uma, tipo assim, eu começaria assim, entendeu, Mateus?
+
+[17:30] Eu pegaria Pera aí, mas pensando aqui, só um adendo. Você não acha que talvez seria mais fácil a gente pegar, mesmo com as informações erradas, importar tudo para dentro do sistema, e dentro do sistema fazer alguma coisa que a gente tenha esse filtro de uma forma muito mais fácil? E aí eliminando o que não faz mais sentido ter de informação, ou que não precisa estar em reserva.
+
+[18:05] Eu acho que vai ter que ser isso, porque não vai, nós não vamos ter tempo para isso.
+
+[18:09] Se não for pedir para o Mateus fazer isso, Mateus vai demorar mais uma semana e mais uma semana.
+
+[18:14] É, aí vai, o Mateus que vai, mas Mateus que vai ter que verificar, entendeu? Não tem jeito.
+
+[18:21] Você não tem como nem puxar o log aí de informação do que que aconteceu, de como aconteceu?
+
+[18:27] Que jeito, meu amigo? Não tem como, porque o que eu faria aqui, tipo, não precisa, na minha cabeça, tá? Não precisaria olhar todas as vendas. Eu pegaria aqui, ó, de junho de 2025 para trás. Então vamos por data de, porque seria já um dia do pagamento, não data da venda. Aqui, ó, tá vendo? Aqui, ó, 30/06. Foi a última venda no mês de junho de 2025. Então eu pegaria aqui, ó, qual que é o número dessa venda? É a 2477. Então todo número inferior, porque lá não tem data, tá, na planilha, todo número inferior a 2477 eu checaria. Talvez eu tô criando um terrorismo aqui e nem tenha tantas. Vamos fazer esse filtro do reserva só para a gente poder ter uma noção, ó. 24,77, esse número para baixo.
+
+[19:30] Então vou tirar os 3, a gente já consegue eliminar 3 agora.
+
+[19:34] Talvez, talvez nem esse terrorismo todo, entendeu? É que tem que olhar tanto reserva quanto entrega futura. Que número que eu falei? 2477. Pera aí que o filtro não deu certo não. Olha, mas que porra! E quem tá deixando filtrar?
+
+[22:02] Faz ali, eu acho que é isso, personalizado menor que 24,77.
+
+[22:08] É, mas é o que eu tô pondo.
+
+[22:09] É, então, mas aí você seleciona, tem que selecionar todos, eu acho.
+
+[22:14] Não, ele teria que já vir já. Por exemplo, se eu colocar igual a 49,10, por exemplo, eu tenho que me dar só o 49,10. Entendeu? Então eu quero menor do que 24,78 para poder pegar 24,77.
+
+[23:05] Maior ou igual a zero, talvez.
+
+[23:07] Eu ia pôr isso.
+
+[23:09] Vamos ver, tem algum outro filtro?
+
+[23:16] Não, tá limpo o filtro.
+
+[23:19] Vê dos outros, tá limpo. Cachorro, no Excel também não dá, né? Já passou a era do Excel. Fala assim, negócio complicado, velho.
+
+[23:43] Não, louco, negócio maravilhoso, organiza muito a vida.
+
+[23:48] Por exemplo, Mateus, uma coisa que eu te falei para matar, você matou o quentinho alface? Não, né? Porque tá aparecendo aqui.
+
+[23:54] Não matei.
+
+[23:54] Tipo, um exemplo, entendeu?
+
+[23:56] Um exemplo, sim, mas não matei. Não, não matei as vendas, não dei saída dos itens e não dei entrada dos itens ainda.
+
+[24:03] Não tô fazendo bosta nenhuma também.
+
+[24:05] Não, tô à toa aqui, tô só recebendo, filha da puta.
+
+[24:12] Mas tudo aí já tá finalizado do quinto, tá finalizado já.
+
+[24:18] Nada, não está, não, nada não. Sim, nós estamos estudando aqui, ó, que nós vamos fazer. Deixa eu selecionar na mão aqui, vai, essa porra. Nossa, mas aí não tem muito não.
+
+[24:32] O que eu acho que é o certo é você jogar no Július. Desce e coloca um filtro do— não tem data, né?
+
+[24:41] Pensa que tem um problema. Por exemplo, pera aí, deixa eu explicar para o Felipe. Nós estamos pensando numa coisa, vou dar um exemplo. Talvez a gente vai carregar algumas coisas que não precisaria carregar, por exemplo, mas a gente vai ter que carregar assim mesmo e depois ir matando. Vou dar um exemplo, vamos supor, tem alguém com dor de barriga, precisa entregar o material antes de passar a venda. Aí foi, mandou o orçamento para o Mateus, Mateus foi, entregou o material para o cliente, não tem venda no sistema ainda, ok? Entregou o material, aí pede, passa essa venda daí 2 dias, por exemplo. Esse material fica na reserva e se perde a informação de de repente tirar a lista de entrega e matar isso. Fica lá no reserva, o material que já acabou, que já foi entregue, que já era, sabe? Então, exato. Aí tem duas coisas. A primeira, não, aí teria que olhar. Então aí teria que fazer o seguinte, a gente teria que fazer esse filtro dessas vendas antigas, digamos assim, e ir checando, ó, que às vezes tem uma venda que ficou um item para trás porque não entregou, porque de repente o cliente não ia nem precisar e não fez nem devolução. Tem que matar ela, fazer, entregar ela e voltar ela para o estoque. Vou dar um exemplo, é assim que teria que matar para poder ter redondo, mas a gente não vai ter tempo para isso. Então vai ter que carregar do jeito que tá, que é o jeito que tá na pontinha. Conecte isso e aí a gente vai ter que matar depois. É porque só que o bom desse relatório vai ser para poder enxergar esses, porque não tinha como enxergar isso aí, identificar alguma coisa assim. Exato, mas é uma situação que a gente tá alinhando aqui, que ele vai ter que carregar, montar a estrutura tudo, porque é uma situação que o Matheus se dedicando assim com o tempo É coisa, é papo de 30 dias, entendeu? Ele vai fazendo em paralelo. A gente tá trocando a ideia aqui de como fazer. Rapidinho, só para a gente só ter uma noção aqui de quantidade. Meus gatos, não tem muito não.
+
+[27:28] Você pulou um 47 ali, eu acho. Só 47, parece.
+
+[27:32] Não, peguei aqui. Não, é para cima. Vou chegar nele. 478, 400.
+
+[27:39] Ah, você tá embaixo.
+
+[27:40] Você colocar por ordem?
+
+[27:43] Eu pus por ordem. Tá por ordem, só que ele não conta o zero. Aí por isso que aparece aqui. Chegou minha outra importação.
+
+[27:59] Qual que era o número? 2477.
+
+[28:06] Então aqui, ó, daqui para cima tudo certo. No Július eu consigo fazer esse filtro, Pedro, se a gente precisar.
+
+[28:23] Que Július?
+
+[28:24] Aí, que é para, é uma IA de exatas.
+
+[28:31] É o Cloud Coworking, dá para fazer isso também.
+
+[28:38] Ou seja, a questão dele gerar todo dia, como ele não trouxe para o front-end, vai ser ótimo. Beleza, não tem muito assim, tem bastante número, mas às vezes não tem tanto que os clientes. Se a gente for falar em número de clientes, por exemplo, aqui tá vendo, é um monte, mas é uma coisa que o Mateus já tinha que ter feito, não ia nem tá aparecendo. Mas olha aqui, Matheus, Tortouro. Você lembra disso ainda, cara? Essa venda 74, Marcelo Escatena, é real, porque eu segurei a entrega do cara porque ele tava devendo, entendeu? Então a gente sabe que é real. Por exemplo, essa é uma que que a gente sabe que é real, que tem que manter mesmo, que tem que manter. Então vai ter que manter tudo, gato. E aí depois a gente monta um plano de ação para ir matando isso.
+
+[29:45] Aí no meu pensamento eu posso pedir para as projetistas. É, no meu pensamento, plano de ação seria justamente criar uma aba na parte de entrega que ele finaliza esses, essa, essas peças de uma forma muito mais fácil, porque isso não vai mexer no estoque, né? Teoricamente vai.
+
+[30:08] Esse é o ponto. Por exemplo, se eu tenho um material para poder matar, tá? Se eu tenho um material que tá constando em reserva e não vai, a gente só vai matar aquele material, não vai entregar mais, ele tem que dar como entregue na teoria, e esse material tem que voltar para o estoque, tem que somar. Exemplo: tem 10 no estoque geral, constando 10 no estoque geral disponível, digamos assim. Aí tem 1 em reserva, então na verdade vai ter 11 no estoque geral, 1 em reserva, disponível 10. É isso, né, Matheus? Daí, como entregue, vai ficar 10 estoque geral, 10 disponível, só que esse 1 que tava no reserva tem que voltar para disponível. Tem que voltar para o estoque geral para dar como para ficar disponível. Mexe no estoque.
+
+[30:59] Mas a questão é se já foi entregue.
+
+[31:03] Não foi entregue. Essa situação é esse. Se tá no reserva, não foi entregue. Eu tenho que dar como entregue para poder matar a situação.
+
+[31:14] Tem coisa que foi, tem coisa que não foi, né? Esse Mariana e o Marcelo Scatena, por exemplo, não foi entregue, aí não vai baixar, vai ficar em aberto. Mas no caso ali, eu vi aquele do Murilo, por exemplo, se fosse para matar, só para matar na Connect, o jeito que eu faria, né, eu daria como entregue e depois eu faria uma entrada desse um item que tava opcional.
+
+[31:43] Deixa eu te dar um exemplo. Que é de uma peça, vai ser mais fácil. 1675, eu não lembro se isso aqui já foi entregue, se não foi, mas vou, vou. Não foi entregue porque tá no reserva, né? Não, não foi entregue assim, talvez não tirou a lista, entendeu? Isso aqui é da Kátia ainda, entregou e não tirou a lista. Essa aqui é uma situação que teria que checar o estoque. Mas enfim, vamos pegar aqui venda R$16,75 e é o— não, pegar o produto aqui, ó, 11772. Comercial, tem duas situações, tá? 11772, qual a situação desse produto aqui? Estoque geral 1, showroom 1, reserva 1, disponível 1. Então beleza, o produto que tá disponível é o produto que tá no showroom, todo mundo entende isso, entende, né? Beleza. O produto que tá no estoque geral é o produto que tá em reserva. Qual é a checagem que tem que fazer? Tem duas situações aqui. O material já foi entregue para o cliente, só não tirou a lista de entrega. Um exemplo, tá? Vai fazer a lista de entrega, acabou, morreu o assunto, acabou. Material foi entregue para o cliente, que aqui é um caso que o Matheus iria contar o estoque, ele ia ter que procurar essa peça lá para ver se tá lá. Um exemplo, beleza. Mas pode ser a situação de que a obra já acabou, esse material não foi entregue e nem vai ser entregue. Acabou, morreu, já era. Aí é diferente. Aí o Matheus tem que dar como entregue para poder tirar da reserva. Nosso sistema vai ter algum outro jeito, não sei, não ficaria inventando muita coisa. Vai ter que dar como entregue e a gente tem esse material. Tem que voltar com ele para o estoque, porque aí agora a gente não vai ter só um disponível, nós vamos ter dois, um com Mateus lá e um no showroom. Aí mexe no estoque. E tanto reserva saindo mexe no estoque também, porque vai sair do estoque geral.
+
+[34:13] Não, se ele sai do reserva virtualmente, entendeu?
+
+[34:17] No virtual vai mexer, não no físico, porque aí já foi entregue. No caso é a situação do já foi entregue.
+
+[34:22] A gente faz a mesma questão daquela do vínculo da Connect. Que aí o Matheus consegue selecionar lá e falar que esse não é para mexer no estoque, ou é para mexer no estoque. Aí se for para mexer no estoque, faz a entrega do jeito normal. Eu não inventaria mais nada, eu carregaria, porque aí senão o Matheus vai ter que fazer a mesma coisa que ele faz atualmente lá, dá baixa numa compra para entrar o material. Não sei se você tá entendendo, tipo, eu tô tentando fazer alguma coisa que dê para burlar isso sem que perca muito, sem que tenha que fazer milhões de processos para isso acontecer.
+
+[35:07] Não, tudo bem se conseguir facilitar, porque tem essas duas situações. Aí tem aquele material de entrega futura, que para poder matar a entrega futura, que aquele material que não vai ser, não vai ser produzido, não vai entregar, enfim, É porque entrega futura, se tiver, é material de peça especial, que as outras não fica entrega futura, vai ter chego e vai, se não for para o cliente, vai estar em reserva, né? É, teria que ver como matar também, porque numa situação aqui da Connect teria que fazer uma entrada fake, reservar para aquele cliente e fazer uma lista de entrega fake também.
+
+[35:47] Então sim, esse é o processo.
+
+[35:51] Aí eu literalmente acho que ali naquela, naquele sistema de entrega, a gente já faz uma aba ali, ou até mesmo aonde fica as entregas, aquele lugar que você seleciona a venda, já faz por ali e seleciona que não precisa mexer no estoque. Você fala tipo um check, é tipo um check para a gente conseguir matar esses que estão com problema, entendeu?
+
+[36:23] Tipo assim, ah, vou dar um exemplo aqui, tá? Vamos supor que esse material, tipo, tem ele mesmo e não vai entregar mais para o cliente. Aí o Matheus faria a lista de entrega e aí, tipo, perguntaria se quer Adicionar esse produto no estoque geral, alguma coisa assim.
+
+[36:45] É, aí aquela questão de movimentação é mais ou menos isso, né? Só que aí separadamente, né?
+
+[36:55] É, só que é separadamente, né?
+
+[36:57] Só que aí a peça tá atrelada a um cliente que ou já foi entregue ou não vai ser entregue, certo?
+
+[37:03] Isso. E se já foi entregue, é só fazer a lista e acabou, matou. Agora, se não vai ser entregue, Tem que tirar do cliente e voltar ele para o estoque disponível, tá? Simplificando, entendeu?
+
+[37:20] Perfeito. Vai ser um trabalhinho, mas dá para fazer. É isso. Eu acho que agora é justamente o que que dá para eu fazer aqui com a inteligência artificial. Dá para eu pegar esses últimos de julho que você falou, né, de julho de 2025 para baixo, e deixar ele acima, né, tipo para mais antigo, é para baixo eu falo 2024 e deixar ele tipo como um igual fica garantia que fica mostra que é diferente quando para o Mateus ver. Não, eu só tô tentando Porque aí o próprio sistema já identifica, ó, essa peça tá separada há 2 anos, um exemplo. E aí a gente tem que tomar cuidado no momento de fazer a entrega ou no momento em decidir o que que aquela peça vai ser feita no final das contas.
+
+[38:22] É que talvez aquela peça vai ter em várias, tipo, ela vem, ela existe desde 3 anos atrás e vai estar Não pode tomar como um padrão, entendeu? É a venda, não é o produto no caso.
+
+[38:40] Não, mas é o produto que tá atrelado àquele cliente que fechou há 3 anos atrás, um exemplo. Sim, então é isso. Quando entrar no setor ali, tiver reserva para cliente tal fechado em tal ano, Aquele, o card fica com uma coloração diferente. E aí vai, consequentemente aparece, no caso ali aparece o vendedor e aparece a equipe. É só consultar, falar, ó, e aí, essa peça aqui tá em reserva 1 ano e meio, que a gente vai fazer? Já foi entregue? Tá tudo certo? Não tá? Aí eles vão falar, passar o feedback, a gente já registra e deixa tipo com um cardzinho também com observação, o que que aconteceu. Até para caso a gente ter um problema depois, conseguir identificar o que que aconteceu, por que que a gente deu baixa nessa peça em específico.
+
+[39:36] Tá, você entendeu, Matheus?
+
+[39:38] Eu entendi, embora não saiba certinho a mecânica do sistema novo assim, né? Eu acho que vocês estão falando aí essas, esse jeito de aparecer e tal, né? Eu Eu não entendo ainda como que vai ser, né?
+
+[39:52] Maria ia pedir para o Matheus.
+
+[39:55] Pensando aqui, Matheus, é tipo, é literalmente, não se prenda à visualização, é mais para a gente conseguir identificar o que que é e o que que não é, e quais são as peças que estão atreladas a um cliente há muito tempo, que a partir disso a gente consegue visualizar Porque hoje, para você visualizar, você tem que entrar na planilha, fazer o filtro. Aí você vai olhar um por um, consultar, depois mandar mensagem para o Murilo, naquele caso em específico que a gente citou. Aí vai ter que ver com o Murilo, Murilo vai ver o que que aconteceu, vai falar: essa peça já foi entregue, ou não, o eletricista se virou lá e não vai precisar entregar esse driver. Enfim, aí a gente vai, de alguma forma, a gente vai ter que registrar isso. É só isso que eu tô pensando, porque no final das contas a gente conseguindo registrar essa, o que que aconteceu com essa peça, vai, vai muito mais fácil para gente, vai ser muito mais fácil no final das contas, porque depois a gente pensando, ah, que que aconteceu, tá lá registrado o que aconteceu. É, inclusive já mostra aí a questão de movimentação do estoque, separação.
+
+[41:08] Aqui já vamos, é, só vamos trocar uma ideia aqui com o Matheus, porque vai ser bem importante para ele aqui. Porque aqui ele consegue visualizar também. Aqui, ô Pedro, que que nós vamos fazer, eu acho, né, com esses dados que vão vir, tá? Vamos pegar aqui o 3649, por exemplo.
+
+[41:35] Pode ser em torno de 10289, sai bastante. É o ABDM. É, pode ser esse aqui, ó, 93.
+
+[41:48] Então, ah, você já criou aqui reserva sem—
+
+[41:55] sim, tá, é tudo que a gente conversou aí.
+
+[42:00] Você vai criar outro aqui, que vai criar um setor aqui, por exemplo, Que nem tem aqui, certo? Aí você vai criar aqui o reserva herança Connect e o entrega futura herança Connect também, tá? Entendeu, Matheus?
+
+[42:17] Aí é justamente aonde a gente vai conseguir visualizar, entendeu?
+
+[42:21] Então, por exemplo, Matheus, 193 em reserva da Connect. Aí, Pedro, tem que— os dados precisam bater, né? É, aqui beleza, tá zero. Mas, por exemplo, que eu tô querendo dizer é: os dados precisam bater. Vamos pôr esse produto que vai estar nessa planilha de reserva vinculada a cliente, precisa bater com aquela planilha de produto, é, com a quantidade também de produto e com a quantidade que tá em reserva para cliente. Exato.
+
+[42:52] Não, alguma coisa tá errada.
+
+[42:54] Esse reserva aqui é um primeiro momento, é zero. Ele só vai começar a ser preenchido A partir do momento que a gente fizer as vendas aqui nesse sistema, entendeu, Matheus? Aí, Pedro, é para Débora, por exemplo, na hora de uma entrada de mercadoria tem que aparecer as duas entregas futuras, tanto a que foi feita a venda aqui no sistema quanto a que veio de herança, tá? Porque aí ela vai dar o vínculo, tipo, é um trampo para ela ter que fazer os dois vínculos, vai ter que fazer duas entradas.
+
+[43:35] E beleza.
+
+[43:37] Aí na separação parcial eu pensaria em fazer a mesma coisa.
+
+[43:45] Venda parcial ali, ó, a gente colocou o nome aqui do lado de contas.
+
+[43:56] Por exemplo, ter aqui duas, entendeu o que eu quis dizer?
+
+[44:05] Duas visualizações.
+
+[44:06] Então, por exemplo, aqui, por exemplo, vai zerar isso aqui de novo, certo? Aí tem que limpar porque os dados da Cristiane vão vir já com histórico. Isso é, e as nossas aqui, tal, é a aba de venda do sistema Lutineira, das vendas do sistema Lutineira, as vendas parciais, né, do sistema Lutineira, e as vendas parciais da Connect, para poder ficar diferente.
+
+[44:39] E aí entra aí numa venda parcial até para o Matheus ver. O ajustar que você tinha me pedido.
+
+[44:53] Ah, deixa eu ver. Reserva. Então, mas se fosse ao contrário, ele não deixa fazer ao contrário porque não tem histórico. Pera aí, vamos pegar aqui um exemplo. Aqui tá na entrega futura, ele só pode fazer da entrega futura para reserva. Então vamos ver, entrega futura para reserva. Aí teria que botar 4 aqui, colocar o motivo e fazer. Só que no caso aqui, isso é sem separar. Sem separar, beleza, vai mover da entrega futura para o reserva. Só que para mover para o reserva teria que ter estoque. Como vai ficar o estoque se ele, se eu deixar fazer? Vou fazer para a gente ver, tá, como vai ficar.
+
+[45:47] É bom a gente já testar porque isso a gente conversou bastante da última vez, mas porque o Matheus faz isso.
+
+[45:53] Se ele tem que fazer esse tipo de movimentação, então pensa, material tá na entrega futura, você tá na entrega futura é porque não tem estoque disponível. Se eu estou movendo para o reserva, O que que ele faz primeiro? Ele dá entrada no produto, entendeu? Ajusta o estoque do produto para depois mover para o reserva, porque senão o sistema não lê que tem estoque, não deixa mover. Teoricamente é isso. Ah, zero, erro, zero peças livres no estoque. É isso, tá? Agora vem cá.
+
+[46:29] Então tá certo, teoricamente tá. Beleza. Agora uma coisa, tem a movimentação ali também.
+
+[46:39] É, tem que ter uma forma fácil aqui de fazer, de fazer uma entrada sem fazer uma entrada, entrada mesmo. Eu consigo adicionar?
+
+[46:58] Não, né?
+
+[47:01] Aí eu acho que vai ter que ser pela necessidade de compra.
+
+[47:06] Deixa eu fazer um teste aqui.
+
+[47:10] Mas é isso, dependendo se você, se você falar para mim assim, ah, eu gostaria de selecionar sem fazer a necessidade de compra, eu pico.
+
+[47:17] Porque aqui tem jeito, a gente faz um, mas tem que ficar um log, tá?
+
+[47:22] É isso, era justamente isso. Eu preciso fazer uma forma de registro geral do que tá acontecendo, porque aqui, ó, tem como, mas não fica log, entendeu?
+
+[47:34] Vou dar um exemplo aqui, ó, a 12327, mesmo aqui, tá? Eu consigo vir aqui, ó, editar e adicionar algum, uma quantidade aqui, entendeu? Que seja, eu vou colocar, depois eu tiro. Se eu colocar 1, por exemplo, e eu vou salvar, ficou 1 e diminuiu o disponível para 8,5. Só que não tem log, por exemplo, aqui, ó, não fica log disso. Aparece que eu editei, mas não fala o que eu fiz.
+
+[48:09] Logo embaixo tá escrito, tá vendo? Ah, é, tá assim aqui, fica assim.
+
+[48:14] Para 1, de 0 para 1.
+
+[48:17] Alteração de estoque setor para 1.
+
+[48:21] Não é muito, a leitura é meio esquisita, mas é essas alterações direto no cadastro.
+
+[48:30] Então pode ir aí, aqui, ó, vou trazer para 0 de novo.
+
+[48:37] A parte que eu acho estranha desse log, Vini, só falando assim, é que tem que clicar em editar para ver. Não sei Aonde é?
+
+[48:44] Tipo, não precisaria, né? Só vir aqui, né? Entendeu, Pedro? E aí aqui, tipo, seria mais fácil para não ter que fazer uma entrada e não entrada não gerar financeiro, sabe?
+
+[48:58] E isso vai ficar dentro de consulta de produtos?
+
+[49:05] Não. Ah, ou aqui, ó. Porque aí no caso tá em cadastro, não, no cadastro do produto aqui, ó, consultar produtos ali.
+
+[49:17] É que o consultar produtos para gente aqui é a mesma coisa que cadastro e consulta, dá para fazer os dois, consultar, editar no caso, né? Isso.
+
+[49:29] Aí teria que criar alguma coisa aqui, aqui pode ser.
+
+[49:36] Tá em cima de estoque integrado aqui, tem um maiszinho que você consegue adicionar, né? Pode ser no mesmo formato ali, o maiszinho abre a quantidade e joga para o estoque geral.
+
+[49:48] Isso pode ser, né, Matheus? É, isso seria para ajustar o estoque geral lá, adicionar o estoque para poder, às vezes acontece Até de ter menos, né?
+
+[50:02] De ter menos. E aí eu quero dizer com isso que, por exemplo, ele tá 2, a gente foi lá e contou o estoque disso e não tem nenhum. Eu colocaria 0 e o maiszinho é na verdade um confirma, na verdade, né?
+
+[50:13] Não é para somar, é para adicionar, é para abrir o campo, né?
+
+[50:18] Para abrir o campo, no caso é um editar, né? Um editor de número.
+
+[50:23] É que aí no caso já é o campo de edição. Eu posso, eu posso fazer com que nesse lugar aqui em editar peça tem a possibilidade de mexer no estoque. Só que aí aquela mesma questão, quando mexer vai ter que abrir um card e você vai explicar o motivo, você vai colocar o motivo e vai ficar registrado a mesma, aquela mesma visualização que tem na Connect vai ter aí, só que com a observação também, tá?
+
+[50:55] E aí tipo, esse é um negócio que quem pode fazer Só eu e o Mateus.
+
+[51:03] É, eu no caso deixaria, é só você e o Mateus, né?
+
+[51:11] Nem a Débora, nem, né? Sabe por quê? Porque na verdade quem vai fazer isso é o Mateus, porque é in loco que percebe isso, entendeu? Se eventualmente a Débora precisar, às vezes ela vai mexer em alguma coisa, Matheus fica nem sabendo, é pior, entendeu? Então deixa só eu e o Matheus, porque o Matheus tem que ter acesso total aqui nessa parte de produtos, tá? Ele não vai cadastrar peça, mas é importante que ele tenha acesso. Beleza.
+
+[51:55] Aqui, cara, na Connect, assim, mexe, acaba mexendo bastante, principalmente que não sei como que vai ser a rotina no sistema novo, mas uma rotina de devolução, por exemplo, de peça de produção, devolveu, só que ficou errado por algum motivo, não sei se, claro, não sei como que vai acontecer nesse sistema novo, mas devolve 1 metro de esteca errado, sei lá por quê, né? Aí fica lá constando, aí depois vai vai vincular em alguma venda futura, para não ficar— é onde às vezes eu ajusto. Ah, não pode ficar saldo positivo desse item, tem que ficar conforme tem que ficar, zero ali, né? Enfim, zerado no sentido de que não dá para pegar esse exemplo que eu acabei de dar, né, 1 metro de esteca e suprir a necessidade para algum cliente. Não, tem que esperar a peça ficar pronta e aí vai dar entrada, né?
+
+[52:44] No caso específico, no caso aí seria realmente fazer um orçamento de devolução que a gente seguiu o mesmo padrão da Connect. E aí mexer no estoque, ou dentro da movimentação de peça, ou dentro do cadastro.
+
+[53:07] Eu falei que assim, só reiterando, eu não sei como que funciona no novo, embora tem algumas mecânicas parecidas assim. É porque na Conex às vezes dava alguns bugzinhos, né? E aí às vezes na hora que faz a devolução, por algum motivo, não sei, o item fica positivo. Às vezes o item tava entrega futura, faz devolução, o item ficava positivo no estoque, entendeu? Aí hoje às vezes você não vê, aí amanhã a hora que você vai procurar o item, cadê o item, entendeu? É loucura. Enfim, acontece várias situações no cotidiano, o Matheus.
+
+[53:41] Oi, deixa eu te mostrar uma coisa, ó. A Vitória não vai fazer mais transferência, entendeu? E por exemplo, vai ser aqui, ó. Vou te dar um exemplo, ó, aqui, ó. E vai poder trocar entre, na mesma pessoa, sabe aquele negócio? Ah, fez devolução e aquisição só para trocar o L. Sim, aí beleza. Mas aqui vou dar um exemplo, ó. Vamos supor que precisa entregar o material do L32, tá, que tem as coisas tal, e o L25 não tem reserva, mas tem 2 do próprio cliente no L23. Você vem aqui, ó, trocar. Aqui é tudo dela.
+
+[54:31] Ah, tá, você pega do mesmo cliente.
+
+[54:33] Pego aqui, ó, do mesmo cliente, ó. Selecionei quem eu quero, a quantidade, coloca aqui, ó, 2.
+
+[54:42] Coloca um teste, poderia pegar um apenas.
+
+[54:45] Sim, urgência, ó, confirma. Aí mesma coisa, o L23, ele tem o log que ele foi transferido, ou seja, em algum momento ele tinha reserva, voltou para entrega futura. E do L32 que tava em entrega futura veio para reserva.
+
+[55:06] E no canto superior ali direito aqui tem o log que foi feito.
+
+[55:11] Ah, maravilhoso!
+
+[55:13] O top isso aqui, né?
+
+[55:14] Top!
+
+[55:15] Aí outra coisa, as meninas aqui, separação depois para mostrar.
+
+[55:18] Eu ia fazer aqui, gato, ó. Vamos pôr as meninas, vamos separar aqui, né? Vamos pôr um aqui só, separar. Já abre lá a separação do seu sistema.
+
+[55:35] Legal. E aí já tá, já tem as informações que a gente passou tudo na reunião, que é pedido normal, entrega garantia. Desce um pouquinho, vim lá para baixo, tem as opções também de mais Aí, ó, incluir peça em garantia.
+
+[55:58] E agora tá aparecendo na lista? Sim, quando salva lá, né? Tá, ok, entendeu?
+
+[56:08] Aí ele já vai automaticamente, as meninas não vão precisar fazer esse processo, já vai cair no sistema, já vai ser tudo automático, tá?
+
+[56:18] Só Só até para, não sei se eu tô antecipando, você tem que separar a venda inteira ou uma lista grande. Tem um botão clique que move para tudo ou não?
+
+[56:30] Ou tem que criar, Pedro? Vou dar um exemplo, Pedro. É, vou dar um exemplo, uma venda de 10 itens paisagismo, por exemplo. Aí chegou tudo, tá tudo em reserva, a pessoa não ter que vir aqui e separar um por um, ter aqui separar tudo Aí vai mover tudo para o aguardando separar, né?
+
+[56:50] O filtro que você fez ali, Vini, só para— eu não lembro se tem. Não, aperta em separar ali. Aqui não, embaixo.
+
+[57:03] Ah, tá aqui. A gente não sabe se vai vir tudo, né? Ah não, só a fonte, ó. Ah não, pera aí, porque ela tá no—
+
+[57:14] porque ela tá selecionado.
+
+[57:16] Aí vamos ver.
+
+[57:21] A informação é separar em menos um, ao menos um item.
+
+[57:27] Pode até ser um botão aqui do lado, ó, separar tudo. Aí é isso, tudo que tiver em reserva vai separar.
+
+[57:37] Na Connect ali tem o botãozinho ali em cima, né? É bem, bem isso mesmo, é um É, dependendo da situação, sim. Eu só, claro, erros também ocorrem justamente por causa do botão separar tudo, tá? Assim, o sistema tá com algum erro, transferiu aquela situação que a gente tava falando. Não sei se o Pedro já tava, que o Murilo separou 2 e 2 do item. Talvez ele apertou separar tudo, moveu apenas o que tava na reserva e não moveu né, não se atentou que tinha um intransferido, né, e ficou. Então nessa situação específica, o automático ali de, ah não, vende, vou entregar todos os itens, não entregou exatamente todos os itens, ficou um para trás. Não sei o quanto isso é bom ou ruim, né, tipo, de ser automático, né, de não ter que clicar e digitar a quantidade, mas É, não, beleza.
+
+[58:39] Eu tô tentando achar aqui o HTTP do novo site.
+
+[58:43] Pedro, só, só, eu acho que você já sabe como fazer, mas só para a gente, por exemplo, aqui você vai ter que unificar as informações, correto? Vou dar um exemplo aqui, ó. Pera aí, vou falar aqui do trampo que você vai ter que fazer agora, né? Eu peguei a entrega futura, né?
+
+[59:09] Reserva.
+
+[59:10] Vamos ver se a gente acha aqui um. Ah, o caceta! A Cristiane mesmo, né? Pode ser torrent. Vamos lá. Vamos pegar aqui, tirar os filtros aqui. Vamos filtrar o cliente. A nota aí, 24,77 para baixo, é julho, junho, maio. Para lá, né, para cima, do jeito que você quiser. Então vamos lá, ó, por exemplo, vamos pegar aqui a Cristiane Torrente.
+
+[60:09] Vou até anotar, é junho de 2025, né?
+
+[60:13] Isso, até junho de 2025. Ó, eu vou te mandar essa planilha aqui, mas provavelmente não vai ser essa que nós vamos né, utilizar, porque vai ter o gap aí. Nesse meio tempo já teve entrada, já rolou, nós temos que pôr tipo um, entendeu?
+
+[60:34] Mas é bom você já me mandar essas informações até para eu já começar a estipular como que eu vou importar todas as informações para dentro do sistema.
+
+[60:43] E aí você vai ter o trampo aí.
+
+[60:45] É, aí o que que eu vou fazer antes de importar? Uma coisa que até o Felipe pediu para passar as informações de como que vai ser importado isso. Eu já tenho mais ou menos uma noção, que é literalmente foi tudo que a gente conversou todos esses dias, que é justamente não pode mexer no estoque, ele só vai ficar como histórico, vai, as informações não vão colidir com o que a gente tem realmente em produtos. Então é só fazer com que o histórico de produto continue, né?
+
+[61:15] Então é, vamos lá, não pode, não pode mexer em estoque em partes, tá? Por exemplo, se a gente vai, quer ver, vou dar um exemplo aqui.
+
+[61:30] Não pode mexer em estoque porque eu vou fazer, eu vou importar a planilha de estoque atualizada, entendeu?
+
+[61:36] Tudo bem, mas por exemplo, esse número na teoria vai estar aqui dentro. Se a gente fizer uma lista de entrega desse material da reserva, tem que sair do estoque geral também.
+
+[61:50] Mas aí vai dar certo. Mas aí vai sair dessa reserva sem herança Connect e vai entrar para um novo que vai ser reserva com herança Connect.
+
+[62:00] Tudo bem, então esse estoque geral não pode estar constando a herança da Connect. Senão não vai dar certo. Todo número de reserva está dentro do estoque geral.
+
+[62:17] Sim, aí a questão é: eu vou importar a planilha atual do estoque, certo? E vou importar as informações de peça reservada, de tudo que aquele cliente comprou. E essa importação não pode mexer na quantidade em estoque. Ele só pode fazer com que tudo que a gente tenha tenha o caminho do que foi feito no sistema da Connect, entendeu?
+
+[62:47] Eu sei, Gato, mas ó, vou dar um exemplo, tá? Vou desenhar aqui, vou dar um exemplo de padaria aqui. Você carregou o estoque, certo? O estoque geral vai vir com o número 3, disponível vai ser 0. A diferença é porque tem 3 na reserva, concorda? Sim, que vai ser 3 na reserva da Herança Connect para poder fazer a lista de entrega. Se eu faço a lista de entrega aqui a lista de entrega de 3, esse número vai sair fora, certo? Esse aqui tem que sair também, tá mexendo no estoque.
+
+[63:42] Não, mas aí você vai fazer, você vai fazer a entrega dentro do nosso sistema, certo? Sim, aí ele vai mexer. Eu tô falando na hora de importar, na hora de importar as informações, o que eu vou importar para dentro.
+
+[63:55] Ele trouxe, não pode somar no estoque, entendi.
+
+[63:58] É isso. Tipo, ele não vai poder mexer, ele só vai fazer as alterações quando a gente mexer, né? É isso, quando a gente mexer dentro do nosso sistema.
+
+[64:08] Mas eu já entendi, já, porque senão para mim também, eu não mexo aqui, ferrou, não deu errado.
+
+[64:18] Mas pode ficar tranquilo, qualquer movimentação que a gente fizer dentro do nosso sistema, até por isso que foi o que eu falei, Quando a gente importar tudo, a partir do momento que a gente importar, tá, os dois iguais, tudo tem que ser feito em paralelo. Vai ser trampo, vai. Só que a partir do momento que a gente perceber, ah, mano, no novo sistema tá sendo muito mais fácil para a gente fazer as coisas, o novo sistema a gente deixa.
+
+[64:43] Aí a gente vai ver a usabilidade, ver aonde nós vamos achar os erros, né?
+
+[64:48] Que aí, né, mas aí vamos por Tá perfeito, a gente já pode começar a migrar as coisas e no final das contas só fazer a parte fiscal, a parte fiscal na Connect.
+
+[65:02] Nós estamos trabalhando nisso, vai ser inclusive depois você me manda as questões. Ah não, mas aí tem que, não dá para fazer só a parte fiscal na Connect, aí tem que fazer tudo, tipo, o que não é, o que não teoricamente, né, o que não precisaria fazer É ficar dando entrada, essas coisas, entendeu? Mas não dá, porque aí depois se eu preciso fazer uma outra nota, nossa, é, não vai bagunçar.
+
+[65:27] É, vai ter que trabalhar em duplicidade, não tem o que fazer.
+
+[65:30] Deve ter uma data aqui, ó, dessa venda para frente não faz mais nada.
+
+[65:35] É, mas aí vai cortar a Connect.
+
+[65:38] É, corta sim, deixa de fazer as operações lá, mas a gente fica com ela para consultas ainda, entendeu?
+
+[65:47] Se bem que é que na Citel você não conseguiu trazer as informações. A gente tá trazendo todas.
+
+[65:55] Isso é, mas mesmo com a Citel, que nem a gente mudou em agosto, né, Matheus? Foi, aí eu tive que ficar com ela até fevereiro, até fevereiro. Mas é isso, porque eu não trouxe as informações das entregas, sim, que vai facilitar.
+
+[66:12] Que aí a gente vai ter essa história aqui.
+
+[66:17] Por exemplo, peguei a venda da Cristiane, que é aquela que a gente tava usando de teste lá no sistema. É onde você vai ter que unificar com as informações, que é a quantidade que tem essa planilha aqui, é a quantidade de— tem os L's e as quantidades de entrega futura. E aqui são reserva, todos os materiais que estão em reserva. O detalhe é, nós não temos a informação da Cristiane, é a mesma venda, ó, entrega 5882, 5882, é a mesma venda.
+
+[67:01] E o mesmo L, ele pode ter item na reserva e entrega futura, né?
+
+[67:06] Sim, vamos ver se tem algum aqui.
+
+[67:07] Um item aleatório, uma fonte, uma fita, uma lâmpada, a linha.
+
+[67:11] A linha com certeza. Ó, vamos pegar aqui a linha, que é o L32. Vou filtrar só o L32 aqui. Então, por exemplo, no L32, na entrega futura tem só a linha, certo? Aqui no L32, vamos ver. Ó, tem a fita e a fonte.
+
+[67:42] Mas ainda poderia, dificultando um pouquinho mais, ter alguma coisa entregue, uma fonte na reserva e uma fonte na entrega futura do mesmo L. Poderia, não sei quantas venderam aí.
+
+[67:55] Enfim, sim, da mesma forma que tem aqui, ó. Eu vi um aqui, ó, que vendeu 2. E aqui, por exemplo, esse item, exatamente isso, 6 vendido, 4 na entrega futura e 2 na reserva. Exatamente, tem que vir assim, na teoria tem que vir desse jeito aqui. Agora poderia ser mais complicado ainda, só que a gente não vai saber. Poderia ter 6 na venda, que a gente não tem a informação da quantidade vendida, não veio na— se eu fosse pedir isso para o Sérgio ia demorar 20 dias. Então poderia ter tipo 4 na entrega futura, 1 no reserva e 1 entregue. Sim, o número entregue a gente não vai ter, infelizmente não por enquanto.
+
+[68:50] Depois, mais para frente, eu vejo se Conforme a gente for fazendo no nosso sistema, vai ter essas informações.
+
+[68:57] É, no nosso vai ter.
+
+[69:01] E aí, mas então você já tá com relatório em mãos?
+
+[69:05] Vou te mandar aí agora. Ó, aqui eu pintei esses daqui, ó. Você nem carrega, tá? A entrega futura, eu acho. É nesse de entrega futura aqui. Esses 3 aqui, ó, nem carrega, tá? Isso aqui é cagada, tipo, o sistema deixou faturar um produto sem cadastro. É coisa antiga, já foi resolvida.
+
+[69:44] O lançamento, você tem em mãos? O 115 e o 4252, é isso, né?
+
+[69:53] É, vou te mandar pintado já lá. Ele, deixa eu ver uma coisa aqui que eu fiquei curioso.
+
+[70:06] É na venda mesmo, né? Ele apareceu.
+
+[70:17] Verdade, Matheus. Eu vou dar uma fuçada aqui depois, viu, para ver se não tem nada de coisa entregue do quê, como assim, do sistema. Tipo, se a gente não tem o histórico Entregue, mas eu acho que não vai ter, não vai ter isso.
+
+[70:44] Você fala dentro do próprio sistema gerar um relatório de itens entregues? Ô Pedro, deixa eu só fazer uma pergunta. Nesse sistema, não sei como que funciona tal, mas na Connect, se a gente, a planilha anda, né, o item entregou, finalizou, acabou, né, beleza, concluiu. Na Connect é meio que assim irreversível, mas já teve caso, por exemplo, das meninas pedirem fazer uma lista de entrega, a gente entrega e o material volta para o estoque porque era só um teste, alguma coisa assim. Tem como estornar a baixa final desse no sistema ou não?
+
+[71:45] Atualmente não.
+
+[71:48] Pode criar.
+
+[71:51] Não, beleza. É porque assim, é um pouco melhor, porque aí pensando aqui naquele sistema de entrega que a gente tem da logística, Na aba finalizados você vai ter um botão para apertar ali e alterar a finalização, é isso?
+
+[72:13] É que, é que hoje, né, do jeito que eu falei, eu trato separado o sistema, o software de gestão do sistema lá de entrega, né, de gestão de entrega, que também é gestão, enfim, mas é a gestão do produto em si. Pensando lá na separação parcial, quando a gente anda com o produto, quando finaliza a entrega, né, ele fica lá na coluna entregue e acabou. E aí dá para ver que entregou e tá tudo bem. Mas aí acontece às vezes das meninas passarem uma lista e, como eu falei, a gente tem que estornar essa baixa para o produto voltar para o estoque, para depois gerar uma nova lista de separação quando for ter que realmente separar o material. Entendeu? É um pouco complexo, um pouco chato, mas na Citel era possível, com uma senha, lógico, né, não é qualquer um que podia fazer isso, estornar a baixa. Às vezes até por uma questão de, ai, era, tá lá escrito que era para o José receber, mas aí na hora que a vitória foi baixada escreveu Maria, se confundiu, entendeu? Não sei, coisa que acontece no dia a dia. Editar essa parte, essa baixa final.
+
+[73:29] É, o editar, o editar eu acho super possível. Agora, a questão que me pega um pouco é estornar uma peça, né, que foi o que você tinha falado no começo.
+
+[73:40] Isso acontece, tipo, já entregue ter que voltar para reserva. Aí, devolução, falar que acontece sempre não, mas que acontece.
+
+[73:49] Mas aí seria uma devolução de peça, certo?
+
+[73:52] Não, não é uma devolução, é É como eu falei, às vezes foi separado para amostra, tipo, ah, vamos entregar um spot, uma lâmpada para o cliente, para ele lá.
+
+[74:04] Eu já fiz um sistema de emprestar peça.
+
+[74:10] E não é emprestar, é dentro da própria venda. Tá entendendo, Vini?
+
+[74:16] Tô.
+
+[74:17] É tipo, é bem isso que eu tô falando mesmo. Ah, vamos entregar o L1 Mateus, você para, vendeu 100 peças do L1. Vamos pensar assim, vamos entregar um e um de cada, um spot, uma lâmpada para amostra. Aí elas foram lá, fez o teste com o cliente, pá, só para ver como ficou. Ah, Mateus, põe de volta aí no estoque, que quando for entregado daqui 6 meses, quando a obra tiver no ponto de entrega, aí a gente manda as 100. E não vai mandar 99, vou mandar 100, entendeu?
+
+[74:49] Entendi.
+
+[74:49] Agora ficou um pouco mais claro. Mas pode dar o exemplo.
+
+[74:53] Não, não, pode falar. Acho que agora ficou mais claro para você entender.
+
+[75:01] Era algo diferente, Vini?
+
+[75:02] Tipo, não, não, era isso mesmo. Por exemplo, era basicamente isso, tipo, a questão do empréstimo para obra faz mais sentido. Vendeu 100, entregou 1 para o cliente. Pro eletricista lá fazer o corte. Aí foi isso, fez separação, tudo. Aí o eletricista foi lá, pegou o material no estoque.
+
+[75:23] O que a gente fez?
+
+[75:24] Deu baixa como entregue. Aí daqui 10 dias as meninas foram na obra, tal. O eletricista: pode levar, não vou precisar mais, me manda depois tudo junto. Ou seja, tem que voltar esse material, cancelar aquela entrega e voltar esse material para o reserva para daqui 3 meses entregar de novo.
+
+[75:44] É, eu não, eu não faria o cancelamento da entrega, até porque a entrega fica como um registro de que foi entregue, né?
+
+[75:53] Eu acho que isso é super importante.
+
+[75:55] E eu faria alguma coisa dentro ali, até dentro do sistema de logística, para voltar a informação, para voltar uma peça que foi entregue, que ela vai, vai ser entregue depois tudo junto. Que foi o exemplo dado. Mas eu acho que essa informação que foi entregue e voltou para o estoque tem que ter, porque se a gente cancelar a entrega simplesmente, a gente perde informação.
+
+[76:24] Não, é cancelar lá o que eu falo, né, o site lá da entrega, cancelar aquele histórico lá não é legal, não é bacana. Acho que tem que manter. Mas hoje, ouvindo, tá na tua tela aí, né? Lá no, lá na, onde dá baixa nas vendas, você tem aí fácil? Deixa eu ver, para mim é no liberar.
+
+[76:51] Pera aí, acho que não, pera aí, acho que eu nem tenho estoque.
+
+[76:57] Pera aí que eu minimizei, eu não tô vendo aqui agora.
+
+[77:01] Era no liberar produto e expedição.
+
+[77:04] Isso, exato, é aqui na minha Aí ali eu coloco localizar, né? Aí tem que mudar ali para venda parcial. Se você der um executar, você vai ver tudo que tá em separado, essas coisas. Beleza. Se hoje eu finalizar aqui, 25, ó, esse aqui, que coisa velha. Não, não, não, é separado porque dali, tá, tá. É porque isso aí, em teoria, é coisa de produção. Foi separado para fazer peça de produção. Tá, beleza. Tem muita coisa que entraria nesse caso, que aquelas listas que eu mandava para o Cláudio.
+
+[77:42] Inclusive, a produção você já passou para o Matheus?
+
+[77:45] Não, ainda não. Ah, o Matheus não vai mexer na produção, é o João.
+
+[77:49] É o João. E aí, ainda de novo, o sistema hoje Imagina, ao clicar ali, né, no separado e clicar em baixar, tipo assim, você quer baixar mesmo? Sim, porque foi entregue. Você tem que, é baixando, né, concluindo o processo que você elimina o item do sistema, certo? Pelo menos no nosso, na Connect, né, do jeito que funciona hoje aqui, é ali que tira de fato o item, porque até então ele só foi andando de coluna. Ao baixar, ele Realmente zera. Só que nessa situação hipotética, que é rara mas acontece, o item deveria voltar para reserva. E aí não tem como estornar uma— eu tô mexendo o mouse como se eu fosse mexer na tela, como se eu fosse, né, como se o item tivesse que voltar para reserva.
+
+[78:44] Mas aqui, Matheus, essa etapa não vai ter mais. Vai ser a hora que der entregue lá no sistema de logística, já vai baixar aqui. Vai vir aqui, tipo, vai ter a informação da parcial aqui. É que não tem nenhum. Deixa eu ver se tem um aqui.
+
+[79:08] Mostra aqui, ó.
+
+[79:11] Aqui, Matheus, ó, já vem aqui, ó. Ah, tem o estornar aqui, ó. Vamos ver se funciona então.
+
+[79:18] Mas aí o estornar aí cancela todo o processo.
+
+[79:26] Espera, o Pedro tá falando aí.
+
+[79:27] Calma aí, calma, calma. Entra no chat dele. Pera aí, chat da reunião. Posso te mandar no chat nosso aqui? Calma aí, eu dificultei de mandar no Nossa, quanta gente para responder!
+
+[79:56] Ah, esse é o de logística, né?
+
+[80:02] Tá, que aí vai aparecer. Eu quero que o Matheus, inclusive até para o Matheus já ver como que vai ficar, porque a peça, as peças, eu tenho acesso aqui. É o mesmo da central.
+
+[80:22] Se eu soubesse.
+
+[80:29] Quer que eu faça aqui então? Faz.
+
+[80:40] Eu paro de compartilhar o meu?
+
+[80:42] Não precisa, ele vai parar automaticamente. Estão conseguindo ver a minha tela aqui?
+
+[80:49] Sim, sim, sim, sim.
+
+[80:52] Então aqui, ó, os detalhes. Aqui já vai vir a própria peça, a quantidade dela. E aí aqui você consegue imprimir o pedido, que é a mesma informação que as meninas hoje te mandam.
+
+[81:11] Tá, sim.
+
+[81:12] Que foi separado por quem, conferido por—
+
+[81:16] só depois a gente volta na parte da Alice. Não, vamos concluir essa parte.
+
+[81:21] Aí tem aqui também, só que é mais— eu posso colocar inclusive a parte do, da venda aqui, ou da separação, que a separação já tá, né?
+
+[81:37] No caso, é esse aqui. Esse é o botão de imprimir, visualizar ali o que foi a demanda, né? O endereço, o responsável, observação se tiver. É isso, é o que eu imprimo aqui.
+
+[81:54] Aí agora eu fiz tudo aquilo que a gente conversou, tirei aquelas informações do sobrecarregar nos dias, né? Andava repetindo.
+
+[82:06] Enfim, isso aí foi a prima do Vini. Separação estornada, revisão.
+
+[82:18] Foi justamente o que eu falei para você não fazer, Vini.
+
+[82:21] Não, eu não fiz.
+
+[82:22] Não, eu sei, a gente fez uma vez e aí ficou registrado, porque se você fizesse ia voltar aquela, o pedido. Entendeu? E aí eu não ia conseguir mostrar para o Mateus.
+
+[82:34] Ah, tá.
+
+[82:36] Então aqui já vai ficar, já vai vir tudo de uma vez. Aí só falta eu trazer todas as informações das entregas finalizadas, que não tá tudo aqui, mas tem grande parte já.
+
+[82:49] Então, mas aquela lá que eu ia fazer era para mostrar para a gente ver se o material voltava para o Separação, né? É um dos Vinícius, eu não sei qual. Acho que é no meu.
+
+[83:09] Eu, será que não é esse aqui?
+
+[83:12] Não, esse é o Estornado.
+
+[83:14] É aquela lá.
+
+[83:20] Aí, que nem, ó, tá como entregue. Certo, é tudo entregue. O estornar, teoricamente você consegue selecionar. É, faz aí, Pedro, vamos ver se volta lá para o reserva. Estorna tudo.
+
+[83:39] Ah, tinha o reverter tudo aqui, né? Tá, beleza. Eu Aqui, ó, peça já foi entregue, não foi possível.
+
+[83:53] Inclusive, o fluxo de devolução, esse é o detalhe que o Matheus tá falando.
+
+[84:01] Aí o certo seria entrar aqui, orçamento.
+
+[84:07] É, mas não é um caso de devolução, porque vai gerar crédito para o cliente, não pode, não é isso, não pode, não, não é o caso, é outro caso.
+
+[84:16] Tá, não, beleza, eu vou fazer isso.
+
+[84:21] E aí eu nem sei se é necessário assim hoje. Hoje, sinceramente, o que que eu faço? Às vezes eu ponho uma anotação, deixo meio standby, sabe? Tipo, não tem muito o que resolver, lógico, né?
+
+[84:33] Enfim, era uma função que só devia estar disponível para ele, entendeu?
+
+[84:40] Sim.
+
+[84:42] Na Citel, lembro que tinha. Aí era uma senha 1 lá padrão, né? Claro, se tornar, né? Aí o item voltava lá para reserva.
+
+[84:56] Mas por mim, eu acho que o certo é fazer isso e deixar também como histórico, deixar o log registrado. Aí a gente, caso tenha algum problema decorrente de uma peça que voltou, a gente sabe o que aconteceu e quando aconteceu.
+
+[85:17] Tem algum campo observação na venda, alguma coisa nesse sentido aqui na devolução? No caso, tipo assim, eu tô pensando tipo assim, uma pasta da venda. Imagina que numa pasta, quando você clicar na pasta da venda, aí tem lá informação tipo entregou L1 para teste, Aí depois, informação 2, o L1 de teste voltou e tá na reserva, você enviar junto quando for mandar o restante, sabe? Sei lá, entendeu? Alguma coisa nesse sentido. Mas é loucura isso aí.
+
+[85:50] De novo sumiu o quê? O Vinícius. É maiúsculo aquela separação lá? Opa, lá vem, né? Escolher o projeto, qualquer um. É isso, vai ter que fazer uma mini conferência aqui. Um foi devolvido aqui, ó. Beleza. Aí a observação que você perguntou, Matheus, ficaria aqui.
+
+[87:19] Ah, mas aí, né, que aí incluindo esse caso, então, e esse valor total menos 128, tipo, mas ele não pode gerar crédito para o cliente, era só questão de voltar o item para o estoque mesmo, não dá certo nesse sentido.
+
+[87:32] Eu acho que tá, então é isso, vai ter que criar isso, cara, que sinceramente nem precisa de entrega para matar, tá? A Débora ia dar, não, mas eu acho que é isso, se for uma coisa tão pontual assim, deixa standby para uma para fazer futuramente.
+
+[87:54] Mas contanto que o resto, todas as coisas estejam funcionando, perfeito. Sim, sim, é que, mas é isso, teoricamente teria que fazer dessa forma, mas sem mexer o estoque, né?
+
+[88:07] Sem mexer, não mexendo no estoque, mas não mexendo em financeiro, não gerando um crédito para o cliente. Simplesmente é tipo assim, ah, entreguei Cancelou. Enfim, não tem uma questão que eu acho que pode ficar para depois, porque como eu falei, é bem pontual, não acontece poucas vezes, sendo sincero.
+
+[88:30] Aqui não mexe se colocar o desconto de 100%, mas aí é só uma forma de burlar o sistema também.
+
+[88:38] Mas aí o item voltaria lá para reserva?
+
+[88:40] Sim.
+
+[88:44] Ah, mas aí vai registrar uma venda, sabe? Não, é tão atípico fazer aquilo, tem que ser— acho que não.
+
+[88:58] Depois a gente vê isso.
+
+[89:00] Até porque é uma situação que o Matheus vai resolver por lá mesmo, sabe? Aí aqui o Matheus já não tem esse acesso no orçamento para fazer devolução, já vai envolver mais pessoas.
+
+[89:14] Beleza, beleza.
+
+[89:15] Aí a gente também deixa o sistema para se adequar à empresa, que é aquilo que a gente conversou.
+
+[89:21] A gente vai fazendo conforme precisa, tá?
+
+[89:26] O Vini e Pedro, só uma coisinha a respeito da lista de entrega lá. Aqueles campos quadrados que ficaram assim, né? Com relação à separação, conferência e tal. Os nossos aqui funcionários e tal precisa ter aquele campo de RG e ali?
+
+[89:49] Eu acho que não precisa não, Pedro, só o nome.
+
+[89:51] Eu acho para dar uma limpada, sabe, tipo, e deixar embaixo, lá embaixo. Isso, tipo que nem eu tinha falado, né, tipo um rodapé mesmo, né? A lista de entregas, tipo, o nosso Assinado e conferido. Porque aí quando você imprime, imagina que sai 10 listas, o separado e conferido tem que estar em todas as 10, entendeu? Por isso que eu falei, tipo, como se fosse uma nota de rodapé, só uma linha escrito separado por, conferido por.
+
+[90:23] Isso.
+
+[90:24] E nisso eles já, tipo, já assinam, já colocam a data.
+
+[90:27] Eu acho que eu assim Deixaria isso, no meu ponto de vista, tá? Deixaria isso e não precisa colocar o CPF, por exemplo.
+
+[90:39] Não, não pode tirar, Pedro, é muita coisa.
+
+[90:42] Mas para o entregador e para quem vai receber também não pode deixar.
+
+[90:49] Mas só que para quem tem, vamos pensar numa coisa aqui, tá muito grande isso também, entendeu? Tipo assim, se eu tiver, por exemplo, mais 4 produtos, já vai mudar para outra página.
+
+[91:05] E vai ser uma página só para observação e assinatura. Mas isso numa entrega grande vai ser assim sempre.
+
+[91:15] Eu deixaria, cara, eu não sei, eu mudaria um pouco, tem que ficar um pouco mais limpo.
+
+[91:23] Não, mas pode falar.
+
+[91:26] Eu tô pensando aqui, deixa eu colocar grande aqui para a gente conseguir ver.
+
+[91:31] O campo de assinaturas tá maior do que o campo do produto em si, né? Tipo, as informações, claro, saber quem separou, quem conferiu e tal, é importante, mas é porque aqui no caso é só um produto, né?
+
+[91:48] Mas tem que pôr o fornecedor, né?
+
+[91:50] Ah, colocou.
+
+[91:54] Observação, por exemplo, eu, para mim não precisa ter data que tudo tem uma data só, sabe?
+
+[92:03] Mas é a data, a data da entrega em si. Se quiser que o entregador assine, eu até acho, acho ok, beleza. Por mim a gente pode padronizar isso, mas O separado por, eu acho desnecessário. Nome, RG, data.
+
+[92:26] Por exemplo, nome aqui, ó, nome, RG, data, do separado por, conferido por, já tira e deixa só essa linha em negrito. Pode nem, eu nem deixaria em negrito, eu deixaria em pretinho aqui, ó, pequenininho aqui, igual tá mesmo. Não precisa dar destaque para isso, isso daqui é só para Controle interno mesmo, controle interno, e traz lá para o rodapé, deixa lá embaixo.
+
+[92:50] Então isso aqui, esse tracejado aqui e o controle interno, nem tinha visto. E o controle interno jogar aqui para o rodapé, isso, só para pessoa assinar, assinado por, separado por e conferido por. Aí a pessoa registrou e beleza, não vai ter hora, não vai ter data nem O nome, o nome ele vai assinar, né? Mas beleza. E aí aqui no entregador continua como tá, o CPF vai deixar?
+
+[93:25] O entregador não, acho que não precisa.
+
+[93:28] De quem recebe sim.
+
+[93:30] Ai, mano, eu nem vou fazer o quê com CPF do cara. É que às vezes a pessoa perguntar, quer colocar RG, CPF, a gente falar Já que você perguntou, pô, eu prefiro muito mais que o cara escreva o nome por extenso do que—
+
+[93:47] porque aí que tá, às vezes o cara, 90% das vezes, tá, isso eu, ele assina. Quando eu vou receber alguma coisa, eu não vou colocar meu nome por extenso, eu vou jogar minha assinatura e foda-se, tá ligado? E aqui no caso, o cara obrigatoriamente ele vai colocar o nome. Não sei, aí é mais por questão de controle nosso para caso aconteça alguma coisa, a gente tá resguardado sabendo que foi aquela pessoa em específico que recebeu. Porque no caso aqui, se o cara só assinou, a gente não vai saber quem que foi essa pessoa que recebeu, a não ser que o entregador coloque o nome da pessoa que recebeu X, entendeu?
+
+[94:32] Mas, por exemplo, ó, eu, eu de repente o que eu faria, tá? Pera aí, se eu não rabiscar eu não consigo explicar.
+
+[94:44] Pera aí, deixa eu só pegar um negócio.
+
+[94:45] Gera esse PDF aí, me manda rapidinho, já que você tá com ele aí. Ué, com fome já. Você me mandou?
+
+[95:23] Tô enviando aqui.
+
+[95:25] Ah, tá.
+
+[95:27] O Vini, ó, tô te mandando uma lista aí assinada que a gente entregou ontem, essa daí, para você ter uma noção. Tipo assim, quantidade de itens, né, bastante, e o espaço. Até que tem essas informações ali, né? Isso que eu falei para adicionar o separado e tal é para economizar a questão do carimbo, né? Que já fica um campo ali, é mais fácil. Os meninos não tem que ficar batendo carimbo e tal, né, que fica mais poluído, né. Tendo sempre essa coisa padrão, eles só vão sempre assinar e pôr a data ali no lugar. E embaixo ainda, o cara ainda assinou, né, pois por extenso ali, e depois o RG também, né. Nesse exemplo que eu tô te dando aí, se quiser depois compartilhar com o Pedro aí.
+
+[96:14] Entendi, vou mandar para ele. Manda aqui, Matheus. Ah, você não tem no computador aí, né?
+
+[96:21] O quê?
+
+[96:22] Não, Matheus, na verdade tá no sistema de entrega já.
+
+[96:28] Eu vou gerar aqui um. Pera aí, deixa eu compartilhar aqui.
+
+[96:34] Foi baixado ontem. Se for lá no finalizado, vai dar lá para mim.
+
+[96:38] Eu vou pegar aqui numa coisa. Ó, estão vendo? Cadê, gente?
+
+[97:12] O cabo aberto, graças a Deus.
+
+[97:14] Rapaz, aqui você não viu, viu aqui?
+
+[97:17] É, não, deixa eu baixar aqui melhor. Beleza, ó, que eu acho, né? Baixar aqui. Isso daqui, isso daqui tudo, tipo, isso aqui sai, certo? Isso aqui sai. Aí traz, pode nem tira esse controle interno, pode trazer esse tracejado aqui para baixo, né, no rodapé. E aí nessa mesma letra aqui, ó, para não dar destaque e fininho, você vai pôr separado por e conferido por nessa mesma letra.
+
+[98:06] Você fala a colocação do controle interno, tá?
+
+[98:12] E não precisa ser embaixo, pode ser aqui, ó, separado, conferido, entendeu? Tá aqui. E aí vai pôr dois pontos, a pessoa Assina aqui, beleza?
+
+[98:28] Beleza.
+
+[98:28] Aí, beleza. Aí de repente a questão da entrega, né? Pode na nossa aqui, ó, como tá, só para você ver. Tem aqui, ó, tipo, fica mais limpo, entendeu? Na mesma linha, o conferido, tipo, pode ser o recebedor e pode ser o entregador, um debaixo do outro aqui numa linha só. Você tá vendo aqui embaixo ou não? Conferido aqui, é porque aqui teoricamente teria que ser de repente a nossa assinatura e aqui o cara O intuito da assinatura de quem tá recebendo embaixo da mensagem é que ele tá assumindo a total responsabilidade e tal.
+
+[99:28] Sim.
+
+[99:29] Então é, coloca a nossa entrega, o nosso entregador, ou até o de baixo, pode colocar embaixo disso daqui, ó. Então como ficaria? Limpa tudo, né? Aqui no caso limpa isso aqui tudo. E aí fica assim, ó, é receber numa mesma linha o recebedor RG e data, entregador RG. Pode deixar, né, para ficar, manter o padrão, ele não vai preencher mais. E data. E aqui em cima, né, isso aqui saiu fora, né, no caso. Aqui vai ter essa mensagem aqui, ó: assumo total responsabilidade.
+
+[100:19] Isso.
+
+[100:20] E eu deixaria essa observação, deixaria uma linha só, tá? Não tem observação de duas, de três linhas não. Nossa, é porque, mano, se teve uma observação de três linhas, tem uma cagada. Volta tudo e faz de novo, porque não Entendeu? Aí acho que fica melhor.
+
+[100:45] A observação, ele tá aparecendo.
+
+[100:47] Ah, tá, tá.
+
+[100:48] A observação seria para escrever observação na entrega, né?
+
+[100:52] Na entrega, tipo, faltou uma peça do L1 aqui, vai escrever aqui.
+
+[101:01] É que aí eu, a pessoa que vai conferir que vai, que recebeu, no caso, vai visualizar e vai falar, tá faltando tal coisa. Se ele não fizer isso, a responsabilidade é dele também, que ele tá assinando um termo de responsabilidade. Sim, então é bem por isso que eu falo que é importante a questão do nome, do CPF, porque a gente tá lidando com coisas que tem um valor alto, né?
+
+[101:30] E a partir daí, meu amigo, mas na teoria funciona, na teoria funciona, mas deu algum BO, a gente joga para outra pessoa, esquece. Mas tudo bem, não, mas tendo registro, é, mas nunca aconteceu, tá? O fato é basicamente ter o nome e ser legível, né? Sim, porque Mas aí isso é os meninos, tem que falar, coloca o nome por extenso, tal. O cara chino tem que preencher tudo isso aqui.
+
+[102:05] Tendo a informação de nome, o cara coloca o nome por extenso.
+
+[102:09] Sim, é, mas aí na mesma linha, acho que vai ficar mais limpo.
+
+[102:14] Porque nessa lista que eu mandei a foto aí para o Vini, por exemplo, é uma lista até bem grande, muito item e tal. Mas numa lista, por exemplo, de entrega, uma fita, uma fonte, um item apenas, beleza. A lista fica mais limpa, né? A lista hoje que sai da Connect, ela tá legalzinha nessa parte ali, que fica um campo branco assim, né? Então fica bem limpo, tipo, tô vendo que tá entregando, e lá embaixo as assinaturas, simples assim, tá? Mateus, uma parte estética mesmo.
+
+[102:43] Oi, pera aí, deixa eu ver uma coisa aqui. Essa visualização, essa grade aqui te incomoda?
+
+[102:52] Eu falei sobre isso com o Leandro aqui. Me incomoda, mas o Leandro falou que para separar o material, por exemplo, em grade, fica melhor. Então não sei.
+
+[103:10] O Leandro gosta?
+
+[103:14] É, o Leandro, quando era Citel, né, a Citel fazia um negrito um sim ou não, né? Modelo de tabela do Excel e tal.
+
+[103:23] E aí também ficava conectado, né?
+
+[103:27] Sim, não dá para ver.
+
+[103:29] É um cinza um pouco mais escuro, sim, branco, cinza um pouco mais escuro, branco.
+
+[103:36] Na impressão real aqui nem dá para ver, sendo bem sincero.
+
+[103:42] Aí eu posso fazer, é que é isso, né? Isso é mais por questão de visualização para não ter nenhum erro. E eu posso colocar a cor cinza ali também para deixar o padrão.
+
+[103:55] Você precisa código, anota aí.
+
+[104:01] Esperar o Vini, Pedro.
+
+[104:04] Beleza.
+
+[104:11] 826712.
+
+[104:15] É pintar, colocar a linha cinza, eu acho que fica Acho que talvez um pouco poluído. Eu acho que em grade também fica, mas se não pôr, acho que sei lá, não sei, não sei, não sei. Acho que a grade aparece até mais do que as linhas em cinza, mas do jeito que tá hoje na Connect nem dá para ver essas linhas em cinza, tá sendo bem sincero. Então a folha sai praticamente branca.
+
+[104:42] E se aqui, e se não fosse, não sei, tá, Pedro, se eu vou escutar, tá? Se não fosse linha por linha, fosse por L. Exemplo: tem 4 itens que é do L1, aí passa uma linha, 4 itens do L2, aí passa uma linha, igual no orçamento, tipo isso. O que que você acha, Matheus?
+
+[105:11] Isso é bom. Uma visualizaria legal, talvez o L, não sei. Acho que eu falar que deixaria sem nada, para mim, o que o meu gosto pessoal é sem linha nenhuma, mas na hora da separação ali, por exemplo, ter linha Realmente, talvez os meninos, né, visualize o item mais fácil.
+
+[105:44] Tem que pensar o que que é mais rápido no dia a dia, né? Não importa, eu acho que no meu ponto de vista não importa ser bonito, mas funcional.
+
+[105:55] Segue o baile assim, se começar a incomodar, aí troca.
+
+[106:00] A hora que sai uma lista de 4 páginas que tiver cheia de linha, aí eu te falo, se começar a incomodar, troca.
+
+[106:06] Porque é até bom, às vezes você pega, a gente como vai estar trabalhando lado a lado, você pega a lista da Connect, a lista do sistema da lutineira, bate uma com a outra, pergunta para quem que é a pessoa que faz a separação.
+
+[106:24] A separação, o menino aqui do estoque que faz, o Leandro, um deles.
+
+[106:29] Pergunta para o Leandro, qual que você prefere?
+
+[106:32] Eu mesmo faço separação, sinceramente.
+
+[106:35] Mas não, eu sei. Mas aí você pergunta ou vê você mesmo e vê qual que você prefere, me fala. Eu posso copiar, não tem problema nenhum.
+
+[106:43] Sim, uma lista maior para a gente ter mais noção, porque essa tá fácil, né? Tem um itemzinho só ali e tal. Agora uma lista realmente de 20, 30 itens, né? Várias páginas, né? Como que vai ficar isso depois no visual? Mas isso assim, detalhe estético, não sei. É que fica tabeladinho, né, velho? Tipo, ok, não sei se te incomoda e tal.
+
+[107:06] Me incomoda um pouco, mas eu não faço entrega, né? Tá.
+
+[107:11] É, não, tipo, só sobe ali rapidinho a página só para ver um negócio. O detalhe do cabeçalho, não tá ok. Cabeçalho tá ok. O número da, vai ter, tá. Aí é só para eu já aprender como que vai ser. Vai ter parcial, vai ter alguma coisa assim?
+
+[107:29] A 2 ali, a parcial dessa venda.
+
+[107:32] Ah, tá.
+
+[107:33] Então a venda, a venda 3, parcial 2.
+
+[107:37] Entendi, entendi.
+
+[107:39] Mas aí vamos, vem cá, deixa eu entender. Aí tem outra venda, segue a sequência da parcial, vai ser P1 daquela venda, P1 daquela venda, tá? Acho que é ok.
+
+[107:52] Não, ok, ok, funciona. Tipo, venda 25, P1. Venda 25P2, P3, P4, por aí vai.
+
+[108:00] Aí venda 25P1, 26P1, e aí assim por diante, porque aqui cada venda vai ter sua parcial. Aí vai ter uma venda que teve 30 parciais, vai estar lá, venda 03P30.
+
+[108:15] E isso fica no registro lá no campo da venda? Sim, no campo da venda ou no campo Lá no sistema mesmo que eu falo aqui, ó. Ah, tá, tá, parciais dessa venda. Legal, tá, tá. É porque eu não tinha visto até então. Ok, ok, ótimo.
+
+[108:36] Fica o registro de quem recebeu, aí tem todas as informações. Quando fizer, o que fizer na logística lá vai vir para cá com uma forma de visualização mais rápida para as meninas.
+
+[108:48] Tá, tá, tá, tá, tá.
+
+[108:50] Não, você também, seja quem for, tá?
+
+[108:56] É legal, é isso então, é isso.
+
+[109:00] É sobre isso, planilhas, viu, Pedro?
+
+[109:02] Já tá, eu já vou agora, já vou pegar e já começar a realizar.
+
+[109:07] Pega nisso já, aí amanhã a gente conversa, tá?
+
+[109:13] Aí a gente senta para conversar só sobre isso.
+
+[109:16] Beleza, vai ter que estruturar. E a gente faz alguns testes, que nem amanhã é quinta, e de repente a gente vê na segunda, sei lá.
+
+[109:24] Então eu falei com o Filipe, essa semana eu não vou voltar, semana que vem eu vou estar a semana inteira.
+
+[109:30] Então talvez seria até melhor a gente começar na segunda, a gente pega, que hoje é quarta, né, a gente pega quinta e sexta para estruturar, fazer uns testes finais, né. Aí o que eu posso fazer Eu posso entrar no meu email de repente no sábado e te encaminhar o que gerou da lista do sábado, entendeu? Que pegou, porque aí no sábado não vai ter movimentação, nada.
+
+[109:55] É, aí você carrega, carrega o todo, deixa tudo pronto, aí segunda-feira a gente já começa.
+
+[110:05] Beleza, então tá.
+
+[110:07] Tá, sobre o motivo inicial da reunião, a questão dos itens, Vini, não sei, falando bem, bem franco, se as equipes, se as meninas conseguirem ajudar a gente, o que foi entregue, o que não foi, de repente a gente já conseguiu eliminar e filtrar um pouco disso. Eu não sei, não sei como que tá.
+
+[110:28] Ou faz que nem falou, carrega e depois vê, mas Aqui, Pedro, na visualização parcial, sabe que vai ter aqui que nem vai ter aqui, né? Você vai trazer o número, você vai trazer o número da venda igual do sistema do Sérgio, certo?
+
+[110:47] Mesmo número vai ter que ser subsequente, né? Vai ter que ser o próximo da lista dele.
+
+[110:56] Não, não, não, não, as antigas, as antigas.
+
+[111:00] Sim, o que eu tô falando é vamos cortar na venda 15800, por exemplo, só um exemplo. A próxima é 15801 dentro do nosso sistema aqui, porque ele vai andar em paralelo.
+
+[111:15] Não, beleza, mas tipo, na, o histórico vai vir com o número da venda dele, certo?
+
+[111:21] Vai.
+
+[111:22] Beleza. Aí de repente você pode colocar uma marcação aqui nessa visualização aqui do 2477 para cima Que é venda antiga. Aí eu peço para as meninas irem dando uma olhada, tá? Deixa eu te falar, aqui podia trazer o vendedor, tá bom?
+
+[111:54] Então na venda parcial ali apareceu o vendedor. O vendedor ou a equipe?
+
+[112:01] Pode ser quem fez o orçamento, vendedor, quem é o digitador lá, né? No caso, que provavelmente se tiver algum problema vai ser consultado, sei lá, por exemplo, Murilo que fez, né, que passou. Nós vamos atrás do Murilo, no caso, porque não tem, né, a informação. Não sei, por exemplo, eu não sei de quem é essa venda, de qual equipe é. Tá, entra aí.
+
+[112:31] Nem clicando nela?
+
+[112:32] É, então era isso que eu queria ver.
+
+[112:35] Nem clicando.
+
+[112:36] Ah, mas tentei, velho.
+
+[112:40] É por isso que é bom a gente trabalhar em paralelo, porque a gente começa a ver as coisas que precisam realmente no dia a dia. Mas é isso, pode deixar que eu já vou colocar isso aí.
+
+[112:49] 97, 31, 80. É o quê? E aí traz a mesma informação na venda parcial, porque lá tem, perdão, na venda da Connect, que lá tem também em feitos, tá?
+
+[113:08] Lá no Sérgio, na planilha que você me mandou, né?
+
+[113:15] É, lá tem também.
+
+[113:17] Que aí, no caso, é vendedora. A gente só vai mudar o nome para digitador. Isso, galera, só isso.
+
+[113:29] Falou, valeu, tchau para vocês!
+
+[113:31] Nossa, era rápido, 2 horas de reunião aqui em cima.
+
+[113:36] Tá louco!
+
+[113:36] Tchau, galera, um abraço! Falou, valeu!

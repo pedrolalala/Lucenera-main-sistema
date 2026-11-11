@@ -57,6 +57,8 @@ Nunca invente tabela, coluna, funcao ou policy sem verificar o snapshot central.
 
 ### Seguranca do banco (SPEC-196, 11/10/2026)
 
+Roteiro fixo de analise de seguranca (repetir mensalmente e a cada sistema novo): `03-Projeto/Seguranca/ROTEIRO_ANALISE_SEGURANCA_DADOS.md` (scripts em `scripts/seguranca/`, relatorios em `03-Projeto/Seguranca/rodadas/`).
+
 A chave `anon` vai dentro de todo site; quem protege os dados e o banco, nao a tela.
 
 1. Tabela nova: sempre `ENABLE ROW LEVEL SECURITY` e `REVOKE ALL ... FROM anon` (o Supabase da grant para `anon` por padrao).
@@ -65,6 +67,10 @@ A chave `anon` vai dentro de todo site; quem protege os dados e o banco, nao a t
 4. Pagina publica (sem login) le dados so por RPC `SECURITY DEFINER` que filtra o necessario. Hoje o unico acesso `anon` liberado e o site do Showroom (`vw_showroom_publico`, `showroom_import_pecas`).
 5. Mais de uma politica permissiva para o mesmo comando = vale a mais aberta. Ao trocar uma politica, apague as antigas.
 6. Depois de mexer em permissao, testar como `anon` e como um usuario sem o sistema (ex.: auxiliar de estoque), em ROLLBACK.
+8. (SPEC-242) Edge Function que usa `SUPABASE_SERVICE_ROLE_KEY` sempre chama `exigirUsuario(req, corsHeaders, ['<slug>'])` de `supabase/functions/_shared/exigir-usuario.ts` antes de ler/gravar — a chave `anon` e um JWT valido, `verify_jwt` nao basta. Funcao de cron/webhook usa segredo proprio (`x-...-secret`).
+9. (SPEC-242) Trava de papel em funcao de banco: `IF v_role IS DISTINCT FROM 'admin'` (ou `IS NOT TRUE`), nunca `!=`/`<>` em variavel que pode ser NULL (visitante/conta sem `usuarios` passa). Funcao nova: `REVOKE ALL ON FUNCTION ... FROM PUBLIC, anon`.
+10. (SPEC-242) Bucket de documento (orcamento, NF, pedido, anexo) e privado e abre por `createSignedUrl`; nunca `getPublicUrl`. Publico so foto de vitrine (Showroom, catalogo Ubiqua).
+11. Qualquer pessoa consegue uma conta logada (Catalogo Ubiqua cria conta para o publico): "qualquer logado" = publico.
 7. `produtos` (SPEC-193 C2, 12/10/2026): custo e impostos (`preco_custo`, `custo_total`, `margem_lucro`, `porc_*`, `icms_entrada`, `ipi_entrada`...) nao sao legiveis por `authenticated` — so pela `vw_produtos_custo` (Administracao, lista `produto_custo_visualizadores`). Nunca `select('*')` nem `.select()` vazio em `produtos`; para saber se tem ST use `tem_st`. **Coluna nova em `produtos` precisa de `GRANT SELECT (coluna) ON produtos TO authenticated`**, senao nenhum sistema enxerga. View interna que precise de custo le de `vw_produtos_custo_restrito`. Codigo da peca = `codigo_produto`, codigo do fornecedor = `referencia` (SPEC-193 B3, migration 205: `codigo_legado`, `percentual_lucro` e `categoria` texto nao existem mais; `sku` e coluna GERADA = `referencia`, so leitura — nunca gravar; lucro = `margem_lucro`; categoria = nome de `categoria_id`). Para saldo de estoque use `vw_consulta_estoque`.
 
 ## Fluxo de implementacao

@@ -1,0 +1,27 @@
+[00:00] Oi, bom dia, tá bom? Bom também. Deixa eu tirar uma dúvida. Quando você faz aquela movimentação lá de reserva para entrega futura, de entrega futura para reserva, vou dar um exemplo aqui só para entender como é feito, tá? Vamos supor que tem um item que tá 10 na reserva, tá constando 10 na reserva, estoque disponível 0, só tem esses 10, 10 estoque geral, 10 reserva, certo?
+
+[00:40] Beleza.
+
+[00:41] Aí na hora que vocês vão lá separar o material, tá errado, tipo tem 9, certo? Ok. Nesse caso você tem que ajustar o estoque antes de mover ou assim que você move que a gente já ajusta? Porque na teoria teria que ficar entrega futura de uma.
+
+[01:05] Não, fazendo essa movimentação, tirando esse 1 do reserva, passando por entrega futura, tem que mexer lá no cadastro de produto e diminuir esse 1.
+
+[01:17] O estoque geral tem que vir para 9, né?
+
+[01:21] Isso, exato.
+
+[01:22] Aí tem que mexer manual nisso, no estoque geral, né?
+
+[01:26] E não muda automático assim, tipo, só porque ajustou ali, tá? Não sei se é exatamente isso que você tá falando.
+
+[01:35] Não é exatamente isso, só que a ordem, a ordem dos fatores não altera o produto, você tanto faz.
+
+[01:40] Não altera. Eu poderia mexer no cadastro primeiro e depois fazer o ajuste, ou fazer o ajuste depois mexer no cadastro, tá? Não interfere.
+
+[01:49] Pensando no nosso sistema, a gente pode fazer com que quando ele faça movimentação, essa movimentação vai automática sem ter que entrar em Entendi, entendi o que o Pedro tá falando. Ah, pode ser interessante se mover aí automático, que aí ele não precisa ficar fazendo dois processos para acontecer um.
+
+[02:08] É, tem que testar para ver se vai dar certo.
+
+[02:11] É, vou, eu vou fazer desse jeito, que aí fica mais fácil no dia a dia. Eu não tenho que fazer dois processos, poupa um processo, poupa um trabalho, né?
+
+[02:22] Assim, claro, Checar, né, para ver se funciona, né?

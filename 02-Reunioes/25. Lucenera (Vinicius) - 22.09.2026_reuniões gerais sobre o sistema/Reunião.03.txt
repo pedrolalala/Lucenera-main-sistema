@@ -1,0 +1,91 @@
+[00:23] Fez basicamente o mesmo rolê, né?
+
+[00:26] É o mesmo layout, eu usei o mesmo princípio, né, porque os dois são só você analisar o que que tá acontecendo com algum determinado quesito. Esse, no caso, a peça de garantia, o outro a fabricação, tá. Aí só tem que ver a questão de fornecedor, produto.
+
+[00:50] Deixa eu entender aqui, se a gente for começar, por exemplo, Qual a diferença de abrir um protocolo e adicionar um item? Tipo, eu tenho que abrir um protocolo e depois adicionar um item dentro do protocolo?
+
+[01:06] Deixa eu ver, abre um protocolo aí, vamos ver quais são os Nenhum item. Ah, é, tem que selecionar, tem que primeiro selecionar os itens e aí abrir o protocolo. O item de garantia é isso.
+
+[01:35] Um exemplo aqui, aqui não ficou obrigatório, né? Não, tá bom. Aqui vai estar linkado, era para estar já. Código interno não.
+
+[02:16] Ah, pega um produto, eu vou colocar o código interno para a gente, para ficar mais fácil. Isso aqui não, o código interno é referência, né, também é.
+
+[02:30] Ou não sei se tem como dar dois cliques e abrir, entendeu?
+
+[02:35] Abrir e fazer a mesma, a mesma forma de busca do orçamento.
+
+[02:39] É porque aqui, ó, 2649. Ah, mas acho que até dá para tocar aqui. Aqui às vezes vai, sei lá. Ah não, acho que até dá aqui, mas de repente colocar o código interno aqui, ó, na frente. Acho que tranquilo assim, não tem problema. Acho que dá para Data da venda, não sei se vai ser difícil. A busca automática exige cliente. Aí perto não encontrar nada, preencher a data manualmente. Padrim geral influenciador. Queimou, enviou errado, produção errada. Pode colocar Avaria também aqui, tá? Avaria, avaria, que é quando teve um problema na entrega, né? É, ou chegou quebrado, essas coisas. Vai longe. Mas o que que virou que eu não Mas é, pera aí, Pedro, rapidinho.
+
+[04:32] Tranquilo.
+
+[05:15] Existem várias motoras aqui em Tóquio, Japão, a mesma figura.
+
+[05:40] Pode passar. Que lindo, né? Daqui a pouco tem uma foto no story do pôr do sol no Central Park em Cândida, né? Um pasto assim no Central Park. E aí, nossa, que legal, né? O pessoal vai lá no Central Park, tem sol, tem não sei o quê, não vai a arte, super cool. Aí ontem eu fui ao Net Studio da Rua Oliveira Paola, postei uma foto E as pessoas falam, ai, porque São Paulo não tem praia. Ai, se tivesse uma praia, era melhor. Gente, o problema de vocês é exclusivamente de São Paulo, porque assim, Ibirapuera é o Central Park brasileiro. Sempre foi assim, não preciso nem falar mais nada. É o Central Park brasileiro, é a festa do exato. Bom dia, turma, hein?
+
+[07:21] Ou vamos lá, atendimento imediato, foi para análise.
+
+[07:36] Isso foi o que a gente conversou.
+
+[07:38] Aí você pode tirar foi aqui, pode colocar análise do reportar análise do fornecedor. Tá, reportar análise do fornecedor. Em análise, em análise pode ser também. A gente recebeu peça nova antes de devolver a defeituosa. Esse criado, você aqui não puxou, né?
+
+[08:27] Não, vai ter que abrir um item, uma parte para editar.
+
+[08:32] Agora é que não veio, né? Não veio a peça. O cliente, beleza, eu não coloquei. Motivo, tal, a quantidade. E aqui a data, que acho que teria que vir a data de hoje, né?
+
+[08:44] Sim.
+
+[08:45] Aí seria isso aqui, por exemplo, vamos pôr abrir um protocolo.
+
+[08:50] Aí você vai colocar Interlight.
+
+[08:59] E se tivesse mais? Ah, eu faria diferente. A gente vem botando aqui, né, lá ele, ó, vai colocando aqui, parará, parará, parará. Aí a gente vem aqui e clica, tum tum tum tum, abrir protocolo, tá igual na necessidade de ponto. Isso, então a gente seleciona, vai selecionando as peças.
+
+[09:31] Isso.
+
+[09:31] E aí abre o protocolo, tá? E aí ali vai ficar agrupado aquilo que a gente selecionou para abrir um protocolo. Basicamente isso, né? Aí acho que sim.
+
+[09:42] É, cria mais uma peça aí, vamos abrir o protocolo só para a gente, da Interlight mesmo, né? É, vamos seguir.
+
+[09:52] Vou pôr aqui um teste.
+
+[10:00] Ou qualquer coisa aqui só para Cliente pegou a peça, não pegou, tá com algum bug com relação a isso. Adiantamento e pegou certinho. A data não pegou também, criado em, tem que pegar aqui, Pedro.
+
+[10:39] Que nem aqui a gente tá colocando aqui, né, que adiantou sem ter a peça queimada, né. Então isso daqui teoricamente mesmo que a gente ande com o fornecedor, tudo vira uma pendência que fica aguardando retornar essa peça queimada. E aí, quando voltar essa peça queimada, a gente precisa baixar essa pendência, entendeu?
+
+[11:07] O adiantamento, no caso, é que você adiantou as 10 peças que vieram com erro, certo?
+
+[11:12] É aqui que a gente fez, ó, atendimento imediato. Então vamos lá, que que é? A gente pode lidar de duas formas aqui, ó. Atendimento imediato: eu fui lá no estoque com a minha peça queimada, entreguei a queimada, peguei a nova, morreu, matou o processo. Adiantamento atendido de imediato. Agora, qual que é o outro? O cliente liga e fala: eu tenho 5 peças queimadas aqui, Mas eu quero as peças novas. Sei se é essa conversa, tá? Eu quero as peças novas para o cliente, para o eletricista vir e fazer um serviço só. Eu teoricamente estou atendendo, já tá saindo o material do meu estoque, estou atendendo de imediato. Só que é uma situação de adiantamento de garantia. Por quê? Porque eu não tenho as peças decorativas, as peças queimadas. Aí qual que é a conversa com o cliente? Ok, eu te adianto, mas com a Interlight é difícil isso acontecer, tá? Mas se o fornecedor não acatar a garantia, eu preciso te cobrar. Aí beleza, aí o cara vai, adianta, devolve essas peças em algum momento, ou né, É a questão de ter o controle de que essas, porque se o cliente não devolve essas peças queimadas, é prejuízo nosso. A gente deu sim duas, três peças. Agora, se o cara devolve essas peças de garantia, essas peças queimadas, o fornecedor acata a garantia, tudo bonitinho, beleza, zero a zero. Então tem que ficar uma pendência aguardando o retorno aguardando peças queimadas, por exemplo.
+
+[13:06] Sim.
+
+[13:07] Aí beleza, chegou essas peças, aí baixa aqui como pendência, né, mata pendência, e aí segue o baile.
+
+[13:15] Tá, entendi.
+
+[13:17] Entendeu mais ou menos? Tem que ficar tipo, quando entregar essas peças queimadas, ter como resolver, tipo, baixar esse adiantamento aqui.
+
+[13:29] Tá bom, tá.
+
+[13:35] Acho que aí depois, né, vai abrir um aqui. Beleza, se eu fosse abrir aqui, vamos ver uma coisa. Aí depois do protocolo poderia ter que ter tipo aqui, por que que eu tô— vamos fazer uma coisa aqui. Ah, tá. Então coloquei qualquer outro aqui, ele só vai abrir quando tiver o, só com o mesmo fornecedor, né? Aí já abre as peças, tá. Mas acho que pode ser tipo de clicar aqui e aí vem abrir protocolo. Mas vamos abrir só para a gente ver uma coisa aqui. Abrir protocolo, beleza. É em contato com fornecedor. Boa, em contato com fornecedor. Nota fiscal emitida, material enviada, aguardando análise, material perfeito. Aqui nada, aqui não precisa mudar nada. Aqui é isso aqui mesmo. E aí, finalizado, peça nova, conserto não acatado.
+
+[14:45] Pode botar um aqui, é Crédito gerado em despacho, mais uma nova, mais um novo status.
+
+[14:55] O cara atendeu com peça nova ou foi consertado ou não acatou ou gerou o crédito, tá? Só para entender aqui certinho. E aí vou pôr peça nova aqui, vamos ver. Salvar. Desfecho é uma data, né?
+
+[15:16] A data aqui, a data do que aconteceu, de quando aconteceu, tá?
+
+[15:22] Até de quando criou o protocolo e quando finalizou, tá?
+
+[15:25] Até para ter um controle de tudo, né?
+
+[15:29] É, de quanto tempo demora e tal.
+
+[15:34] Beleza.
+
+[15:35] Aqui, na verdade, aquilo que eu te falei, você já criou aqui, ó, adiantamentos pendentes. Aqui, vamos marcar aqui que foi aquilo lá. Aqui de repente também, Pedro, criamos o protocolo, né? Seria importante ver o que tá dentro desse protocolo, as peças, você fala, é, tá, o que que foi criado, né? O que que tava dentro desse protocolo? Não aparece, não aparece, não tem nada aqui para— e o adiantamento você já criou aqui, ó, adiantamentos pendentes. Aquele lá ainda tá pendente, ó. Aí acho que teria que vir a informação da peça em específico, da peça, cliente, tudo. E aí a gente vai colocar, marcar como devolvida, beleza. Acho que ok, só fazer esses ajustes, acho que já fica, já fica bom já, tá?
+
+[16:41] Vou fazer isso quanto antes para a gente liberar esses sistemas para o estoque.
+
+[16:46] Beleza, aqui acho que já era, é isso.
+
+[16:51] Então eu vou pausar aqui.

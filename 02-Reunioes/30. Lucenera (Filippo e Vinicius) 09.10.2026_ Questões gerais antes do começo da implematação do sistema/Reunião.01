@@ -1,0 +1,475 @@
+[00:00] Já tá gravando.
+
+[00:08] A regra é assim: uma peça que não tem desconto, por exemplo, preço de custo, e aí essa peça tem ST e IPI, ou que seja IPI ou outras despesas, por exemplo, ela vai pegar preço de custo vezes a porcentagem da ST. Mas essa porcentagem de ST varia de peça para peça, de fornecedor para fornecedor, de NCM para NCM. Essas regras vêm de um fornecedor, ele que nos fornece.
+
+[00:42] Perfeito. Então nós temos que carregar todas essas regras aqui para ele poder fazer a nossa seta.
+
+[00:47] É, carregar.
+
+[00:48] A gente tem que fazer, na realidade, é o cálculo certo, que foi justamente o que a gente bateu ontem, o cálculo certo com base nas informações passadas pelo pelo fornecedor, que aí chega no resultado final do valor do cliente.
+
+[01:01] Mas isso como se transforma em linguagem máquina? Porque daí tem uma planilha com essas regras. Então, se usar o fornecedor, o produto, com— entendeu? A gente tem que pensar como entregar aqui dentro as coisas de uma forma que não erra mais. É porque a gente olha justamente nessas questões aqui, como são milhões, Que a gente pode se perder muito não sabendo porque erra. Não, a gente tem que conhecer as regras. Então como vai se transformar isso em informação para máquina? Que é um só da vez, as informações que estão lá.
+
+[01:38] Na verdade então teria que identificar pela planilha do cadastro de produto, identificar essas regras, entendeu?
+
+[01:45] A regra que está aqui, preço de custo tabela do fornecedor. Porcentagem de desconto do fornecedor igual a custo com desconto, BDI, porcentagem de frete, porcentagem de ST.
+
+[01:59] Mas o que ele está falando é outra coisa. A regra que ele está falando é a regra que determina aquele imposto.
+
+[02:05] Exato. E essa regra tem que ser muito clara. Vou te falar, é como ter uma pessoa que faz a coisa para você.
+
+[02:12] Você tem que dar uma informação clara, inequivocável, O que que ele tem que fazer? Teoricamente, a gente teria que fazer de forma mais fácil, eu acho, de fazer isso, usar inteligência artificial e ele reconhecer. Por exemplo, vamos falar, Interlight tem várias regras, cada NCM, por exemplo, tem uma ST diferente. E a própria inteligência identificar, ó, a marca Interlight, quando é esse NCM, é essa regra e tal, tal, tal.
+
+[02:41] Beleza.
+
+[02:41] A Interlight é um caso bem atípico, digamos assim, porque São várias ST e vários NCMs. Mas se a gente pegar, por exemplo, a Aloy, um exemplo, ela não é ST única porque praticamente sempre o mesmo NCM.
+
+[02:58] Então deixa eu entender, vamos falar do ST por enquanto, é um imposto, você vai ter investimento, ST se trata desta forma, o ST acompanha o NCM, é o único parâmetro que gera o Esse ano e tal é 7%, né?
+
+[03:21] Também é o regime tributário da empresa que tá faturando.
+
+[03:24] Também o regime tributário da empresa. Perfeito. Para que não tenha que sempre—
+
+[03:30] desculpa, é o regime, por exemplo, tem o regime tributário de quem tá faturando e o regime tributário de quem tá comprando. Vou dar um exemplo, tá?
+
+[03:40] Nós como slide, nós como foto.
+
+[03:42] Exato. Só que veja bem, da Interlight, caso bem atípico, né? Quando ela fatura, ela tem um regime tributário único lá, mas a gente tem dois. Quando ela fatura um NCM, vou dar um exemplo, um NCM específico para a Interlight, a gente vai pagar 25,38% de SCT. Esse mesmo NCM faturando para Manoela ou para Foco, nós vamos pagar 15,48 de ST. Só que no sistema, hoje depois a gente pode, eu não tenho como fazer essa diferenciação, porque eu sempre uso o maior no nosso buraco.
+
+[04:26] Não é a realidade.
+
+[04:27] Então, só que por exemplo, aí quando a gente dá para fazer, então justamente o que falo de estruturar, mas como a gente trabalharia isso por conta da— a gente teria valores diferentes de venda.
+
+[04:40] Cada peça teria um valor, teria dois valores de venda dependendo de qual empresa ela tá tributando.
+
+[04:47] Só que também isso mudou. Eu preciso que a gente também dê uma resolvida e temos mais empresa justamente para ter uma vantagem também, né? Então pagar 10% a mais do produto não é outra coisa, né? Então falo, a gente tem que achar formas de compensar certas dificuldades. Eu sei que temos que comprar um pouco pela slide, um pouco pela foto, por causa de— mas se tem uma situação dessa, compra o certo com a empresa e depois Vamos achar outra solução.
+
+[05:34] É, só que aí a gente tem que evitar de vender para—
+
+[05:36] Não, posso pensar de fazer uma venda, não sei, vamos, entendeu? Assim, até onde eu consegui tocar, minha prioridade de vender Interlight sempre foi Manoela e Foco, porque também tem uma questão, que realmente os paisagismos são sempre uma fase sucessiva, né?
+
+[06:00] Então, mas aí a gente entra naquele caso, Felipe, que a gente já comentou, de de repente para o ano que vem ter a opção de uma venda de algumas marcas, a gente determinar que só vende por uma determinada empresa. Vou dar um exemplo, tá? Então aí com a reforma tributária, beleza, mas aí vai ter eleição, a gente não sabe o que vai acontecer. Porque sempre veio prorrogando. Exemplo, setembro agora, nós estamos em outubro já, né? Setembro agora, as empresas do Simples Nacional, os nossos fornecedores principalmente, eles deveriam optar por manter no Simples Nacional puro ou migrar para o Simples Nacional híbrido. O que no frigir dos ovos é isso. Se ele migra para o híbrido, é a possibilidade de tomar crédito e dar crédito de ICMS. Beleza. Aí foi tudo prorrogado, tá tudo prorrogando as datas. Fizemos, eu e o Marcos fez um questionário, um questionário mandando para todos os fornecedores. Tem fornecedor que nem sabe como tratar ainda, porque reforma tributária, por que que não sabe? Porque o governo não divulgou alíquota. Então ele não tem como mensurar isso, entendeu? Se faz mais vontade em ficar numa empresa ou na outra, num regime ou no outro.
+
+[07:27] Então eu acho que até em virtude disso é muito importante que a gente imposta pelas regras do governo, né?
+
+[07:34] Sim.
+
+[07:34] Por exemplo, as variáveis de um ECT são o NCM.
+
+[07:40] NCM.
+
+[07:41] NCM.
+
+[07:42] Ó, vou te dar um exemplo, desculpa te interromper. Decine que fatura lá de Brasília, é o mesmo, é a mesma ST faturando para mim, para mim faturando para Slide ou para—
+
+[07:56] mas porque tá dentro de algum tipo de regra. É, exato, sim, regime tributário fornecedor.
+
+[08:04] Eu só tenho esse problema de ST diferente com a Interlight.
+
+[08:11] 3.
+
+[08:13] Então a Interlight a gente pode tratar ela como uma empresa típica de recebimento. Mas aí a questão é, quando tem uma venda que tá, um exemplo, na Manuela, só que tem coisas da Slide, a Slide deve ter coisas da Interlight no estoque, você falou? É, não só no estoque, mas a venda foi feita pela compra.
+
+[08:40] Geralmente é feita, geralmente não compra por onde vendeu, senão depois não fecha saldo de estoque. Amanhã depois tem uma fiscalização.
+
+[08:53] Esquece as fiscalizações, esquece. Verdade, agora começamos a ser realistas, e dentro desse realismo pode ser que perfeitamente, porque realmente vamos começar a fazer muita gambiarra, vai ter que assumir uma hora um determinado regime tributário e pronto. Mas talvez dê para estruturar realmente o que falamos. Determinadas marcas onde tem uma boa conveniência, se vende só com isso. Cliente, sinto muito, você vai ter duas notas fiscais.
+
+[09:29] Acho mais viável assim.
+
+[09:32] Os fornecedores mesmo têm, manda para nós, não tem problema algum, não importa nada diferente. Também com o sistema sempre vai poder ser o orçamento tudo limpinho, uma coisa única, com duas faturas, notas fiscais, não tem problema nenhum.
+
+[09:46] Foi justamente o que a gente tinha conversado de fazer duas emissões de nota fiscal. O cliente vai receber duas, mas o orçamento vai estar lá.
+
+[09:55] NCM, regime tributário, empresa nossa, que mais? Tipo produto não é NCM?
+
+[10:04] Isso, é, o que manda é o NCM.
+
+[10:07] É o código fiscal do produto.
+
+[10:13] Tem estado, estado, então estado da empresa, o estado de faturamento e o estado de recebimento.
+
+[10:21] Faturamento é sempre o mesmo para nós, recebe São Paulo.
+
+[10:24] Depende se eu tô comprando da Stella, por exemplo. Não, não, fornecedor é o que eu falei, estado de faturamento, de recebimento.
+
+[10:33] Que tenha a questão de importação.
+
+[10:34] Como diria esse eminente nosso? É, mas nós deixamos sempre em São Paulo.
+
+[10:39] Não, a gente sempre em São Paulo, é.
+
+[10:40] Está no do fornecedor. Isso que é. Então, está no contrato. É isso que eu quero também, que um pouquinho a gente e você, que conhece bem, que pode nos ajudar cada vez mais nisso. Temos que racionalizar, exceção às regras. Então o que vai ter que fazer? Uma planilha de SMS, provavelmente uma planilha de regime tributários possíveis, que vão ser nos fornecedores indicado, ele é o regime A, B, C, D, E, né? Uma, já para qual empresa, determinar onde que essa empresa tá, e uma planilha dos vários estados, dos fornecedores todos, como funciona. Também poderia essa planilha ter todos os estados de uma determinada maneira, em determinado momento, mesmo não entrando fornecedor, porque se entrar um fornecedor, o que acontece com isso também? Chega uma coisa diferente já, já é uma planilha especial para ler. Agora, essas são, e depois explicar como são as regras. E lá eu já Desconheço um pouco como funciona, está no SQL?
+
+[11:55] É o SQL.
+
+[11:56] É o SQL que gerencia depois como isso aqui é usado.
+
+[12:01] Então, uma coisa que seria interessante a gente fazer, uma reunião com o Marcos, justamente para botar ponto no i, para ver como que isso funciona realmente.
+
+[12:13] Só que agora, o que você vai me dar?
+
+[12:15] A gente precisa, eu preciso fazer isso para poder mostrar para ele, porque ele vai falar justamente isso. Ele falou, são as regras do fornecedor. Tem que consultar com fornecedor, entendeu?
+
+[12:25] Então vamos entender um momentinho hoje como no sistema atual nós, como está isso estruturado. Funciona no sistema?
+
+[12:33] Funciona.
+
+[12:34] Perfeito.
+
+[12:34] Mas tipo, não tá determinado.
+
+[12:36] Chegou um fornecedor, como você vai fazer?
+
+[12:39] Ah, chegou um, eu vou perguntar para ele qual é a alíquota de ST e de IPI. Aí, por exemplo, normalmente, tá, um fornecedor normal, ele tem, ele vai me fornecer alíquota de ST ou se não tem ST Pode acontecer, ó, não tem ST, mas tem o ICMS.
+
+[12:59] E por que não tem ST?
+
+[13:02] Aí é o regime tributário, é o NCM, é como ele importa, é como ele fabrica. Aí eu já não tenho como saber.
+
+[13:11] Então, falta entender uma coisa: se nós estamos em condições de colocar regras que sejam gerais e que depois, só pelo fornecedor estar em São Paulo, ter esse regime tributário, faturar para uma outra nossa e ter os NSN registrados, consegue dar o imposto. Ou não, não temos, não tem, não tem. As regras são tão variadas, cada um fez de uma forma. Temos uma situação, é isso que eu preciso entender. Se o fornecedor tem que contratar Mas todos os fornecedores, mesmo com IATA, poder ajudar nessa questão aqui. Entender, se 4 fornecedores que tem mesmo regime tributário, estão no mesmo estado e tem os mesmos NCMs de produtos, sim, é sempre o mesmo.
+
+[14:13] É o Marco Aéreo.
+
+[14:15] Por que é isso? Mas porque, pera aí, desculpa, só para terminar, porque ficou muito complexo, então não dá para contentar de carregar fornecedor por fornecedor as regras dele.
+
+[14:27] Eu, sinceridade, eu acho bem complexo. Vou te dar um exemplo, porque o que que pode mudar também? Você tem uma, às vezes um produto, um exemplo, que de dois fornecedores praticamente a mesma coisa, só que um tem mais peças importadas ou terceirizadas e outro tem peças, componentes, eu digo assim, né, mais nacionais ou que ele mesmo fabrica. Muda completamente, mas é a composição. E aí não tem como mudar no NSM isso, o número de NSM.
+
+[15:01] Às vezes não, o mesmo NSM tem duas regras diferentes.
+
+[15:06] Por quê? Porque uma peça, tipo, tem mais produto importado e outra menos.
+
+[15:12] Então, gente, e uma coisa, já que se trata, esses impostos aqui são impostos que são já detidos por ele ou a gente tem que pagar?
+
+[15:22] A ST destacado na nota, certo? E a gente paga na nota, paga para eles, paga para eles.
+
+[15:30] É um custo que temos que ter só conhecimento na hora de formar o preço.
+
+[15:34] Isso, eu uso na hora de formar. É, vamos lá, ST é isso, ela destaca na nota, por isso que é embutido no do produto lá bonitinho, né? Isso cai no BDI lá. Aí acontece, aí por exemplo tem ST, a primeira parcela da nota fiscal, essa ST na verdade eles têm que recolher antecipadamente, senão a mercadoria não pode nem transitar. Exemplo, fatura de R$10, uma nota, é isso, tem que recolher. Agora, quando é ICMS ela não tem a ST destacada na nota. Quando esse é um produto ICMS, não tem. Depende do NCM, depende de onde tá vindo, se é importado ou não.
+
+[16:21] É, não, amigo, por isso que eu falei da gente sentar com o Marcos, que aí a gente tem que entrar nos tormentos.
+
+[16:32] Seja um gênio da contabilidade, ou seja, ele faz mais ECT, tributação cibernacional, não é muito assim.
+
+[16:42] Aí beleza, aí nesses casos, por exemplo, que é um produto ICMS, ele não vem destacado na nota. Quem tem que recolher esse imposto somos nós no final do mês.
+
+[16:53] Bom, que jeito nós sabemos isso?
+
+[16:55] Vamos dar um exemplo da Estela, tá? A Stella tem um ICMS de Santa Catarina para São Paulo de 4%, certo? Então quando a gente compra pela Slide da Stella, eu tô creditando 4% de ICMS, tem um crédito lá. Quando eu vendo esse mesmo produto para o estado de São Paulo, que é o nosso maior, teoricamente, eu pago 18% em cima do preço de venda. Ok, beleza.
+
+[17:35] Isso pela slide.
+
+[17:37] Então aí eu vou fazer uma conta aqui, né, de padaria. Acreditei R$4, um exemplo, e na venda tô pagando 18%, um exemplo. Só que eu tenho 4, então eu tenho 14 para pagar. Eu acredito, abate, entendeu? Beleza. Aí eu cheguei, mas eu preciso precificar isso, eu não posso, né? Outras despesas preenchido que tem lá, alguns principalmente da escola, é o ICMS, que não é ST, que não é visível para mim, entendeu? Aí eu já faço, fiz um cálculo e eu tô embutindo esses 14 14% já no produto também, no custo do produto.
+
+[18:22] 14% é tirando 4% que já paga na hora que chega.
+
+[18:25] Isso, só que por exemplo, eu credito 4% no custo e pago 18% na venda. Isso vira praticamente uma ST de 30%.
+
+[18:36] Por quê?
+
+[18:37] Porque eu tô pagando, tipo, um exemplo, a gente tem que pôr nossa margem. Então, um exemplo, tô pagando lá e eu tenho custo do item também.
+
+[18:45] Exato. Não, porque no custo, se eu compro uma coisa com 12% de ST, eu pago 12% acima do valor do produto. Se eu pago 18% de ICMS, eu pago 18% de ICMS. Agora, tem não ICMS, tem com essa coisa de crédito, etc., tem a problemática de isolar esse crédito e sabendo que talvez você é uma movimentação financeira, é o Marcos que faz.
+
+[19:13] Tá tudo lá, tipo, já dá quando ele vai apurar o ICMS, automaticamente o sistema da Receita Federal usa do crédito já.
+
+[19:20] Agora, só que também estamos tratando de um assunto que se forma o preço do produto. Isso eu acho que pelas regras do fornecedor vamos fazer isso. Agora, a parte totalmente fiscal é mais então provavelmente com aquele aplicativo Foco e como estamos fazendo agora com contabilidade, é ele que vai apurar. Então vamos, só que agora nós precisamos que os custos sejam certos.
+
+[19:53] Então eu vou dar minha opinião, eu acho que assim, tentar dar um prompt para inteligência artificial entender os padrões de acordo com a tabela de preço. Perdão, de acordo com a planilha de cadastro de produto, certo? Aí você vai falar para ela, ó, quando tem preenchido o ST, é considerado ST pago na fonte. Que é pago na fonte, já vai na nota. Quando tá preenchido em outras despesas, lê-se ICMS, que é pago por fora.
+
+[20:27] Espera uma coisa, porque o que você está falando, volto a falar, é questão depois de impostos. Sim, de pagamentos ou de impostos.
+
+[20:37] Mas tudo isso eu já falei.
+
+[20:38] Já vou falar, eu acho que um step que é o mais complexo, que é aquela das também com as notas fiscais, né? A questão nossa é ter o custo certo do produto. Agora, isso que é o importante.
+
+[20:55] Mas o que eu tô falando é para formar uma ideia.
+
+[20:57] Mas dá tipo, baixou interlaje, interlaje é assim. Está certo de usar, mas só para falar, entenda. Então cada produto deve ser registrado com os próprios impostos, porque o custo final é aquele, né? Sim, exceto a Light. Cria também, e podemos até pensar em já, por enquanto cria assim e registra. E cada produto vai na registração de produto com O próprio valor, o ECT, o IPI, o ISMS. O que tem vai ser preenchido, é o valor final de compra. Pronto, empresa por empresa, metemos os custos certos. Não vamos nos complicar a vida ainda em relação a isso que estou vendo que é extremamente complexo, como você está falando, e que não basta IAC, é muito complexo mesmo, tem as regras, tem, então vamos Depois tem a questão, então vamos isolar as coisas, porque ter o preço certo do produto é já um 90%, 95% do que precisamos. E para rodar tudo, fazer orçamentos, vender, então isso que deve estar certo é isso que deve. Podemos pedir também que depois no final possa se falar do que que são O que pagamos de custo, o que pagamos de imposto nos produtos, já entra, são impostos, né? Mas o conhecimento no sistema entra então fabricante por fabricante com as regras como está hoje.
+
+[22:42] Como está hoje, né?
+
+[22:43] Você não está se pondo problema muito assim? Sim, com a contabilidade, né? Ó, de repente podemos ver, ah, quando Umas regrinhas a mais que você pode acrescentar. Quando chega a nota, o ICMS 4%, que nós temos que pagá-lo. Até lá, sim, que o Marcos pode pegar. E eu preciso da lista disso, não sei como. O que você passa hoje para ele?
+
+[23:13] As notas, ele apura pelas notas, pelo XML. Tanto o XML quanto nós temos que pagar eventualmente de um imposto XML de de compra e de venda.
+
+[23:26] Isso aqui te falo também, porque todo mundo erra nesse mundo, essas coisas aqui ainda mais. É bom devagarzinho ter nós também uma comprovação disso, que ele faz fazer e percebe que você bate. Nossa, já estamos conseguindo! É o mesmo que sempre o Marcos faz, ou não, dá diferença entender se está com o coração nosso ou com o dele.
+
+[23:51] Eu já confiro isso. Porque eu peço a memória, ele apura e eu peço a memória de cálculo daquilo e eu já bato.
+
+[23:58] Ah, então você tem a memória de cálculo que ele faz?
+
+[24:01] É.
+
+[24:01] Beleza, a gente usa a memória de cálculo com base no que ele já tá fazendo.
+
+[24:05] Usa o skill, cria um skill. Criar um skill é simplesmente dar um argumento para criar skill, dar um argumento do GPT, esquece a data, tá? Como diz, eu preciso de um assistente de contabilidade que saiba das regras, etc. Eu vou te carregar aqui essa coisa aqui e vamos tentar entender o quê, quais são, você tem que ter os conhecimentos, né? Não sei se existem, consultar de repente no site, não sei o que é possível, mas quanto menos, quanto menos, para evitar de ser sempre o próprio, sim, estou falando, eu vou te carregando. Determinado, esse documento, esse documento, desse documento você tem que me trazer essas informações, desse documento essas informações. Assim é só pegar, usar o esquema, botar, carrega, ele te dá já, eu conferi, está tudo certo, não, aí eu acho que isso aqui não está certo, né? Tá. Mas bom, então nada, essa questão aqui da formação de crédito que está um pouco, né? Não, e basta a gente baixar todos os fornecedores. Pelo tempo.
+
+[25:14] É isso, já tem.
+
+[25:15] A gente fez ontem, a gente fez o cálculo lá. Aparentemente, da questão de consulta de produtos, já tá essa estrutura de como é precificado, já tá certo. Agora falta a gente passar.
+
+[25:28] Como foi inserido lá então?
+
+[25:31] O Sérgio passa todo dia a planilha do cadastro de produto, porque aí já tá pré-definido na planilha de produtos.
+
+[25:38] Isso.
+
+[25:39] Então você pediu de atualizar a planilha com os impostos.
+
+[25:43] Foi o que o Vini pediu. E aí agora ele tá importando com os impostos. Antes ele só impostava custo total.
+
+[25:50] Isso aqui é a planilha produtos. Isso é importante, né, amor? Ficou feliz? Ela faz as coisas sozinha, vai que não faz certo.
+
+[26:01] É que a gente bateu o olho num preço, tá esquisito esse preço aqui.
+
+[26:06] Produtos ou produtos fornecedores?
+
+[26:08] Não, produtos.
+
+[26:09] Produtos, ok. Então tá o produto, seus custos, preço de custo, preço de venda. Onde estão os impostos? IPI entrada, IPI entrada.
+
+[26:34] Tem que ver se ele tá exportando o ST.
+
+[26:40] Ontem a gente olhou que exportava.
+
+[26:44] Se é ST, pronto. Você vê daí, status comercial, máscara produto, porcentagem ST. Aqui tem 30% de ST, 36% de ST. É questão.
+
+[26:59] Por que desconto?
+
+[27:00] Ah, precisa ver que produto que é. Precisa olhar ali.
+
+[27:03] Opção desconto, o que é isso?
+
+[27:05] Ah, por exemplo, o desconto de caixa fechada da internet, por exemplo. Aí, por exemplo, vamos supor, ok, mas ele tá aqui. Não, ele faz o cálculo lá.
+
+[27:16] Internet tem uma opção de pegar 50%?
+
+[27:19] Não, depende do produto.
+
+[27:20] Depende, por exemplo, a Cris Bertolucci é 50% em cima da tabela.
+
+[27:24] Sim.
+
+[27:24] Aí a gente no preço de valor de custo do produto coloca-se o preço cheio, R$1.000. O sistema vai tirar 50% e vai calcular imposto em cima do resultado. Da Interlight, mesma coisa, é o valor de custo de tabela. Por que que tem que ter? Porque senão a gente nunca consegue. Se eu já coloco no sistema com desconto, nunca consigo conferir. Tem que sempre ficar fazendo cálculo, conferir com fornecedor preço de tabela. Enfim, então valor de custo, preço de tabela, tenho 25% de desconto fornecedor, sistema faz o cálculo, tira 25% de desconto e faz as porcentagens dos impostos em cima do valor líquido, né, sem o desconto, com desconto aplicado.
+
+[28:09] Então o produto é Interlight, você cobrar o item, cobrar uma caixa, isso parece 50%?
+
+[28:13] Não, Interlight não, é 20%, Interlight 25%. Na caixa fechada.
+
+[28:19] Esse 50% de quem?
+
+[28:21] Deve ser da Cris Bertolucci. Plafom, vereda, escovado, é Cris Bertolucci, ela tem 50%.
+
+[28:35] E todas essas colunas, as categorias não estão sendo preenchidas?
+
+[28:42] É, tem categoria, a mão tá vindo do Do coisa.
+
+[28:46] Não, mas viu que não tá? A gente viu ontem, não tava preenchendo categoria, marca, fornecedor e o tipo de unidade, que foi aquele print.
+
+[28:57] Não, mas isso é no front aqui.
+
+[29:00] É, mas aqui tipo nu, tá tudo nu aqui na categoria, né? Na planilha aqui, na planilha aqui, aqui no Superbase, na do Sérgio tá vindo tudo.
+
+[29:11] Descrição categoria, é isso? Tá bom.
+
+[29:15] Por exemplo, a categoria é mega importante porque em cima da categoria luminária que é feito o cálculo da RT.
+
+[29:24] Agora eu estou vendo aqui também nessa planilha estoque disponível. Tá certo isso aqui?
+
+[29:37] É como vem. Do Sérgio Sport.
+
+[29:45] Mas por que você fala que não tá certo?
+
+[29:50] A lógica máquina que estou percebendo com uma certa experiência: quanto a informação é mais contida e precisa sobre um assunto, mais ela não vai alucinar. Quanto mais em uma planilha você põe tudo, ela primeiro que tem que ler tudo isso para tirar uma informação, ela preenche. Porque, por exemplo, estoque disponível, por que demora? Porque vai ter que ler tudo. Nós precisaríamos de uma planilha estoque disponível, estoque, e no estoque não entram todos, entram todos que tem número positivo ou negativo. Tudo que está com zero não entra. Assim vai ser muito mais rápido e menos chance de erro. Então aqui produtos, deve ser cadastrados os produtos com as informações, sim, de custo, de imposto. Teoricamente poderia até ser A caráter do produto, depois impostos, mas talvez não precisa ser tudo que são as informações relativas aos produtos, estão lá, beleza. Mas já a necessidade de compra, quantidade do estoque, talvez não, não, não, deveria ter uma planilha à parte justamente para render também a pesquisa disso mais leve. Porque ele não vai consultar mais a planilha de produtos, mas vai aprender do estoque.
+
+[31:33] Você fala, deixa eu ver se eu entendi, tá? Você fala que nesse caso ele vai ler todas as informações para poder te dar o estoque disponível. E se a gente desmembra isso, teoricamente faz uma planilha só com código, referência, descrição e o saldo de estoque, ele entende também isso.
+
+[31:54] Código, beleza, vai colocar. Mas, ó, esse é o ID do produto.
+
+[32:02] Tipo, não precisa ser tudo isso, é só o ID.
+
+[32:07] Eu vou ter que desmembrar esses produtos em várias planilhas e ter o ID de cada um linkando para buscar quando for buscar uma informação de precificação, imposto. Ele vai buscar somente na planilha de prevenção. Só que qual que é a grande questão que eu falei? Por que que ela tá estruturada dessa forma? Porque como a gente recebe diariamente essas informações e elas são adicionadas, se desmembrar e começar a colocar, pode ser que tenha aquela questão de erro de importação.
+
+[32:48] Bem pré-definida, ele sabe que tem que desmembrar essa informação.
+
+[32:54] Olha, essa informação, beleza, eu vou fazer.
+
+[32:57] Mas é sentido, sem complicar demais.
+
+[33:01] Depois desmembrar, aí tem que trazer todos os setores, no caso, né? Traz um do estoque total, do reserva, para ele poder fazer o cálculo, para ele poder ler.
+
+[33:13] Ainda tem os outros dois que precisa ter tudo que tem relacionado ao número de valor preciso ou têneo. E logicamente, então lá, esses têneos tá onde, né? Mas agora vamos ver, então, create debt, ok, update debt, ok, código de produto. Preferência, ok? Estoque total, ou seja, é isso que é estoque, estoque disponível. Isso aqui vai no estoque, entendi. Unidade é unidade medida, é unidade medida. Se é por unidade, por metro, é, mas normalmente unidade, que é mesmo a fita, vai ser a fita, unidade, é o rolo, né?
+
+[34:13] É, no caso aí vai é quando é por metro, medida, só quando é a peça comercial.
+
+[34:22] Esse percentual de lucro, como que é? É a margem de lucro.
+
+[34:28] É que aqui é em margem, né? E a gente sempre é falado em markup, né?
+
+[34:33] É o que aí foi uma coisa que a gente conversou ontem.
+
+[34:36] A gente pode decidir se vai usar markup, deixar Ou por isso vai interferir até para a gente fazer a visualização depois lá na hora que tiver avaliando o orçamento. Você prefere deixar por marcafa ou por margem?
+
+[34:50] Pode ser assim, depois as pessoas transformam esse dado como quiserem, não tem problema. Vamos mexer um pouquinho no MC. Código ligado o quê?
+
+[34:57] Código V ligado é o código interno do sistema.
+
+[35:06] Referência é a referência do fornecedor, código é o código do sistema.
+
+[35:10] Código ligado, código produto, referência, tá duplicado aí, então estático, entendeu? Isso que eu falo, tem um pouquinho também de trabalho, velho, é de identificar também e conferir essas coisas. E ver se está na lógica mais certa, né? Com certeza uma duplicidade de coluna é um barulho.
+
+[35:39] Ô Pedro, ó, ruim. Então aqui, ó, olhando, não tá vindo a categoria, o fornecedor, que é o que a gente quer.
+
+[35:45] Não é item, mas não sabemos.
+
+[35:47] Ah não, esse aqui não sei o que que é, ó.
+
+[35:49] Mas então a categoria que é luminária, se tem categorias, então beleza, vai ter a coisa categorias produto, tem. É, vamos ver aqui. Isso, acessório.
+
+[36:15] Aí já tá, já tá com as informações da categoria, mas tá apresentado no front.
+
+[36:22] Então talvez, pelo menos aqui nessa planilha, precisaríamos pedir de preencher a coluna categoria com as categorias identificadas.
+
+[36:33] Tá faltando referência, não veio.
+
+[36:36] Então pega outro produto, será que pega o 10.539, que é o que a gente tava olhando muito ontem. Tá faltando a referência, veio no caso, né? A marca veio agora, a categoria veio, tá faltando fornecedor e a descrição técnica.
+
+[37:05] A descrição técnica no caso seria—
+
+[37:10] hoje eu duplico aqui no sistema do server, tá? Mas de repente é uma coisa para a gente poder usar. Se o Filipe quiser assim, é, eu duplico o nome. Mas por exemplo, uma vez você comentou comigo, Vini, seria interessante a gente ter uma descrição mais sintética para mostrar menos para o cliente o que seria o produto. Então a gente poderia de repente utilizar essa descrição técnica.
+
+[37:34] Podemos deixar lá e ver um pouquinho, porque pode demorar.
+
+[37:39] Depois a gente muda.
+
+[37:40] Não é fundamental, mas uma coisa que eu quero pode ter.
+
+[37:43] Ou nem traz ela então, deixa lembrando.
+
+[37:46] Eu faria um assunto muito importante. Eu questionaria a mesma IA, né, de examinar ela. Nós já identificamos que código legado e código é a referência, é a mesma coisa. Tem uma coluna categoria que não está puxando a categoria que em categoria ID está expressa.
+
+[38:11] É que aí eu vou ter que tirar código de categoria, a categoria, e deixar só o ID categoria.
+
+[38:19] Só que espera antes disso. Fly e arandela indireta, branco.
+
+[38:24] Oi?
+
+[38:25] Bem, fly e arandela indireta está dando como código de categoria luminário. Ok.
+
+[38:34] Nossa Senhora, eu falei, eu falei, vai comer meu rabo é agora, vai estar com acessório. Então, então, não, eventualmente um mood.
+
+[38:48] Então dá uma primeira analisada, já dá uma checada, dá de conferir e até falar, nós estamos pensando, aqui tem por exemplo informações sobre o estoque, estou pensando de criar uma planilha específica para o estoque, para que também quando seja consultado o estoque seja mais rápido para ir lá fazer isso, para o Apo fazer isso. Primeiro me responde, dá uma coisa, vamos fazer isso aqui depois juntos, e depois vai. Ok, então vamos atualizar dessa forma.
+
+[39:24] Mas pensando aqui, a consulta de produto, que consequentemente vai buscar, é onde a gente busca o estoque, ela puxa todas as informações da planilha de produto.
+
+[39:36] Deixa eu te falar uma coisa, não precisa puxar todas. Deixa eu dar uma sugestão, eu não sei o quanto complica e quanto é. O exemplo do CERD, tá, que eu acho que faz sentido também. Tem duas rotinas: o cadastro de produto, por exemplo, é só eu e a Débora que acessa. As meninas, na hora de fazer o orçamento, é consulta de produto, porque só vem código referência, descrição e a questão lá dos setores Não carrega imposto, não carrega nada. Não sei se de repente faria sentido ter essas duas estruturas. Faz uma estrutura só de consulta e quando quer cadastrar, estamos falando de database, é diferente.
+
+[40:22] Isso que está falando é já interface.
+
+[40:25] Não, mas a gente tá falando da questão para deixar separado.
+
+[40:29] Amor, 5 minutos, consigo negociar.
+
+[40:32] Sim, eu entendi.
+
+[40:37] Não, deixa só como acho, como vejo, posso estar errado, mas a questão de, aqui está arquivado, é mais comum. Quero ver o estoque? Na planilha de estoque tem que ser só o código ID do produto e o número presente, estoque total, Estoque showroom, estoque disponível.
+
+[41:06] E aí vai ter mais reserva, mais algumas reservas, é os setores que tiveram.
+
+[41:12] Depois eles veem umas coisas, as meninas veem uma outra. Eu, para ver, para consultar se tem um produto, vejo só o produto e quantos tem.
+
+[41:24] É, mas foi isso que ele falou.
+
+[41:28] Escala, entendeu? A planilha é que tenha as informações necessárias sobre o estoque.
+
+[41:34] É, talvez eu não soube me explicar, mas é isso. Por exemplo, hoje para consultar um produto carrega tudo.
+
+[41:40] Ele foi justo.
+
+[41:41] Absurdamente nada.
+
+[41:42] É isso que ele tinha falado, é a mesma coisa que a gente tá conversando, a gente tá no mesmo ponto aqui, é isso. A gente vai separar, vamos separar a planilha e aí vai ter a forma de visualização só do estoque e a forma de visualização—
+
+[41:54] E do estoque, não quero que seja na planilha estoque, quero os custos. Não importa, os impostos não precisa, ninguém vai puxar aqui.
+
+[42:02] Só com preço de venda só assim, né?
+
+[42:05] De repente, de repente poderia ser, talvez, se vamos ver que tem uma lentidão em fazer os orçamentos, ficar os impostos, talvez se possa fazer uma outra varinha, mas não é essencial. Agora, a questão desse toque é muito essencial, porque geralmente a consulta para ver se é mais facilitada. Depois as duplicidades com código ligado aqui, categoria ID, fazer que se visualize. De repente esse aqui, eu não sei se isso influência, acho que não influência, né, a posição da coluna.
+
+[42:38] Não, não pode mexer na posição da coluna, não vai mudar nada.
+
+[42:46] Categoria, pronto, categoria tá Anteriormente. Agora, falar que isso tem que visualizar, senão não faz sentido nem de ter, né? E depois daqui, uma coisa que eu também citei, isso aqui são visualizações, podemos criar quantas queremos, isso não deixa pesado, né? São visualizações que não podem pensar, não sei se são já visualizações que correspondem ao que visualizamos talvez Mas você aqui pode determinar, a planilha visualiza isso, quer puxar isso de uma planilha, de outra planilha, de dados, informações. Então as visualizações, o importante é estar o database bem estruturado para tudo funcionar melhor. Descrição técnica, ok, uma polícia na entrada, é, a planilha tem essa informação de Não sei, porção despesas, porção frete, a porcentagem de despesa, porcentagem de frete.
+
+[43:53] A despesa é o ICMS.
+
+[43:56] Que é o valor custo direto?
+
+[43:59] É o valor dos impostos, o resultado dos impostos aplicado no custo, que é o BDI.
+
+[44:06] É o BDI, é o custo indireto.
+
+[44:10] Mas interpretar, sabe quando o BDI custa? Quando tá aí, até DDI eu não sei. Uma pessoa, eu não sei de nada, né? Valor dos impostos, valor de impostos, né? Valor da pessoa, valor dos impostos, valor imposto, não, porque é só, é só o valor dos impostos, né? Mas tudo bem, não é, é que são todas vazias, então tem que entender ver depois como essas aqui serão preenchidas, né? Margem de lucro, beleza. NCM, que é, eu quero NCM, que é fundamental para o fiscal. Então vamos, depois vamos analisar a diretiva, entender tendência aí do múltiplo de compra.
+
+[44:54] Geral, a gente nem é múltiplo de compra, é, por exemplo, é, tá tudo 1 aí, né? É, não sei. Aí depois a gente precisa ver como trabalhar. Por exemplo, se eu for comprar uma lâmpada da Stella, é só caixa fechada, não tem como comprar.
+
+[45:11] Então, mas isso aí foi uma coisa que eu até falei com você, a gente vai precisar pegar determinação de produto, falar assim, esse produto só pode comprar.
+
+[45:21] Eu acho que precisa de uma ajuda dos fornecedores ali, talvez tenha uma planilha nisso, das caixas fechadas.
+
+[45:27] Não só os fornecedores, dúvidas, a gente vai ter que sentar com a Carol e falar assim, ó, como que é.
+
+[45:34] Mas isso vem do fornecedor, né?
+
+[45:35] Então não, isso para automatizar um pouco, porque chegar ali automático é manual cada coisa.
+
+[45:41] Então é o que eu posso tentar. Por exemplo, a Stella, isso só vai acontecer, por exemplo, com LED e Stella, só as duas. Ou se eventualmente eu comprar LED, não, LED VANCE Brilha.
+
+[45:58] Então aí a gente precisa nomear todas, todas que tem caixa fechada, qual que é a porcentagem de desconto, qual que é.
+
+[46:06] E aí a gente fica, isso é, eu deixaria aí por enquanto porque é verídico. É, isso daí é um preenchimento, é uma configuração do sistema do Sérgio. Veio aí para poder fazer as emissões de nota. Se não tiver preenchido, por exemplo, não emite a nota.
+
+[46:29] Eu deixaria porque eu não sei qual vai ser a integração conforme o grupo nacional. Beleza, então depois vamos tentar fazer só esse lixamento para ter o estoque. E beleza, e o valor dos impostos, então começamos Tá trabalhando isso na embaixada, né? Aqui está correto, será? O quê? Os impostos? É o que já temos?
+
+[46:56] Foi justamente o que a gente tava batendo ontem.
+
+[46:58] Já tá no sistema, já tá pronto, já tá pronto essa parte aqui.
+
+[47:02] Na verdade, isso tá já resolvido. Sim, sim, sim. Bem, não uso, gente, não tem o quê que eu vou fazer. Se não uso, você vê uma coisa que não tá legal, a gente corrige, né?
+
+[47:16] É uma regra que eu coloquei aqui para Por exemplo, quando chegar nota, por exemplo, tiveram várias mudanças de NCM de agosto para cá. Então eu já determinei, quando chega nota fiscal, a Vitória tem que entrar no produto e conferir o NCM. Falei, pelo menos 6 meses você tem que fazer isso para mim.
+
+[47:34] E aqui, importante também, a questão de isso.
+
+[47:37] E aqui a Débora confere, além do preço de custo, né, se veio tudo certinho, se os impostos estão batendo. Quando chega nota também.
+
+[47:48] Porque, tá bom, depois nós vamos trabalhar a questão que na verdade começamos, que era da administração bancária. Tenta passar para gente como deve ser, tá? Dá uma olhada, nos orientar. Você tem que explicar para alguém ler e fazer aquilo que estamos hoje fazendo. Faz Bancou de uma forma mais rápida possível.
+
+[48:13] A estrutura do quanto a pagar, sabe por quê?
+
+[48:16] É ali eu peguei, eu preciso passar o sistema, eu precisava quais operações estão dentro desse análise.
+
+[48:22] Tem um monte. Agora vamos lá fazer uma, agora na tarde vamos pegar isso, só fazer isso.
+
+[48:28] Pode, sim. Por enquanto, se quiser, pode você pegar e registrar em áudio tudo que tem que ser feito.
+
+[48:37] Eu te mando um áudio melhor, ou de repente posso até gravar um vídeo mostrando, mostrando.
+
+[48:44] O áudio, se você transcrever, ele tem talvez um despachamento racionalizado pela IA nos ajudar.
+
+[48:51] Na verdade, eu vou até pedir para as meninas, por exemplo, vou dar um exemplo aqui de dificuldade que acontece se baixou tipo 3 contas juntos. Por exemplo, de contas a pagar, baixou 3 contas, sei lá, e eventualmente precisou estornar alguma coisa tal. Hora de estornar essa baixa, estorna tudo junto, entendeu? Não pode, teria que estornar só aquela, mas aqui não, no sistema da Connect. Então é uma dificuldade que aí eu vou trazer isso também, que aí a gente vai mexer aí, não vai conseguir, que a gente Sim, você começa, porque também vai ser realizada esta parte desta forma: primeiro a estrutura principal e depois talvez as mudanças.
+
+[49:46] Agora, processos aqui dentro, tá, tá, tá. A gente tenta já dar um prompt inicial bem, bem completo, mas provavelmente muitas coisas ele terá que depois da nova vista, segundo você quepare, e ajustar. Quando acharmos que tá bom, vamos passar para você examinar.
+
+[50:10] A funcionalidade dele ainda não tá, não tá 100%, mas a questão da visualização tá do mesmo jeito que é da Connect, até que tem remessa, retorno bancário, tem de repente dá para até melhorar. Beleza, mas é isso que eu tô falando. Tipo, aí você vai entrar, você vai conseguir identificar todas as planilhas.
+
+[50:32] Já está isso aqui criado?
+
+[50:34] Já tá criado. A Lana pediu quando eu comecei.
+
+[50:40] Então já tem uma análise primeiro, análise, e o que mudar. E aí tem as coisas que não aparecem, né?
+
+[50:50] Que aí É isso que tipo a gente precisa começar a ver. Ah, tem um campo aqui que abre 5 campos, um negócio que você clica que abre 5 campos. Isso eu não mapeei porque eu só mapeei a parte que a Ana me mandou a foto. Então é essa coisa, essas coisas que a gente vai ter que começar a ver e o que que isso se aplica em cima do sistema no geral, entendeu?
+
+[51:18] Vem, vai.
+
+[51:18] Ô, Felipe, tem uma missão para você: vender uma Meshmatics.

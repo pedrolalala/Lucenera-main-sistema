@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-11 (SPEC-241 — PDF do orçamento para o cliente com NCM; NO AR)
+
+- Edge Function `generate-report` **publicada em São Paulo (versão 5)** a partir da main (PR #3), com autorização do Filippo. Acrescenta o modelo `cliente_ncm`: coluna NCM depois de "Código", NCM formatado `9405.19.90`, aviso "NCM conforme cadastro do produto…". Os modelos "cliente" e "interno" não mudaram. O Orçamentos já estava no ar com a 3ª opção no menu da impressora; até hoje ela saía sem NCM.
+- Conferido antes: `produtos.ncm` existe (4.932 de 4.943 produtos com NCM). Depois: a função sobe e responde (401 sem login, como esperado).
+- Pendente: testar os 3 modelos com um orçamento real e o Vinicius mandar para um cliente PJ.
+- SPEC-259: nada a publicar; a função e as migrations 302/303 já estavam no ar desde 06/11. Faltam decisões (grupos B e C) e a Fase 4 (telas).
+
 ## 2026-11-11 (main = no ar: Edge Functions)
 
 - Regra decidida pelo Filippo em 10/11: o que está no ar no Supabase de São Paulo sai da main do central; nunca publicar da pasta de um sistema; registrar aqui cada publicação; conferência "no ar × main" toda quinta-feira (nos primeiros dias, com mais frequência).

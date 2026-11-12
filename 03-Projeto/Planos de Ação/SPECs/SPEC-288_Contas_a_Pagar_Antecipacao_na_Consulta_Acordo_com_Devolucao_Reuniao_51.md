@@ -15,10 +15,10 @@ Relacionadas: SPEC-215 (antecipação a fornecedor), SPEC-270 (modalidade anteci
 
 ## Checklist de Ação
 
-- [ ] **A. Antecipação do Contas a Pagar aparece na consulta** (espelho no financeiro novo) — decisão técnica na seção A
+- [ ] **A. Antecipação do Contas a Pagar aparece na consulta** (espelho no financeiro novo) — migration 342 redigida e ensaiada em ROLLBACK com a Omega Light real; **NÃO aplicada** (aguarda autorização)
 - [x] **B. Acordo aceita devolução + aquisição** (total zero vira compensação, sem parcela nova) — migration 341 aplicada e tela publicada em 12/11; total negativo segue bloqueado (decisão 2)
-- [ ] **C. Filtros da consulta se mantêm** ao trocar de aba
-- [ ] **D. Lançamento aparece na lista sem recarregar**
+- [x] **C. Filtros da consulta se mantêm** ao trocar de aba — hook `useFiltroPersistido` (sessão do navegador, separado por Pagar/Receber) em Consultar Duplicatas e Contas em Aberto; código commitado local, **não publicado**
+- [ ] **D. Lançamento aparece na lista sem recarregar** — a consulta recarrega ao reabrir a tela (a tela remonta ao voltar da aba Antecipações) e agora mantém o filtro; confirmar em teste depois de aplicar o item A
 - [ ] **E. Devolução/brinde com número próprio** (decisão do usuário) e **busca por projeto** corrigida
 - [ ] CHANGELOG, snapshot do banco, contexto do sistema
 
@@ -100,6 +100,9 @@ Código: reverter o commit do Retorno Bancário. Banco: `rollback.sql` de cada m
 
 - Análise da Reunião 51 e da imagem (somente leitura); causa do item A confirmada no banco; limite do acordo (item B) confirmado pela leitura do código da função e dos dados. SPEC criada.
 - Item B implementado no mesmo dia depois que o usuário esbarrou nele (print: 2 parcelas, total R$ 0,00, botão travado): migration `20261112_341_spec288_acordo_compensacao_total_zero` ensaiada em ROLLBACK com a devolução real (−2.640,95 + 2.640,95) e **APLICADA em SP**; `AcordoModal` com modo "Compensação" (commit `e3b0987` no Retorno Bancário, publicado em Contas a Pagar e Contas a Receber). Itens A, C, D e E seguem pendentes.
+- Item A (código pronto): migration `20261112_342_spec288_espelho_pagamento_antecipado_pagar` — coluna `pagamentos_antecipados.titulo_id` + gatilho `trg_fin_espelho_antecipado` que cria/cancela um título `adiantamento` (pagar) com parcela firme e baixa `pagamento` (origem `ponte`, sem conta bancária), retroativo para a Omega Light, e conferência de integridade ajustada para acusar só o que ficou sem espelho. Ensaio em ROLLBACK: a consulta passa a mostrar `CP / Pago / adiantamento / OMEGA LIGHT / R$ 2.608,52 / 05/11/2026`; cancelar estorna e cancela o título; lançamento novo ganha título; integridade 0; nenhuma falha. Falha do espelho nunca trava o lançamento (vai para `financeiro_ponte_falhas`). **Não aplicada.** Observação: quem lança só com acesso `dashboard-financeiro` (sem `financeiro`) não terá espelho (cai em `financeiro_ponte_falhas`).
+- Item C (código pronto): filtros persistidos por sessão em Consultar Duplicatas e Contas em Aberto. **Não publicado.**
+- Item E: depende das decisões 3 e da verificação de dados da busca por projeto; não iniciado.
 
 ## Pendências
 

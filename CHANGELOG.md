@@ -44,6 +44,30 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Endereço sem número: não é bug de código, é cadastro em `contatos` sem número (decisão pendente).
 - Spec: `SPEC-284_Central_Solicitacoes_Aprovadas_11_11.md`. Repositórios: só o central.
 
+## 2026-11-12 (SPEC-285 descartada — parcela manual continua permitida)
+
+- Decisão do Filippo: o lançamento manual de parcela deve continuar possível. SPEC-285 (trava no banco, migration 339, e o CRM somente leitura) foi **descartada antes de ser aplicada**: arquivos retirados do repositório e nada mudou no banco. Ficam no histórico do git (PR #14).
+- Nova direção, a escrever: manter o lançamento manual, mas ligado ao financeiro novo (origem `manual`), para que apareça em Contas a Receber/Pagar e no Fluxo Futuro. Vale também para a "Cadastrar Duplicata".
+- Os números 285 (SPEC) e 339 (migration) não serão reaproveitados.
+
+## 2026-11-11 (SPEC-284 — Dashboard Estoque e Pedido Avulso lendo o estoque real; migration 337 APLICADA)
+
+- Problema: a página Estoque do Dashboard (`v_estoque_produtos`) e as colunas Estoque/Disponível do Pedido Avulso do Compras (`vw_estoque_produtos`) leem `produtos.estoque_total`/`estoque_disponivel`, paradas desde 05/11 (a importação da Connect que as gravava foi suspensa pela SPEC-222). No Pedido Avulso: 391 peças com disponível diferente; em 282 a tela diz que há disponível e não há.
+- Migration `20261111_337_spec284_estoque_telas_leem_estoque_real` (up/rollback/dry_run): as duas views passam a ler `estoque_itens` (local Estoque); mesmas colunas e tipos, sem mudança de tela. Ensaio em SP desfeito: 0 diferenças nas duas views, `security_invoker` mantido. **APLICADA em SP no fim do dia 11/11** (autorização do Filippo). Conferido depois: 0 diferenças nas duas views; Dashboard com R$ 4.249.279 a custo em estoque (R$ 1.475.695 disponíveis). Conferência visual das telas no ar fica com o usuário (exige login). **Parte B aplicada** (migration 338, autorização do Filippo): o gatilho `trg_sync_estoque_itens_from_produtos` passa a rodar só no INSERT, para criar a linha Estoque da peça nova. Em UPDATE de `produtos.estoque_*` (importação com `--incluir-estoque` ou edição manual) não sobrescreve mais o estoque real. Ensaio: +1000 na coluna antiga da 13587 deixou o estoque real em 289.
+
+## 2026-11-11 (Panorama Financeiro semanal removido)
+
+- Decisão do Filippo: removidos o workflow `.github/workflows/panorama-financeiro-semanal.yml` e o gerador `scripts/panorama_financeiro/gerar_relatorio.py` + `template.html`. O que importa é o Dashboard alimentado em tempo real.
+- Motivos: nunca funcionou (19 execuções, de 18/08 a 06/11, todas com falha: `RESEND_API_KEY` vazio); lia as tabelas antigas (`transacoes`, `negociacoes`, `pedido_compra`, colunas `produtos.estoque_*`), paradas desde 05/11; e gravaria o relatório financeiro no repositório, que é público.
+- Mantidos `exportar_nao_quitadas.py` e `exportar_nao_quitadas_formato_connect.py` (ferramentas à parte, base da SPEC-117). O secret `RESEND_API_KEY` do repositório fica sem uso (o Pedro pode apagar).
+
+## 2026-11-11 (SPEC-198 — backup SP → Ohio volta a funcionar; banco deixa de ficar público no GitHub)
+
+- **Exposição corrigida:** o workflow `backup-sp-para-ohio.yml` guardava o dump completo (public + memoria + `auth.users`/`auth.identities`) como Artifact por 90 dias. O repositório é **público** e qualquer conta do GitHub podia baixar. Removido o `upload-artifact` (PR #5) e **apagados os 30 artifacts** `lucenera-sp-1..30` (14/10 a 11/11), com autorização do Filippo. Cópias que valem agora: Ohio (esta rotina) e os backups diários do Supabase (plano Pro, 7 dias).
+- **O backup falhava todo dia desde 20/10** (último sucesso em 19/10), e Ohio estava 3 semanas desatualizado. Três causas corrigidas em `scripts/backup_sp_para_ohio.py`: (1) a regra `orcamentos_data_inicio_pagamento_check` saiu do banco e o script parava ao procurá-la (PR #5); (2) a `vw_staging_resumo` lê o schema `backup`, que não é copiado, e agora fica fora da reserva (PR #6); (3) o schema `auditoria` (triggers de auditoria em 49 tabelas) não existia em Ohio e agora é copiado junto (PR #7). Também cria em Ohio as pastas do Storage que faltam (PR #8).
+- Execução manual 43122864413: **carga ok; SP 347.169 linhas = Ohio 347.169 linhas, 0 tabelas diferentes**; 35 arquivos do Storage com erro 400 (pastas inexistentes em Ohio). Execução 43124676389 (com o PR #8): 5 pastas criadas em Ohio, **35 arquivos copiados, 0 erros**, banco de novo 347.169 = 347.169; nenhum artifact gerado.
+- **Pendente (Pedro):** tornar os repositórios privados (o histórico do central ainda tem planilhas com dados de clientes); conferir integrações (Cloudflare, Railway "natural-unity", Skip/Lovable) e convidar a conta do Filippo nos 19 sistemas antes. Recomendado pedir troca de senha dos usuários (as senhas criptografadas estavam nos arquivos públicos). O workflow "Panorama Financeiro semanal" também falha (não investigado).
+
 ## 2026-11-11 (SPEC-281 — salvar orçamento com itens ligados à venda; migration 332 APLICADA)
 
 - Problema: salvar o CNX-5154 (venda CNX-6007) dava `violates foreign key constraint projeto_itens_orcamento_item_id_fkey` porque `replace_orcamento_itens` apagava e recriava todos os itens.

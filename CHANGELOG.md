@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-12 (SPEC-287 — Financeiro: Acordo / renegociação de parcelas, levantamento da Reunião 47; nada implementado)
+
+- Pergunta do usuário: o acordo falado na Reunião 47 (Lana, 10/11) já foi feito? **Não.** O botão "Acordo" de Consultar Duplicatas só mostra "ainda não implementado"; `financeiro_renegociacoes` tem 0 registros e não há função de acordo (só `financeiro_baixar`/`financeiro_baixar_lote`).
+- SPEC-287 registra os casos da reunião (30% na 1ª parcela + resto igual, acordo com arquiteta abatendo RTs, vários pedidos numa parcela só, desconto no Pix), o que o modelo da SPEC-258 já oferece (`renegociada`, `abatimento`, `substitui_titulo_id`), um desenho proposto e 8 perguntas em aberto. Sem mudança de código, banco ou dado.
+- Observação: o plano de parcelas do orçamento já aceita valor por parcela (SPEC-156); confirmar com a Carol antes de tratar o caso 1 como acordo.
+- Spec: `SPEC-287_Financeiro_Acordo_Renegociacao_de_Parcelas_Reuniao_47.md`.
+
 ## 2026-11-12 (SPEC-286 — Compras: pedido com sinal e parcelas de valores diferentes; migration 339 APLICADA em SP)
 
 - Pedido da Débora na Central (solicitação 71d0c134): sinal + resto parcelado (ex.: pedido 1802, 25% + 3x). Hoje as parcelas saem sempre em partes iguais; o 1802 já está certo porque 25% = 1/4, e o sinal já aparece como previsão em Contas a Pagar.

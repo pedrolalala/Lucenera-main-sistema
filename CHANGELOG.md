@@ -2,9 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-12 (SPEC-287 — Financeiro: Acordo / renegociação de parcelas, levantamento da Reunião 47; nada implementado)
+## 2026-11-12 (SPEC-287 — Financeiro: Acordo / renegociação de parcelas da Reunião 47; migration 340 APLICADA, Contas a Pagar/Receber publicados)
 
-- Pergunta do usuário: o acordo falado na Reunião 47 (Lana, 10/11) já foi feito? **Não.** O botão "Acordo" de Consultar Duplicatas só mostra "ainda não implementado"; `financeiro_renegociacoes` tem 0 registros e não há função de acordo (só `financeiro_baixar`/`financeiro_baixar_lote`).
+- **Implementado (2ª parte do dia):** migration `20261112_340_spec287_financeiro_criar_acordo` (função `financeiro_criar_acordo` + sequência `seq_financeiro_acordo`), ensaiada em ROLLBACK com 3 parcelas reais e **APLICADA em SP em 12/11/2026** (função existe, `anon` sem execução, nenhuma parcela renegociada ainda). Botão "Acordo" de Consultar Duplicatas abre `AcordoModal` (desconto, nº de parcelas, % de entrada, datas, formas, motivo). Retorno Bancário commit `b7d2230` no GitHub; Contas a Pagar e Contas a Receber publicados pelo Cloudflare a partir dele. Caso da arquiteta/RT (compensação) fica para a 2ª fase.
+- Situação antes (levantamento): o botão "Acordo" de Consultar Duplicatas só mostrava "ainda não implementado"; `financeiro_renegociacoes` tinha 0 registros e não havia função de acordo (só `financeiro_baixar`/`financeiro_baixar_lote`).
 - SPEC-287 registra os casos da reunião (30% na 1ª parcela + resto igual, acordo com arquiteta abatendo RTs, vários pedidos numa parcela só, desconto no Pix), o que o modelo da SPEC-258 já oferece (`renegociada`, `abatimento`, `substitui_titulo_id`), um desenho proposto e 8 perguntas em aberto. Sem mudança de código, banco ou dado.
 - Observação: o plano de parcelas do orçamento já aceita valor por parcela (SPEC-156); confirmar com a Carol antes de tratar o caso 1 como acordo.
 - Spec: `SPEC-287_Financeiro_Acordo_Renegociacao_de_Parcelas_Reuniao_47.md`.

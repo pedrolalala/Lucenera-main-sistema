@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-287 — Financeiro: Acordo (renegociação de parcelas) — levantamento da Reunião 47"
-status: não iniciado
+status: pendente
 data_ultima_modificacao: 2026-11-12
 sistemas_envolvidos:
   - Consultar Duplicatas / Adm. Bancária (04-Sistemas/retorno-bancario-bradesco-5392a)
@@ -16,8 +16,8 @@ sistemas_envolvidos:
 
 - [ ] Usuário e Filippo/Lana respondem as perguntas em aberto (seção 5)
 - [ ] Decidir o desenho (seção 6) e aprovar esta SPEC
-- [ ] Banco: função de acordo e regras (depois da aprovação)
-- [ ] Consultar Duplicatas: ligar o botão "Acordo" (hoje só mostra "ainda não implementado")
+- [x] Banco: função de acordo (migration 340 aplicada em 12/11)
+- [x] Consultar Duplicatas: botão "Acordo" ligado (AcordoModal), publicado em Contas a Pagar e Receber
 - [ ] Contas a Receber / a Pagar: mostrar o vínculo do acordo
 - [ ] CHANGELOG, snapshot do banco, contexto dos sistemas
 
@@ -101,8 +101,8 @@ Nada aplicado. Quando houver migration: `rollback.sql` removendo a função; os 
 
 - Levantamento da Reunião 47 e do estado do sistema (somente leitura). SPEC criada.
 - Usuário pediu para implementar mesmo com as perguntas em aberto. Padrões adotados (a revisar): quem tem acesso `financeiro` cria o acordo; desconto vira `abatimento` (não é receita realizada); só parcela `firme` e sem baixa entra; boleto emitido não é cancelado pelo acordo (a tela avisa); casos A, B, C e E cobertos; **caso D (abater de RT/compensação) fica para uma 2ª fase** porque depende das regras de RT.
-- Migration `20261112_340_spec287_financeiro_criar_acordo` (função `financeiro_criar_acordo` + sequência `seq_financeiro_acordo`) redigida e ensaiada em ROLLBACK com 3 parcelas reais (R$ 10.327,40, desconto de R$ 1.032,74, novo plano 30% + 2 iguais): origens viram `renegociada`, baixas `renegociacao`/`abatimento`, nova conta `ACORDO-1` com 3 parcelas pendentes, 9 vínculos em `financeiro_renegociacoes`; soma errada, sem motivo e parcela já renegociada são recusadas; `anon` sem execução. **Ainda NÃO aplicada em SP (aguarda autorização do usuário).**
-- Retorno Bancário / Consultar Duplicatas: botão "Acordo" agora abre `AcordoModal` (desconto, nº de parcelas, % de entrada, datas, formas, motivo, soma conferida) e chama a função. Código local, type-check sem erros, **não commitado nem publicado**.
+- Migration `20261112_340_spec287_financeiro_criar_acordo` (função `financeiro_criar_acordo` + sequência `seq_financeiro_acordo`) redigida e ensaiada em ROLLBACK com 3 parcelas reais (R$ 10.327,40, desconto de R$ 1.032,74, novo plano 30% + 2 iguais): origens viram `renegociada`, baixas `renegociacao`/`abatimento`, nova conta `ACORDO-1` com 3 parcelas pendentes, 9 vínculos em `financeiro_renegociacoes`; soma errada, sem motivo e parcela já renegociada são recusadas; `anon` sem execução. **APLICADA em SP em 12/11/2026** (função criada, `anon` sem execução, nenhuma parcela renegociada).
+- Retorno Bancário / Consultar Duplicatas: botão "Acordo" agora abre `AcordoModal` (desconto, nº de parcelas, % de entrada, datas, formas, motivo, soma conferida) e chama a função. Type-check sem erros; commit `b7d2230` no GitHub e publicado (Contas a Pagar e Contas a Receber, pelo Cloudflare).
 
 ## Pendências
 

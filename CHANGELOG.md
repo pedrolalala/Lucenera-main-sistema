@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-12 (SPEC-288 itens A e C — antecipação do Contas a Pagar na consulta e filtros que se mantêm; migration 342 APLICADA, publicado)
+
+- **A.** Pagamento antecipado a fornecedor (SPEC-215) vivia só em `pagamentos_antecipados` e não aparecia em Consultar Duplicatas (caso Omega Light, 05/11, R$ 2.608,52). Migration `20261112_342_spec288_espelho_pagamento_antecipado_pagar` (**APLICADA em SP**, ensaiada em ROLLBACK): coluna `pagamentos_antecipados.titulo_id`, gatilho `trg_fin_espelho_antecipado` que cria/cancela um título `adiantamento` (pagar) com parcela firme e baixa `pagamento` (origem `ponte`), retroativo para a Omega Light; `vw_financeiro_ponte_pagar_integridade` só acusa o que ficou sem espelho (hoje 0). Falha do espelho não trava o lançamento (`financeiro_ponte_falhas`). Quem lança só com `dashboard-financeiro` não ganha espelho.
+- **C.** Hook `useFiltroPersistido`: Consultar Duplicatas e Contas em Aberto guardam os filtros na sessão (por Pagar/Receber). Retorno Bancário commit `64d42ac`, publicado pelo Cloudflare.
+- Itens D (confirmar em teste) e E (número de devolução/brinde, busca por projeto) seguem pendentes na SPEC-288.
+
 ## 2026-11-12 (SPEC-288 — Reunião 51: acordo com total zero vira compensação; migration 341 APLICADA, Contas a Pagar/Receber publicados)
 
 - Problema (usuário, com print): duas parcelas que se anulam (devolução negativa + aquisição) davam total R$ 0,00 e o botão "Confirmar acordo" nunca liberava (a tela exigia soma > 0 e parcela nova).

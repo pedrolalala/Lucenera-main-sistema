@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-12 (SPEC-288 — Reunião 51: acordo com total zero vira compensação; migration 341 APLICADA, Contas a Pagar/Receber publicados)
+
+- Problema (usuário, com print): duas parcelas que se anulam (devolução negativa + aquisição) davam total R$ 0,00 e o botão "Confirmar acordo" nunca liberava (a tela exigia soma > 0 e parcela nova).
+- Migration `20261112_341_spec288_acordo_compensacao_total_zero` (mesma assinatura de `financeiro_criar_acordo`; ensaiada em ROLLBACK com a devolução real de −2.640,95 + parcela de 2.640,95 do mesmo cliente e **APLICADA em SP**): sem plano novo e total zero, a positiva recebe baixa `compensacao`, as duas ficam `renegociada` e ligadas em `financeiro_renegociacoes`; sem parcela nova. Total negativo e desconto na compensação são recusados. Rollback = reaplicar a 340.
+- `AcordoModal`: com total zero mostra o aviso "Compensação", só pede o motivo e o botão vira "Confirmar compensação"; total negativo é bloqueado com aviso. Retorno Bancário commit `e3b0987`, Contas a Pagar/Receber publicados pelo Cloudflare.
+- Spec criada no mesmo dia: `SPEC-288_Contas_a_Pagar_Antecipacao_na_Consulta_Acordo_com_Devolucao_Reuniao_51.md` (itens A, C, D e E seguem pendentes: antecipação do Contas a Pagar sem espelho no financeiro novo, filtros entre abas, número de devolução/brinde, busca por projeto).
+
 ## 2026-11-12 (SPEC-287 — Financeiro: Acordo / renegociação de parcelas da Reunião 47; migration 340 APLICADA, Contas a Pagar/Receber publicados)
 
 - **Implementado (2ª parte do dia):** migration `20261112_340_spec287_financeiro_criar_acordo` (função `financeiro_criar_acordo` + sequência `seq_financeiro_acordo`), ensaiada em ROLLBACK com 3 parcelas reais e **APLICADA em SP em 12/11/2026** (função existe, `anon` sem execução, nenhuma parcela renegociada ainda). Botão "Acordo" de Consultar Duplicatas abre `AcordoModal` (desconto, nº de parcelas, % de entrada, datas, formas, motivo). Retorno Bancário commit `b7d2230` no GitHub; Contas a Pagar e Contas a Receber publicados pelo Cloudflare a partir dele. Caso da arquiteta/RT (compensação) fica para a 2ª fase.

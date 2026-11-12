@@ -7,6 +7,12 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Helena: ORC-0052 com início em 20/11 saía com 28/11 no PDF. Causa: `generate-report` somava `dias_offset` (contados do dia do salvamento) a `data_inicio_pagamento`. Correção em `calcularParcelasPdf`: parcela 1 = data de início, demais mantêm o espaçamento. Sem impacto no banco. SPEC `SPEC-290_Orcamento_PDF_Data_das_Parcelas_Divergente_Reuniao_53.md`.
 - Migration `20261112_344_spec290_aprovacao_vencimento_parte_da_data_inicio`: `aprovar_orcamento_financeiro` usava `current_date` + offsets (mesmo desvio se aprovasse em outro dia); migration 344 ensaiada em ROLLBACK e APLICADA em SP (parcela 1 = data de início, demais mantêm o espaçamento). Repositório a receber commit: central.
 
+## 2026-11-12 (SPEC-290 e SPEC-291 — Compras: vincular pagamento já existente e pedido parcial mostrando só o que falta; SPECs criadas, nada implementado)
+
+- **SPEC-290:** pedidos "Antecipado" (1985, 1925, 1733) já têm a duplicata paga da Connect (8405, 8284, 7554) sem ligação com o pedido; a opção "já pago" da SPEC-289 criaria um 2º pagamento e a entrada normal gera parcela (a Débora cancelou a NF 11221 por isso). Proposta: detectar e vincular o pagamento existente sem dinheiro novo, rastreio em Consultar Duplicatas, trava na opção "já pago", e importação do Connect sem duplicar antecipação nativa.
+- **SPEC-291:** pedido "Concluído parcialmente" (ex.: 1930) passa a mostrar só o que falta, "A receber" no cabeçalho e parcelas pelo restante; `valor_total` gravado não muda. Sem migration.
+- Repositórios a receber commit: central (e Compras/Contas a Pagar na implementação).
+
 ## 2026-11-12 (SPEC-289 — Reunião 52: entrada parcial por peça e pedido já pago na entrada da NF; código pronto no Compras, migration 343 redigida e ensaiada, NÃO aplicada, nada publicado)
 
 - Origem: reunião com a Débora e 2 pedidos na Central (17:24 entrada parcial; 17:37 usar antecipação na entrada da NF, pedido 1985).

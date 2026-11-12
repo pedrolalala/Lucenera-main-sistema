@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-12 (SPEC-291 Compras — pedido "Concluído parcialmente" mostra só o que falta; só tela, sem migration, código local sem commit/publicação)
+
+- SPEC `SPEC-291_Compras_Pedido_Parcialmente_Recebido_Mostra_So_o_Que_Falta.md` (itens A–E implementados; F pendente).
+- **Compras (`compras-lucenera-3o23t98ee`):** `PedidoItensResumo` (coluna Falta + "Já recebidas (N) — ver"), cabeçalho em `PedidosCompra.tsx` ("A receber: R$ X" e "Pedido R$ total · recebido R$ Y"), `PedidoParcelasPanel` (restante de cada parcela pela mesma conta da previsão do Contas a Pagar e linha "já abatido pela NF"), PDF e "Enviar ao fornecedor" só com o que falta e parcelas pelo restante (`pdf-pedido-fornecedor.ts`). Funções novas só de leitura em `services/pedido-compra.ts`. `valor_total` gravado não muda.
+- **Correções do revisor:** erros de leitura não são mais engolidos (parcelas mostram aviso, PDF/e-mail abortam, cabeçalho "A receber indisponível"); divergência só vermelha em erro real de cadastro (com NF é cinza "Diferença = impostos/ST da NF"); PDF parcial sem tabela de parcelas, com "Valor do saldo (itens que faltam)" e as NF já recebidas; a receber considera o desconto % do pedido.
+- Conta das parcelas conferida em leitura contra o pedido 1930 real: 0,00 / 598,19 / 1.523,34. `tsc` com os mesmos 6 erros antigos, `oxlint` e `vite build` ok.
+
 ## 2026-11-12 (SPEC-290 Compras — vincular o pagamento já existente na entrada da NF; código pronto no Compras e no Contas a Pagar, migration 345 redigida e ensaiada, NÃO aplicada, nada publicado)
 
 - SPEC `SPEC-290_Compras_Vincular_Pagamento_Ja_Existente_na_Entrada_da_NF.md` (itens A–D implementados; E só ensaiado, sem mudar o importador). Número de migration: **345** (a 344 já é da SPEC-290 do PDF das parcelas, aplicada).

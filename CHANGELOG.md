@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-11 (SPEC-198 — backup SP → Ohio volta a funcionar; banco deixa de ficar público no GitHub)
+
+- **Exposição corrigida:** o workflow `backup-sp-para-ohio.yml` guardava o dump completo (public + memoria + `auth.users`/`auth.identities`) como Artifact por 90 dias. O repositório é **público** e qualquer conta do GitHub podia baixar. Removido o `upload-artifact` (PR #5) e **apagados os 30 artifacts** `lucenera-sp-1..30` (14/10 a 11/11), com autorização do Filippo. Cópias que valem agora: Ohio (esta rotina) e os backups diários do Supabase (plano Pro, 7 dias).
+- **O backup falhava todo dia desde 20/10** (último sucesso em 19/10), e Ohio estava 3 semanas desatualizado. Três causas corrigidas em `scripts/backup_sp_para_ohio.py`: (1) a regra `orcamentos_data_inicio_pagamento_check` saiu do banco e o script parava ao procurá-la (PR #5); (2) a `vw_staging_resumo` lê o schema `backup`, que não é copiado, e agora fica fora da reserva (PR #6); (3) o schema `auditoria` (triggers de auditoria em 49 tabelas) não existia em Ohio e agora é copiado junto (PR #7). Também cria em Ohio as pastas do Storage que faltam (PR #8).
+- Execução manual 43122864413: **carga ok; SP 347.169 linhas = Ohio 347.169 linhas, 0 tabelas diferentes**; 35 arquivos do Storage com erro 400 (pastas inexistentes em Ohio). Execução 43124676389 (com o PR #8): 5 pastas criadas em Ohio, **35 arquivos copiados, 0 erros**, banco de novo 347.169 = 347.169; nenhum artifact gerado.
+- **Pendente (Pedro):** tornar os repositórios privados (o histórico do central ainda tem planilhas com dados de clientes); conferir integrações (Cloudflare, Railway "natural-unity", Skip/Lovable) e convidar a conta do Filippo nos 19 sistemas antes. Recomendado pedir troca de senha dos usuários (as senhas criptografadas estavam nos arquivos públicos). O workflow "Panorama Financeiro semanal" também falha (não investigado).
+
 ## 2026-11-11 (SPEC-281 — salvar orçamento com itens ligados à venda; migration 332 APLICADA)
 
 - Problema: salvar o CNX-5154 (venda CNX-6007) dava `violates foreign key constraint projeto_itens_orcamento_item_id_fkey` porque `replace_orcamento_itens` apagava e recriava todos os itens.

@@ -171,10 +171,41 @@ def objetos(db):
     return r
 
 
+def buckets(db):
+    c = psycopg2.connect(db, connect_timeout=30, options=RW)
+    k = c.cursor()
+    k.execute("select id, public, file_size_limit, allowed_mime_types from storage.buckets")
+    r = {b: (pub, lim, mimes) for b, pub, lim, mimes in k.fetchall()}
+    c.close()
+    return r
+
+
+def criar_buckets_faltando():
+    # 11/11/2026: pastas criadas em SP depois da virada (ex.: solicitacoes-anexos) não existiam em Ohio e o
+    # upload voltava 400. Cria em Ohio com as mesmas configurações de SP.
+    import json
+    oh = buckets(OH_DB)
+    for b, (pub, lim, mimes) in buckets(SP_DB).items():
+        if b in oh:
+            continue
+        corpo = {"id": b, "name": b, "public": bool(pub)}
+        if lim:
+            corpo["file_size_limit"] = int(lim)
+        if mimes:
+            corpo["allowed_mime_types"] = list(mimes)
+        try:
+            storage_req(os.environ["OHIO_URL"], os.environ["OHIO_SERVICE_ROLE_KEY"], "POST", "bucket",
+                        data=json.dumps(corpo).encode(), ctype="application/json").read()
+            print("  pasta criada em Ohio:", b)
+        except Exception as e:
+            print("  pasta com erro:", b, str(e)[:100])
+
+
 def copiar_arquivos():
     if not (os.environ.get("SP_SERVICE_ROLE_KEY") and os.environ.get("OHIO_SERVICE_ROLE_KEY")):
         print("arquivos: pulado (sem as chaves service_role)")
         return
+    criar_buckets_faltando()
     ja = {(b, n): s for b, n, s, _ in objetos(OH_DB)}
     novos = erros = 0
     for b, n, s, mt in objetos(SP_DB):

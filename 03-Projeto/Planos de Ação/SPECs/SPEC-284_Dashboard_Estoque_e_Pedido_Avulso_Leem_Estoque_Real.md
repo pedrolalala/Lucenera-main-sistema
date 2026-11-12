@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-284 — Dashboard (Estoque) e Compras (Pedido Avulso) passam a ler o estoque real"
-status: pendente
+status: concluído
 data_ultima_modificacao: 2026-11-11
 sistemas_envolvidos:
   - Banco (Supabase SP) — views v_estoque_produtos e vw_estoque_produtos
@@ -15,13 +15,13 @@ sistemas_envolvidos:
 - [x] Diagnóstico com números do banco e conferência do código e da tela no ar (11/11)
 - [x] Migration `20261111_337_spec284_estoque_telas_leem_estoque_real` (up, rollback, dry_run)
 - [x] Ensaio em ROLLBACK no Supabase SP
-- [ ] Aplicar no Supabase SP (com autorização)
-- [ ] Conferir as duas telas no ar (Dashboard → Estoque; Compras → Pedido Avulso)
+- [x] Aplicar no Supabase SP (autorizado pelo Filippo em 11/11)
+- [ ] Conferir as duas telas no ar (Dashboard → Estoque; Compras → Pedido Avulso): exige login, fica com o usuário
 - [ ] Parte B (decisão): desligar o gatilho `trg_sync_estoque_itens_from_produtos`
 
 ### Passos manuais do usuário
 
-- [ ] Autorizar a aplicação da migration 337
+- [x] Autorizar a aplicação da migration 337 (11/11)
 - [ ] Decidir a Parte B (gatilho antigo)
 
 ## Objetivo
@@ -77,3 +77,13 @@ O gatilho `trg_sync_estoque_itens_from_produtos` (em `produtos`, `AFTER INSERT O
   - Exemplos: 12135 = 123 / −31; 12395 = 598 / 17; 13587 = 289 / 17; 8952 = 858 / 63.
   - `vw_estoque_produtos` mantém `security_invoker=true`.
   - Conferido depois: as views no banco continuam as antigas (12135 = 155 / 0). **Não aplicada.**
+
+### 2026-11-11 (noite) — aplicada
+
+- Migration 337 **APLICADA** no Supabase SP (`apply_migration`, registrada em `supabase_migrations.schema_migrations`), com autorização do Filippo.
+- Conferido depois:
+  - Dashboard: 4.571 linhas, 0 diferenças com `estoque_itens`; valor a custo do estoque R$ 4.249.279, dos quais R$ 1.475.695 disponíveis.
+  - Compras: 4.571 linhas, 0 diferenças.
+  - 13587 = 289 / 17; 12135 = 123 / −31.
+  - `security_invoker=true` mantido.
+- A Parte B (gatilho antigo) segue pendente de decisão.

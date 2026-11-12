@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-11 (Panorama Financeiro semanal removido)
+
+- Decisão do Filippo: removidos o workflow `.github/workflows/panorama-financeiro-semanal.yml` e o gerador `scripts/panorama_financeiro/gerar_relatorio.py` + `template.html`. O que importa é o Dashboard alimentado em tempo real.
+- Motivos: nunca funcionou (19 execuções, de 18/08 a 06/11, todas com falha: `RESEND_API_KEY` vazio); lia as tabelas antigas (`transacoes`, `negociacoes`, `pedido_compra`, colunas `produtos.estoque_*`), paradas desde 05/11; e gravaria o relatório financeiro no repositório, que é público.
+- Mantidos `exportar_nao_quitadas.py` e `exportar_nao_quitadas_formato_connect.py` (ferramentas à parte, base da SPEC-117). O secret `RESEND_API_KEY` do repositório fica sem uso (o Pedro pode apagar).
+
 ## 2026-11-11 (SPEC-198 — backup SP → Ohio volta a funcionar; banco deixa de ficar público no GitHub)
 
 - **Exposição corrigida:** o workflow `backup-sp-para-ohio.yml` guardava o dump completo (public + memoria + `auth.users`/`auth.identities`) como Artifact por 90 dias. O repositório é **público** e qualquer conta do GitHub podia baixar. Removido o `upload-artifact` (PR #5) e **apagados os 30 artifacts** `lucenera-sp-1..30` (14/10 a 11/11), com autorização do Filippo. Cópias que valem agora: Ohio (esta rotina) e os backups diários do Supabase (plano Pro, 7 dias).

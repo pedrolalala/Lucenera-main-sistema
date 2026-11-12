@@ -15,11 +15,12 @@ Relacionadas: SPEC-215 (antecipação a fornecedor), SPEC-270 (modalidade anteci
 
 ## Checklist de Ação
 
-- [ ] **A. Antecipação do Contas a Pagar aparece na consulta** (espelho no financeiro novo) — migration 342 redigida e ensaiada em ROLLBACK com a Omega Light real; **NÃO aplicada** (aguarda autorização)
+- [x] **A. Antecipação do Contas a Pagar aparece na consulta** (espelho no financeiro novo) — migration 342 **APLICADA em SP em 12/11**; a Omega Light aparece em Consultar Duplicatas (CP / Pago / adiantamento / R$ 2.608,52 / 05/11)
 - [x] **B. Acordo aceita devolução + aquisição** (total zero vira compensação, sem parcela nova) — migration 341 aplicada e tela publicada em 12/11; total negativo segue bloqueado (decisão 2)
-- [x] **C. Filtros da consulta se mantêm** ao trocar de aba — hook `useFiltroPersistido` (sessão do navegador, separado por Pagar/Receber) em Consultar Duplicatas e Contas em Aberto; código commitado local, **não publicado**
-- [ ] **D. Lançamento aparece na lista sem recarregar** — a consulta recarrega ao reabrir a tela (a tela remonta ao voltar da aba Antecipações) e agora mantém o filtro; confirmar em teste depois de aplicar o item A
-- [ ] **E. Devolução/brinde com número próprio** (decisão do usuário) e **busca por projeto** corrigida
+- [x] **C. Filtros da consulta se mantêm** ao trocar de aba — hook `useFiltroPersistido` (sessão do navegador, separado por Pagar/Receber) em Consultar Duplicatas e Contas em Aberto; publicado (commit `64d42ac`)
+- [x] **D. Lançamento aparece na lista sem recarregar** — por desenho: a consulta recarrega ao reabrir a tela (remonta ao voltar da aba Antecipações) e agora mantém o filtro, e o item A faz a antecipação nascer no financeiro. Falta só o teste visual da Lana (não testado na tela)
+- [x] **E1. Busca por projeto corrigida** — causa: linhas do financeiro novo chegavam à grade sem projeto (`orcamentos: null`), então escolher um projeto eliminava todas; agora usa o `projeto_id` da própria parcela (commit `20b54e8`, publicado)
+- [ ] **E2. Devolução/brinde com número próprio** — NÃO feito: o número de venda nasce dentro de `aprovar_orcamento_financeiro` (função crítica que aprova a venda e gera as parcelas); depende das decisões 3 (prefixo "D", prefixo do brinde, vendas antigas)
 - [ ] CHANGELOG, snapshot do banco, contexto do sistema
 
 ### Passos manuais do usuário

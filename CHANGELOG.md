@@ -2,11 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-12 (SPEC-289 — Reunião 52: entrada parcial por peça e pedido já pago na entrada da NF; SPEC criada, nada implementado)
+
+- Origem: reunião com a Débora e 2 pedidos na Central (17:24 entrada parcial; 17:37 usar antecipação na entrada da NF, pedido 1985).
+- SPEC `SPEC-289_Compras_Entrada_Parcial_por_Peca_e_Pedido_Pago_na_Entrada_Reuniao_52.md`: "Chegou" por peça começando desmarcado, e opção "pedido já pago" na entrada que cria a antecipação ligada ao pedido. Sem impacto no banco até a migration ser autorizada. Repositório a receber commit: central (e Compras na implementação).
+
 ## 2026-11-12 (SPEC-288 itens A e C — antecipação do Contas a Pagar na consulta e filtros que se mantêm; migration 342 APLICADA, publicado)
 
 - **A.** Pagamento antecipado a fornecedor (SPEC-215) vivia só em `pagamentos_antecipados` e não aparecia em Consultar Duplicatas (caso Omega Light, 05/11, R$ 2.608,52). Migration `20261112_342_spec288_espelho_pagamento_antecipado_pagar` (**APLICADA em SP**, ensaiada em ROLLBACK): coluna `pagamentos_antecipados.titulo_id`, gatilho `trg_fin_espelho_antecipado` que cria/cancela um título `adiantamento` (pagar) com parcela firme e baixa `pagamento` (origem `ponte`), retroativo para a Omega Light; `vw_financeiro_ponte_pagar_integridade` só acusa o que ficou sem espelho (hoje 0). Falha do espelho não trava o lançamento (`financeiro_ponte_falhas`). Quem lança só com `dashboard-financeiro` não ganha espelho.
 - **C.** Hook `useFiltroPersistido`: Consultar Duplicatas e Contas em Aberto guardam os filtros na sessão (por Pagar/Receber). Retorno Bancário commit `64d42ac`, publicado pelo Cloudflare.
-- Itens D (confirmar em teste) e E (número de devolução/brinde, busca por projeto) seguem pendentes na SPEC-288.
+- **E1.** Busca por projeto na consulta: a linha do financeiro novo chegava sem o projeto, então escolher um projeto eliminava todas as parcelas; passa a usar o `projeto_id` da parcela. Retorno Bancário commit `20b54e8`, publicado.
+- Em produção já foi feita pelo usuário a compensação do cliente 23.316 ROBERTA DEMETERCO (acordo 2: devolução −2.640,95 + venda VENDA-8507, ambas `renegociada`; o acordo nº 1 foi consumido pelos ensaios).
+- **Pendentes na SPEC-288:** E2 (número próprio de devolução/brinde: nasce em `aprovar_orcamento_financeiro`, aguarda decisão do prefixo) e teste visual do item D.
 
 ## 2026-11-12 (SPEC-288 — Reunião 51: acordo com total zero vira compensação; migration 341 APLICADA, Contas a Pagar/Receber publicados)
 

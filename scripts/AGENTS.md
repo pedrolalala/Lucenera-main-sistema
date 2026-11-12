@@ -29,6 +29,8 @@ Dashboard contra a planilha.
 `estoque_itens` (quantidade E quantidade_reservada) e apagaria as entradas de nota fiscal e as reservas das
 aprovacoes do sistema novo. SPEC-224 (23/10): `estoque_showroom` tambem fica de fora (o Showroom e do sistema
 Movimentacao de Pecas). So use `--incluir-estoque` com decisao explicita do usuario.
+SPEC-284 (11/11/2026): o gatilho agora so roda no INSERT de peca nova; `--incluir-estoque` passou a gravar so
+`produtos.estoque_*`, que nenhuma tela le mais (Dashboard e Pedido Avulso leem `estoque_itens`). Na pratica, a opcao nao tem mais efeito.
 
 **Fornecedor da peca = fornecedor da marca (SPEC-193 B2, decisao 09/10/2026).** O import de
 Produtos NUNCA grava fornecedor por produto. No fim dele roda `conferencia_marca_fornecedor.py`

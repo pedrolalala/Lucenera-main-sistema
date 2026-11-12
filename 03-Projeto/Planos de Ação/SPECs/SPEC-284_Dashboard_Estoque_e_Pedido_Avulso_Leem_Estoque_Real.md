@@ -17,12 +17,12 @@ sistemas_envolvidos:
 - [x] Ensaio em ROLLBACK no Supabase SP
 - [x] Aplicar no Supabase SP (autorizado pelo Filippo em 11/11)
 - [ ] Conferir as duas telas no ar (Dashboard → Estoque; Compras → Pedido Avulso): exige login, fica com o usuário
-- [ ] Parte B (decisão): desligar o gatilho `trg_sync_estoque_itens_from_produtos`
+- [x] Parte B: gatilho `trg_sync_estoque_itens_from_produtos` só no INSERT (migration 338, aplicada 11/11)
 
 ### Passos manuais do usuário
 
 - [x] Autorizar a aplicação da migration 337 (11/11)
-- [ ] Decidir a Parte B (gatilho antigo)
+- [x] Decidir a Parte B (gatilho antigo): Filippo, 11/11, "desligar"
 
 ## Objetivo
 
@@ -86,4 +86,8 @@ O gatilho `trg_sync_estoque_itens_from_produtos` (em `produtos`, `AFTER INSERT O
   - Compras: 4.571 linhas, 0 diferenças.
   - 13587 = 289 / 17; 12135 = 123 / −31.
   - `security_invoker=true` mantido.
-- A Parte B (gatilho antigo) segue pendente de decisão.
+- **Parte B decidida e aplicada:**
+  - Ao conferir a função, vi que o gatilho também cria a linha 'Estoque' de toda peça nova. Por isso não foi desligado inteiro: passou a rodar **só no INSERT**. Em UPDATE das colunas antigas, não mexe mais no estoque real.
+  - Migration `20261111_338_spec284_gatilho_estoque_so_peca_nova` (up/rollback/dry_run).
+  - Ensaio desfeito: subir `produtos.estoque_total` da 13587 em +1000 deixou `estoque_itens` em 289, sem mudança.
+  - Aplicada e conferida: gatilho `AFTER INSERT`, ativo, com comentário; registrada em `schema_migrations`.

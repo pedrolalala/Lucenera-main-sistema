@@ -86,13 +86,26 @@ function calcularParcelasPdf(
       ? new Date(budget.created_at)
       : new Date()
 
+  // SPEC-290 (reunião 53, Helena, 12/11): os offsets gravados pelo formulário
+  // (plano_parcelas.dias_offset / prazo_pagamento_dias) são contados a partir
+  // do DIA EM QUE O ORÇAMENTO FOI SALVO, não de data_inicio_pagamento. Somar
+  // o offset à data_inicio empurrava tudo (20/11 + 8 = 28/11). A parcela 1
+  // vence em data_inicio_pagamento e as demais mantêm o espaçamento entre
+  // offsets (offset_i − offset_1).
   const plano = Array.isArray(budget.plano_parcelas) ? budget.plano_parcelas : null
   if (plano && plano.length > 0) {
-    return [...plano]
-      .sort((a: any, b: any) => (a?.numero ?? 0) - (b?.numero ?? 0))
+    const ordenado = [...plano].sort(
+      (a: any, b: any) => (a?.numero ?? 0) - (b?.numero ?? 0),
+    )
+    const off1 = budget.data_inicio_pagamento
+      ? Number(ordenado[0]?.dias_offset) || 0
+      : 0
+    return ordenado
       .map((p: any) => {
         const vencimento = new Date(dataBase)
-        vencimento.setDate(vencimento.getDate() + (Number(p?.dias_offset) || 0))
+        vencimento.setDate(
+          vencimento.getDate() + ((Number(p?.dias_offset) || 0) - off1),
+        )
         return {
           numero: Number(p?.numero) || 0,
           valor: Number(p?.valor) || 0,
@@ -114,7 +127,8 @@ function calcularParcelasPdf(
       : base
     if (!isUltima) acumulado += valor
     const vencimento = new Date(dataBase)
-    vencimento.setDate(vencimento.getDate() + (prazos[i] ?? 0))
+    const off1 = budget.data_inicio_pagamento ? prazos[0] ?? 0 : 0
+    vencimento.setDate(vencimento.getDate() + ((prazos[i] ?? 0) - off1))
     return { numero: i + 1, valor, vencimento }
   })
 }
@@ -902,6 +916,7 @@ Deno.serve(async (req: Request) => {
         `1- Este orçamento tem validade até ${validadeStr}.`,
         '2- A LuceNera se reserva no direito de não aceitar trocas e devoluções, de acordo com o Código de Defesa do Consumidor.',
         '3- O prazo de entrega padrão dos materiais é de 30 dias, a partir da aprovação das fichas técnicas. Pelos materiais especiais, prazo a consultar.',
+        '4- A LuceNera não possui mão de obra de instalação.',
       ]
 
       obsLines.forEach((line) => {

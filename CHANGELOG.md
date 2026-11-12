@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-12 (SPEC-290 — Reunião 53: data das parcelas no PDF do orçamento; `generate-report` publicada, migration 344 APLICADA)
+
+- Helena: ORC-0052 com início em 20/11 saía com 28/11 no PDF. Causa: `generate-report` somava `dias_offset` (contados do dia do salvamento) a `data_inicio_pagamento`. Correção em `calcularParcelasPdf`: parcela 1 = data de início, demais mantêm o espaçamento. Sem impacto no banco. SPEC `SPEC-290_Orcamento_PDF_Data_das_Parcelas_Divergente_Reuniao_53.md`.
+- Migration `20261112_344_spec290_aprovacao_vencimento_parte_da_data_inicio`: `aprovar_orcamento_financeiro` usava `current_date` + offsets (mesmo desvio se aprovasse em outro dia); migration 344 ensaiada em ROLLBACK e APLICADA em SP (parcela 1 = data de início, demais mantêm o espaçamento). Repositório a receber commit: central.
+
 ## 2026-11-12 (SPEC-289 — Reunião 52: entrada parcial por peça e pedido já pago na entrada da NF; código pronto no Compras, migration 343 redigida e ensaiada, NÃO aplicada, nada publicado)
 
 - Origem: reunião com a Débora e 2 pedidos na Central (17:24 entrada parcial; 17:37 usar antecipação na entrada da NF, pedido 1985).

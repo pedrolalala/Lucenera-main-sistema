@@ -27,7 +27,8 @@ Na reunião o Vinicius pediu "habilitar para a Carol poder fazer essa troca". Ho
 - Risco registrado: quem tem `financeiro` passa a poder alterar preço de item enquanto o orçamento está em revisão (trigger de auditoria `auditoria_itens_*` continua registrando).
 - Ensaio em transação com ROLLBACK (12/11): antes Carol negada; depois Carol permitida em Revisão Financeira; negada em Orçamento Aprovado; funcionário sem `financeiro` negado nas duas etapas; `anon` sem execução.
 - Rollback: `rollback.sql` (restaura a definição da 332).
-- Pendente após aplicar: testar com a própria Carol e atualizar `supabase/db/current/03_functions.sql`.
+- Snapshot `supabase/db/current/03_functions.sql` atualizado em 12/11 a partir da definição real do banco.
+- Pendente: testar com a própria Carol.
 
 ## Banco
 Parte 1 (quantidade): nenhuma mudança. Parte 2: migration 338 acima. Rollback da parte 1: reverter o commit.

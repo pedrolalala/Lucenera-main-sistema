@@ -26,6 +26,12 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Helena: ORC-0052 com início em 20/11 saía com 28/11 no PDF. Causa: `generate-report` somava `dias_offset` (contados do dia do salvamento) a `data_inicio_pagamento`. Correção em `calcularParcelasPdf`: parcela 1 = data de início, demais mantêm o espaçamento. Sem impacto no banco. SPEC `SPEC-290_Orcamento_PDF_Data_das_Parcelas_Divergente_Reuniao_53.md`.
 - Migration `20261112_344_spec290_aprovacao_vencimento_parte_da_data_inicio`: `aprovar_orcamento_financeiro` usava `current_date` + offsets (mesmo desvio se aprovasse em outro dia); migration 344 ensaiada em ROLLBACK e APLICADA em SP (parcela 1 = data de início, demais mantêm o espaçamento). Repositório a receber commit: central.
 
+## 2026-11-12 (SPEC-293 — Compras: editar o número do pedido (temporário); SPEC criada, nada implementado)
+
+- Origem: solicitação da Débora na Central (12/11 19:11). Verificado que **não existe** pedido igual em 11/11, nem SPEC, nem menção nas reuniões 44–52.
+- SPEC `SPEC-293_Compras_Editar_Numero_do_Pedido_Temporario.md`: RPC de renomear com auditoria e de/para em `backup`, permissão só Débora/administradores com chave liga/desliga, qualquer status, atualização dos textos do financeiro, sufixo CONNECT opcional e sequência automática continuando do maior número. Sem impacto no banco até a migration ser autorizada. Aberto: lista de números a trocar.
+- Número 292 já usado pela SPEC-292 (Carol, CRM e Cadastro); esta ficou 293.
+
 ## 2026-11-12 (SPEC-290 e SPEC-291 — Compras: vincular pagamento já existente e pedido parcial mostrando só o que falta; SPECs criadas, nada implementado)
 
 - **SPEC-290:** pedidos "Antecipado" (1985, 1925, 1733) já têm a duplicata paga da Connect (8405, 8284, 7554) sem ligação com o pedido; a opção "já pago" da SPEC-289 criaria um 2º pagamento e a entrada normal gera parcela (a Débora cancelou a NF 11221 por isso). Proposta: detectar e vincular o pagamento existente sem dinheiro novo, rastreio em Consultar Duplicatas, trava na opção "já pago", e importação do Connect sem duplicar antecipação nativa.

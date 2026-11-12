@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-11 (SPEC-284 — Dashboard Estoque e Pedido Avulso lendo o estoque real; migration 337 ENSAIADA, NÃO aplicada)
+
+- Problema: a página Estoque do Dashboard (`v_estoque_produtos`) e as colunas Estoque/Disponível do Pedido Avulso do Compras (`vw_estoque_produtos`) leem `produtos.estoque_total`/`estoque_disponivel`, paradas desde 05/11 (a importação da Connect que as gravava foi suspensa pela SPEC-222). No Pedido Avulso: 391 peças com disponível diferente; em 282 a tela diz que há disponível e não há.
+- Migration `20261111_337_spec284_estoque_telas_leem_estoque_real` (up/rollback/dry_run): as duas views passam a ler `estoque_itens` (local Estoque); mesmas colunas e tipos, sem mudança de tela. Ensaio em SP desfeito: 0 diferenças nas duas views, `security_invoker` mantido. **Aguarda autorização para aplicar.** Parte B (desligar o gatilho `trg_sync_estoque_itens_from_produtos`) aguarda decisão.
+
 ## 2026-11-11 (Panorama Financeiro semanal removido)
 
 - Decisão do Filippo: removidos o workflow `.github/workflows/panorama-financeiro-semanal.yml` e o gerador `scripts/panorama_financeiro/gerar_relatorio.py` + `template.html`. O que importa é o Dashboard alimentado em tempo real.

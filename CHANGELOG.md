@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-12 (SPEC-286 — Compras: pedido com sinal e parcelas de valores diferentes; migration 339 APLICADA em SP)
+
+- Pedido da Débora na Central (solicitação 71d0c134): sinal + resto parcelado (ex.: pedido 1802, 25% + 3x). Hoje as parcelas saem sempre em partes iguais; o 1802 já está certo porque 25% = 1/4, e o sinal já aparece como previsão em Contas a Pagar.
+- Banco: migration `20261112_339_spec286_pedido_parcelas_percentuais` (redigida; ensaio em ROLLBACK ok: 30/25/25/20% = 2.577,72 + 2.148,10 + 2.148,10 + 1.718,48, soma 8.592,40; percentuais com quantidade errada ou NULL voltam a partes iguais; RPC nega sem login; `anon` sem execução). Coluna `pedidos_compra.condicoes_percentuais`, RPC `definir_percentuais_parcelas_pedido` (só em "Aguardando aprovar") e `gerar_parcelas_pedido_compra` lendo os %. O texto `condicoes_pagamento` não muda (PDF, Entrada de NF e e-mail seguem iguais). **APLICADA em SP em 12/11/2026** e conferida (coluna criada, função usa os %, `anon` sem execução, parcelas do 1802 intactas).
+- Compras (`compras-lucenera-3o23t98ee`): `CondicaoPagamentoCampo` ganha "Valores diferentes por parcela" (% por parcela, R$ ao lado, soma deve fechar 100%); ligado em `EditarPedidoDialog` e `ModalGerarCompraItemOrcamento`. Código local, **não publicado nem commitado**; falta publicar.
+- Spec: `SPEC-286_Compras_Pedido_Condicao_de_Pagamento_Sinal_e_Parcelas_Diferentes.md`.
+
 ## 2026-11-12 (SPEC-285 — Orçamento: trocar o produto da linha mantém a quantidade)
 
 - Problema (reunião 50, Vinicius e Carol): ao trocar um item especial por produto real, a quantidade voltava para 1 mesmo digitando 2 no modal. Causa: `buildNewItem` fixava `quantidade: 1` e sobrescrevia a linha; valia para qualquer troca de linha.

@@ -2,6 +2,20 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-12 (SPEC-285 — Orçamento: trocar o produto da linha mantém a quantidade)
+
+- Problema (reunião 50, Vinicius e Carol): ao trocar um item especial por produto real, a quantidade voltava para 1 mesmo digitando 2 no modal. Causa: `buildNewItem` fixava `quantidade: 1` e sobrescrevia a linha; valia para qualquer troca de linha.
+- Correção em `BudgetFormPage.tsx`: usa a quantidade digitada no modal; sem ela mantém a da linha; sem nenhuma, 1. Sem mudança de banco. Type-check ok. Código local, **não publicado nem commitado**.
+- Permissão da Carol: o banco só deixava admin trocar produto/valor de item. Migration `20261112_338_spec285_revisao_financeira_troca_item_financeiro` (redigida, ensaio em ROLLBACK ok, **APLICADA em SP em 12/11**, conferida: trava `financeiro` na função, `anon` sem execução): quem tem acesso `financeiro` troca produto e valor, só com o orçamento em "Aprovação Financeira". Rollback: `rollback.sql`.
+- Spec: `SPEC-285_Orcamento_Trocar_Produto_da_Linha_Mantem_Quantidade.md`.
+
+## 2026-11-11 (SPEC-284 — 4 solicitações aprovadas da Central; migration 337 NÃO aplicada)
+
+- Rodapé do orçamento (`generate-report`): nova observação 4 "não possui mão de obra de instalação". PDF da venda com datas do financeiro = SPEC-277 (só falta publicar a função).
+- Migration `20261111_337_spec284_duplicata_automatica_nf_compra` (redigida, dry-run OK, não aplicada): NF no Contas a Pagar passa a ter Duplicata automática e Fatura = nº da NF.
+- Endereço sem número: não é bug de código, é cadastro em `contatos` sem número (decisão pendente).
+- Spec: `SPEC-284_Central_Solicitacoes_Aprovadas_11_11.md`. Repositórios: só o central.
+
 ## 2026-11-11 (SPEC-281 — salvar orçamento com itens ligados à venda; migration 332 APLICADA)
 
 - Problema: salvar o CNX-5154 (venda CNX-6007) dava `violates foreign key constraint projeto_itens_orcamento_item_id_fkey` porque `replace_orcamento_itens` apagava e recriava todos os itens.

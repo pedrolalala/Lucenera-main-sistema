@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-12 (SPEC-285 — CRM: parcelas do projeto só nascem do orçamento; migration 339 ENSAIADA, NÃO aplicada)
+
+- O editor manual de parcelas da página do projeto no CRM grava `projeto_parcelas` sem orçamento. Essas parcelas vão só para o financeiro antigo: a ponte para o novo exige `orcamento_id`, então não aparecem em Contas a Receber nem no Fluxo Futuro e não geram RT. Uso: 387 parcelas, todas de 04/05 (R$ 8,1 mi); nenhum uso do editor em 30 dias.
+- Migration `20261112_339_spec285_bloquear_parcela_manual` (up/rollback/dry_run): gatilho que recusa, pelas telas, criar, alterar ou excluir parcela sem orçamento. Ensaio desfeito: os 4 casos deram o resultado esperado. **Aguarda autorização.**
+- Patch do CRM pronto em `03-Projeto/Planos de Ação/SPECs/SPEC-285_patch_crm_ProjectDetail.diff` (editor vira somente leitura). Aplicar e publicar: Pedro.
+
 ## 2026-11-11 (SPEC-284 — Dashboard Estoque e Pedido Avulso lendo o estoque real; migration 337 APLICADA)
 
 - Problema: a página Estoque do Dashboard (`v_estoque_produtos`) e as colunas Estoque/Disponível do Pedido Avulso do Compras (`vw_estoque_produtos`) leem `produtos.estoque_total`/`estoque_disponivel`, paradas desde 05/11 (a importação da Connect que as gravava foi suspensa pela SPEC-222). No Pedido Avulso: 391 peças com disponível diferente; em 282 a tela diz que há disponível e não há.

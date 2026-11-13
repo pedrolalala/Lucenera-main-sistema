@@ -2,13 +2,18 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-13 — SPEC-305 — Contas a Pagar/Receber: Tipo data Pagamento, situação Todos e total Pago (reunião Vinicius) — NO AR; 360, 361 e 362 aplicadas
+- Teste de janeiro/2026 (FOCO, Ribeirão): Pago da tela R$ 155.871,32 × Connect R$ 132.728,18. A view `vw_financeiro_duplicatas` já dava o valor certo; a tela somava `valor_pago || valor` e baixa interna (pago 0) virava o valor da parcela. Agora `??`. Conferência geral banco × planilha de 05/11: 172 de 178 combinações empresa/mês batem; as 6 que diferem = pagamentos novos de novembro (Pagar e Receber ISLIGHT) e a duplicata 2988.
+- Filtro Tipo data ganha Pagamento (Receber e Pagar) e o Contas a Pagar ganha situação Todos. Retorno Bancário commit 129a4b5 (pushado), Contas a Receber e Contas a Pagar publicados (wrangler, SP).
+- Banco: migration 360 APLICADA (título legado da duplicata 2988, R$ 0,00, de ISLIGHT para FOCO ILUMINACAO, como na planilha). Migration 361 (perfil `ribeirao` nos 10.396 títulos legado_connect sem perfil; backup em `backup._bkp_spec305_perfil_titulos`; 6 títulos `sao_paulo` do Contas a Pagar divergem da planilha e NÃO são tocados) APLICADA em 13/11 (os 6 `sao_paulo` ficam como estão, decisão do usuário). Migration 362 APLICADA (decisão do usuário: "o que tiver sem perfil joga para Ribeirão"): 39 títulos nativos + 44 boletos sem perfil → `ribeirao`; backup em `backup._bkp_spec305_perfil_restante`; ensaio sem baixa nem valor alterados. Repos: central (SPEC-305, migrations 360/361, CHANGELOG) e Retorno Bancário.
+
 ## 2026-11-13 — SPEC-304 — Compras: Entrada de NF travada por 1 centavo (reunião 58, Débora) — NO AR
 - Botão "Registrar Entrada" ficava cinza com "Diferença OK": a trava comparava a diferença sem arredondar (7441,97 − 7441,96 = 0,01000000000022 > 0,01). Agora arredonda em centavos. Sem mudança no banco (já aceita 1 centavo).
 - Pendente: parcelas sugeridas x fisco (1ª R$ 2.656,20) aguardam a Carol. Repos: central (SPEC-304, CHANGELOG) e Compras.
 
 ## 2026-11-13 — SPEC-303 — Empréstimo: botão "Enviar para o Cliente" trocado por "Confirmar empréstimo" na lista geral
 - A lista geral de Orçamentos ainda oferecia enviar ao cliente para empréstimo (a aba Rascunho já estava certa); o envio travava e o gatilho da SPEC-223 proíbe de qualquer forma. Agora abre o orçamento no quadro do empréstimo. Sem migration (360 ensaiada, barrada pelo gatilho e descartada; banco intacto).
-- Falta commit/publicação do Orçamentos e teste do usuário.
+- Orçamentos commit ea609b1 (pushado) e NO AR em financeiro-lucenera.pages.dev (wrangler + build do Git, ambos em São Paulo; conferido que o pacote servido tem o botão novo). Falta teste do usuário.
 
 ## 2026-11-13 — SPEC-302 — Tipo de devolução "TROCA DEV SEM VINCULO CONNECT" (reunião 57, Vinicius) — migration 359 ENSAIADA, NÃO aplicada
 - Peça entregue antes da virada da Connect: devolução sem item de origem, sem venda extra; ao efetivar o sistema cria sozinho uma venda de registro (REG-…, origem Connect, já Aprovada, peças entregues, sem reserva/parcela/NF) e a devolução só vincula nela; o caminho normal devolve a peça ao Estoque Geral e gera o valor negativo.

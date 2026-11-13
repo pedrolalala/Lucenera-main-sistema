@@ -2,9 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-13 — SPEC-303 — Empréstimo: enviar ao cliente sem forma de pagamento — migration 360 escrita, NÃO aplicada
-- `enviar_orcamento_para_cliente` exigia Projeto e Forma de Pagamento; no orçamento de empréstimo (Outros → EMPRESTIMO) a forma é nula e o projeto opcional, então o envio travava. A 360 dispensa os dois só no empréstimo.
-- Sem mudança de código nas telas. Falta ensaio com ROLLBACK, autorização para aplicar e teste do usuário. Repo central: SPEC-303, migration 360, CHANGELOG.
+## 2026-11-13 — SPEC-304 — Compras: Entrada de NF travada por 1 centavo (reunião 58, Débora) — NO AR
+- Botão "Registrar Entrada" ficava cinza com "Diferença OK": a trava comparava a diferença sem arredondar (7441,97 − 7441,96 = 0,01000000000022 > 0,01). Agora arredonda em centavos. Sem mudança no banco (já aceita 1 centavo).
+- Pendente: parcelas sugeridas x fisco (1ª R$ 2.656,20) aguardam a Carol. Repos: central (SPEC-304, CHANGELOG) e Compras.
+
+## 2026-11-13 — SPEC-303 — Empréstimo: botão "Enviar para o Cliente" trocado por "Confirmar empréstimo" na lista geral
+- A lista geral de Orçamentos ainda oferecia enviar ao cliente para empréstimo (a aba Rascunho já estava certa); o envio travava e o gatilho da SPEC-223 proíbe de qualquer forma. Agora abre o orçamento no quadro do empréstimo. Sem migration (360 ensaiada, barrada pelo gatilho e descartada; banco intacto).
+- Falta commit/publicação do Orçamentos e teste do usuário.
 
 ## 2026-11-13 — SPEC-302 — Tipo de devolução "TROCA DEV SEM VINCULO CONNECT" (reunião 57, Vinicius) — migration 359 ENSAIADA, NÃO aplicada
 - Peça entregue antes da virada da Connect: devolução sem item de origem, sem venda extra; ao efetivar o sistema cria sozinho uma venda de registro (REG-…, origem Connect, já Aprovada, peças entregues, sem reserva/parcela/NF) e a devolução só vincula nela; o caminho normal devolve a peça ao Estoque Geral e gera o valor negativo.

@@ -2964,7 +2964,15 @@ BEGIN
     WHERE u.id = auth.uid()
       AND COALESCE(u.ativo, true) = true;
 
-    IF v_user_role IS DISTINCT FROM 'admin' THEN
+    -- SPEC-285 (reuniao 50, 12/11/2026): na Revisao Financeira quem tem acesso 'financeiro' (ex.: Carol) tambem
+    -- troca produto/valor de item. So com orcamento em 'Aprovação Financeira', usuario ativo e logado.
+    IF v_user_role IS DISTINCT FROM 'admin'
+       AND NOT (
+         v_user_role IS NOT NULL
+         AND auth.uid() IS NOT NULL
+         AND public.pode_acessar_sistema('financeiro')
+         AND EXISTS (SELECT 1 FROM public.orcamentos o WHERE o.id = p_orcamento_id AND o.status::text = 'Aprovação Financeira')
+       ) THEN
       WITH old_items AS (
         SELECT
           COALESCE(produto_id::text, '') AS identidade,
@@ -2998,7 +3006,7 @@ BEGIN
       WHERE o.rn IS NULL;
 
       IF v_extra_count > 0 THEN
-        RAISE EXCEPTION 'Permissao negada: alterar valor ou produto de item do orcamento requer perfil administrador.'
+        RAISE EXCEPTION 'Permissao negada: alterar valor ou produto de item do orcamento requer perfil administrador (ou financeiro na Revisao Financeira).'
           USING ERRCODE = 'P0001';
       END IF;
     END IF;

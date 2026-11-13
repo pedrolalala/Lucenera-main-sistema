@@ -2,6 +2,9 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-13 — SPEC-297 ajuste: Cancelar conta no lugar de Apagar (migration 356 aplicada)
+- Nada é apagado: parcela/boleto ficam Cancelado, filtro Canceladas nas duas telas, justificativa e log. Tela commitada no Retorno Bancário; deploy pendente.
+
 ## 2026-11-13 — SPEC-297 e SPEC-298 (pedidos da Carol): migrations 354 e 355 aplicadas
 - Contas a Receber/Pagar: devolução deixa de aparecer 2x (view liga o boleto 'Nota de Crédito'); Editar/Apagar conta com justificativa obrigatória e log (tela commitada, deploy pendente).
 - Orçamentos: número de venda por tipo (DEV/CSCE/CSCS/USC/BR) ao efetivar, com retroativo (7 orçamentos); rótulos na tela e no PDF (deploy pendente).

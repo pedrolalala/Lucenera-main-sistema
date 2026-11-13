@@ -34,3 +34,11 @@ Passou: sem acesso ao financeiro recusado, sem motivo, troca de sinal, anon, edi
 
 ## Rollback
 `rollback.sql` da 354 (restaura a view e remove as 3 funções; a tabela de backup fica).
+
+## Ajuste de 13/11/2026 (pedido do usuário): "apagar" vira CANCELAR — migration 356 APLICADA
+Motivo: já existe o filtro de canceladas e não se perde o registro do que aconteceu.
+- `financeiro_apagar_parcela` e `boleto_apagar_avulso` (354) **removidas**; entram `financeiro_cancelar_parcela` e `boleto_cancelar_avulso`. **Nada é apagado**: a parcela fica `cancelada`, o título é cancelado quando era a última parcela, e o boleto **fica na tabela com status `Cancelado`** (a ponte já marca a cobrança como cancelada), com o motivo e a data na observação. Log `cancelou_conta` em `auditoria.eventos`.
+- Trava por origem (ensaio mostrou que `financeiro_ponte_nota` **reabre** parcela cancelada de nota de compra): cancelar só para Connect, venda, devolução e manual; editar só para Connect e manual. Nota de compra/pedido: cancelar pela entrada da NF/pedido no Compras; antecipação: pelo cancelamento próprio.
+- Ensaio (ROLLBACK): venda e conta da Connect continuam canceladas depois das pontes e de mexer na origem; NF recusada; anon recusado; rollback.sql devolve as funções da 354.
+- Tela: botão **Cancelar** (pop-up de justificativa) nas duas telas; filtro **Canceladas** agora nas duas (antes só na Pagar), carrega sob demanda (~1.100 de legado); conta cancelada não edita, não cancela de novo e não recebe baixa.
+- [ ] Deploy dos dois modos (commit no repo Retorno Bancário), depois teste.

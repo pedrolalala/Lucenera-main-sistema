@@ -2,6 +2,16 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-13 — SPEC-293 (reunião 55): migrations 347 e 353 aplicadas
+- Compras/Banco: RPC de renomear número do pedido ativa para a Débora; sequência de pedidos em 2003 (próximo = 2004). Compras ainda sem deploy.
+
+## 2026-11-13 (SPEC-294 — devolução com preço errado por item duplicado da importação do XML da Connect; migrations 351 e 352 APLICADAS em SP)
+
+- SPEC `SPEC-294_Devolucao_Preco_Errado_Item_Duplicado_Importacao_XML_Connect.md` (A1 e B1 feitos; A2, B2 e D1 pendentes).
+- **Migration 351 (dado):** apaga a linha duplicada (sem `produto_id`, sem vínculo em `projeto_itens`) do CNX-8479 (venda CNX-6001) e recalcula `desconto_global` (R$ 62,95; base R$ 732,95 = XML; `valor_total` R$ 670,00). Backup em `backup.spec294_orcamento_itens_apagados` e `backup.spec294_orcamentos_desconto`. CNX-6879, CNX-7763 e CNX-7861 têm 5 linhas duplicadas, mas a base não fecha com o XML: ficaram fora (D1). Preço da devolução do CNX-6001 deve sair em R$ 134,00 (líquido, decisão do Vinicius).
+- **Migration 352 (causa):** `aplicar_xml_connect_orcamentos` casa linha do XML sem `cod_produto` pela referência (peça única, ou já presente no projeto do orçamento) em vez de criar item avulso. Só troca a função; **o importador NÃO foi reexecutado**: reexecutar muda a base de 8 orçamentos (CNX-5154, 5236, 6879, 7327, 7618, 7763, 7861, 8138) e ainda sobram duplicatas onde a referência do XML não bate com o cadastro (CNX-6879, 7034, 7301, 7327, 7618). Rollback restaura a função da 273.
+- Repositórios que precisam de commit: central (migrations 351/352, SPEC, CHANGELOG).
+
 ## 2026-11-13 (SPEC-292/296/295 — permissões da Carol, Vitória e Matheus; migrations 346–350 APLICADAS em SP; CRM e Orçamentos publicados)
 
 - **Carol (SPEC-292, migration 346):** CRM só Clientes e Fornecedores (visualizar; módulo novo `crm.clientes`, acesso `crm` em Acesso a Sistemas) e Cadastro com criar/editar peça (volta o que a SPEC-269 tirou). CRM (`lucenera-crm`): `use-auth` devolve `modulosPermitidos`, `Layout` mostra só as abas liberadas — NO AR em crm-lucenera.pages.dev (deploy 169bbbff).

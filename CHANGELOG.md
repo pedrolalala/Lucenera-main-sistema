@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-13 — SPEC-297 e SPEC-298 (pedidos da Carol): migrations 354 e 355 aplicadas
+- Contas a Receber/Pagar: devolução deixa de aparecer 2x (view liga o boleto 'Nota de Crédito'); Editar/Apagar conta com justificativa obrigatória e log (tela commitada, deploy pendente).
+- Orçamentos: número de venda por tipo (DEV/CSCE/CSCS/USC/BR) ao efetivar, com retroativo (7 orçamentos); rótulos na tela e no PDF (deploy pendente).
+- Repositórios a receber commit/deploy: Retorno Bancário (f8b93cf), Orçamentos, Edge generate-report.
+
 ## 2026-11-13 — SPEC-293 (reunião 55): migrations 347 e 353 aplicadas
 - Compras/Banco: RPC de renomear número do pedido ativa para a Débora; sequência de pedidos em 2003 (próximo = 2004). Compras ainda sem deploy.
 

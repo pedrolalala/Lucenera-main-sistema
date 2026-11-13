@@ -78,3 +78,11 @@ Telas: reverter o commit de Compras. Banco: `rollback.sql` remove a RPC e restau
 - **seq_antes = 1994:** a linha marcador em `backup.spec293_renumeracao_pedidos_compra` vai gravar `seq_antes = 1994` (e não 1803), porque os ensaios de 12/11 avançaram a sequência real (não volta com ROLLBACK). Por isso o rollback.sql devolve a 1994, não a 1803. Os dry-runs agora guardam e devolvem a sequência ao fim (`_seq0`); conferido: sequência real continua 1994 depois deles.
 - **Auditoria:** cada troca gera 2 eventos (o do gatilho `auditoria_registrar` com número antigo/novo e o da RPC com o motivo em `motivo_troca_numero`). No ensaio do 1930 a contagem pela chave `numero` apareceu como 3 (a conferir pelo revisor; não afeta o resultado).
 - **Ensaio completo repetido:** `dry_run.sql` e `dry_run_rollback.sql` passam. O teste do duplicado por caixa passou a usar "1930 connect" (o antigo usava PC-LEGADO, agora reservado).
+
+## Reunião 55 (13/11/2026) — Débora
+
+- Pedido: editar o número do pedido (ex.: 1997 no sistema = 2003 na Connect); no fechamento do lote da Necessidade de Compra o campo "Nº do pedido" já existe (em branco gera automático); o próximo automático deve ser **2004**.
+- **Migration 347 APLICADA** em 13/11 (RPC `renomear_numero_pedido_compra`, edição ligada para a Débora e administradores).
+- **Migration 353 APLICADA** (`20261113_353_spec293_sequencia_pedido_compra_2004`): sequência em 2003, próximo pedido = 2004. Rollback: `rollback.sql`.
+- Pedidos 1995–1997 criados hoje seguem com o número do sistema; a Débora renomeia pela tela (ex.: 1997 → 2003).
+- **Pendente:** publicar o Compras (`wrangler pages deploy dist --project-name compras-lucenera`; build de 13/11 feito, commit aacc8f4 já no GitHub) e a Débora testar.

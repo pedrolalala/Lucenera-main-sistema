@@ -551,7 +551,9 @@ Deno.serve(async (req: Request) => {
       // revenda Ubiqua, que não tem numero_venda) continua com o número do
       // orçamento.
       const numeroVenda: string | null = budget.numero_venda || null
-      page.drawText(numeroVenda ? 'Venda' : 'Orçamento', {
+      // SPEC-298: DEV-/CSCE-/CSCS-/USC-/BR- têm número de venda próprio; o rótulo acompanha o tipo
+      const rotuloVenda = ({ DEV: 'Devolução', CSCE: 'Casa Cor Entrada', CSCS: 'Casa Cor Saída', USC: 'Uso e Consumo', BR: 'Bonificação' } as Record<string, string>)[(numeroVenda || '').split('-')[0].toUpperCase()] || 'Venda'
+      page.drawText(numeroVenda ? rotuloVenda : 'Orçamento', {
         x: width - 120,
         y,
         size: 11,

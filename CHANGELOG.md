@@ -13,6 +13,14 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 ## 2026-11-13 — SPEC-293 (reunião 55): migrations 347 e 353 aplicadas
 - Compras/Banco: RPC de renomear número do pedido ativa para a Débora; sequência de pedidos em 2003 (próximo = 2004). Compras ainda sem deploy.
 
+## 2026-11-13 (numeração repetida — conferência de pontas soltas antes de juntar a branch das SPEC-286..299 na main)
+
+- **Migration 338:** duas pastas com o mesmo número, ambas APLICADAS: `20261111_338_spec284_gatilho_estoque_so_peca_nova` (Filippo, já na main) e `20261112_338_spec285_revisao_financeira_troca_item_financeiro` (SPEC-285 troca de item). Datas diferentes mantêm a ordem; **não renomear** (aplicadas).
+- **Migration 347:** idem — `20261112_347_spec293_renomear_numero_pedido_compra` (redigida/ensaiada, NÃO aplicada) e `20261113_347_spec296_papel_vitoria_estoque_entrada_nf` (aplicada). Quando a 347 da SPEC-293 for aplicar, usar o próximo número livre.
+- **SPEC-285 e migration 339 do Filippo (CRM parcelas manuais):** DESCARTADAS na main em 12/11 (nunca aplicadas). A SPEC-285 atual (`SPEC-285_Orcamento_Trocar_Produto_da_Linha_Mantem_Quantidade`) e a migration 339 (`spec286_pedido_parcelas_percentuais`, aplicada) são outras, só repetem o número.
+- **SPEC-290:** dois arquivos com o mesmo número; "PDF data das parcelas (Reunião 53)" passou a **SPEC-290b**.
+- Regra daqui para frente: conferir `git fetch` + os números livres em `main` (SPECs e migrations) antes de criar SPEC ou migration nova.
+
 ## 2026-11-13 (SPEC-294 — devolução com preço errado por item duplicado da importação do XML da Connect; migrations 351 e 352 APLICADAS em SP)
 
 - SPEC `SPEC-294_Devolucao_Preco_Errado_Item_Duplicado_Importacao_XML_Connect.md` (A1 e B1 feitos; A2, B2 e D1 pendentes).
@@ -46,8 +54,9 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - **Correções do revisor (12/11, ainda na 345 não aplicada):** a detecção que falha na tela bloqueia "já foi pago" e avisa o usuário (com proteção contra resposta atrasada); nada vem pré-marcado (vincular é confirmação humana, com aviso de outro pedido aberto de valor parecido); a RPC `registrar_entrada_nota_compra` agora valida a janela de data (emissão − 3 dias), o teto (vínculos + antecipações aplicadas ≤ total do pedido + R$ 0,01) e o fornecedor da NOTA com `IS DISTINCT FROM` (duplicata do fornecedor antigo é recusada); aviso "falta vincular" só em pedido aberto sem nota já coberta; `pedidos_pago_antecipado_info` usa a ação `visualizar`. Previsão superestimada com vínculo parcial aceita como defasagem temporária (documentada na SPEC). `dry_run.sql` com 83 verificações; `rollback.sql` reensaiado.
 - Repositórios a receber commit: central, Compras e Contas a Pagar.
 
-## 2026-11-12 (SPEC-290 — Reunião 53: data das parcelas no PDF do orçamento; `generate-report` publicada, migration 344 APLICADA)
+## 2026-11-12 (SPEC-290b — Reunião 53: data das parcelas no PDF do orçamento; `generate-report` publicada, migration 344 APLICADA)
 
+- Renumerada 13/11 de SPEC-290 para **290b** (o número 290 também foi usado por "Vincular pagamento já existente"); a migration 344 mantém `spec290` no nome por já estar aplicada.
 - Helena: ORC-0052 com início em 20/11 saía com 28/11 no PDF. Causa: `generate-report` somava `dias_offset` (contados do dia do salvamento) a `data_inicio_pagamento`. Correção em `calcularParcelasPdf`: parcela 1 = data de início, demais mantêm o espaçamento. Sem impacto no banco. SPEC `SPEC-290_Orcamento_PDF_Data_das_Parcelas_Divergente_Reuniao_53.md`.
 - Migration `20261112_344_spec290_aprovacao_vencimento_parte_da_data_inicio`: `aprovar_orcamento_financeiro` usava `current_date` + offsets (mesmo desvio se aprovasse em outro dia); migration 344 ensaiada em ROLLBACK e APLICADA em SP (parcela 1 = data de início, demais mantêm o espaçamento). Repositório a receber commit: central.
 

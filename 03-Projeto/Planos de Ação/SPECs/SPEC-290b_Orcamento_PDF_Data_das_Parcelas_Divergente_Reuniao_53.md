@@ -1,4 +1,4 @@
-# SPEC-290 — Orçamento: PDF exportado mostra data de parcela diferente da escolhida (Reunião 53, Helena, 12/11/2026)
+# SPEC-290b — Orçamento: PDF exportado mostra data de parcela diferente da escolhida (Reunião 53, Helena, 12/11/2026)
 
 ## Problema
 Helena salvou o ORC-0052 com início do pagamento em 20/11 (boleto sempre dia 20). O PDF saiu com 28/11 em todas as vias (cliente, interna, etc.).

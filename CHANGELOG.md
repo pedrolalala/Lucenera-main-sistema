@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-13 (SPEC-292/296/295 — permissões da Carol, Vitória e Matheus; migrations 346–350 APLICADAS em SP; CRM e Orçamentos publicados)
+
+- **Carol (SPEC-292, migration 346):** CRM só Clientes e Fornecedores (visualizar; módulo novo `crm.clientes`, acesso `crm` em Acesso a Sistemas) e Cadastro com criar/editar peça (volta o que a SPEC-269 tirou). CRM (`lucenera-crm`): `use-auth` devolve `modulosPermitidos`, `Layout` mostra só as abas liberadas — NO AR em crm-lucenera.pages.dev (deploy 169bbbff).
+- **Vitória (SPEC-296, reunião 54, migrations 347/348):** papel novo `estoque_entrada_nf` no lugar de `estoque` só para ela — Cadastro ver/editar, Orçamentos criar/editar, Venda Parcial, Entregas, Compras ver/editar (só para entrada de NF, decisão do usuário), Solicitações, Produção/Garantia criar/editar; sem Movimentação de Peças.
+- **Matheus (SPEC-295, migrations 349/350):** Produção/Garantia criar/editar (exceção individual) e efetiva Garantia/Uso e Consumo/Descarte sem esperar o financeiro: acesso-chave sem card `orcamentos-efetivar-sem-cobranca`; `aprovar_orcamento_financeiro` aceita a chave só para Outros/SAC (exceto Empréstimo). Orçamentos (`financeiro-lucenera`): aba Revisão Financeira abre para a chave, só com esses tipos e sem "Devolver" — NO AR (deploy 52aa2fe5). Dry-run: barrado na venda ORC-0043, aprova bonificação ORC-0053 (ROLLBACK).
+- SPECs 292, 295 e 296 (293 e 294 são de outras sessões). Falta teste real das três pessoas.
+
 ## 2026-11-12 (SPEC-291 Compras — pedido "Concluído parcialmente" mostra só o que falta; só tela, sem migration, código local sem commit/publicação)
 
 - SPEC `SPEC-291_Compras_Pedido_Parcialmente_Recebido_Mostra_So_o_Que_Falta.md` (itens A–E implementados; F pendente).

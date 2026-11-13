@@ -17,6 +17,8 @@ sistemas_envolvidos:
 - [x] Migration 360 (APLICADA 13/11): título legado da duplicata 2988 de ISLIGHT para FOCO ILUMINACAO (como na planilha).
 - [x] Migration 361 (APLICADA 13/11; os 6 `sao_paulo` ficam como estão, decisão do usuário): `perfil = 'ribeirao'` nos 10.396 títulos legado_connect sem perfil (planilha: tudo RIBEIRAO PRETO); gera 10.396 eventos no histórico; 6 títulos `sao_paulo` do Contas a Pagar (duplicatas 7524, 7525, 7570, 7591, 7610, 7677) divergem da planilha e não são tocados.
 - [x] Migration 362 (APLICADA 13/11, decisão do usuário): o que ainda estava sem perfil (39 títulos nativos + 44 boletos) vira `ribeirao`; backup em `backup._bkp_spec305_perfil_restante`.
+- [x] Estornar boleto antigo pago (sem parcela no financeiro novo): a tela deixa estornar e só volta o boleto para Pendente (Retorno Bancário 631692b, Contas a Receber e Contas a Pagar publicados 13/11).
+- [x] Boleto antigo de VINICIUS BORTOLIN COSTA (CP, R$ 4.000,00, venc. 25/09/2026, Pago sem valor e sem data) APAGADO a pedido do usuário; cópia em `backup._bkp_spec305_boleto_apagado`.
 - [ ] Conferir janeiro/2026 na tela contra a Connect.
 
 ### Passos manuais do usuário
@@ -36,7 +38,13 @@ Pedido do Vinicius (reunião): no Contas a Pagar e no Contas a Receber o "Tipo d
 
 - A view `vw_financeiro_duplicatas` já devolve `valor_pago` certo: soma R$ 132.728,18 nas 45 parcelas (inclui juros; 5 baixas internas com 0). Nada a mudar no banco.
 - Causa do Pago errado: `ConsultarDuplicatas.tsx` somava `valor_pago || valor`, e o `0` caía no valor da parcela.
-- Pendência separada: `perfil` é NULL em todas as duplicatas do financeiro novo; o filtro Perfil (Ribeirão/São Paulo) não encontra nada nelas. A decidir com o usuário.
+- `perfil` era NULL em quase todas as duplicatas do financeiro novo (o filtro Perfil não achava nada): RESOLVIDO pelas migrations 361 e 362.
+
+## Estorno e boleto antigo (13/11/2026)
+
+- Estorno no banco funciona para todos os tipos de baixa (teste em ROLLBACK, 266 baixas reais e as 38 de hoje, como Lana, Caroline e Vinicius admin). Exceções por regra: baixa de valor zero no Receber (478, check `financeiro_baixas_check3`) e parcela já renegociada.
+- A conta que o usuário tentou estornar era um boleto antigo (`boletos`, sem `parcela_id`): a tela barrava com "Estorno indisponível". Agora estorna voltando o boleto para Pendente; boleto apagado a pedido.
+- A conta `vinicius_bortolin` (viewer, e-mail pessoal, 0 acessos) NÃO é o Vinicius admin da empresa (conta `Vinicius`, com financeiro/contas-pagar/contas-receber). Nenhum acesso foi concedido.
 
 ## Rollback
 

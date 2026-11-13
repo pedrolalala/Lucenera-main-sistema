@@ -2,6 +2,22 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-13 — SPEC-303 — Empréstimo: enviar ao cliente sem forma de pagamento — migration 360 escrita, NÃO aplicada
+- `enviar_orcamento_para_cliente` exigia Projeto e Forma de Pagamento; no orçamento de empréstimo (Outros → EMPRESTIMO) a forma é nula e o projeto opcional, então o envio travava. A 360 dispensa os dois só no empréstimo.
+- Sem mudança de código nas telas. Falta ensaio com ROLLBACK, autorização para aplicar e teste do usuário. Repo central: SPEC-303, migration 360, CHANGELOG.
+
+## 2026-11-13 — SPEC-302 — Tipo de devolução "TROCA DEV SEM VINCULO CONNECT" (reunião 57, Vinicius) — migration 359 ENSAIADA, NÃO aplicada
+- Peça entregue antes da virada da Connect: devolução sem item de origem, sem venda extra; ao efetivar o sistema cria sozinho uma venda de registro (REG-…, origem Connect, já Aprovada, peças entregues, sem reserva/parcela/NF) e a devolução só vincula nela; o caminho normal devolve a peça ao Estoque Geral e gera o valor negativo.
+- Substitui a SPEC-300 (banner Connect removido do código; migration 357 aplicada fica sem uso).
+- Falta: autorização para aplicar a 359 e publicar Orçamentos. Repos com mudança: central (SPEC-302, 359, CHANGELOG) e Orçamentos.
+
+## 2026-11-13 — SPEC-300: devolução de peça entregue antes da virada (migration 357 ENSAIADA com ROLLBACK e APLICADA em SP em 13/11)
+- Caso: troca/devolução da Roberta Demeterco (projeto 23.316, orçamento Connect #8367). As 5 peças saíram da venda CNX-2451, que no sistema tem 24 itens e nenhum deles é uma dessas peças (a herança só trouxe reserva/entrega futura). Sem item de origem a devolução não podia ser lançada nem aprovada. O XML importa certo.
+- **Migration 357** (`20261113_357_spec300_devolucao_peca_entregue_antes_da_virada`): colunas `orcamento_itens.origem_connect_venda` e `origem_connect_motivo` (+ CHECK: venda, motivo e produto obrigatórios, sem `projeto_item_origem_id`); remenda `replace_orcamento_itens` (versão da 338) e `aprovar_orcamento_financeiro` (versão da 350): linha marcada passa na aprovação (a venda Connect tem que ser do mesmo projeto e empresa) e NÃO chama `registrar_devolucao_projeto_item*` (não movimenta estoque, regra SPEC-244). Crédito/parcelas saem normais; `financeiro_ponte_devolucao` cria o título sem compensar contra a venda (nenhuma origem).
+- Ensaio com ROLLBACK no SP: 6 linhas salvas, aprovação gerou parcela −R$ 1.343,89, estoque (movimentos, físico, reservado) igual antes/depois, venda inexistente e linha sem origem/sem marca barradas, CHECK barra motivo vazio, `rollback.sql` devolve as colunas e as funções.
+- Orçamentos (código local, `tsc` e `oxlint` limpos, NÃO commitado/publicado): banner "Peça entregue antes da virada (Connect)" na aba de itens da devolução (venda Connect + motivo, aplica às linhas sem origem), selo "Origem Connect · CNX-xxxx" no cartão, conferência em `validarItensDevolucao`, store lê/grava as colunas. A 357 já está aplicada, então Orçamentos pode ser publicado.
+- Repositórios que precisam de commit: central (SPEC-300, migration 357, CHANGELOG) e Orçamentos.
+
 ## 2026-11-13 — SPEC-297 ajuste: Cancelar conta no lugar de Apagar (migration 356 aplicada)
 - Nada é apagado: parcela/boleto ficam Cancelado, filtro Canceladas nas duas telas, justificativa e log. Tela commitada no Retorno Bancário; deploy pendente.
 

@@ -2,6 +2,34 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-14 (SPEC-287 — código do projeto gerado pelo sistema; sincronização só sistema → SharePoint; migration 340 APLICADA)
+
+- **Decisão do Filippo:** projeto novo nasce só no sistema e a lista "Organização Projetos" não alimenta mais o sistema. O código é o próximo número livre (último + 1, `26.360`…). O item vai para a lista sem Código, como antes, e o fluxo do Power Automate numera igual e cria pasta e Teams. O fluxo não se relança: se falhar, as pastas se fazem à mão com o código do sistema.
+- Migration `20261114_340_spec287_codigo_projeto_sistema` (001 + rollback):
+  - `gerar_codigo_projeto()` com trava; o trigger de criação usa o código oficial em vez de `PROV-NNNN`;
+  - cron `sharepoint-projetos-pull` (5 em 5 min, 24h) **desligado**;
+  - cron `sharepoint-projetos-conferencia` nos dias úteis às 8h de São Paulo, só leitura;
+  - CHECKs de `sharepoint_sync_log` ampliados.
+  - Ensaio em ROLLBACK antes: `26.360`/`26.361`.
+- Edge Functions:
+  - `sharepoint-projetos-conferencia` v1 (nova): compara códigos lista × sistema e grava o resumo no log;
+  - `sharepoint-projetos-push` v6: código igual na lista com nome diferente vira `conflict` e não sobrescreve o item de outro projeto.
+- Primeira conferência: 4.062 itens, **0 códigos diferentes**. 2 divergências antigas: `26.336` LUCIA SALOMÃO (pasta duplicada apagada em 06/11) e `26.346` JULIA MARIA E VICTOR estavam no sistema, mas o item tinha sido apagado da lista.
+  - Apagados do sistema a pedido do Filippo; não tinham nenhuma ligação. Cópia em `backup._bkp_spec287_projetos_removidos`.
+  - Conferência refeita: **ok**.
+- Documentos: `03-Projeto/Planos de Ação/SPECs/SPEC-287_Projetos_Codigo_Gerado_Pelo_Sistema_Sync_So_Sistema_SharePoint.md`. Repositório a receber commit: o central (SPEC, migration, `supabase/functions/sharepoint-projetos-push`, `supabase/functions/sharepoint-projetos-conferencia`, CHANGELOG).
+
+## 2026-11-13 (SPEC-286 — Dashboard Financeiro: custos por categoria e ponto de equilíbrio real; publicado em 14/11)
+
+- **14/11, publicado:** o Pedro aplicou o patch na `main` do `dashboard-lucenera-b02z85wa3` (commit `18b37ba`, mesmo conteúdo do `f75cd26`), e o Cloudflare Pages publicou. Ponteiro do submodule no central atualizado para `18b37ba`.
+
+- Pedido do Filippo. No sistema `dashboard-lucenera-b02z85wa3`, branch `spec/286-custos-categoria-ponto-equilibrio` (sem commit, sem push): pizza e lista de custos por categoria no cartão Custo Operacional; Ponto de Equilíbrio passa a ser a receita necessária = (custos fixos + distribuição de lucro) ÷ margem de contribuição do período (antes era só receita − custo fixo); eixo de valores dos gráficos Saldo Acumulado e Resultado Diário sem corte.
+- Classificação fixo/variável passa a ser feita na tela, pela apropriação (prêmio de vendas vira variável; aluguel e despesas dos sócios deixam de ser "outro"). Sem mudança no banco.
+- Conferido no banco (jan–out/2026): categorias somam 11.710.593 = Despesa Operacional; margem 28,8%; receita de equilíbrio ≈ 14,43 mi (≈ 1,44 mi/mês).
+- O ponto de equilíbrio usa os últimos 12 meses fechados e mostra o valor por mês (nov/2025–out/2026: ≈ 1,43 mi/mês contra 1,24 mi/mês recebido). Build rodou sem erro.
+- 14/11: Filippo conferiu a tela e autorizou publicar. Pizzas maiores, com rótulo fora da fatia e legenda ao lado. Commit local `f75cd26` no branch do sistema. **Não foi para o ar:** a conta `filippogiorgibrasil` não tem permissão de escrita em `pedrolalala/dashboard-lucenera-b02z85wa3` (push recusado, 403). O deploy desse sistema é automático pelo Cloudflare Pages a partir do GitHub. Patch para o Pedro em `~/Desktop/Para-Pedro/SPEC-286-dashboard-custos-ponto-equilibrio.patch`.
+- Documentos: `03-Projeto/Planos de Ação/SPECs/SPEC-286_Dashboard_Custos_Por_Categoria_Ponto_Equilibrio_Real.md`. Repositório a receber commit: `dashboard-lucenera-b02z85wa3` e o central.
+
 ## 2026-11-12 (SPEC-285 descartada — parcela manual continua permitida)
 
 - Decisão do Filippo: o lançamento manual de parcela deve continuar possível. SPEC-285 (trava no banco, migration 339, e o CRM somente leitura) foi **descartada antes de ser aplicada**: arquivos retirados do repositório e nada mudou no banco. Ficam no histórico do git (PR #14).
@@ -1842,7 +1870,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - As duas migrations represadas desde 11/09 (`aprovar_orcamento_financeiro` com bloqueio de peça sem cadastro + `numero_venda`; `replace_orcamento_itens` com o fix do "reset falso-positivo" do ciclo de aprovação) foram aplicadas no Supabase real em 2026-09-14, rodadas manualmente pelo usuário via `psql` (ação bloqueada para execução automática pelo classificador de modo automático do Claude Code — "Production Deploy").
 - **Bug encontrado e corrigido antes de aplicar**: a migration da SPEC-136 inseria a coluna nova `venda_numero` no meio da lista de colunas de `vw_estoque_saldos_projeto_item`; `CREATE OR REPLACE VIEW` no Postgres só aceita coluna nova no final da lista — teria falhado. Corrigida nos 2 arquivos (repo central + submodule) antes de qualquer tentativa de aplicação.
 - **Gap encontrado só depois de aplicar a migration da SPEC-136**: ela reescreve `aprovar_orcamento_financeiro` (Prompts 2 e 3) mas nunca tocava `replace_orcamento_itens` (Prompt 1) — apesar de o texto da SPEC dizer que era "superset" da 135. Corrigido com uma migration adicional, `supabase/db/migrations/20260914_139_fix_replace_orcamento_itens_pos_136/`, aplicando só essa função (sem reaplicar a versão antiga de `aprovar_orcamento_financeiro`, que teria revertido `numero_venda`).
-- Cada migration foi testada primeiro com dry-run (`BEGIN; ...; ROLLBACK;` contra o Supabase real) antes do `COMMIT` de verdade — nenhum erro em nenhuma das duas.
+- Cada migration foi testada primeiro com dry-run (`BEGIN; ...; ROLLBACK;` contra o Supabase real) antes do `f75cd26` de verdade — nenhum erro em nenhuma das duas.
 - Confirmado em produção via `information_schema.columns` e `pg_get_functiondef`: `orcamentos.numero_venda`, `vw_estoque_saldos_projeto_item.venda_numero`, bloqueio de peça sem cadastro e no-op de itens iguais — todos presentes.
 - **Com isso, os 7 prompts do documento "LUCENERA — LIGHT DESIGN" (11/09/2026) estão implementados e em produção.** Falta só teste ao vivo end-to-end de cada fluxo (não bloqueia nada, é validação de conforto).
 

@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-14 — SPEC-306 — Dashboard Financeiro: custos por categoria e Ponto de Equilíbrio real (Filippo; chamada "SPEC-286" no patch) — commit 18b37ba pushado
+- Patch do Filippo aplicado com `git am` no dashboard (sem permissão de escrita dele, 403) e pushado na main; Cloudflare Pages publica sozinho. Ponto de Equilíbrio = (fixos + distribuição de lucro) ÷ margem de contribuição, 12 meses fechados; pizzas de custo maiores + por categoria; classificação fixo/variável na tela; eixos sem corte. Só `Index.tsx` e `cash-flow.ts`, sem banco.
+- `filippogiorgibrasil` convidado como write no repo do dashboard (aceite pendente). Falta conferência visual do usuário.
+
 ## 2026-11-13 — SPEC-305 — Contas a Pagar/Receber: Tipo data Pagamento, situação Todos e total Pago (reunião Vinicius) — NO AR; 360, 361 e 362 aplicadas
 - Teste de janeiro/2026 (FOCO, Ribeirão): Pago da tela R$ 155.871,32 × Connect R$ 132.728,18. A view `vw_financeiro_duplicatas` já dava o valor certo; a tela somava `valor_pago || valor` e baixa interna (pago 0) virava o valor da parcela. Agora `??`. Conferência geral banco × planilha de 05/11: 172 de 178 combinações empresa/mês batem; as 6 que diferem = pagamentos novos de novembro (Pagar e Receber ISLIGHT) e a duplicata 2988.
 - Filtro Tipo data ganha Pagamento (Receber e Pagar) e o Contas a Pagar ganha situação Todos. Retorno Bancário commit 129a4b5 (pushado), Contas a Receber e Contas a Pagar publicados (wrangler, SP).

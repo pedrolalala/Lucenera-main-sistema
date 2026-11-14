@@ -2,6 +2,13 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-14 (SPEC-288 — Dashboard Financeiro: detalhe dos custos por categoria → apropriação → favorecido)
+
+- Pedido do Filippo: clicar numa categoria da lista de custos (SPEC-286) e descer nos níveis, só com totais. Exemplo: Marketing → PUBLICIDADE → agência, fotógrafo etc. Pessoal mostra também o nome das pessoas (decisão do Filippo).
+- Migration `20261114_341_spec288_favorecido_view_realizado` (up + rollback): coluna `favorecido` (nome do contato do título) no fim da `v_financeiro_realizado_novo`. Ensaio em ROLLBACK: as 18 colunas antigas ficam idênticas linha a linha (18.466 linhas). Aplicada **depois** do merge na main (regra de 14/11).
+- Dashboard (`dashboard-lucenera-b02z85wa3`), branch `spec/288-detalhe-custos`, commit `b02951a`: janela de detalhe; build e lint sem erro; tela conferida no navegador. A publicação é com o Pedro (sem escrita da conta do Filippo).
+- Documentos: `03-Projeto/Planos de Ação/SPECs/SPEC-288_Dashboard_Detalhe_Custos_Categoria_Apropriacao_Favorecido.md`.
+
 ## 2026-11-14 (SPEC-287 — código do projeto gerado pelo sistema; sincronização só sistema → SharePoint; migration 340 APLICADA)
 
 - **Decisão do Filippo:** projeto novo nasce só no sistema e a lista "Organização Projetos" não alimenta mais o sistema. O código é o próximo número livre (último + 1, `26.360`…). O item vai para a lista sem Código, como antes, e o fluxo do Power Automate numera igual e cria pasta e Teams. O fluxo não se relança: se falhar, as pastas se fazem à mão com o código do sistema.

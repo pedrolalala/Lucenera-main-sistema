@@ -7,10 +7,11 @@ import { corsHeaders } from '../_shared/cors.ts'
 // projeto. Nunca chamada por usuário final — protegida por um segredo compartilhado
 // (header x-sync-secret), gerado junto com o secret do Vault 'sharepoint_sync_secret'.
 //
-// SPEC-228 (2026-10-26): NUNCA envia field_0 (Código). O código oficial é gerado só pelo fluxo
-// do Power Automate da lista, e o fluxo só roda (numera + cria grupo/pasta no Teams) quando o
-// item chega com o Código vazio. O sistema cria o projeto com código provisório `PROV-NNNN` e
-// recebe o código oficial pelo pull (sharepoint-projetos-pull).
+// SPEC-228 (2026-10-26): NUNCA envia field_0 (Código) — o fluxo do Power Automate só roda
+// (numera + cria grupo/pasta no Teams) quando o item chega com o Código vazio.
+// SPEC-287 (2026-11-14): o código oficial nasce no sistema (último + 1). O item continua indo
+// sem Código e o fluxo numera igual, porque lista e sistema têm o mesmo último número. Não há
+// mais pull; a conferência diária (sharepoint-projetos-conferencia) avisa se desalinhar.
 //
 // Mapa de campos (confirmado por leitura real da lista + amostra de dados em 2026-09-11):
 //   Title = nome | field_0 = codigo (só leitura, ver acima) | field_9 = responsavel_nome | field_4 = cidade
@@ -175,7 +176,33 @@ Deno.serve(async (req: Request) => {
       if (buscaResponse.ok) {
         const buscaData = await buscaResponse.json().catch(() => ({}))
         const achado = buscaData.value?.[0]
-        if (achado) sharepointItemId = achado.id
+        if (achado) {
+          // SPEC-287 (2026-11-14): o código agora nasce no sistema. Mesmo código + mesmo nome =
+          // é este projeto (tentativa anterior gravou no Graph e não confirmou) -> reaproveita.
+          // Mesmo código + nome diferente = lista e sistema desalinhados -> NÃO sobrescreve o
+          // item de outro projeto: registra conflito e para.
+          const nomeLista = String(achado.fields?.Title ?? '').trim().toLowerCase()
+          const nomeSistema = String(projeto.nome ?? '').trim().toLowerCase()
+          if (nomeLista === nomeSistema) {
+            sharepointItemId = achado.id
+          } else {
+            await supabase.from('sharepoint_sync_log').insert({
+              projeto_id: projetoId,
+              sharepoint_item_id: achado.id,
+              direction: 'push',
+              action: 'conflict',
+              source: 'sistema',
+              changed_by_usuario_id: changedByUsuarioId,
+              campos_alterados: fields,
+              payload_hash: syncHash,
+              erro: `Código ${codigo} já existe na lista para outro item ("${achado.fields?.Title ?? ''}"). Nada gravado na lista.`,
+            })
+            return new Response(
+              JSON.stringify({ success: false, conflito: true, sharepoint_item_id: achado.id }),
+              { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+            )
+          }
+        }
       }
       // busca falhou (ex. coluna não indexada recusada mesmo com o header) — segue tentando
       // criar; não trava o push por causa disso, só reduz a proteção contra duplicata.

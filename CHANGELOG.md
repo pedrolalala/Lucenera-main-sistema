@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-14 — SPEC-307 — Central (abertos 13/11): antecipações em aberto (358 APLICADA) e campo Frete na Entrada de NF (363 APLICADA) — telas SEM commit/deploy
+- Migration 358 (SPEC-301) aplicada no banco de SP: antecipação do Pagar e do Receber nasce em aberto (sem baixa automática), vencimento e nº do pedido digitado. As telas novas do Retorno Bancário (Contas a Pagar/Receber) seguem sem deploy.
+- Migration 363 (nova): `notas_fiscais_compra.valor_frete` (numeric(12,2), >= 0); `registrar_entrada_nota_compra` grava `p_nota->>'valor_frete'` e `espelho_entrada_nota_compra` devolve o frete (mesmas assinaturas). Rollback devolve as funções e remove a coluna.
+- Compras (só no working tree, build e tsc ok): campo Frete no Resumo da nota (soma no total da nota) e linha Frete no PDF do espelho.
+- Pendente: commit/deploy do Compras e do Retorno Bancário, teste da Debora e da Carol, ST/IPI (A3) e parcelas sugeridas (A1).
+
 ## 2026-11-14 — SPEC-306 — Dashboard Financeiro: custos por categoria e Ponto de Equilíbrio real (Filippo; chamada "SPEC-286" no patch) — commit 18b37ba pushado
 - Patch do Filippo aplicado com `git am` no dashboard (sem permissão de escrita dele, 403) e pushado na main; Cloudflare Pages publica sozinho. Ponto de Equilíbrio = (fixos + distribuição de lucro) ÷ margem de contribuição, 12 meses fechados; pizzas de custo maiores + por categoria; classificação fixo/variável na tela; eixos sem corte. Só `Index.tsx` e `cash-flow.ts`, sem banco.
 - `filippogiorgibrasil` convidado como write no repo do dashboard (aceite pendente). Falta conferência visual do usuário.

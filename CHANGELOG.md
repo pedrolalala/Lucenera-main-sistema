@@ -2,6 +2,20 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-14 (SPEC-289 — Dashboard Financeiro: comissões da equipe com o salário de cada pessoa)
+
+- Pedido do Filippo: na janela de "Comissões da equipe" (SPEC-288), ver por pessoa a comissão ao lado do salário e quanto custa no total. **Só visualização:** o banco não muda e nenhum total da tela muda.
+- Colunas:
+  - Comissão;
+  - Salário (salários, férias, 13º, acertos, vales de funcionário);
+  - Vale transporte;
+  - Total, com linha de total da equipe.
+- INSS e FGTS ficam fora: são pagos em guia única e não dá para separar por pessoa. A tela avisa.
+- Dashboard, branch `spec/288-detalhe-custos`, commit `63a1808` (em cima do `b02951a` da SPEC-288). Build e lint sem erro.
+- Tela conferida com dados de 2026: soma das comissões = total da categoria (R$ 976.671,39).
+- Patch único 288 + 289 para o Pedro em `~/Desktop/Para-Pedro/SPEC-288-289-dashboard.patch` (substitui o patch só da 288). Testado numa cópia limpa do `18b37ba`.
+- Documentos: `03-Projeto/Planos de Ação/SPECs/SPEC-289_Dashboard_Comissoes_Equipe_Com_Salario_Por_Pessoa.md`.
+
 ## 2026-11-14 (SPEC-288 — Dashboard Financeiro: detalhe dos custos por categoria → apropriação → favorecido)
 
 - Pedido do Filippo: clicar numa categoria da lista de custos (SPEC-286) e descer nos níveis, só com totais. Exemplo: Marketing → PUBLICIDADE → agência, fotógrafo etc. Pessoal mostra também o nome das pessoas (decisão do Filippo).

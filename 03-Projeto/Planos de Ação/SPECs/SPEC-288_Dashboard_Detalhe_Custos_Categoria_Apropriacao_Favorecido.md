@@ -11,10 +11,10 @@ sistemas_envolvidos:
 
 ## Checklist de Ação
 
-- [ ] Banco: coluna `favorecido` (nome do contato do título) no fim da `v_financeiro_realizado_novo` (migration 341).
-- [ ] Dashboard: clicar numa categoria da lista "Por categoria" abre uma janela com as apropriações da categoria.
-- [ ] Dashboard: clicar numa apropriação mostra para quem foi o dinheiro (favorecido), com número de pagamentos e total.
-- [ ] Teste: totais da janela = total da categoria na lista; build e lint sem erro; tela conferida no navegador.
+- [x] Banco: coluna `favorecido` (nome do contato do título) no fim da `v_financeiro_realizado_novo` (migration 341).
+- [x] Dashboard: clicar numa categoria da lista "Por categoria" abre uma janela com as apropriações da categoria.
+- [x] Dashboard: clicar numa apropriação mostra para quem foi o dinheiro (favorecido), com número de pagamentos e total.
+- [x] Teste: totais da janela = total da categoria na lista; build e lint sem erro; tela conferida no navegador.
 
 ### Passos manuais do usuário
 
@@ -56,4 +56,15 @@ Pedido do Filippo (14/11/2026): na lista de custos por categoria (SPEC-286), ent
 
 ## Realizado
 
+### 2026-11-14
+
+- Dashboard: commit `b02951a` no branch `spec/288-detalhe-custos` do sistema (em cima do `18b37ba`). Build e lint sem erro.
+- Repositório central: PR #18 juntado na `main` (`19b89e9`), com SPEC, migration e CHANGELOG.
+- **Depois do merge**, migration 341 aplicada em SP. A view continua com 18.466 linhas e a mesma soma (57.829.996); 1 despesa sem favorecido; grant de leitura mantido.
+- Tela conferida no navegador com dados reais (nov/2026): Estrutura R$ 8.867,58 = soma das apropriações; Condomínio São Paulo → Legus Soluções Imobiliárias R$ 4.672,12.
+- Patch e PDF para o Pedro em `~/Desktop/Para-Pedro/` (`SPEC-288-dashboard-detalhe-custos.patch`, `SPEC-288-publicar-dashboard.pdf`).
+
 ## Pendências
+
+- [ ] Pedro publica o Dashboard (aplica o patch na `main` do sistema). Depois, atualizar o ponteiro do submodule no repositório central e mudar esta SPEC para `concluído`.
+  - **14/11, depois:** o patch passou a ser único com a SPEC-289 (`SPEC-288-289-dashboard.patch`). O patch só da 288 foi retirado de `Para-Pedro`.

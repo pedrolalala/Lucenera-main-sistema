@@ -13,6 +13,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 
 ## 2026-11-16 - SPEC-312 - Cancelar acordo reabre as parcelas originais - APLICADA
 - Caso da Carol (ORC-0042 -123,23 + VENDA-8522 369,23 = R$ 246,00, 11/11/2026): o acordo 3 foi cancelado como teste e as originais ficaram "renegociadas" (nao entravam em novo acordo). Dado corrigido: ACORDO-3 reativado (R$ 246,00, firme).
+- Retorno Bancario f91522f: as originais que vem do boleto antigo (ex.: ORC-0041-P1, ORC-0042-P1) tambem aparecem como Pago (valor 0, data do acordo) na grade; antes ficavam como A porque o boleto seguia 'pendente_registro'.
 - Reuniao 60: as parcelas ORIGINAIS de um acordo deixam de sumir: aparecem como Pago, valor pago 0, data do acordo, saldo 0 (migration 374 APLICADA, so a view `vw_financeiro_duplicatas`; vale para os acordos 2, 3 e 4; rollback.sql pronto). Retorno Bancario: Estornar numa conta de acordo orienta cancelar a ACORDO-n (local, sem commit/deploy).
 - Banco: migration 372 APLICADA (gatilho `trg_financeiro_acordo_cancelado`: ao cancelar a ultima parcela aberta de um acordo, originais voltam a `firme` e as baixas do acordo sao estornadas; rollback.sql pronto). Sem mudanca de codigo de tela. SPEC-312.
 

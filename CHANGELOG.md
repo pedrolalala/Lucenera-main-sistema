@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-14 — SPEC-308 — Peça única Ubiqua: estoque unificado, Tabela 2 (preço de revenda) e baixa por venda ou revenda (Central, Carol 13/11) — SÓ DESENHO, nada aplicado
+- SPEC escrita a partir de leitura do banco de SP e do código: o duplicado da Carol vem da busca do Orçamento juntar `produtos` + `revenda_ubiqua` (cópia de planilha com estoque de junho e `valor_revenda` no lugar do preço). Códigos ISLIGHT "-IS" (40; 15 com par MANOELLA) guardam 418 un. de estoque.
+- Desenho: peça canônica (código MANOELLA), `produto_equivalente`, Tabela 2 `produto_preco_revenda` (+histórico, só lista autorizada), `orcamento_itens.tabela_preco`, vitrine `revenda_ubiqua.produto_id`, livro `ubiqua_estoque_movimento` e RPCs de reserva/baixa/liberação do pedido do site. Migrations previstas 364 a 368, ainda sem arquivo.
+- Achado de segurança: `revenda_ubiqua` expõe `vl_custo_*` (59 linhas) para qualquer usuário logado (incluindo revendedores e contas públicas); correção prevista na Fase 2.
+- Pendente: decisões D1 a D9 da SPEC com o usuário.
+
 ## 2026-11-14 — SPEC-307 — Central (abertos 13/11): antecipações em aberto (358 APLICADA) e campo Frete na Entrada de NF (363 APLICADA) — telas SEM commit/deploy
 - Migration 358 (SPEC-301) aplicada no banco de SP: antecipação do Pagar e do Receber nasce em aberto (sem baixa automática), vencimento e nº do pedido digitado. As telas novas do Retorno Bancário (Contas a Pagar/Receber) seguem sem deploy.
 - Migration 363 (nova): `notas_fiscais_compra.valor_frete` (numeric(12,2), >= 0); `registrar_entrada_nota_compra` grava `p_nota->>'valor_frete'` e `espelho_entrada_nota_compra` devolve o frete (mesmas assinaturas). Rollback devolve as funções e remove a coluna.

@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-16 - SPEC-309 - Editar (Contas a Pagar/Receber) abre o formulario completo tambem para contas da Connect/financeiro novo - NO AR
+- Migration 369 APLICADA (so funcoes: `financeiro_conta_para_edicao` e `financeiro_editar_conta`, com justificativa obrigatoria e log em `auditoria`; rollback.sql pronto).
+- Retorno Bancario (commit 7618b59, deploy Pagar e Receber): o Editar e o duplo clique abrem o Cadastrar Duplicatas em modo edicao (`?parcela=<id>`) para contas sem grupo de conta; a janelinha da SPEC-297 deixa de ser usada.
+- Regras: so origem Connect/manual; parcela paga so leitura; nao adiciona/remove parcela nem troca situacao nesta versao. Falta teste da Caroline (contas 5504 a pagar e 3957 a receber).
+
 ## 2026-11-16 — Contas a Pagar / Contas a Receber: Editar volta a abrir o formulário do Cadastrar Duplicatas — NO AR
 - A SPEC-297 (commit f8b93cf, 13/11) fez todo boleto ligado a uma parcela do financeiro abrir o modal "Editar conta" no botão Editar. Restaurado o comportamento original: duplicata com `conta_grupo_id` abre `/cadastrar-duplicata?id=…` em modo edição; o modal da SPEC-297 (justificativa e log) fica só para contas sem grupo (legado da Connect e nativas do financeiro).
 - Sem impacto no banco. Código: retorno-bancario-bradesco-5392a 21d1095 (main, pushado); NO AR por wrangler em contas-pagar-lucenera (deploy b403d26a) e contas-receber-lucenera (deploy 23cbe7dc), bundle conferido em produção.

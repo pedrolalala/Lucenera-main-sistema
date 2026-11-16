@@ -2953,6 +2953,8 @@ DECLARE
   inserted_count integer;
   v_user_role text;
   v_extra_count integer;
+  v_extra_fora_tabela integer;
+  v_status text;
   v_itens_iguais boolean;
   v_pares jsonb;
   v_par record;
@@ -2988,6 +2990,7 @@ BEGIN
       new_items AS (
         SELECT
           COALESCE(item->>'produto_id', '') AS identidade,
+          CASE WHEN item->>'produto_id' IS NULL OR item->>'produto_id' = '' THEN NULL ELSE (item->>'produto_id')::uuid END AS produto_uuid,
           COALESCE(item->>'descricao', '') AS descricao_,
           (item->>'preco_unitario')::numeric AS preco_unitario,
           row_number() OVER (
@@ -2996,7 +2999,11 @@ BEGIN
           ) AS rn
         FROM jsonb_array_elements(p_items) WITH ORDINALITY AS t(item, ordinality)
       )
-      SELECT count(*) INTO v_extra_count
+      SELECT count(*), count(*) FILTER (WHERE NOT (
+               n.produto_uuid IS NOT NULL
+               AND n.preco_unitario = (SELECT COALESCE(NULLIF(pr.preco_venda, 0), pr.valor_venda) FROM public.produtos pr WHERE pr.id = n.produto_uuid)
+             ))
+      INTO v_extra_count, v_extra_fora_tabela
       FROM new_items n
       LEFT JOIN old_items o
         ON o.identidade = n.identidade
@@ -3005,8 +3012,17 @@ BEGIN
        AND o.rn = n.rn
       WHERE o.rn IS NULL;
 
-      IF v_extra_count > 0 THEN
-        RAISE EXCEPTION 'Permissao negada: alterar valor ou produto de item do orcamento requer perfil administrador (ou financeiro na Revisao Financeira).'
+      SELECT o.status::text INTO v_status FROM public.orcamentos o WHERE o.id = p_orcamento_id;
+
+      -- SPEC-315: equipe com permissao de editar orcamentos, em rascunho ou Aprovacao da Equipe, so com peca de preco de tabela.
+      IF v_extra_count > 0 AND NOT (
+           v_user_role IS NOT NULL
+           AND auth.uid() IS NOT NULL
+           AND v_status IN ('rascunho', 'Aprovação da Equipe')
+           AND (SELECT public.hub_pode_executar(auth.uid(), 'orcamentos', NULL, 'editar'))
+           AND v_extra_fora_tabela = 0
+         ) THEN
+        RAISE EXCEPTION 'Permissao negada: alterar valor ou produto de item do orcamento requer perfil administrador (ou financeiro na Revisao Financeira; a equipe so inclui/troca peca pelo preco de tabela em rascunho ou Aprovacao da Equipe).'
           USING ERRCODE = 'P0001';
       END IF;
     END IF;

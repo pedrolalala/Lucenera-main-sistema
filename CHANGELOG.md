@@ -2,13 +2,17 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-16 - SPEC-315 - Orcamento: equipe inclui/troca peca apos a Carol devolver (preco de tabela) - migration 373 APLICADA, Compras sem deploy
+- Caso ORC-0081: pecas 12131 (L19/L22) nao entravam. `replace_orcamento_itens` so deixa admin (ou financeiro em Aprovacao Financeira) incluir/trocar item; Helena era barrada ate em rascunho. Excecao estreita: quem edita Orcamentos inclui/troca peca em rascunho e Aprovacao da Equipe, so pelo preco de tabela; preco manual e item sem cadastro seguem so admin (SPEC-108).
+- Banco: migration 376 ensaiada em ROLLBACK (6 cenarios), rollback.sql pronto; NAO aplicada. Codigo: BudgetFormPage.tsx e BudgetItemCard.tsx (`canTrocarProduto`) so no working tree, sem commit/deploy. SPEC-315.
+
 ## 2026-11-16 - SPEC-313 - Registrar Entrega aceita o codigo que aparece na Separacao - NO AR
 - Matheus digitava `ORC-0080-P1` e recebia "Codigo invalido". A busca agora aceita codigo da entrega/parcial (ORC-0080-P1, 5777-P1, LUC-8364), numero da venda e codigo da obra com ou sem ponto (23.230 / 23230); tolera espacos, minusculas e "ORÇ". Se bate com mais de uma entrega, mostra lista para escolher; "Cancelado" passa a ser bloqueado; Enter busca.
 - Sem impacto no banco. Codigo: lucenera-logistics-b7cd1 b32c0eb (pushado), NO AR por wrangler em logistica-lucenera. Falta teste do Matheus. SPEC-313.
 
 ## 2026-11-16 - SPEC-299 - Compras: pedido adiantado com destino reservado pelo codigo do projeto - REDIGIDA (migration NAO aplicada)
 - Reuniao 56 (Vinicius e Debora): pedido avulso adiantado para venda fechada que ainda nao passou nao pode cobrir a necessidade de outras vendas. A quantidade fica reservada para o projeto (codigo), cobre so o proprio projeto quando virar venda, vem sugerida na entrada da NF e pode ser liberada com motivo.
-- Banco: migration 373 (tabela `pedido_compra_item_destino_projeto`, 4 RPCs, 2 views recriadas com as mesmas colunas) ensaiada em ROLLBACK; rollback.sql pronto; NAO aplicada.
+- Banco: migration 373 (tabela `pedido_compra_item_destino_projeto`, 4 RPCs, 2 views recriadas com as mesmas colunas) ensaiada em ROLLBACK e APLICADA em 16/11; rollback.sql pronto.
 - Codigo: Compras (Pedido Avulso, modal de fechar pedido, Pedidos, Entrada de NF) alterado so no working tree, sem commit/deploy. Falta B3 (aviso na Necessidade). SPEC-299.
 
 ## 2026-11-16 - SPEC-312 - Cancelar acordo reabre as parcelas originais - APLICADA

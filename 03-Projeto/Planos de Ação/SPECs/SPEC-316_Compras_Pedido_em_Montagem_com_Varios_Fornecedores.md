@@ -36,3 +36,6 @@ Código no Compras (`NecessidadeCompra.tsx`); `tsc` ok.
 
 ## Pendências
 - [ ] Débora confirmar que o fornecedor de cada item (vindo do cadastro) é o que ela quer, ou pedir troca de fornecedor por item.
+
+## Decisão final (16/11)
+Um único pedido de compra com vários fornecedores NÃO será feito: o pedido segue com um fornecedor só e o caso de peças produzidas por demanda na Lucenera ("pedido de produção") é lançado pelo Pedido Avulso. Vale o que está nas SPEC-316 e SPEC-317 (um pedido por fornecedor ao fechar; fornecedor trocável por produto).

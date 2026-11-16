@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-16 - SPEC-317 - Compras: escolher o fornecedor por produto no pedido em montagem - NO AR
+- Debora: na Necessidade de Compra o fornecedor vinha fixo do cadastro (so o Pedido Avulso permitia escolher). Agora o botao "Fornecedor por produto" do pedido em montagem deixa trocar o fornecedor de cada produto (busca por nome); produto sem fornecedor cadastrado tambem entra e o fornecedor se escolhe ali. Fechar continua gerando um pedido por fornecedor (SPEC-316).
+- Sem impacto no banco. Codigo: compras-lucenera 8f1f4d6 (pushado, publicado por wrangler so com esta mudanca; SPEC-299 segue sem commit). Falta teste da Debora. SPEC-317.
+
 ## 2026-11-16 - SPEC-314 - Matheus: espelho da NF com referencia e solicitacao de separacao sem pecas - NO AR
 - Espelho da entrada de NF (Compras): agora traz a referencia do fornecedor; colunas Codigo, Referencia, Produto, Quantidade (valor unitario saiu da linha dos itens). Solicitacao de separacao impressa (Logistica): sem a lista de pecas.
 - Banco: migration 375 APLICADA (so a funcao `espelho_entrada_nota_compra`, chave `referencia`; rollback.sql pronto).

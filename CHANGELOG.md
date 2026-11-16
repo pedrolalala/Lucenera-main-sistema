@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-16 — Venda Parcial: Log de Transferências com o L de origem e destino, e log por venda — NO AR (separacao-lucenera.pages.dev)
+- Pedido da Helena (venda 8523): o Log mostrava quem pegou emprestado e de qual venda, mas não o L. `listarLogTrocas` agora lê `projeto_itens.l_fixo` de cada lado e a tela mostra "Venda X (L n)" em De e Para; o L entra na busca.
+- Painel "Transferências desta venda" removido do topo da venda. O botão Log de Transferências, dentro de uma venda, mostra só as transferências daquela venda; na tela inicial mostra todas.
+- Sem impacto no banco. Código: separacao-parcial 1a131fc (main, pushado); deploy via wrangler no projeto `separacao-lucenera`.
+
 ## 2026-11-14 — SPEC-308 — Peça única Ubiqua: estoque unificado, Tabela 2 (preço de revenda) e baixa por venda ou revenda (Central, Carol 13/11) — SÓ DESENHO, nada aplicado
 - SPEC escrita a partir de leitura do banco de SP e do código: o duplicado da Carol vem da busca do Orçamento juntar `produtos` + `revenda_ubiqua` (cópia de planilha com estoque de junho e `valor_revenda` no lugar do preço). Códigos ISLIGHT "-IS" (40; 15 com par MANOELLA) guardam 418 un. de estoque.
 - Desenho: peça canônica (código MANOELLA), `produto_equivalente`, Tabela 2 `produto_preco_revenda` (+histórico, só lista autorizada), `orcamento_itens.tabela_preco`, vitrine `revenda_ubiqua.produto_id`, livro `ubiqua_estoque_movimento` e RPCs de reserva/baixa/liberação do pedido do site. Migrations previstas 364 a 368, ainda sem arquivo.

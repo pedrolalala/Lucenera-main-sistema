@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-16 — Contas a Pagar / Contas a Receber: Editar volta a abrir o formulário do Cadastrar Duplicatas — NO AR
+- A SPEC-297 (commit f8b93cf, 13/11) fez todo boleto ligado a uma parcela do financeiro abrir o modal "Editar conta" no botão Editar. Restaurado o comportamento original: duplicata com `conta_grupo_id` abre `/cadastrar-duplicata?id=…` em modo edição; o modal da SPEC-297 (justificativa e log) fica só para contas sem grupo (legado da Connect e nativas do financeiro).
+- Sem impacto no banco. Código: retorno-bancario-bradesco-5392a 21d1095 (main, pushado); NO AR por wrangler em contas-pagar-lucenera (deploy b403d26a) e contas-receber-lucenera (deploy 23cbe7dc), bundle conferido em produção.
+- Obs.: editar pelo formulário não pede justificativa nem grava log (diferente do modal).
+
 ## 2026-11-16 — Venda Parcial: Log de Transferências com o L de origem e destino, e log por venda — NO AR (separacao-lucenera.pages.dev)
 - Pedido da Helena (venda 8523): o Log mostrava quem pegou emprestado e de qual venda, mas não o L. `listarLogTrocas` agora lê `projeto_itens.l_fixo` de cada lado e a tela mostra "Venda X (L n)" em De e Para; o L entra na busca.
 - Painel "Transferências desta venda" removido do topo da venda. O botão Log de Transferências, dentro de uma venda, mostra só as transferências daquela venda; na tela inicial mostra todas.

@@ -11,6 +11,10 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Banco: migration 375 APLICADA (so a funcao `espelho_entrada_nota_compra`, chave `referencia`; rollback.sql pronto).
 - Codigo: compras-lucenera efcca23 (publicado so com o espelho; SPEC-299 segue sem commit) e lucenera-logistics 3ed0d74, ambos pushados e publicados por wrangler. Falta teste do Matheus. SPEC-314.
 
+## 2026-11-16 - Orcamentos: Carol vincula produto cadastrado na Revisao Financeira - NO AR
+- A busca de produto do item ficava desabilitada para o financeiro em Aprovacao Financeira (so admin/rascunho/Aprovacao da Equipe). `canTrocarProduto` agora vale tambem para quem tem acesso `financeiro` nesse status; o banco (SPEC-285, replace_orcamento_itens) ja liberava. Criar produto novo e preco manual seguem so admin.
+- Sem impacto no banco. Codigo: gestao-financeira-clone-544cb 4c8fe98 (pushado), publicado por wrangler em financeiro-lucenera (deploy 38f8e74e). Obs.: o deploy leva junto o 034442f (SPEC-315), cuja migration 376 estava como nao aplicada. Falta teste da Carol.
+
 ## 2026-11-16 - SPEC-315 - Orcamento: equipe inclui/troca peca apos a Carol devolver (preco de tabela) - migration 373 APLICADA, Compras sem deploy
 - Caso ORC-0081: pecas 12131 (L19/L22) nao entravam. `replace_orcamento_itens` so deixa admin (ou financeiro em Aprovacao Financeira) incluir/trocar item; Helena era barrada ate em rascunho. Excecao estreita: quem edita Orcamentos inclui/troca peca em rascunho e Aprovacao da Equipe, so pelo preco de tabela; preco manual e item sem cadastro seguem so admin (SPEC-108).
 - Banco: migration 376 ensaiada em ROLLBACK (6 cenarios), rollback.sql pronto; NAO aplicada. Codigo: BudgetFormPage.tsx e BudgetItemCard.tsx (`canTrocarProduto`) so no working tree, sem commit/deploy. SPEC-315.

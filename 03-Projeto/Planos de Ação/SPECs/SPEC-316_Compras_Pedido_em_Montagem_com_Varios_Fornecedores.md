@@ -1,12 +1,12 @@
 ---
-titulo: "SPEC-310 — Compras: pedido em montagem com itens de vários fornecedores (gera um pedido de compra por fornecedor)"
+titulo: "SPEC-316 — Compras: pedido em montagem com itens de vários fornecedores (gera um pedido de compra por fornecedor)"
 status: 16/11 — implementado no Compras (sem mudança de banco); ver Realizado
 data_ultima_modificacao: 2026-11-16
 sistemas_envolvidos:
   - Compras (04-Sistemas/compras-lucenera-3o23t98ee) — Necessidade de Compra, pedido em montagem
 ---
 
-# SPEC-310
+# SPEC-316
 
 ## Origem
 Central de Solicitações, Débora, 12/11/2026: "PEDIDO DE PRODUÇÃO LUCENERA - COLOCAR MAIS DE UM FORNECEDOR NO MESMO PEDIDO" (id `073a9cc7-c8cc-41a0-bcab-6b8139d565b9`). Esclarecimento do usuário (16/11): há marcas específicas cujos itens vêm de vários fornecedores, por vários motivos; é preciso habilitar isso.

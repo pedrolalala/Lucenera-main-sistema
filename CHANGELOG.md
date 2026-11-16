@@ -31,7 +31,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Banco: migration 371 APLICADA (`separacoes.outras_vendas text`; rollback.sql pronto). SPEC-311.
 - Codigo: separacao-parcial aa9ae12 (deploy separacao-lucenera) e lucenera-logistics-b7cd1 6a194dc (deploy logistica-lucenera), ambos pushados e publicados por wrangler. Falta teste da Isa.
 
-## 2026-11-16 - SPEC-310 - Compras: pedido em montagem com varios fornecedores - NO AR
+## 2026-11-16 - SPEC-316 - Compras: pedido em montagem com varios fornecedores - NO AR
 - Central (Debora, 12/11): marca que compra de mais de um fornecedor. A Necessidade de Compra aceita itens de fornecedores diferentes no pedido em montagem; ao fechar, sai um pedido de compra por fornecedor, em sequencia. Sem mudanca de banco (pedido de compra segue com 1 fornecedor).
 - Compras (`NecessidadeCompra.tsx`), deploy em compras-lucenera. Falta teste da Debora.
 

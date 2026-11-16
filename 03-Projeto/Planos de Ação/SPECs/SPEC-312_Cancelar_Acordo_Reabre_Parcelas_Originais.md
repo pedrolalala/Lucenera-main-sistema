@@ -20,7 +20,7 @@ sistemas_envolvidos:
 
 ### Passos manuais do usuário
 
-- [ ] Carol: F5 em Contas a Receber e conferir o ACORDO-3 de R$ 246,00 (11/11/2026)
+- [x] Carol conferiu as 3 linhas (ORC-0042, VENDA-8522 pagas 0 em 13/11 + ACORDO-3 R$ 246,00 em aberto) em 16/11
 
 ## Objetivo
 

@@ -2,6 +2,19 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-16 - SPEC-313 - Registrar Entrega aceita o codigo que aparece na Separacao - NO AR
+- Matheus digitava `ORC-0080-P1` e recebia "Codigo invalido". A busca agora aceita codigo da entrega/parcial (ORC-0080-P1, 5777-P1, LUC-8364), numero da venda e codigo da obra com ou sem ponto (23.230 / 23230); tolera espacos, minusculas e "ORÇ". Se bate com mais de uma entrega, mostra lista para escolher; "Cancelado" passa a ser bloqueado; Enter busca.
+- Sem impacto no banco. Codigo: lucenera-logistics-b7cd1 b32c0eb (pushado), NO AR por wrangler em logistica-lucenera. Falta teste do Matheus. SPEC-313.
+
+## 2026-11-16 - SPEC-299 - Compras: pedido adiantado com destino reservado pelo codigo do projeto - REDIGIDA (migration NAO aplicada)
+- Reuniao 56 (Vinicius e Debora): pedido avulso adiantado para venda fechada que ainda nao passou nao pode cobrir a necessidade de outras vendas. A quantidade fica reservada para o projeto (codigo), cobre so o proprio projeto quando virar venda, vem sugerida na entrada da NF e pode ser liberada com motivo.
+- Banco: migration 373 (tabela `pedido_compra_item_destino_projeto`, 4 RPCs, 2 views recriadas com as mesmas colunas) ensaiada em ROLLBACK; rollback.sql pronto; NAO aplicada.
+- Codigo: Compras (Pedido Avulso, modal de fechar pedido, Pedidos, Entrada de NF) alterado so no working tree, sem commit/deploy. Falta B3 (aviso na Necessidade). SPEC-299.
+
+## 2026-11-16 - SPEC-312 - Cancelar acordo reabre as parcelas originais - APLICADA
+- Caso da Carol (ORC-0042 -123,23 + VENDA-8522 369,23 = R$ 246,00, 11/11/2026): o acordo 3 foi cancelado como teste e as originais ficaram "renegociadas" (nao entravam em novo acordo). Dado corrigido: ACORDO-3 reativado (R$ 246,00, firme).
+- Banco: migration 372 APLICADA (gatilho `trg_financeiro_acordo_cancelado`: ao cancelar a ultima parcela aberta de um acordo, originais voltam a `firme` e as baixas do acordo sao estornadas; rollback.sql pronto). Sem mudanca de codigo de tela. SPEC-312.
+
 ## 2026-11-16 - SPEC-311 - Venda Parcial: outras vendas na mesma entrega - NO AR
 - Pedido da Isa: antes dava para vincular dois numeros de venda, agora nao. Na tela "Nova Separacao" da Venda Parcial entra o campo "Outras vendas na mesma entrega" (varios numeros, Enter adiciona). So informativo: a parcial continua de uma venda, estoque/reserva/numeracao P1/P2 nao mudam. O card da Logistica mostra "Tambem nesta entrega: ...".
 - Banco: migration 371 APLICADA (`separacoes.outras_vendas text`; rollback.sql pronto). SPEC-311.

@@ -17,7 +17,7 @@ Regras:
     deixa escolher a empresa);
   - NAO cria itens, parcelas nem Contas a Pagar (pedidos_compra so tem gatilho de
     auditoria e de numeracao);
-  - rerun-safe: pula pedido cujo numero ja existe ("N", "N CONNECT" ou "PC-LEGADO-N");
+  - rerun-safe: pula pedido cujo numero ja existe ("N", "N CONNECT", "PC-LEGADO-N" ou numero antigo de pedido renomeado - SPEC-293);
   - tudo numa transacao; sem --aplicar faz ROLLBACK (dry-run).
 
 Uso:
@@ -83,6 +83,14 @@ def main() -> None:
         m = re.search(r"(\d{3,5})", l)
         if m:
             existentes.add(int(m.group(1)))
+    # SPEC-293: pedido renomeado na tela (ex.: "1930 CONNECT" -> outro numero) continua existente pelo numero ANTIGO,
+    # registrado em backup.spec293_renumeracao_pedidos_compra. Tolera a tabela ainda nao existir (migration 347 nao aplicada).
+    if psql(url, "select to_regclass('backup.spec293_renumeracao_pedidos_compra') is not null") == "t":
+        for l in psql(url, "select numero_antigo from backup.spec293_renumeracao_pedidos_compra "
+                           "where pedido_id <> '00000000-0000-0000-0000-000000000000'").splitlines():
+            m = re.search(r"(\d{3,5})", l)
+            if m:
+                existentes.add(int(m.group(1)))
 
     forn: dict[str, list[tuple[str, str, int]]] = {}
     for l in psql(url, "select c.id,c.nome,(select count(*) from pedidos_compra p where p.fornecedor_id=c.id) "

@@ -58,12 +58,12 @@ def trancar(on):
 
 def dump_sp():
     # arquivos para guardar (pg_restore): -n e -t não se misturam no mesmo pg_dump
-    run(["pg_dump", SP_DB, "-Fc", "--no-owner", "-n", "public", "-n", "memoria", "-f", p("lucenera_sp.dump")])
+    run(["pg_dump", SP_DB, "-Fc", "--no-owner", "-n", "public", "-n", "memoria", "-n", "auditoria", "-f", p("lucenera_sp.dump")])
     run(["pg_dump", SP_DB, "-Fc", "--no-owner", "-t", "auth.users", "-t", "auth.identities",
          "-t", "supabase_migrations.schema_migrations", "-f", p("lucenera_sp_auth.dump")])
-    run(["pg_dump", SP_DB, "--schema-only", "--quote-all-identifiers", "--no-owner", "-n", "public", "-n", "memoria",
+    run(["pg_dump", SP_DB, "--schema-only", "--quote-all-identifiers", "--no-owner", "-n", "public", "-n", "memoria", "-n", "auditoria",
          "-f", p("schema.sql")])
-    run(["pg_dump", SP_DB, "--data-only", "--quote-all-identifiers", "--no-owner", "-n", "public", "-n", "memoria",
+    run(["pg_dump", SP_DB, "--data-only", "--quote-all-identifiers", "--no-owner", "-n", "public", "-n", "memoria", "-n", "auditoria",
          "--disable-triggers", "-f", p("data_public.sql")])
     run(["pg_dump", SP_DB, "--data-only", "--quote-all-identifiers", "--no-owner", "-t", "auth.users",
          "-t", "auth.identities", "-t", "supabase_migrations.schema_migrations", "--disable-triggers",
@@ -71,14 +71,34 @@ def dump_sp():
 
     schema = open(p("schema.sql"), encoding="utf-8").read().replace('CREATE SCHEMA "public";', "-- (public criado antes)")
     schema = re.sub(r'^ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin".*$', "-- (supabase_admin)", schema, flags=re.M)
+    # Views que leem o schema "backup" (que não é copiado) quebravam a carga em Ohio (11/11/2026:
+    # vw_staging_resumo -> backup.staging_conta_pagar/receber). Ficam de fora da reserva, junto com os
+    # GRANT/COMMENT delas; o resto da cópia segue igual.
+    fora = []
+    for m in list(re.finditer(r'^CREATE VIEW "public"\."([^"]+)" AS\n.*?;\n', schema, flags=re.M | re.S)):
+        if '"backup".' in m.group(0):
+            fora.append(m.group(1))
+    for nome in fora:
+        schema = re.sub(r'^CREATE VIEW "public"\."' + re.escape(nome) + r'" AS\n.*?;\n',
+                        f"-- (view {nome} fora: lê o schema backup)\n", schema, flags=re.M | re.S)
+        schema = re.sub(r'^(GRANT|REVOKE|COMMENT|ALTER)[^\n]*"public"\."' + re.escape(nome) + r'"[^\n]*;$',
+                        "", schema, flags=re.M)
+    if fora:
+        print("views fora da reserva (leem o schema backup):", ", ".join(fora))
     open(p("schema_x.sql"), "w", encoding="utf-8").write(schema)
     for src, dst in (("data_auth.sql", "d1.sql"), ("data_public.sql", "d2.sql")):
         t = open(p(src), encoding="utf-8").read()
         t = re.sub(r"^ALTER TABLE .* (DISABLE|ENABLE) TRIGGER ALL;$", "", t, flags=re.M)
         open(p(dst), "w", encoding="utf-8").write(
             "SET session_replication_role = replica;\n" + t + "\nSET session_replication_role = origin;\n")
-    chk = re.search(r'ALTER TABLE "public"\."orcamentos"\s+ADD CONSTRAINT "orcamentos_data_inicio_pagamento_check"'
-                    r'[^;]*;', schema).group(0)
+    # A regra de data de início do pagamento foi retirada do banco (data retroativa liberada). Sem ela o
+    # re.search devolvia None e o backup parava desde 20/10/2026. Agora: se a regra existir, ela é tirada antes
+    # dos dados e recriada depois; se não existir, segue sem ela.
+    m = re.search(r'ALTER TABLE "public"\."orcamentos"\s+ADD CONSTRAINT "orcamentos_data_inicio_pagamento_check"'
+                  r'[^;]*;', schema)
+    chk = m.group(0) if m else "-- (sem orcamentos_data_inicio_pagamento_check)"
+    drop_chk = ('ALTER TABLE "public"."orcamentos" DROP CONSTRAINT "orcamentos_data_inicio_pagamento_check";'
+                if m else "-- (sem orcamentos_data_inicio_pagamento_check)")
 
     # políticas de storage (dependem de funções de public e somem no DROP CASCADE)
     c = psycopg2.connect(SP_DB, connect_timeout=30)
@@ -104,13 +124,14 @@ def dump_sp():
         "    execute format('drop policy %I on storage.objects', r.policyname); end loop; end $$;",
         "DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;",
         "DROP SCHEMA IF EXISTS memoria CASCADE;",
+        "DROP SCHEMA IF EXISTS auditoria CASCADE;  -- registro de auditoria (SPEC-242): copiado junto, 11/11/2026",
         "DROP SCHEMA public CASCADE;",
         "CREATE SCHEMA public;",
         "ALTER SCHEMA public OWNER TO pg_database_owner;",
         "CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA public;",
         "CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public;",
         inc("schema_x.sql"),
-        'ALTER TABLE "public"."orcamentos" DROP CONSTRAINT "orcamentos_data_inicio_pagamento_check";',
+        drop_chk,
         "TRUNCATE auth.users CASCADE;",
         "TRUNCATE supabase_migrations.schema_migrations;",
         inc("d1.sql"),
@@ -150,10 +171,41 @@ def objetos(db):
     return r
 
 
+def buckets(db):
+    c = psycopg2.connect(db, connect_timeout=30, options=RW)
+    k = c.cursor()
+    k.execute("select id, public, file_size_limit, allowed_mime_types from storage.buckets")
+    r = {b: (pub, lim, mimes) for b, pub, lim, mimes in k.fetchall()}
+    c.close()
+    return r
+
+
+def criar_buckets_faltando():
+    # 11/11/2026: pastas criadas em SP depois da virada (ex.: solicitacoes-anexos) não existiam em Ohio e o
+    # upload voltava 400. Cria em Ohio com as mesmas configurações de SP.
+    import json
+    oh = buckets(OH_DB)
+    for b, (pub, lim, mimes) in buckets(SP_DB).items():
+        if b in oh:
+            continue
+        corpo = {"id": b, "name": b, "public": bool(pub)}
+        if lim:
+            corpo["file_size_limit"] = int(lim)
+        if mimes:
+            corpo["allowed_mime_types"] = list(mimes)
+        try:
+            storage_req(os.environ["OHIO_URL"], os.environ["OHIO_SERVICE_ROLE_KEY"], "POST", "bucket",
+                        data=json.dumps(corpo).encode(), ctype="application/json").read()
+            print("  pasta criada em Ohio:", b)
+        except Exception as e:
+            print("  pasta com erro:", b, str(e)[:100])
+
+
 def copiar_arquivos():
     if not (os.environ.get("SP_SERVICE_ROLE_KEY") and os.environ.get("OHIO_SERVICE_ROLE_KEY")):
         print("arquivos: pulado (sem as chaves service_role)")
         return
+    criar_buckets_faltando()
     ja = {(b, n): s for b, n, s, _ in objetos(OH_DB)}
     novos = erros = 0
     for b, n, s, mt in objetos(SP_DB):

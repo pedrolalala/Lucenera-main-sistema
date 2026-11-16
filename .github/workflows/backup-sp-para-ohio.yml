@@ -1,8 +1,10 @@
 name: Backup diario Sao Paulo -> Ohio
 
 # SPEC-198: o banco oficial e o Supabase de Sao Paulo. Todo dia de madrugada ele e copiado para o projeto
-# antigo de Ohio, que fica como reserva SOMENTE LEITURA (scripts/backup_sp_para_ohio.py). O arquivo do
-# backup tambem fica guardado aqui no GitHub (aba Actions -> execucao -> Artifacts) por 90 dias.
+# antigo de Ohio, que fica como reserva SOMENTE LEITURA (scripts/backup_sp_para_ohio.py).
+# 11/11/2026: o arquivo do backup NAO e mais guardado no GitHub (Artifacts). O repositorio e publico e
+# qualquer conta do GitHub conseguia baixar o banco inteiro. Copias que valem: Ohio (esta rotina) e os
+# backups diarios do proprio Supabase (plano Pro, 7 dias).
 
 on:
   schedule:
@@ -49,14 +51,3 @@ jobs:
         run: |
           pg_dump --version
           python scripts/backup_sp_para_ohio.py
-
-      - name: Guardar o arquivo do backup (90 dias)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lucenera-sp-${{ github.run_number }}
-          path: |
-            backup_out/lucenera_sp.dump
-            backup_out/lucenera_sp_auth.dump
-          retention-days: 90
-          if-no-files-found: warn

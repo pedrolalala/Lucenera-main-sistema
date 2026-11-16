@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-16 - SPEC-311 - Venda Parcial: outras vendas na mesma entrega - NO AR
+- Pedido da Isa: antes dava para vincular dois numeros de venda, agora nao. Na tela "Nova Separacao" da Venda Parcial entra o campo "Outras vendas na mesma entrega" (varios numeros, Enter adiciona). So informativo: a parcial continua de uma venda, estoque/reserva/numeracao P1/P2 nao mudam. O card da Logistica mostra "Tambem nesta entrega: ...".
+- Banco: migration 371 APLICADA (`separacoes.outras_vendas text`; rollback.sql pronto). SPEC-311.
+- Codigo: separacao-parcial aa9ae12 (deploy separacao-lucenera) e lucenera-logistics-b7cd1 6a194dc (deploy logistica-lucenera), ambos pushados e publicados por wrangler. Falta teste da Isa.
+
 ## 2026-11-16 - SPEC-310 - Compras: pedido em montagem com varios fornecedores - NO AR
 - Central (Debora, 12/11): marca que compra de mais de um fornecedor. A Necessidade de Compra aceita itens de fornecedores diferentes no pedido em montagem; ao fechar, sai um pedido de compra por fornecedor, em sequencia. Sem mudanca de banco (pedido de compra segue com 1 fornecedor).
 - Compras (`NecessidadeCompra.tsx`), deploy em compras-lucenera. Falta teste da Debora.

@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-16 - SPEC-310 - Compras: pedido em montagem com varios fornecedores - NO AR
+- Central (Debora, 12/11): marca que compra de mais de um fornecedor. A Necessidade de Compra aceita itens de fornecedores diferentes no pedido em montagem; ao fechar, sai um pedido de compra por fornecedor, em sequencia. Sem mudanca de banco (pedido de compra segue com 1 fornecedor).
+- Compras (`NecessidadeCompra.tsx`), deploy em compras-lucenera. Falta teste da Debora.
+
+## 2026-11-16 - SPEC-310 - Estoque lido do local certo (estoque_itens) e coluna antiga alinhada - APLICADA
+- Migration 370 APLICADA: `ubiqua_estoque_atual()` passa a ler `estoque_itens` (geral + showroom - reservado) e a coluna antiga `produtos.estoque_total/estoque_disponivel` de 47 produtos foi alinhada ao `estoque_itens` (backup em `backup._bkp_spec310_produtos_estoque_antigo`; rollback.sql pronto). Ensaio em ROLLBACK antes: preco/custo, estoque_itens e kardex inalterados.
+- Conferencia Connect x sistema (planilha Produtos 16/11): estoque geral bate em 4.559 de 4.574. Restam 15 diferencas de saldo geral e 1 de showroom (321403-IS), decisao do usuario.
+
 ## 2026-11-16 - SPEC-309 - Editar (Contas a Pagar/Receber) abre o formulario completo tambem para contas da Connect/financeiro novo - NO AR
 - Migration 369 APLICADA (so funcoes: `financeiro_conta_para_edicao` e `financeiro_editar_conta`, com justificativa obrigatoria e log em `auditoria`; rollback.sql pronto).
 - Retorno Bancario (commit 7618b59, deploy Pagar e Receber): o Editar e o duplo clique abrem o Cadastrar Duplicatas em modo edicao (`?parcela=<id>`) para contas sem grupo de conta; a janelinha da SPEC-297 deixa de ser usada.

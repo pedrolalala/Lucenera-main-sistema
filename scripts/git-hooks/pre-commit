@@ -1,0 +1,46 @@
+#!/bin/sh
+# Protezione del repo centrale (14/11/2026, richiesta di Filippo).
+# Attivazione, una volta sola su ogni computer:
+#   git config core.hooksPath scripts/git-hooks
+#
+# Blocca il commit se il segnalibro (puntatore) di un sistema in 04-Sistemas/:
+#   1) tornerebbe INDIETRO rispetto alla versione già registrata (cartella locale vecchia), oppure
+#   2) punterebbe a una versione che NON è ancora su GitHub (commit solo locale).
+# Regola di AGENTS.md: "Nao atualizar ponteiro de submodule para commit local que ainda nao foi enviado ao GitHub."
+
+segnale="$(git rev-parse --git-dir)/.blocco_commit"
+rm -f "$segnale"
+
+git diff --cached --raw -z | tr '\0' '\n' | while IFS= read -r intestazione; do
+  read -r percorso || break
+  # formato: :modo_vecchio modo_nuovo sha_vecchio sha_nuovo stato
+  modo_nuovo=$(echo "$intestazione" | awk '{print $2}')
+  [ "$modo_nuovo" = "160000" ] || continue
+  vecchio=$(echo "$intestazione" | awk '{print $3}')
+  nuovo=$(echo "$intestazione" | awk '{print $4}')
+  [ -d "$percorso" ] || continue
+
+  git -C "$percorso" fetch -q origin 2>/dev/null
+
+  if ! git -C "$percorso" branch -r --contains "$nuovo" 2>/dev/null | grep -q .; then
+    echo "BLOCCATO: '$percorso' punta a $nuovo, che non è ancora su GitHub."
+    echo "          Prima il push di quel sistema, oppure toglilo dal commit: git restore --staged \"$percorso\""
+    echo x >> "$segnale"
+    continue
+  fi
+
+  case "$vecchio" in 0000000000000000000000000000000000000000) continue ;; esac
+  if [ "$vecchio" != "$nuovo" ] && git -C "$percorso" merge-base --is-ancestor "$nuovo" "$vecchio" 2>/dev/null; then
+    echo "BLOCCATO: '$percorso' tornerebbe INDIETRO (da $vecchio a $nuovo)."
+    echo "          La cartella su questo computer è vecchia: aggiornala con  git submodule update \"$percorso\""
+    echo x >> "$segnale"
+  fi
+done
+
+if [ -f "$segnale" ]; then
+  rm -f "$segnale"
+  echo ""
+  echo "Commit annullato per proteggere il repo centrale. Nessuna modifica è stata persa."
+  exit 1
+fi
+exit 0

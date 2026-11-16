@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-16 - SPEC-314 - Matheus: espelho da NF com referencia e solicitacao de separacao sem pecas - NO AR
+- Espelho da entrada de NF (Compras): agora traz a referencia do fornecedor; colunas Codigo, Referencia, Produto, Quantidade (valor unitario saiu da linha dos itens). Solicitacao de separacao impressa (Logistica): sem a lista de pecas.
+- Banco: migration 375 APLICADA (so a funcao `espelho_entrada_nota_compra`, chave `referencia`; rollback.sql pronto).
+- Codigo: compras-lucenera efcca23 (publicado so com o espelho; SPEC-299 segue sem commit) e lucenera-logistics 3ed0d74, ambos pushados e publicados por wrangler. Falta teste do Matheus. SPEC-314.
+
 ## 2026-11-16 - SPEC-315 - Orcamento: equipe inclui/troca peca apos a Carol devolver (preco de tabela) - migration 373 APLICADA, Compras sem deploy
 - Caso ORC-0081: pecas 12131 (L19/L22) nao entravam. `replace_orcamento_itens` so deixa admin (ou financeiro em Aprovacao Financeira) incluir/trocar item; Helena era barrada ate em rascunho. Excecao estreita: quem edita Orcamentos inclui/troca peca em rascunho e Aprovacao da Equipe, so pelo preco de tabela; preco manual e item sem cadastro seguem so admin (SPEC-108).
 - Banco: migration 376 ensaiada em ROLLBACK (6 cenarios), rollback.sql pronto; NAO aplicada. Codigo: BudgetFormPage.tsx e BudgetItemCard.tsx (`canTrocarProduto`) so no working tree, sem commit/deploy. SPEC-315.

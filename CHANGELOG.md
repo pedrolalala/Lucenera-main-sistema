@@ -2,11 +2,23 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-17 - Entrada de NF: Duplicata automatica e Fatura = numero da NF no boleto espelho (migration 379 APLICADA)
+- Solicitacao da Central a0bc76a8 (SPEC-284, "Descritivo de fatura na entrada de nota fiscal") estava Concluida mas o erro continuava para a Debora. A migration 337 da duplicata (que o CHANGELOG de 11/11 ainda dizia "nao aplicada") esta aplicada, mas so corrigia o titulo do modelo novo. Consultar Duplicatas esconde a parcela nova quando ha `boleto_id` e mostra o boleto espelho `NFC-*`, criado por `fn_nota_compra_parcela_gera_contas_pagar` com `numero_documento` = numero da NF e `fatura` vazia.
+- Migration `20261117_379_nf_compra_boleto_duplicata_e_fatura` (up/rollback/dry_run): `financeiro_ponte_nota` passa a gravar no boleto `NFC-*` numero_documento = duplicata automatica do titulo (900xxx) e fatura = numero da NF; backfill de 27 boletos ja lancados. Teste de entrada nova (em ROLLBACK, ponte forcada): Duplicata 900058 / Fatura 6605. Nenhuma linha com os dois iguais.
+- **Migration 380 APLICADA** (`20261117_380_nf_compra_duplicata_formato_connect`): Duplicata da NF no formato da Connect, em ordem de lancamento. Sequencia propria `seq_duplicata_nf_compra` (comeca em 8425, acima do maior codigo da Connect, 8424; o gatilho pula numero ja usado). As 18 NFs ja lancadas foram renumeradas de 900026..900058 para 8425..8442 (boleto espelho junto). Vendas nativas seguem em 900000+. Teste de NF nova (ROLLBACK): Duplicata 8443 / Fatura = NF; sequencia devolvida, proxima real = 8443. Atencao: se a Connect ainda emitir codigos acima de 8424, ha risco de colisao (o gatilho so checa o que ja esta no banco).
+- Sem commit de sistema (so banco). Commit no repo central pendente.
+
 ## 2026-11-17 - SPEC-319 - Historico geral de movimentacao da peca (Reuniao 61) - APLICADA, publicacao a conferir
 - O historico (kardex SPEC-231 G) ja existia; ajustado ao pedido da reuniao: devolucao aparece como D e soma no saldo; colunas Nota, Fornecedor, Venda, Cliente e Sistema; setor "Estoque Geral"/Showroom/Todos; tela abre por `?codigo=`; menu e RPC SO para papel admin (quem tinha so Dashboard Financeiro perde o acesso).
 - Banco: migration 378 APLICADA (`20261117_378_spec319_historico_movimentacao_peca/`: up, rollback, dry_run). Recria `relatorio_movimentacao_item` (mesma assinatura de entrada, retorno com 4 colunas novas; sem overload; `anon` sem execute). Dry-run testado como admin, nao-admin e anon.
 - Codigo: dashboard-lucenera a4b0662 (Movimentacao do item) e cadastro-lucenera 040c87e (botao "Historico da peca" em Pecas e Produtos, so admin), pushados.
 - Pendente: teste do usuario (peca com entrada, venda, devolucao e transferencia), testar log de transferencia nas duas vendas da Separacao Parcial, trecho da reuniao apos 08:57. SPEC-319.
+
+## 2026-11-16 - SPEC-318 - Sistema Log de Atividade (quem fez o que, quando e o que mudou) - CODIGO PRONTO, NAO APLICADO/PUBLICADO
+- Sistema novo `04-Sistemas/log-atividade/` (React + Vite + Tailwind/shadcn, base da Central): filtros de usuario, data/hora de-ate (Brasilia), sistema, acao, busca, SQL direto (mostrar/ocultar/somente); lista paginada; detalhe antes -> depois com IP e navegador; aba Por usuario; exportar Excel do filtro (sem IP/navegador). Sem atualizacao ao vivo e sem financeiro_eventos (decisoes pendentes). Build/typecheck/oxlint/oxfmt ok.
+- Acesso SOMENTE Pedro e Filippo (tabela `auditoria.log_visualizadores` + `auditoria.pode_ver_log()`); nem Lana nem Vinicius. A aba Movimentacao da Central e as RPCs `auditoria_listar`/`auditoria_resumo_usuarios` NAO foram alteradas.
+- Banco: migration 377 (`20261116_377_spec318_log_atividade/`: up, rollback, dry_run, tests) com RPCs `auditoria_log_listar`, `auditoria_log_resumo_usuarios`, `auditoria_log_filtros`. NAO APLICADA. Dry-run/tests nao rodados (pendente do usuario).
+- Pendente: aplicar 377, criar repo `log-lucenera`, projeto Cloudflare, INSERT em `systems` (slug `log-atividade`, sem Acesso a Sistemas para Vinicius/Lana). SPEC-318.
 
 ## 2026-11-16 - SPEC-317 - Compras: escolher o fornecedor por produto no pedido em montagem - NO AR
 - Debora: na Necessidade de Compra o fornecedor vinha fixo do cadastro (so o Pedido Avulso permitia escolher). Agora o botao "Fornecedor por produto" do pedido em montagem deixa trocar o fornecedor de cada produto (busca por nome); produto sem fornecedor cadastrado tambem entra e o fornecedor se escolhe ali. Fechar continua gerando um pedido por fornecedor (SPEC-316).

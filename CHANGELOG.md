@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-17 - SPEC-319 - Historico geral de movimentacao da peca (Reuniao 61) - APLICADA, publicacao a conferir
+- O historico (kardex SPEC-231 G) ja existia; ajustado ao pedido da reuniao: devolucao aparece como D e soma no saldo; colunas Nota, Fornecedor, Venda, Cliente e Sistema; setor "Estoque Geral"/Showroom/Todos; tela abre por `?codigo=`; menu e RPC SO para papel admin (quem tinha so Dashboard Financeiro perde o acesso).
+- Banco: migration 378 APLICADA (`20261117_378_spec319_historico_movimentacao_peca/`: up, rollback, dry_run). Recria `relatorio_movimentacao_item` (mesma assinatura de entrada, retorno com 4 colunas novas; sem overload; `anon` sem execute). Dry-run testado como admin, nao-admin e anon.
+- Codigo: dashboard-lucenera a4b0662 (Movimentacao do item) e cadastro-lucenera 040c87e (botao "Historico da peca" em Pecas e Produtos, so admin), pushados.
+- Pendente: teste do usuario (peca com entrada, venda, devolucao e transferencia), testar log de transferencia nas duas vendas da Separacao Parcial, trecho da reuniao apos 08:57. SPEC-319.
+
 ## 2026-11-16 - SPEC-317 - Compras: escolher o fornecedor por produto no pedido em montagem - NO AR
 - Debora: na Necessidade de Compra o fornecedor vinha fixo do cadastro (so o Pedido Avulso permitia escolher). Agora o botao "Fornecedor por produto" do pedido em montagem deixa trocar o fornecedor de cada produto (busca por nome); produto sem fornecedor cadastrado tambem entra e o fornecedor se escolhe ali. Fechar continua gerando um pedido por fornecedor (SPEC-316).
 - Sem impacto no banco. Codigo: compras-lucenera 8f1f4d6 (pushado, publicado por wrangler so com esta mudanca; SPEC-299 segue sem commit). Falta teste da Debora. SPEC-317.

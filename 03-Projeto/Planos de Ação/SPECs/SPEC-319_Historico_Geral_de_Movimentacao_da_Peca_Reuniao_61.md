@@ -84,6 +84,8 @@ Reaplicar a versão anterior da RPC (migration 251). Sem alteração de tabela.
 - Migration 378 aplicada (RPC recriada: tipo D, nota, fornecedor, venda, cliente, portão admin). Testada em dry-run como admin, não-admin e anon; peça 11150 (devolução D soma), 12771 (NF 123 ILUMINAR), 12130 (transferência T).
 - Dashboard a4b0662: colunas novas, setor "Estoque Geral", cores de D/T, `?codigo=` abre já buscando, menu só admin. Cadastro 040c87e: botão "Histórico da peça".
 
+- 17/11 (pedido do usuário): botão do Cadastro sempre habilitado; sem peça selecionada mostra o histórico de **todas as peças em ordem cronológica** (migration 379, dashboard f64b45b, cadastro 1d7f4fb).
+
 ## Pendências
 
 - [ ] Responder as 5 decisões em aberto antes de implementar.

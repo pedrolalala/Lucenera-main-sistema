@@ -12,6 +12,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - O historico (kardex SPEC-231 G) ja existia; ajustado ao pedido da reuniao: devolucao aparece como D e soma no saldo; colunas Nota, Fornecedor, Venda, Cliente e Sistema; setor "Estoque Geral"/Showroom/Todos; tela abre por `?codigo=`; menu e RPC SO para papel admin (quem tinha so Dashboard Financeiro perde o acesso).
 - Banco: migration 378 APLICADA (`20261117_378_spec319_historico_movimentacao_peca/`: up, rollback, dry_run). Recria `relatorio_movimentacao_item` (mesma assinatura de entrada, retorno com 4 colunas novas; sem overload; `anon` sem execute). Dry-run testado como admin, nao-admin e anon.
 - Codigo: dashboard-lucenera a4b0662 (Movimentacao do item) e cadastro-lucenera 040c87e (botao "Historico da peca" em Pecas e Produtos, so admin), pushados.
+- Ajuste 17/11 (pedido do usuario): botao "Historico da peca" sempre habilitado; sem peca selecionada abre o historico de TODAS as pecas em ordem cronologica (migration 379 APLICADA: mesma RPC, codigo vazio = todas, sem "Saldo anterior", saldo por peca). Dashboard f64b45b, Cadastro 1d7f4fb.
 - Pendente: teste do usuario (peca com entrada, venda, devolucao e transferencia), testar log de transferencia nas duas vendas da Separacao Parcial, trecho da reuniao apos 08:57. SPEC-319.
 
 ## 2026-11-16 - SPEC-318 - Sistema Log de Atividade (quem fez o que, quando e o que mudou) - CODIGO PRONTO, NAO APLICADO/PUBLICADO

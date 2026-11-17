@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-17 - SPEC-321 parte 2 - Carol cancela venda e desfaz aprovacao (migration 382 APLICADA, telas no ar)
+- Pedido do usuario: a Caroline (papel funcionario, acessos Orcamentos + Financeiro) e quem faz o cancelamento; o desfazer aprovacao deve seguir o mesmo processo. `desfazer_aprovacao_financeira` so deixava admin/gerente e RECUSAVA quando havia pedido de compra vinculado.
+- Migration `20261117_382_spec321_desfazer_aprovacao_mesmo_processo` (up/rollback): desfazer liberado a quem tem acesso 'financeiro'; pedido de compra deixa de bloquear: grava aviso para a Compras (`tipo` novo na tabela de avisos), solta destino por projeto e o vinculo de origem cai com os itens do projeto (pecas entram no Estoque Geral ao chegar); helper `_avisar_pedidos_da_venda`. Ensaio em ROLLBACK como a Caroline no ORC-0048: ok; usuario sem acesso barrado.
+- Telas: botao Cancelar venda na listagem tambem para o financeiro (gestao-financeira 9351873); `CancelarVendaDialog` com modo 'desfazer' (82331ef, financeiro-lucenera) e aviso da Compras diferencia cancelada x aprovacao desfeita (compras fa88121). Nota: o titulo do financeiro novo segue ativo apos desfazer (como antes; sem parcelas abertas).
+
 ## 2026-11-17 - SPEC-321 - Cancelar venda com pedido de compra em andamento (migration 381 APLICADA, telas no ar)
 - Caso ORC-0048 / VENDA-8527: cliente cancelou, pedido de compra 2013 em andamento. `cancelar_orcamento` testava status 'aprovado' (o real e 'Orcamento Aprovado') e so trocava o status; alem disso `anon` tinha EXECUTE sem checagem de permissao. `desfazer_aprovacao_financeira` bloqueia quando ha pedido de compra vinculado.
 - Migration `20261117_381_spec321_cancelar_venda_pedido_em_andamento` (up/rollback/dry_run): `cancelar_orcamento` corrigida (permissao 'orcamentos', motivo obrigatorio, bloqueios: parcela paga, boleto registrado, NF, peca separada/entregue, Connect, baixa direta), cancela financeiro novo (titulo + parcelas), libera destino por projeto dos pedidos e grava aviso; RPC `previa_cancelamento_orcamento` (pop-up); tabela `pedido_compra_aviso_cancelamento` + `marcar_aviso_cancelamento_visto`. Ensaio em ROLLBACK no ORC-0048: ok (39 saldos, 6 parcelas, 6 boletos, 1 titulo, reserva -130, 1 aviso; anon barrado).

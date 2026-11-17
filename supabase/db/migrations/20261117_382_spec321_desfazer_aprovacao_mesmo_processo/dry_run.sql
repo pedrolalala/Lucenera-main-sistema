@@ -1,0 +1,1 @@
+-- dry-run feito por script Python (up.sql + chamada como a Caroline no ORC-0048, em ROLLBACK). Ver SPEC-321.

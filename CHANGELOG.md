@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-17 - Contas a Pagar / a Receber: busca de cliente e fornecedor em Cadastrar Duplicatas (NO AR)
+- Pedido do usuario: a busca do cliente na aba Cadastrar Duplicatas estava estranha. Causa: select simples com a lista inteira de `contatos` (limite de 1.000 linhas do Supabase cortava os demais), sem busca e com inativos/duplicados.
+- Novo componente `SeletorPessoa` (retorno-bancario-bradesco-5392a, a9cdb37): busca no servidor por nome, razao social ou CPF/CNPJ (50 resultados), so ativos e sem `canonical_id`; usado em Cadastrar Duplicatas (cliente/fornecedor) e em Antecipacao de pagamento (cliente). Filtro de tipo segue `contatos.tipo` (quem tem o papel so em `contato_tipos` nao aparece).
+- Sem migration. NO AR por wrangler: contas-pagar-lucenera (b3346e3d) e contas-receber-lucenera (40d5e19e). adm-bancaria-lucenera nao republicado. Falta teste do usuario.
+
 ## 2026-11-17 - SPEC-321 parte 2 - Carol cancela venda e desfaz aprovacao (migration 382 APLICADA, telas no ar)
 - Pedido do usuario: a Caroline (papel funcionario, acessos Orcamentos + Financeiro) e quem faz o cancelamento; o desfazer aprovacao deve seguir o mesmo processo. `desfazer_aprovacao_financeira` so deixava admin/gerente e RECUSAVA quando havia pedido de compra vinculado.
 - Migration `20261117_382_spec321_desfazer_aprovacao_mesmo_processo` (up/rollback): desfazer liberado a quem tem acesso 'financeiro'; pedido de compra deixa de bloquear: grava aviso para a Compras (`tipo` novo na tabela de avisos), solta destino por projeto e o vinculo de origem cai com os itens do projeto (pecas entram no Estoque Geral ao chegar); helper `_avisar_pedidos_da_venda`. Ensaio em ROLLBACK como a Caroline no ORC-0048: ok; usuario sem acesso barrado.
@@ -23,8 +28,6 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Banco: migration 378 APLICADA (`20261117_378_spec319_historico_movimentacao_peca/`: up, rollback, dry_run). Recria `relatorio_movimentacao_item` (mesma assinatura de entrada, retorno com 4 colunas novas; sem overload; `anon` sem execute). Dry-run testado como admin, nao-admin e anon.
 - Codigo: dashboard-lucenera a4b0662 (Movimentacao do item) e cadastro-lucenera 040c87e (botao "Historico da peca" em Pecas e Produtos, so admin), pushados.
 - Ajuste 17/11 (pedido do usuario): botao "Historico da peca" sempre habilitado; sem peca selecionada abre o historico de TODAS as pecas em ordem cronologica (migration 379 APLICADA: mesma RPC, codigo vazio = todas, sem "Saldo anterior", saldo por peca). Dashboard f64b45b, Cadastro 1d7f4fb.
-- Ajuste 17/11 (2): o historico passa a ficar DENTRO do Cadastro (Consultar Produtos), tela `/historico` (botao "Historico da peca" abre nela, sem sair do sistema), em largura total e sem rolagem lateral (texto quebra em linha; Nota/Fornecedor e Venda/Cliente empilhados); filtros de codigo, data, setor, tipo e busca, ordem e CSV. Item "Movimentacao do item" saiu do menu do Dashboard. Sem banco novo. Cadastro 40f4f5d, Dashboard 6bb7813.
-- 17/11: usuario testou e aprovou. Tela antiga "Movimentacao do item" APAGADA do Dashboard (rota, pagina e servico; dashboard-lucenera 3273795). A RPC continua a mesma, usada so pelo Cadastro.
 - Pendente: teste do usuario (peca com entrada, venda, devolucao e transferencia), testar log de transferencia nas duas vendas da Separacao Parcial, trecho da reuniao apos 08:57. SPEC-319.
 
 ## 2026-11-16 - SPEC-318 - Sistema Log de Atividade (quem fez o que, quando e o que mudou) - CODIGO PRONTO, NAO APLICADO/PUBLICADO

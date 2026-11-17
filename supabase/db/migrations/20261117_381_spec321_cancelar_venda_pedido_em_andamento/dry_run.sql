@@ -1,0 +1,4 @@
+-- SPEC-321 dry-run: roda DEPOIS do up.sql, dentro da MESMA transação, e termina em ROLLBACK.
+-- (scripts/aplicar_migration_sql.py faz up + este arquivo; sem COMMIT embutido)
+-- Testes: previa e cancelamento do ORC-0048 como usuário autenticado com acesso a 'orcamentos'.
+-- Conferir: status cancelado, saldos zerados, reserva devolvida, título cancelado, destino/aviso gravados.

@@ -86,6 +86,8 @@ Reaplicar a versão anterior da RPC (migration 251). Sem alteração de tabela.
 
 - 17/11 (pedido do usuário): botão do Cadastro sempre habilitado; sem peça selecionada mostra o histórico de **todas as peças em ordem cronológica** (migration 379, dashboard f64b45b, cadastro 1d7f4fb).
 
+- 17/11 (pedido do usuário): o histórico passa a ficar **dentro do Cadastro** (`/historico`), não no Dashboard; tabela em largura total sem rolagem lateral. Dashboard 6bb7813 (item saiu do menu), Cadastro 40f4f5d.
+
 ## Pendências
 
 - [ ] Responder as 5 decisões em aberto antes de implementar.

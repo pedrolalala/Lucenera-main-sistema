@@ -24,6 +24,7 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - Codigo: dashboard-lucenera a4b0662 (Movimentacao do item) e cadastro-lucenera 040c87e (botao "Historico da peca" em Pecas e Produtos, so admin), pushados.
 - Ajuste 17/11 (pedido do usuario): botao "Historico da peca" sempre habilitado; sem peca selecionada abre o historico de TODAS as pecas em ordem cronologica (migration 379 APLICADA: mesma RPC, codigo vazio = todas, sem "Saldo anterior", saldo por peca). Dashboard f64b45b, Cadastro 1d7f4fb.
 - Ajuste 17/11 (2): o historico passa a ficar DENTRO do Cadastro (Consultar Produtos), tela `/historico` (botao "Historico da peca" abre nela, sem sair do sistema), em largura total e sem rolagem lateral (texto quebra em linha; Nota/Fornecedor e Venda/Cliente empilhados); filtros de codigo, data, setor, tipo e busca, ordem e CSV. Item "Movimentacao do item" saiu do menu do Dashboard. Sem banco novo. Cadastro 40f4f5d, Dashboard 6bb7813.
+- 17/11: usuario testou e aprovou. Tela antiga "Movimentacao do item" APAGADA do Dashboard (rota, pagina e servico; dashboard-lucenera 3273795). A RPC continua a mesma, usada so pelo Cadastro.
 - Pendente: teste do usuario (peca com entrada, venda, devolucao e transferencia), testar log de transferencia nas duas vendas da Separacao Parcial, trecho da reuniao apos 08:57. SPEC-319.
 
 ## 2026-11-16 - SPEC-318 - Sistema Log de Atividade (quem fez o que, quando e o que mudou) - CODIGO PRONTO, NAO APLICADO/PUBLICADO

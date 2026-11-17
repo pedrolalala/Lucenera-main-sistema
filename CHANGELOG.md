@@ -2,6 +2,12 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-17 - SPEC-322 - Compensacao (permuta) pagar x receber + cadastro do Pagar no financeiro novo (migration 383 APLICADA, telas no ar)
+- Caso Leonardo Agostinho Bermudes (prestador em permuta; a receber R$ 1.686,99 no modelo novo): em vez de valor negativo no Contas a Receber, compensacao entre a pagar e a receber da mesma pessoa/empresa, sem dinheiro (baixa `compensacao`, motivo obrigatorio, parcial permitida, estorno nas duas contas juntas).
+- Migration `20261117_383_spec322_compensacao_permuta` (up/rollback/dry_run): coluna `financeiro_baixas.compensacao_id`; funcoes `financeiro_compensacao_candidatas`, `financeiro_compensar`, `financeiro_estornar_compensacao`, `financeiro_cadastrar_conta_manual`, `financeiro_compensar_nova_conta` (so authenticated/service_role). Ensaio em ROLLBACK com o Leonardo ok; aplicada e conferida (coluna, 5 funcoes, anon sem execute).
+- retorno-bancario-bradesco-5392a 12ea9d4: botao Compensar em Consultar Duplicatas (aba "Registrar o servico e compensar" partindo do a receber); Estornar desfaz a compensacao inteira; Cadastrar Duplicatas do Contas a Pagar grava conta NOVA no financeiro novo (exige Fornecedor e Apropriacao, nasce Aberta, linha digitavel vai na observacao; antes gravava so em `boletos`, sem espelho); Remessa ignora boleto de valor negativo. NO AR por wrangler: contas-pagar-lucenera (cd4af9b1) e contas-receber-lucenera (e566a640).
+- Falta: teste do usuario com o Leonardo e da Carol; conferir a conta manual nova do Pagar em Contas em Aberto e no fluxo de caixa. SPEC-322.
+
 ## 2026-11-17 - Contas a Pagar / a Receber: busca de cliente e fornecedor em Cadastrar Duplicatas (NO AR)
 - Pedido do usuario: a busca do cliente na aba Cadastrar Duplicatas estava estranha. Causa: select simples com a lista inteira de `contatos` (limite de 1.000 linhas do Supabase cortava os demais), sem busca e com inativos/duplicados.
 - Novo componente `SeletorPessoa` (retorno-bancario-bradesco-5392a, a9cdb37): busca no servidor por nome, razao social ou CPF/CNPJ (50 resultados), so ativos e sem `canonical_id`; usado em Cadastrar Duplicatas (cliente/fornecedor) e em Antecipacao de pagamento (cliente). Filtro de tipo segue `contatos.tipo` (quem tem o papel so em `contato_tipos` nao aparece).

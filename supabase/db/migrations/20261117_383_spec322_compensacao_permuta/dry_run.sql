@@ -1,0 +1,6 @@
+-- SPEC-322 dry-run (rascunho, NÃO aplicado): rodar up.sql e, como usuário com acesso 'financeiro', tudo em ROLLBACK:
+--   1) criar título a pagar manual (financeiro_criar_titulo, origem 'manual') da mesma pessoa/empresa de uma parcela firme a receber;
+--   2) financeiro_compensacao_candidatas(parcela_pagar) lista a parcela a receber;
+--   3) financeiro_compensar(pagar, receber, valor parcial, 'teste') -> os dois saldos caem; movimenta_caixa = false nas duas baixas;
+--   4) pessoa/empresa diferente, valor acima do saldo, parcela não firme: recusados; usuário sem 'financeiro' e anon: barrados;
+--   5) financeiro_estornar_compensacao(id, 'teste') -> valor_liquidado volta nas duas parcelas.

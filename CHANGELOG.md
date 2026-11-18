@@ -2,6 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-18 - SPEC-323 A3 - Entrada de NF avulsa com quantidade soma no Estoque Geral (migration 387 aplicada, Compras no ar)
+- Compras: campo "Quantidade da nota" na entrada avulsa; fornecedor livre (caso Flos SPA, peca 12052). Vazio = so registra a nota, como antes. Nao abre Contas a Pagar (A4 em aberto).
+- Banco: coluna `notas_fiscais_compra.quantidade_avulsa`, RPC `registrar_entrada_nota_avulsa` (nota + estoque na mesma transacao), `cancelar_entrada_nota_compra` devolve a quantidade da avulsa e deixou de quebrar em nota sem pedido. Testado em ROLLBACK (soma 3, cancela, volta a 0).
+- Migration `20261118_387_spec323_entrada_nf_avulsa_estoque`. Repositorios: central + compras-lucenera.
+
 ## 2026-11-18 - SPEC-323 - Triagem da Central de Solicitacoes: entrada de NF avulsa (caso Flos), devolucao presa na fila financeira, fatura de producao (SO DESENHO, nada aplicado)
 - Triagem da Central (9 abertas/em analise; 99 concluidas; 36 em desenvolvimento) em ordem de urgencia. SPEC unica `SPEC-323_Central_18_11_Entrada_NF_Flos_Devolucao_Fila_Financeira_e_Fatura_Producao.md`.
 - A (Debora, peca 12052 da FLOS SPA): a busca de peca da entrada avulsa so olha nome/referencia (nao acha o codigo) e a entrada avulsa so grava a nota (sem quantidade, sem estoque, sem Contas a Pagar). Proposta: busca por codigo, fornecedor livre, quantidade + soma ao estoque. Aguarda decisao de quantidade e de Contas a Pagar.

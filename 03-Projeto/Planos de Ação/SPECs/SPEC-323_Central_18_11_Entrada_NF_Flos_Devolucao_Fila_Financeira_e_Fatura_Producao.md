@@ -19,9 +19,9 @@ sistemas_envolvidos:
 
 - [x] A1. `buscarProdutosParaEntrada` (`services/notas-fiscais-compra.ts`) passa a achar também por `codigo_produto` (digitar `12052` acha a peça). Aplicar a mesma busca nos demais seletores de peça de Compras (Pedido avulso) que hoje só olham nome e referência.
 - [x] A2. Garantir que nenhuma busca de peça em Compras filtre pelo fornecedor principal (`produtos.fornecedor_principal_id`): a nota ou o pedido pode ser de QUALQUER fornecedor, independente do fornecedor do cadastro da peça.
-- [ ] A3. Entrada avulsa com peça: campo **Quantidade** obrigatório quando houver peça; ao registrar, soma ao estoque geral (`estoque_itens`) e marca `estoque_somado_em`, reaproveitando a regra da entrada por pedido (`registrar_entrada_nota_compra`), sem duplicar a lógica no front.
-- [ ] A4. Decidir com o usuário (ver Decisões) se a nota avulsa gera Contas a Pagar; implementar conforme a decisão.
-- [ ] A5. Migration (se A3 exigir função nova): `supabase/db/migrations/20261118_NNN_spec323_entrada_nf_avulsa_estoque/` com up, rollback e dry_run (sem COMMIT embutido no dry_run).
+- [x] A3. (feito 18/11: RPC `registrar_entrada_nota_avulsa`, migration 387 aplicada, Compras no ar) Entrada avulsa com peça: campo **Quantidade** obrigatório quando houver peça; ao registrar, soma ao estoque geral (`estoque_itens`) e marca `estoque_somado_em`, reaproveitando a regra da entrada por pedido (`registrar_entrada_nota_compra`), sem duplicar a lógica no front.
+- [ ] A4. (NÃO feito: a nota avulsa NÃO abre Contas a Pagar; a Flos já está paga/lançada na Connect) Decidir com o usuário (ver Decisões) se a nota avulsa gera Contas a Pagar; implementar conforme a decisão.
+- [x] A5. (387 aplicada; corrige também o cancelamento de nota avulsa, que quebrava) Migration (se A3 exigir função nova): `supabase/db/migrations/20261118_NNN_spec323_entrada_nf_avulsa_estoque/` com up, rollback e dry_run (sem COMMIT embutido no dry_run).
 - [ ] A6. Atualizar `04-Sistemas/compras-lucenera-3o23t98ee/supabase/AI_DB_CONTEXT.md` se houver função nova.
 
 ### B. Devolução já efetivada que continua na Aprovação Financeira (ORC-0071) — pedido da Caroline, 16/11

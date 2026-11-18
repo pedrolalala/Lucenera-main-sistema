@@ -76,7 +76,7 @@ Diferenças entre as empresas: MANOELLA e FOCO são Simples ("GPS ME/EPP": só o
 7. **Rubricas de férias, 13º, rescisão, adiantamento:** outubro teve férias e descontos de férias recebidas. Falta ver **um mês com 13º e uma rescisão** para saber se a planilha tem o mesmo desenho (ou outro arquivo).
 8. **Funcionário sem CPF/sem cadastro:** ficam numa **fila de pendências** e o mês não gera os títulos dessa pessoa até o RH ligar/cadastrar (recomendado) — ou gera com nome solto?
 9. O arquivo é **.xlsx** (o usuário falou "XLS"): aceitar `.xlsx` e, se a contabilidade mandar, `.xls` antigo?
-10. **Reajuste sindical de 0,33% (informado pelo usuário em 18/11, "esse mês"):** não sei ainda se vale para a competência de outubro (já analisada, sem sinal disso) ou para novembro. Perguntas: (a) a partir de qual competência vale e há **retroativo** (diferença de meses anteriores) na folha? (b) aplica a **todos** os salários ou só a uma categoria/sindicato? (c) o salário-base do cadastro do funcionário passa a ser atualizado pela importação (recomendado: a folha da contabilidade é a fonte, o cadastro apenas guarda o "salário vigente" para consulta)?
+10. **Efeito sindical de outubro/2026 (esclarecido pelo usuário em 18/11):** não houve reajuste salarial; foi só uma questão sindical do mês. Os salários da planilha batem com o cadastro. Fica **sem regra especial**: rubricas sindicais (05841 contribuição assistencial, 01006 dia de classe sindical) geram a guia `SINDICATO` quando aparecem na planilha, sem valor ou percentual fixo.
 
 ## Definição da SPEC (proposta)
 
@@ -119,7 +119,7 @@ Diferenças entre as empresas: MANOELLA e FOCO são Simples ("GPS ME/EPP": só o
 - Nunca apagar: reimportar cancela a versão anterior (com motivo) e cria a nova; cancelamento bloqueado se houver baixa.
 - Salário individual nunca sai do RH; relatórios do financeiro só enxergam guias e totais.
 - A planilha é a fonte: o sistema **não recalcula** a folha (a tela antiga de cálculo sai ou vira só consulta).
-- **Reajuste coletivo (dissídio/convenção, ex.: 0,33%):** o sistema não calcula nem aplica o percentual; lê o que a contabilidade lançou. Na conferência, mostra por funcionário a **variação do salário-base × mês anterior** e avisa quando a variação for diferente do esperado (campo "reajuste esperado %" opcional na importação, tolerância de R$ 0,02 por arredondamento). Rubricas de **retroativo/diferença** entram no plano de contas como salário, sem título separado.
+- **Rubricas sindicais eventuais:** valor sempre lido da planilha; a conferência só mostra a variação do salário-base × mês anterior como aviso informativo (tolerância R$ 0,02).
 - Competência e empresa do arquivo mandam; o usuário não escolhe mês manualmente (evita lançar no mês errado).
 
 ## Checklist de Ação

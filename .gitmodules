@@ -56,3 +56,6 @@
 [submodule "04-Sistemas/movimentacao-pecas"]
 	path = 04-Sistemas/movimentacao-pecas
 	url = https://github.com/pedrolalala/movimentacao-pecas.git
+[submodule "04-Sistemas/escoar-reserva"]
+	path = 04-Sistemas/escoar-reserva
+	url = https://github.com/pedrolalala/escoar-reserva.git

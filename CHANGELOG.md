@@ -2,6 +2,14 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-18 - SPEC-323 - Triagem da Central de Solicitacoes: entrada de NF avulsa (caso Flos), devolucao presa na fila financeira, fatura de producao (SO DESENHO, nada aplicado)
+- Triagem da Central (9 abertas/em analise; 99 concluidas; 36 em desenvolvimento) em ordem de urgencia. SPEC unica `SPEC-323_Central_18_11_Entrada_NF_Flos_Devolucao_Fila_Financeira_e_Fatura_Producao.md`.
+- A (Debora, peca 12052 da FLOS SPA): a busca de peca da entrada avulsa so olha nome/referencia (nao acha o codigo) e a entrada avulsa so grava a nota (sem quantidade, sem estoque, sem Contas a Pagar). Proposta: busca por codigo, fornecedor livre, quantidade + soma ao estoque. Aguarda decisao de quantidade e de Contas a Pagar.
+- B (Caroline): ORC-0071 (DEV-0011, R$ 1.343,89, troca dev sem vinculo Connect) segue em Aprovacao Financeira com credito ja lancado; unico caso da fila. Causa a confirmar na funcao da SPEC-302.
+- C (Debora, fatura de producao no Contas a Pagar): sem candidato nos dados; aguarda print. D (acordo Caio Medici Madureira): nao reproduzido, dados corretos; aguarda print da Caroline.
+- 18/11 NO AR (A1/A2): busca de peca da Entrada de NF tambem por codigo (compras-lucenera 63c34fb, wrangler -> compras-lucenera.pages.dev, sem migration). Falta A3/A4 (quantidade + estoque + Contas a Pagar), aguardando decisao. ORC-0071 nao e bug: o credito nasce na ponte ao criar a parcela e o orcamento aguarda a Aprovacao Financeira.
+- Ja cobertos: SPEC-316 (varios fornecedores, no ar), SPEC-308 (Ubiqua/Tabela 2, so desenho), SPEC-321 (estorno de venda). Sem migration e sem mudanca de codigo. Repositorio: so o central.
+
 ## 2026-11-18 - SPEC-320: NO AR em escoar-lucenera.pages.dev (385 e 386 APLICADAS; falta teste em tela e repo próprio)
 - Migration 385 aplicada em SP (3 tabelas + 5 funções; 5 funções, 2 operadores, RLS ligado conferidos). Migration 386 aplicada: card "Escoar Reserva sem Venda" no Hub (slug `escoar-reserva`, ordem 101) para Matheus e Vitória; admin vê pelo papel.
 - Deploy por wrangler (projeto `escoar-lucenera` criado com `--force` na criação; site responde 200, bundle com o Supabase de São Paulo). Sem commit: o sistema ainda não tem repositório próprio.

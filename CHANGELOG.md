@@ -2,6 +2,20 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-18 - SPEC-324: importar a Folha da contabilidade (holerite mensal) para o Contas a Pagar (só SPEC)
+- Analisados os 5 xlsx de outubro/2026 (`01-Documento/01 - Planilhas/Holerite`), o RH, o Contas a Pagar e o banco (só leitura). Leitura de teste bateu com os Totais da contabilidade (FOCO 16 holerites = R$ 39.543,14; ISLIGHT R$ 2.257,11). Total a desembolsar em outubro: R$ 99.536,17 (líquido + GPS + FGTS + IRRF + sindicato + consignado). Achados: "Gerar folha" do RH está quebrada (colunas inexistentes), `folha_pagamento` é dado de teste, nenhum título de folha existe, faltam holerites da MANOELLA, 4 CPFs sem cadastro.
+- Nada implementado e nenhuma migration. 9 decisões em aberto na SPEC.
+
+## 2026-11-18 - SPEC-320: NO AR em escoar-lucenera.pages.dev (385 e 386 APLICADAS; falta teste em tela e repo próprio)
+- Migration 385 aplicada em SP (3 tabelas + 5 funções; 5 funções, 2 operadores, RLS ligado conferidos). Migration 386 aplicada: card "Escoar Reserva sem Venda" no Hub (slug `escoar-reserva`, ordem 101) para Matheus e Vitória; admin vê pelo papel.
+- Deploy por wrangler (projeto `escoar-lucenera` criado com `--force` na criação; site responde 200, bundle com o Supabase de São Paulo). Sem commit: o sistema ainda não tem repositório próprio.
+- Pendente: teste do Pedro com a 11887 e depois a 8952; criar repo e ligar o Cloudflare ao Git; quem aprova a sobra final (Vinicius saiu).
+
+## 2026-11-18 - SPEC-320: sistema "Escoar reserva sem venda" (histórico do rascunho)
+- Novo sistema `04-Sistemas/escoar-reserva` (React/Vite, build ok): lança por lista de entrega da Connect as peças/quantidades; tira da reserva sem venda e do Estoque Geral; pré-visualização, histórico, CSV e estorno (só admin).
+- Migration `20261118_385_spec320_escoar_reserva_sem_venda` (up/rollback) escrita e testada em dry-run com ROLLBACK; **NÃO aplicada** (aguarda OK). Cria tabelas `escoar_reserva_lotes/itens/operadores` e 5 funções `escoar_reserva_*` / `pode_escoar_reserva_connect`. Operam Matheus, Vitória e admin. Peças negativas ficam fora.
+- Pendente: aplicar 385, publicar, registrar no Hub, teste com 11887 e 8952. Repositório próprio ainda não criado.
+
 ## 2026-11-18 - SPEC-323 A3 - Entrada de NF avulsa com quantidade soma no Estoque Geral (migration 387 aplicada, Compras no ar)
 - Compras: campo "Quantidade da nota" na entrada avulsa; fornecedor livre (caso Flos SPA, peca 12052). Vazio = so registra a nota, como antes. Nao abre Contas a Pagar (A4 em aberto).
 - Banco: coluna `notas_fiscais_compra.quantidade_avulsa`, RPC `registrar_entrada_nota_avulsa` (nota + estoque na mesma transacao), `cancelar_entrada_nota_compra` devolve a quantidade da avulsa e deixou de quebrar em nota sem pedido. Testado em ROLLBACK (soma 3, cancela, volta a 0).
@@ -14,16 +28,6 @@ Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS
 - C (Debora, fatura de producao no Contas a Pagar): sem candidato nos dados; aguarda print. D (acordo Caio Medici Madureira): nao reproduzido, dados corretos; aguarda print da Caroline.
 - 18/11 NO AR (A1/A2): busca de peca da Entrada de NF tambem por codigo (compras-lucenera 63c34fb, wrangler -> compras-lucenera.pages.dev, sem migration). Falta A3/A4 (quantidade + estoque + Contas a Pagar), aguardando decisao. ORC-0071 nao e bug: o credito nasce na ponte ao criar a parcela e o orcamento aguarda a Aprovacao Financeira.
 - Ja cobertos: SPEC-316 (varios fornecedores, no ar), SPEC-308 (Ubiqua/Tabela 2, so desenho), SPEC-321 (estorno de venda). Sem migration e sem mudanca de codigo. Repositorio: so o central.
-
-## 2026-11-18 - SPEC-320: NO AR em escoar-lucenera.pages.dev (385 e 386 APLICADAS; falta teste em tela e repo próprio)
-- Migration 385 aplicada em SP (3 tabelas + 5 funções; 5 funções, 2 operadores, RLS ligado conferidos). Migration 386 aplicada: card "Escoar Reserva sem Venda" no Hub (slug `escoar-reserva`, ordem 101) para Matheus e Vitória; admin vê pelo papel.
-- Deploy por wrangler (projeto `escoar-lucenera` criado com `--force` na criação; site responde 200, bundle com o Supabase de São Paulo). Sem commit: o sistema ainda não tem repositório próprio.
-- Pendente: teste do Pedro com a 11887 e depois a 8952; criar repo e ligar o Cloudflare ao Git; quem aprova a sobra final (Vinicius saiu).
-
-## 2026-11-18 - SPEC-320: sistema "Escoar reserva sem venda" (histórico do rascunho)
-- Novo sistema `04-Sistemas/escoar-reserva` (React/Vite, build ok): lança por lista de entrega da Connect as peças/quantidades; tira da reserva sem venda e do Estoque Geral; pré-visualização, histórico, CSV e estorno (só admin).
-- Migration `20261118_385_spec320_escoar_reserva_sem_venda` (up/rollback) escrita e testada em dry-run com ROLLBACK; **NÃO aplicada** (aguarda OK). Cria tabelas `escoar_reserva_lotes/itens/operadores` e 5 funções `escoar_reserva_*` / `pode_escoar_reserva_connect`. Operam Matheus, Vitória e admin. Peças negativas ficam fora.
-- Pendente: aplicar 385, publicar, registrar no Hub, teste com 11887 e 8952. Repositório próprio ainda não criado.
 
 ## 2026-11-18 - Ajuste manual de estoque 13188 / 13778 (7340-S-MC saiu de linha, banco SP)
 - Pedido do usuario: a 7340-S-MC (13188) saiu de linha e as pecas que chegaram ja sao da nova referencia; o estoque da Connect ja foi ajustado e o sistema Lucenera precisa bater.

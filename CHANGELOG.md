@@ -2,6 +2,10 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
+## 2026-11-18 - Ajuste manual de estoque 13188 / 13778 (7340-S-MC saiu de linha, banco SP)
+- Pedido do usuario: a 7340-S-MC (13188) saiu de linha e as pecas que chegaram ja sao da nova referencia; o estoque da Connect ja foi ajustado e o sistema Lucenera precisa bater.
+- UPDATE direto em `estoque_itens.quantidade` (mesmo metodo da Reuniao 44): peca 13188 geral 1->5 (reserva 4 mantida, disponivel 1) e peca 13778 (7440-S-MC) geral 0->8 (sem reserva, disponivel 8). Conferido em `vw_consulta_estoque`. Sem migration, sem importador. A coluna `estoque_itens.quantidade_disponivel` nao e calculada e ficou defasada (13188 mostra -3); as telas usam a view.
+
 ## 2026-11-17 - SPEC-322 - Compensacao (permuta) pagar x receber + cadastro do Pagar no financeiro novo (migration 383 APLICADA, telas no ar)
 - Caso Leonardo Agostinho Bermudes (prestador em permuta; a receber R$ 1.686,99 no modelo novo): em vez de valor negativo no Contas a Receber, compensacao entre a pagar e a receber da mesma pessoa/empresa, sem dinheiro (baixa `compensacao`, motivo obrigatorio, parcial permitida, estorno nas duas contas juntas).
 - Migration `20261117_383_spec322_compensacao_permuta` (up/rollback/dry_run): coluna `financeiro_baixas.compensacao_id`; funcoes `financeiro_compensacao_candidatas`, `financeiro_compensar`, `financeiro_estornar_compensacao`, `financeiro_cadastrar_conta_manual`, `financeiro_compensar_nova_conta` (so authenticated/service_role). Ensaio em ROLLBACK com o Leonardo ok; aplicada e conferida (coluna, 5 funcoes, anon sem execute).

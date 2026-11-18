@@ -27,6 +27,8 @@ Criado em 10/11/2026 (resposta à análise do Filippo: o `AGENTS.md` citava este
 | Showroom Lucenera | `showroom` | `showroom-qtq8er2dk` | showroom-qtq8er2dk | showroom-lucenera.pages.dev |
 | Memória Lucenera | `memoria` | `memoria-lucenera` | memoria-lucenera | memoria-lucenera.pages.dev |
 | Fichas Técnicas (Catálogo Ubiqua) | `ubiqua` | `catalogo-pecas-ubiqua-e6fa0` | cat-logo-pe-as-ubiqua- | sistema.apilucenera.site |
+| Log de Atividade (SPEC-318) | `log-atividade` | `log-atividade` | log-lucenera (a criar) | a publicar (previsto log-lucenera.pages.dev) |
+| Escoar Reserva sem Venda (SPEC-320) | `escoar-reserva` | `escoar-reserva` | escoar-reserva | escoar-lucenera.pages.dev |
 
 ## Observações
 - Contas a Pagar, Contas a Receber e Administração Bancária são **o mesmo código** publicado em 3 endereços; muda só o modo no build.

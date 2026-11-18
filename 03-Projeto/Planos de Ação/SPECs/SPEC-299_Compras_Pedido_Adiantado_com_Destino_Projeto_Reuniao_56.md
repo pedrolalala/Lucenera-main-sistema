@@ -1,7 +1,7 @@
 ---
 titulo: "SPEC-299 — Compras: pedido adiantado para uma venda que ainda não passou (destino reservado pelo código do projeto)"
-status: não iniciado
-data_ultima_modificacao: 2026-11-13
+status: pendente
+data_ultima_modificacao: 2026-11-16
 sistemas_envolvidos:
   - Compras (compras-lucenera-3o23t98ee) — Pedido Avulso, Pedidos de Compra, Necessidade de Compra, Entrada de Nota Fiscal
   - Banco (Supabase) — tabela nova de destino do item do pedido, views de necessidade, RPC de entrada
@@ -16,19 +16,19 @@ sistemas_envolvidos:
 ## Checklist de Ação
 
 **A. Banco**
-- [ ] A1. Tabela nova `pedido_compra_item_destino_projeto` (`pedido_compra_item_id`, `projeto_id`, `quantidade`, `criado_por`, `criado_em`, `liberado_em`/`liberado_por`/`motivo_liberacao`); RLS ligado, `REVOKE ALL ... FROM anon`, SELECT por `pode_acessar_sistema('compras')`, escrita só por RPC `SECURITY DEFINER`
-- [ ] A2. RPC `reservar_pedido_item_para_projeto(item, projeto, quantidade)` — grava o destino; recusa quantidade maior que a do item do pedido ou que a soma já reservada
-- [ ] A3. RPC `liberar_destino_projeto_pedido_item(...)` — tira o vínculo (cancelou/devolveu/trocou a peça); a quantidade volta a ser pedido "livre"
-- [ ] A4. Necessidade de compra por peça: o que está **reservado para um projeto** não entra na cobertura de outras vendas (cobertura livre = pedido em andamento − reservado para projeto)
-- [ ] A5. Quando o projeto vira venda (itens entram no `projeto_itens`), a reserva do pedido passa a cobrir **os itens daquele projeto** (some a necessidade deles enquanto o pedido está a caminho) — sem duplicar contagem
-- [ ] A6. RPC de entrada (`entregas_futuras_para_entrada` e a gravação da entrada) devolve o destino por projeto para pré-preencher "Para quem"
+- [x] A1. Tabela nova `pedido_compra_item_destino_projeto` (`pedido_compra_item_id`, `projeto_id`, `quantidade`, `criado_por`, `criado_em`, `liberado_em`/`liberado_por`/`motivo_liberacao`); RLS ligado, `REVOKE ALL ... FROM anon`, SELECT por `pode_acessar_sistema('compras')`, escrita só por RPC `SECURITY DEFINER`
+- [x] A2. RPC `reservar_pedido_item_para_projeto(item, projeto, quantidade)` — grava o destino; recusa quantidade maior que a do item do pedido ou que a soma já reservada
+- [x] A3. RPC `liberar_destino_projeto_pedido_item(...)` — tira o vínculo (cancelou/devolveu/trocou a peça); a quantidade volta a ser pedido "livre"
+- [x] A4. Necessidade de compra por peça: o que está **reservado para um projeto** não entra na cobertura de outras vendas (cobertura livre = pedido em andamento − reservado para projeto)
+- [x] A5. Quando o projeto vira venda (itens entram no `projeto_itens`), a reserva do pedido passa a cobrir **os itens daquele projeto** (some a necessidade deles enquanto o pedido está a caminho) — sem duplicar contagem
+- [x] A6. RPC `destinos_projeto_do_pedido` devolve as reservas do pedido; a entrada usa para pré-preencher "Para quem" (`entregas_futuras_para_entrada` ficou intacta)
 
 **B. Compras (telas)**
-- [ ] B1. Pedido Avulso e itens do Pedido de Compra: campo "Reservado para o projeto" (busca por código do projeto) + quantidade exata, com o rótulo/tag "Compra adiantada — projeto XXXX" na lista de pedidos
-- [ ] B2. Aviso no Pedido Avulso quando a peça já tem venda aberta ("Existe venda a ser vinculada?") para a Débora lembrar de marcar o projeto
+- [x] B1. Pedido Avulso e itens do Pedido de Compra: campo "Reservado para o projeto" (busca por código do projeto) + quantidade exata, com o rótulo/tag "Compra adiantada — projeto XXXX" na lista de pedidos
+- [x] B2. Aviso no Pedido Avulso quando a peça já tem venda aberta ("Existe venda a ser vinculada?") para a Débora lembrar de marcar o projeto
 - [ ] B3. Necessidade de Compra: mostrar na linha da peça "X un. do pedido NNNN estão reservadas para o projeto YYYY (não cobrem outras vendas)"
-- [ ] B4. Entrada de NF: item do pedido que veio com projeto já entra **vinculado** a esse projeto (igual ao fluxo normal de "Para quem"), com opção de **retirar o vínculo** → a peça entra no estoque geral
-- [ ] B5. Ação "Liberar destino" no pedido (para devolução de orçamento / cancelamento antes de a peça chegar), com motivo
+- [x] B4. Entrada de NF: item do pedido que veio com projeto já entra **vinculado** a esse projeto (igual ao fluxo normal de "Para quem"), com opção de **retirar o vínculo** → a peça entra no estoque geral
+- [x] B5. Ação "Liberar destino" no pedido (para devolução de orçamento / cancelamento antes de a peça chegar), com motivo
 
 **C. Fora do código (Controle de Produção)**
 - [ ] C1. Liberar a tela do Controle de Produção para toda a empresa (leitura); **alterar status só Vinícius, Débora, Matheus e Vitória** por enquanto; João entra na semana seguinte (o Vinícius libera e ensina)
@@ -37,7 +37,7 @@ sistemas_envolvidos:
 - [ ] Migration com dry-run em ROLLBACK (sem COMMIT embutido), teste como usuário sem o sistema Compras, publicar Compras por wrangler, CHANGELOG, `AI_DB_CONTEXT.md` do Compras
 
 ### Passos manuais do usuário
-- [ ] Confirmar com o Vinícius/Débora os "Pontos para confirmar" abaixo
+- [ ] Validar com o Vinícius/Débora as "Decisões aprovadas" abaixo
 - [ ] Liberar o acesso do Controle de Produção (item C1) no Hub/Acesso a Sistemas
 - [ ] Teste com a Débora: pedido avulso de 10 reservado para o projeto X; vender 5 da mesma peça no meio → **tem que abrir necessidade de 5**; passar a venda do projeto X → necessidade dela fica coberta; dar entrada → vem vinculada ao cliente do projeto X
 
@@ -109,22 +109,30 @@ flowchart LR
 ### Rollback
 Tabela nova + RPCs novas + views recriadas: guardar a definição atual das views em `backup`, `rollback.sql` recria as views antigas e apaga a tabela; sem mexer em dado existente.
 
-## Pontos para confirmar
+## Decisões aprovadas (16/11/2026 — usuário: "faça o que for melhor", adotadas as recomendações)
 
-1. **Código do projeto existe no orçamento ainda em andamento?** A reunião assume que sim (o orçamento tem projeto antes de virar venda). Conferir no banco real.
-2. **Quando o projeto vira venda**, a reserva cobre automaticamente os itens da mesma peça (A5)? Recomendação: **sim**, até o limite da quantidade reservada.
-3. **Peça trocada no orçamento** depois da reserva: aviso e obrigar "liberar/trocar destino" (recomendado) ou liberar sozinho?
-4. **Devolução de orçamento** libera a reserva automaticamente ou só avisa a Débora? Recomendação: avisar (a peça pode já estar comprada e a decisão é dela).
-5. **Pedido reservado a mais de um projeto** (ex.: 10 = 6 do projeto A + 4 do B)? Recomendação: permitir, a soma ≤ quantidade.
-6. **Precedência com a SPEC-221**: implementar esta junto ou antes dela (recomendação: antes, é menor e evita o buraco já).
+1. **Código do projeto:** o orçamento já tem `projeto_id` antes de virar venda (`orcamentos.projeto_id`) e o projeto tem `codigo` (snapshot central). A busca do Pedido Avulso é por `projetos.codigo`. Falta só conferir no banco real que orçamentos em andamento têm `projeto_id` preenchido.
+2. **Venda passou:** a reserva cobre automaticamente os itens da mesma peça do projeto, até o limite reservado (A5).
+3. **Troca de peça no orçamento:** o sistema avisa a Débora e exige liberar/trocar o destino; não libera sozinho.
+4. **Devolução de orçamento:** só avisa a Débora (a peça pode já estar comprada); a liberação é ação dela (B5).
+5. **Mais de um projeto no mesmo item:** permitido, com soma das reservas ≤ quantidade do item.
+6. **Ordem:** SPEC-299 antes da SPEC-221; a SPEC-221 deve respeitar a cobertura livre (pedido − reservado para projeto) ao ser retomada.
 
 ## Realizado
 
-(vazio)
+### 2026-11-16
+
+- Migration `20261116_373_spec299_pedido_adiantado_destino_projeto` REDIGIDA e ensaiada em ROLLBACK (`dry_run.sql`, com teste: reserva de 2 un. baixou a cobertura do produto de 17 para 15; liberar devolveu; as views mantiveram 174 e 946 linhas). **APLICADA em 16/11/2026** (tabela vazia, 4 funções criadas, RLS ligado e sem acesso `anon`). (Número 373 porque 357 já era da SPEC-300.) Tem `up.sql`, `dry_run.sql` e `rollback.sql`.
+  - Tabela `pedido_compra_item_destino_projeto` (RLS por `pode_acessar_sistema('necessidade-de-compra')`, sem `anon`, escrita só por RPC); RPCs `reservar_pedido_item_para_projeto`, `liberar_destino_projeto_pedido_item`, `destinos_projeto_do_pedido`, `buscar_projetos_para_reserva`.
+  - Views recriadas com as mesmas colunas: `vw_necessidade_compra_pedidos_abertos` (reservado sai da cobertura livre; cobre só o que o próprio projeto já tem em entrega futura) e `vw_necessidade_compra_item_orcamento` (reserva cobre os L do próprio projeto, na ordem do L).
+- Compras (só no working tree, sem commit/deploy): Pedido Avulso com botão ⌖ "Reservar para projeto" por linha (`ReservaProjetoDialog`: busca por código/nome/cliente, quem tem a peça no orçamento vem primeiro, soma limitada à quantidade); `ModalGerarCompraItemOrcamento` grava as reservas após criar o pedido; Pedidos mostra "Compra adiantada: N un. → projeto X" com "liberar" (motivo obrigatório); Entrada de NF sugere primeiro os L dos projetos reservados.
+- Achado no banco real: `orcamentos.projeto_id` está preenchido em enviado_cliente (6/6) e Aprovação Financeira (17/17), mas só 5 de 36 rascunhos — rascunho sem projeto não aparece na busca.
 
 ## Pendências
 
-- [ ] Confirmar com Vinícius e Débora os 6 pontos acima antes de redigir a migration.
-- [ ] Verificar no banco real se o orçamento sem venda já tem `projeto_id` e como o código do projeto é exibido na busca do Pedido Avulso.
-- [ ] Definir como esta SPEC convive com a SPEC-221 (cobertura por peça pela data da venda), que está em standby.
+- [ ] Commitar e publicar o Compras (wrangler); a migration 373 já está aplicada.
+- [ ] Item B3 (aviso na tela Necessidade de Compra: "X un. do pedido NNNN reservadas para o projeto YYYY") ainda não feito.
+- [ ] Testar com a Débora o roteiro dos passos manuais (pedido de 10 reservado ao projeto; venda de 5 abre necessidade; entrada vem vinculada).
+- [ ] Mostrar as decisões aprovadas (seção acima) ao Vinícius e à Débora para validação; se divergirem, reabrir só o ponto divergente.
+- [ ] Ao retomar a SPEC-221, ajustar a cobertura por peça para descontar o que está reservado para projeto.
 - [ ] Liberar o Controle de Produção para a empresa toda e a edição de status para Vinícius, Débora, Matheus e Vitória (João na semana seguinte, o Vinícius libera e ensina) — passo no Hub/Acesso a Sistemas.

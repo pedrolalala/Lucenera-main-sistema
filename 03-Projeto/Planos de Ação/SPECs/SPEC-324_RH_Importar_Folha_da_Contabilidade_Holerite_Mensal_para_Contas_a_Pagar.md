@@ -1,6 +1,6 @@
 ---
 titulo: "SPEC-324 — RH: importar a Folha de Pagamento mensal (planilha da contabilidade) e gerar a conta a pagar certa (salário por funcionário + guias da empresa)"
-status: não iniciado
+status: no ar (migration 388 aplicada em 18/11; RH publicado em rh-lucenera.pages.dev; falta teste real em tela com outubro)
 data_ultima_modificacao: 2026-11-18
 sistemas_envolvidos:
   - RH (`dashboard-rh-lucenera-5fe9c`) — tela de importação e conferência da folha
@@ -76,7 +76,7 @@ Diferenças entre as empresas: MANOELLA e FOCO são Simples ("GPS ME/EPP": só o
 7. **Rubricas de férias, 13º, rescisão, adiantamento:** outubro teve férias e descontos de férias recebidas. Falta ver **um mês com 13º e uma rescisão** para saber se a planilha tem o mesmo desenho (ou outro arquivo).
 8. **Funcionário sem CPF/sem cadastro:** ficam numa **fila de pendências** e o mês não gera os títulos dessa pessoa até o RH ligar/cadastrar (recomendado) — ou gera com nome solto?
 9. O arquivo é **.xlsx** (o usuário falou "XLS"): aceitar `.xlsx` e, se a contabilidade mandar, `.xls` antigo?
-10. **Efeito sindical de outubro/2026 (esclarecido pelo usuário em 18/11):** não houve reajuste salarial; foi só uma questão sindical do mês. Os salários da planilha batem com o cadastro. Fica **sem regra especial**: rubricas sindicais (05841 contribuição assistencial, 01006 dia de classe sindical) geram a guia `SINDICATO` quando aparecem na planilha, sem valor ou percentual fixo.
+10. **Efeito sindical de outubro/2026 (esclarecido pelo usuário em 18/11):** não houve reajuste salarial; foi só uma questão sindical do mês. Os salários da planilha batem com o cadastro. **Correção:** `01006 DIA CLASSE SINDICAL` é um **provento pago ao funcionário** (já está no líquido), não uma guia; só a `05841 CONTRIB. ASSISTENCIAL` (desconto) gera a guia SINDICATO. Sem regra especial por mês: o valor vem sempre da planilha.
 
 ## Definição da SPEC (proposta)
 
@@ -159,8 +159,19 @@ Diferenças entre as empresas: MANOELLA e FOCO são Simples ("GPS ME/EPP": só o
 
 - 18/11/2026: análise dos 5 arquivos, do RH, do Contas a Pagar e do banco (somente leitura); protótipo de leitura conferido contra os totais; SPEC criada. Nada implementado, nenhuma migration criada.
 
+### Implementação (18/11/2026) — o que ficou diferente do desenho
+
+- Migration `20261118_388_spec324_rh_importar_folha_contabilidade` (up/rollback): 3 tabelas (`folha_importacoes`, `folha_holerites` com as rubricas em `jsonb`, `folha_guias`), RLS ligada sem policy, `REVOKE ALL` de anon/authenticated, 8 funções `SECURITY DEFINER` (conferir, vincular, excluir_holerite, gerar_titulos, cancelar, listar, detalhe, exige_rh). Não houve tabela de de-para de rubricas: o mapa das guias é fixo na função (GPS→INSS 90000018, FGTS 2010012, IRRF→DARF 2010016, SINDICATO 2010014, consignado→EMPRÉSTIMO 2020041, salário→SALARIOS E ORDENADOS 2010001).
+- **Guia GPS = "VALOR A RECOLHER GPS" dos Totais** (inclui parte da empresa/RAT/terceiros; ISLIGHT: R$ 888,33, não só o INSS descontado). Consignado = soma dos empréstimos descontados (repasse ao banco).
+- O financeiro exige `folha_pagamento_id` quando a origem é `folha`: o salário grava/atualiza a linha de `folha_pagamento` do funcionário no mês e liga o título a ela. As **guias entram com origem `manual`** (sem funcionário) e ficam ligadas à importação por `folha_guias`.
+- Leitor de planilha **próprio** (JSZip + XML) em `src/lib/folha-xlsx.ts`: o exportador da contabilidade grava `worksheets/Sheet1.xml` com S maiúsculo e a biblioteca `exceljs` devolve a planilha vazia; textos vêm com entidades numéricas (`&#47;`).
+- Tela: `src/components/FolhaImportar.tsx` dentro de "Folha de Pagamento" do RH (a "Gerar folha" quebrada foi removida).
+- Ensaio no banco (ROLLBACK, como usuário RH, sem RH e anon): FOCO 16 holerites = R$ 39.543,14 (4 sem cadastro barram a geração); ISLIGHT = R$ 2.257,11; guias FOCO R$ 13.946,26; total da empresa FOCO R$ 53.489,40 e ISLIGHT R$ 3.367,84, iguais ao medido; gerar duas vezes e reimportar mês gerado são barrados; cancelar com baixa é barrado; sem RH é barrado. Leitor testado nos 5 arquivos (somas e CPFs batem).
+
 ## Pendências
 
-- [ ] Decisões 1–9 do usuário (seção "Decisões em aberto").
+- [x] Decisões 1 (lançamento separado) e 3 (outubro: salário pago, guias abertas) seguidas pela recomendação em 18/11; as demais seguem em aberto.
+- [x] Migration 388 aplicada e RH publicado (18/11). Falta o teste real em tela com os 5 arquivos de outubro e o commit do submodule RH.
+- [ ] Decisões 2, 4, 5, 6, 7, 8, 9 (vencimentos a confirmar com a contabilidade; quem vê a folha; perfil Ribeirão/SP — a tela usa Ribeirão por padrão e deixa escolher).
 - [ ] Planilha de holerites da MANOELLA (0043) de outubro/2026 e exemplo de mês com 13º/rescisão, da contabilidade.
 - [ ] Definir quem vê a folha depois da saída do Vinicius e da Lana.

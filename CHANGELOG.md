@@ -2,9 +2,11 @@
 
 Registro cronologico das mudancas no repositorio central `Lucenera - ADAPTA PASS`.
 
-## 2026-11-18 - SPEC-324: importar a Folha da contabilidade (holerite mensal) para o Contas a Pagar (só SPEC)
-- Analisados os 5 xlsx de outubro/2026 (`01-Documento/01 - Planilhas/Holerite`), o RH, o Contas a Pagar e o banco (só leitura). Leitura de teste bateu com os Totais da contabilidade (FOCO 16 holerites = R$ 39.543,14; ISLIGHT R$ 2.257,11). Total a desembolsar em outubro: R$ 99.536,17 (líquido + GPS + FGTS + IRRF + sindicato + consignado). Achados: "Gerar folha" do RH está quebrada (colunas inexistentes), `folha_pagamento` é dado de teste, nenhum título de folha existe, faltam holerites da MANOELLA, 4 CPFs sem cadastro.
-- Nada implementado e nenhuma migration. 9 decisões em aberto na SPEC.
+## 2026-11-18 - SPEC-324: importar a Folha da contabilidade para o Contas a Pagar (migration 388 APLICADA; RH no ar em rh-lucenera.pages.dev, sem commit)
+- Analisados os 5 xlsx de outubro/2026 (`01-Documento/01 - Planilhas/Holerite`). Esclarecido: não houve reajuste salarial; `01006 DIA CLASSE SINDICAL` é provento do funcionário e só `05841 CONTRIB. ASSISTENCIAL` gera guia.
+- Migration `20261118_388_spec324_rh_importar_folha_contabilidade` (up/rollback): `folha_importacoes`, `folha_holerites`, `folha_guias` (RLS sem policy, REVOKE anon) + 8 funções `folha_importar_*` (só quem tem o RH). Ensaio com ROLLBACK: FOCO/ISLIGHT batem com os Totais, pendências de cadastro barram, geração/reimportação duplicada barradas, cancelar com baixa barrado, usuário sem RH barrado.
+- RH (`dashboard-rh-lucenera-5fe9c`): `src/lib/folha-xlsx.ts` (leitor próprio JSZip; `exceljs` não lê o arquivo da contabilidade) e `src/components/FolhaImportar.tsx` na tela Folha; "Gerar folha" quebrada removida. Build ok; dependência nova `jszip` (pnpm-lock não atualizado).
+- 388 aplicada em SP (3 tabelas com RLS, 10 funções, anon sem execute) e RH publicado por wrangler (build com as variáveis de SP; um primeiro deploy saiu sem elas e foi refeito na hora). Pendente: teste real em tela com outubro, commit do submodule RH, vencimentos confirmados com a contabilidade, holerites da MANOELLA.
 
 ## 2026-11-18 - SPEC-320: NO AR em escoar-lucenera.pages.dev (385 e 386 APLICADAS; falta teste em tela e repo próprio)
 - Migration 385 aplicada em SP (3 tabelas + 5 funções; 5 funções, 2 operadores, RLS ligado conferidos). Migration 386 aplicada: card "Escoar Reserva sem Venda" no Hub (slug `escoar-reserva`, ordem 101) para Matheus e Vitória; admin vê pelo papel.
